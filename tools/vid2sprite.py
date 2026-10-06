@@ -8,7 +8,8 @@ usage:
   --frames  how many frames to keep (default 12).
   --height  character height in the sheet, in pixels (default 240; the game scales it down smoothly).
   --start / --end   use only these video frames (1-based, inclusive).
-  --align   feet (default: ground moves) or center (spins, flips and rolls rotate around the middle).
+  --align   feet (default: walking, standing), center (in the air: flips spin around the middle),
+            or ground (tumbling on the floor: rolls).
   --ref     start:end frames where the character is seen at full height, for consistent scale (default 4:end).
 
 Writes <out_prefix>_sheet.png (one row, transparent), <out_prefix>_preview.gif and <out_prefix>.json.
@@ -23,7 +24,7 @@ ap.add_argument("clip"); ap.add_argument("out")
 ap.add_argument("--once", action="store_true"); ap.add_argument("--loop", action="store_true")
 ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", type=int, default=240)
 ap.add_argument("--start", type=int, default=1); ap.add_argument("--end", type=int, default=0)
-ap.add_argument("--align", choices=["feet", "center"], default="feet")
+ap.add_argument("--align", choices=["feet", "center", "ground"], default="feet")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 args = ap.parse_args()
 
@@ -67,6 +68,9 @@ files = [f for f in files if on_green(f)]
 def anchor(im):
     m = np.asarray(im)[..., 3] > 128; ys, xs = np.where(m)
     foot = ys.max(); top = ys.min()
+    if args.align == "ground":   # on the floor but tumbling: lowest point on the ground line, centred by the whole body
+        cx = int((xs.min() + xs.max()) / 2)
+        return foot, cx, xs.min(), top, xs.max(), foot
     if args.align == "center":
         cy = int((ys.min() + ys.max()) / 2); cx = int((xs.min() + xs.max()) / 2)
         return cy, cx, xs.min(), top, xs.max(), foot

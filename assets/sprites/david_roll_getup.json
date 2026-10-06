@@ -1,0 +1,20 @@
+{
+  "frames": 7,
+  "frame_w": 225,
+  "frame_h": 233,
+  "ms_per_frame": 131,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 119,
+  "anchor_y": 230,
+  "source": "d_roll.mp4",
+  "video_frames": [
+    109,
+    113,
+    116,
+    119,
+    123,
+    127,
+    130
+  ]
+}

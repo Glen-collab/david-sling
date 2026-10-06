@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 166,
+  "frame_h": 263,
+  "ms_per_frame": 104,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 98,
+  "anchor_y": 261,
+  "source": "hf_2.mp4",
+  "video_frames": [
+    31,
+    34,
+    36,
+    39,
+    42,
+    45,
+    47,
+    50
+  ]
+}

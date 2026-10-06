@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 152,
+  "frame_h": 227,
+  "ms_per_frame": 79,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 72,
+  "anchor_y": 224,
+  "source": "hf_2.mp4",
+  "video_frames": [
+    126,
+    128,
+    130,
+    132,
+    134,
+    136,
+    137,
+    139,
+    141,
+    143
+  ]
+}
