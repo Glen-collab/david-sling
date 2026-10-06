@@ -7,6 +7,9 @@ usage:
   --once    keep the whole move start to finish (jump, throw, roll, flip).
   --frames  how many frames to keep (default 12).
   --height  character height in the sheet, in pixels (default 240; the game scales it down smoothly).
+  --start / --end   use only these video frames (1-based, inclusive).
+  --align   feet (default: ground moves) or center (spins, flips and rolls rotate around the middle).
+  --ref     start:end frames where the character is seen at full height, for consistent scale (default 4:end).
 
 Writes <out_prefix>_sheet.png (one row, transparent), <out_prefix>_preview.gif and <out_prefix>.json.
 Needs ffmpeg on the PATH, numpy and Pillow.
@@ -19,6 +22,9 @@ ap = argparse.ArgumentParser()
 ap.add_argument("clip"); ap.add_argument("out")
 ap.add_argument("--once", action="store_true"); ap.add_argument("--loop", action="store_true")
 ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", type=int, default=240)
+ap.add_argument("--start", type=int, default=1); ap.add_argument("--end", type=int, default=0)
+ap.add_argument("--align", choices=["feet", "center"], default="feet")
+ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 args = ap.parse_args()
 
 tmp = tempfile.mkdtemp()
@@ -27,6 +33,8 @@ fps_txt = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-
                           "-of", "csv=p=0", args.clip], capture_output=True, text=True).stdout.strip().split("\n")[0]
 num, den = (fps_txt.split("/") + ["1"])[:2]; fps = float(num) / float(den)
 files = sorted(glob.glob(os.path.join(tmp, "*.png")))
+all_files = files
+files = files[args.start - 1:(args.end or len(files))]
 
 def green_mask(a):
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
@@ -59,8 +67,11 @@ files = [f for f in files if on_green(f)]
 def anchor(im):
     m = np.asarray(im)[..., 3] > 128; ys, xs = np.where(m)
     foot = ys.max(); top = ys.min()
+    if args.align == "center":
+        cy = int((ys.min() + ys.max()) / 2); cx = int((xs.min() + xs.max()) / 2)
+        return cy, cx, xs.min(), top, xs.max(), foot
     cx = int(np.median(xs[ys < top + max(10, (foot - top) // 4)]))   # head/shoulders centre
-    return foot, cx, xs.min(), top, xs.max()
+    return foot, cx, xs.min(), top, xs.max(), foot
 
 # loop finding on small aligned silhouettes
 def sil(im, a):
@@ -95,10 +106,18 @@ sel = [(keyed[i], anchors[i]) for i in idx]
 L = min(a[2] - a[1] for _, a in sel) - 12
 T = min(a[3] - a[0] for _, a in sel) - 12
 R = max(a[4] - a[1] for _, a in sel) + 12
-crops = [im.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + 6)) for im, a in sel]
+B = max(a[5] - a[0] for _, a in sel) + 6
+crops = [im.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + B)) for im, a in sel]
 
 # scale so the character's standing height = --height (measured from the tallest frame)
-char_h = max(a[0] - a[3] for _, a in sel)
+# the character's full standing height, measured across the whole clip, so every move is the same scale
+def height_of(path):
+    k = key(path)
+    if k is None: return 0
+    m = np.asarray(k)[..., 3] > 128; ys, xs = np.where(m)
+    return (ys.max() - ys.min()) if len(ys) else 0
+r0, r1 = (int(v) for v in args.ref.split(":"))
+char_h = max(height_of(f) for f in all_files[r0 - 1:(r1 or len(all_files))][::6] if on_green(f))
 sc = args.height / char_h
 cw, ch = round(crops[0].width * sc), round(crops[0].height * sc)
 frames = [c.resize((cw, ch), Image.LANCZOS) for c in crops]
@@ -115,5 +134,6 @@ for f in frames:
 gif[0].save(args.out + "_preview.gif", save_all=True, append_images=gif[1:], duration=ms, loop=0)
 
 json.dump({"frames": N, "frame_w": cw, "frame_h": ch, "ms_per_frame": ms, "loop": not args.once,
-           "foot_y": ch - round(6 * sc), "center_x": round(-L * sc)}, open(args.out + ".json", "w"), indent=2)
+           "align": args.align, "anchor_x": round(-L * sc), "anchor_y": round(-T * sc),
+           "source": os.path.basename(args.clip), "video_frames": [args.start + i for i in idx]}, open(args.out + ".json", "w"), indent=2)
 print(f"{N} frames of {cw}x{ch}, {ms} ms each -> {args.out}_sheet.png")

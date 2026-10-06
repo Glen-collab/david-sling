@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 264,
+  "frame_h": 181,
+  "ms_per_frame": 142,
+  "loop": false,
+  "align": "center",
+  "anchor_x": 132,
+  "anchor_y": 93,
+  "source": "c1_1.mp4",
+  "video_frames": [
+    97,
+    101,
+    104,
+    108,
+    112,
+    115,
+    119,
+    123,
+    126,
+    130
+  ]
+}

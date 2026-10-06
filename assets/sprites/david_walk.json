@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 150,
+  "frame_h": 247,
+  "ms_per_frame": 87,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 79,
+  "anchor_y": 244,
+  "source": "david_walking.MP4",
+  "video_frames": [
+    54,
+    56,
+    58,
+    60,
+    62,
+    64,
+    66,
+    69,
+    71,
+    73,
+    75,
+    77
+  ]
+}
