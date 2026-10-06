@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **Worlds 1–4 drafted for review; creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1–5 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -91,7 +91,7 @@ Jesus told this parable about a thousand years after David. The game connects th
 | 2 | the boy from Tekoa (made up), lost in a flash flood | David gets him out and takes him home |
 | 3 | **David himself** | Not even invited. Samuel refuses to sit down until the overlooked youngest son arrives (1 Sam 16:11) |
 | 4 | **King Saul** | Troubled and tormented; David's music reaches him (1 Sam 16:23) |
-| 5 | a frightened young soldier (made up) | Too scared to go on; David helps him back to camp |
+| 5 | Tobi, a frightened young scout (made up) | Hiding in a cave after hearing the giant; David gets him back to camp, and Tobi teaches him the double jump |
 | 6 | the whole army | "all the Israelites…ran from him in great fear" (1 Sam 17:24) |
 | 7 | (to decide) | |
 | 8 | Israel | God saves the people through the least likely one |
@@ -449,6 +449,9 @@ Four short screens, no more:
 | 1-4 campfire | Hanan | 👁️ Warning (tier 1): the lion's tail-flick · 📜 Psalm 23:4 | Tier 2 after a loss: +1 heart for the fight, longer dazed window |
 | End of World 1 | Jesse | | **Gift:** Jesse's own old sling, a family heirloom (slightly faster reload) |
 
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-1--the-shepherds-fields)
+
 ---
 
 ## 5b. World 2 — The Wilderness *(DRAFT FOR REVIEW)*
@@ -584,6 +587,9 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 | 2-3 | Hanan | 🗝️ Secret: follow the ibex · 📜 Psalm 104:18 | |
 | 2-4 campfire | Hanan | 👁️ Warning (tier 1): the slow turn and the stand-up slam · 📜 Proverbs 17:12 | Tier 2 after a loss: slower turn, longer stand-up, +1 heart |
 | End of World 2 | The boy's father | | **Gift:** a leather sling pouch, so the charged shot charges a little faster |
+
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-2--the-wilderness)
 
 ---
 
@@ -729,6 +735,9 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 | 3-4 campfire | Hanan | 👁️ Warning (tier 1): the ox's charge and the trees · 📜 Proverbs 22:4 | Tier 2 after a loss: longer tell, horns stuck longer, +1 heart |
 | End of World 3 | Hanan | | **Gift:** Hanan's shepherd's staff, +1 max heart |
 
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-3--the-anointing)
+
 ---
 
 ## 5d. World 4 — The King's Court *(DRAFT FOR REVIEW)*
@@ -861,16 +870,148 @@ The road north from Bethlehem through vineyards and villages, past the walled ci
 | 4-4 | The Steward | Tier 2 after a loss: wider timing, slower calm loss | |
 | End of World 4 | King Saul | | **Gift: the King's Favour** = fast travel between world maps |
 
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-4--the-kings-court)
+
 ---
 
-## 6. Worlds 5–8 (outline only — to be detailed one at a time)
+## 5e. World 5 — The Road to the Valley *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 17:1–24.
+**What happens:** the Philistines gather for war at Sokoh in Judah, and Saul's army camps in the Valley of Elah (17:1–2). Jesse's three oldest sons, Eliab, Abinadab and Shammah, have gone with Saul (17:13). Every morning and evening for forty days, a Philistine champion comes out and shouts a challenge (17:16). Jesse sends David with roasted grain and ten loaves for his brothers, and ten cheeses for their commander, to see how they are (17:17–18). David leaves the flock with a shepherd (17:20), reaches the camp as the armies take up their battle lines, and hears the giant for the first time. The army runs in fear (17:23–24).
+**The big idea:** **fear.** Everyone in this world is afraid: fleeing villagers, a scout who's lost his nerve, a whole army. David is walking toward the thing everyone else is running from.
+**The lost one:** **Tobi** *(made up)*, a young Israelite scout who froze with fear on the mountain trail and has been hiding in a cave for two days.
+**David learns:** the **double jump** (Tobi's "scout's leap"), and to keep going toward a hard thing because he was sent.
+**Enemies:** Philistine raiders and lookouts (driven off), striped hyena at night (laughs before it lunges), a **leopard** stalker (mini-boss), vultures following the armies, vipers and scorpions. **Harmless:** gazelles, tortoises, and the **chariot horses** (never hit the horses).
+**Hanan:** keeps the flock while David is gone. He's the shepherd David leaves them with (17:20).
+
+### World 5 map
+West from Bethlehem through dry hills, down a mountain trail, along a ridge watched by Philistine lookouts, and into the Valley of Elah with two camps facing each other.
+
+```
+ [🏠 Jesse's house] ──> (5-1) ──> [🙋 Fleeing family] ──> (5-2)
+                                                            │
+ [✨ Terebinth grove] <── (5-3) <── [🔥 Tobi's cave] <──────┘
+          │                │
+          └───────────> (5-4 🐎 Valley road)
+                           │
+                   [⛺ Israelite camp]  (end scene)
+```
+
+| Dot | What's there |
+|---|---|
+| 🏠 Jesse's house | Start. Jesse gives the provisions. Hanan takes the flock. |
+| 5-1 | The Supply Road |
+| 🙋 Fleeing family | *(made up)* A village family running from the Philistines with their scattered flock. Help gather it (5-1) and they give you a Secret. |
+| 5-2 | The Mountain Trail (night) |
+| 🔥 Tobi's cave | Tobi's campfire. Rest, Journal, counsel. |
+| 5-3 | The Lookouts' Ridge |
+| ✨ Terebinth grove | Opens when all World 5 sheep are found. Bonus stage plus a Psalm piece. The Valley of Elah is named after these trees: *elah* is the Hebrew word for terebinth. |
+| 5-4 🐎 | Down to Elah, with the Philistine Chariot at the end |
+| ⛺ Israelite camp | The end scene (David hears Goliath). This dot becomes the start of World 6. |
+
+### Opening scene
+1. Jesse, older now, at the table. Three empty places where Eliab, Abinadab and Shammah sit. *"Forty days, and no word."*
+2. He gives David the roasted grain, the ten loaves and the ten cheeses (17:17–18). *"See how your brothers are, and bring me back some news."*
+3. Hanan takes the flock: *"Go. I've kept sheep longer than you've been alive. They'll be here."*
+4. Title card: **WORLD 5 — THE ROAD TO THE VALLEY**
+
+### Carrying the provisions
+David carries the provisions through every stage. **If he's hit, a loaf or a cheese drops** and bounces nearby (like coins spilling): grab it back before it's gone. How much arrives at the camp is shown in the stage score and in the end scene. **Carrying never slows David's movement** (rule 1). It's a score you protect, not a weight.
+
+### 5-1 · The Supply Road — *fear on the road*
+- **Level:** a long dusty road west through dry hills, a crumbling watchtower, dry stone walls, olive terraces. Villagers **coming the other way**, fleeing the Philistines.
+- **Lost sheep (5):** the fleeing family's flock has scattered across the hills in their panic. Gather them with the harp and lead them back to the family on the road.
+- **Philistine raiders** have come up into the hills to grab livestock and grain. Hit them and they drop what they took and run.
+- **Vultures** circle overhead. They follow armies, a grim hint of what's ahead.
+- **The fleeing father** *(made up)*:
+  > "You're going *that* way? Boy, there's a giant in that valley. Turn around."
+  - 🗝️ Secret: *"There's a cave on the mountain trail. I saw a soldier hiding up there."* (Leads to Tobi.)
+- **Scroll:** **Exodus 20:12**: honor your father and your mother. (David is doing what Jesse asked, even on a hard road.)
+- **The One:** a lamb that ran into the abandoned watchtower; climb the broken stairs.
+
+### 5-2 · The Mountain Trail — *night; meet Tobi; learn the double jump*
+- **Level:** a narrow trail along cliffs at night, under a big moon and stars. Rock shelves, narrow ledges, gaps, loose stones.
+- **Striped hyenas** come out at night. **They laugh before they lunge,** a warning you can hear before you see it. (Journal fact: the striped hyena is real and still lives in Israel.)
+- **Mid-stage mini-boss: the leopard.** It stalks you along the trail from the trees above. The leopard is real, and the prophets describe one lying in wait by the road (Jeremiah 5:6, Hosea 13:7).
+  - Tell: leaves rustle, and two eyes shine in the branches. It drops on you from above. Roll away, then hit it on the ground. After 3 hits it retreats up the tree and leaves.
+- **Tobi's cave (checkpoint):** behind the fleeing father's Secret. Tobi is a young scout curled up by a cold fire.
+  > "I'm a scout. I'm supposed to be fast. I heard him — the giant — and I just ran. I've been here two days."
+  - David lights the fire and plays the harp. Tobi calms down and teaches what he knows:
+  > "Scouts learn to push off anything — a rock, a branch, even a bit of nothing. Jump, then jump again. Like this."
+  - 🎓 **Skill: double jump** (A again in mid-air: a sharp tuck-and-kick).
+  - Tobi follows you for the rest of the stage, so you're getting him back to camp.
+- **Scroll:** **Psalm 4:8**: in peace I will lie down and sleep.
+- **The One:** on a high shelf above the trail that needs the new double jump. It's the first lamb the double jump is for.
+
+### 5-3 · The Lookouts' Ridge — *don't be seen*
+- **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
+- **Lookouts (light stealth):** each one watches a stretch of ridge with a torchlight cone. If he sees you, he shouts and lights a **signal fire**, and a few extra raiders come. **Being seen is never a fail state**, just a harder few seconds. Sneaking past (or knocking the torch out of his hand with a quick shot) earns a "Not seen" bonus.
+- **Tobi** knows the ridge:
+  > "The lookouts change every time the moon moves behind a cloud. That's your moment."
+  - 👁️ Warning for the boss: *"Down in the valley there's a Philistine chariot that hunts scouts on the road. A chariot can't turn on rough ground. Get to the rocks."*
+- **Shepherd's Judgment:** gazelles bound across the ridge. Leave them be.
+- **Scroll:** **Psalm 27:1**: the LORD is my light and my salvation; whom shall I fear? (A psalm of David.)
+- **The One:** in a crevice under a lookout's tower; you have to get past him unseen to reach it.
+
+### 5-4 · Down to Elah — *the valley road*
+- **Level:** the descent into the Valley of Elah at dawn. Terebinth trees, a dry streambed (seen for the first time; World 6 begins here), **chariot wheel ruts** in the dust. Both camps are visible on the hills across the valley in the background. Every so often a **distant booming voice** echoes across the valley. You can't make out the words yet.
+- **Scroll:** **Psalm 20:7**: some trust in chariots and some in horses, but we trust in the name of the LORD our God. (A psalm of David, placed right before the chariot.)
+- **The One:** among the terebinths, behind a fallen trunk.
+- **Stage ending:** wheels thunder behind you. A **Philistine chariot** comes over the rise, hunting scouts on the road.
+
+### BOSS · The Philistine Chariot (end of 5-4)
+**Faithful to history:** the Philistines had chariots (1 Sam 13:5). This chase is invented. It uses **everything learned so far:** quick release for the archer, charged shots for the wheel, double jump over the horses, and roll under the arrows.
+
+**The arena:** the open valley road, **auto-scrolling to the right**. Smooth road on the left half, **rough rocky ground** on the right edge. Terebinth trees and boulders along the way.
+
+**Phase 1 — The archer.** The chariot rides alongside you. The **archer** draws and fires (tell: he raises his bow and it glints). Roll or jump the arrows. He ducks behind his shield, but when he rises to draw, a **quick-release double shot** knocks his bow aside. 3 hits and he drops his bow.
+**Phase 2 — The ram.** The driver tries to run you down. Tell: the horses toss their heads and the driver whips the reins. **Double jump over the horses** as they pass. **Don't hit the horses**: they're animals pulling a cart, and hitting them lowers your Care score. Hit the **cracked wheel** with **charged shots** as the chariot passes. 3 hits and the wheel wobbles.
+**Phase 3 — Rough ground.** With tier-1 counsel (Tobi's warning), the rocky ground on the right flashes. Lure the chariot onto the rocks. It can't turn there, and the wheel breaks. The chariot stops, the horses rear, and **the crew jump down and run back to the Philistine lines.** The horses trot off free. Nobody is killed.
+
+**Counsel tier 2** (Tobi: *"Sit down. Tell me what happened."*): the archer's tell lasts longer, the cracked wheel takes 2 hits instead of 3, and +1 heart.
+
+### End of World 5 — the camp, and the giant (reflection scene)
+1. David walks into the Israelite camp with Tobi behind him. Tobi's commander runs over and grabs him: he thought Tobi was dead.
+2. David leaves the provisions with the **keeper of supplies** (17:22) and gives the cheeses to the commander (17:18).
+3. He runs to the battle line to find his brothers, just as both armies go out shouting the war cry (17:20–22). He finds them. Shammah grins; Eliab frowns.
+4. Then **the voice.** Across the valley, a huge figure steps out of the Philistine line (shown only as a dark silhouette for now) and shouts his challenge (17:23).
+5. **The whole Israelite army turns and runs** in fear (17:24). Soldiers rush past David on both sides. **David doesn't move.** The camera holds on him, standing still in the middle of the running crowd.
+6. **Gift:** Tobi gives David his **scout's cloak**, +1 max heart. *"You walked toward it. I'll never forget that."*
+7. Verse: **Psalm 56:3**: when I am afraid, I put my trust in you. (A psalm of David.)
+8. World code. *To be continued in World 6: The Valley of Elah.*
+
+### World 5 — summary table
+| Stage | New thing | Sheep | People | Scroll |
+|---|---|---|---|---|
+| 5-1 | Carrying the provisions, raiders, fleeing villagers | 5 (the fleeing family's) + The One | Jesse, Hanan, the fleeing father | Exodus 20:12 |
+| 5-2 | Night trail, hyenas, **leopard mini-boss**, **double jump** | 5 + The One | **Tobi** | Psalm 4:8 |
+| 5-3 | Light stealth past the lookouts, signal fires | 5 + The One | **Tobi** | Psalm 27:1 |
+| 5-4 end | The valley road; **Boss:** the Philistine Chariot | 5 + The One | **Tobi** | Psalm 20:7 |
+
+### World 5 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| Map: 🏠 Jesse's house | Jesse | 🧭 Story: take the provisions to your brothers | |
+| 5-1 / Map: 🙋 | The fleeing father *(made up)* | 🗝️ Secret: a soldier hiding in a cave on the trail | Trust: his family's flock is returned |
+| 5-2 | Tobi *(made up)* | 🎓 Skill: double jump | |
+| Map: 🔥 Tobi's cave | Tobi | 📜 Journal: the Philistines and their five cities, including Gath, Goliath's home town | Rest + harp |
+| 5-3 | Tobi | 🗝️ Lookouts and the moon · 👁️ Warning (tier 1): chariots can't turn on rough ground | |
+| 5-4 | Tobi | Tier 2 after a loss: longer archer tell, weaker wheel, +1 heart | |
+| End of World 5 | Tobi | | **Gift:** Tobi's scout cloak, +1 max heart |
+
+**Sprite list for this world:** [SPRITES.md → World 5](SPRITES.md#world-5--the-road-to-the-valley)
+
+---
+
+## 6. Worlds 6–8 (outline only — to be detailed one at a time)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
 | 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear. **Detailed in §5b.** |
 | 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
 | 4 | The King's Court | 1 Sam 16:14–23 | Quick release | **Saul's Torment. Detailed in §5d.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
-| 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | **Proposed: the Philistine Chariot.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
+| 5 | The Road to the Valley | 1 Sam 17:1–24 | Double jump | **The Philistine Chariot. Detailed in §5e.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — | **Proposed: the Philistine Watchtower.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
 | 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | **Proposed: Goliath's Shield-Bearer.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
 | 8 | David & Goliath | 1 Sam 17:41–50 | — | **Goliath:** dodge and survive; the final hit is one charged stone (you carry 5). |
@@ -889,6 +1030,8 @@ The road north from Bethlehem through vineyards and villages, past the walled ci
 - [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
 
 ## 8. Sprite sheet rules (for Photoshop)
+
+The full list of sprites needed, world by world, is in [SPRITES.md](SPRITES.md).
 - One animation per PNG, frames in a **single row**, no gaps.
 - Every frame of David is the **same cell size** (decide once, never change).
 - **Feet on the same pixel row** in every frame; body centred on the same spot.
