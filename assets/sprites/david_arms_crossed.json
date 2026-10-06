@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 161,
+  "frame_h": 268,
+  "ms_per_frame": 62,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 91,
+  "anchor_y": 265,
+  "source": "c3_3.mp4",
+  "video_frames": [
+    130,
+    132,
+    133,
+    134,
+    136,
+    138,
+    139,
+    140
+  ]
+}
