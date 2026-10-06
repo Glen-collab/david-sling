@@ -125,3 +125,14 @@ Frame counts are starting targets. Fewer frames is fine if the motion reads.
 - **Tiles/backgrounds:** ☐ supply road · ☐ night mountain trail · ☐ ridge with lookouts · ☐ descent into the Valley of Elah, with both camps in the background
 - **Map:** ☐ World 5 map
 - **Ending scene:** ☐ Goliath in silhouette only, far away, shouting (a dark shape; his full sprite isn't seen until World 6)
+
+## World 6 — The Valley of Elah
+- **Enemies:** ☐ Philistine archer (lean out 2, draw 3, fire 2, bow knocked away 2) · ☐ Philistine slinger (whirl 4, release 2) · ☐ Philistine skirmisher (run 6, flee 6) · ☐ volley of arrows / stones (falling, 3) · reuse viper, scorpion, vulture
+- **Harmless:** ☐ camp donkey · ☐ ox · ☐ soldiers' dog · reuse hedgehog
+- **People:** ☐ frightened soldier (hiding/cowering 2, standing up with spear 4, back at post 2): 2–3 looks · ☐ soldiers at the fire (talk 2) · ☐ **Eliab angry** (portrait + 3-frame rant) · ☐ water captain · ☐ water carriers with jars (walk 6) · ☐ **Saul standing in his tent** (talk 2, long pause 1) · ☐ commanders (idle)
+- **Goliath at a distance:** ☐ small far-off Goliath on the Philistine line (taunt 4, shout 2). His full-size sprite is World 8.
+- **Boss — the Philistine Watchtower:** ☐ tower rolling (wheels 4) · ☐ window shutters open/closed · ☐ archer in window (3) · ☐ wheel pin glint (2) · ☐ tower leaning, 3 stages · ☐ crew climbing down the back (4) · ☐ tower falling (6) + big dust cloud (4) · ☐ rope ladder (whole / cut rungs)
+- **Flashback frames:** ☐ sepia/tinted versions of the lion and bear fights (can reuse sprites with a palette swap)
+- **Objects:** ☐ tents (bounce top) · ☐ supply wagons · ☐ water jars (full / empty) · ☐ reeds · ☐ deep pool · ☐ cover rocks · ☐ shepherd's bag (gift icon)
+- **Tiles/backgrounds:** ☐ Israelite camp · ☐ no-man's land valley floor · ☐ streambed with pools · ☐ Philistine camp in the far background · ☐ Saul's tent interior
+- **Map:** ☐ World 6 map

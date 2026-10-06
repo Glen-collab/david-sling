@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **Worlds 1–5 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1–6 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -424,7 +424,7 @@ Four short screens, no more:
 4. David sits at the fold's gate and plays. David's song, a little fuller than in 1-1.
 5. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
 
-> **World 7 callback (planned):** when David tells Saul about the lion (1 Sam 17:34–37), the game shows a pixel replay of *this exact fight* the player won.
+> **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a pixel replay of *this exact fight* the player won.
 
 ### World 1 — summary table
 | Stage | New thing | Sheep | People | Scroll |
@@ -1004,7 +1004,148 @@ David carries the provisions through every stage. **If he's hit, a loaf or a che
 
 ---
 
-## 6. Worlds 6–8 (outline only — to be detailed one at a time)
+## 5f. World 6 — The Valley of Elah *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 17:25–37.
+**What happens:** the soldiers talk about the reward Saul has promised to whoever defeats the giant (17:25). David asks about it, and asks who this Philistine is to defy the armies of the living God (17:26). **Eliab** hears him and burns with anger: why has David come, who is looking after "those few sheep in the wilderness," and David only came to watch the battle (17:28). David answers, *"Now what have I done? Can't I even speak?"* and turns to ask someone else (17:29–30). His words reach Saul, who sends for him (17:31). David says no one should lose heart; he will go and fight (17:32). Saul says he's only a young man and the giant has been a warrior since his youth (17:33). David tells him about the lion and the bear (17:34–37). Saul: *"Go, and the LORD be with you"* (17:37).
+**The lost one:** **the whole army.** For forty days they've heard the giant morning and evening (17:16), and they've lost heart.
+**The big idea:** courage is catching. David's harp and his words lift frightened soldiers, and soldiers who've been lifted help in return.
+**Invented, and labelled so:** the Philistine watchtower and the water carriers. The Bible goes straight from Eliab's rebuke to Saul sending for David. The game puts a few hours of camp life in between, then picks the story back up at 17:31.
+**David learns:** no new move this world. The new thing is **encouraging soldiers** with the harp (Thread 2), and the game now expects you to **combine** everything: roll, flip, double jump, quick release, charged shots.
+**Enemies:** Philistine archers and slingers on the far slope (driven off), Philistine skirmishers, vipers and scorpions in the streambed, vultures. **Harmless:** camp donkeys and oxen, hedgehog (callback), the soldiers' dogs.
+
+### World 6 map
+The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on the right, the dry streambed between them, and a tall wooden tower moving at the edge of the Philistine lines.
+
+```
+ [⛺ Israelite camp] ──> (6-1) ──> [🙋 Water captain] ──> (6-2)
+                                                           │
+ [✨ The quiet spring] <── (6-3) <── [🔥 Brothers' fire] <─┘
+          │                 │
+          └────────────> (6-4 🗼 The Tower)
+                            │
+                    [👑 Saul's tent]  (end scene)
+```
+
+| Dot | What's there |
+|---|---|
+| ⛺ Israelite camp | Start. Continues straight from the end of World 5. |
+| 6-1 | The Camp of Fear |
+| 🙋 Water captain | *(made up)* In charge of the men who fetch water from the streambed. The tower's archers have pinned them down for days. |
+| 6-2 | No-Man's Land |
+| 🔥 Brothers' fire | Shammah and Abinadab's campfire. Rest, Journal, counsel. |
+| 6-3 | The Water Carriers |
+| ✨ The quiet spring | Opens when every frightened soldier in World 6 has been lifted. Bonus stage plus a Psalm piece. |
+| 6-4 🗼 | The Tower's Shadow, with the Philistine Watchtower at the end |
+| 👑 Saul's tent | The end scene: David before Saul |
+
+**Lost things in this world:** each stage hides **5 frightened soldiers** instead of 5 sheep: hiding in supply wagons, under carts, behind rocks, curled up in tents. Find them and **play the harp**. Each one stands up, picks up his spear, and goes back to his post. (The One is still a lamb: the camp keeps a small flock for food, and one is always loose.)
+
+**Encouraged soldiers help back:** every soldier you lift in Worlds 6 adds to your **Courage count**. In the watchtower fight, lifted soldiers on the Israelite slope throw stones at the tower's archers to cover you: more courage, more cover. It's like counsel: it makes the fight gentler, never easier than fair, and skilled players can win with zero. All of them appear in the crowd in World 8.
+
+### Opening scene
+1. Straight on from World 5: the army has run back up the hill. David is standing alone on the slope.
+2. Soldiers around a cooking fire, muttering:
+   > "Forty days."
+   > "The king will make rich the man who kills him. And give him his daughter."
+   > "And free his father's family from taxes." (17:25)
+   > "Nobody's going to do it."
+3. Title card: **WORLD 6 — THE VALLEY OF ELAH**
+
+### 6-1 · The Camp of Fear — *lift the soldiers; face Eliab*
+- **Level:** the Israelite camp: tents to bounce on, supply wagons, rope lines, cooking fires, watch platforms, the commanders' tents at the top of the hill.
+- **5 frightened soldiers** hidden around the camp. Lift each one with the harp.
+- **Asking questions:** David goes from soldier to soldier asking about the reward and about the giant. Each answer is a short line and a Journal card. One of them:
+  > "Who is he, that he should defy the armies of the living God?" — David, to the men (17:26)
+- **Eliab, at the end of the stage.** A cut-scene, not a fight:
+  - Eliab, red-faced: *"Why have you come down here? And who's looking after those few sheep in the wilderness? You came down just to watch the battle."* (17:28. The Journal links back to World 2: David really *was* out in the wilderness with them.)
+  - David: *"Now what have I done? Can't I even speak?"* (17:29)
+  - **David doesn't argue. He just turns and keeps asking** (17:30). The player sees what David didn't do.
+  - Shammah, quietly, after Eliab stomps off: *"He's afraid too. He just shows it by being angry."*
+- **Scroll:** **Proverbs 15:1**: a gentle answer turns away wrath.
+- **The One:** a lamb from the army's food flock, loose on top of the supply wagons.
+
+### 6-2 · No-Man's Land — *see the giant*
+- **Story:** David wants to see this Philistine for himself.
+- **Level:** the slope down to the valley floor, and out into the open ground between the armies. Rocks and dips for cover. **Philistine archers and slingers** on the far slope fire **volleys**: a shout, then a rain of arrows or stones in a pattern you can read. Get behind cover or roll through gaps.
+- **The giant, seen in full for the first time,** far across the valley on the morning shout (17:16). He's small in the distance, but you can see the size of him next to the men around him. His voice booms. He mocks the army. **You can't reach him, and the game doesn't let you try.**
+- **Goliath's Field Guide card** fills in as you watch: his height of "six cubits and a span" (about 9 feet 9 inches), bronze helmet, scale armor weighing about 125 pounds, bronze greaves, a bronze javelin, and a spear with an iron point of about 15 pounds (17:4–7). **Honest note in the card:** some ancient copies of the text give his height as four cubits and a span (about 6 feet 9 inches). Either way, a huge, heavily armed warrior.
+- **Shepherd's Judgment:** vipers in the rocks. Hedgehogs too.
+- **5 frightened soldiers** pinned behind rocks out in no-man's land. Lift them and they run back up the hill.
+- **Scroll:** **Psalm 3:6**: I will not fear though tens of thousands assail me. (A psalm of David.)
+- **The One:** a lamb that wandered right out into the open ground. Grab it between volleys.
+
+### 6-3 · The Water Carriers — *the streambed*
+- **Story:** the camp is running out of water. The water carriers have to go down to the stream, but a **Philistine watchtower** has been rolled up to the edge of the valley, and its archers fire on anyone who goes near the water.
+- **The Water captain** *(made up)*:
+  > "My men won't go down there. I don't blame them."
+  - 🧭 Story: lead the water carriers down to the pools and back.
+- **Level:** down into the streambed: smooth stones, dry pools, a few deep pools still holding water, reeds, terebinth roots. **Escort the water carriers** (3 of them, each carrying a jar) like the sheep line. The tower's archers fire from the far side. Vipers and scorpions under the stones.
+- **Shammah comes along** and fills a jar too. At the brothers' fire before the stage:
+  > "The streambed's full of good stones, you know. Round ones."
+  - (Foreshadowing the five smooth stones in World 7.)
+- **Abinadab's counsel** (👁️ tier 1, for the boss):
+  > "Those towers are top-heavy. Knock the pins out of the front wheels and it'll lean. Lean it far enough and it goes over."
+- **5 frightened soldiers:** the water carriers who refused to go. Lift them and they join the line.
+- **Scroll:** **Psalm 23:2**: he leads me beside quiet waters.
+- **The One:** in the reeds at the deepest pool, reached by a flip across the water.
+
+### 6-4 · The Tower's Shadow — *toward the tower*
+- **Level:** along the streambed toward the tower, then up the bank under it. The tower **rolls forward slowly** along the edge of the valley as you go, and its shadow falls across the level. Archers' volleys get tighter. Philistine skirmishers come down to block the path.
+- **5 frightened soldiers** in a forward trench, too scared to move. Lift them, and they're the ones who cover you in the boss fight.
+- **Scroll:** **Deuteronomy 31:6**: be strong and courageous; the LORD your God goes with you.
+- **The One:** under the tower's ramp, at the very end of the stage.
+
+### BOSS · The Philistine Watchtower (end of 6-4)
+**Invented:** siege towers are a real ancient weapon; this one, in this valley, is made up. It's a **structure**, not another big soldier, and **nobody dies**: when it goes over, the crew climb down the back and run.
+
+**The tower:** three floors of rough planks on four big wheels, a leather-covered front, rope ladders down the sides. Archers on the first two floors, **slingers** on the top floor.
+
+**Phase 1 — The archers.** Archers lean out of the windows on floors 1 and 2 to fire. Tell: a window's shutter swings open. **Quick-release** shots into an open window knock that archer's bow away. 4 windows. Meanwhile, **lifted soldiers** throw stones from the Israelite slope to draw the archers' fire (more Courage, more cover).
+**Phase 2 — The wheels.** With tier-1 counsel (Abinadab), the **wheel pins** on the front wheels glint. Each pin takes a **charged shot**. The tower jolts and leans a bit after each one. Philistine skirmishers run out to block you; drive them off.
+**Phase 3 — The top.** The tower is leaning but still standing. Climb the **rope ladder** on the side (double jump between rungs that have been cut) to the top floor, where the slingers are. **Their stones and yours:** a charged shot knocks an incoming stone out of the air. Fire at the top beam; the lean grows; the crew jump down the back and run. **The tower goes over with a huge crash and a cloud of dust.**
+
+**Counsel tier 2** (Abinadab: *"Sit down. Tell me what happened."*): shutters stay open longer, the wheel pins take 2 charged shots instead of 3 total, and +1 heart.
+
+### End of World 6 — before Saul (reflection scene)
+1. The water carriers come up the hill with full jars. The soldiers who were hiding are cheering. **Word of what David has been saying reaches Saul, and Saul sends for him** (17:31).
+2. **Saul's tent.** Saul, tall and grey-bearded, with his commanders. David: *"Let no one lose heart on account of this Philistine. Your servant will go and fight him."* (17:32)
+3. Saul: *you are not able; you're only a young man, and he has been a warrior from his youth* (17:33).
+4. **David answers with what the player has lived** (17:34–37):
+   - *"When a lion or a bear came and carried off a sheep…"* The screen shows a **replay of the player's own lion fight from World 1**, in pixel flashback.
+   - *"…I went after it, struck it and rescued the sheep."* The **bear fight from World 2** flashes in.
+   - *"The LORD who rescued me from the paw of the lion and the paw of the bear will rescue me from the hand of this Philistine."* (17:37: the verse World 1 ended on.)
+5. Saul, after a long pause: *"Go, and the LORD be with you."* (17:37)
+6. **Gift:** outside the tent, Shammah gives David a **new shepherd's bag** with a pouch in it. *"For your stones."* (Sets up 17:40 in World 7. Effect: carries the special stones found from now on.)
+7. David plays. David's song, now with a fourth part.
+8. World code.
+
+### World 6 — summary table
+| Stage | New thing | Lost things | People | Scroll |
+|---|---|---|---|---|
+| 6-1 | Lifting soldiers with the harp; asking questions; Eliab's rebuke | 5 soldiers + The One | soldiers, **Eliab**, Shammah | Proverbs 15:1 |
+| 6-2 | Volley dodging; Goliath seen in full; Goliath's Field Guide card | 5 soldiers + The One | — | Psalm 3:6 |
+| 6-3 | Escort the water carriers through the streambed | 5 soldiers + The One | Water captain, **Shammah**, **Abinadab** | Psalm 23:2 |
+| 6-4 end | The rolling tower's shadow; **Boss:** the Philistine Watchtower | 5 soldiers + The One | **Abinadab** | Deuteronomy 31:6 |
+
+### World 6 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 6-1 | Soldiers | 📜 Journal: the king's reward (17:25) | |
+| 6-1 | Shammah | 📜 Journal: why Eliab is angry | |
+| 6-2 | (watching Goliath) | 📜 Goliath's Field Guide card (17:4–7) | |
+| Map: 🙋 Water captain | Water captain *(made up)* | 🧭 Story: lead the water carriers | Trust: a shortcut path down to 6-4 |
+| Map: 🔥 Brothers' fire | Shammah | 🗝️ "The streambed's full of good stones" | Rest + harp |
+| 6-3 | Abinadab | 👁️ Warning (tier 1): knock out the wheel pins | |
+| 6-4 | Abinadab | Tier 2 after a loss: longer shutter windows, weaker pins, +1 heart | |
+| All of World 6 | Lifted soldiers | | Cover fire in the tower fight; they appear in the crowd in World 8 |
+| End of World 6 | Shammah | | **Gift:** a shepherd's bag for the stones |
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-6--the-valley-of-elah)
+
+---
+
+## 6. Worlds 7–8 (outline only — to be detailed one at a time)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
@@ -1012,7 +1153,7 @@ David carries the provisions through every stage. **If he's hit, a loaf or a che
 | 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
 | 4 | The King's Court | 1 Sam 16:14–23 | Quick release | **Saul's Torment. Detailed in §5d.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:1–24 | Double jump | **The Philistine Chariot. Detailed in §5e.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
-| 6 | The Valley of Elah | 1 Sam 17:25–37 | — | **Proposed: the Philistine Watchtower.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
+| 6 | The Valley of Elah | 1 Sam 17:25–37 | — (harp lifts soldiers) | **The Philistine Watchtower. Detailed in §5f.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
 | 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | **Proposed: Goliath's Shield-Bearer.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
 | 8 | David & Goliath | 1 Sam 17:41–50 | — | **Goliath:** dodge and survive; the final hit is one charged stone (you carry 5). |
 
