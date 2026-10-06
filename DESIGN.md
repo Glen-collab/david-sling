@@ -485,8 +485,8 @@ Four short screens, no more:
 3. Verse on screen: **1 Samuel 17:37** "The LORD who rescued me from the paw of the lion and the paw of the bear will rescue me from the hand of this Philistine."
    Caption: *David will say these words to King Saul years from now. Tonight is where they begin.*
 4. David sits at the fold's gate and plays. David's song, a little fuller than in 1-1.
-4. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
-5. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favourite, until the lion takes it.)
+5. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
+6. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favourite, until the lion takes it.)
 
 > **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a pixel replay of *this exact fight* the player won.
 
