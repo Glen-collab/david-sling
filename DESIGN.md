@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> Status: **World 1 drafted for review; The One and The Song threads added.** Worlds 2–8 are outlines only.
+> Status: **World 1 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -141,6 +141,45 @@ NES layout: **D-pad, A, B, Select, Start.**
 
 ---
 
+## 4b. The overworld map (Super Mario Bros. 3 style)
+
+Between stages, David walks a small map, one per world. The map is how the player sees the journey from Bethlehem to the Valley of Elah.
+
+- **Controls on the map:** D-pad moves David along the path; **A** enters a dot; **Start** opens the Shepherd's Journal.
+- **Each map has:** 4 stage dots, 2–3 story or rest dots, and the boss (inside the last stage dot, like SMB3's castle).
+- **Cleared stages stay open.** Walk back to any cleared stage to replay it. That's how you fetch The One lambs that need a later move (rule 2).
+- **Map dots that aren't stages:**
+  - 🏠 **Home / story spot:** a short scene (Jesse's house, Samuel's arrival, the palace gate).
+  - 🔥 **Hanan's campfire:** rest, play the harp (refill hearts), read the Journal, hear an optional teaching.
+  - 🙋 **Someone who needs help:** a small favour; the reward is a heart, a shortcut, or a hint.
+  - ✨ **Bonus spot:** opens when you've found every lost sheep in that world. A short bonus area with a Psalm piece.
+- **A path in the map opens with each cleared stage,** drawn as a dotted line filling in, as in SMB3.
+- **The Journal's "real map" page** shows the true places (Bethlehem, the wilderness of Judah, Gibeah, the Valley of Elah). Distances will be checked before they go in.
+
+### World 1 map — The Shepherd's Fields
+Golden grass hills, olive trees, stone walls, the village of Bethlehem on its hill in the top-left corner.
+
+```
+ [🏠 Jesse's house] ──> (1-1) ──> [🔥 Hanan] ──> (1-2)
+                                                   │
+ [✨ Hidden meadow] <── (1-3) <── [🙋 Shepherd girl]┘
+        │                 │
+        └─────────────> (1-4 🦁 Lion's den)
+```
+
+| Dot | What's there |
+|---|---|
+| 🏠 Jesse's house | Start. Opening scene. Later: brothers' lines change as you progress. |
+| 1-1 | The Hills of Bethlehem |
+| 🔥 Hanan | Hanan's camp. Rest and Journal. |
+| 1-2 | The Wandering Flock |
+| 🙋 Shepherd girl | *(made up)* Her goat is stuck up a rock. Knock down the thornbush with your sling → she shows you the shortcut to 1-4. |
+| 1-3 | The Rocky Pastures |
+| ✨ Hidden meadow | Opens when all of World 1's sheep are found. Bonus area + a Psalm 23 piece. |
+| 1-4 🦁 | The Lion's Territory, with the Lion at the end. The dot is a cave mouth with two eyes glowing in it. |
+
+---
+
 ## 5. World 1 — The Shepherd's Fields *(DRAFT FOR REVIEW)*
 
 **Bible:** 1 Samuel 16:11 (David "tending the sheep"), 17:34–37 (the lion and the bear), Psalm 23.
@@ -258,11 +297,11 @@ Four short screens, no more:
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
 | 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear |
-| 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | *To rethink:* "Trial of Pride" felt like filler |
-| 4 | The King's Court | 1 Sam 16:14–23 | Shooting faster | *To rethink.* Includes a harp rhythm segment to soothe Saul. |
-| 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | *To rethink:* fewer human soldiers. Maybe an animal or a mountain hazard. |
-| 6 | The Valley of Elah | 1 Sam 17:25–37 | — | *To rethink.* Eliab's rebuke (17:28) happens here. |
-| 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | Saul's armor stage: you *win* by taking it off. Five smooth stones from the stream. |
+| 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **Proposed: the Wild Ox.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
+| 4 | The King's Court | 1 Sam 16:14–23 | Shooting faster | **Proposed: Saul's Torment.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
+| 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | **Proposed: the Philistine Chariot.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
+| 6 | The Valley of Elah | 1 Sam 17:25–37 | — | **Proposed: the Philistine Watchtower.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
+| 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | **Proposed: Goliath's Shield-Bearer.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
 | 8 | David & Goliath | 1 Sam 17:41–50 | — | **Goliath:** dodge and survive; the final hit is one charged stone (you carry 5). |
 
 **Story order check:** Saul throwing his spear at David (1 Sam 18–19) and Jonathan's friendship (1 Sam 18:1) happen **after** Goliath. They stay out of this game (they're sequel material).
@@ -283,6 +322,6 @@ Four short screens, no more:
 - Every frame of David is the **same cell size** (decide once, never change).
 - **Feet on the same pixel row** in every frame; body centred on the same spot.
 - **Faces right only.** The game mirrors him.
-- **Real transparency:** delete any fake grey checkerboard GPT paints in.
+- **Real transparency:** delete any fake grey checkerboard GPT paints in. Easiest: have GPT draw on solid magenta #FF00FF, then Select > Color Range > Delete (see ART_PROMPTS.md).
 - Resize only with **Nearest Neighbor (hard edges)**.
 - File names: `david_run.png`, `david_throw.png`, `lion_pounce.png`, …
