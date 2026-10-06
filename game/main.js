@@ -33,7 +33,7 @@ const TUNE = {
   TILE: 36,
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
-    david_sling_throw: 1.12,
+    david_sling_throw: 1.15,
     david_crawl: 0.92,
   },
 };
