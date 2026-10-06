@@ -50,6 +50,23 @@ Frame counts are starting targets. Fewer frames is fine if the motion reads.
 | ☐ | victory | 4 | |
 | ☐ | portrait | 1–3 | neutral, happy, determined |
 
+### The lamb (player 2, 32 × 32)
+| ☐ | Animation | Frames |
+|---|---|---|
+| ☐ | idle (with an ear flick) | 4 |
+| ☐ | trot | 6 |
+| ☐ | hop | 3 |
+| ☐ | headbutt | 4 |
+| ☐ | bleat | 3 |
+| ☐ | tumble when hit | 4 |
+| ☐ | pop back in (sparkle) | 3 |
+| ☐ | ears up / alert | 2 |
+| ☐ | wiggle in the lion's mouth | 3 |
+| ☐ | curled up asleep by the fire | 2 |
+| ☐ | wearing Saul's helmet, walking | 4 |
+| ☐ | riding on David's shoulders (David's carry sheet, with the lamb drawn in) | reuse 8 |
+| ☐ | portrait (64 × 64) | 2 (happy, alert) |
+
 ### Sheep
 | ☐ | Sprite | Frames |
 |---|---|---|

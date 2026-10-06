@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **All 8 worlds drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
+> Status: **All 8 worlds drafted for review; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
 ---
 
@@ -265,6 +265,69 @@ The score gives skilled players something to chase on replays. It never blocks p
 
 ---
 
+## 3e. Two-player co-op — the Lamb
+
+**Player 2 is a lamb:** David's own lamb, the one he carries home from the lion in World 1. A parent and a child can play the whole game together: one plays David, the other plays the lamb.
+
+### Why a lamb (and not a cat or a dog)
+- **It's the game's heart.** The One, the lost sheep, the shepherd carrying the lamb home on his shoulders (Luke 15:5). The lamb *is* the theme.
+- **Pet lambs were real in Bible times.** Nathan's parable describes a poor man's little ewe lamb that grew up with his children, ate his food, drank from his cup and slept in his arms, "like a daughter to him" (2 Samuel 12:3). Journal fact. (It's also the parable that matters most in Part 2.)
+- **Cats don't fit:** the Bible never mentions house cats, and they weren't a normal part of life in Israel then. A sheepdog is possible (Job 30:1) but a lamb ties everything together.
+- **It's ours.** We're not borrowing any character from an existing movie or show.
+
+**Naming:** at the start of a new game, the players name the lamb. (Default name to be decided.)
+
+### Joining and leaving
+- **Drop in, drop out:** press Start on controller 2 at any time. The lamb hops onto the screen next to David. Press Start + Select on controller 2 to leave.
+- **Solo play:** the lamb still follows David around as a companion, like the sheep in your line. It doesn't do lamb jobs on its own.
+- **Rule: everything stays possible solo** (rule 2). Lamb-only routes lead to **optional** secrets, and every secret also has a David-only way in, usually harder.
+
+### The lamb can't lose
+- **No hearts, no lives.** If the lamb is hit, it tumbles, says "baa!", and bounces back beside David. If it falls in a pit or gets left off-screen, it pops back next to David a moment later.
+- **David's hearts are the team's hearts.** The lamb's job is to help, never to be the reason you lose. A small child can play it without any pressure.
+
+### What the lamb can do (all real sheep behaviour, no magic)
+| Button (controller 2) | Move | What it's for |
+|---|---|---|
+| D-pad | Trot | Small and quick |
+| A | Hop | Short jump. David can **jump off the lamb's back** for a boost to a ledge he can't reach alone (optional routes). |
+| B | **Headbutt** | Sheep butt heads. Knocks loose stones, pushes small rocks into place, knocks fruit and gourds down, scares off crows and rats. Doesn't hurt real enemies. |
+| Select | **Bleat** | **Sheep follow sheep.** Lost sheep come to the lamb's call, so the lamb can gather and lead the line while David fights. |
+| ↓ next to David | **Ride on David's shoulders** | The lamb hops up, and David carries it (the Luke 15:5 pose). For hard stretches where the younger player wants a rest. Press ↓ again to hop down. |
+
+**Passive:**
+- **Small:** fits through gaps, fences and burrows David can't, to reach items, open gates from the inside, or find The One.
+- **Ears up:** the lamb's ears perk up and it freezes for a moment when a predator is close but still off screen: a built-in early warning for both players.
+- **Finds The One:** when a hidden lamb is nearby, P2's lamb looks toward it and bleats softly.
+
+### Co-op in the bosses
+The lamb never has to fight. It **helps:**
+| Boss | The lamb's job |
+|---|---|
+| **The Lion (W1)** | **Phase 1, the lamb is the one in the lion's mouth.** P2 **wiggles** (mash any button) to slow the lion down while David hits it. When the lion drops it, the lamb runs to safety and the two players are together for the rest of the game. (Solo: the lamb is carried by the lion, as before.) |
+| The Bear (W2) | Bleats to call the pinned sheep away from the pen wall |
+| The Wild Ox (W3) | Hops between the trees; the ox charges whatever moves, so the lamb can draw a charge into a tree |
+| Saul's Torment (W4) | Two-player rhythm: P2 plays the ↑ ↓ lanes and P1 plays A and B |
+| The Chariot (W5) | Rides on David's shoulders and bleats a warning before each arrow volley |
+| The Watchtower (W6) | Headbutts the wheel chocks loose (the pins still take David's charged shots) |
+| The Shield-Bearer (W7) | Runs between his legs; he looks down, and the shield dips |
+| **Goliath (W8)** | **Fetches missed stones** and brings them back to David. Once per phase, trots out in front of Goliath, who stops to laugh (*"Am I a dog, that you come at me with sticks?"*), and the next tell lasts longer |
+
+### Small moments that make co-op worth it
+- **World 7:** in Saul's tent, the lamb puts its head into Saul's spare helmet and wanders around with it on.
+- **Campfires:** when both players sit at a fire, the lamb curls up next to David while he plays the harp.
+- **The gifts screen (W7)** includes the lamb: *"The lamb you went after."*
+- **The ending (8-4):** the lamb walks the path home beside David, and at the fold it's the one that runs ahead to Hanan.
+- **Score:** a co-op line in the stage score for things you did together (boosts, gathered lines, stones fetched).
+
+### Building it (for later)
+- Two inputs, two players on the same keyboard or two gamepads.
+- **The camera keeps David in view**; the lamb is on a "leash": too far off screen, and it pops back to David.
+- Every level gets **lamb routes** (small gaps, boost ledges) as optional secrets.
+- Unicorn's co-op version (`coop_unicorn`) already has two-player input to borrow from.
+
+---
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -401,7 +464,7 @@ Four short screens, no more:
 
 **Arena:** a rocky moonlit hollow, about 1½ screens wide, with two raised rocks for high ground and a low overhang only rollable under.
 
-**Phase 1 — The Chase.** The lion has the lamb in its mouth and keeps away from you, leaping between rocks.
+**Phase 1 — The Chase.** The lion has the lamb in its mouth and keeps away from you, leaping between rocks. **In co-op, player 2 *is* that lamb**, wiggling (mash any button) to slow the lion down (see §3e).
 - Hit it 3 times with the sling. On the third hit it drops the lamb, which runs to the safe side of the arena.
 - The lion doesn't attack yet. It only runs and snarls. This is the player learning to hit a moving target.
 
@@ -422,7 +485,8 @@ Four short screens, no more:
 3. Verse on screen: **1 Samuel 17:37** "The LORD who rescued me from the paw of the lion and the paw of the bear will rescue me from the hand of this Philistine."
    Caption: *David will say these words to King Saul years from now. Tonight is where they begin.*
 4. David sits at the fold's gate and plays. David's song, a little fuller than in 1-1.
-5. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
+4. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
+5. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favourite, until the lion takes it.)
 
 > **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a pixel replay of *this exact fight* the player won.
 
