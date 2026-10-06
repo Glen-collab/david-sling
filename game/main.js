@@ -28,7 +28,14 @@ const TUNE = {
   STONE_GRAVITY: 1300,
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   LAMB_SPEED: 380,
+  LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
+  CARRY_JUMP2: 0.95,      // second jump while carrying the lamb (1 = as strong as the flip)
   TILE: 36,
+  // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
+  SPRITE_SIZE: {
+    david_sling_throw: 1.12,
+    david_crawl: 0.92,
+  },
 };
 
 // ============================================================================
@@ -218,7 +225,7 @@ function animDone(name, t, msOverride) {
 // draw frame i of a sheet so its anchor sits at (x, y) on screen
 function drawSprite(name, i, x, y, facing, extraScale = 1, alpha = 1) {
   const s = SPR[name]; if (!s || !s.img.complete || !s.img.naturalWidth) return;
-  const sc = SCALE * extraScale;
+  const sc = SCALE * extraScale * (TUNE.SPRITE_SIZE[name] || 1);
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(Math.round(x), Math.round(y));
@@ -285,6 +292,7 @@ function headroom(b, h) { // can he stand up here?
 function updateDavid(dt) {
   const d = david;
   d.t += dt;
+  if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown";
 
@@ -314,8 +322,10 @@ function updateDavid(dt) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
       setState(d.carrying ? "carry" : "jump");
-    } else if (pressed("a") && !d.onGround && !d.flipUsed && !d.carrying && d.coyote <= 0) {
-      d.vy = -TUNE.FLIP_SPEED; d.flipUsed = true; setState("flip");
+    } else if (pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
+      d.flipUsed = true;
+      if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
+      else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
     }
     if (released("a") && d.vy < 0 && d.state !== "flip") d.vy *= TUNE.JUMP_CUT;
   }
@@ -418,9 +428,11 @@ function drawDavid(camX) {
     drawSprite("david_sling_throw", i, x, y, d.facing);
     if (d.charging && d.charge >= TUNE.CHARGE_TIME) { // golden glow when fully charged
       ctx.save(); ctx.globalCompositeOperation = "lighter";
-      const g = ctx.createRadialGradient(x + d.facing * 20, y - 120, 2, x + d.facing * 20, y - 120, 40);
-      g.addColorStop(0, "rgba(255,210,90,0.8)"); g.addColorStop(1, "rgba(255,180,40,0)");
-      ctx.fillStyle = g; ctx.fillRect(x - 60, y - 180, 160, 120); ctx.restore();
+      // centred on the sling stone, which whirls just above and behind his head
+      const gx = x - d.facing * 8, gy = y - 104 * (TUNE.SPRITE_SIZE.david_sling_throw || 1);
+      const g = ctx.createRadialGradient(gx, gy, 2, gx, gy, 30);
+      g.addColorStop(0, "rgba(255,215,100,0.85)"); g.addColorStop(1, "rgba(255,180,40,0)");
+      ctx.fillStyle = g; ctx.fillRect(gx - 34, gy - 34, 68, 68); ctx.restore();
     }
     return;
   }
@@ -450,7 +462,10 @@ function drawDavid(camX) {
     case "pickup": drawSprite("david_pickup_lamb", Math.min(15, 5 + Math.floor(d.t / 0.6 * 11)), x, y, d.facing); break;
     case "putdown": drawSprite("david_pickup_lamb", Math.min(5, Math.floor(d.t / 0.4 * 6)), x, y, d.facing); break;
     case "carry": {
-      if (Math.abs(d.vx) > 15 || !d.onGround) drawSprite("david_carry_lamb_walk", frameOf("david_carry_lamb_walk", t * Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED)), x, y, d.facing);
+      if (!d.onGround) {
+        const hop = d.carryHop > 0 ? 6 : 3;   // a different stride pose for the second hop
+        drawSprite("david_carry_lamb_walk", hop, x, y, d.facing);
+      } else if (Math.abs(d.vx) > 15) drawSprite("david_carry_lamb_walk", frameOf("david_carry_lamb_walk", t * Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED)), x, y, d.facing);
       else drawSprite("david_pickup_lamb", 15, x, y, d.facing);
       break;
     }
@@ -473,8 +488,14 @@ function updateLamb(dt) {
   const before = lamb.x;
   collideBody(lamb, 30, 40, dt);
   lamb.blocked = Math.abs(lamb.vx) < 5 && Math.abs(target) > 50 && Math.abs(lamb.x - before) < 0.5;
-  // too far behind: pop back next to David
-  if (Math.abs(lamb.x - david.x) > 900 || lamb.y > ROWS * T + 300) { lamb.x = david.x - david.facing * 60; lamb.y = david.y; lamb.vy = 0; }
+  // left behind (stuck under a ledge, fell in a pit, too far away): pop back next to David
+  const far = Math.abs(lamb.x - david.x) > 260 || lamb.y - david.y > 110;
+  lamb.lostT = far && david.onGround ? (lamb.lostT || 0) + dt : 0;
+  if (lamb.lostT > TUNE.LAMB_CATCHUP || Math.abs(lamb.x - david.x) > 900 || lamb.y > ROWS * T + 100) popLamb();
+}
+function popLamb() {
+  lamb.x = david.x - david.facing * 55; lamb.y = david.y; lamb.vx = 0; lamb.vy = -300; lamb.lostT = 0;
+  for (let k = 0; k < 14; k++) bits.push({ x: lamb.x, y: lamb.y - 20, vx: (Math.random() - 0.5) * 360, vy: -Math.random() * 420, life: 0.6, color: "#fff7c2" });
 }
 function drawLamb(camX) {
   if (lamb.carried) return;
@@ -546,8 +567,7 @@ function drawTiles(camX) {
     ctx.fillStyle = "#d9a441"; ctx.beginPath(); ctx.ellipse(x, y - 20, 16, 20, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#5b7a2a"; ctx.fillRect(x - 2, y - 46, 4, 8);
   }
-  ctx.fillStyle = "#d9a441";
-  for (const b of bits) ctx.fillRect(b.x - camX - 3, b.y - 3, 6, 6);
+  for (const b of bits) { ctx.fillStyle = b.color || "#d9a441"; ctx.fillRect(b.x - camX - 3, b.y - 3, 6, 6); }
   ctx.fillStyle = "rgba(60,40,20,0.85)"; ctx.font = "bold 16px sans-serif";
   for (const l of labels) ctx.fillText(l.text, l.x - camX, l.y);
 }
