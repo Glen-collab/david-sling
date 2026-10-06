@@ -1,6 +1,6 @@
 # David: The Shepherd's Sling
 
-A pixel-art side-scroller (cute, Pixar-like character designs drawn in pixels) with classic NES-style controls, following David from the sheep fields of Bethlehem to the Valley of Elah.
+A side-scroller with smooth, Pixar-style characters (made from AI video clips, like Rainbow Unicorn Quest) and classic NES-style controls, following David from the sheep fields of Bethlehem to the Valley of Elah.
 8 worlds · 32 stages · 8 bosses · 1 or 2 players (player 2 is David's lamb).
 
 **Status:** design phase. Nothing is built yet. The story and levels are being finalized one world at a time in [DESIGN.md](DESIGN.md).

@@ -4,20 +4,20 @@ A checklist of every sprite the game needs, world by world. Tick them off as you
 **Prompts** for most of these are in [ART_PROMPTS.md](ART_PROMPTS.md). **Sheet rules** are in DESIGN.md §8.
 
 ## Sizes
-The look is **pixel art with a Pixar-like character design** (the try2 walk). The game draws at **640 × 360** and scales up exactly 3× to a 1080p monitor (4× to 1440p), so pixels stay crisp.
+The look is **smooth, Pixar-style characters, like Rainbow Unicorn Quest** (not pixel art). Sprites are stored large and the game scales them down smoothly, so they stay sharp at any screen size.
 
-| Kind | Frame size | Notes |
+| Kind | Height in the sprite sheet | Notes |
 |---|---|---|
-| Tiles (ground, platforms, walls) | 32 × 32 | |
-| David | 80 × 80 | David himself about 63 px tall (like try2); room for the sling swing and flips |
-| The lamb, sheep, small animals | 48 × 48 | |
-| People (NPCs) | 80 × 80 | Same scale as David |
-| Big enemies (wolf, boar, leopard) | 96 × 64 | |
-| Bosses | 192 × 192 | Goliath: 160 × 160 or larger (about twice David's height) |
-| Dialogue portraits | 96 × 96 | |
-| Map icons | 32 × 32 | |
+| David | 240 px | `tools/vid2sprite.py --height 240` (the default) |
+| People (NPCs) | 240 px | Same scale as David |
+| The lamb, sheep, small animals | about 110 px | |
+| Big enemies (wolf, boar, leopard) | about 160 px | |
+| Bosses | about 400 px | Goliath about 480 px (twice David's height) |
+| Dialogue portraits | 256 × 256 | |
 
-**How sprites are made:** AI video clips split into frames and converted to pixels. See [VIDEO_SPRITES.md](VIDEO_SPRITES.md).
+**Keep scale consistent:** ask Grok for the same framing every time ("full body, centred, same distance from camera"), and the converter sizes every clip to the same character height.
+
+**How sprites are made:** Grok video clips run through `tools/vid2sprite.py`. See [VIDEO_SPRITES.md](VIDEO_SPRITES.md).
 
 Frame counts are starting targets. Fewer frames is fine if the motion reads.
 

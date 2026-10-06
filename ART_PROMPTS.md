@@ -10,19 +10,18 @@ Bosses for worlds 3–7 are **proposals** (see DESIGN.md §6). Draw them anyway 
 ## Style block (paste this first, every time)
 
 ```
-Style: pixel art game sprite with a cute, Pixar-like character design: rounded, appealing
-cartoon proportions and expressive faces, drawn in clean pixel art with crisp square pixels,
-a dark outline and soft pixel shading. Bright, readable, cheerful but not cartoon-silly;
-clear silhouettes that read well small. Setting: ancient Israel around 1000 BC (Judah, Iron Age): limestone hills,
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing cartoon characters
+with expressive faces and soft warm lighting. NOT pixel art. Bright, readable, cheerful but
+not cartoon-silly; clear silhouettes that read well small. Setting: ancient Israel around 1000 BC (Judah, Iron Age): limestone hills,
 olive trees, dry grass, stone sheepfolds, clay-brick villages.
 No text, no letters, no numbers, no logos, no UI anywhere in the image.
 ```
-**The look is pixel art with a Pixar-like character design** (like `try2-walk-animated.gif`). Upload that David with every David request. **For animations, use video instead**: see [VIDEO_SPRITES.md](VIDEO_SPRITES.md).
+**The look is smooth Pixar-style characters, like the unicorn game.** Upload a frame from David's walk clip with every David request. **For animations, use Grok video**: see [VIDEO_SPRITES.md](VIDEO_SPRITES.md). These still-image prompts are for concept art, maps and one-off poses. (Map and background style may change to SNES-style later.)
 
 ### Extra lines for every **map** prompt
 ```
 Format: one complete overworld map screen laid out like the Super Mario Bros. 3
-world maps, in the same pixel-art look. Seen from above at a slight tilt. Wide landscape, 16:9.
+world maps. Seen from above at a slight tilt. Wide landscape, 16:9.
 A winding dotted path connects round "level dots" (plain empty circles) and a few small
 landmark buildings. No characters on the map.
 ```
@@ -30,10 +29,10 @@ landmark buildings. No characters on the map.
 ### Extra lines for every **boss** prompt
 ```
 Format: a single game sprite, full body, seen from the side, FACING LEFT, standing on
-nothing. Solid flat magenta background (#FF00FF) everywhere around it: no checkerboard, no
-floor, no shadow on the ground, no scenery, no text or numbers.
+nothing. Solid flat bright green background (#00FF00) everywhere around it: no checkerboard,
+no floor, no shadow on the ground, no scenery, no text or numbers.
 ```
-Magenta is on purpose: it's a colour that's in none of the sprites, so it removes cleanly. A fake checkerboard can't be removed that way.
+Green is on purpose: the converter removes it cleanly, the same way as in the video clips. A fake checkerboard can't be removed that way.
 
 ---
 
@@ -277,5 +276,5 @@ No frame numbers, no titles.
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
-- If it adds text or a checkerboard, say *"no text, no numbers, solid #FF00FF magenta background only."*
+- If it adds text or a checkerboard, say *"no text, no numbers, solid #00FF00 green background only."*
 - Keep the first good image of each boss as the "reference" and upload it with every later pose request.

@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> **Look:** **pixel art with a cute, Pixar-like character design**: the little squares of a pixel game, but characters with the rounded, appealing look of an animated movie. The reference is `try2-walk-animated.gif` (David's pixel walk, 2026-10-06). **Controls:** NES-style (D-pad, A, B, Select, Start).
+> **Look:** **smooth, Pixar-style characters, like Rainbow Unicorn Quest.** No pixel squares on the characters. Sprites come from Grok video clips (see [VIDEO_SPRITES.md](VIDEO_SPRITES.md)). Reference: `FINAL-david_walk_preview.gif` (2026-10-06). Backgrounds may get an SNES-style look later; not decided yet. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
 > Status: **All 8 worlds drafted for review; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
@@ -1499,7 +1499,9 @@ After the credits, if you found every lamb:
 - [ ] Sage's name: "Old Hanan" is a placeholder.
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
-- [x] Look: **pixel art with a Pixar-like character design** (the try2 walk). Screen: **640 × 360**, scaled up 3× to 1080p.
+- [x] Look: **smooth Pixar-style characters, like the unicorn game** (decided 2026-10-06 after comparing pixel and smooth versions of the same walk).
+- [ ] Backgrounds: SNES-style or matching the smooth characters? (Later.)
+- [ ] Screen resolution: set when the engine is built; sprites are stored large and scaled down smoothly, so they work at any size.
 - [x] How sprites are made: **AI video clips (Grok) split into frames**, then converted to the game's pixel style. See [VIDEO_SPRITES.md](VIDEO_SPRITES.md). (A cutout rig was tested and dropped.)
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
 - [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
@@ -1511,10 +1513,10 @@ After the credits, if you found every lamb:
 The full list of sprites needed, world by world, is in [SPRITES.md](SPRITES.md).
 - One animation per PNG, frames in a **single row**, no gaps.
 - Every frame of David is the **same cell size** (decide once, never change).
-- **Feet on the same pixel row** in every frame; body centred on the same spot.
+- **Feet on the same line** in every frame; body centred on the same spot (the converter does this).
 - **Faces right only.** The game mirrors him.
-- **Background:** solid bright green (#00FF00) for video, solid magenta (#FF00FF) for still images. I remove it.
-- Send raw files. I snap them to the pixel grid and the game's colours (the process used for try2).
-- If you resize anything yourself, use **Nearest Neighbor (hard edges)**.
+- **Background:** solid bright green (#00FF00), for video and stills. The converter removes it.
+- Send raw files. No pixel step: the art stays smooth.
+- If you resize anything yourself, use normal smooth resizing (Bicubic).
 - **Legs must alternate** in walk and run cycles (video does this naturally).
 - File names: `david_run.png`, `david_throw.png`, `lion_pounce.png`, …

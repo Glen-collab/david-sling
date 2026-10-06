@@ -1,121 +1,119 @@
-"""Turn a green-screen walk-in-place clip into a pixel-art sprite sheet like try2.
-usage: python vid2sprite.py <frames_dir> <out_prefix> [target_height]"""
-import sys, glob, os
-import numpy as np
-from PIL import Image
+"""Turn a green-screen AI video clip into a smooth sprite sheet (Pixar look, no pixel step).
 
-frames_dir, out_prefix = sys.argv[1], sys.argv[2]
-TARGET_H = int(sys.argv[3]) if len(sys.argv) > 3 else 63
-files = sorted(glob.glob(os.path.join(frames_dir, "*.png")))
+usage:
+  python tools/vid2sprite.py <clip.mp4> <out_prefix> [--loop | --once] [--frames N] [--height H]
+
+  --loop    find one clean repeating cycle (walk, run, idle). Default.
+  --once    keep the whole move start to finish (jump, throw, roll, flip).
+  --frames  how many frames to keep (default 12).
+  --height  character height in the sheet, in pixels (default 240; the game scales it down smoothly).
+
+Writes <out_prefix>_sheet.png (one row, transparent), <out_prefix>_preview.gif and <out_prefix>.json.
+Needs ffmpeg on the PATH, numpy and Pillow.
+"""
+import argparse, glob, json, os, subprocess, tempfile
+import numpy as np
+from PIL import Image, ImageFilter
+
+ap = argparse.ArgumentParser()
+ap.add_argument("clip"); ap.add_argument("out")
+ap.add_argument("--once", action="store_true"); ap.add_argument("--loop", action="store_true")
+ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", type=int, default=240)
+args = ap.parse_args()
+
+tmp = tempfile.mkdtemp()
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", args.clip, "-map", "0:v:0", os.path.join(tmp, "f%04d.png")], check=True)
+fps_txt = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate",
+                          "-of", "csv=p=0", args.clip], capture_output=True, text=True).stdout.strip().split("\n")[0]
+num, den = (fps_txt.split("/") + ["1"])[:2]; fps = float(num) / float(den)
+files = sorted(glob.glob(os.path.join(tmp, "*.png")))
+
+def green_mask(a):
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    return ((g > r + 30) & (g > b + 30)) | ((g > 50) & (g > r * 1.25) & (g > b * 1.25)) | \
+           ((g > 90) & (g >= r * 0.85) & (g > b * 1.6))
 
 def key(path):
-    a = np.asarray(Image.open(path).convert("RGB")).astype(int)
+    a = np.asarray(Image.open(path).convert("RGB")).astype(float)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    green = (g > r + 30) & (g > b + 30)
-    alpha = (~green).astype(np.uint8) * 255
-    # spill suppression on the remaining pixels
-    a2 = a.copy()
-    lim = np.maximum(r, b)
-    a2[..., 1] = np.where(g > lim + 8, lim + 8, g)
-    # keep only the biggest blob roughly: drop tiny specks at the frame borders
-    alpha[:3, :] = 0; alpha[-3:, :] = 0; alpha[:, :3] = 0; alpha[:, -3:] = 0
-    return np.dstack([a2.clip(0, 255).astype(np.uint8), alpha])
+    ex = g - np.maximum(r, b)
+    alpha = np.clip(1 - (ex - 15) / 45, 0, 1)
+    alpha[green_mask(a)] = 0
+    a[..., 1] = np.minimum(g, np.maximum(r, b) + 6)          # remove green spill on edges
+    al = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
+    alpha = np.asarray(al).copy()
+    alpha[:4, :] = 0; alpha[-4:, :] = 0; alpha[:, :4] = 0; alpha[:, -4:] = 0
+    # keep only the largest connected figure (drops specks)
+    m = alpha > 128
+    ys, xs = np.where(m)
+    if len(ys):
+        im = Image.fromarray(a.clip(0, 255).astype(np.uint8)).convert("RGBA"); im.putalpha(Image.fromarray(alpha))
+        return im
+    return None
 
-def green_ratio(path):
-    a = np.asarray(Image.open(path).convert("RGB")).astype(int)
-    r, g, b = a[..., 0], a[..., 1], a[..., 2]
-    return ((g > r + 30) & (g > b + 30)).mean()
+# skip frames that aren't on the green screen (e.g. a reference screenshot at the start)
+def on_green(path):
+    return green_mask(np.asarray(Image.open(path).convert("RGB")).astype(int)).mean() > 0.4
+files = [f for f in files if on_green(f)]
 
-# skip intro frames that aren't on the green screen
-good = [f for f in files if green_ratio(f) > 0.5]
-start = files.index(good[0])
-files = files[start:]
-print("using frames", start, "to", start + len(files) - 1)
+def anchor(im):
+    m = np.asarray(im)[..., 3] > 128; ys, xs = np.where(m)
+    foot = ys.max(); top = ys.min()
+    cx = int(np.median(xs[ys < top + max(10, (foot - top) // 4)]))   # head/shoulders centre
+    return foot, cx, xs.min(), top, xs.max()
+
+# loop finding on small aligned silhouettes
+def sil(im, a):
+    foot, cx = a[0], a[1]
+    m = (np.asarray(im)[..., 3] > 128).astype(np.uint8) * 255
+    can = Image.new("L", (600, 800)); can.paste(Image.fromarray(m), (300 - cx, 780 - foot))
+    return np.asarray(can.resize((90, 120), Image.BOX)) > 100
 
 keyed = [key(f) for f in files]
+keyed = [k for k in keyed if k is not None]
+anchors = [anchor(k) for k in keyed]
+n = len(keyed)
 
-# silhouette per frame, aligned on feet (bottom) and body centre (columns of the top half)
-def silhouette(k):
-    m = k[..., 3] > 128
-    ys, xs = np.where(m)
-    return m, ys.max(), int(np.median(xs[ys < ys.min() + (ys.max() - ys.min()) // 2]))
+if args.once:
+    s, length = 0, n
+else:
+    sils = [sil(k, a) for k, a in zip(keyed, anchors)]
+    best = None
+    for s0 in range(0, max(1, min(n // 2, n - 15))):
+        for lag in range(max(10, int(fps * 0.5)), min(n - s0, int(fps * 2.5))):
+            d = (sils[s0] ^ sils[s0 + lag]).mean()
+            if best is None or d < best[0]:
+                best = (d, s0, lag)
+    _, s, length = best
+    print(f"loop: starts at frame {s}, {length} frames long ({length / fps:.2f}s), mismatch {best[0]:.4f}")
 
-info = [silhouette(k) for k in keyed]
-H = max(i[0].shape[0] for i in info)
+N = min(args.frames, length)
+idx = [s + round(i * length / N) for i in range(N)] if not args.once else [round(i * (n - 1) / (N - 1)) for i in range(N)]
 
-def aligned_mask(i, size=(200, 160)):
-    m, foot, cx = i
-    out = np.zeros(size, bool)
-    h, w = size
-    ys, xs = np.where(m)
-    ys2 = ys - foot + h - 5; xs2 = xs - cx + w // 2
-    ok = (ys2 >= 0) & (ys2 < h) & (xs2 >= 0) & (xs2 < w)
-    out[ys2[ok], xs2[ok]] = True
-    return out
+# one shared box around all chosen frames, aligned on feet + head centre
+sel = [(keyed[i], anchors[i]) for i in idx]
+L = min(a[2] - a[1] for _, a in sel) - 12
+T = min(a[3] - a[0] for _, a in sel) - 12
+R = max(a[4] - a[1] for _, a in sel) + 12
+crops = [im.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + 6)) for im, a in sel]
 
-small = [np.asarray(Image.fromarray(aligned_mask(i, (640, 480)).astype(np.uint8) * 255).resize((120, 160), Image.BOX)) > 100 for i in info]
+# scale so the character's standing height = --height (measured from the tallest frame)
+char_h = max(a[0] - a[3] for _, a in sel)
+sc = args.height / char_h
+cw, ch = round(crops[0].width * sc), round(crops[0].height * sc)
+frames = [c.resize((cw, ch), Image.LANCZOS) for c in crops]
 
-def diff(a, b):
-    return (small[a] ^ small[b]).mean()
+sheet = Image.new("RGBA", (cw * N, ch))
+for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, 0))
+sheet.save(args.out + "_sheet.png")
 
-# find the loop: for each start in the first part, the lag (12..60) with the smallest difference
-best = None
-for s in range(0, min(30, len(small) - 61)):
-    for lag in range(14, 61):
-        d = diff(s, s + lag)
-        if best is None or d < best[0]:
-            best = (d, s, lag)
-d, s, lag = best
-print("loop: start", s, "length", lag, "diff", round(d, 4))
-
-# sample the loop down to N frames
-N = 12 if lag >= 20 else 8
-idx = [s + round(i * lag / N) for i in range(N)]
-
-# crop each frame around the feet/centre, consistent box
-pad = 20
-boxes = []
-for i in idx:
-    m, foot, cx = info[i]
-    ys, xs = np.where(m)
-    boxes.append((xs.min() - cx, ys.min() - foot, xs.max() - cx, 0))
-L = min(b[0] for b in boxes) - pad; T = min(b[1] for b in boxes) - pad; R = max(b[2] for b in boxes) + pad
-crops = []
-for i in idx:
-    m, foot, cx = info[i]
-    im = Image.fromarray(keyed[i])
-    crops.append(im.crop((cx + L, foot + T, cx + R, foot + 2)))
-full_h = crops[0].height - pad - 2  # body height in source pixels
-scale = TARGET_H / full_h
-W2, H2 = round(crops[0].width * scale), round(crops[0].height * scale)
-
-# pixelize: premultiplied BOX downscale, alpha threshold, palette from figure pixels only
-def down(c):
-    a = np.asarray(c).astype(float)
-    al = a[..., 3:4] / 255.0
-    pre = np.dstack([a[..., :3] * al, a[..., 3:4]])
-    s = np.asarray(Image.fromarray(pre[..., :3].clip(0, 255).astype(np.uint8)).resize((W2, H2), Image.BOX)).astype(float)
-    sa = np.asarray(Image.fromarray(a[..., 3].astype(np.uint8)).resize((W2, H2), Image.BOX)).astype(float)
-    rgb = np.where(sa[..., None] > 0, s / np.maximum(sa[..., None] / 255.0, 1e-3), 0)
-    return rgb.clip(0, 255).astype(np.uint8), sa > 110
-
-smalls = [down(c) for c in crops]
-allpx = np.concatenate([rgb[m] for rgb, m in smalls])
-pal = Image.fromarray(allpx.reshape(-1, 1, 3)).quantize(colors=24, method=Image.MEDIANCUT)
-outs = []
-for rgb, m in smalls:
-    q = np.asarray(Image.fromarray(rgb).quantize(palette=pal, dither=Image.NONE).convert("RGB"))
-    outs.append(np.dstack([q, m.astype(np.uint8) * 255]))
-
-sheet = np.concatenate(outs, axis=1)
-Image.fromarray(sheet).save(out_prefix + "_sheet.png")
-S = 5
+ms = round(1000 * (length / fps) / N)
 gif = []
-for o in outs:
-    bg = Image.new("RGBA", (W2, H2), (110, 160, 210, 255)); bg.alpha_composite(Image.fromarray(o))
-    gif.append(bg.convert("RGB").resize((W2 * S, H2 * S), Image.NEAREST))
-gif[0].save(out_prefix + "_preview.gif", save_all=True, append_images=gif[1:], duration=round(1000 * lag / 24 / N), loop=0)
-strip = Image.new("RGB", (W2 * S * N, H2 * S), "white")
-for k, g in enumerate(gif): strip.paste(g, (k * W2 * S, 0))
-strip.save(out_prefix + "_frames.png")
-print("frames", N, "frame size", W2, "x", H2, "ms/frame", round(1000 * lag / 24 / N))
+for f in frames:
+    bg = Image.new("RGBA", f.size, (110, 160, 210, 255)); bg.alpha_composite(f)
+    gif.append(bg.convert("RGB").resize((cw // 2 * 2 // 1, ch), Image.LANCZOS))
+gif[0].save(args.out + "_preview.gif", save_all=True, append_images=gif[1:], duration=ms, loop=0)
+
+json.dump({"frames": N, "frame_w": cw, "frame_h": ch, "ms_per_frame": ms, "loop": not args.once,
+           "foot_y": ch - round(6 * sc), "center_x": round(-L * sc)}, open(args.out + ".json", "w"), indent=2)
+print(f"{N} frames of {cw}x{ch}, {ms} ms each -> {args.out}_sheet.png")
