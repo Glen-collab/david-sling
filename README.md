@@ -13,7 +13,7 @@ An NES-style pixel-art side-scroller following David from the sheep fields of Be
 | A | Z | Jump |
 | B | X | Sling (tap) · hold to charge (from World 2) |
 | Down + A | ↓ + Z | Roll |
-| Select | Shift | Call the flock |
+| Select | Shift | Play the harp |
 | Start | Enter | Pause / Shepherd's Journal |
 
 Scripture quotations are taken from the Holy Bible, New International Version® NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide.
