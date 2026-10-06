@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **Worlds 1–7 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **All 8 worlds drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
 ---
 
@@ -182,7 +182,7 @@ All counsel numbers live in one tuning table in the code, so "make the lion easi
 **The message: David didn't become David alone.**
 
 ### The payoff at Goliath
-Everyone you helped or listened to **appears on the Israelite hillside** in the final fight: Hanan, Shammah, the shepherd girl, the soldier you got home. More people met = a bigger crowd. It doesn't make the fight easier. But when Goliath taunts, short lines from them flash up: *"Remember the lion."* *"The battle is the LORD's."*
+Everyone you helped or listened to **appears on the Israelite hillside** in the final fight: Hanan, Shammah, the shepherd girl, the soldier you got home. More people met = a bigger crowd. **Each of them calls out a warning before one of Goliath's attacks** ("Remember the lion!"), so the more people you met, the more warnings you get. Like counsel, it makes the fight gentler, never unfair the other way: a player who met nobody fights with no callouts. See §5h.
 
 ---
 
@@ -1289,7 +1289,133 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 
 ---
 
-## 6. World 8 (outline only)
+## 5h. World 8 — David and Goliath *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 17:41–58.
+**What happens:** Goliath looks David over and despises him for being only a boy (17:42). He mocks him (*"Am I a dog, that you come at me with sticks?"*), curses him, and says he'll feed him to the birds (17:43–44). David answers: *you come against me with sword and spear and javelin, but I come against you in the name of the LORD Almighty* (17:45); the whole world will know there is a God in Israel (17:46); *it is not by sword or spear that the LORD saves; for the battle is the LORD's* (17:47). As Goliath moves in to attack, **David runs quickly toward the battle line to meet him** (17:48). He takes a stone from his bag, slings it, and strikes the Philistine on the forehead. Goliath falls face down (17:49). David triumphs with a sling and a stone, without a sword in his hand (17:50). The Philistines run, and Israel chases them (17:51–52). Afterwards Saul asks, *"Whose son is this young man?"* and David answers, *"I am the son of your servant Jesse of Bethlehem"* (17:55–58).
+**The lost one:** **Israel.** God saves his people through the least likely person on the field.
+**Kid-clean, but honest:** after Goliath falls, the Bible says more about what David did with Goliath's sword (17:51, 54). The game fades to white at that point and the Journal gives the reference, so families can read it together.
+
+### World 8 breaks the pattern, on purpose
+In every other world the boss is at the end of stage 4. Here, **Goliath is at the end of 8-2**, because that's where he is in the story: the duel is quick, and it isn't the end. **8-3 is the victory and 8-4 is the trip home**, the quiet epilogue the whole game has been building to.
+
+*(The alternative is ChatGPT's version: four stages of dodging Goliath, with the fight at the end of 8-4. That would stretch a very short Bible scene into four levels of the same thing. Your call; this doc assumes the version above.)*
+
+### World 8 map
+The smallest map in the game: the open valley floor, the ring of stones where the duel happens, the road west where the Philistines run, and a dotted path all the way back east to Bethlehem.
+
+```
+ (8-1) ──> (8-2 ⚔️ Goliath) ──> (8-3) ──> [👑 Saul & Abner] ──> (8-4 🏠 Home)
+```
+No campfires, no helpers, no bonus spot. Nothing between David and the giant.
+
+### 8-1 · The Valley — *the words before the fight*
+- **Level:** a short walk across the last stretch of open ground into the ring where the duel will be. Both armies on the hills. **Everyone you lifted, helped or listened to** stands on the Israelite slope (see §3c). The more people you met, the bigger your crowd. Eliab is there too, at the edge.
+- **Goliath's taunts** (17:43–44) come as he steps forward, booming across the valley. The ground shakes when he plants his spear.
+- **David's answer is played, not watched.** When Goliath finishes, a prompt appears: **press A** to answer. Each press is one line of David's reply (17:45–47), in big letters across the valley. The last press is: ***"The battle is the LORD's."*** The Israelite crowd roars.
+- **Scroll:** **1 Samuel 17:47** (the full verse goes in the Journal).
+- **The One:** a lamb that wandered out of the Israelite camp onto the valley floor. It runs to you as you walk out.
+
+### 8-2 · BOSS · Goliath
+**The rule for the fight:** **plain stones bounce off his bronze.** His helmet, scale armor and greaves (17:5–6) clang and spark when hit. You **can't wear him down**. The whole fight is about surviving, closing in, and waiting for the one opening. Then **one stone**.
+
+**Your five smooth stones** (World 7) are shown in the corner. Ordinary throwing stones still work for knocking things out of the air, but **only the five smooth stones can end the fight.**
+
+**The arena:** the ring of open ground between the armies. Goliath takes up nearly half the screen's height.
+
+**Phase 1 — Sword and spear.** Goliath advances (17:41, 48).
+- **Spear thrust:** tell = he plants his feet and draws the spear back (the iron head glints). Long reach. Jump or roll under it.
+- **Spear slam:** tell = he lifts the spear high. He drives the butt into the ground; a shockwave runs along the ground. Be in the air.
+- **Javelin throw:** tell = he reaches over his shoulder for the bronze javelin (17:6). It flies in a high arc. Watch its shadow and step aside; a quick-release shot can deflect it.
+- **Sword sweep:** close range. Don't be close.
+- **The key move: run toward him.** The Bible says David *ran* to meet him (17:48). If you back away, Goliath keeps advancing and the arena shrinks behind you. If you dodge forward, **past** his attacks, he has to turn and reset. A **distance meter** at the top shows how close you are. Get close enough three times, and phase 1 ends.
+
+**Phase 2 — Fear and faith.** Goliath roars. Attacks come faster and in combinations. **The crowd you gathered calls out warnings** before his attacks, in the voices of people you met:
+- Hanan: *"Remember the lion!"* before the long lunge (it's the lion's pounce, much bigger).
+- Abinadab: *"Get above him!"* before the spear slam.
+- Tobi: *"Watch the sky!"* before the javelin.
+- Gera: *"Release, reload!"* when a javelin can be knocked aside.
+- Shammah: *"Run toward him, David!"* before each chance to close in.
+- Each voice line is a warning, like a counsel card. **The more people you met in Worlds 1–7, the more warnings you get.** A player who met nobody fights with no callouts: harder, still fair.
+- Survive and close in 3 more times.
+
+**Phase 3 — One stone.** Goliath stops, throws his head back, and **roars curses at the sky** (17:43), and for a moment **his forehead is open** under the edge of the helmet. Time slows a little.
+- **Hold B** to wind up a full charge, while still keeping clear of his feet. **Release.**
+- **A hit:** total silence. A white flash. The stone strikes his forehead. Goliath sways, and **falls face down** in the dust (17:49). The ground shakes. Nothing else moves.
+- **A miss:** the stone lands in the dust behind him. Goliath laughs and attacks again, and opens up again after the next combination. **One of your five stones is gone** from the counter. (Missed stones land where you can pick them back up with ↓ if you get the chance, so you can never run out: rule 2.)
+- **The fight ends with one stone.** It doesn't matter if it's the first or the fifth.
+
+**Counsel tier 2** (after a loss, Shammah, from the edge of the slope: *"Come here. Tell me what happened."*): every tell lasts a little longer, and phase 3's opening lasts twice as long. +1 heart.
+
+**Kid-clean ending to the fight:** after Goliath falls, David walks up to him. The screen fades to white. *(Journal: "The Bible tells what happened next in 1 Samuel 17:50–51.")*
+
+### 8-3 · The Rout — *the Philistines run*
+- **Story:** when the Philistines see their champion has fallen, they turn and run, and the army of Israel rises with a shout and chases them (17:51–52).
+- **Level:** a joyful, fast, **auto-running** stage west across the valley and up the road toward the Philistine towns. The Israelite army pours down the hills around you, shouting. Philistines drop their shields and spears and run. **No fighting**: anything in your way is a dropped shield to jump over, a tent to bounce off, a cart to roll under. Your lifted soldiers from World 6 run alongside you.
+- **The music:** David's song at full speed, all four parts.
+- **Scroll:** **Psalm 144:1**: praise be to the LORD my Rock, who trains my hands for war. (A psalm of David.)
+- **The One:** a lamb caught up in the stampede, standing in the middle of the abandoned Philistine camp.
+
+### 👑 Saul & Abner — *"Whose son is this young man?"*
+1. Back at Saul's tent. Saul turns to **Abner**, the commander of his army: *"Abner, whose son is that young man?"* Abner doesn't know (17:55).
+2. Abner brings David in (17:57).
+3. Saul asks him. David answers, simply: ***"I am the son of your servant Jesse of Bethlehem."*** (17:58)
+   - The player has spent the whole game becoming the hero of the valley, and David answers with who he's always been: a son, a shepherd, from Bethlehem.
+
+### 8-4 · Home — *the hills of Bethlehem (playable epilogue)*
+- **The quietest stage in the game.** No enemies, no timer, no danger. The **World 1 hills** at golden sunset, the same tiles and the same music from 1-1, slowed down.
+- **Everyone is on the path home.** Each character you met stands somewhere along the way, and you can stop and talk to them (one line each):
+  - The shepherd girl and her goat (World 1). The boy from Tekoa and his father (World 2). The old gleaner (World 3). The Steward, who has come down from Gibeah (World 4). Tobi (World 5). The water captain (World 6). Gera, Abinadab, Shammah.
+  - **Eliab** walks the path home a little behind the others. He doesn't say anything. The game, like the parable, doesn't tell you what's in his heart.
+- **The flock is waiting at the fold,** with Hanan at the gate.
+- **The One:** the last lamb in the game, at the top of the very first hill from 1-1.
+- **At the fold:**
+  1. Hanan, older, leaning on a new staff: *"I heard."*
+  2. David looks back toward the hills. **Flashback**: the moonlit rocks of World 1, and the lamb you rescued from the lion, in the same pixel art the player saw at the start of the game.
+  3. Hanan: *"The lion was bigger than you. The giant was bigger than you. They always will be. Remember who stood with you."* (His World 1 line, finished.)
+  4. Final words on screen: ***The battle is the LORD's.*** (1 Samuel 17:47)
+
+### Credits
+- **David's song** plays over the credits: **the full song if you found every Psalm piece**, or the parts you found if not. The Psalm 23 page in the Journal is shown alongside it, filled in as far as you got.
+- **Credits art:** scenes from each world, with the people from each one.
+- **Scripture credit:** the NIV notice (see README).
+- **Final score:** sheep saved, The One found (out of 32), creatures spared, soldiers lifted, counsel heard, and the Shepherd's Care rating.
+
+### Secret ending (all 32 of The One)
+After the credits, if you found every lamb:
+1. Black screen. *About a thousand years later.*
+2. **The same hills of Bethlehem, at night.** Shepherds sit by a fire, keeping watch over their flocks (Luke 2:8). Same tiles, same fold.
+3. The sky fills with light. Shepherds cover their eyes (Luke 2:9). A voice: *"Do not be afraid."* (Luke 2:10)
+4. Last words on screen: **"…in the town of David a Savior has been born to you"** (Luke 2:11).
+5. The Journal's **"The One"** page completes: Luke 15:4, the lost sheep, told by the one born in David's town.
+
+### Post-game
+- **Replay any stage** from the map, with fast travel (World 4's gift).
+- **Shepherd's Trial:** every boss again, no counsel help, best times.
+- **Stats page:** 100% means every sheep, every One, every scroll, every Psalm piece, every Field Guide creature, every soldier lifted.
+
+### World 8 — summary table
+| Stage | What it is | The One | People | Scroll |
+|---|---|---|---|---|
+| 8-1 | The walk out and **the words**: you press A to speak David's answer | ✓ | everyone you met (on the hill) | 1 Samuel 17:47 |
+| 8-2 | **Boss: Goliath** — survive, run toward him, one stone | ✓ (after the fight) | the crowd's callouts | — |
+| 8-3 | **The rout**: joyful auto-run, no fighting | ✓ | lifted soldiers | Psalm 144:1 |
+| 👑 | Saul & Abner: "Whose son is this young man?" | | Saul, Abner | |
+| 8-4 | **Home**: the World 1 hills at sunset; everyone on the path; Hanan at the fold | ✓ (the last one) | everyone | — |
+
+### World 8 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 8-1 | Everyone you met | | **They're your crowd**: each one adds a warning callout in the Goliath fight |
+| 8-2 | Shammah | Tier 2 after a loss: longer tells, longer opening, +1 heart | |
+| 👑 | Saul, Abner | 📜 1 Samuel 17:55–58 | |
+| 8-4 | Hanan | 📜 The last Journal entry | |
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-8--david-and-goliath)
+
+---
+
+## 6. All 8 worlds at a glance
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
@@ -1299,7 +1425,7 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 | 5 | The Road to the Valley | 1 Sam 17:1–24 | Double jump | **The Philistine Chariot. Detailed in §5e.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — (harp lifts soldiers) | **The Philistine Watchtower. Detailed in §5f.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
 | 7 | The Giant's Shadow | 1 Sam 17:38–41 | — (the armor comes off) | **Goliath's Shield-Bearer. Detailed in §5g.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
-| 8 | David & Goliath | 1 Sam 17:41–50 | — | **Goliath:** dodge and survive; the final hit is one charged stone (you carry 5). |
+| 8 | David & Goliath | 1 Sam 17:41–58 | — | **Goliath. Detailed in §5h.** Survive, run toward him, one stone. |
 
 **Story order check:** Saul throwing his spear at David (1 Sam 18–19) and Jonathan's friendship (1 Sam 18:1) happen **after** Goliath. They stay out of this game (they're sequel material).
 
@@ -1311,6 +1437,8 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
 - [ ] Screen size and sprite scale: decide after seeing Glen's GPT sprite sheets.
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
+- [ ] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home (recommended), or ChatGPT's four dodging stages with Goliath at the end of 8-4?
+- [ ] Part 2 teaser after the credits (Jonathan, 1 Sam 18:1), or keep Part 2 completely separate?
 - [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
 
 ## 8. Sprite sheet rules (for Photoshop)

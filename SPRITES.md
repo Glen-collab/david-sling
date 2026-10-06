@@ -148,3 +148,15 @@ Frame counts are starting targets. Fewer frames is fine if the motion reads.
 - **Gifts screen icons (32×32):** ☐ Jesse's sling · ☐ leather pouch · ☐ Hanan's staff · ☐ King's Favour (a seal) · ☐ scout's cloak · ☐ shepherd's bag · ☐ five stones
 - **Tiles/backgrounds:** ☐ Saul's tent area · ☐ the slope down with crowds on both hills · ☐ the streambed close up · ☐ the open valley floor with a darkening right edge
 - **Map:** ☐ World 7 map
+
+## World 8 — David and Goliath
+- **David:** ☐ run toward (forward lean, 8) · ☐ answer pose, arm raised (2) · ☐ reach into bag for a stone (3) · ☐ final throw, slow-motion (8, can reuse the sling throw with extra in-between frames) · ☐ walk home at sunset (reuse walk with palette) · ☐ stand at the fold looking back (2)
+- **Goliath (128 × 192):** ☐ walk/advance 6 · ☐ taunt / laugh 4 · ☐ plant feet + draw spear back 3 · ☐ spear thrust 4 · ☐ lift spear high 2 · ☐ spear-butt slam 3 + shockwave 4 · ☐ reach for javelin 3 · ☐ javelin throw 3 · ☐ sword sweep 4 · ☐ roar at the sky, head back, forehead open 4 · ☐ stones clanging off bronze (spark, 3) · ☐ hit, sway 3 · ☐ fall face down 6 · ☐ lying still 1 · ☐ portrait (64 × 64)
+- **Projectiles:** ☐ bronze javelin (spin 4) · ☐ javelin shadow on the ground
+- **People:** ☐ **Abner** (portrait, idle 2, talk 2) · ☐ Israelite army charging downhill (run 6, 3 looks) · ☐ Philistines fleeing, dropping shields (run 6, 2 looks) · ☐ crowd versions of every named character (small, cheering 2): Hanan, Jesse, Eliab, Abinadab, Shammah, shepherd girl, boy from Tekoa & father, gleaner, Steward, Gera, Tobi, water captain
+- **Objects:** ☐ ring of stones (arena edge) · ☐ dropped shields and spears · ☐ abandoned Philistine tents · ☐ stone counter (5 stones, full/empty)
+- **Effects:** ☐ white flash · ☐ slow-motion streak on the stone · ☐ dust cloud when Goliath falls (6) · ☐ big text lines for David's answer (a title font)
+- **Ending:** ☐ the fold at sunset · ☐ Hanan, older, with a new staff · ☐ credits scene art, one per world
+- **Secret ending:** ☐ shepherds at night by a fire (3 looks: idle 2, cover eyes 2) · ☐ light filling the sky (6) · ☐ a figure of light (an angel shown simply as a bright shape, not a detailed character)
+- **Tiles/backgrounds:** ☐ the duel ring with both armies on the hills · ☐ the road west with the Philistine camp · ☐ World 1 hills at sunset (palette swap) · ☐ World 1 hills at night, with a starry sky (secret ending)
+- **Map:** ☐ World 8 map

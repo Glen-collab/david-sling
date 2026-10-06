@@ -250,6 +250,22 @@ A rock hyrax (small, round, brown, like a guinea pig) sitting on a rock. A Nubia
 (wild goat with long curved ridged horns) standing on a ledge. A spur-thighed tortoise.
 ```
 
+## Big scenes (full-screen art for the ending)
+Use the style block, plus: *"Format: one full-screen game scene, wide 16:9, no characters' faces in close-up."*
+
+```
+Ending: the hills of Bethlehem at golden sunset. A stone sheepfold with a flock of white sheep
+inside. An old shepherd with a white beard leans on a staff at the gate. A young shepherd
+boy with a sling at his belt and a small harp on his back stands looking back toward the hills,
+seen from behind. Long warm shadows, a few olive trees, the village on its hill in the distance.
+```
+```
+Secret ending: the same hills of Bethlehem at night under a deep blue sky full of stars.
+Three shepherds sit around a small campfire beside a stone sheepfold with sleeping sheep.
+High above them, the sky is opening with a great soft golden-white light shining down on
+them; the shepherds are shielding their eyes. Peaceful and awe-filled, not scary.
+```
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
