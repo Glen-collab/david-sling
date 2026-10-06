@@ -1363,7 +1363,7 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 ### World 8 breaks the pattern, on purpose
 In every other world the boss is at the end of stage 4. Here, **Goliath is at the end of 8-2**, because that's where he is in the story: the duel is quick, and it isn't the end. **8-3 is the victory and 8-4 is the trip home**, the quiet epilogue the whole game has been building to.
 
-*(The alternative is ChatGPT's version: four stages of dodging Goliath, with the fight at the end of 8-4. That would stretch a very short Bible scene into four levels of the same thing. Your call; this doc assumes the version above.)*
+*(Approved over ChatGPT's version of four dodging stages with Goliath at the end of 8-4.)*
 
 ### World 8 map
 The smallest map in the game: the open valley floor, the ring of stones where the duel happens, the road west where the Philistines run, and a dotted path all the way back east to Bethlehem.
@@ -1501,8 +1501,8 @@ After the credits, if you found every lamb:
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
 - [ ] Screen size and sprite scale: decide after seeing Glen's GPT sprite sheets.
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
-- [ ] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home (recommended), or ChatGPT's four dodging stages with Goliath at the end of 8-4?
-- [ ] Part 2 teaser after the credits (Jonathan, 1 Sam 18:1), or keep Part 2 completely separate?
+- [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
+- [ ] Part 2 teaser: **parked** until this game is finished.
 - [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
 
 ## 8. Sprite sheet rules (for Photoshop)
