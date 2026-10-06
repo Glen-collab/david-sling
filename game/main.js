@@ -119,7 +119,7 @@ const released = b => !input.now[b] && !!input.prev[b];
 const setup = { active: false, step: 0, rest: null, wait: 0, map: {} };
 function startSetup() {
   const p = readPad();
-  if (!p) { toast("Plug in the controller and press any button on it first."); return; }
+  if (!p) { toast("No controller seen yet: press any button on the controller, then press M."); return; }
   setup.active = true; setup.step = 0; setup.map = {}; setup.wait = 0.4;
   setup.rest = { axes: [...p.axes], buttons: p.buttons.map(b => b.pressed) };
 }
@@ -153,7 +153,18 @@ function updateSetup(dt) {
     }
   }
 }
-addEventListener("gamepadconnected", () => { if (!padMap) toast("Controller found. Press F2 to set up its buttons (recommended for NES pads)."); });
+// Start the setup by itself the first time a controller shows up with no saved buttons.
+addEventListener("gamepadconnected", () => { if (!padMap && !setup.active) setTimeout(startSetup, 300); });
+// Holding Select + Start on the controller (default layout) for 2 seconds also starts it.
+let comboT = 0;
+function checkCombo(dt) {
+  const p = readPad(); if (!p || setup.active) { comboT = 0; return; }
+  const pressedCount = p.buttons.filter(b => b.pressed).length;
+  const sel = padMap ? padControl(p, padMap.select) : !!(p.buttons[8] && p.buttons[8].pressed);
+  const st = padMap ? padControl(p, padMap.start) : !!(p.buttons[9] && p.buttons[9].pressed);
+  comboT = (sel && st) ? comboT + dt : 0;
+  if (comboT > 2) { comboT = 0; startSetup(); }
+}
 
 let toastText = "", toastTime = 0;
 function toast(t) { toastText = t; toastTime = 4; }
@@ -552,8 +563,9 @@ function drawStones(camX) {
 
 let debug = false;
 addEventListener("keydown", e => {
-  if (e.code === "F2") { e.preventDefault(); startSetup(); }
+  if (e.code === "F2" || e.code === "KeyM") { e.preventDefault(); startSetup(); }
   if (e.code === "Backquote") debug = !debug;
+  if (e.code === "Escape" && setup.active) { setup.active = false; toast("Controller setup cancelled."); }
   if (e.code === "KeyR") { david.x = spawn.x; david.y = spawn.y; david.vx = david.vy = 0; for (const g of gourds) g.alive = true; }
 });
 
@@ -564,8 +576,8 @@ function drawHUD() {
     "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
     "X = B: sling (hold to charge, Up to aim up)   Down: crouch / crawl",
     "Down + A while moving: roll   Down next to the lamb: pick up / put down",
-    "Shift = Select: play the harp   R: reset   F2: set up NES controller",
-    "Controller: " + (readPad() ? (padMap ? "mapped ✓" : "connected (default buttons; F2 to set up)") : "none"),
+    "Shift = Select: play the harp   R: reset   M: set up the NES controller",
+    "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
   lines.forEach((l, i) => ctx.fillText(l, 20, 32 + i * 21));
   if (toastTime > 0) {
@@ -581,7 +593,7 @@ function drawHUD() {
     const names = { up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT", a: "A", b: "B", select: "SELECT", start: "START" };
     ctx.fillText("Press " + names[BUTTONS[setup.step]] + " on the controller", W / 2, H / 2);
     ctx.font = "18px sans-serif"; ctx.fillStyle = "#ccc";
-    ctx.fillText(`(${setup.step + 1} of ${BUTTONS.length})`, W / 2, H / 2 + 40);
+    ctx.fillText(`(${setup.step + 1} of ${BUTTONS.length})   Esc on the keyboard to cancel`, W / 2, H / 2 + 40);
     ctx.textAlign = "left";
   }
 }
@@ -598,7 +610,7 @@ function frame(now) {
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
     requestAnimationFrame(frame); return;
   }
-  if (setup.active) updateSetup(dt);
+  if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   if (!setup.active) { updateDavid(dt); updateLamb(dt); updateStones(dt); }
   const targetCam = Math.max(0, Math.min(LEVEL_W - W, david.x - W * 0.4 + david.facing * 80));
