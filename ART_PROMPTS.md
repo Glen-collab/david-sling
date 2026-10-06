@@ -10,18 +10,20 @@ Bosses for worlds 3–7 are **proposals** (see DESIGN.md §6). Draw them anyway 
 ## Style block (paste this first, every time)
 
 ```
-Style: retro 8-bit NES pixel art, like Super Mario Bros. 3 (1988). Crisp, hard-edged
-square pixels, no anti-aliasing, no blur, no gradients, no painterly shading.
-Limited palette of about 12-16 colors with dark outlines. Bright, readable, cheerful
-but not cartoon-silly. Setting: ancient Israel around 1000 BC (Judah, Bronze/Iron Age):
-limestone hills, olive trees, dry grass, stone sheepfolds, clay-brick villages.
+Style: 16-bit pixel art in the style of the best Super Nintendo era games (Super Mario World,
+Yoshi's Island, Chrono Trigger) and modern pixel-art games. Crisp, hard-edged square pixels,
+no anti-aliasing, no blur, no smooth gradients, no painterly brushwork. A rich but controlled
+palette with soft pixel shading and dark outlines. Bright, readable, cheerful but not
+cartoon-silly. Setting: ancient Israel around 1000 BC (Judah, Iron Age): limestone hills,
+olive trees, dry grass, stone sheepfolds, clay-brick villages.
 No text, no letters, no numbers, no logos, no UI anywhere in the image.
 ```
+**Already generated art with the old 8-bit prompt?** Re-run it with this one. The game is 16-bit pixel art, not NES 8-bit.
 
 ### Extra lines for every **map** prompt
 ```
-Format: one complete overworld map screen in the style of the Super Mario Bros. 3
-world maps. Seen from above at a slight tilt. Wide landscape, 16:9.
+Format: one complete overworld map screen in the style of the Super Mario World and
+Super Mario Bros. 3 world maps. Seen from above at a slight tilt. Wide landscape, 16:9.
 A winding dotted path connects round "level dots" (plain empty circles) and a few small
 landmark buildings. No characters on the map.
 ```
@@ -200,6 +202,53 @@ monster: a huge, terrifying human soldier. Standing tall, spear planted, looking
 Poses: **standing tall, laughing / taunting**, **thrusting the spear forward**, **slamming the spear butt into the ground (shockwave)**, **throwing the javelin**, **helmet tilted back while he roars (his forehead open)**, **falling forward**.
 
 ---
+
+## Creatures (small sprites)
+Use the style block + the boss extra lines, then one of these. Dangerous/harmless pairs should be generated **in the same request** so they're drawn to the same scale and clearly different.
+
+```
+Pair 1: Left, a Palestine viper: thick body, wide triangular head, tan with a dark
+zigzag stripe, coiled and puffed up, ready to strike. Right, a whip snake: long, very
+slim, plain dark grey-black, small narrow head, stretched out sliding along. Same scale.
+```
+```
+Pair 2: Left, a yellow scorpion: pale yellow, tail curled high with the stinger raised.
+Right, a hedgehog: small, round, brown spines, cute face, walking. Same scale.
+```
+```
+Pair 3: Left, a hornet nest: grey papery ball hanging from a branch, a few angry hornets.
+Right, a honeybee hive in a hollow tree trunk: golden honeycomb visible, a few bees. Same scale.
+```
+```
+A grey wolf, side view facing left, mid-run. Separately: the same wolf yelping and
+running away.
+```
+```
+A golden jackal, small and thin, sandy coat, side view facing left, running with a
+small white lamb held gently in its mouth (not hurt).
+```
+```
+A red fox, side view facing left, running low.
+```
+```
+A large eagle diving, wings swept back, talons out, side view facing left.
+```
+```
+A striped hyena (pale grey with dark stripes, sloped back, big ears), side view
+facing left, head low, mouth open as if laughing.
+```
+```
+An Arabian leopard, pale golden with dark rosettes, crouched on a tree branch, looking
+down, side view facing left.
+```
+```
+A white sheep lying stuck on its back with its legs in the air, looking helpless
+("cast sheep"). Separately: the same sheep standing normally.
+```
+```
+A rock hyrax (small, round, brown, like a guinea pig) sitting on a rock. A Nubian ibex
+(wild goat with long curved ridged horns) standing on a ledge. A spur-thighed tortoise.
+```
 
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).

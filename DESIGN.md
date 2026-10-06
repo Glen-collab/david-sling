@@ -1,7 +1,9 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> Status: **Worlds 1–3 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
+
+> Status: **Worlds 1–3 drafted for review; creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -11,7 +13,7 @@
 
 **The education promise:** the player learns *what David learned, while doing what David did*. Every lesson the game teaches is one the player is about to use. A mentor says "a shepherd counts his flock every evening," and the next stretch of level is about finding the sheep that are missing. Scripture and facts are never a wall of text before the fun. They are the reason the next thing works.
 
-**Tone:** warm, brave, a little funny (the brothers), never preachy. Violence stays NES-clean: enemies are knocked out, run off, or fade away. No blood.
+**Tone:** warm, brave, a little funny (the brothers), never preachy. Violence stays clean, like classic Nintendo games: enemies are knocked out, run off, or fade away. No blood.
 
 ---
 
@@ -114,7 +116,7 @@ David was a musician *before* he was a warrior or a king. The servant who recomm
 | World 1 | **Gathers the flock.** Lost sheep within hearing come to David. (Replaces the whistle.) |
 | World 1 | **Campfires:** sit and play to rest. Refills hearts. A small, quiet moment every stage. |
 | World 2 | Calms nervous animals (a skittish donkey or goat that's blocking a path) |
-| World 4 | **Soothes Saul.** The harp stage is an NES rhythm segment, B and A in time with the tune (1 Sam 16:23) |
+| World 4 | **Soothes Saul.** The harp stage is a rhythm segment, B and A in time with the tune (1 Sam 16:23) |
 | World 6 | Lifts the frightened soldiers. Afraid NPCs who block a path or hide will follow or help. |
 
 - **"Psalm pieces":** a few stages hide a page of music. Each one adds a verse to Psalm 23 in the Journal and a new phrase to David's tune. Collect them all and David's full song plays over the **ending credits**.
@@ -184,6 +186,85 @@ Everyone you helped or listened to **appears on the Israelite hillside** in the 
 
 ---
 
+## 3d. Creatures & dangers — what a shepherd watches for
+
+Every enemy and hazard is something a real shepherd in ancient Judah had to deal with. Most predators are **driven off**, not killed: hit a wolf and it yelps and runs. That keeps the game kid-friendly and true to the job: a shepherd's goal is a safe flock, not a body count.
+
+### 1. Predators that go after the flock
+| Animal | Real behaviour | Game role | First seen |
+|---|---|---|---|
+| **Fox** | Small, quick, opportunistic | Fast nuisance; runs at the sheep in your line | 1-2 |
+| **Raven** | Bold, steals food | Dives at you on open ground | 1-3 |
+| **Jackal** | Scavenger, steals lambs | Darts in, grabs a lamb and runs. Chase it down and hit it to make it drop the lamb. | 1-4 |
+| **Wolf** | Hunts in packs at dusk | Packs circle and try to cut a sheep off from the line. Hit = yelp and run off. | 2-4 |
+| **Eagle** | Large eagles can carry off a lamb | Circles, then dives at the back of your line. Hit it before it lifts off, or chase the shadow. | 2-3 |
+| **Wild boar** | Charges; the Bible mentions "boars from the forest" (Psalm 80:13) | Tap shots bounce off; a charged shot stops it | 2-1 |
+| **Striped hyena** | Real in Israel; comes out at night | Night stages only. **Laughs before it attacks**, a built-in warning sound. | World 5 |
+| **Leopard** | Lived in Judah; the prophets mention it (Jeremiah 5:6, Hosea 13:7) | A **mini-boss stalker** that climbs trees and drops from above | World 5 |
+| Lion · Bear · Wild ox | | World bosses | 1, 2, 3 |
+
+### 2. Shepherd's Judgment — dangerous or harmless?
+**Some creatures look scary but are harmless, or even helpful. A good shepherd looks before he throws.**
+
+| Dangerous: sling it | Harmless: leave it alone | Why leaving it pays off |
+|---|---|---|
+| 🐍 **Palestine viper**, the real venomous snake of the region: fat body, **wide triangle head**, tan with a dark zigzag, coils and puffs up before striking | 🐍 **Whip snake**: long, slim, plain dark, narrow head, fast. Harmless to people. | It **eats the rats**. A whip snake left alone clears a rat-blocked path or granary. |
+| 🦂 **Yellow scorpion**, one of the most dangerous scorpions in the world | 🦔 **Hedgehog**: slow, round, harmless | It **eats scorpions**. Leave it, and a scorpion nest ahead is cleared. |
+| 🐝 **Hornet nest**: grey papery ball, angry buzz. Knock it down and it scatters. | 🐝 **Honeybee hive**: in a rock crack or hollow tree, golden comb, calm hum | Leave it and you can **collect honey** at the end (+1 heart). Knock it down and that's gone. |
+| | 🐢 Tortoise · 🦎 chameleon · ibex · rock hyrax · gazelle · stork · owl · sheepdogs · other people's sheep | A tortoise you didn't hit becomes a **stepping stone** across a stream. Others just add to your Care score. |
+
+**Scoring:** sparing harmless creatures earns points. Hitting one **never costs a life**. It lowers that stage's **Shepherd's Care** rating. Keep doing it and Hanan has a word with you: the righteous care for the needs of their animals (**Proverbs 12:10**).
+
+**They must look clearly different in pixel art.** Each dangerous/harmless pair is designed side by side so the difference reads at a glance (shape first, colour second, a behaviour tell third, e.g. the viper coils and puffs up, the whip snake just slides past). The first time you meet each one, someone points out how to tell them apart.
+
+### 3. The Field Guide (Journal page)
+The first time you see any creature, it's added to the Journal's **Field Guide** with its pixel portrait, its real name, whether it's dangerous, how to tell it apart, and one real fact. Example:
+
+> **Whip snake** · *harmless* · Long, thin, dark, narrow head. Fast. Eats rats and mice, so farmers were glad to have one around the barn. Don't confuse it with the viper: look at the head.
+
+Filling in every creature is a collection goal of its own.
+
+### 4. Dangers to the sheep themselves (shepherd chores)
+| Chore | What happens | How you fix it | Why it's real |
+|---|---|---|---|
+| **Cast sheep** | A sheep rolls onto its back and can't get up. It can die if nobody helps. | Walk to it, press ↓ to roll it back onto its feet. | A real danger for heavy sheep. Pastors often connect it to "Why, my soul, are you downcast?" (Psalm 42:5), from Phillip Keller's book *A Shepherd Looks at Psalm 23*. |
+| **Flies** | A swarm pesters some sheep; they shake their heads and slow the whole line. | Rub **oil** on their heads (pick up an oil flask, press ↓ at the sheep). | Shepherds put oil on sheep's heads to keep insects off. Keller ties it to "you anoint my head with oil" (Psalm 23:5). An echo of David's own anointing in World 3. |
+| **Poisonous plants** | Oleander grows along dry riverbeds and is toxic to livestock. Sheep wander toward it. | Steer the line around it; play the harp to call them off. | True: oleander is poisonous to animals. |
+| **Thorns** | A sheep's wool catches in a thorn bush and it's stuck. | Clear the thorns with the sling. | |
+| **Pits and crevices** | A sheep falls in. | Find a way down or lower a rope. | Jesus mentions a sheep fallen into a pit (Matthew 12:11). |
+
+### 5. Thieves and raiders
+- **Rustlers** sneak in to steal sheep. Jesus speaks of the thief who comes to steal (John 10:10). Hit them and they drop the sheep and run. They're scared off, never "killed."
+- **Philistine raiders** in Worlds 5–6.
+
+### 6. Helpers
+- **Sheepdogs** (the Bible mentions dogs guarding flocks, Job 30:1). In some stages a dog helps keep your line together and barks when a predator is near.
+- **Other shepherds** who need a hand: helping them is counsel and trust (§3c).
+
+### 7. Stage score (shown at the fold)
+| Score line | |
+|---|---|
+| Sheep saved | out of 5 |
+| The One | found or not |
+| Predators driven off | |
+| Creatures spared | harmless animals left alone |
+| Chores done | cast sheep righted, flies oiled, thorns cleared |
+| **Shepherd's Care** | a rating (★ to ★★★), built from the lines above |
+
+The score gives skilled players something to chase on replays. It never blocks progress.
+
+### Where creatures appear
+| World | New creatures and chores |
+|---|---|
+| 1 Fields | viper vs **whip snake**, fox, raven, jackal, **cast sheep**, thorns |
+| 2 Wilderness | boar, wolves, eagle, scorpion vs **hedgehog**, hornets vs **bees**, oleander, tortoise |
+| 3 Bethlehem | rats (whip snake helps), crows, stray dogs, **rustlers**, **flies (oil the sheep)** |
+| 4 Court | few animals; palace dogs, guards |
+| 5 Road | **hyena** (night), **leopard** stalker, raiders |
+| 6–8 Elah | Philistine soldiers, plus vipers and scorpions in the streambed |
+
+---
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -247,7 +328,7 @@ Golden grass hills, olive trees, stone walls, the village of Bethlehem on its hi
 **Bible:** 1 Samuel 16:11 (David "tending the sheep"), 17:34–37 (the lion and the bear), Psalm 23.
 **Setting:** the hills around Bethlehem in Judah. Dry grass, limestone, olive trees, stone sheepfolds. Day → evening → night across the four stages.
 **David learns:** to move, to sling, to care for the flock, and that faithfulness in small things matters.
-**Enemies:** viper (pops out of rocks), fox (runs at the flock), raven (dives at you), jackal (runs in packs, stage 4 only).
+**Enemies:** viper (pops out of rocks), fox (runs at the flock), raven (dives at you), jackal (stage 4 only). **Harmless:** whip snake. **Chores:** cast sheep, thorns. (See §3d.)
 
 ### Opening scene (before 1-1)
 Four short screens, no more:
@@ -267,6 +348,7 @@ Four short screens, no more:
   > "That doesn't happen by luck. It happens one stone at a time."
   - *Journal fact unlocked:* **Judges 20:16** — the slingers of Benjamin. (NIV: "...each of whom could sling a stone at a hair and not miss.")
 - **Second half:** first vipers. Learn to sling them from a distance instead of jumping over them.
+- **First Shepherd's Judgment:** a **whip snake** slides across the path right after the first viper. Shammah: *"Not that one! The thin dark ones don't hurt anybody. They eat the rats. Look at the head."* Hitting it lowers your Care score; leaving it alone, it slides into a rat hole and the rats blocking a ledge scatter. Both snakes go into the **Field Guide**.
 - **Scroll:** behind a bush on a high ledge → **Psalm 23:1** "The LORD is my shepherd, I lack nothing."
 - **End of stage:** the family sheepfold. Sheep counted in.
 
@@ -280,6 +362,7 @@ Four short screens, no more:
   - *Journal fact:* shepherds counted the flock as it passed "under the rod" (Leviticus 27:32). *Proverbs 27:23*: "Be sure you know the condition of your flocks."
 - **Level:** wider, more open hills with branching paths. Each lost sheep is stuck somewhere: on a ledge, behind a thornbush you clear with the sling, across a gully. Playing the harp nearby brings it to you.
 - **Foxes** run at the sheep behind you. Your job is to protect the line, not just yourself.
+- **First chore: a cast sheep.** One sheep is stuck on its back, legs in the air. Hanan, at the start-of-stage fire: *"A sheep on its back can't get up by itself. Leave it and it dies. Roll it over."* Press ↓ next to it. (Journal: cast sheep and Psalm 42:5.)
 - **Abinadab** is resting at the midpoint: *"You're actually going after all of them? For one sheep? ...Huh. Dad would do the same."*
 - **End of stage, Hanan at the fold:** introduces The One (Thread 1).
   > "Ninety-nine safe in the fold, and you'd still go back out for one. Good."
@@ -328,7 +411,7 @@ Four short screens, no more:
 - **Roar:** tell = it rears up its head. A shockwave ripples along the ground. → be in the air when it hits.
 - 5 hits during dazed windows end the phase. Hits at other times are blocked/shrugged off: you see the stone bounce.
 
-**Phase 3 — Last Stand (short).** Faster pounces, back to back, and a double swipe. 3 more hits. The final hit plays a slow-motion freeze frame, a white flash, and the lion slumps and fades. (No gore. The text says David killed it, and it is clearly beaten, but it's NES-clean.)
+**Phase 3 — Last Stand (short).** Faster pounces, back to back, and a double swipe. 3 more hits. The final hit plays a slow-motion freeze frame, a white flash, and the lion slumps and fades. (No gore. The text says David killed it, and it is clearly beaten, but it's kid-clean.)
 
 **Fairness notes:** the lamb is never in danger during phases 2–3 (it's safe on its side), so the player never feels punished twice. A campfire checkpoint is right before the arena. Phase 1 restarts if you die, but it's short.
 
@@ -374,7 +457,7 @@ Four short screens, no more:
 **Why David is out here:** in the dry summer the grass near Bethlehem runs out, so shepherds moved their flocks to find pasture and water. Hanan leads David and the flock east and up into the wild country.
 **Setting:** the real wilderness of Judah is not a jungle. It's wooded hill country that gives way to dry ravines (*wadis*), cliffs and hidden springs. The four stages follow that: woods → dry riverbed → cliffs and springs → a wooded ravine where the bear lives.
 **David learns:** the **charged sling** (taught by Hanan), patience, and how to read the land.
-**Enemies:** wild boar (Psalm 80:13 mentions "boars from the forest"), wolves, hornet nests (hazard), vultures, scorpions in the dry stretches. **Neutral animals:** ibex (wild goats) and rock hyraxes. You never hit those.
+**Enemies:** wild boar (Psalm 80:13 mentions "boars from the forest"), wolves, eagles, hornet nests, yellow scorpions in the dry stretches. **Harmless:** hedgehog, honeybees, tortoise, ibex (wild goats), rock hyraxes. **Hazard:** oleander. (See §3d.)
 
 ### World 2 map
 Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a waterfall spring in the east, a dark wooded ravine at the end.
@@ -412,12 +495,16 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
   - 🎓 **Skill: charged sling** (hold B, release). A full charge flies flatter and farther, breaks dead branches and cracked rocks, and stuns big animals.
 - **Wild boars** charge along the ground. Tap shots bounce off their heads; one charged shot stops them. This teaches *when* to charge, not just how.
 - **Hornet nests** hang from branches. Knock one down onto a boar to clear the path, or just steer clear.
+- **Hornets vs bees:** a **honeybee hive** sits in a hollow oak near a hornet nest. Abinadab: *"Grey paper ball, knock it down. Golden comb, leave it. Honey later."* Leave the hive and you collect honey at the end of the stage (+1 heart).
 - **Abinadab** at the start of the stage: *"Wild pigs out here. Don't try to out-run them — they're faster than you look."* plus 🗝️ Secret: *"There's a cave behind the falls in 2-3. Found it when I was your age."*
 - **Scroll:** **Psalm 1:3** "That person is like a tree planted by streams of water, which yields its fruit in season and whose leaf does not wither — whatever they do prospers."
 - **The One:** a lamb up in the treetops, reached by chaining two vine swings. It's out of reach unless you ride the swing to full height.
 
 ### 2-2 · The Dry Riverbed — *the flash flood*
 - **Level:** a dry, rocky wadi in the sun. Scorpions under rocks, vultures circling. Halfway through, the sky darkens far away and a low rumble starts.
+- **Scorpion vs hedgehog:** a nest of yellow scorpions blocks a low passage. A **hedgehog** trundles toward it. Leave the hedgehog alone and it clears the nest; hit it and you have to deal with the scorpions yourself.
+- **Oleander:** pink-flowered bushes along the riverbed. Sheep in your line drift toward them; steer around, or play the harp to call them back. (Journal: oleander is poisonous to livestock.)
+- **Tortoise:** sitting in a shallow pool. Leave it and it becomes a stepping stone.
 - **Campfire (midway), Hanan:**
   > "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look."
   - 📜 Journal fact: wadis are dry valleys that flood suddenly after rain falls far away. A real danger in the wilderness, even under a clear sky.
@@ -430,7 +517,7 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 
 ### 2-3 · The High Cliffs — *distance, angles and heights*
 - **Level:** a vertical climbing stage up desert cliffs to a hidden spring with a waterfall (like the real springs of En Gedi in the Judean wilderness). Narrow ledges, crumbling rock, wind gusts at the top.
-- **Charged shots at a distance:** cut rope ladders down, knock loose hanging rocks to make stepping stones, hit vultures diving from far off with diagonal shots.
+- **Charged shots at a distance:** cut rope ladders down, knock loose hanging rocks to make stepping stones, hit **eagles** diving at the back of your sheep line from far off with diagonal shots before they can lift a lamb.
 - **Ibex** leap between ledges. They're neutral and never hurt you. **Hanan's counsel:**
   > "Watch the wild goats. They know every safe path on these cliffs."
   - 🗝️ Secret: follow an ibex and it leads to a hidden ledge route with a heart and The One.
@@ -464,7 +551,7 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 - **Weak point:** when it stands up to roar, a **full charged shot** staggers it and knocks it onto its back for a few seconds. Tap shots do small damage only while it's down.
 - 4 charged hits end the phase.
 
-**Phase 3 — The bridge.** The bear slams the log bridge and it breaks. Now the arena is just the ground and the high ledge. The bear climbs after you onto the ledge, slowly, so you can see it coming. Stay one level away and keep firing charged shots. 3 more. On the last one: slow-motion freeze, flash, and the bear slumps and fades (NES-clean, as with the lion).
+**Phase 3 — The bridge.** The bear slams the log bridge and it breaks. Now the arena is just the ground and the high ledge. The bear climbs after you onto the ledge, slowly, so you can see it coming. Stay one level away and keep firing charged shots. 3 more. On the last one: slow-motion freeze, flash, and the bear slumps and fades (kid-clean, as with the lion).
 
 **Counsel tier 2** (after a loss, go back to Hanan: *"Sit down. Tell me what happened."*): the bear turns even slower, its stand-up lasts +0.4 s, and you get +1 heart for this fight.
 
@@ -507,7 +594,7 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 **The big idea:** David is **this world's lost one.** The prophet comes to Bethlehem to anoint a king, every brother is presented, and David isn't even invited. He's out with the sheep. Samuel refuses to sit down until the overlooked youngest son is brought in (16:11). The player lives that: you're out in the far hills while the town gathers without you.
 **Key verse:** **1 Samuel 16:7**: people look at the outward appearance, but the LORD looks at the heart.
 **David learns:** the **aerial flip** (taught by Shammah); that God sees what people don't; and humility, because after he's anointed he goes straight back to the sheep.
-**Enemies:** crows in the barley, stray dogs, rats in the granary, hornets, and in the storm, the wild ox.
+**Enemies:** crows in the barley, stray dogs, rats in the granary, hornets, **rustlers**, and in the storm, the wild ox. **Harmless:** whip snake (in the granary). **Chores:** oiling sheep pestered by flies. (See §3d.)
 
 ### World 3 map
 Bethlehem up close: the village on its hill, barley fields and a threshing floor, olive groves, and open grassland under storm clouds at the far end.
@@ -540,7 +627,7 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 ### 3-1 · The Day Before — *village life and the rooftops*
 - **Story:** the whole town is getting ready for Samuel. Jesse's family is busy, and David is given the jobs nobody else wants.
 - **Level:** Bethlehem itself. Narrow lanes, **flat rooftops** to run and jump across, ladders, courtyards, the barley fields and the threshing floor.
-- **Jobs that are the level:** chase **crows** out of the barley with the sling, clear **rats** from the granary, and bring a stray goat home through the lanes.
+- **Jobs that are the level:** chase **crows** out of the barley with the sling, clear **rats** from the granary (or spot the whip snake in the rafters and let it do the job for you: a Shepherd's Judgment callback to 1-1), and bring a stray goat home through the lanes.
 - **Eliab** at the house: *"When the prophet sees me, he'll know. Look at me."* (Sets up 16:6–7.)
 - **Shammah:** *"Don't mind him. Somebody has to keep the sheep alive while he's being admired."*
 - **Journal fact:** **Ruth and Boaz**, David's great-grandparents, lived here, and Ruth gathered barley in these very fields (Ruth 2 and 4:17). The threshing floor in this stage is a nod to their story.
@@ -552,6 +639,8 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 ### 3-2 · The Far Pasture — *the one who wasn't invited*
 - **Level:** wide open hills far from town, with long sightlines back to Bethlehem in the background. **You can see the crowd gathering on the town hill** while you work.
 - **Gameplay:** a classic shepherd stage: find the 5 sheep, keep foxes and stray dogs off the line, cross a stream on stepping stones.
+- **Rustlers:** with the town busy, two sheep thieves sneak in to steal from the unguarded flock. Hit them and they drop the sheep and run.
+- **Oil for the flies:** fly swarms pester the sheep and slow the line. You find an oil flask at the campfire; press ↓ at a sheep to oil its head. This is the stage just before David himself is anointed with oil. The Journal makes the link (Psalm 23:5).
 - **Cut-in scenes at each checkpoint (5–6 seconds each, skippable):** back in town, the sons of Jesse pass before Samuel one at a time.
   - Eliab first. Samuel thinks *surely this is the one.* Then: *not this one* (16:6–7).
   - Abinadab: *not this one.* Shammah: *not this one* (16:8–9).
@@ -661,7 +750,7 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 ## 7. Open questions
 - [ ] Sage's name: "Old Hanan" is a placeholder.
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
-- [ ] Lives and continues: NES-style lives, or infinite retries from the campfire (kinder for kids)?
+- [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
 - [ ] Screen size and sprite scale: decide after seeing Glen's GPT sprite sheets.
 - [ ] World 7's lost one.
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?

@@ -1,6 +1,6 @@
 # David: The Shepherd's Sling
 
-An NES-style pixel-art side-scroller following David from the sheep fields of Bethlehem to the Valley of Elah.
+A 16-bit-style pixel-art side-scroller (with classic NES-style controls) following David from the sheep fields of Bethlehem to the Valley of Elah.
 8 worlds · 32 stages · 8 bosses · single player.
 
 **Status:** design phase. Nothing is built yet. The story and levels are being finalized one world at a time in [DESIGN.md](DESIGN.md).
