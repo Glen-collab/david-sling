@@ -210,9 +210,9 @@ Four short screens, no more:
   > "You don't have to be the strongest thing in the hills, David. You have to trust the One who made the hills."
   - *Journal:* **Psalm 23:4** "Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me."
 - **Scroll:** **Joshua 1:9** "Be strong and courageous. Do not be afraid; do not be discouraged, for the LORD your God will be with you wherever you go."
-- **Stage ending:** David reaches the fold. A scream from the flock — **the lion has taken a lamb** and runs off into the rocks. David goes after it (this is exactly 1 Sam 17:34–35).
+- **Stage ending:** David reaches the fold. A scream from the flock — **the lion has taken a lamb** and runs off into the rocks. David goes after it (this is exactly 1 Sam 17:34–35). A last campfire, then the boss arena, **still inside stage 1-4** (like Mario's castle in 1-4). The boss is not a separate stage.
 
-### BOSS · The Lion
+### BOSS · The Lion (end of 1-4)
 **Faithful to the text:** a lion took a sheep, David went after it and rescued the sheep from its mouth, and when it turned on him he struck it down (1 Samuel 17:34–35). The fight follows that order: **rescue first, then defend.**
 
 **Arena:** a rocky moonlit hollow, about 1½ screens wide, with two raised rocks for high ground and a low overhang only rollable under.
@@ -249,7 +249,7 @@ Four short screens, no more:
 | 1-2 | Harp (Select), protecting the line, The One introduced | 5 + The One | **Hanan**, Abinadab | Luke 16:10 |
 | 1-3 | Roll, crumbling ledges, rope bridges, secrets | 5 + The One | Shammah, **Hanan** | Psalm 121:1–2 |
 | 1-4 | Darkness, jackal packs, the lion watching | 5 + The One | **Hanan** | Joshua 1:9 |
-| Boss | The Lion: rescue, then defend | lamb | — | (reflection: 1 Sam 17:37) |
+| 1-4 end | **Boss:** the Lion: rescue, then defend | lamb | — | (reflection: 1 Sam 17:37) |
 
 ---
 
