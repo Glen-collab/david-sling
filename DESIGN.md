@@ -122,6 +122,68 @@ David was a musician *before* he was a warrior or a king. The servant who recomm
 
 ---
 
+## 3c. Counsel & the Journal — wisdom is the power-up
+
+> "Plans fail for lack of counsel, but with many advisers they succeed." — Proverbs 15:22
+> "The way of fools seems right to them, but the wise listen to advice." — Proverbs 12:15
+
+David doesn't get stronger from magic pickups. He gets **wiser** because he listens to the people around him, and in the game wisdom works like a key. The loop is **Listen → Learn → Use → Remember**.
+
+### Listen
+People give **counsel** at map spots, campfires and inside stages. Each person says **1–3 short lines**. A skips ahead, but the **key line is always shown**, so skimming never costs you the card.
+
+### Learn: Counsel cards
+Everything worth keeping goes into the Journal as a card:
+
+| Card | What it does | Example |
+|---|---|---|
+| 📜 **Verse** | Journal entry; counts toward the world's page | Psalm 23:4, from Hanan's campfire |
+| 🗝️ **Secret** | Puts a **?** on a stage's map dot and a faint marker in the stage | Abinadab: "Sheep like to hide by the old fig tree in 1-3." |
+| 👁️ **Warning** | Makes a boss or tough enemy **easier to read** (see "Counsel softens the fight") | Hanan: "A lion crouches and flicks its tail twice before it pounces." |
+| 🧭 **Story key** | Opens a story gate | Jesse's grain, bread and cheese for the brothers (1 Sam 17:17–18) gets you into the army camp in World 5 |
+| 🎓 **Skill** | A new move, *taught by someone* | Shammah teaches the roll in 1-3 |
+
+### Use: counsel softens the fight
+**Ignoring advice makes the game harder. Listening makes it gentler. A skilled player can still beat everything with no counsel at all.**
+
+The game's base difficulty is the *skilled* version: fair, readable, beatable with good timing. Counsel layers help on top:
+
+| Counsel heard | What changes in the boss fight (Lion example) |
+|---|---|
+| **None** | Base fight. Tells are there but subtle (tail flicks twice, 0.5 s before the pounce). Fair for skilled players. |
+| **Tier 1:** the Warning card | The tell **glows** (the tail-flick flashes gold) and lasts a bit longer (+0.15 s). |
+| **Tier 2:** go back after losing | Only given *after you've lost to that boss at least once* and go back to ask. The dazed window lasts +0.5 s, the roar shockwave is shorter, and you get **+1 heart for this fight**, a "word of encouragement". |
+
+**Tier 2 is the heart of it:** humbling yourself to go back and ask for help after failing. Hanan's tier-2 line starts with *"Sit down. Tell me what happened."*
+
+**Making "go back" easy, not a chore:**
+- After a boss loss, the retry screen has two choices: **Try again** / **Go to Hanan** (or whoever holds the advice). One button press, no long walk.
+- After **3 losses** to the same boss, that person's map dot **pulses**, a gentle nudge, never a forced stop.
+- For bosses whose counsellor isn't at the campfire just before the arena, "Go to …" drops you at that person's map spot, and the return trip is one press too.
+
+**For experts:** a post-game **"Shepherd's Trial"** replays every boss with no counsel bonuses. (Name to be decided.)
+
+All counsel numbers live in one tuning table in the code, so "make the lion easier for listeners" is a one-number change.
+
+### Remember: the Journal
+- **After every stage:** David writes 2–3 lines in his Journal about what happened, plus the verse that fits. (Labelled *David's Journal, imagined*. Verses and references stay exact.)
+- **After every world:** a longer entry, and a **gift from someone** (below).
+- **Journal pages:** Verses · Secrets · Warnings · People met · The One · Psalm pieces · Real map.
+
+### Gifts from people, not superpowers
+| Kind | Example | Effect |
+|---|---|---|
+| A skill someone teaches | Hanan / Shammah teach the roll, the long-shot wind-up (charged sling), the flip | Moves exist, but someone taught them to David. No magic. |
+| A gift of gear | Jesse's water skin; Shammah's sling pouch | Small, believable boosts: +1 heart, a slightly faster reload |
+| Trust | The shepherd girl's shortcut; a soldier opens the back way into camp | New routes on the map |
+
+**The message: David didn't become David alone.**
+
+### The payoff at Goliath
+Everyone you helped or listened to **appears on the Israelite hillside** in the final fight: Hanan, Shammah, the shepherd girl, the soldier you got home. More people met = a bigger crowd. It doesn't make the fight easier. But when Goliath taunts, short lines from them flash up: *"Remember the lion."* *"The battle is the LORD's."*
+
+---
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -289,6 +351,20 @@ Four short screens, no more:
 | 1-3 | Roll, crumbling ledges, rope bridges, secrets | 5 + The One | Shammah, **Hanan** | Psalm 121:1–2 |
 | 1-4 | Darkness, jackal packs, the lion watching | 5 + The One | **Hanan** | Joshua 1:9 |
 | 1-4 end | **Boss:** the Lion: rescue, then defend | lamb | — | (reflection: 1 Sam 17:37) |
+
+### World 1 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 1-1 | Shammah | 🎓 Skill: aiming up | |
+| 1-1 campfire | Hanan | 📜 Judges 20:16 (the slingers of Benjamin) | |
+| Map: 🔥 Hanan | Hanan | 🗝️ Secret: "There's a lamb in a low cave in 1-2. You'll need to get low to reach it." | Rest + harp |
+| 1-2 | Hanan | 🎓 Skill: the harp gathers sheep · 📜 Proverbs 27:23 | |
+| 1-2 | Abinadab | 🗝️ Secret: the old fig tree in 1-3 | |
+| Map: 🙋 Shepherd girl | Shepherd girl *(made up)* | 🗝️ Secret: the dry cave below the cliff in 1-4 (The One) | Trust: shortcut to 1-4 |
+| 1-3 | Shammah | 🎓 Skill: the roll | |
+| 1-3 campfire | Hanan | 👁️ Warning: the wild ram charges in a straight line, so roll under it · 📜 Psalm 121:1–2 | |
+| 1-4 campfire | Hanan | 👁️ Warning (tier 1): the lion's tail-flick · 📜 Psalm 23:4 | Tier 2 after a loss: +1 heart for the fight, longer dazed window |
+| End of World 1 | Jesse | | **Gift:** Jesse's own old sling, a family heirloom (slightly faster reload) |
 
 ---
 
