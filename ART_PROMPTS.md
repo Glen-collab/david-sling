@@ -52,11 +52,13 @@ inside it. Mood: peaceful, warm, a hint of danger at the cave.
 
 ### World 2 — The Wilderness
 ```
-The wilderness of Judah. Left side: a dense pine-and-oak forest. Middle: a fast river with
-white rapids and stepping stones crossing it. Right: rising brown mountains with a narrow
-switchback pass. The path ends at a large dark cave under an overhang of rock, with
-claw marks on the stone and a scattered pile of broken branches outside it (the bear's
-den). A small campfire beside the river. Mood: wild, rugged, cooler colors than World 1.
+The wilderness of Judah in summer. Left side: green wooded hills of oak and pine. Middle:
+a wide, dry, rocky riverbed (a wadi) winding through tan and ochre ravines, with scattered
+boulders and dead trees, and dark rain clouds gathering far away in the hills. Right: tall
+pale desert cliffs with a thin waterfall falling into a small green spring pool with palm
+trees. End of the path (bottom-right): a dark wooded ravine with a stone sheep pen at its
+mouth and big claw marks on a tree. A small tent camp with stone pens at the start of the
+path, and a campfire near the riverbed. Mood: wild, hot and dry, rugged.
 ```
 
 ### World 3 — The Anointing

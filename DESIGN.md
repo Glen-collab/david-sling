@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> Status: **World 1 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1 and 2 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -86,7 +86,7 @@ Jesus told this parable about a thousand years after David. The game connects th
 | World | The lost one | Why it fits |
 |---|---|---|
 | 1 | a single lamb taken by the lion | David leaves the flock to go after the one (1 Sam 17:34–35) |
-| 2 | a lost traveller in the wilderness (made up) | David leads them out |
+| 2 | the boy from Tekoa (made up), lost in a flash flood | David gets him out and takes him home |
 | 3 | **David himself** | Not even invited. Samuel refuses to sit down until the overlooked youngest son arrives (1 Sam 16:11) |
 | 4 | **King Saul** | Troubled and tormented; David's music reaches him (1 Sam 16:23) |
 | 5 | a frightened young soldier (made up) | Too scared to go on; David helps him back to camp |
@@ -368,11 +368,143 @@ Four short screens, no more:
 
 ---
 
-## 6. Worlds 2–8 (outline only — to be detailed one at a time)
+## 5b. World 2 — The Wilderness *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 17:34–36 (the bear). Also 17:28, where Eliab sneers, "with whom did you leave those few sheep in the wilderness?" David really did keep the flock out in the wilderness.
+**Why David is out here:** in the dry summer the grass near Bethlehem runs out, so shepherds moved their flocks to find pasture and water. Hanan leads David and the flock east and up into the wild country.
+**Setting:** the real wilderness of Judah is not a jungle. It's wooded hill country that gives way to dry ravines (*wadis*), cliffs and hidden springs. The four stages follow that: woods → dry riverbed → cliffs and springs → a wooded ravine where the bear lives.
+**David learns:** the **charged sling** (taught by Hanan), patience, and how to read the land.
+**Enemies:** wild boar (Psalm 80:13 mentions "boars from the forest"), wolves, hornet nests (hazard), vultures, scorpions in the dry stretches. **Neutral animals:** ibex (wild goats) and rock hyraxes. You never hit those.
+
+### World 2 map
+Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a waterfall spring in the east, a dark wooded ravine at the end.
+
+```
+ [🏠 Summer camp] ──> (2-1) ──> [🔥 Hanan] ──> (2-2)
+                                                 │
+ [✨ Spring pool] <── (2-3) <── [🙋 Tekoa road]──┘
+        │               │
+        └───────────> (2-4 🐻 Bear's ravine)
+```
+
+| Dot | What's there |
+|---|---|
+| 🏠 Summer camp | Start. Tents, stone pens, the flock. Opening scene. Abinadab is here. |
+| 2-1 | The Forest Trail |
+| 🔥 Hanan | Rest, Journal, counsel |
+| 2-2 | The Dry Riverbed (flash flood) |
+| 🙋 Tekoa road | Take the lost boy home to his father. Trust: shortcut to 2-4. |
+| 2-3 | The High Cliffs |
+| ✨ Spring pool | Opens when all World 2 sheep are found. A bonus stage at a waterfall pool, plus a Psalm piece. |
+| 2-4 🐻 | The Bear's Ravine, with the Bear at the end |
+
+### Opening scene
+1. *Summer. The grass around Bethlehem has dried up.*
+2. Hanan, David and the flock walking east into the hills at dawn. Hanan: *"The flock goes where the grass is. So do we."*
+3. Title card: **WORLD 2 — THE WILDERNESS**
+
+### 2-1 · The Forest Trail — *learn the charged sling*
+- **Level:** oak and pine woods on steep hills. Higher platforms in the branches, fallen logs, **swinging vines** over ravines (grab with ↑, jump off with A).
+- **The charged sling is taught by need:** a **dead branch** across the path is too thick to break with tap shots. Stones just bounce off.
+- **Campfire, Hanan teaches it:**
+  > "You throw like a boy in a hurry. Let it swing. Longer. Feel it pull."
+  > "Patience puts the power in the stone."
+  - 🎓 **Skill: charged sling** (hold B, release). A full charge flies flatter and farther, breaks dead branches and cracked rocks, and stuns big animals.
+- **Wild boars** charge along the ground. Tap shots bounce off their heads; one charged shot stops them. This teaches *when* to charge, not just how.
+- **Hornet nests** hang from branches. Knock one down onto a boar to clear the path, or just steer clear.
+- **Abinadab** at the start of the stage: *"Wild pigs out here. Don't try to out-run them — they're faster than you look."* plus 🗝️ Secret: *"There's a cave behind the falls in 2-3. Found it when I was your age."*
+- **Scroll:** **Psalm 1:3** "That person is like a tree planted by streams of water, which yields its fruit in season and whose leaf does not wither — whatever they do prospers."
+- **The One:** a lamb up in the treetops, reached by chaining two vine swings. It's out of reach unless you ride the swing to full height.
+
+### 2-2 · The Dry Riverbed — *the flash flood*
+- **Level:** a dry, rocky wadi in the sun. Scorpions under rocks, vultures circling. Halfway through, the sky darkens far away and a low rumble starts.
+- **Campfire (midway), Hanan:**
+  > "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look."
+  - 📜 Journal fact: wadis are dry valleys that flood suddenly after rain falls far away. A real danger in the wilderness, even under a clear sky.
+- **Set piece: the flood.** The second half is an **auto-scrolling escape**. Water rises behind you from the left, and you run and climb to the right on boulders, logs and ledges. The scroll speed is generous (rule 3). This is the world's "run for your life" moment.
+- **The lost one — the boy from Tekoa** *(made up; Tekoa is a real town a few miles south of Bethlehem)*. He's stranded on a rock in the riverbed, separated from his family. You reach him just before the water. After that he **follows you like a sheep** until the end of the stage.
+  > "I was taking our donkey to market and the water came out of nowhere."
+- **The harp, new use:** his **donkey** stands frozen in fear in a narrow gap, blocking the only way up. Play the harp (Select) to calm it, and it moves.
+- **Scroll:** **Psalm 18:16** "He reached down from on high and took hold of me; he drew me out of deep waters." (Psalm 18 is a psalm of David.)
+- **The One:** in a side cave in the first half, *before* the flood. If you miss it, it's a replay find.
+
+### 2-3 · The High Cliffs — *distance, angles and heights*
+- **Level:** a vertical climbing stage up desert cliffs to a hidden spring with a waterfall (like the real springs of En Gedi in the Judean wilderness). Narrow ledges, crumbling rock, wind gusts at the top.
+- **Charged shots at a distance:** cut rope ladders down, knock loose hanging rocks to make stepping stones, hit vultures diving from far off with diagonal shots.
+- **Ibex** leap between ledges. They're neutral and never hurt you. **Hanan's counsel:**
+  > "Watch the wild goats. They know every safe path on these cliffs."
+  - 🗝️ Secret: follow an ibex and it leads to a hidden ledge route with a heart and The One.
+  - 📜 **Psalm 104:18** "The high mountains belong to the wild goats; the crags are a refuge for the hyrax." (Rock hyraxes sit on the ledges. Kids will want to know what they are, and the Journal has a picture.)
+- **Behind the waterfall:** Abinadab's cave (his Secret card from 2-1). A heart, a Psalm piece, and the way to the bonus spring pool.
+- **Scroll:** **Psalm 18:33** "He makes my feet like the feet of a deer; he causes me to stand on the heights."
+- **The One:** at the very top, on the ibex route.
+
+### 2-4 · The Bear's Ravine — *everything so far, at dusk*
+- **Level:** a deep wooded ravine at dusk. Signs of the bear everywhere: **claw marks** on trees, torn-up logs, overturned rocks. Wolves hunt in pairs in the half-light.
+- **Foreshadowing:** halfway through, a tree crashes down somewhere off screen.
+- **Campfire, Hanan, the last fire of World 2:**
+  > "A lion is quick. A bear is strong and slow to turn. Never fight it up close — keep your distance."
+  > "When it stands up on its back legs, it's about to bring its paws down. Be off the ground."
+  - 👁️ **Warning (tier 1):** the bear's stand-up slam and its slow turn.
+  - 📜 Journal: **Proverbs 17:12** "Better to meet a bear robbed of her cubs than a fool bent on folly." (Hanan adds, dryly: *"And Eliab, some days."*)
+- **Scroll:** **Psalm 46:1** "God is our refuge and strength, an ever-present help in trouble."
+- **Stage ending:** David gets back to the flock's night pen at the mouth of the ravine. **The bear is tearing at the stone wall of the pen** and has pinned a sheep. This follows the Bible's words: "a lion or a bear came and carried off a sheep from the flock" (1 Sam 17:34).
+
+### BOSS · The Bear (end of 2-4)
+**How it differs from the Lion:** the lion was about **close-up dodging and quick timing**. The bear is about **distance, patience and charged shots.** World 2's lesson is the same as its new skill: patience puts the power in the stone.
+
+**Arena:** the ravine in front of the pen. Three levels: the ground, a middle ledge and a high ledge, joined by a **log bridge**.
+
+**Phase 1 — Draw it away.** The bear is at the pen wall with a sheep pinned. It ignores tap shots. **Charged shots** to its back make it turn, let go of the sheep (which runs into the pen) and come after you.
+
+**Phase 2 — The Bear Fights.**
+- **Charge:** tell = it lowers its head and scrapes the ground. It's slow to turn, so jump over it or get above it and hit it while it turns around.
+- **Stand and slam:** tell = it rises up on its back legs (with tier-1 counsel, its shadow flashes). It slams down, shaking the ground and making rocks fall from above. Be in the air, then dodge the rocks.
+- **Throw:** it rips up a boulder or a log and hurls it in an arc. Roll under it or jump over it.
+- **Weak point:** when it stands up to roar, a **full charged shot** staggers it and knocks it onto its back for a few seconds. Tap shots do small damage only while it's down.
+- 4 charged hits end the phase.
+
+**Phase 3 — The bridge.** The bear slams the log bridge and it breaks. Now the arena is just the ground and the high ledge. The bear climbs after you onto the ledge, slowly, so you can see it coming. Stay one level away and keep firing charged shots. 3 more. On the last one: slow-motion freeze, flash, and the bear slumps and fades (NES-clean, as with the lion).
+
+**Counsel tier 2** (after a loss, go back to Hanan: *"Sit down. Tell me what happened."*): the bear turns even slower, its stand-up lasts +0.4 s, and you get +1 heart for this fight.
+
+### End of World 2 — reflection scene
+1. The flock is safe in the pen. David sits on the wall under the stars, sling in his lap.
+2. **The boy from Tekoa and his father**, a leatherworker, arrive. The father gives David something he made: **a new leather sling pouch.** *"For the one who brought my son home."*
+3. Hanan, watching:
+   > "A lion, and now a bear. People will call you brave. Remember who gave you the strength."
+4. Verse: **Psalm 18:1–2** "I love you, LORD, my strength. The LORD is my rock, my fortress and my deliverer; my God is my rock, in whom I take refuge."
+5. David plays. David's song, now with a second part added.
+6. World code.
+
+### World 2 — summary table
+| Stage | New thing | Sheep | People | Scroll |
+|---|---|---|---|---|
+| 2-1 | Charged sling, vine swings, boars, hornets | 5 + The One | Abinadab, **Hanan** | Psalm 1:3 |
+| 2-2 | Flash-flood escape, harp calms the donkey | 5 + The One | **Hanan**, the boy from Tekoa | Psalm 18:16 |
+| 2-3 | Vertical cliffs, long-range shots, follow the ibex | 5 + The One | **Hanan** | Psalm 18:33 |
+| 2-4 end | Dusk ravine, wolves; **Boss:** the Bear, distance and patience | 5 + The One | **Hanan** | Psalm 46:1 |
+
+### World 2 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 2-1 | Abinadab | 🗝️ Secret: the cave behind the falls in 2-3 | |
+| 2-1 campfire | Hanan | 🎓 Skill: charged sling | |
+| Map: 🔥 Hanan | Hanan | 📜 Journal: why shepherds move to summer pasture | Rest + harp |
+| 2-2 campfire | Hanan | 📜 Fact: flash floods in the wadis | |
+| 2-2 | The boy from Tekoa *(made up)* | 🧭 Story: get him home | Map: Tekoa road opens |
+| Map: 🙋 Tekoa road | The boy's father | | Trust: shortcut to 2-4 |
+| 2-3 | Hanan | 🗝️ Secret: follow the ibex · 📜 Psalm 104:18 | |
+| 2-4 campfire | Hanan | 👁️ Warning (tier 1): the slow turn and the stand-up slam · 📜 Proverbs 17:12 | Tier 2 after a loss: slower turn, longer stand-up, +1 heart |
+| End of World 2 | The boy's father | | **Gift:** a leather sling pouch, so the charged shot charges a little faster |
+
+---
+
+## 6. Worlds 3–8 (outline only — to be detailed one at a time)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
-| 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear |
+| 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear. **Detailed in §5b.** |
 | 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **Proposed: the Wild Ox.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
 | 4 | The King's Court | 1 Sam 16:14–23 | Shooting faster | **Proposed: Saul's Torment.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | **Proposed: the Philistine Chariot.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
