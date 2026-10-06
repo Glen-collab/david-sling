@@ -3,19 +3,21 @@
 A checklist of every sprite the game needs, world by world. Tick them off as you finish each sheet in Photoshop.
 **Prompts** for most of these are in [ART_PROMPTS.md](ART_PROMPTS.md). **Sheet rules** are in DESIGN.md §8.
 
-## Sizes (proposed — confirm once we see your first GPT sheet)
-The game draws at a fixed pixel resolution and scales up crisply. Proposed: **384 × 216** (16:9, scales to exactly 5× on a 1920×1080 monitor).
+## Sizes (proposed)
+The look is a **Pixar-style cartoon** (smooth, not pixel art), so sprites are high resolution. The game is built for a **1920 × 1080** screen and scales smoothly to other sizes.
 
-| Kind | Cell size per frame | Notes |
+| Kind | Frame size | Notes |
 |---|---|---|
-| Tiles (ground, platforms, walls) | 16 × 16 | Draw as tilesets per world |
-| David | 48 × 48 | David himself about 32 px tall; extra room for the sling swing and flips |
-| Sheep, lambs, small animals | 32 × 32 | |
-| People (NPCs) | 48 × 48 | Same scale as David |
-| Big enemies (wolf, boar, leopard) | 64 × 48 | |
-| Bosses | 128 × 128 | Goliath: 128 × 192 (he's twice David's height) |
-| Dialogue portraits | 64 × 64 | One face per speaking character, shown in the talk box |
-| Map icons | 16 × 16 or 32 × 32 | |
+| David | 256 × 256 | David himself about 200 px tall; room for the sling swing and flips |
+| The lamb, sheep, small animals | 128 × 128 | |
+| People (NPCs) | 256 × 256 | Same scale as David |
+| Big enemies (wolf, boar, leopard) | 256 × 192 | |
+| Bosses | 512 × 512 | Goliath: 400 × 512 (he's twice David's height) |
+| Ground and platform pieces | 64 × 64 blocks | Painted to match, so they join seamlessly |
+| Dialogue portraits | 256 × 256 | One face per speaking character |
+| Map icons | 64 × 64 | |
+
+**Still to decide:** how David's movement is animated. Either GPT draws every frame (consistency and leg problems so far), or we cut one good David into body parts and the game moves them (open question in DESIGN.md §7).
 
 Frame counts are starting targets. Fewer frames is fine if the motion reads.
 

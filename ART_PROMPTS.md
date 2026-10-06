@@ -10,31 +10,30 @@ Bosses for worlds 3–7 are **proposals** (see DESIGN.md §6). Draw them anyway 
 ## Style block (paste this first, every time)
 
 ```
-Style: 16-bit pixel art in the style of the best Super Nintendo era games (Super Mario World,
-Yoshi's Island, Chrono Trigger) and modern pixel-art games. Crisp, hard-edged square pixels,
-no anti-aliasing, no blur, no smooth gradients, no painterly brushwork. A rich but controlled
-palette with soft pixel shading and dark outlines. Bright, readable, cheerful but not
-cartoon-silly. Setting: ancient Israel around 1000 BC (Judah, Iron Age): limestone hills,
+Style: a Pixar-style 3D animated movie look, rendered as a 2D game sprite. Smooth, rounded,
+appealing cartoon characters with soft warm lighting and gentle shading. NOT pixel art, no
+blocky pixels. Bright, readable, cheerful but not cartoon-silly; clear silhouettes that read
+well small. Setting: ancient Israel around 1000 BC (Judah, Iron Age): limestone hills,
 olive trees, dry grass, stone sheepfolds, clay-brick villages.
 No text, no letters, no numbers, no logos, no UI anywhere in the image.
 ```
-**Already generated art with the old 8-bit prompt?** Re-run it with this one. The game is 16-bit pixel art, not NES 8-bit.
+**The look is Pixar-style cartoon, not pixel art.** Anything made with an older pixel-art version of this block should be re-run. Your first David sheet (the Pixar-style one) is the reference: upload it with every David request.
 
 ### Extra lines for every **map** prompt
 ```
-Format: one complete overworld map screen in the style of the Super Mario World and
-Super Mario Bros. 3 world maps. Seen from above at a slight tilt. Wide landscape, 16:9.
+Format: one complete overworld map screen laid out like the Super Mario Bros. 3
+world maps, in the same Pixar-style look. Seen from above at a slight tilt. Wide landscape, 16:9.
 A winding dotted path connects round "level dots" (plain empty circles) and a few small
 landmark buildings. No characters on the map.
 ```
 
 ### Extra lines for every **boss** prompt
 ```
-Format: a single pixel-art game sprite, full body, seen from the side, FACING LEFT,
-standing on nothing. Solid flat magenta background (#FF00FF) everywhere around it,
-not a checkerboard, not transparent, no shadow on the ground, no scenery.
+Format: a single game sprite, full body, seen from the side, FACING LEFT, standing on
+nothing. Transparent background (PNG with alpha): no checkerboard, no floor, no shadow on
+the ground, no scenery, no text or numbers.
 ```
-Magenta is on purpose. It's a colour that's in none of the sprites, so it can be cleanly removed in Photoshop (Select > Color Range > magenta > Delete). A fake checkerboard can't be removed that way.
+If GPT can't give a real transparent background, ask for a **plain flat light-grey background** instead, and I'll remove it. Avoid magenta for this style: it bleeds into the soft edges.
 
 ---
 
@@ -266,8 +265,17 @@ High above them, the sky is opening with a great soft golden-white light shining
 them; the shepherds are shielding their eyes. Peaceful and awe-filled, not scary.
 ```
 
+## Walk and run cycles: make the legs alternate
+GPT tends to draw the same leg forward in every frame. Add this to any walk or run request:
+```
+The legs MUST alternate. Frame 1: right foot forward. Frame 3: legs passing each other.
+Frame 5: LEFT foot forward. Frame 7: legs passing again. Arms swing opposite to the legs.
+Every frame the same size, feet on the same ground line, evenly spaced in one row.
+No frame numbers, no titles.
+```
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
-- If it adds text or a checkerboard, say *"no text, solid #FF00FF magenta background only."*
+- If it adds text or a checkerboard, say *"no text, no numbers, transparent background."*
 - Keep the first good image of each boss as the "reference" and upload it with every later pose request.

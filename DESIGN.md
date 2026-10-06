@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
+> **Look:** a **Pixar-style cartoon**: smooth, rounded characters with soft lighting, like a 3D animated movie, drawn as high-resolution 2D sprites. **Not pixel art** (no blocky pixels). Think Donkey Kong Country or Rayman Legends in feel. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
 > Status: **All 8 worlds drafted for review; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
@@ -23,7 +23,7 @@ These rules come straight from what went wrong in Rainbow Unicorn Quest.
 
 1. **Damage never takes a move away.** David has hearts, not a small and big form. A hit costs a heart. It never costs a jump height or an ability. If you can reach a ledge when you enter a stage, you can still reach it after any number of hits.
 2. **No soft-locks.** Every stage can be finished using only the moves David has when he enters it. Moves learned later only open *optional* secrets, seen when you replay a stage.
-3. **Required jumps have slack.** No required jump uses more than about 85% of David's real jump. Pixel-perfect jumps belong in optional secret routes only.
+3. **Required jumps have slack.** No required jump uses more than about 85% of David's real jump. Razor-thin jumps belong in optional secret routes only.
 4. **No dead ends without a way back.** If a drop can't be climbed back up, either the route goes forward or there's a ladder, vine, or rope.
 5. **Campfire checkpoints** in the middle of every stage, plus one before every boss.
 6. **The plain stone never runs out.** Special stones are bonuses, never required.
@@ -215,10 +215,10 @@ Every enemy and hazard is something a real shepherd in ancient Judah had to deal
 
 **Scoring:** sparing harmless creatures earns points. Hitting one **never costs a life**. It lowers that stage's **Shepherd's Care** rating. Keep doing it and Hanan has a word with you: the righteous care for the needs of their animals (**Proverbs 12:10**).
 
-**They must look clearly different in pixel art.** Each dangerous/harmless pair is designed side by side so the difference reads at a glance (shape first, colour second, a behaviour tell third, e.g. the viper coils and puffs up, the whip snake just slides past). The first time you meet each one, someone points out how to tell them apart.
+**They must look clearly different in the art.** Each dangerous/harmless pair is designed side by side so the difference reads at a glance (shape first, colour second, a behaviour tell third, e.g. the viper coils and puffs up, the whip snake just slides past). The first time you meet each one, someone points out how to tell them apart.
 
 ### 3. The Field Guide (Journal page)
-The first time you see any creature, it's added to the Journal's **Field Guide** with its pixel portrait, its real name, whether it's dangerous, how to tell it apart, and one real fact. Example:
+The first time you see any creature, it's added to the Journal's **Field Guide** with its portrait, its real name, whether it's dangerous, how to tell it apart, and one real fact. Example:
 
 > **Whip snake** · *harmless* · Long, thin, dark, narrow head. Fast. Eats rats and mice, so farmers were glad to have one around the barn. Don't confuse it with the viper: look at the head.
 
@@ -488,7 +488,7 @@ Four short screens, no more:
 5. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
 6. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favourite, until the lion takes it.)
 
-> **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a pixel replay of *this exact fight* the player won.
+> **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a replay of *this exact fight* the player won.
 
 ### World 1 — summary table
 | Stage | New thing | Sheep | People | Scroll |
@@ -1176,7 +1176,7 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
 2. **Saul's tent.** Saul, tall and grey-bearded, with his commanders. David: *"Let no one lose heart on account of this Philistine. Your servant will go and fight him."* (17:32)
 3. Saul: *you are not able; you're only a young man, and he has been a warrior from his youth* (17:33).
 4. **David answers with what the player has lived** (17:34–37):
-   - *"When a lion or a bear came and carried off a sheep…"* The screen shows a **replay of the player's own lion fight from World 1**, in pixel flashback.
+   - *"When a lion or a bear came and carried off a sheep…"* The screen shows a **replay of the player's own lion fight from World 1**, as a flashback.
    - *"…I went after it, struck it and rescued the sheep."* The **bear fight from World 2** flashes in.
    - *"The LORD who rescued me from the paw of the lion and the paw of the bear will rescue me from the hand of this Philistine."* (17:37: the verse World 1 ended on.)
 5. Saul, after a long pause: *"Go, and the LORD be with you."* (17:37)
@@ -1435,7 +1435,7 @@ No campfires, no helpers, no bonus spot. Nothing between David and the giant.
 - **The One:** the last lamb in the game, at the top of the very first hill from 1-1.
 - **At the fold:**
   1. Hanan, older, leaning on a new staff: *"I heard."*
-  2. David looks back toward the hills. **Flashback**: the moonlit rocks of World 1, and the lamb you rescued from the lion, in the same pixel art the player saw at the start of the game.
+  2. David looks back toward the hills. **Flashback**: the moonlit rocks of World 1, and the lamb you rescued from the lion, in the same art the player saw at the start of the game.
   3. Hanan: *"The lion was bigger than you. The giant was bigger than you. They always will be. Remember who stood with you."* (His World 1 line, finished.)
   4. Final words on screen: ***The battle is the LORD's.*** (1 Samuel 17:47)
 
@@ -1499,7 +1499,8 @@ After the credits, if you found every lamb:
 - [ ] Sage's name: "Old Hanan" is a placeholder.
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
-- [ ] Screen size and sprite scale: decide after seeing Glen's GPT sprite sheets.
+- [x] Look: **Pixar-style cartoon, not pixel art** (decided after the first sprite sheets). Screen: built for 1920 × 1080.
+- [ ] How David is animated: GPT draws every frame, or one good David cut into body parts that the game moves (a "cutout rig").
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
 - [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
 - [ ] Part 2 teaser: **parked** until this game is finished.
@@ -1510,8 +1511,9 @@ After the credits, if you found every lamb:
 The full list of sprites needed, world by world, is in [SPRITES.md](SPRITES.md).
 - One animation per PNG, frames in a **single row**, no gaps.
 - Every frame of David is the **same cell size** (decide once, never change).
-- **Feet on the same pixel row** in every frame; body centred on the same spot.
+- **Feet on the same line** in every frame; body centred on the same spot.
 - **Faces right only.** The game mirrors him.
-- **Real transparency:** delete any fake grey checkerboard GPT paints in. Easiest: have GPT draw on solid magenta #FF00FF, then Select > Color Range > Delete (see ART_PROMPTS.md).
-- Resize only with **Nearest Neighbor (hard edges)**.
+- **Real transparency:** ask GPT for a transparent background. Delete any fake grey checkerboard it paints in, and any brown smudge left around the character.
+- Resize with normal smooth resizing (Bicubic). The art is smooth, not pixel art.
+- **Legs must alternate** in walk and run cycles (see ART_PROMPTS.md).
 - File names: `david_run.png`, `david_throw.png`, `lion_pounce.png`, …
