@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **Worlds 1–3 drafted for review; creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1–4 drafted for review; creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -731,13 +731,145 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 
 ---
 
-## 6. Worlds 4–8 (outline only — to be detailed one at a time)
+## 5d. World 4 — The King's Court *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 16:14–23.
+**What happens:** King Saul is tormented and troubled (16:14). His servants suggest finding someone who can play the lyre to bring him relief. One servant names David: a son of Jesse who plays well, is brave, speaks well, and the LORD is with him (16:18). Saul sends for "David your son, who is with the sheep" (16:19). Jesse sends him with a donkey loaded with bread, a skin of wine and a young goat (16:20). Saul likes David very much and makes him one of his armor-bearers (16:21). Whenever Saul is troubled, David plays, and Saul finds relief (16:23).
+**The lost one:** **King Saul.** Powerful, tall, and suffering. The game never makes Saul the villain. His trouble is the enemy, not him.
+**Note on the text:** the Bible says the trouble came on Saul as a spirit. The game shows it as storm-like shadows (no monsters, no faces) and the Journal gives the reference so families can read it themselves.
+**David learns:** **quick release** (fast double shots), taught by a Benjamite slinger; that skill opens doors ("serve before kings", Proverbs 22:29); and that his music can help someone who is hurting.
+**Where:** **Gibeah**, Saul's hilltop home town and fortress (1 Sam 10:26), north of Jerusalem. Roughly 10 miles from Bethlehem (to be checked).
+**Enemies:** bandits on the road (driven off), wild boar in the vineyards (Psalm 80:13 again), crows, palace guard dogs (they bark and chase, then lose interest), rats in the storerooms. **Harmless:** doves, sparrows, market goats, the whip snake in the storeroom (callback). **Not in this world:** Jonathan. He's Saul's son, but his friendship with David starts after Goliath, which is Part 2.
+
+### World 4 map
+The road north from Bethlehem through vineyards and villages, past the walled city of Jebus (Jerusalem) seen from a distance, up to the fortress of Gibeah on its hill.
+
+```
+ [🏠 Bethlehem gate] ──> (4-1) ──> [🙋 Vineyard keeper] ──> (4-2)
+                                                              │
+ [✨ Rooftop garden] <── (4-3) <── [🔥 Servants' fire] <──────┘
+          │                │
+          └──────────> (4-4 👑 The King's Hall)
+```
+
+| Dot | What's there |
+|---|---|
+| 🏠 Bethlehem gate | Start. Hanan's farewell. Jesse loads the donkey. |
+| 4-1 | The Road to Gibeah |
+| 🙋 Vineyard keeper | *(made up)* Wild boars are wrecking his vines. Help and he gives you a Secret and a shortcut. |
+| 4-2 | The Training Yard |
+| 🔥 Servants' fire | The palace kitchen hearth. Rest, Journal, counsel from the Steward. |
+| 4-3 | The Broken String |
+| ✨ Rooftop garden | Opens when all of World 4's lost items are found. Bonus stage plus a Psalm piece. |
+| 4-4 👑 | The King's Hall, with Saul's Torment at the end |
+
+**Sheep in this world:** David is away from the flock, so the "5 lost sheep" become **5 lost things** in each stage: the donkey's dropped gifts in 4-1, stray palace goats in 4-2, harp-string materials in 4-3, scattered lamps in 4-4. **The One is still a lamb**: one lost lamb hidden somewhere in every stage, even in the palace. (In 4-2, the lamb was meant for the king's table. Bring it back and the Steward lets it go to the palace flock instead.)
+
+### Opening scene
+1. A royal messenger at Jesse's door: *"The king asks for your son David, who is with the sheep."*
+2. The brothers stare. Eliab: *"Him? For the king?"*
+3. Jesse loads a donkey with bread, a skin of wine and a young goat for the king (16:20).
+4. **Hanan at the Bethlehem gate:**
+   > "You're going where I can't follow, David. Palaces are full of people who will tell you what you want to hear. Find the one who tells you the truth, and listen to him."
+   > "I'll be here when you come home."
+5. Title card: **WORLD 4 — THE KING'S COURT**
+
+### 4-1 · The Road to Gibeah — *escort the donkey*
+- **Level:** a long road north through vineyards, terraced hills, small villages and a stream crossing. The walls of Jebus (Jerusalem) are visible in the background. **Journal fact:** in David's youth, Jerusalem was still a Jebusite city. He would take it many years later (2 Samuel 5).
+- **The donkey** follows behind you like the sheep line, carrying the gifts for Saul. If it's hit, gifts drop on the ground: pick them back up. It gets spooked by barking dogs; play the harp to calm it (callback to 2-2).
+- **Bandits** jump out on the lonely stretches to grab the gifts. Hit them and they drop the goods and run.
+- **Wild boars** in the vineyards, as the psalm describes (Psalm 80:13).
+- **Shepherd's Judgment:** doves on the road are harmless; crows stealing grapes are fair game.
+- **Scroll:** **Psalm 121:8**: the LORD will watch over your coming and going.
+- **The One:** a lamb that strayed from a village flock, on a vineyard terrace above the road.
+
+### 4-2 · The Training Yard — *learn quick release*
+- **Story:** David arrives at Gibeah. Before he plays for the king, the captain of the yard wants to see what this shepherd boy can do. David is now one of Saul's **armor-bearers** (16:21), so he trains with the king's men.
+- **Gera the slinger** *(made up)*, an old soldier from **Saul's own tribe, Benjamin**:
+  > "So you're the shepherd with the sling. You know Benjamin's slingers are famous? We can hit a hair and not miss."
+  - (A callback to Hanan's story in 1-1. **Judges 20:16** is the same verse.)
+  > "You throw well. But slow. Let me show you how we do it — release, reload, release."
+  - 🎓 **Skill: quick release.** Tap B twice quickly for two fast shots. Not stronger, just faster.
+- **Level:** a sling course across the training yard and the walls: **moving targets** on ropes, swinging targets, targets behind gaps you have to jump to see, clay jars on the battlements. A **guard dog** chases you across part of it.
+- **Score:** an optional par time and accuracy rating. It never stops you finishing.
+- **Scroll:** **Proverbs 22:29**: someone skilled in their work will serve before kings.
+- **The One:** the lamb meant for the king's table, hidden in a feed shed on the wall.
+
+### 4-3 · The Broken String — *across the town of Gibeah*
+- **Story:** David is called to play for the king for the first time, and a **string on his harp snaps.** The Steward sends him into town to find what he needs before nightfall: a gut string from the market, a new tuning peg from the carpenter, and beeswax for the wood.
+- **The Steward** *(made up; the palace's old head servant, and the "one who tells you the truth" Hanan told you to find)*:
+  > "The king is not well. Everyone here pretends he is. I won't."
+  > "Most nights he's quiet. Some nights it's like a storm in him. That's when they'll want you."
+  - 👁️ **Warning (tier 1)** for the boss: *"When the dark comes on him, don't rush. Play steady. Rushing makes it worse."*
+- **Level:** the town of Gibeah: market stalls with awnings to bounce on, crowded lanes, a well, flat rooftops, the carpenter's yard (stacks of beams), the beekeeper's hives. **Three items to collect** and bring back.
+- **Shepherd's Judgment:** the beekeeper's **bees** are calm if you leave them; the **hornets** in the old wall are not (callback to 2-1).
+- **Scroll:** **Psalm 33:3**: sing a new song; play skilfully.
+- **The One:** a lamb hiding in the market under a cloth stall; it only comes out if you play the harp nearby (once your harp is fixed, so this is a replay find or for players who come back after the items).
+
+### 4-4 · The King's Hall — *the palace at night*
+- **Story:** night. A storm outside. Servants run past with lamps, whispering. The king is troubled again. The Steward: *"Now, David."*
+- **Level:** the palace interior at night: corridors, staircases, balconies and the great hall. **The shadows** begin to drift through the halls: dark, cloud-like wisps that slowly follow you. Touching one doesn't hurt but makes you shiver to a stop for a moment. Lamps keep them back: light the hall lamps as you go (the 5 "lost things" of this stage).
+- **No enemies to hit here.** The sling can't help. That's the point. (Palace dogs bark, servants are in the way, but nobody to fight.)
+- **Servants' fire (checkpoint):** the Steward's tier-2 counsel waits here after a loss.
+- **Scroll:** **Psalm 34:18**: the LORD is close to the brokenhearted.
+- **The One:** a lamb from the palace flock that wandered inside during the storm, hiding under the great staircase.
+
+### BOSS · Saul's Torment (end of 4-4) — *won with music, not the sling*
+**The only boss in the game you can't hit.** The sling is put away. David sits at the side of the king's chair and plays.
+
+**How it plays:** a rhythm fight with the same buttons. Notes come in time with **David's song**, the melody that's been growing since 1-1, so the player already knows the tune.
+- Notes arrive in **four lanes: ↑ ↓ A B.** Hit them in time.
+- **Shadows** gather around Saul's chair. Every steady phrase you play **pushes them back.** Missed notes let them creep closer.
+- **No hearts are lost.** Instead there's a **calm meter** for Saul. If the shadows reach Saul, he sends you out of the room. You go back to the Servants' fire and try again.
+
+**Phase 1 — The quiet part.** The first part of David's song (from World 1). Slow, simple. The shadows drift back.
+**Phase 2 — The storm.** Thunder outside; Saul cries out. The tempo picks up with the second part of the song (from World 2). The Steward's tier-1 warning matters here: **steady beats beat fast ones.** Rushing (pressing early) makes the shadows surge. With tier-1 counsel, the beat marker glows on every fourth note.
+**Phase 3 — The new part.** The third part of the song (from the anointing). Longer held notes. The shadows thin and fade one by one.
+
+**Ending:** the hall goes quiet. Saul leans back, calm, and sleeps. The Bible says relief would come to Saul; he would feel better (16:23). Saul is shown as a tired man at peace, not a defeated enemy.
+
+**Counsel tier 2** (the Steward: *"Sit down. Tell me what happened."*): wider timing window on every note, and missed notes push the calm meter back less.
+
+**Easy option:** a "follow the beat" assist that slows the song (kids, or anyone who finds rhythm games hard). It never changes what happens in the story.
+
+### End of World 4 — reflection scene
+1. Morning at Gibeah. Saul, rested, talks to David. He sends word to Jesse: *let David stay in my service, for I am pleased with him* (16:22).
+2. **Gift: the King's Favour.** David may come and go between Gibeah and Bethlehem. In fact, he went back and forth to tend his father's sheep (17:15).
+   - **In the game:** this unlocks **fast travel** between all world maps you've visited, so going back for The One lambs and secrets becomes quick.
+3. The Steward:
+   > "You didn't fix him, boy. Only God can. But you gave him rest tonight. That's a gift too."
+4. Verse: **1 Samuel 16:23**: relief came to Saul.
+5. David goes home to the sheep. Hanan is at the gate, as promised.
+6. World code.
+
+### World 4 — summary table
+| Stage | New thing | Lost things | People | Scroll |
+|---|---|---|---|---|
+| 4-1 | Escort the donkey, bandits, vineyard boars | 5 dropped gifts + The One | Hanan (farewell), Jesse | Psalm 121:8 |
+| 4-2 | **Quick release**, target course, guard dog | 5 stray goats + The One | Gera the slinger | Proverbs 22:29 |
+| 4-3 | Town of Gibeah, collect 3 harp parts | 5 + The One | **the Steward**, beekeeper | Psalm 33:3 |
+| 4-4 end | Night palace, shadows and lamps; **Boss:** Saul's Torment (rhythm) | 5 lamps + The One | **the Steward**, Saul | Psalm 34:18 |
+
+### World 4 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| Map: 🏠 Bethlehem gate | Hanan | 🧭 "Find the one who tells you the truth" | |
+| Map: 🙋 Vineyard keeper | Vineyard keeper *(made up)* | 🗝️ Secret: the feed shed on the wall in 4-2 (The One) | Trust: shortcut to 4-3 |
+| 4-2 | Gera the slinger *(made up)* | 🎓 Skill: quick release · 📜 Judges 20:16 (callback) | |
+| 4-3 | The Steward *(made up)* | 👁️ Warning (tier 1): play steady, don't rush | |
+| Map: 🔥 Servants' fire | The Steward | 📜 Journal: who Saul was (1 Sam 9:1–2, 10:1) | Rest + harp |
+| 4-4 | The Steward | Tier 2 after a loss: wider timing, slower calm loss | |
+| End of World 4 | King Saul | | **Gift: the King's Favour** = fast travel between world maps |
+
+---
+
+## 6. Worlds 5–8 (outline only — to be detailed one at a time)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
 | 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear. **Detailed in §5b.** |
 | 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
-| 4 | The King's Court | 1 Sam 16:14–23 | Shooting faster | **Proposed: Saul's Torment.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
+| 4 | The King's Court | 1 Sam 16:14–23 | Quick release | **Saul's Torment. Detailed in §5d.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | **Proposed: the Philistine Chariot.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — | **Proposed: the Philistine Watchtower.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
 | 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | **Proposed: Goliath's Shield-Bearer.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
