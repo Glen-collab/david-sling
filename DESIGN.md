@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> Status: **Worlds 1 and 2 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1–3 drafted for review; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -500,12 +500,154 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 
 ---
 
-## 6. Worlds 3–8 (outline only — to be detailed one at a time)
+## 5c. World 3 — The Anointing *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 16:1–13.
+**Verse text note:** from World 3 on, this doc gives the **reference plus a short phrase**. The exact NIV wording is pasted in from Bible Gateway at build time.
+**The big idea:** David is **this world's lost one.** The prophet comes to Bethlehem to anoint a king, every brother is presented, and David isn't even invited. He's out with the sheep. Samuel refuses to sit down until the overlooked youngest son is brought in (16:11). The player lives that: you're out in the far hills while the town gathers without you.
+**Key verse:** **1 Samuel 16:7**: people look at the outward appearance, but the LORD looks at the heart.
+**David learns:** the **aerial flip** (taught by Shammah); that God sees what people don't; and humility, because after he's anointed he goes straight back to the sheep.
+**Enemies:** crows in the barley, stray dogs, rats in the granary, hornets, and in the storm, the wild ox.
+
+### World 3 map
+Bethlehem up close: the village on its hill, barley fields and a threshing floor, olive groves, and open grassland under storm clouds at the far end.
+
+```
+ [🏠 Jesse's house] ──> (3-1) ──> [🙋 The gleaner] ──> (3-2)
+                                                         │
+ [✨ Well by the gate] <── (3-4) <── [⭐ The Anointing] <── (3-3)
+                            │
+                         (🐂 in the storm)
+```
+
+| Dot | What's there |
+|---|---|
+| 🏠 Jesse's house | Start. Family scene. News that the prophet is coming. |
+| 3-1 | The Day Before |
+| 🙋 The gleaner | *(made up)* An old widow gathering leftover barley at the field's edge, as the Law allowed the poor to do (Leviticus 19:9–10). Help her and she tells you a Secret. |
+| 3-2 | The Far Pasture |
+| 3-3 | We Will Not Sit Down |
+| ⭐ The Anointing | A story spot, not a stage. The anointing scene plays here. |
+| 3-4 | The Chosen Shepherd, with the Wild Ox at the end |
+| ✨ Well by the gate | Opens when all World 3 sheep are found. Bonus stage plus a Psalm piece. Years later, David would long for a drink from this exact well (2 Samuel 23:15). |
+
+### Opening scene
+1. Jesse's house at evening. A messenger runs in: *"The prophet Samuel is coming to Bethlehem!"*
+2. The town elders look worried. The Bible says they trembled when Samuel arrived (16:4), because a prophet's visit could mean trouble.
+3. Eliab stands up straight, adjusts his cloak and smiles.
+4. Title card: **WORLD 3 — THE ANOINTING**
+
+### 3-1 · The Day Before — *village life and the rooftops*
+- **Story:** the whole town is getting ready for Samuel. Jesse's family is busy, and David is given the jobs nobody else wants.
+- **Level:** Bethlehem itself. Narrow lanes, **flat rooftops** to run and jump across, ladders, courtyards, the barley fields and the threshing floor.
+- **Jobs that are the level:** chase **crows** out of the barley with the sling, clear **rats** from the granary, and bring a stray goat home through the lanes.
+- **Eliab** at the house: *"When the prophet sees me, he'll know. Look at me."* (Sets up 16:6–7.)
+- **Shammah:** *"Don't mind him. Somebody has to keep the sheep alive while he's being admired."*
+- **Journal fact:** **Ruth and Boaz**, David's great-grandparents, lived here, and Ruth gathered barley in these very fields (Ruth 2 and 4:17). The threshing floor in this stage is a nod to their story.
+- **Journal fact:** the name Bethlehem is usually taken to mean "house of bread".
+- **Scroll:** **Micah 5:2**, a prophecy that a ruler would come out of little Bethlehem. (Ties into Thread 1: the Son of David.)
+- **The One:** on the highest rooftop, reached by a long chain of roof jumps.
+- **End of stage:** Jesse: *"David, the flock still needs you. Take them to the far pasture tomorrow."* David goes. Nobody thinks to invite him.
+
+### 3-2 · The Far Pasture — *the one who wasn't invited*
+- **Level:** wide open hills far from town, with long sightlines back to Bethlehem in the background. **You can see the crowd gathering on the town hill** while you work.
+- **Gameplay:** a classic shepherd stage: find the 5 sheep, keep foxes and stray dogs off the line, cross a stream on stepping stones.
+- **Cut-in scenes at each checkpoint (5–6 seconds each, skippable):** back in town, the sons of Jesse pass before Samuel one at a time.
+  - Eliab first. Samuel thinks *surely this is the one.* Then: *not this one* (16:6–7).
+  - Abinadab: *not this one.* Shammah: *not this one* (16:8–9).
+  - The other brothers: *not these* (16:10).
+  - Then you're back in the hills with the sheep. It's lonely on purpose.
+- **Hanan isn't at this campfire.** He's in town for the gathering. The campfire is just David's. Playing the harp here adds a quiet phrase to David's song.
+- **Scroll:** **Psalm 139:1**: you have searched me, LORD, and you know me.
+- **The One:** across the stream in a thorny thicket; clear the thorns with charged shots.
+- **End of stage:** Shammah comes running over the hill, out of breath.
+
+### 3-3 · We Will Not Sit Down — *the run back to town; learn the flip*
+- **Story:** Samuel has asked Jesse, *"Are these all the sons you have?"* Jesse: there is still the youngest, tending the sheep. Samuel: *"Send for him; we will not sit down until he arrives"* (16:11). Shammah has come to get you.
+- **Shammah teaches the aerial flip** at the start, so you can keep up:
+  > "Remember rolling down the hills when we were little? Do it in the air. Jump, then roll."
+  - 🎓 **Skill: aerial flip** (A again at the top of a jump, after a roll or a run). A little extra height and air control.
+- **Level:** a fast, joyful run from the hills, through the fields and up into town: stone walls, fences, barley rows, then the rooftops again with the flip opening new routes. **Shammah runs alongside** and points out the way. **No timer.** The whole town is waiting, and the music speeds up as you get close.
+- **The flock comes too,** following you into town.
+- **Scroll:** **Psalm 78:70**: he chose David his servant and took him from the sheep pens.
+- **The One:** a flip-only route over the town wall.
+
+### ⭐ The Anointing — a story scene, not a fight
+1. David walks into the gathering, dusty from the fields. Everyone turns. The Bible describes him as glowing with health, with a fine appearance (16:12).
+2. **Samuel hears the LORD: this is the one; rise and anoint him** (16:12).
+3. Samuel pours oil from a **horn** over David's head, in front of his brothers (16:13).
+4. **The Spirit of the LORD came powerfully upon David from that day on** (16:13). Shown simply: a warm light, the music swells, and David's song plays with a new third part. No glowing powers and no new stats. Something changed in David, not in his sling.
+5. Eliab looks away.
+6. **Journal:** "Anointing" explained for kids: pouring oil on someone's head was how Israel set apart a king or a priest. The word *Messiah* means "anointed one." (Ties into Thread 1.)
+
+### 3-4 · The Chosen Shepherd — *back to work, then the storm*
+- **Story:** what does the newly anointed king do the next morning? **He goes back to the sheep.** Later, when Saul sends for him, David is still "with the sheep" (16:19). That's the lesson of the world.
+- **Hanan's campfire, his last in World 3:**
+  > "So. The prophet poured oil on your head."
+  > "And tomorrow the sheep still need water. Kings are made in the small things, David."
+  - 👁️ **Warning (tier 1):** *"Storm coming. In a storm the wild oxen panic and charge at anything that moves. If one charges, put a tree between you."*
+  - 📜 **Proverbs 22:4** (humility).
+- **Level:** open grassland as a storm rolls in. Wind gusts push you, rain makes the ground slippery (a little slide on landing), and lightning lights up dark sections. Required jumps leave room for the slide (rule 3).
+- **Scroll:** **Psalm 29:3–4**, a psalm of David about the voice of the LORD over the storm.
+- **The One:** in a hollow under a fallen oak, reached by rolling.
+- **Stage ending:** a huge **wild ox** bursts out of the rain and charges straight at the flock.
+
+### BOSS · The Wild Ox (end of 3-4)
+**Not killed: driven off.** The Bible doesn't describe this fight; it's invented, so the game can choose. Not every animal needs to die. The ox gives up and runs off into the storm. Kids will notice that difference.
+
+**How it plays:** the Lion was dodging, the Bear was distance, and the Ox is **using the arena and the new flip.**
+
+**Arena:** a muddy hillside in the rain with **three big trees**, a low stone wall and the flock huddled on the far left.
+
+**Phase 1 — Turn it from the flock.** The ox is charging at the flock. Hit it with charged shots to make it turn toward you instead.
+
+**Phase 2 — Use the trees.**
+- **Charge:** tell = it paws the ground three times and lowers its horns (with tier-1 counsel, its eyes flash). Stand in front of a tree and **flip over the ox** at the last second. Its **horns stick in the trunk** and it's stuck for a few seconds. Hit it then.
+- **Lightning:** a strike hits a tree, and a branch falls; move.
+- **Mud slide:** it skids if it misses you on wet ground, so the next charge comes from a strange angle.
+- 3 trees, 3 good stuck-in-a-tree hits. Each time a tree splits and falls.
+
+**Phase 3 — No trees left.** It charges back and forth along the open slope, faster. Flip over every charge; hit it while it skids to turn. 3 hits. Then it stops, shakes its head, snorts, and **runs off into the rain.**
+
+**Counsel tier 2** (Hanan: *"Sit down. Tell me what happened."*): the ox paws one extra time before each charge, horns stay stuck +0.5 s, and you get +1 heart.
+
+### End of World 3 — reflection scene
+1. The storm clears. Sunset over Bethlehem. The flock is safe.
+2. Hanan by the fire. He gives David **his own old shepherd's staff:**
+   > "I won't always be on these hills with you. Take this. When the path is hard, lean on it, and remember who leads you."
+   - Ties to **Psalm 23:4** (the rod and the staff).
+3. Verse on screen: **1 Samuel 16:7**: the LORD looks at the heart.
+4. A messenger on horseback in the distance, riding toward Bethlehem from the king (sets up World 4).
+5. David plays. World code.
+
+### World 3 — summary table
+| Stage | New thing | Sheep | People | Scroll |
+|---|---|---|---|---|
+| 3-1 | Village rooftops, chores as level goals | 5 + The One | Jesse, Eliab, Shammah | Micah 5:2 |
+| 3-2 | Being left out, cut-in scenes of the brothers before Samuel | 5 + The One | (cut-ins) | Psalm 139:1 |
+| 3-3 | **Aerial flip**, joyful run back to town with Shammah | 5 + The One | Shammah | Psalm 78:70 |
+| ⭐ | **The Anointing** (story scene) | | Samuel, Jesse, all the brothers | |
+| 3-4 end | Storm: wind, mud, lightning; **Boss:** the Wild Ox, driven off | 5 + The One | **Hanan** | Psalm 29:3–4 |
+
+### World 3 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 3-1 | Jesse | 🧭 Story: take the flock to the far pasture | |
+| Map: 🙋 The gleaner | Old widow *(made up)* | 🗝️ Secret: the hollow under the fallen oak in 3-4 (The One) · 📜 Leviticus 19:9–10 | Trust: a heart refill whenever you pass |
+| 3-2 campfire | (David alone) | 📜 Psalm 139:1 | Harp adds a phrase to David's song |
+| 3-3 | Shammah | 🎓 Skill: aerial flip | |
+| ⭐ | Samuel | 📜 1 Samuel 16:7 · Journal: what "anointing" means | |
+| 3-4 campfire | Hanan | 👁️ Warning (tier 1): the ox's charge and the trees · 📜 Proverbs 22:4 | Tier 2 after a loss: longer tell, horns stuck longer, +1 heart |
+| End of World 3 | Hanan | | **Gift:** Hanan's shepherd's staff, +1 max heart |
+
+---
+
+## 6. Worlds 4–8 (outline only — to be detailed one at a time)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
 | 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear. **Detailed in §5b.** |
-| 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **Proposed: the Wild Ox.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
+| 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
 | 4 | The King's Court | 1 Sam 16:14–23 | Shooting faster | **Proposed: Saul's Torment.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:17–24 | Double jump | **Proposed: the Philistine Chariot.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — | **Proposed: the Philistine Watchtower.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
