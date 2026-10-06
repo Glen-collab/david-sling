@@ -136,3 +136,15 @@ Frame counts are starting targets. Fewer frames is fine if the motion reads.
 - **Objects:** ☐ tents (bounce top) · ☐ supply wagons · ☐ water jars (full / empty) · ☐ reeds · ☐ deep pool · ☐ cover rocks · ☐ shepherd's bag (gift icon)
 - **Tiles/backgrounds:** ☐ Israelite camp · ☐ no-man's land valley floor · ☐ streambed with pools · ☐ Philistine camp in the far background · ☐ Saul's tent interior
 - **Map:** ☐ World 6 map
+
+## World 7 — The Giant's Shadow
+- **David in Saul's armor:** ☐ clanky walk 8 · ☐ tiny hop 3 · ☐ thud landing 2 · ☐ helmet slipping over the eyes 3 · ☐ sword catching 2 · ☐ taking the armor off 6 · ☐ armor pile on the ground (1) · ☐ grey "armor hearts" icon
+- **David, other:** ☐ kneel at the stream and pick up a stone 4 · ☐ look at a stone (close-up hand, 2) · ☐ stand with staff + sling, bag at side (the 17:40 pose, 2)
+- **People:** ☐ **Saul dressing David** (4) · ☐ Saul nodding (2) · ☐ soldiers lining the path, watching (2–3 looks) · ☐ **Eliab, arms crossed, apart** (1–2) · reuse Tobi, Shammah
+- **Memory sections:** palette-shifted (warmer, softer) versions of World 1–3 tiles (no new art if the palette swap looks right)
+- **Stones:** ☐ smooth round stone · ☐ rough/jagged stone · ☐ flat stone · ☐ close-up versions of each (32×32) · ☐ stone shine (2) · ☐ five-stones pouch counter (0–5)
+- **Goliath:** ☐ approaching, full size, walking (6) · ☐ standing back, laughing (4) · ☐ his shadow on the ground (grows in 3 sizes)
+- **Boss — the Shield-Bearer:** ☐ walk behind shield 6 · ☐ lift shield 3 · ☐ slam shield 3 + ground shockwave 4 · ☐ charge shield-first 6 · ☐ peek over the top 2 · ☐ shield tilted / knocked sideways 2 · ☐ shield knocked out of hands 4 · ☐ shield lying flat (1) · ☐ backing away 4
+- **Gifts screen icons (32×32):** ☐ Jesse's sling · ☐ leather pouch · ☐ Hanan's staff · ☐ King's Favour (a seal) · ☐ scout's cloak · ☐ shepherd's bag · ☐ five stones
+- **Tiles/backgrounds:** ☐ Saul's tent area · ☐ the slope down with crowds on both hills · ☐ the streambed close up · ☐ the open valley floor with a darkening right edge
+- **Map:** ☐ World 7 map

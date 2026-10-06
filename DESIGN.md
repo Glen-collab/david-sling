@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** 16-bit-era pixel art (Super Nintendo era: richer colour and detail), **not** 8-bit NES art. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **Worlds 1–6 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
+> Status: **Worlds 1–7 drafted for review; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).** Worlds 2–8 are outlines only.
 
 ---
 
@@ -93,7 +93,7 @@ Jesus told this parable about a thousand years after David. The game connects th
 | 4 | **King Saul** | Troubled and tormented; David's music reaches him (1 Sam 16:23) |
 | 5 | Tobi, a frightened young scout (made up) | Hiding in a cave after hearing the giant; David gets him back to camp, and Tobi teaches him the double jump |
 | 6 | the whole army | "all the Israelites…ran from him in great fear" (1 Sam 17:24) |
-| 7 | (to decide) | |
+| 7 | **Eliab** | The angry older brother. Luke 15's older brother "refused to go in," and the story ends without saying whether he did. The game leaves it open too. |
 | 8 | Israel | God saves the people through the least likely one |
 
 - **Secret ending:** find all 32 of The One and, after the credits, a new scene unlocks: the same Bethlehem hills from World 1, **a thousand years later**, at night. Shepherds keep watch over their flocks, and the sky fills with light (Luke 2:8–14). Last line on screen: *"He will be called the Son of David."* It closes the whole thread without a single extra word of preaching.
@@ -1145,7 +1145,151 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
 
 ---
 
-## 6. Worlds 7–8 (outline only — to be detailed one at a time)
+## 5g. World 7 — The Giant's Shadow *(DRAFT FOR REVIEW)*
+
+**Bible:** 1 Samuel 17:38–41.
+**What happens:** Saul dresses David in his own tunic, a coat of armor and a bronze helmet. David straps on a sword and tries walking around, because he isn't used to them. *"I cannot go in these,"* he says, and takes them off (17:38–39). He takes his staff, chooses **five smooth stones** from the stream, puts them in the pouch of his shepherd's bag, and with his sling in his hand goes toward the Philistine (17:40). The Philistine, with his shield-bearer in front of him, keeps coming closer (17:41).
+**The big idea:** **use what God has given you.** Not the king's armor. The sling, the staff, the stones, and the years in the hills.
+**Keeping the story in one piece:** the Bible tells these moments one right after another, with no gap. So this world doesn't add a night or a side quest. It's **one continuous walk**: from Saul's tent, down the hill, into the streambed, and out onto the valley floor.
+**The lost one:** **Eliab.** The proud, angry older brother. In Luke 15, the same chapter as the lost sheep, Jesus tells of an older brother who "became angry and refused to go in" (Luke 15:28), and **the story ends without telling us whether he ever did.** The game does the same: it shows Eliab and leaves it open. (Nothing is invented about Eliab beyond where he stands and how he looks.)
+**David learns:** no new move. **Taking the armor off is the upgrade.**
+**Enemies:** almost none. Ancient champions' duels were watched, not interrupted, so the Philistine army doesn't attack. The danger in this world is the land, the creatures in the streambed, and the giant coming closer.
+
+### World 7 map
+A short map: Saul's tent at the top of the Israelite hill, the path down, the streambed, and the open valley floor with a huge shadow falling across it from the right.
+
+```
+ [⛺ Saul's tent] ──> (7-1) ──> [🙋 Tobi] ──> (7-2) ──> [🔥 Shammah]
+                                                            │
+                [✨ Gera's sling range] <── (7-3) <─────────┘
+                                             │
+                                          (7-4 🛡️ The Shield-Bearer)
+```
+
+| Dot | What's there |
+|---|---|
+| ⛺ Saul's tent | Start. Saul brings out his armor. |
+| 7-1 | Saul's Armor |
+| 🙋 Tobi | At the edge of the camp. Counsel for the boss. |
+| 7-2 | Remember the Hills |
+| 🔥 Shammah | The last campfire on the Israelite side. Rest, Journal, harp. |
+| 7-3 | Five Smooth Stones |
+| ✨ Gera's sling range | *(callback to World 4)* Opens when all World 7 lost things are found. A bonus target challenge with Gera, plus a Psalm piece. |
+| 7-4 🛡️ | The Giant's Shadow, with the Shield-Bearer at the end |
+
+### Opening scene
+1. Saul's tent. Saul, a head taller than everyone (1 Sam 9:2), has his armor brought out: the tunic, the coat of armor, the bronze helmet, his sword.
+2. He dresses David in it himself (17:38). It's **far too big.** The helmet slides down over David's eyes. The tunic drags on the ground.
+3. Title card: **WORLD 7 — THE GIANT'S SHADOW**
+
+### 7-1 · Saul's Armor — *the stage you win by taking it off*
+- **"He tried walking around"** (17:39). The stage starts in the armor, in the camp beside Saul's tent: a little training course of crates, a low wall, a ditch, a ladder.
+- **In the armor, David can only:** walk slowly (clank, clank), make a tiny hop, and land with a thud. **No sling** (you can't swing it in a coat of armor), no roll, no flip, no double jump. Every few steps the **helmet slips down over his eyes** and the top of the screen goes dark for a moment. The sword drags and catches on things. It's funny, and it's frustrating on purpose.
+- **Armor hearts:** the armor shows as 3 extra grey hearts. It's the one time the game offers *more protection*, and it's exactly what David should give up.
+- **You can take it off at any moment:** stand still and **press Select.** A small prompt shows it from the start. Most players will try to push on in the armor first. The course is built so that **you can get a little way, but not to the end**: the last gap needs a real jump, and the exit is a narrow gap between tents you can't fit through in the armor.
+- **When you take it off**, David says it: *"I cannot go in these, because I am not used to them."* (17:39) He sets the armor down carefully and bows to Saul. **Saul nods.** He isn't offended.
+- **Then the stage opens up:** the rest of 7-1 is a fast, light run through the camp to the edge of the hill, with every move back. The contrast is the lesson.
+- **5 lost things:** the last 5 frightened soldiers, hiding in the camp. Lift them with the harp; they line the path to watch.
+- **Scroll:** **Zechariah 4:6**: not by might nor by power, but by my Spirit, says the LORD.
+- **The One:** behind Saul's tent, only reachable after the armor comes off.
+
+### 🙋 Tobi, at the edge of the camp
+> "That shield-bearer walks in front of him everywhere. The shield's as big as a door."
+> "Heavy, though. Every time he slams it down, he has to lift it again. That's your moment."
+- 👁️ **Warning (tier 1)** for the boss.
+
+### 7-2 · Remember the Hills — *the walk down*
+- **The walk down the hill** from the camp to the streambed, with both armies watching from the slopes. The giant's taunts echo across the valley.
+- **As David walks, the stage flashes between now and then.** A few steps of the present-day slope, then the screen shimmers and David is back on a stretch of **World 1, 2 or 3**: the rope bridge in 1-3, the lion's moonlit rocks in 1-4, the vine swings in 2-1, the cliffs in 2-3, the Bethlehem rooftops in 3-3. Then back to the slope.
+- **These memory sections are remixed and harder,** using every move David has now. It's a mastery test across everything you've learned, and a reminder of the World 7 big idea: **God prepared David in the quiet places.**
+- **The memories are labelled** *"David remembers"* and look slightly warmer and softer, so kids know they're memories, not travel.
+- **5 lost things:** a lost sheep in each memory section. They're memories, so they fade into sparkles when you reach them, and each one adds a line to the Journal.
+- **Scroll:** **Psalm 18:34**: he trains my hands for battle. (A psalm of David.)
+- **The One:** at the end of the hardest memory section, the lion's rocks from 1-4.
+
+### 🔥 Shammah's fire, the last on the Israelite side
+> "You want me to come with you to the stream?"
+> "...No. I know. You have to go on your own."
+- He reminds you of his gift: the shepherd's bag. *"Five stones. Pick good ones."*
+
+### 7-3 · Five Smooth Stones — *choose your stones*
+- **The streambed** in the middle of the valley. Pools, reeds, roots, and thousands of stones.
+- **Choosing stones is the gameplay.** Stones shine faintly when you're near them. Press ↓ to look at one: a close-up shows it.
+  - **Rough, jagged or flat stones** wobble in flight. Put them back.
+  - **Smooth, round stones** fly true. Keep them.
+  - **Journal fact:** smooth, round stones fly straighter from a sling. Archaeologists have found many shaped sling stones in Israel from Bible times, some about the size of a tennis ball.
+- **5 smooth stones** are the lost things in this stage, and you need all 5 to finish it. They're on the main path, never hidden behind hard jumps (rule 2), but finding the very best ones takes looking around.
+- **Shepherd's Judgment:** vipers and scorpions under the stones; a hedgehog and a whip snake too. Look before you throw, one last time.
+- **"Why five?"** A Journal card: the Bible doesn't say why David took five stones. Some preachers point out he was being sensible in case he missed. Others note that Goliath had relatives in Gath who were also giants (2 Samuel 21:22). Either way, he needed only one.
+- **Scroll:** **Psalm 62:6**: he alone is my rock and my salvation.
+- **The One:** a lamb from the army's flock, standing on a rock in the middle of the deepest pool.
+- **Stage ending:** David stands up with the five stones in his bag, staff in one hand, sling in the other, exactly as 17:40 describes. He walks out onto the open ground.
+
+### 7-4 · The Giant's Shadow — *out onto the valley floor*
+- **A short, quiet, tense stage.** David walks out across the open valley floor toward the Philistine line. **No enemies, no music**: only a slow drum, the wind, and the armies' noise on the hills.
+- **The giant's shadow** grows across the ground as he comes forward. The screen slowly darkens from the right. His footsteps get louder.
+- **Hazards are the land:** dry cracks, loose rocks, a few vipers in the stones, vultures overhead.
+- **Eliab** is visible far up the Israelite slope, apart from the others, arms crossed. The camera rests on him for a moment. Nothing more. (The Journal's "The One" page adds Luke 15:28, about the older brother.)
+- **Scroll:** **Psalm 118:6**: the LORD is with me; I will not be afraid.
+- **The One:** behind the last boulder before the open ground.
+- **Stage ending:** the Philistine, **with his shield-bearer in front of him**, keeps coming closer (17:41). The shield-bearer, a huge man behind a shield as big as a door, steps out ahead of Goliath.
+
+### BOSS · The Shield-Bearer (end of 7-4)
+**From the text, with invented detail:** the shield-bearer is in 1 Samuel 17:7 and 17:41, walking in front of Goliath. The Bible doesn't say what happened to him. In the game, getting past him is the **opening of the duel**, not a separate battle, and **he isn't killed**: he's knocked off balance, loses his shield, and backs off. That leaves Goliath without the shield's cover, which is how World 8 begins.
+
+**Goliath** stands behind him the whole fight, laughing and taunting, and never steps in. (He's waiting for his turn.)
+
+**The arena:** the open valley floor. The shield-bearer pushes forward, so **the space shrinks** toward the stream behind you.
+
+**Phase 1 — The wall.** He walks forward behind the shield. Stones bounce off it. Tell: he **lifts the shield to slam it down** (with tier-1 counsel, the shield's bronze rim flashes). The slam sends a shockwave along the ground: be in the air. While he's lifting it again, **flip or double jump over him** and hit him from behind. 3 hits.
+**Phase 2 — The shove.** He charges, shield first, to knock you into the stream. **Roll** under the edge of the shield as he comes, or get high. He peeks over the top to find you: a **quick-release** shot at the shield's edge as he peeks knocks it sideways. 3 times.
+**Phase 3 — The shield falls.** One **charged shot** to the shield's edge while it's tilted knocks it out of his hands. It falls flat with a huge crash. He stares at it, looks back at Goliath, and **backs away**. Goliath laughs at him.
+
+**Counsel tier 2** (Shammah, from the Israelite slope: *"Come here. Tell me what happened."*): the slam tell lasts longer, the shield tilts for longer after each peek, and +1 heart.
+
+### End of World 7 — everything you need (reflection scene)
+1. The shield lies in the dust. The valley goes quiet. Goliath and David face each other across the open ground for the first time.
+2. **The gifts screen.** Before the last world, the game shows everything David carries and who gave it to him:
+
+| Gift | From | World |
+|---|---|---|
+| The sling (Jesse's old sling) | Jesse, his father | 1 |
+| The leather sling pouch | The leatherworker of Tekoa | 2 |
+| The shepherd's staff | Hanan | 3 |
+| The King's Favour | King Saul | 4 |
+| The scout's cloak | Tobi | 5 |
+| The shepherd's bag | Shammah | 6 |
+| Five smooth stones | the stream | 7 |
+| *(and the moves)* | Hanan, Shammah, Gera, Tobi | 1–5 |
+
+   The line under it: *Everything you need, you already have.*
+3. Verse: **1 Samuel 17:40**: he took his staff, chose five smooth stones, and with his sling in his hand approached the Philistine.
+4. World code. *To be continued in World 8: David and Goliath.*
+
+### World 7 — summary table
+| Stage | New thing | Lost things | People | Scroll |
+|---|---|---|---|---|
+| 7-1 | **Saul's armor**: slow, no sling, helmet over the eyes; take it off to win | 5 soldiers + The One | Saul, Tobi | Zechariah 4:6 |
+| 7-2 | The walk down; **memory sections** remixed from Worlds 1–3 | 5 remembered sheep + The One | Shammah | Psalm 18:34 |
+| 7-3 | **Choosing five smooth stones**; last Shepherd's Judgment | 5 smooth stones + The One | — | Psalm 62:6 |
+| 7-4 end | The quiet walk, the giant's shadow; **Boss:** the Shield-Bearer | The One | Eliab (seen far off) | Psalm 118:6 |
+
+### World 7 — who gives what
+| Where | Person | Card | Gift / effect |
+|---|---|---|---|
+| 7-1 | Saul | 📜 1 Samuel 17:38–39 | His blessing stands; he nods when you set the armor down |
+| Map: 🙋 Tobi | Tobi | 👁️ Warning (tier 1): the shield-slam and the lift | |
+| Map: 🔥 Shammah | Shammah | 📜 Journal: "Why five?" | Rest + harp |
+| 7-3 | (the stream) | 📜 Fact: sling stones | **Five smooth stones** |
+| 7-4 | Shammah | Tier 2 after a loss: longer slam tell, longer tilt, +1 heart | |
+| 7-4 | (Eliab, far off) | 📜 "The One" page: Luke 15:28 | |
+| End of World 7 | — | | **The gifts screen** |
+
+**Sprite list for this world:** [SPRITES.md](SPRITES.md#world-7--the-giants-shadow)
+
+---
+
+## 6. World 8 (outline only)
 
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
@@ -1154,7 +1298,7 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
 | 4 | The King's Court | 1 Sam 16:14–23 | Quick release | **Saul's Torment. Detailed in §5d.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:1–24 | Double jump | **The Philistine Chariot. Detailed in §5e.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — (harp lifts soldiers) | **The Philistine Watchtower. Detailed in §5f.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
-| 7 | The Giant's Shadow | 1 Sam 17:38–40 | — | **Proposed: Goliath's Shield-Bearer.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
+| 7 | The Giant's Shadow | 1 Sam 17:38–41 | — (the armor comes off) | **Goliath's Shield-Bearer. Detailed in §5g.** He's in the text: "his shield bearer went ahead of him" (1 Sam 17:7, 41). A huge shield wall you have to get around. Also the Saul's armor stage (you *win* by taking it off) and the five smooth stones. |
 | 8 | David & Goliath | 1 Sam 17:41–50 | — | **Goliath:** dodge and survive; the final hit is one charged stone (you carry 5). |
 
 **Story order check:** Saul throwing his spear at David (1 Sam 18–19) and Jonathan's friendship (1 Sam 18:1) happen **after** Goliath. They stay out of this game (they're sequel material).
@@ -1166,7 +1310,6 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
 - [ ] Screen size and sprite scale: decide after seeing Glen's GPT sprite sheets.
-- [ ] World 7's lost one.
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
 - [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
 
