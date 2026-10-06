@@ -1,7 +1,7 @@
 # David: The Shepherd's Sling — Story & Level Bible
 
 > Working document. Each world gets locked before anything for it is built.
-> **Look:** a **Pixar-style cartoon**: smooth, rounded characters with soft lighting, like a 3D animated movie, drawn as high-resolution 2D sprites. **Not pixel art** (no blocky pixels). Think Donkey Kong Country or Rayman Legends in feel. **Controls:** NES-style (D-pad, A, B, Select, Start).
+> **Look:** **pixel art with a cute, Pixar-like character design**: the little squares of a pixel game, but characters with the rounded, appealing look of an animated movie. The reference is `try2-walk-animated.gif` (David's pixel walk, 2026-10-06). **Controls:** NES-style (D-pad, A, B, Select, Start).
 
 > Status: **All 8 worlds drafted for review; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
@@ -1499,8 +1499,8 @@ After the credits, if you found every lamb:
 - [ ] Sage's name: "Old Hanan" is a placeholder.
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
 - [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
-- [x] Look: **Pixar-style cartoon, not pixel art** (decided after the first sprite sheets). Screen: built for 1920 × 1080.
-- [ ] How David is animated: GPT draws every frame, or one good David cut into body parts that the game moves (a "cutout rig").
+- [x] Look: **pixel art with a Pixar-like character design** (the try2 walk). Screen: **640 × 360**, scaled up 3× to 1080p.
+- [x] How sprites are made: **AI video clips (Grok) split into frames**, then converted to the game's pixel style. See [VIDEO_SPRITES.md](VIDEO_SPRITES.md). (A cutout rig was tested and dropped.)
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
 - [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
 - [ ] Part 2 teaser: **parked** until this game is finished.
@@ -1511,9 +1511,10 @@ After the credits, if you found every lamb:
 The full list of sprites needed, world by world, is in [SPRITES.md](SPRITES.md).
 - One animation per PNG, frames in a **single row**, no gaps.
 - Every frame of David is the **same cell size** (decide once, never change).
-- **Feet on the same line** in every frame; body centred on the same spot.
+- **Feet on the same pixel row** in every frame; body centred on the same spot.
 - **Faces right only.** The game mirrors him.
-- **Real transparency:** ask GPT for a transparent background. Delete any fake grey checkerboard it paints in, and any brown smudge left around the character.
-- Resize with normal smooth resizing (Bicubic). The art is smooth, not pixel art.
-- **Legs must alternate** in walk and run cycles (see ART_PROMPTS.md).
+- **Background:** solid bright green (#00FF00) for video, solid magenta (#FF00FF) for still images. I remove it.
+- Send raw files. I snap them to the pixel grid and the game's colours (the process used for try2).
+- If you resize anything yourself, use **Nearest Neighbor (hard edges)**.
+- **Legs must alternate** in walk and run cycles (video does this naturally).
 - File names: `david_run.png`, `david_throw.png`, `lion_pounce.png`, …

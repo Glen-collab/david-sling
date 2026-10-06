@@ -3,21 +3,21 @@
 A checklist of every sprite the game needs, world by world. Tick them off as you finish each sheet in Photoshop.
 **Prompts** for most of these are in [ART_PROMPTS.md](ART_PROMPTS.md). **Sheet rules** are in DESIGN.md §8.
 
-## Sizes (proposed)
-The look is a **Pixar-style cartoon** (smooth, not pixel art), so sprites are high resolution. The game is built for a **1920 × 1080** screen and scales smoothly to other sizes.
+## Sizes
+The look is **pixel art with a Pixar-like character design** (the try2 walk). The game draws at **640 × 360** and scales up exactly 3× to a 1080p monitor (4× to 1440p), so pixels stay crisp.
 
 | Kind | Frame size | Notes |
 |---|---|---|
-| David | 256 × 256 | David himself about 200 px tall; room for the sling swing and flips |
-| The lamb, sheep, small animals | 128 × 128 | |
-| People (NPCs) | 256 × 256 | Same scale as David |
-| Big enemies (wolf, boar, leopard) | 256 × 192 | |
-| Bosses | 512 × 512 | Goliath: 400 × 512 (he's twice David's height) |
-| Ground and platform pieces | 64 × 64 blocks | Painted to match, so they join seamlessly |
-| Dialogue portraits | 256 × 256 | One face per speaking character |
-| Map icons | 64 × 64 | |
+| Tiles (ground, platforms, walls) | 32 × 32 | |
+| David | 80 × 80 | David himself about 63 px tall (like try2); room for the sling swing and flips |
+| The lamb, sheep, small animals | 48 × 48 | |
+| People (NPCs) | 80 × 80 | Same scale as David |
+| Big enemies (wolf, boar, leopard) | 96 × 64 | |
+| Bosses | 192 × 192 | Goliath: 160 × 160 or larger (about twice David's height) |
+| Dialogue portraits | 96 × 96 | |
+| Map icons | 32 × 32 | |
 
-**Still to decide:** how David's movement is animated. Either GPT draws every frame (consistency and leg problems so far), or we cut one good David into body parts and the game moves them (open question in DESIGN.md §7).
+**How sprites are made:** AI video clips split into frames and converted to pixels. See [VIDEO_SPRITES.md](VIDEO_SPRITES.md).
 
 Frame counts are starting targets. Fewer frames is fine if the motion reads.
 
