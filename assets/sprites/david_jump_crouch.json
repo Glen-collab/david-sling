@@ -1,0 +1,18 @@
+{
+  "frames": 5,
+  "frame_w": 147,
+  "frame_h": 243,
+  "ms_per_frame": 133,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 94,
+  "anchor_y": 240,
+  "source": "jump.mp4",
+  "video_frames": [
+    52,
+    56,
+    60,
+    63,
+    67
+  ]
+}

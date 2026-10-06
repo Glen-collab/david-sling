@@ -12,6 +12,10 @@ Made with `tools/vid2sprite.py` from Glen's Grok clips. Each PNG is one row of f
 | `david_flip.png` | 10 | 215×208 | 112 | once | center | hf_1.mp4 |
 | `david_flip_takeoff.png` | 6 | 221×235 | 153 | once | feet | hf_1.mp4 |
 | `david_guard.png` | 6 | 208×258 | 90 | once | feet | c3_3.mp4 |
+| `david_idle.png` | 10 | 93×248 | 140 | back-and-forth | feet | jump.mp4 |
+| `david_jump_air.png` | 10 | 157×254 | 158 | once | center | jump.mp4 |
+| `david_jump_crouch.png` | 5 | 147×243 | 133 | once | feet | jump.mp4 |
+| `david_jump_land.png` | 6 | 149×238 | 167 | once | feet | jump.mp4 |
 | `david_kneel_harp.png` | 10 | 210×257 | 162 | once | feet | hf_2.mp4 |
 | `david_land.png` | 6 | 264×222 | 139 | once | feet | hf_1.mp4 |
 | `david_pickup_lamb.png` | 16 | 182×247 | 159 | once | feet | c2_1.mp4 |
@@ -26,6 +30,8 @@ Made with `tools/vid2sprite.py` from Glen's Grok clips. Each PNG is one row of f
 | `lamb_run.png` | 10 | 106×92 | 96 | loop | feet | c3_1.mp4 |
 
 **How they're used:**
+- `david_idle`: standing still, side-on; plays forward then backward (a slow breath)
+- `david_jump_crouch + david_jump_air + david_jump_land`: the normal jump in three parts; the game moves him, the frames stay centred
 - `david_guard`: block / brace (fists up)
 - `david_arm_raised`: 8-1: raising his arm as he answers Goliath
 - `david_stop`: skid to a stop from a run
