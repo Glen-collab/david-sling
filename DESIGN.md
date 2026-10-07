@@ -352,10 +352,13 @@ Like Super Mario World's dragon coins: **3 hidden special stones in every stage*
 - **Spend or save.** David knows these stones will matter against Goliath, so every one you spend early is one you don't have later. The count carries from stage to stage.
 - **Bible tie-in for the Journal:** Samuel set up a stone and named it **Ebenezer**, "Thus far the LORD has helped us" (1 Samuel 7:12). Each special stone is a reminder of a time God helped. (Working name for them: *Ebenezer stones*.)
 
-**How saved stones matter against Goliath (to decide):**
-1. **Courage:** each saved stone = 1 extra heart for the Goliath fight. David remembers each time God helped him.
-2. **Focus:** each saved stone makes Goliath's one opening (phase 3) last a little longer.
-3. Both, but smaller.
+**How saved stones matter against Goliath: a little of both (decided 2026-10-07).** It works like an achievement: the more you found and kept, the more it pays off at the end.
+- **Courage:** every **4 saved stones = +1 heart** for the Goliath fight (up to +4 at 16 or more). David remembers each time God helped him.
+- **Focus:** every saved stone makes Goliath's one opening (phase 3) last **+0.05 s longer** (up to +1 s at 20 or more).
+- **Before the fight**, the screen shows the stones David carries and what they're worth: *"14 stones of remembrance: +3 hearts, a steadier aim."*
+- Players who spent them all can still win. It's a reward, never a requirement (rule 2).
+
+**Achievements view (Journal):** a stage-by-stage grid like Super Mario World's dragon coins, with 3 stone slots per stage, filled in as you find them. Finding all 3 in a stage lights that stage's dot on the map gold. All 96 = a gold star on the save file.
 
 The five smooth stones from the stream (World 7) stay separate. They're the story's stones, and the final blow is always one of them.
 
@@ -1415,7 +1418,7 @@ No campfires, no helpers, no bonus spot. Nothing between David and the giant.
 ### 8-2 · BOSS · Goliath
 **The rule for the fight:** **plain stones bounce off his bronze.** His helmet, scale armor and greaves (17:5–6) clang and spark when hit. You **can't wear him down**. The whole fight is about surviving, closing in, and waiting for the one opening. Then **one stone**.
 
-**Your five smooth stones** (World 7) are shown in the corner. Ordinary throwing stones still work for knocking things out of the air, but **only the five smooth stones can end the fight.**
+**Your five smooth stones** (World 7) are shown in the corner, along with any **special stones** you saved (§3f), which give bonus hearts and a longer opening. Ordinary throwing stones still work for knocking things out of the air, but **only the five smooth stones can end the fight.**
 
 **The arena:** the ring of open ground between the armies. Goliath takes up nearly half the screen's height.
 
