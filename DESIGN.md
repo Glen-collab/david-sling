@@ -253,6 +253,22 @@ Filling in every creature is a collection goal of its own.
 
 The score gives skilled players something to chase on replays. It never blocks progress.
 
+### 8. Food, health and "look before you eat"
+Art: `assets/items/` (cut from Glen's food & nature sheet). Food heals; a few look-alikes hurt, the same lesson as the snakes.
+
+| Item | Bible | In the game |
+|---|---|---|
+| Grapes, olives, dates, figs | everyday food of Judah | small heal |
+| Bread, sheep's cheese, roasted grain | what Jesse sent with David (1 Sam 17:17–18) | heal; also the World 5 delivery |
+| Lentils | brought to David in the wilderness (2 Sam 17:28) | medium heal |
+| Fig cake, raisins | Abigail's gift to David (1 Sam 25:18) | big heal |
+| **Honey** | Jonathan tasted honey and "his eyes brightened" (1 Sam 14:27) | full heal; only if you spared the bees |
+| **Wild gourds** ⚠️ | "there is death in the pot!" (2 Kings 4:39–40) | **poisonous**: costs a heart. Can also hang from vines and be slung down. |
+| **Poison berries** ⚠️, **oleander** ⚠️ | oleander is truly toxic | poisonous; the sheep avoid it too |
+| Thistle | thorns and thistles | hazard: prickly, not food |
+
+Each one gets a Field Guide card the first time it's seen.
+
 ### Where creatures appear
 | World | New creatures and chores |
 |---|---|
