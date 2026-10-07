@@ -481,3 +481,4 @@ window.SPRITE_DATA = {
   "align": "feet"
  }
 };
+window.ITEM_LIST = ["beehive_tree", "bread", "campfire", "cave", "cheese", "cliff_edge", "crops", "date_palm", "dates", "fig_cake", "fig_tree", "figs", "grape_vine", "grapes", "honey", "lentils", "oleander", "olive_tree", "olives", "poison_berries", "raisins", "roasted_grain", "rock_ledge", "stone_wall", "tent", "thistle", "thorn_bush", "toxic_mushroom", "vineyard", "wasp_large", "wasp_small", "wild_gourds"];

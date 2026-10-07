@@ -1,6 +1,8 @@
-# Movement test
+# Game (World 1-1 sample + movement test)
 
 Double-click `index.html` to play in your browser (Chrome or Edge). No install needed.
+
+**1** = World 1-1 sample (food, poison look-alikes, cobras, campfire checkpoints, the Lion). **2** = the old movement test. **H** = show/hide the controls.
 
 **Keyboard:** arrows move (hold to run) · Z or Space = A (jump; again in the air = flip) · X = B (sling; hold to charge, hold Up to aim up) · Down = crouch/crawl · Down + A while moving = roll · Down next to the lamb = pick up / put down · Shift = Select (harp) · R = back to start · ` (backtick) = show hitboxes.
 

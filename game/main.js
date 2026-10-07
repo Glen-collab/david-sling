@@ -31,10 +31,22 @@ const TUNE = {
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
   CARRY_JUMP2: 0.95,      // second jump while carrying the lamb (1 = as strong as the flip)
   TILE: 36,
+  HEARTS: 4,
+  HURT_INVINCIBLE: 1.3,   // seconds of flashing after a hit
+  ITEM_SIZE: 0.32,        // food pickups
+  SNAKE_RANGE: 120,       // how close before a snake strikes
+  LION_HP: 6,             // tap stone = 1, charged stone = 2 (only while it's dazed)
+  LION_PROWL: 130, LION_RUN: 330,
+  LION_POUNCE_RANGE: 360, // how close before it roars and pounces
+  LION_TELL: 0.9,         // seconds of roar warning before the pounce
+  LION_JUMP: 820,
+  LION_DAZED: 1.8,        // seconds it stays dazed after landing (your window to hit it)
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
     david_crawl: 0.92,
+    lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
+    cobra_hood: 1.5, snake_strike: 1.5,
   },
 };
 
@@ -177,35 +189,76 @@ let toastText = "", toastTime = 0;
 function toast(t) { toastText = t; toastTime = 4; }
 
 // ============================================================================
-// Level: a rough 1-1 block-out, built from simple commands (columns/rows are tiles).
-// Screen is 20 tiles tall; the ground surface is row 17.
+// Levels. "1-1" is the World 1 sample; "#test" in the address opens the old movement test.
+// Built from simple commands (columns/rows are tiles). Screen is 20 tiles tall; ground surface is row 17.
 // ============================================================================
+const LEVEL_NAME = location.hash === "#test" ? "test" : "1-1";
 const T = TUNE.TILE;
-const ROWS = 20, COLS = 150, GR = 17;
-const solid = [...Array(ROWS)].map(() => Array(COLS).fill(false));
+const ROWS = 20, COLS = LEVEL_NAME === "test" ? 150 : 232, GR = 17;
+const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone
 const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
-const gourds = [], labels = [];
-const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = true; };
-const block = (c, r, w, h) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = true; };
+const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
+let lionSpawn = null, arenaX = Infinity;
+const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = 1; };
+const block = (c, r, w, h, mat = 1) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
+const rock = (c, r, w, h) => block(c, r, w, h, 2);
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
-const gourd = (c, r) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true });   // sits on top of row r+1
+const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true, hanging });
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
+// decoration: an item image standing on row r (its bottom on the top of row r+1); layer "back" or "front"
+const deco = (name, c, r, size = 1, layer = "back") => decor.push({ name, x: c * T + T / 2, y: (r + 1) * T, size, layer });
+const food = (name, c, r) => pickups.push({ name, x: c * T + T / 2, y: (r + 1) * T, t: Math.random() * 6, taken: false });
+const snake = (kind, c) => snakes.push({ kind, x: c * T + T / 2, y: GR * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
+const campfire = (c, r = GR - 1) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false });
 
-ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
-block(12, 15, 2, 2); block(16, 14, 2, 3);
-ground(28, 85);  label(26, 9, "small gap: jump");
-plat(32, 13, 4); plat(38, 10, 4); gourd(39, 9);
-block(46, 14, 3, 3); gourd(47, 13);               label(43, 10, "B: sling the gourds (hold B to charge, Up to aim up)");
-block(64, 12, 20, 3);                             label(64, 11, "low tunnel: Down + A while running = roll, or hold Down to crawl");
-
-ground(89, 145); label(87, 9, "gap");
-block(100, 10, 3, 7); gourd(101, 9);              label(95, 8, "tall wall: jump, then A again in the air = flip");
-plat(108, 13, 4); plat(114, 10, 4); gourd(115, 9);
-block(124, 15, 2, 2); block(127, 13, 2, 4); block(130, 11, 2, 6); gourd(131, 10);
-block(140, 9, 6, 8);                              label(133, 6, "end of the test. R = back to the start");
+if (LEVEL_NAME === "test") {
+  ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
+  block(12, 15, 2, 2); block(16, 14, 2, 3);
+  ground(28, 85);  label(26, 9, "small gap: jump");
+  plat(32, 13, 4); plat(38, 10, 4); gourd(39, 9);
+  block(46, 14, 3, 3); gourd(47, 13);               label(43, 10, "B: sling the gourds (hold B to charge, Up to aim up)");
+  block(64, 12, 20, 3);                             label(64, 11, "low tunnel: Down + A while running = roll, or hold Down to crawl");
+  ground(89, 145); label(87, 9, "gap");
+  block(100, 10, 3, 7); gourd(101, 9);              label(95, 8, "tall wall: jump, then A again in the air = flip");
+  plat(108, 13, 4); plat(114, 10, 4); gourd(115, 9);
+  block(124, 15, 2, 2); block(127, 13, 2, 4); block(130, 11, 2, 6); gourd(131, 10);
+  block(140, 9, 6, 8);                              label(133, 6, "end of the test. R = back to the start");
+} else {
+  // ---- 1-1 sample: The Hills of Bethlehem ----
+  ground(0, 60);
+  deco("olive_tree", 4, 16, 1.0); deco("date_palm", 15, 16, 1.1);
+  label(2, 6, "World 1-1 sample. Eat food to heal, but look before you eat.");
+  food("grapes", 10, 16); food("bread", 21, 16);
+  rock(26, 15, 3, 2); rock(30, 13, 3, 4);
+  gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
+  snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
+  deco("thorn_bush", 43, 16, 0.8, "front");
+  food("poison_berries", 45, 16); rock(47, 15, 3, 2); food("cheese", 48, 14);
+  label(44, 11, "Berries or cheese? Look before you eat.");
+  deco("olive_tree", 55, 16, 1.15);
+  ground(64, 122);
+  campfire(68); deco("tent", 73, 16, 1.1);            label(64, 10, "Campfire: checkpoint. Sit and play the harp (Select) to rest.");
+  plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
+  snake("viper", 93);
+  deco("beehive_tree", 99, 16, 1.2); food("honey", 101, 16);
+  food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
+  deco("fig_tree", 114, 16, 1.0);
+  rock(117, 14, 2, 3);
+  ground(126, 232);
+  deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
+  rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
+  snake("cobra", 147);
+  campfire(155);                                      label(152, 10, "Last campfire before the lion");
+  deco("stone_wall", 160, 16, 1.0, "back");
+  deco("cave", 214, 16, 1.7);                         // the lion's den
+  rock(226, 4, 6, 13);
+  lionSpawn = { x: 205 * T, y: GR * T }; arenaX = 168 * T;
+  label(170, 6, "The lion's territory");
+}
 
 const spawn = { x: 3 * T, y: GR * T }, lambSpawn = { x: 5 * T, y: GR * T };
-const isSolid = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && solid[r][c];
+let checkpoint = { ...spawn };
+const isSolid = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && solid[r][c] > 0;
 const isOneway = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && oneway[r][c];
 const LEVEL_W = COLS * T;
 
@@ -514,8 +567,12 @@ function updateStones(dt) {
     if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) s.life = 0;
     for (const g of gourds) if (g.alive && Math.hypot(s.x - g.x, s.y - (g.y - 24)) < 28) {
       g.alive = false; s.life = 0;
-      for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8 });
+      for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
     }
+    for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - sn.x) < 34 && s.y > sn.y - 70 && s.y < sn.y + 6) {
+      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; s.life = 0; toast("Driven off!");
+    }
+    if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
   }
   for (let i = stones.length - 1; i >= 0; i--) if (stones[i].life <= 0) stones.splice(i, 1);
   for (const b of bits) { b.life -= dt; b.vy += 1400 * dt; b.x += b.vx * dt; b.y += b.vy * dt; }
@@ -525,34 +582,18 @@ function updateStones(dt) {
 // ============================================================================
 // Drawing the world
 // ============================================================================
-function drawBackground(camX) {
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#7fb6e8"); g.addColorStop(0.6, "#cfe6f2"); g.addColorStop(1, "#f3e3c0");
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  // far hills
-  ctx.fillStyle = "#c9b98a";
-  for (let i = -1; i < 6; i++) {
-    const x = i * 420 - (camX * 0.2) % 420;
-    ctx.beginPath(); ctx.ellipse(x + 210, 560, 300, 170, 0, Math.PI, 0); ctx.fill();
-  }
-  // Bethlehem on its hill (far)
-  const bx = 900 - camX * 0.15;
-  ctx.fillStyle = "#b9a678"; ctx.beginPath(); ctx.ellipse(bx, 520, 260, 130, 0, Math.PI, 0); ctx.fill();
-  ctx.fillStyle = "#e6d6b0";
-  for (let k = 0; k < 7; k++) ctx.fillRect(bx - 110 + k * 32, 410 - (k % 3) * 10, 26, 22);
-  // near hills
-  ctx.fillStyle = "#9fb86a";
-  for (let i = -1; i < 6; i++) {
-    const x = i * 360 - (camX * 0.45) % 360;
-    ctx.beginPath(); ctx.ellipse(x + 180, 640, 240, 120, 0, Math.PI, 0); ctx.fill();
-  }
-}
 function drawTiles(camX) {
   const c0 = Math.floor(camX / T), c1 = Math.ceil((camX + W) / T);
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
     const x = c * T - camX, y = r * T;
     if (isSolid(c, r)) {
       const top = !isSolid(c, r - 1);
+      if (solid[r][c] === 2) {   // limestone
+        ctx.fillStyle = "#c9b48c"; ctx.fillRect(x, y, T, T);
+        ctx.fillStyle = "#b39c74"; ctx.fillRect(x, y + T - 4, T, 4); ctx.fillRect(x + ((r % 2) ? 0 : T / 2), y, 3, T);
+        if (top) { ctx.fillStyle = "#e0cfa8"; ctx.fillRect(x, y, T, 5); ctx.fillStyle = "#7fae4a"; if ((c * 7 + r) % 3 === 0) ctx.fillRect(x + 8, y - 4, 10, 6); }
+        continue;
+      }
       ctx.fillStyle = "#8b6a3e"; ctx.fillRect(x, y, T, T);
       ctx.fillStyle = "#77592f"; ctx.fillRect(x + 5, y + 15, 8, 5); ctx.fillRect(x + 21, y + 25, 9, 5);
       if (top) { ctx.fillStyle = "#6fae3e"; ctx.fillRect(x, y, T, 10); ctx.fillStyle = "#86c650"; ctx.fillRect(x, y, T, 4); }
@@ -564,8 +605,9 @@ function drawTiles(camX) {
   // gourds
   for (const g of gourds) if (g.alive) {
     const x = g.x - camX, y = g.y;
-    ctx.fillStyle = "#d9a441"; ctx.beginPath(); ctx.ellipse(x, y - 20, 16, 20, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#5b7a2a"; ctx.fillRect(x - 2, y - 46, 4, 8);
+    if (g.hanging) { ctx.strokeStyle = "#4e7a2a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, y - 50); ctx.stroke(); }
+    if (ITEM.wild_gourds && ITEM.wild_gourds.naturalWidth) drawItem("wild_gourds", x, y, 0.32);
+    else { ctx.fillStyle = "#d9a441"; ctx.beginPath(); ctx.ellipse(x, y - 20, 16, 20, 0, 0, Math.PI * 2); ctx.fill(); }
   }
   for (const b of bits) { ctx.fillStyle = b.color || "#d9a441"; ctx.fillRect(b.x - camX - 3, b.y - 3, 6, 6); }
   ctx.fillStyle = "rgba(60,40,20,0.85)"; ctx.font = "bold 16px sans-serif";
@@ -586,20 +628,35 @@ addEventListener("keydown", e => {
   if (e.code === "F2" || e.code === "KeyM") { e.preventDefault(); startSetup(); }
   if (e.code === "Backquote") debug = !debug;
   if (e.code === "Escape" && setup.active) { setup.active = false; toast("Controller setup cancelled."); }
-  if (e.code === "KeyR") { david.x = spawn.x; david.y = spawn.y; david.vx = david.vy = 0; for (const g of gourds) g.alive = true; }
+  if (e.code === "KeyR") { respawn(); }
+  if (e.code === "KeyH") helpT = helpT > 0 ? 0 : 9999;
+  if (e.code === "Digit1") { location.hash = ""; location.reload(); }
+  if (e.code === "Digit2") { location.hash = "test"; location.reload(); }
 });
 
+let helpT = 12;
 function drawHUD() {
-  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 560, 118);
+  drawHearts();
+  if (helpT <= 0) {
+    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 300, 26);
+    ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
+    ctx.fillText("H = controls   1 = World 1-1   2 = movement test", 18, 28);
+  } else drawHelp();
+  drawToastAndSetup();
+}
+function drawHelp() {
+  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 700, 118);
   ctx.fillStyle = "#fff"; ctx.font = "15px sans-serif";
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
     "X = B: sling (hold to charge, Up to aim up)   Down: crouch / crawl",
     "Down + A while moving: roll   Down next to the lamb: pick up / put down",
-    "Shift = Select: play the harp   R: reset   M: set up the NES controller",
+    "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
   lines.forEach((l, i) => ctx.fillText(l, 20, 32 + i * 21));
+}
+function drawToastAndSetup() {
   if (toastTime > 0) {
     ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.fillRect(W / 2 - 330, H - 70, 660, 44);
     ctx.fillStyle = "#ffe08a"; ctx.font = "18px sans-serif"; ctx.textAlign = "center";
@@ -619,12 +676,272 @@ function drawHUD() {
 }
 
 // ============================================================================
+// World: items, hearts and damage, food, snakes, campfires, the lion
+// ============================================================================
+const ITEM = {};
+for (const name of window.ITEM_LIST || []) {
+  total++;
+  const img = new Image();
+  img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
+  img.src = `../assets/items/${name}.png`;
+  ITEM[name] = img;
+}
+function drawItem(name, x, y, size, alpha = 1) {   // (x, y) = bottom-centre
+  const img = ITEM[name]; if (!img || !img.naturalWidth) return;
+  const w = img.naturalWidth * size, h = img.naturalHeight * size;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(img, Math.round(x - w / 2), Math.round(y - h), w, h); ctx.restore();
+}
+
+const FOOD = {   // heal amount; negative = poison
+  grapes: 1, olives: 1, dates: 1, figs: 1, raisins: 1, bread: 1, cheese: 1, roasted_grain: 1, lentils: 2,
+  fig_cake: 3, honey: 99, poison_berries: -1, wild_gourds: -1,
+};
+const FOOD_TEXT = {
+  bread: "Bread", cheese: "Sheep's cheese", grapes: "Grapes", figs: "Figs", dates: "Dates", honey: "Honey: his eyes brightened (1 Samuel 14:27)",
+  fig_cake: "Fig cake (1 Samuel 25:18)", poison_berries: "Poison berries!", wild_gourds: "Wild gourds: death in the pot! (2 Kings 4:39-40)",
+  lentils: "Lentils", raisins: "Raisins", olives: "Olives", roasted_grain: "Roasted grain",
+};
+
+// hearts
+david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0;
+function hurtDavid(fromX) {
+  const d = david;
+  if (d.inv > 0 || d.deadT > 0) return;
+  d.hearts--; d.inv = TUNE.HURT_INVINCIBLE;
+  d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
+  d.harp = false; d.charging = false; d.throwT = -1;
+  if (d.state !== "carry") setState("jump");
+  if (d.hearts <= 0) { d.deadT = 1.2; toast("Ouch! Back to the campfire..."); }
+}
+function respawn() {
+  const d = david;
+  d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
+  lamb.x = d.x - 50; lamb.y = d.y;
+  if (lion) resetLion();
+}
+
+// food
+function updatePickups(dt) {
+  for (const p of pickups) {
+    if (p.taken) continue;
+    p.t += dt;
+    if (Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10) {
+      p.taken = true;
+      const v = FOOD[p.name] ?? 1;
+      if (v < 0) hurtDavid(p.x); else david.hearts = Math.min(david.maxHearts, david.hearts + v);
+      toast((v < 0 ? "" : "+ ") + (FOOD_TEXT[p.name] || p.name));
+      for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });
+    }
+  }
+}
+function drawPickups(camX) {
+  for (const p of pickups) if (!p.taken) drawItem(p.name, p.x - camX, p.y - 4 + Math.sin(p.t * 3) * 3, TUNE.ITEM_SIZE);
+}
+
+// snakes: "cobra" (hood up, sways, lunges when close) and "viper" (coiled, strikes when close)
+function updateSnakes(dt) {
+  for (const s of snakes) {
+    if (s.gone) { if (s.alpha > 0) { s.alpha -= dt * 1.5; s.y += s.vy * dt; s.vy += 1600 * dt; s.x += s.vx * dt; } continue; }
+    s.t += dt;
+    s.facing = Math.sign(david.x - s.x) || s.facing;
+    const dx = Math.abs(david.x - s.x), sameLevel = Math.abs(david.y - s.y) < 70;
+    if (s.state === "idle" && dx < TUNE.SNAKE_RANGE && sameLevel) { s.state = "strike"; s.t = 0; }
+    if (s.state === "strike" && s.t > 0.7) { s.state = "rest"; s.t = 0; }
+    if (s.state === "rest" && s.t > 0.8) { s.state = "idle"; s.t = 0; }
+    // how far the head reaches right now
+    const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
+    s.reach = 22 + lunge;
+    if (dx < s.reach + BODY_W / 2 && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
+  }
+}
+function drawSnakes(camX) {
+  for (const s of snakes) {
+    if (s.alpha <= 0) continue;
+    const x = s.x - camX;
+    if (s.kind === "cobra") {
+      const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 30 : 0;
+      drawSprite("cobra_hood", frameOf("cobra_hood", s.t), x + s.facing * lunge, s.y, s.facing, 1, s.alpha);
+    } else {
+      const n = SPR.snake_strike.frames;
+      const i = s.state === "strike" ? Math.round(Math.abs(Math.cos(Math.min(1, s.t / 0.7) * Math.PI)) * (n - 1)) : n - 1;
+      drawSprite("snake_strike", i, x, s.y, s.facing, 1, s.alpha);
+    }
+  }
+}
+
+// campfires: checkpoint; playing the harp next to one refills hearts
+function updateFires(dt) {
+  for (const f of fires) {
+    const near = Math.abs(david.x - f.x) < 70 && Math.abs(david.y - f.y) < 40;
+    if (near && !f.lit) { f.lit = true; checkpoint = { x: f.x - 30, y: f.y }; toast("Campfire: checkpoint. Play the harp here (Select) to rest."); }
+    if (near && david.state === "harp" && david.hearts < david.maxHearts) {
+      f.healT = (f.healT || 0) + dt;
+      if (f.healT > 0.8) { f.healT = 0; david.hearts++; }
+    }
+  }
+}
+function drawFires(camX) {
+  for (const f of fires) {
+    drawItem("campfire", f.x - camX, f.y + 4, 0.55);
+    if (f.lit) {   // warm flicker
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      const r = 60 + Math.sin(performance.now() / 90) * 6;
+      const g = ctx.createRadialGradient(f.x - camX, f.y - 34, 4, f.x - camX, f.y - 34, r);
+      g.addColorStop(0, "rgba(255,170,60,0.35)"); g.addColorStop(1, "rgba(255,120,30,0)");
+      ctx.fillStyle = g; ctx.fillRect(f.x - camX - r, f.y - 34 - r, r * 2, r * 2); ctx.restore();
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The Lion (World 1 boss, simple version): prowl -> roar (the warning) -> pounce -> dazed (hit it now)
+// ---------------------------------------------------------------------------
+let lion = lionSpawn ? { x: lionSpawn.x, y: lionSpawn.y } : null;
+function resetLion() {
+  Object.assign(lion, { x: lionSpawn.x, y: lionSpawn.y, vx: 0, vy: 0, onGround: true, state: "sit", t: 0, facing: -1,
+                        hp: TUNE.LION_HP, flash: 0, alpha: 1, told: false, awake: false, pounceCool: 0 });
+}
+if (lion) resetLion();
+function lionBox() {   // body box in world coords
+  const sz = TUNE.SPRITE_SIZE.lion_prowl || 1;
+  const len = 120 * sz, hgt = 70 * sz, head = 26 * sz;   // the sprite's anchor is the lion's head
+  const front = lion.x + lion.facing * head, back = lion.x - lion.facing * (len - head);
+  return { x0: Math.min(front, back), x1: Math.max(front, back), y0: lion.y - hgt, y1: lion.y };
+}
+function setLion(s) { if (lion.state !== s) { lion.state = s; lion.t = 0; } }
+function updateLion(dt) {
+  if (!lion) return;
+  const L = lion; L.t += dt; L.flash = Math.max(0, L.flash - dt);
+  if (L.state === "defeated") { L.alpha = Math.max(0, L.alpha - dt * 0.5); return; }
+  if (!L.awake) {
+    if (david.x > arenaX) { L.awake = true; setLion("intro"); toast("The lion! Watch for its roar, then dodge the pounce. Hit it while it's dazed."); }
+    return;
+  }
+  const dx = david.x - L.x, dist = Math.abs(dx);
+  L.pounceCool = Math.max(0, L.pounceCool - dt);
+  switch (L.state) {
+    case "intro": if (L.t > 1.6) setLion("prowl"); break;
+    case "prowl": case "run": {
+      L.facing = Math.sign(dx) || L.facing;
+      const fast = dist > 520;
+      setLion(fast ? "run" : "prowl");
+      L.vx = L.facing * (fast ? TUNE.LION_RUN : TUNE.LION_PROWL);
+      if (dist < TUNE.LION_POUNCE_RANGE && L.pounceCool <= 0) { L.vx = 0; setLion("tell"); }
+      break;
+    }
+    case "tell":   // the roar: this is the player's warning
+      L.vx = 0; L.facing = Math.sign(dx) || L.facing;
+      if (L.t > TUNE.LION_TELL) {
+        setLion("pounce");
+        L.vx = L.facing * Math.max(320, Math.min(760, dist * 1.5));
+        L.vy = -TUNE.LION_JUMP; L.onGround = false;
+      }
+      break;
+    case "pounce":
+      if (L.onGround && L.t > 0.15) { L.vx = 0; setLion("dazed"); }
+      break;
+    case "dazed":
+      L.vx = 0;
+      if (L.t > TUNE.LION_DAZED) { setLion("prowl"); L.pounceCool = 0.9; }
+      break;
+  }
+  // physics
+  L.vy = Math.min(TUNE.MAX_FALL, (L.vy || 0) + TUNE.GRAVITY * dt);
+  collideBody(L, 100, 60, dt);
+  // touching the lion hurts, unless it's dazed
+  if (L.state !== "dazed" && L.state !== "intro") {
+    const b = lionBox();
+    if (david.x + BODY_W / 2 > b.x0 && david.x - BODY_W / 2 < b.x1 && david.y > b.y0 && david.y - david.h < b.y1) hurtDavid(L.x);
+  }
+}
+function stoneHitsLion(s) {
+  if (!lion || lion.state === "defeated" || !lion.awake) return false;
+  const b = lionBox();
+  if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
+  if (lion.state === "dazed") {
+    lion.hp -= s.charged ? 2 : 1; lion.flash = 0.25;
+    if (lion.hp <= 0) {
+      setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
+    }
+  } else if (!lion.told) { lion.told = true; toast("Stones bounce off! Wait until it's dazed after a pounce."); }
+  for (let k = 0; k < 6; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.4, color: lion.state === "dazed" || lion.state === "defeated" ? "#fff2b0" : "#bbb" });
+  return true;
+}
+function drawLion(camX) {
+  if (!lion || lion.alpha <= 0) return;
+  const L = lion, x = L.x - camX, y = L.y;
+  const map = { sit: "lion_sit_roar", intro: "lion_sit_roar", prowl: "lion_prowl", run: "lion_run", tell: "lion_roar", pounce: "lion_pounce", dazed: "lion_dazed", defeated: "lion_dazed" };
+  const name = map[L.state];
+  let i = frameOf(name, L.t);
+  if (L.state === "pounce") i = Math.min(SPR.lion_pounce.frames - 1, 3 + Math.floor(L.t / 0.07));
+  if (L.state === "tell") i = Math.min(SPR.lion_roar.frames - 1, Math.floor(L.t / TUNE.LION_TELL * 6));
+  drawSprite(name, i, x, y, L.facing, 1, L.alpha);
+  if (L.state === "tell") {   // gold warning glow (the "counsel" tell)
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.25 + 0.2 * Math.sin(L.t * 30);
+    ctx.fillStyle = "#ffcc55"; const b = lionBox(); ctx.fillRect(b.x0 - camX, b.y0, b.x1 - b.x0, b.y1 - b.y0); ctx.restore();
+  }
+  if (L.flash > 0) {
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = L.flash * 3;
+    const b = lionBox(); ctx.fillStyle = "#fff"; ctx.fillRect(b.x0 - camX, b.y0, b.x1 - b.x0, b.y1 - b.y0); ctx.restore();
+  }
+  if (L.awake && L.state !== "defeated") {   // boss health bar
+    ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(W / 2 - 160, 24, 320, 18);
+    ctx.fillStyle = "#e0a030"; ctx.fillRect(W / 2 - 158, 26, 316 * Math.max(0, L.hp) / TUNE.LION_HP, 14);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center"; ctx.fillText("THE LION", W / 2, 20); ctx.textAlign = "left";
+  }
+}
+
+function updateWorld(dt) {
+  david.inv = Math.max(0, david.inv - dt);
+  if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
+  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt);
+}
+
+// background layers (stand-ins until there is real background art)
+function drawBackground(camX) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#86b8e0"); g.addColorStop(0.55, "#d9e7ea"); g.addColorStop(1, "#f4e2bd");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // far ridges
+  ctx.fillStyle = "#cdbf98";
+  for (let i = -1; i < 7; i++) { const x = i * 420 - (camX * 0.12) % 420; ctx.beginPath(); ctx.ellipse(x + 210, 540, 300, 150, 0, Math.PI, 0); ctx.fill(); }
+  // Bethlehem on its hill
+  const bx = 980 - camX * 0.1;
+  ctx.fillStyle = "#bfae82"; ctx.beginPath(); ctx.ellipse(bx, 500, 250, 120, 0, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = "#ead9b2"; for (let k = 0; k < 8; k++) ctx.fillRect(bx - 120 + k * 30, 392 - (k % 3) * 10, 24, 20);
+  // middle hills with faded trees
+  const p2 = camX * 0.35;
+  ctx.fillStyle = "#b5bf82";
+  for (let i = -1; i < 7; i++) { const x = i * 380 - p2 % 380; ctx.beginPath(); ctx.ellipse(x + 190, 610, 260, 120, 0, Math.PI, 0); ctx.fill(); }
+  const trees = ["olive_tree", "date_palm", "fig_tree", "olive_tree"];
+  for (let i = -1; i < 9; i++) {
+    const k = Math.floor((p2 + i * 300) / 300); const x = k * 300 - p2 + 80;
+    drawItem(trees[((k % 4) + 4) % 4], x, 545 + (k % 2) * 12, 0.42, 0.55);
+  }
+  // near hills
+  ctx.fillStyle = "#9fb86a";
+  for (let i = -1; i < 7; i++) { const x = i * 360 - (camX * 0.6) % 360; ctx.beginPath(); ctx.ellipse(x + 180, 650, 240, 110, 0, Math.PI, 0); ctx.fill(); }
+}
+function drawDecor(camX, layer) {
+  for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300) drawItem(d.name, d.x - camX, d.y + 6, d.size * 0.85);
+}
+function drawHearts() {
+  for (let i = 0; i < david.maxHearts; i++) {
+    const x = W - 40 - i * 34, y = 22, full = i < david.hearts;
+    ctx.fillStyle = full ? "#e0383e" : "rgba(0,0,0,0.3)";
+    ctx.beginPath(); ctx.moveTo(x, y + 8); ctx.bezierCurveTo(x, y, x - 13, y, x - 13, y + 8); ctx.bezierCurveTo(x - 13, y + 16, x, y + 22, x, y + 26);
+    ctx.bezierCurveTo(x, y + 22, x + 13, y + 16, x + 13, y + 8); ctx.bezierCurveTo(x + 13, y, x, y, x, y + 8); ctx.fill();
+  }
+}
+
+// ============================================================================
 // Main loop
 // ============================================================================
 let camX = 0, last = performance.now();
 function frame(now) {
   const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
   if (toastTime > 0) toastTime -= dt;
+  if (helpT > 0 && helpT < 9000) helpT -= dt;
   if (loaded < total) {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
@@ -632,15 +949,22 @@ function frame(now) {
   }
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
-  if (!setup.active) { updateDavid(dt); updateLamb(dt); updateStones(dt); }
+  if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const targetCam = Math.max(0, Math.min(LEVEL_W - W, david.x - W * 0.4 + david.facing * 80));
   camX += (targetCam - camX) * Math.min(1, dt * 6);
 
   drawBackground(camX);
+  drawDecor(camX, "back");
   drawTiles(camX);
+  drawFires(camX);
+  drawPickups(camX);
+  drawSnakes(camX);
+  drawLion(camX);
   drawLamb(camX);
-  drawDavid(camX);
+  if (!(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawStones(camX);
+  drawDecor(camX, "front");
+  if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
   if (debug) {
     ctx.strokeStyle = "red"; ctx.strokeRect(david.x - camX - BODY_W / 2, david.y - david.h, BODY_W, david.h);
     ctx.fillStyle = "#fff"; ctx.fillText(`${david.state} vx ${david.vx | 0} vy ${david.vy | 0}`, 20, H - 20);

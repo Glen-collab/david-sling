@@ -248,6 +248,44 @@ A rock hyrax (small, round, brown, like a guinea pig) sitting on a rock. A Nubia
 (wild goat with long curved ridged horns) standing on a ledge. A spur-thighed tortoise.
 ```
 
+## Background layers (for the side-scrolling stages)
+The game draws the background in **3 layers** that slide at different speeds as David runs (far moves slowest), which gives depth. Make each layer as its own image.
+
+**Paste with every layer:** the style block, plus:
+```
+Format: a very wide side-scrolling game background, about 3 times wider than tall
+(for example 3072 x 1024). Seen straight from the side, no perspective tilt. The left and
+right edges must match so the image can repeat seamlessly. No characters, no animals,
+no text.
+```
+
+### Layer 1: far (sky and distant hills). Full picture, no green.
+```
+World 1, the hills of Bethlehem in golden late afternoon. A soft blue sky fading to warm
+gold near the horizon, a few gentle clouds. Along the bottom third: far-away pale tan and
+lavender hills, very soft and hazy. On one hill, small and far away, the walled village of
+Bethlehem with flat-roofed clay houses.
+```
+
+### Layer 2: middle (rolling hills with trees). Sky must be solid green.
+```
+World 1 middle distance: rolling golden-green hills covering the bottom half, dotted with
+olive trees, a few date palms, low dry-stone walls and tiny white sheep far away. Slightly
+hazy and softer than the foreground. EVERYTHING above the hills is solid flat bright green
+(#00FF00), no sky, no clouds.
+```
+
+### Layer 3: near (foreground edge). Everything above it solid green.
+```
+World 1 foreground strip: the bottom quarter only, tall dry grass, wildflowers, small
+rocks and a few thorn bushes, in full bright colour and sharp. EVERYTHING above it is
+solid flat bright green (#00FF00).
+```
+
+**The green is on purpose:** I remove it so the layers stack on top of each other. Swap the description for other worlds: the wilderness ravines and cliffs (World 2), Bethlehem's rooftops (World 3), Gibeah's fortress (World 4), and so on (see the world map prompts above for each setting).
+
+**Night versions** (1-4, the lion's territory): the same three prompts with "moonlit night, deep blue sky, stars, silver moonlight".
+
 ## Big scenes (full-screen art for the ending)
 Use the style block, plus: *"Format: one full-screen game scene, wide 16:9, no characters' faces in close-up."*
 
