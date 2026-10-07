@@ -12,7 +12,10 @@
 </head>
 <body>
 <canvas id="game" width="1280" height="720"></canvas>
-<script src="sprites.js"></script>
-<script src="main.js"></script>
+<script>
+  // Always load fresh copies (so edited sprites and new code show up on a normal reload).
+  window.BUILD = Date.now();
+  document.write('<script src="sprites.js?v=' + BUILD + '"><\/script><script src="main.js?v=' + BUILD + '"><\/script>');
+</script>
 </body>
 </html>

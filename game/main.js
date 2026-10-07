@@ -29,6 +29,8 @@ const TUNE = {
   POWER_SPEED: 1500,      // the Power Sling (A + B together, uses a special stone)
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   LAMB_SPEED: 380,
+  HORNET_RANGE: 300,      // how close before a hornet dives at David
+  HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
   HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
@@ -53,6 +55,7 @@ const TUNE = {
     david_crawl: 0.92,
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
+    bee_fly: 0.6, hornet_fly: 1.0,
   },
 };
 
@@ -75,7 +78,7 @@ for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
   const img = new Image();
   img.onload = () => { loaded++; };
   img.onerror = () => { loaded++; console.warn("missing sprite", d.src); };
-  img.src = d.src;
+  img.src = d.src + "?v=" + (window.BUILD || 0);
   SPR[name] = { ...d, img };
 }
 
@@ -213,6 +216,10 @@ const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r +
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
 // decoration: an item image standing on row r (its bottom on the top of row r+1); layer "back" or "front"
 const deco = (name, c, r, size = 1, layer = "back", surprise = null) => decor.push({ name, x: c * T + T / 2, y: (r + 1) * T, size, layer, surprise, shaken: false, shakeT: 0 });
+const bees = [], hornets = [];
+const bee = (c, k) => bees.push({ hx: c * T + T / 2, k, t: k * 1.6, x: 0, y: 0, facing: 1, gone: false, alpha: 1, vx: 0, vy: 0 });
+const hornet = (c, r) => hornets.push({ hx: c * T + T / 2, hy: (r + 1) * T, x: c * T + T / 2, y: (r + 1) * T, state: "hover", t: Math.random() * 3, facing: -1, gone: false, alpha: 1, vx: 0, vy: 0 });
+let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
 const olive = (x, y, kind) => olives.push({ x, y, kind: kind || (Math.random() < 0.5 ? "green" : "purple"), taken: false, t: Math.random() * 6, vy: 0, falling: false, placed: true });
 const oliveRow = (c0, r, n, step = 1) => { for (let k = 0; k < n; k++) olive(c0 * T + T / 2 + k * step * T, (r + 1) * T - 14); };
@@ -260,6 +267,8 @@ if (LEVEL_NAME === "test") {
   plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
   snake("viper", 93);
   deco("beehive_tree", 99, 16, 1.2); food("honey", 101, 16);
+  for (let k = 0; k < 4; k++) bee(99, k);              // honeybees: harmless. Leave them be and the honey is yours.
+  hornet(108, 11); hornet(131, 10);                     // hornets: they dive at you. Sling them.
   food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
   deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
   rock(117, 14, 2, 3);
@@ -620,6 +629,7 @@ function updateStones(dt) {
     for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - sn.x) < 34 && s.y > sn.y - 70 && s.y < sn.y + 6) {
       sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
     }
+    if (s.life > 0 && stoneHitsBugs(s)) s.life = 0;
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
     if (s.life > 0 && !s.power && stoneHitsTree(s)) s.life = 0;
   }
@@ -739,7 +749,7 @@ for (const name of window.ITEM_LIST || []) {
   total++;
   const img = new Image();
   img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
-  img.src = `../assets/items/${name}.png`;
+  img.src = `../assets/items/${name}.png?v=${window.BUILD || 0}`;
   ITEM[name] = img;
 }
 function drawItem(name, x, y, size, alpha = 1) {   // (x, y) = bottom-centre
@@ -779,6 +789,9 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   for (const t of decor) { t.shaken = false; t.shakeT = 0; }
   for (const g of gourds) g.alive = true;
   for (const f of fires) f.lit = false;
+  for (const b of bees) Object.assign(b, { gone: false, alpha: 1 });
+  for (const h of hornets) Object.assign(h, { gone: false, alpha: 1, x: h.hx, y: h.hy, state: "hover", t: 0 });
+  beesAngry = false;
 }
 function respawn() {
   const d = david;
@@ -1039,6 +1052,7 @@ function shakeTree(t) {
   t.shaken = true; t.shakeT = 0.6;
   const b = canopy(t), cx = t.x, cy = (b.y0 + b.y1) / 2;
   const drop = TREE_DROPS[t.name];
+  if (drop === "honey" && beesAngry) { toast("No honey: you hit the bees."); return; }
   if (drop === "olives") for (let k = 0; k < 8; k++) olives.push({ x: cx + (Math.random() - 0.5) * 60, y: cy, vx: (Math.random() - 0.5) * 260, vy: -200 - Math.random() * 200, falling: true, kind: Math.random() < 0.5 ? "green" : "purple", taken: false, t: 0, placed: false });
   else for (let k = 0; k < (drop === "honey" ? 1 : 2); k++) pickups.push({ name: drop, x: cx + (k ? 30 : -30), y: cy, vx: (k ? 1 : -1) * 120, vy: -250, falling: true, t: 0, taken: false, dropped: true });
   if (t.surprise === "golden_olive") olives.push({ x: cx, y: cy, vx: 60, vy: -380, falling: true, kind: "golden", taken: false, t: 0, placed: false });
@@ -1068,7 +1082,60 @@ function stoneHitsTree(s) {
   return false;
 }
 
+// honeybees circle the hive; hornets hover, then dive at David
+function updateBees(dt) {
+  for (const b of bees) {
+    if (b.gone) { if (b.alpha > 0) { b.alpha -= dt * 1.5; b.vy += 900 * dt; b.x += b.vx * dt; b.y += b.vy * dt; } continue; }
+    b.t += dt;
+    const tree = decor.find(d => d.name === "beehive_tree"); const c = tree && canopy(tree);
+    const cx = c ? c.x1 - 18 : b.hx, cy = c ? (c.y0 + c.y1) / 2 + 30 : 380;   // around the hive hanging on the right
+    const nx = cx + Math.cos(b.t * 1.7 + b.k) * (34 + b.k * 9), ny = cy + Math.sin(b.t * 2.3 + b.k * 2) * (22 + b.k * 5);
+    b.facing = nx > b.x ? 1 : -1; b.x = nx; b.y = ny;
+  }
+}
+function updateHornets(dt) {
+  for (const h of hornets) {
+    if (h.gone) { if (h.alpha > 0) { h.alpha -= dt * 1.5; h.vy += 900 * dt; h.x += h.vx * dt; h.y += h.vy * dt; } continue; }
+    h.t += dt;
+    const dx = david.x - h.x, dy = (david.y - 60) - h.y, dist = Math.hypot(dx, dy);
+    if (h.state === "hover") {
+      h.x += ((h.hx + Math.sin(h.t * 1.3) * 50) - h.x) * Math.min(1, dt * 2);
+      h.y += ((h.hy + Math.sin(h.t * 2.1) * 18) - h.y) * Math.min(1, dt * 2);
+      h.facing = dx > 0 ? 1 : -1;
+      if (dist < TUNE.HORNET_RANGE && h.t > 1.2) { h.state = "dive"; h.t = 0; h.vx = dx / dist * TUNE.HORNET_DIVE; h.vy = dy / dist * TUNE.HORNET_DIVE; }
+    } else if (h.state === "dive") {
+      h.x += h.vx * dt; h.y += h.vy * dt; h.facing = h.vx > 0 ? 1 : -1;
+      if (h.t > 0.9) { h.state = "back"; h.t = 0; }
+    } else {   // back to its spot
+      h.x += (h.hx - h.x) * Math.min(1, dt * 1.8); h.y += (h.hy - h.y) * Math.min(1, dt * 1.8);
+      if (h.t > 1.2) { h.state = "hover"; h.t = 0; }
+    }
+    if (Math.abs(h.x - david.x) < 26 && h.y > david.y - david.h - 10 && h.y < david.y) hurtDavid(h.x);
+  }
+}
+function stoneHitsBugs(s) {
+  for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < 26) {
+    h.gone = true; h.vx = Math.sign(s.vx) * 160; h.vy = -260; toast("Hornet driven off!"); return !s.power;
+  }
+  for (const b of bees) if (!b.gone && Math.hypot(s.x - b.x, s.y - b.y) < 20) {
+    b.gone = true; b.vx = Math.sign(s.vx) * 120; b.vy = -200;
+    if (!beesAngry) {
+      beesAngry = true;
+      for (const p of pickups) if (p.name === "honey") p.taken = true;   // the honey is gone
+      toast("You hit a honeybee! Bees are harmless... and now the honey is gone.");
+    }
+    return !s.power;
+  }
+  return false;
+}
+function drawBugs(camX) {
+  if (!SPR.bee_fly || !SPR.hornet_fly) return;
+  for (const b of bees) if (b.alpha > 0) drawSprite("bee_fly", frameOf("bee_fly", b.t * 2), b.x - camX, b.y, b.facing, 1, b.alpha);
+  for (const h of hornets) if (h.alpha > 0) drawSprite("hornet_fly", frameOf("hornet_fly", h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.facing, 1, h.alpha);
+}
+
 function updateWorld(dt) {
+  updateBees(dt); updateHornets(dt);
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
@@ -1160,6 +1227,7 @@ function frame(now) {
   drawOlives(camX);
   drawSpecials(camX);
   drawSnakes(camX);
+  drawBugs(camX);
   drawLion(camX);
   drawLamb(camX);
   if (!(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);

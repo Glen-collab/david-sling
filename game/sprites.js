@@ -60,6 +60,18 @@ window.SPRITE_DATA = {
   "ay": 155,
   "align": "feet"
  },
+ "bee_fly": {
+  "src": "../assets/sprites/bee_fly.png",
+  "frames": 8,
+  "w": 103,
+  "h": 82,
+  "ms": 89,
+  "loop": true,
+  "pingpong": false,
+  "ax": 52,
+  "ay": 41,
+  "align": "center"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,
@@ -347,6 +359,18 @@ window.SPRITE_DATA = {
   "ax": 79,
   "ay": 244,
   "align": "feet"
+ },
+ "hornet_fly": {
+  "src": "../assets/sprites/hornet_fly.png",
+  "frames": 8,
+  "w": 118,
+  "h": 84,
+  "ms": 214,
+  "loop": true,
+  "pingpong": false,
+  "ax": 59,
+  "ay": 43,
+  "align": "center"
  },
  "lamb_run": {
   "src": "../assets/sprites/lamb_run.png",
