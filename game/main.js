@@ -34,7 +34,7 @@ const TUNE = {
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
   HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
-  HARP_SIT_SHRINK: 0.78,  // the sit-down sheet shrinks from full size to this, frame by frame (the clip zoomed in)
+  HARP_SIT_SHRINK: 0.70,  // the sit-down sheet shrinks from full size to this, frame by frame (the clip zoomed in)
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
   CARRY_JUMP2: 0.95,      // second jump while carrying the lamb (1 = as strong as the flip)
   TILE: 36,
@@ -57,7 +57,7 @@ const TUNE = {
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
     bee_fly: 0.6, hornet_fly: 1.0,
-    david_play_harp: 0.77,       // the harp clip zoomed in as he sat down
+    david_play_harp: 0.69,       // the harp clip zoomed in as he sat down
   },
 };
 
