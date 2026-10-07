@@ -423,8 +423,8 @@ function updateDavid(dt) {
       ((pressed("b") && held("a")) || (pressed("a") && held("b")))) {
     d.specialStones--;
     d.throwT = TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
-    const aimUp = held("up");
-    const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : 0;
+    const aimUp = held("up"), aimDown = held("down") && !d.onGround;   // Down only aims while in the air (on the ground it's crouch)
+    const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
     stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
                   charged: true, power: true, life: 1.6, trail: [] });
     toast(`Power Sling! (${d.specialStones} special stone${d.specialStones === 1 ? "" : "s"} left)`);
@@ -441,7 +441,8 @@ function updateDavid(dt) {
       const full = Math.min(1, d.charge / TUNE.CHARGE_TIME);
       const sp = full >= 1 ? TUNE.STONE_SPEED_CHARGED : TUNE.STONE_SPEED;
       const aimUp = held("up"), straightUp = aimUp && !(held("left") || held("right"));
-      const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : -0.12;
+      const aimDown = held("down") && !d.onGround;   // Down + B in the air: throw diagonally down
+      const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
     }
@@ -721,7 +722,7 @@ function drawHelp() {
   ctx.fillStyle = "#fff"; ctx.font = "15px sans-serif";
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
-    "X = B: sling (hold to charge, hold Up to aim up)   A + B together: Power Sling (uses a special stone)",
+    "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
     "Down + A while moving: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
     "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),

@@ -392,7 +392,7 @@ NES layout: **D-pad, A, B, Select, Start.**
 |---|---|---|
 | ← → | Walk / run (run builds up with momentum, Mario style) | 1-1 |
 | A | Jump (hold for higher) | 1-1 |
-| B | Sling throw: forward, **↑ = up, ↗ = diagonal** | 1-1 |
+| B | Sling throw: forward, **↑ = up, ↗ = diagonal up, ↓ in the air = diagonal down** | 1-1 |
 | ↓ + A while running | **Roll:** short dodge, passes under low gaps, brief no-damage window | 1-3 |
 | Select | **Play the harp:** lost sheep within hearing come to David; at campfires, rest and refill hearts (see Thread 2) | 1-2 |
 | Hold B, release | **Charged sling** | World 2 |
