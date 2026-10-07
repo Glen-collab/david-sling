@@ -58,7 +58,7 @@ const TUNE = {
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
     bee_fly: 0.6, hornet_fly: 1.0,
-    david_play_harp: 0.69,       // the harp clip zoomed in as he sat down
+    david_play_harp: 0.66,       // the harp clip zoomed in as he sat down
   },
 };
 
