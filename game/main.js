@@ -22,10 +22,11 @@ const TUNE = {
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
-  STONE_SPEED: 780,       // tap throw
+  STONE_SPEED: 820,       // tap throw
   STONE_SPEED_CHARGED: 1250,
   CHARGE_TIME: 0.6,       // seconds holding B for a full charge
-  STONE_GRAVITY: 1300,
+  STONE_GRAVITY: 900,     // lower = stones fly higher and farther
+  POWER_SPEED: 1500,      // the Power Sling (A + B together, uses a special stone)
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   LAMB_SPEED: 380,
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
@@ -210,6 +211,8 @@ const deco = (name, c, r, size = 1, layer = "back") => decor.push({ name, x: c *
 const food = (name, c, r) => pickups.push({ name, x: c * T + T / 2, y: (r + 1) * T, t: Math.random() * 6, taken: false });
 const snake = (kind, c) => snakes.push({ kind, x: c * T + T / 2, y: GR * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
 const campfire = (c, r = GR - 1) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false });
+const specials = [];   // hidden special stones (like Mario's dragon coins); saved for the Power Sling
+const special = (c, r) => specials.push({ x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
 
 if (LEVEL_NAME === "test") {
   ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
@@ -229,6 +232,9 @@ if (LEVEL_NAME === "test") {
   deco("olive_tree", 4, 16, 1.0); deco("date_palm", 15, 16, 1.1);
   label(2, 6, "World 1-1 sample. Eat food to heal, but look before you eat.");
   food("grapes", 10, 16); food("bread", 21, 16);
+  special(16, 9);                                       // above the date palm: jump + flip
+  special(87, 6);                                       // high above the fig platform: flip from the platform
+  special(138, 16);                                     // tucked behind the crops
   rock(26, 15, 3, 2); rock(30, 13, 3, 4);
   gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
   snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
@@ -276,11 +282,12 @@ function animDone(name, t, msOverride) {
   const s = SPR[name]; return t * 1000 >= (msOverride || s.ms) * s.frames;
 }
 // draw frame i of a sheet so its anchor sits at (x, y) on screen
-function drawSprite(name, i, x, y, facing, extraScale = 1, alpha = 1) {
+function drawSprite(name, i, x, y, facing, extraScale = 1, alpha = 1, filter = "") {
   const s = SPR[name]; if (!s || !s.img.complete || !s.img.naturalWidth) return;
   const sc = SCALE * extraScale * (TUNE.SPRITE_SIZE[name] || 1);
   ctx.save();
   ctx.globalAlpha = alpha;
+  if (filter) ctx.filter = filter;
   ctx.translate(Math.round(x), Math.round(y));
   ctx.scale(facing * sc, sc);
   ctx.drawImage(s.img, i * s.w, 0, s.w, s.h, -s.ax, -s.ay, s.w, s.h);
@@ -384,6 +391,18 @@ function updateDavid(dt) {
   }
 
   // --- sling (B): tap to throw, hold to charge
+  // A + B together (either order, within a moment of each other) = Power Sling
+  const justStarted = d.throwT < 0 || (d.charging && d.charge < 0.15);
+  if (!d.carrying && !d.harp && !busy && d.specialStones > 0 && justStarted &&
+      ((pressed("b") && held("a")) || (pressed("a") && held("b")))) {
+    d.specialStones--;
+    d.throwT = TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
+    const aimUp = held("up");
+    const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : 0;
+    stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
+                  charged: true, power: true, life: 1.6, trail: [] });
+    toast(`Power Sling! (${d.specialStones} special stone${d.specialStones === 1 ? "" : "s"} left)`);
+  }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) d.charging = false; }
@@ -395,9 +414,9 @@ function updateDavid(dt) {
       d.thrown = true;
       const full = Math.min(1, d.charge / TUNE.CHARGE_TIME);
       const sp = full >= 1 ? TUNE.STONE_SPEED_CHARGED : TUNE.STONE_SPEED;
-      const aimUp = held("up");
-      const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.12) : -0.12;
-      stones.push({ x: d.x + d.facing * 30, y: d.y - 78, vx: Math.cos(ang) * sp * d.facing + d.vx * 0.3,
+      const aimUp = held("up"), straightUp = aimUp && !(held("left") || held("right"));
+      const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : -0.12;
+      stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
     }
     if (d.throwT >= TUNE.THROW_TIME) d.throwT = -1;
@@ -562,15 +581,16 @@ function drawLamb(camX) {
 const bits = [];
 function updateStones(dt) {
   for (const s of stones) {
-    s.life -= dt; s.vy += TUNE.STONE_GRAVITY * dt * (s.charged ? 0.45 : 1);
+    s.life -= dt; s.vy += TUNE.STONE_GRAVITY * dt * (s.power ? 0.08 : s.charged ? 0.45 : 1);
     s.x += s.vx * dt; s.y += s.vy * dt;
+    if (s.power) { s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift(); }
     if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) s.life = 0;
-    for (const g of gourds) if (g.alive && Math.hypot(s.x - g.x, s.y - (g.y - 24)) < 28) {
-      g.alive = false; s.life = 0;
+    for (const g of gourds) if (g.alive && Math.hypot(s.x - g.x, s.y - (g.y - 24)) < 30) {
+      g.alive = false; if (!s.power) s.life = 0;
       for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
     }
     for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - sn.x) < 34 && s.y > sn.y - 70 && s.y < sn.y + 6) {
-      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; s.life = 0; toast("Driven off!");
+      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
     }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
   }
@@ -614,7 +634,14 @@ function drawTiles(camX) {
   for (const l of labels) ctx.fillText(l.text, l.x - camX, l.y);
 }
 function drawStones(camX) {
+  for (const s of stones) if (s.power) {
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    s.trail.forEach(([tx, ty], k) => { ctx.fillStyle = `rgba(255,220,120,${(k + 1) / s.trail.length * 0.5})`; ctx.beginPath(); ctx.arc(tx - camX, ty, 4 + k, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = "rgba(255,240,180,0.9)"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 16, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    ctx.fillStyle = "#fffbea"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 8, 0, Math.PI * 2); ctx.fill();
+  }
   for (const s of stones) {
+    if (s.power) continue;
     if (s.charged) {
       ctx.save(); ctx.globalCompositeOperation = "lighter";
       ctx.fillStyle = "rgba(255,200,80,0.45)"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 12, 0, Math.PI * 2); ctx.fill(); ctx.restore();
@@ -636,7 +663,7 @@ addEventListener("keydown", e => {
 
 let helpT = 12;
 function drawHUD() {
-  drawHearts();
+  drawHearts(); drawSpecialCount();
   if (helpT <= 0) {
     ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 300, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
@@ -645,11 +672,11 @@ function drawHUD() {
   drawToastAndSetup();
 }
 function drawHelp() {
-  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 700, 118);
+  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 760, 118);
   ctx.fillStyle = "#fff"; ctx.font = "15px sans-serif";
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
-    "X = B: sling (hold to charge, Up to aim up)   Down: crouch / crawl",
+    "X = B: sling (hold to charge, hold Up to aim up)   A + B together: Power Sling (uses a special stone)",
     "Down + A while moving: roll   Down next to the lamb: pick up / put down",
     "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
@@ -703,7 +730,7 @@ const FOOD_TEXT = {
 };
 
 // hearts
-david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0;
+david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
 function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0) return;
@@ -804,7 +831,7 @@ function resetLion() {
 if (lion) resetLion();
 function lionBox() {   // body box in world coords
   const sz = TUNE.SPRITE_SIZE.lion_prowl || 1;
-  const len = 120 * sz, hgt = 70 * sz, head = 26 * sz;   // the sprite's anchor is the lion's head
+  const len = 120 * sz, hgt = 88 * sz, head = 26 * sz;   // the sprite's anchor is the lion's head
   const front = lion.x + lion.facing * head, back = lion.x - lion.facing * (len - head);
   return { x0: Math.min(front, back), x1: Math.max(front, back), y0: lion.y - hgt, y1: lion.y };
 }
@@ -814,7 +841,7 @@ function updateLion(dt) {
   const L = lion; L.t += dt; L.flash = Math.max(0, L.flash - dt);
   if (L.state === "defeated") { L.alpha = Math.max(0, L.alpha - dt * 0.5); return; }
   if (!L.awake) {
-    if (david.x > arenaX) { L.awake = true; setLion("intro"); toast("The lion! Watch for its roar, then dodge the pounce. Hit it while it's dazed."); }
+    if (david.x > arenaX) { L.awake = true; setLion("intro"); helpT = 0; toast("The lion! Watch for its roar, then dodge the pounce. Hit it while it's dazed."); }
     return;
   }
   const dx = david.x - L.x, dist = Math.abs(dx);
@@ -858,8 +885,12 @@ function stoneHitsLion(s) {
   if (!lion || lion.state === "defeated" || !lion.awake) return false;
   const b = lionBox();
   if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
-  if (lion.state === "dazed") {
-    lion.hp -= s.charged ? 2 : 1; lion.flash = 0.25;
+  if (s.power && lion.state !== "dazed") {   // the Power Sling knocks it dazed and hurts it
+    lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed");
+    toast("Power Sling! The lion is dazed. Hit it now!");
+    if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)"); }
+  } else if (lion.state === "dazed") {
+    lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25;
     if (lion.hp <= 0) {
       setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
     }
@@ -875,15 +906,13 @@ function drawLion(camX) {
   let i = frameOf(name, L.t);
   if (L.state === "pounce") i = Math.min(SPR.lion_pounce.frames - 1, 3 + Math.floor(L.t / 0.07));
   if (L.state === "tell") i = Math.min(SPR.lion_roar.frames - 1, Math.floor(L.t / TUNE.LION_TELL * 6));
-  drawSprite(name, i, x, y, L.facing, 1, L.alpha);
-  if (L.state === "tell") {   // gold warning glow (the "counsel" tell)
-    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.25 + 0.2 * Math.sin(L.t * 30);
-    ctx.fillStyle = "#ffcc55"; const b = lionBox(); ctx.fillRect(b.x0 - camX, b.y0, b.x1 - b.x0, b.y1 - b.y0); ctx.restore();
+  let filter = "";
+  if (L.state === "tell") {   // gold warning glow around the lion's outline (the "counsel" tell)
+    const a = (0.55 + 0.45 * Math.sin(L.t * 24)).toFixed(2);
+    filter = `drop-shadow(0 0 10px rgba(255,200,60,${a})) drop-shadow(0 0 4px rgba(255,230,140,${a}))`;
   }
-  if (L.flash > 0) {
-    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = L.flash * 3;
-    const b = lionBox(); ctx.fillStyle = "#fff"; ctx.fillRect(b.x0 - camX, b.y0, b.x1 - b.x0, b.y1 - b.y0); ctx.restore();
-  }
+  if (L.flash > 0) filter = "brightness(2.2)";
+  drawSprite(name, i, x, y, L.facing, 1, L.alpha, filter);
   if (L.awake && L.state !== "defeated") {   // boss health bar
     ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(W / 2 - 160, 24, 320, 18);
     ctx.fillStyle = "#e0a030"; ctx.fillRect(W / 2 - 158, 26, 316 * Math.max(0, L.hp) / TUNE.LION_HP, 14);
@@ -891,7 +920,33 @@ function drawLion(camX) {
   }
 }
 
+function updateSpecials(dt) {
+  for (const sp of specials) {
+    if (sp.taken) continue;
+    sp.t += dt;
+    if (Math.abs(sp.x - david.x) < 34 && david.y > sp.y - 70 && david.y - david.h < sp.y + 10) {
+      sp.taken = true; david.specialStones++;
+      const found = specials.filter(q => q.taken).length;
+      toast(`Special stone! (${found} of ${specials.length} in this stage)  Save it for later, or A + B for a Power Sling.`);
+      for (let k = 0; k < 16; k++) bits.push({ x: sp.x, y: sp.y - 20, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 480, life: 0.7, color: "#fff2b0" });
+    }
+  }
+}
+function drawSpecialStone(x, y, r, glow) {
+  if (glow) {
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x, y, 2, x, y, r * 2.6); g.addColorStop(0, "rgba(255,225,130,0.75)"); g.addColorStop(1, "rgba(255,200,80,0)");
+    ctx.fillStyle = g; ctx.fillRect(x - r * 3, y - r * 3, r * 6, r * 6); ctx.restore();
+  }
+  ctx.fillStyle = "#e9e1cf"; ctx.beginPath(); ctx.ellipse(x, y, r * 1.15, r * 0.9, -0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#c7bca4"; ctx.beginPath(); ctx.ellipse(x + r * 0.25, y + r * 0.25, r * 0.8, r * 0.5, -0.3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#fffdf6"; ctx.beginPath(); ctx.ellipse(x - r * 0.4, y - r * 0.35, r * 0.35, r * 0.2, -0.3, 0, Math.PI * 2); ctx.fill();
+}
+function drawSpecials(camX) {
+  for (const sp of specials) if (!sp.taken) drawSpecialStone(sp.x - camX, sp.y - 26 + Math.sin(sp.t * 3) * 4, 11, true);
+}
 function updateWorld(dt) {
+  updateSpecials(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
   updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt);
@@ -924,6 +979,12 @@ function drawBackground(camX) {
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300) drawItem(d.name, d.x - camX, d.y + 6, d.size * 0.85);
+}
+function drawSpecialCount() {
+  if (!specials.length && !david.specialStones) return;
+  drawSpecialStone(W - 78, 72, 10, david.specialStones > 0);
+  ctx.fillStyle = "#fff"; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 3; ctx.font = "bold 20px sans-serif";
+  ctx.strokeText(`× ${david.specialStones}`, W - 60, 79); ctx.fillText(`× ${david.specialStones}`, W - 60, 79);
 }
 function drawHearts() {
   for (let i = 0; i < david.maxHearts; i++) {
@@ -958,6 +1019,7 @@ function frame(now) {
   drawTiles(camX);
   drawFires(camX);
   drawPickups(camX);
+  drawSpecials(camX);
   drawSnakes(camX);
   drawLion(camX);
   drawLamb(camX);

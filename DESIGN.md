@@ -344,6 +344,21 @@ The lamb never has to fight. It **helps:**
 
 ---
 
+## 3f. Special stones and the Power Sling *(Glen's idea, 2026-10-07)*
+
+Like Super Mario World's dragon coins: **3 hidden special stones in every stage**, in hard-to-reach or out-of-the-way spots. David keeps them in his shepherd's bag.
+
+- **A + B together = Power Sling.** Uses one special stone. It flies straight and fast with a glowing trail, goes through snakes, wasps and gourds, and **knocks a boss dazed even when it isn't** (on the Lion: dazes it and does 2 damage; 3 if it was already dazed).
+- **Spend or save.** David knows these stones will matter against Goliath, so every one you spend early is one you don't have later. The count carries from stage to stage.
+- **Bible tie-in for the Journal:** Samuel set up a stone and named it **Ebenezer**, "Thus far the LORD has helped us" (1 Samuel 7:12). Each special stone is a reminder of a time God helped. (Working name for them: *Ebenezer stones*.)
+
+**How saved stones matter against Goliath (to decide):**
+1. **Courage:** each saved stone = 1 extra heart for the Goliath fight. David remembers each time God helped him.
+2. **Focus:** each saved stone makes Goliath's one opening (phase 3) last a little longer.
+3. Both, but smaller.
+
+The five smooth stones from the stream (World 7) stay separate. They're the story's stones, and the final blow is always one of them.
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -356,6 +371,7 @@ NES layout: **D-pad, A, B, Select, Start.**
 | ↓ + A while running | **Roll:** short dodge, passes under low gaps, brief no-damage window | 1-3 |
 | Select | **Play the harp:** lost sheep within hearing come to David; at campfires, rest and refill hearts (see Thread 2) | 1-2 |
 | Hold B, release | **Charged sling** | World 2 |
+| A + B together | **Power Sling** (uses a special stone, §3f) | World 1 |
 | A at the top of a jump, after a roll | **Aerial flip** | World 3 |
 | A in mid-air | **Double jump** | World 5 |
 
