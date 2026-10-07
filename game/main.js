@@ -29,6 +29,9 @@ const TUNE = {
   POWER_SPEED: 1500,      // the Power Sling (A + B together, uses a special stone)
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   LAMB_SPEED: 380,
+  HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
+  HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
+  HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
   CARRY_JUMP2: 0.95,      // second jump while carrying the lamb (1 = as strong as the flip)
   TILE: 36,
@@ -364,13 +367,14 @@ function updateDavid(dt) {
   d.t += dt;
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
-  const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown";
+  const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup";
 
   // --- harp (Select): kneel and play while standing still
   if (pressed("select") && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
-    if (d.harp) { d.harp = false; setState("idle"); } else { d.harp = true; setState("kneel"); }
+    if (d.harp) { d.harp = false; setState("standup"); } else { d.harp = true; setState("kneel"); }
   }
-  if (d.harp && (dir !== 0 || pressed("a") || pressed("b"))) { d.harp = false; setState("idle"); }
+  // Up, any direction, A or B: put the harp away and stand up
+  if (d.harp && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }
 
   // --- pick up / put down the lamb (Down, standing still, next to it)
   if (pressed("down") && d.onGround && !busy && !d.harp && Math.abs(d.vx) < 40) {
@@ -449,6 +453,9 @@ function updateDavid(dt) {
       else { d.carrying = false; lamb.carried = false; lamb.x = d.x + d.facing * 40; lamb.y = d.y; lamb.vy = 0; }
       setState("idle");
     }
+  } else if (d.state === "standup") {
+    d.vx = 0;
+    if (d.t > TUNE.HARP_STANDUP) setState("idle");
   } else if (d.harp) {
     d.vx = 0;
   } else {
@@ -478,7 +485,7 @@ function updateDavid(dt) {
   collideBody(d, BODY_W, d.h, dt);
 
   // --- choose the animation
-  if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp") {
+  if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp" || d.state === "standup") {
     if (d.state === "kneel" && animDone("david_sit_harp", d.t, 95)) setState("harp");
     return;
   }
@@ -540,7 +547,18 @@ function drawDavid(camX) {
     case "crouch": drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing); break;
     case "crawl": drawSprite("david_crawl", frameOf("david_crawl", t), x, y, d.facing); break;
     case "kneel": drawSprite("david_sit_harp", frameOf("david_sit_harp", t, 95), x, y, d.facing); break;
-    case "harp": drawSprite("david_play_harp", frameOf("david_play_harp", t), x, y, d.facing); break;
+    case "harp": {
+      // frames 1-8 once (settling in), then loop the calm strumming frames 9-12 back and forth
+      const settle = 8 * TUNE.HARP_SETTLE_MS / 1000;
+      let i;
+      if (t < settle) i = Math.floor(t * 1000 / TUNE.HARP_SETTLE_MS);
+      else { const k = Math.floor((t - settle) * 1000 / TUNE.HARP_LOOP_MS) % 6; i = 8 + (k < 4 ? k : 6 - k); }
+      drawSprite("david_play_harp", i, x, y, d.facing); break;
+    }
+    case "standup": {   // the sit-down played backwards: harp back in the satchel, stand up
+      const n = SPR.david_sit_harp.frames;
+      drawSprite("david_sit_harp", Math.max(0, n - 1 - Math.floor(t / TUNE.HARP_STANDUP * n)), x, y, d.facing); break;
+    }
     case "pickup": drawSprite("david_pickup_lamb", Math.min(15, 5 + Math.floor(d.t / 0.6 * 11)), x, y, d.facing); break;
     case "putdown": drawSprite("david_pickup_lamb", Math.min(5, Math.floor(d.t / 0.4 * 6)), x, y, d.facing); break;
     case "carry": {
