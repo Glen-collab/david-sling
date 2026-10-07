@@ -311,6 +311,14 @@ Every frame the same size, feet on the same ground line, evenly spaced in one ro
 No frame numbers, no titles.
 ```
 
+## Items still needed (for the GPT asset sheet)
+Use the same white-background asset-sheet style as the food & nature sheet:
+- **Pomegranate tree** and **a pomegranate** (one of the seven foods of the land, Deuteronomy 8:8)
+- **Barley** (a sheaf, and a few loose heads)
+- **A single olive**, green and purple versions (the "coins"), and a **golden olive** (rare, worth an extra life)
+- **A small clay oil flask / juglet** (the on-screen flask that fills with olives)
+- **Honeybees** and **wasps**, a few flying poses each (or Grok clips, flying in place on green)
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*

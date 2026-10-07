@@ -362,6 +362,28 @@ Like Super Mario World's dragon coins: **3 hidden special stones in every stage*
 
 The five smooth stones from the stream (World 7) stay separate. They're the story's stones, and the final blow is always one of them.
 
+## 3g. Olives, the oil flask, lives, and trees that drop food *(decided 2026-10-07)*
+
+### Olives = the coins
+- **Olives are scattered along the paths** like Mario's coins (green and purple). Lots in every stage.
+- They fill an **oil flask** on screen. **100 olives = a full flask = 1 extra life.**
+- Oil comes from olives (grapes make wine and raisins). Oil runs through the whole story: Samuel's horn of oil (World 3) and oiling the sheep's heads against flies (Psalm 23:5, §3d). **Oiling a fly-bothered sheep uses a little from the flask**, so collecting olives keeps David ready to care for the flock.
+- Grain stays a story item (the roasted grain for the brothers, World 5), not a second coin.
+
+### Trees drop food (like Mario's hidden blocks)
+- **Jump up into a tree's branches, or sling a stone into them**, and the tree shakes and drops its fruit. Each tree shakes once per visit.
+- **Each kind of tree always drops the same thing:** olive tree = a shower of olives; fig tree = figs; date palm = dates; grapevine = grapes; beehive tree = honey (only if you left the bees alone).
+- **Some trees hide a surprise:** a special stone (§3f) or a **golden olive** (worth a full flask = 1 extra life). Players learn which tree had what.
+- **Teaching:** kids learn to tell a fig tree from an olive tree from a date palm. Each tree gets a Field Guide card.
+
+### The seven foods of the land (Journal page)
+*"A land with wheat and barley, vines and fig trees and pomegranates, a land of olive oil and honey"* (**Deuteronomy 8:8**). A Journal page fills in as you find each one: wheat, barley, grapes, figs, pomegranates, olive oil, honey. **Art still needed: pomegranates (and a pomegranate tree) and barley.**
+
+### Lives: Mario-style, but kind
+- **Start with 5 lives.** Losing all your hearts costs a life and puts you back at the last campfire.
+- **Out of lives = back to the start of that stage**, not the start of the world. You keep every special stone, sheep and scroll you've found.
+- **Extra lives:** a full oil flask (100 olives), golden olives hidden in trees, and finding all 5 lost sheep in a stage.
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -1533,7 +1555,7 @@ After the credits, if you found every lamb:
 ## 7. Open questions
 - [ ] Sage's name: "Old Hanan" is a placeholder.
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
-- [ ] Lives and continues: classic lives, or infinite retries from the campfire (kinder for kids)?
+- [x] Lives: Mario-style, 5 lives, out of lives = restart the stage only, keep collectibles (§3g).
 - [x] Look: **smooth Pixar-style characters, like the unicorn game** (decided 2026-10-06 after comparing pixel and smooth versions of the same walk).
 - [ ] Backgrounds: SNES-style or matching the smooth characters? (Later.)
 - [ ] Screen resolution: set when the engine is built; sprites are stored large and scaled down smoothly, so they work at any size.
