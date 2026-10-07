@@ -10,6 +10,7 @@ usage:
   --start / --end   use only these video frames (1-based, inclusive).
   --align   feet (default: walking, standing), center (in the air: flips spin around the middle),
             or ground (tumbling on the floor: rolls).
+  --mirror  flip left-right (most animal clips face left; every sheet should face right).
   --ref     start:end frames where the character is seen at full height, for consistent scale (default 4:end).
 
 Writes <out_prefix>_sheet.png (one row, transparent), <out_prefix>_preview.gif and <out_prefix>.json.
@@ -25,6 +26,7 @@ ap.add_argument("--once", action="store_true"); ap.add_argument("--loop", action
 ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", type=int, default=240)
 ap.add_argument("--start", type=int, default=1); ap.add_argument("--end", type=int, default=0)
 ap.add_argument("--align", choices=["feet", "center", "ground"], default="feet")
+ap.add_argument("--mirror", action="store_true", help="flip left-right so the character faces right (the game's convention)")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 args = ap.parse_args()
 
@@ -125,6 +127,10 @@ char_h = max(height_of(f) for f in all_files[r0 - 1:(r1 or len(all_files))][::6]
 sc = args.height / char_h
 cw, ch = round(crops[0].width * sc), round(crops[0].height * sc)
 frames = [c.resize((cw, ch), Image.LANCZOS) for c in crops]
+anchor_x = round(-L * sc)
+if args.mirror:
+    frames = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in frames]
+    anchor_x = cw - anchor_x
 
 sheet = Image.new("RGBA", (cw * N, ch))
 for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, 0))
@@ -138,6 +144,6 @@ for f in frames:
 gif[0].save(args.out + "_preview.gif", save_all=True, append_images=gif[1:], duration=ms, loop=0)
 
 json.dump({"frames": N, "frame_w": cw, "frame_h": ch, "ms_per_frame": ms, "loop": not args.once,
-           "align": args.align, "anchor_x": round(-L * sc), "anchor_y": round(-T * sc),
+           "align": args.align, "anchor_x": anchor_x, "anchor_y": round(-T * sc),
            "source": os.path.basename(args.clip), "video_frames": [args.start + i for i in idx]}, open(args.out + ".json", "w"), indent=2)
 print(f"{N} frames of {cw}x{ch}, {ms} ms each -> {args.out}_sheet.png")

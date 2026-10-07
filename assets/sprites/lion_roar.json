@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 311,
+  "frame_h": 189,
+  "ms_per_frame": 154,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 231,
+  "anchor_y": 186,
+  "source": "z3_4.mp4",
+  "video_frames": [
+    37,
+    41,
+    45,
+    49,
+    53,
+    57,
+    61,
+    65,
+    69,
+    73
+  ]
+}

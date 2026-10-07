@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 271,
+  "frame_h": 184,
+  "ms_per_frame": 208,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 212,
+  "anchor_y": 181,
+  "source": "z3_3.mp4",
+  "video_frames": [
+    1,
+    7,
+    12,
+    18,
+    23,
+    29,
+    34,
+    40
+  ],
+  "pingpong": true
+}

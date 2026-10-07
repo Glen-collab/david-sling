@@ -1,0 +1,27 @@
+{
+  "frames": 14,
+  "frame_w": 189,
+  "frame_h": 251,
+  "ms_per_frame": 152,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 99,
+  "anchor_y": 249,
+  "source": "harp.mp4",
+  "video_frames": [
+    45,
+    49,
+    53,
+    57,
+    60,
+    64,
+    68,
+    72,
+    76,
+    80,
+    83,
+    87,
+    91,
+    95
+  ]
+}

@@ -397,7 +397,7 @@ function updateDavid(dt) {
 
   // --- choose the animation
   if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp") {
-    if (d.state === "kneel" && animDone("david_kneel_harp", d.t, 70)) setState("harp");
+    if (d.state === "kneel" && animDone("david_sit_harp", d.t, 95)) setState("harp");
     return;
   }
   if (!d.onGround) {
@@ -457,7 +457,7 @@ function drawDavid(camX) {
     case "getup": drawSprite("david_roll_getup", Math.min(6, 3 + Math.floor(d.t / 0.07)), x, y, d.facing); break;
     case "crouch": drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing); break;
     case "crawl": drawSprite("david_crawl", frameOf("david_crawl", t), x, y, d.facing); break;
-    case "kneel": drawSprite("david_kneel_harp", frameOf("david_kneel_harp", t, 70), x, y, d.facing); break;
+    case "kneel": drawSprite("david_sit_harp", frameOf("david_sit_harp", t, 95), x, y, d.facing); break;
     case "harp": drawSprite("david_play_harp", frameOf("david_play_harp", t), x, y, d.facing); break;
     case "pickup": drawSprite("david_pickup_lamb", Math.min(15, 5 + Math.floor(d.t / 0.6 * 11)), x, y, d.facing); break;
     case "putdown": drawSprite("david_pickup_lamb", Math.min(5, Math.floor(d.t / 0.4 * 6)), x, y, d.facing); break;
