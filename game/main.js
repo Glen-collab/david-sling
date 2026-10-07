@@ -33,6 +33,8 @@ const TUNE = {
   CARRY_JUMP2: 0.95,      // second jump while carrying the lamb (1 = as strong as the flip)
   TILE: 36,
   HEARTS: 4,
+  LIVES: 5,
+  OLIVES_PER_LIFE: 100,   // olives to fill the oil flask = 1 extra life
   HURT_INVINCIBLE: 1.3,   // seconds of flashing after a hit
   ITEM_SIZE: 0.32,        // food pickups
   SNAKE_RANGE: 120,       // how close before a snake strikes
@@ -207,7 +209,11 @@ const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true;
 const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true, hanging });
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
 // decoration: an item image standing on row r (its bottom on the top of row r+1); layer "back" or "front"
-const deco = (name, c, r, size = 1, layer = "back") => decor.push({ name, x: c * T + T / 2, y: (r + 1) * T, size, layer });
+const deco = (name, c, r, size = 1, layer = "back", surprise = null) => decor.push({ name, x: c * T + T / 2, y: (r + 1) * T, size, layer, surprise, shaken: false, shakeT: 0 });
+const olives = [];   // the "coins"
+const olive = (x, y, kind) => olives.push({ x, y, kind: kind || (Math.random() < 0.5 ? "green" : "purple"), taken: false, t: Math.random() * 6, vy: 0, falling: false, placed: true });
+const oliveRow = (c0, r, n, step = 1) => { for (let k = 0; k < n; k++) olive(c0 * T + T / 2 + k * step * T, (r + 1) * T - 14); };
+const oliveArc = (c0, r, n) => { for (let k = 0; k < n; k++) { const f = k / (n - 1); olive(c0 * T + T / 2 + k * T, (r + 1) * T - 14 - Math.sin(f * Math.PI) * 110); } };
 const food = (name, c, r) => pickups.push({ name, x: c * T + T / 2, y: (r + 1) * T, t: Math.random() * 6, taken: false });
 const snake = (kind, c) => snakes.push({ kind, x: c * T + T / 2, y: GR * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
 const campfire = (c, r = GR - 1) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false });
@@ -234,21 +240,25 @@ if (LEVEL_NAME === "test") {
   food("grapes", 10, 16); food("bread", 21, 16);
   special(16, 9);                                       // above the date palm: jump + flip
   special(87, 6);                                       // high above the fig platform: flip from the platform
-  special(138, 16);                                     // tucked behind the crops
+  // the third special stone is hidden in the fig tree (col 114): jump into its branches
+  oliveRow(6, 16, 6); oliveArc(22, 16, 5); oliveRow(26, 14, 3); oliveRow(30, 12, 3);
+  oliveArc(35, 16, 6); oliveRow(50, 16, 4); oliveArc(64, 16, 4);
+  oliveRow(80, 12, 4); oliveRow(86, 9, 3); oliveRow(95, 16, 4); oliveArc(103, 16, 5);
+  oliveRow(126, 16, 6); oliveArc(133, 16, 5); oliveRow(144, 16, 3); oliveArc(158, 16, 6);
   rock(26, 15, 3, 2); rock(30, 13, 3, 4);
   gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
   snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
   deco("thorn_bush", 43, 16, 0.8, "front");
   food("poison_berries", 45, 16); rock(47, 15, 3, 2); food("cheese", 48, 14);
   label(44, 11, "Berries or cheese? Look before you eat.");
-  deco("olive_tree", 55, 16, 1.15);
+  deco("olive_tree", 55, 16, 1.15, "back", "golden_olive");   // jump into it: a shower of olives, and a golden one
   ground(64, 122);
   campfire(68); deco("tent", 73, 16, 1.1);            label(64, 10, "Campfire: checkpoint. Sit and play the harp (Select) to rest.");
   plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
   snake("viper", 93);
   deco("beehive_tree", 99, 16, 1.2); food("honey", 101, 16);
   food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
-  deco("fig_tree", 114, 16, 1.0);
+  deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
   rock(117, 14, 2, 3);
   ground(126, 232);
   deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
@@ -593,6 +603,7 @@ function updateStones(dt) {
       sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
     }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
+    if (s.life > 0 && !s.power && stoneHitsTree(s)) s.life = 0;
   }
   for (let i = stones.length - 1; i >= 0; i--) if (stones[i].life <= 0) stones.splice(i, 1);
   for (const b of bits) { b.life -= dt; b.vy += 1400 * dt; b.x += b.vx * dt; b.y += b.vy * dt; }
@@ -663,7 +674,7 @@ addEventListener("keydown", e => {
 
 let helpT = 12;
 function drawHUD() {
-  drawHearts(); drawSpecialCount();
+  drawHearts(); drawSpecialCount(); drawLivesAndOil();
   if (helpT <= 0) {
     ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 300, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
@@ -677,7 +688,7 @@ function drawHelp() {
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
     "X = B: sling (hold to charge, hold Up to aim up)   A + B together: Power Sling (uses a special stone)",
-    "Down + A while moving: roll   Down next to the lamb: pick up / put down",
+    "Down + A while moving: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
     "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
@@ -731,6 +742,7 @@ const FOOD_TEXT = {
 
 // hearts
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
+david.lives = TUNE.LIVES; david.olives = 0;
 function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0) return;
@@ -738,19 +750,38 @@ function hurtDavid(fromX) {
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
   if (d.state !== "carry") setState("jump");
-  if (d.hearts <= 0) { d.deadT = 1.2; toast("Ouch! Back to the campfire..."); }
+  if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; toast(d.lives > 0 ? `Ouch! Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage."); }
+}
+function restartStage() {   // out of lives: back to the start of THIS stage; special stones you found are kept
+  const d = david;
+  d.lives = TUNE.LIVES; checkpoint = { ...spawn };
+  for (const s of snakes) Object.assign(s, { gone: false, alpha: 1, x: s.home, state: "idle", t: 0 });
+  for (let i = pickups.length - 1; i >= 0; i--) { if (pickups[i].dropped) pickups.splice(i, 1); else pickups[i].taken = false; }
+  for (let i = olives.length - 1; i >= 0; i--) { if (!olives[i].placed) olives.splice(i, 1); else olives[i].taken = false; }
+  for (const t of decor) { t.shaken = false; t.shakeT = 0; }
+  for (const g of gourds) g.alive = true;
+  for (const f of fires) f.lit = false;
 }
 function respawn() {
   const d = david;
+  if (d.lives <= 0) restartStage();
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
   if (lion) resetLion();
 }
 
 // food
+function fall(o, dt) {   // simple fall-and-land for dropped things
+  if (!o.falling) return;
+  o.vy = Math.min(1200, o.vy + 1800 * dt); o.y += o.vy * dt; o.x += (o.vx || 0) * dt; o.vx = (o.vx || 0) * 0.98;
+  const c = Math.floor(o.x / T), r = Math.floor(o.y / T);
+  if (o.vy > 0 && (isSolid(c, r) || isOneway(c, r))) { o.y = r * T; o.falling = false; o.vy = 0; o.vx = 0; }
+  if (o.y > ROWS * T + 200) o.taken = true;
+}
 function updatePickups(dt) {
   for (const p of pickups) {
     if (p.taken) continue;
+    fall(p, dt);
     p.t += dt;
     if (Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10) {
       p.taken = true;
@@ -945,8 +976,82 @@ function drawSpecialStone(x, y, r, glow) {
 function drawSpecials(camX) {
   for (const sp of specials) if (!sp.taken) drawSpecialStone(sp.x - camX, sp.y - 26 + Math.sin(sp.t * 3) * 4, 11, true);
 }
+// olives (the coins) fill the oil flask
+function updateOlives(dt) {
+  for (const o of olives) {
+    if (o.taken) continue;
+    fall(o, dt); o.t += dt;
+    if (Math.abs(o.x - david.x) < 24 && o.y > david.y - david.h - 10 && o.y < david.y + 6) {
+      o.taken = true;
+      if (o.kind === "golden") { david.lives++; toast("A golden olive! A whole flask of oil: +1 life"); }
+      else {
+        david.olives++;
+        if (david.olives >= TUNE.OLIVES_PER_LIFE) { david.olives -= TUNE.OLIVES_PER_LIFE; david.lives++; toast("The oil flask is full: +1 life!"); }
+      }
+      for (let k = 0; k < 4; k++) bits.push({ x: o.x, y: o.y, vx: (Math.random() - 0.5) * 160, vy: -Math.random() * 220, life: 0.35, color: o.kind === "golden" ? "#ffd84a" : "#d7e6a0" });
+    }
+  }
+}
+function drawOlive(x, y, kind, size = 1) {
+  const col = kind === "golden" ? ["#f2c230", "#c8941a"] : kind === "purple" ? ["#5a2f5c", "#3c1d3e"] : ["#8aa83a", "#647d22"];
+  if (kind === "golden") {
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x, y, 1, x, y, 20 * size); g.addColorStop(0, "rgba(255,220,90,0.7)"); g.addColorStop(1, "rgba(255,200,60,0)");
+    ctx.fillStyle = g; ctx.fillRect(x - 22 * size, y - 22 * size, 44 * size, 44 * size); ctx.restore();
+  }
+  ctx.fillStyle = col[1]; ctx.beginPath(); ctx.ellipse(x + 1, y + 1, 6 * size, 8 * size, 0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = col[0]; ctx.beginPath(); ctx.ellipse(x, y, 6 * size, 8 * size, 0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.beginPath(); ctx.ellipse(x - 2 * size, y - 3 * size, 1.6 * size, 2.6 * size, 0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#5d7a2a"; ctx.beginPath(); ctx.ellipse(x + 4 * size, y - 8 * size, 5 * size, 2 * size, -0.6, 0, Math.PI * 2); ctx.fill();
+}
+function drawOlives(camX) {
+  for (const o of olives) if (!o.taken && o.x - camX > -20 && o.x - camX < W + 20)
+    drawOlive(o.x - camX, o.y + (o.falling ? 0 : Math.sin(o.t * 3) * 2), o.kind, o.kind === "golden" ? 1.4 : 1);
+}
+
+// trees drop their fruit when you jump into the branches or sling a stone into them
+const TREE_DROPS = { olive_tree: "olives", fig_tree: "figs", date_palm: "dates", grape_vine: "grapes", beehive_tree: "honey" };
+function canopy(t) {   // the leafy top part of a tree, in world coordinates
+  const img = ITEM[t.name]; if (!img || !img.naturalWidth) return null;
+  const w = img.naturalWidth * t.size * 0.85, h = img.naturalHeight * t.size * 0.85, bottom = t.y + 6;
+  return { x0: t.x - w * 0.42, x1: t.x + w * 0.42, y0: bottom - h, y1: bottom - h * 0.42 };
+}
+function shakeTree(t) {
+  if (t.shaken) { t.shakeT = 0.25; return; }
+  t.shaken = true; t.shakeT = 0.6;
+  const b = canopy(t), cx = t.x, cy = (b.y0 + b.y1) / 2;
+  const drop = TREE_DROPS[t.name];
+  if (drop === "olives") for (let k = 0; k < 8; k++) olives.push({ x: cx + (Math.random() - 0.5) * 60, y: cy, vx: (Math.random() - 0.5) * 260, vy: -200 - Math.random() * 200, falling: true, kind: Math.random() < 0.5 ? "green" : "purple", taken: false, t: 0, placed: false });
+  else for (let k = 0; k < (drop === "honey" ? 1 : 2); k++) pickups.push({ name: drop, x: cx + (k ? 30 : -30), y: cy, vx: (k ? 1 : -1) * 120, vy: -250, falling: true, t: 0, taken: false, dropped: true });
+  if (t.surprise === "golden_olive") olives.push({ x: cx, y: cy, vx: 60, vy: -380, falling: true, kind: "golden", taken: false, t: 0, placed: false });
+  if (t.surprise === "special") {   // one time only: it stays found (or lying there) even after a stage restart
+    specials.push({ x: cx - 10, y: cy, vx: -80, vy: -380, falling: true, taken: false, t: 0, dropped: true });
+    t.surprise = null;
+  }
+  toast(t.surprise ? "Something fell out of the tree!" : `The ${t.name.replace("_", " ")} dropped ${drop}!`);
+}
+function updateTrees(dt) {
+  for (const t of decor) {
+    t.shakeT = Math.max(0, t.shakeT - dt);
+    if (!TREE_DROPS[t.name]) continue;
+    const b = canopy(t); if (!b) continue;
+    const head = david.y - david.h;
+    if (david.vy < -60 && head < b.y1 && head > b.y0 && david.x > b.x0 && david.x < b.x1 && !t.bumped) { t.bumped = true; shakeTree(t); }
+    if (david.onGround) t.bumped = false;
+  }
+  for (const sp of specials) fall(sp, dt);
+}
+function stoneHitsTree(s) {
+  for (const t of decor) {
+    if (!TREE_DROPS[t.name]) continue;
+    const b = canopy(t); if (!b) continue;
+    if (s.x > b.x0 && s.x < b.x1 && s.y > b.y0 && s.y < b.y1) { shakeTree(t); return true; }
+  }
+  return false;
+}
+
 function updateWorld(dt) {
-  updateSpecials(dt);
+  updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
   updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt);
@@ -978,7 +1083,22 @@ function drawBackground(camX) {
   for (let i = -1; i < 7; i++) { const x = i * 360 - (camX * 0.6) % 360; ctx.beginPath(); ctx.ellipse(x + 180, 650, 240, 110, 0, Math.PI, 0); ctx.fill(); }
 }
 function drawDecor(camX, layer) {
-  for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300) drawItem(d.name, d.x - camX, d.y + 6, d.size * 0.85);
+  for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
+    drawItem(d.name, d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, d.y + 6, d.size * 0.85);
+}
+function drawLivesAndOil() {
+  // lives
+  ctx.fillStyle = "#fff"; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 3; ctx.font = "bold 20px sans-serif";
+  ctx.fillStyle = "#c98a4a"; ctx.beginPath(); ctx.arc(W - 72, 108, 10, 0, Math.PI * 2); ctx.fill();          // a little face
+  ctx.fillStyle = "#4a2c18"; ctx.beginPath(); ctx.arc(W - 72, 103, 10, Math.PI, 0); ctx.fill();             // curly hair
+  ctx.fillStyle = "#fff"; ctx.strokeText(`× ${david.lives}`, W - 60, 115); ctx.fillText(`× ${david.lives}`, W - 60, 115);
+  // oil flask that fills with olives
+  const x = W - 80, y = 132, h = 30, f = david.olives / TUNE.OLIVES_PER_LIFE;
+  ctx.fillStyle = "#b9763e"; ctx.beginPath(); ctx.ellipse(x + 8, y + 18, 11, 14, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(x + 4, y, 8, 8);
+  ctx.save(); ctx.beginPath(); ctx.ellipse(x + 8, y + 18, 8, 11, 0, 0, Math.PI * 2); ctx.clip();
+  ctx.fillStyle = "#e9c84a"; ctx.fillRect(x - 4, y + 29 - 22 * f, 24, 22 * f); ctx.restore();
+  ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif";
+  ctx.strokeText(`${david.olives}`, W - 60, y + 24); ctx.fillText(`${david.olives}`, W - 60, y + 24);
 }
 function drawSpecialCount() {
   if (!specials.length && !david.specialStones) return;
@@ -1019,6 +1139,7 @@ function frame(now) {
   drawTiles(camX);
   drawFires(camX);
   drawPickups(camX);
+  drawOlives(camX);
   drawSpecials(camX);
   drawSnakes(camX);
   drawLion(camX);
