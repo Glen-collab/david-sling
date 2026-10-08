@@ -28,6 +28,8 @@ const TUNE = {
   STONE_GRAVITY: 900,     // lower = stones fly higher and farther
   POWER_SPEED: 1500,      // the Power Sling (A + B together, uses a special stone)
   THROW_TIME: 0.45,       // seconds for the whole throw animation
+  RUN_THROW_TIME: 0.6,    // the throw while running (legs keep running)
+  RUN_THROW_SPEED: 120,   // moving faster than this when the throw starts = running throw
   LAMB_SPEED: 380,
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
@@ -422,7 +424,8 @@ function updateDavid(dt) {
   if (!d.carrying && !d.harp && !busy && d.specialStones > 0 && justStarted &&
       ((pressed("b") && held("a")) || (pressed("a") && held("b")))) {
     d.specialStones--;
-    d.throwT = TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
+    d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
+    d.throwT = d.runThrow ? TUNE.RUN_THROW_TIME * 9 / 12 : TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
     const aimUp = held("up"), aimDown = held("down") && !d.onGround;   // Down only aims while in the air (on the ground it's crouch)
     const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
     stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
@@ -431,11 +434,12 @@ function updateDavid(dt) {
   }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
-    if (d.charging) { d.charge += dt; if (released("b") || !held("b")) d.charging = false; }
+    if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
   if (d.throwT >= 0) {
     if (!d.charging) d.throwT += dt;
-    const relAt = TUNE.THROW_TIME * 7 / 12;
+    const dur = d.runThrow ? TUNE.RUN_THROW_TIME : TUNE.THROW_TIME;
+    const relAt = d.runThrow ? dur * 9.5 / 12 : dur * 7 / 12;   // running throw: the stone leaves at frame 10
     if (!d.thrown && d.throwT >= relAt) {
       d.thrown = true;
       const full = Math.min(1, d.charge / TUNE.CHARGE_TIME);
@@ -446,7 +450,7 @@ function updateDavid(dt) {
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
     }
-    if (d.throwT >= TUNE.THROW_TIME) d.throwT = -1;
+    if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; }
   }
 
   // --- horizontal movement
@@ -526,14 +530,25 @@ function drawDavid(camX) {
   const d = david, x = d.x - camX, y = d.y;
   // the sling throw is drawn on top of whatever the legs are doing when standing; in the air we use the throw frames too
   if (d.throwT >= 0 && d.state !== "roll" && d.state !== "flip") {
-    let i;
-    if (d.charging) i = Math.floor(d.charge * 1000 / 70) % 6;
-    else i = Math.min(11, Math.floor(d.throwT / TUNE.THROW_TIME * 12));
-    drawSprite("david_sling_throw", i, x, y, d.facing);
+    let i, gx, gy;
+    const runningNow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
+    if (d.charging && runningNow && SPR.david_run_sling) {
+      // charging on the run: legs keep running, sling whirling overhead
+      i = frameOf("david_run_sling", d.t * Math.max(0.7, Math.abs(d.vx) / TUNE.RUN_SPEED));
+      drawSprite("david_run_sling", i, x, y, d.facing);
+      const sc = SCALE * (TUNE.SPRITE_SIZE.david_run_sling || 1), sp = SPR.david_run_sling;
+      gx = x + d.facing * (165 - sp.ax) * sc; gy = y - (sp.ay - 22) * sc;   // the stone, up above his head
+    } else if (!d.charging && d.runThrow && SPR.david_run_sling_throw) {
+      i = Math.min(11, Math.floor(d.throwT / TUNE.RUN_THROW_TIME * 12));
+      drawSprite("david_run_sling_throw", i, x, y, d.facing);
+    } else {
+      if (d.charging) i = Math.floor(d.charge * 1000 / 70) % 6;
+      else i = Math.min(11, Math.floor(d.throwT / TUNE.THROW_TIME * 12));
+      drawSprite("david_sling_throw", i, x, y, d.facing);
+      gx = x - d.facing * 8; gy = y - 104 * (TUNE.SPRITE_SIZE.david_sling_throw || 1);   // the stone whirls just above and behind his head
+    }
     if (d.charging && d.charge >= TUNE.CHARGE_TIME) { // golden glow when fully charged
       ctx.save(); ctx.globalCompositeOperation = "lighter";
-      // centred on the sling stone, which whirls just above and behind his head
-      const gx = x - d.facing * 8, gy = y - 104 * (TUNE.SPRITE_SIZE.david_sling_throw || 1);
       const g = ctx.createRadialGradient(gx, gy, 2, gx, gy, 30);
       g.addColorStop(0, "rgba(255,215,100,0.85)"); g.addColorStop(1, "rgba(255,180,40,0)");
       ctx.fillStyle = g; ctx.fillRect(gx - 34, gy - 34, 68, 68); ctx.restore();
