@@ -34,7 +34,7 @@ const TUNE = {
   TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
-  TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150,
+  TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150, TER_BASE_H: 84,
   BG_FAR_SPEED: 0.05,     // background scroll speeds (0 = still, 1 = moves with the ground)
   BG_MID_SPEED: 0.25,
   BG_NEAR_SPEED: 0.55,
@@ -229,6 +229,7 @@ const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r <
 const block = (c, r, w, h, mat = 1) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
 const rock = (c, r, w, h) => block(c, r, w, h, 2);
 const wall = (c, r, w, h) => block(c, r, w, h, 3);   // dry-stone wall
+const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
 const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true, hanging });
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
@@ -289,7 +290,7 @@ if (LEVEL_NAME === "test") {
   hornet(108, 11); hornet(131, 10);                     // hornets: they dive at you. Sling them.
   food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
   deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
-  rock(117, 14, 2, 3);
+  boulder(116, 15, 4, 2);
   ground(126, 232);
   deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
   rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
@@ -686,6 +687,7 @@ function updateStones(dt) {
 // ---------------------------------------------------------------------------
 const TER = {};
 for (const n of ["topsoil", "sediment", "limestone", "limestone_top", "ledge_left", "ledge_mid", "ledge_right",
+                 "base_left", "base_mid", "base_right",
                  "wall_left", "wall_mid", "wall_right", "pit_left", "pit_right"]) {
   total++;
   const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
@@ -702,11 +704,12 @@ function terPattern(name, scale) {   // a repeating fill, cached, anchored to th
   return (terPatterns[key] = ctx.createPattern(c, "repeat-x" === name ? "repeat-x" : "repeat"));
 }
 // draw a strip image repeated along a run, height h, top at y (world coordinates; caller has translated by -camX)
-function terStrip(name, x0, x1, y, h) {
+function terStrip(name, x0, x1, y, h, inset = 0) {   // inset: trim this fraction off each side of the image (hides dark piece edges)
   const img = TER[name]; if (!img || !img.naturalWidth) return;
-  const w = img.naturalWidth * h / img.naturalHeight;
+  const sx = img.naturalWidth * inset, sw = img.naturalWidth - 2 * sx;
+  const w = sw * h / img.naturalHeight;
   ctx.save(); ctx.beginPath(); ctx.rect(x0, y - 2, x1 - x0, h + 4); ctx.clip();
-  for (let x = Math.floor(x0 / w) * w; x < x1; x += w) ctx.drawImage(img, x, y, w + 1, h);
+  for (let x = Math.floor(x0 / w) * w; x < x1; x += w) ctx.drawImage(img, sx, 0, sw, img.naturalHeight, x, y, w + 1, h);
   ctx.restore();
 }
 function terPiece(name, x, y, h, flip = false) {   // one piece scaled to height h, top-left at x,y; returns its width
@@ -730,7 +733,7 @@ function drawTiles(camX) {
   // 2) fills: earth and limestone (walls are drawn as pieces below)
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4) continue;
     ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     ctx.fillRect(c * T, r * T, T + 0.5, T + 0.5);
   }
@@ -748,6 +751,34 @@ function drawTiles(camX) {
         }
       }
     }
+  }
+  // 3b) where limestone sits on earth, sink it into the soil (Glen's limestone base pieces)
+  for (let r = 0; r < ROWS - 1; r++) {
+    let start = -1;
+    for (let c = c0 - 4; c <= c1 + 1; c++) {
+      const on = c <= c1 && matAt(c, r) === 2 && matAt(c, r + 1) === 1;
+      if (on && start < 0) start = c;
+      if (!on && start >= 0) {
+        const h = TUNE.TER_BASE_H, y = (r + 1) * T - h * 0.52, x0 = start * T, x1 = c * T;
+        const lw = TER.base_left.naturalWidth * h / (TER.base_left.naturalHeight || 1);
+        const rw = TER.base_right.naturalWidth * h / (TER.base_right.naturalHeight || 1);
+        terStrip("base_mid", x0 + lw * 0.3, x1 - rw * 0.3, y, h, 0.06);
+        terPiece("base_left", x0 - lw * 0.35, y, h);
+        terPiece("base_right", x1 - rw * 0.65, y, h);
+        start = -1;
+      }
+    }
+  }
+  // boulders (material 4): Glen's half-buried boulder, drawn over the block it fills
+  const seenB = new Set();
+  for (let r = 0; r < ROWS; r++) for (let c = c0 - 6; c <= c1; c++) {
+    if (matAt(c, r) !== 4 || seenB.has(c + "," + r) || matAt(c, r - 1) === 4 || matAt(c - 1, r) === 4) continue;
+    let w = 0; while (matAt(c + w, r) === 4) w++;
+    let h = 0; while (matAt(c, r + h) === 4) h++;
+    for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) seenB.add((c + i) + "," + (r + j));
+    const img = ITEM.boulder_mound; if (!img || !img.naturalWidth) continue;
+    const bw = (w + 1.2) * T, bh = img.naturalHeight * bw / img.naturalWidth;
+    ctx.drawImage(img, c * T - 0.6 * T, (r + h) * T + 10 - bh, bw, bh);
   }
   // 4) cliff edges where the ground meets a pit
   for (let c = c0; c <= c1; c++) {
