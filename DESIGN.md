@@ -362,6 +362,26 @@ Like Super Mario World's dragon coins: **3 hidden special stones in every stage*
 
 The five smooth stones from the stream (World 7) stay separate. They're the story's stones, and the final blow is always one of them.
 
+### The stones thread: from the first field to the giant *(2026-10-08)*
+The stones are one of the game's main threads, start to finish.
+
+**Stones of remembrance (scripture David knew).** When Israel crossed the Jordan, Joshua set up **twelve stones** from the riverbed so that when children asked *"What do these stones mean?"* their parents would tell them what God had done (**Joshua 4:1–9**). And Samuel set up the stone he named **Ebenezer**, "Thus far the LORD has helped us" (**1 Samuel 7:12**), in David's own lifetime, before David was anointed. Each special stone David finds is a small Ebenezer: a reminder of a time God helped.
+
+**Twelve per world.** 3 special stones × 4 stages = **12 per world**, the same number as Joshua's stones. Finding all 12 in a world raises a little **stone cairn** on that world's map, beside the last stage.
+
+**How the thread runs:**
+| When | What happens with the stones |
+|---|---|
+| **1-1, the first special stone** | Hanan explains them: *"Joshua stacked twelve stones by the Jordan so the children would ask what they meant. Keep that one. It'll remind you."* First Journal entry about stones. |
+| **Every stage** | 3 hidden. The Journal's stone page fills in where each was found (the achievements grid above). |
+| **Any time** | Spend one on a Power Sling (A + B), or keep it. Every stone kept now matters at the end. |
+| **End of each world** | The Journal shows the stones carried: *"Stones of remembrance: 9 of 12."* All 12 = the cairn on the map. |
+| **World 7, the stream** | David chooses **five smooth stones** for the giant (1 Samuel 17:40). These are separate: the story's stones. |
+| **World 8, before Goliath** | The stones-of-remembrance screen: *"14 stones of remembrance: +3 hearts, a steadier aim."* (§3f) |
+| **The final blow** | Always one of the **five smooth stones**. The stones of remembrance carried him there; one plain stone from a stream finishes it. |
+
+**The lesson, and why it works as gameplay:** collecting is remembering. A player who goes back for every stone is doing what Joshua told Israel to do: remember what God has done. At the end, that remembering is what gives David courage (extra hearts) and a steady hand (a longer opening).
+
 ## 3g. Olives, the oil flask, lives, and trees that drop food *(decided 2026-10-07)*
 
 ### Olives = the coins

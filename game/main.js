@@ -432,7 +432,7 @@ function updateDavid(dt) {
     const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
     stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
                   charged: true, power: true, life: 1.6, trail: [] });
-    toast(`Power Sling! (${d.specialStones} special stone${d.specialStones === 1 ? "" : "s"} left)`);
+    toast(`Power Sling! (${d.specialStones} stone${d.specialStones === 1 ? "" : "s"} of remembrance left)`);
   }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
@@ -1053,7 +1053,10 @@ function updateSpecials(dt) {
     if (Math.abs(sp.x - david.x) < 34 && david.y > sp.y - 70 && david.y - david.h < sp.y + 10) {
       sp.taken = true; david.specialStones++;
       const found = specials.filter(q => q.taken).length;
-      toast(`Special stone! (${found} of ${specials.length} in this stage)  Save it for later, or A + B for a Power Sling.`);
+      if (!window.firstStoneSeen) {
+        window.firstStoneSeen = true;
+        toast("A stone of remembrance! Joshua set up twelve stones so Israel would remember (Joshua 4). Keep it, or A + B for a Power Sling.");
+      } else toast(`Stone of remembrance! (${found} of ${specials.length} in this stage)  Keep it, or A + B for a Power Sling.`);
       for (let k = 0; k < 16; k++) bits.push({ x: sp.x, y: sp.y - 20, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 480, life: 0.7, color: "#fff2b0" });
     }
   }

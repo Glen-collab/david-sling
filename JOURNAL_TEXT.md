@@ -28,6 +28,13 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 > *Not everything that moves in the grass is my enemy. But the serpent is crafty, so I will look before I throw.*
 > — Genesis 3:1
 
+**When David finds his first special stone (1-1):**
+> **Hanan:** "Joshua stacked twelve stones by the Jordan so the children would ask what they meant. Keep that one. It'll remind you."
+
+**David writes** (on the stone page of the Journal):
+> *Twelve stones by the Jordan, so we would remember. I will keep my stones, and remember every time the LORD helped me.*
+> — Joshua 4:6–7
+
 ### 1-2 · The Wandering Flock
 | | |
 |---|---|
@@ -75,6 +82,7 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 - **Right page (the Psalm):** the first line of the song:
 > *The Lord is my shepherd,*
 > *I have everything I need.*
+- **The stone count:** *"Stones of remembrance: 9 of 12"* (how many of World 1's 12 you found). All 12 raises a stone cairn on the World 1 map.
 - **Music:** the harp opening of the song (the first 15 seconds).
 
 **Optional bonus entry** (after beating the lion), if there's room on the left page:
