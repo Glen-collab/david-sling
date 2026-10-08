@@ -432,6 +432,30 @@ window.SPRITE_DATA = {
   "ay": 137,
   "align": "feet"
  },
+ "jackal_bite": {
+  "src": "../assets/sprites/jackal_bite.png",
+  "frames": 10,
+  "w": 333,
+  "h": 123,
+  "ms": 112,
+  "loop": false,
+  "pingpong": false,
+  "ax": 190,
+  "ay": 121,
+  "align": "feet"
+ },
+ "jackal_run": {
+  "src": "../assets/sprites/jackal_run.png",
+  "frames": 24,
+  "w": 302,
+  "h": 122,
+  "ms": 73,
+  "loop": true,
+  "pingpong": false,
+  "ax": 171,
+  "ay": 120,
+  "align": "feet"
+ },
  "lamb_run": {
   "src": "../assets/sprites/lamb_run.png",
   "frames": 10,

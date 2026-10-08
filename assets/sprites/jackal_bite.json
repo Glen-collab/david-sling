@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 333,
+  "frame_h": 123,
+  "ms_per_frame": 112,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 190,
+  "anchor_y": 121,
+  "source": "jackal_clean.mp4",
+  "video_frames": [
+    40,
+    43,
+    46,
+    49,
+    52,
+    54,
+    57,
+    60,
+    63,
+    66
+  ]
+}
