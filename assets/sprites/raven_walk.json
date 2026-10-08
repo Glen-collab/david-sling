@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 98,
+  "frame_h": 74,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 72,
+  "anchor_y": 72,
+  "source": "raven_g.mp4",
+  "video_frames": [
+    38,
+    39,
+    40,
+    42,
+    43,
+    44,
+    45,
+    46,
+    48,
+    49
+  ]
+}

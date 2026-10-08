@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 102,
+  "frame_h": 59,
+  "ms_per_frame": 214,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 56,
+  "anchor_y": 58,
+  "source": "raven_g.mp4",
+  "video_frames": [
+    85,
+    91,
+    96,
+    102,
+    108,
+    114,
+    119,
+    125
+  ],
+  "pingpong": true
+}

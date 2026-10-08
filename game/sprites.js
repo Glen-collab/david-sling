@@ -360,6 +360,30 @@ window.SPRITE_DATA = {
   "ay": 244,
   "align": "feet"
  },
+ "eagle_peck": {
+  "src": "../assets/sprites/eagle_peck.png",
+  "frames": 8,
+  "w": 141,
+  "h": 104,
+  "ms": 193,
+  "loop": true,
+  "pingpong": true,
+  "ax": 82,
+  "ay": 102,
+  "align": "feet"
+ },
+ "eagle_walk": {
+  "src": "../assets/sprites/eagle_walk.png",
+  "frames": 10,
+  "w": 189,
+  "h": 99,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 124,
+  "ay": 97,
+  "align": "feet"
+ },
  "fox_trot": {
   "src": "../assets/sprites/fox_trot.png",
   "frames": 12,
@@ -599,6 +623,30 @@ window.SPRITE_DATA = {
   "ax": 42,
   "ay": 38,
   "align": "center"
+ },
+ "raven_peck": {
+  "src": "../assets/sprites/raven_peck.png",
+  "frames": 8,
+  "w": 102,
+  "h": 59,
+  "ms": 214,
+  "loop": true,
+  "pingpong": true,
+  "ax": 56,
+  "ay": 58,
+  "align": "feet"
+ },
+ "raven_walk": {
+  "src": "../assets/sprites/raven_walk.png",
+  "frames": 10,
+  "w": 98,
+  "h": 74,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 72,
+  "ay": 72,
+  "align": "feet"
  },
  "snake_strike": {
   "src": "../assets/sprites/snake_strike.png",

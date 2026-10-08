@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 141,
+  "frame_h": 104,
+  "ms_per_frame": 193,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 82,
+  "anchor_y": 102,
+  "source": "eagle_ok.mp4",
+  "video_frames": [
+    90,
+    95,
+    100,
+    105,
+    111,
+    116,
+    121,
+    126
+  ],
+  "pingpong": true
+}
