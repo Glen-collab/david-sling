@@ -226,7 +226,7 @@ const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
 const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
 let lionSpawn = null, arenaX = Infinity;
 const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = 1; };
-const block = (c, r, w, h, mat = 1) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
+const block = (c, r, w, h, mat = 2) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
 const rock = (c, r, w, h) => block(c, r, w, h, 2);
 const wall = (c, r, w, h) => block(c, r, w, h, 3);   // dry-stone wall
 const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
@@ -251,7 +251,7 @@ const special = (c, r) => specials.push({ x: c * T + T / 2, y: (r + 1) * T, take
 
 if (LEVEL_NAME === "test") {
   ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
-  block(12, 15, 2, 2); block(16, 14, 2, 3);
+  block(12, 15, 2, 2, 3); block(16, 14, 2, 3);
   ground(28, 85);  label(26, 9, "small gap: jump");
   plat(32, 13, 4); plat(38, 10, 4); gourd(39, 9);
   block(46, 14, 3, 3); gourd(47, 13);               label(43, 10, "B: sling the gourds (hold B to charge, Up to aim up)");
@@ -259,7 +259,7 @@ if (LEVEL_NAME === "test") {
   ground(89, 145); label(87, 9, "gap");
   block(100, 10, 3, 7); gourd(101, 9);              label(95, 8, "tall wall: jump, then A again in the air = flip");
   plat(108, 13, 4); plat(114, 10, 4); gourd(115, 9);
-  block(124, 15, 2, 2); block(127, 13, 2, 4); block(130, 11, 2, 6); gourd(131, 10);
+  block(124, 15, 2, 2, 3); block(127, 13, 2, 4); block(130, 11, 2, 6); gourd(131, 10);
   block(140, 9, 6, 8);                              label(133, 6, "end of the test. R = back to the start");
 } else {
   // ---- 1-1 sample: The Hills of Bethlehem ----
