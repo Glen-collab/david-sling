@@ -373,6 +373,7 @@ The stones are one of the game's main threads, start to finish.
 | When | What happens with the stones |
 |---|---|
 | **1-1, the first special stone** | Hanan explains them: *"Joshua stacked twelve stones by the Jordan so the children would ask what they meant. Keep that one. It'll remind you."* First Journal entry about stones. |
+| **2-2, a kid at the river asks** | After the flash flood, on the riverbank, **the boy from Tekoa** (World 2's lost one) sees David's stones: *"Why do you carry those?"* **Now David explains**, exactly as Joshua said: when your children ask, tell them (Joshua 4:6–7). In World 1 Hanan taught David; in World 2 David teaches someone younger. |
 | **Every stage** | 3 hidden. The Journal's stone page fills in where each was found (the achievements grid above). |
 | **Any time** | Spend one on a Power Sling (A + B), or keep it. Every stone kept now matters at the end. |
 | **End of each world** | The Journal shows the stones carried: *"Stones of remembrance: 9 of 12."* All 12 = the cairn on the map. |
@@ -718,6 +719,10 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
   > "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look."
   - 📜 Journal fact: wadis are dry valleys that flood suddenly after rain falls far away. A real danger in the wilderness, even under a clear sky.
 - **Set piece: the flood.** The second half is an **auto-scrolling escape**. Water rises behind you from the left, and you run and climb to the right on boulders, logs and ledges. The scroll speed is generous (rule 3). This is the world's "run for your life" moment.
+- **On the riverbank after the flood, the boy asks about the stones** (see §3f, the stones thread):
+  > **Boy:** "Why do you carry those stones around?"
+  > **David:** "Joshua stacked twelve of them by the Jordan, so that when children asked what they meant, someone would tell them what God did. Each of mine is a time He helped me. Like today."
+  - The boy picks up a smooth stone from the riverbed and keeps it. (At the end of World 2 his father's gift, the sling pouch, is "for the one who brought my son home".)
 - **The lost one — the boy from Tekoa** *(made up; Tekoa is a real town a few miles south of Bethlehem)*. He's stranded on a rock in the riverbed, separated from his family. You reach him just before the water. After that he **follows you like a sheep** until the end of the stage.
   > "I was taking our donkey to market and the water came out of nowhere."
 - **The harp, new use:** his **donkey** stands frozen in fear in a narrow gap, blocking the only way up. Play the harp (Select) to calm it, and it moves.
