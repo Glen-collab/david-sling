@@ -1,13 +1,13 @@
 {
   "frames": 12,
-  "frame_w": 208,
+  "frame_w": 248,
   "frame_h": 300,
   "ms_per_frame": 62,
   "loop": true,
   "align": "feet",
-  "anchor_x": 134,
+  "anchor_x": 174,
   "anchor_y": 297,
-  "source": "runsling.mp4",
+  "source": "Glen's whirl edit of runsling.mp4",
   "video_frames": [
     21,
     23,

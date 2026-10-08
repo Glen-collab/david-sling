@@ -303,12 +303,12 @@ window.SPRITE_DATA = {
  "david_run_sling": {
   "src": "../assets/sprites/david_run_sling.png",
   "frames": 12,
-  "w": 208,
+  "w": 248,
   "h": 300,
   "ms": 62,
   "loop": true,
   "pingpong": false,
-  "ax": 134,
+  "ax": 174,
   "ay": 297,
   "align": "feet"
  },
