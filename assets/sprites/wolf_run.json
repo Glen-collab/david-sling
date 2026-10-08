@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 330,
+  "frame_h": 135,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 192,
+  "anchor_y": 132,
+  "source": "z1_1_ok.mp4",
+  "video_frames": [
+    27,
+    29,
+    31,
+    33,
+    36,
+    38,
+    40,
+    42,
+    44,
+    47,
+    49,
+    51
+  ]
+}

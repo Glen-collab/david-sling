@@ -360,6 +360,18 @@ window.SPRITE_DATA = {
   "ay": 244,
   "align": "feet"
  },
+ "fox_trot": {
+  "src": "../assets/sprites/fox_trot.png",
+  "frames": 12,
+  "w": 313,
+  "h": 106,
+  "ms": 55,
+  "loop": true,
+  "pingpong": false,
+  "ax": 197,
+  "ay": 104,
+  "align": "feet"
+ },
  "hornet_fly": {
   "src": "../assets/sprites/hornet_fly.png",
   "frames": 8,
@@ -576,6 +588,18 @@ window.SPRITE_DATA = {
   "ay": 181,
   "align": "feet"
  },
+ "raven_fly": {
+  "src": "../assets/sprites/raven_fly.png",
+  "frames": 8,
+  "w": 84,
+  "h": 74,
+  "ms": 83,
+  "loop": true,
+  "pingpong": false,
+  "ax": 42,
+  "ay": 38,
+  "align": "center"
+ },
  "snake_strike": {
   "src": "../assets/sprites/snake_strike.png",
   "frames": 8,
@@ -586,6 +610,18 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 105,
   "ay": 74,
+  "align": "feet"
+ },
+ "wolf_run": {
+  "src": "../assets/sprites/wolf_run.png",
+  "frames": 12,
+  "w": 330,
+  "h": 135,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 192,
+  "ay": 132,
   "align": "feet"
  }
 };

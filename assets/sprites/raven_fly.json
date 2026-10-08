@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 84,
+  "frame_h": 74,
+  "ms_per_frame": 83,
+  "loop": true,
+  "align": "center",
+  "anchor_x": 42,
+  "anchor_y": 38,
+  "source": "z1_6_ok.mp4",
+  "video_frames": [
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28
+  ]
+}
