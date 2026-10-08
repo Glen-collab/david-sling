@@ -315,7 +315,7 @@ window.SPRITE_DATA = {
  "david_run_sling_throw": {
   "src": "../assets/sprites/david_run_sling_throw.png",
   "frames": 12,
-  "w": 369,
+  "w": 439,
   "h": 310,
   "ms": 149,
   "loop": false,
