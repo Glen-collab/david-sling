@@ -319,6 +319,56 @@ Use the same white-background asset-sheet style as the food & nature sheet:
 - **A small clay oil flask / juglet** (the on-screen flask that fills with olives)
 - **Honeybees** and **wasps**, a few flying poses each (or Grok clips, flying in place on green)
 
+## NEXT BATCH (2026-10-08): what the levels need now, in priority order
+Upload one of the finished item images (e.g. the olive tree) with each request as the style reference, and add: *"same Pixar-style look as the attached image, side-view game art."*
+
+### 1. Ground textures (most important). These replace the plain brown blocks.
+I build every ground, ledge and platform piece from these in code, so they only need to **tile seamlessly** (the left edge must match the right edge, and for fills, top matches bottom too). Ask for each as its own image:
+```
+A) Grassy ground TOP STRIP for a side-scrolling game: a long horizontal strip, 2048 x 256,
+   seen straight from the side. Golden-green Judean pasture grass and a little soil lip along
+   the top edge, wildflowers here and there. Seamless: the left edge must match the right edge.
+   Solid flat #00FF00 green above the grass. No objects, no text.
+B) Soil FILL texture: 1024 x 1024 square, packed earth with small stones and roots, seen from
+   the side. Seamless on all four edges (tileable). Fills the whole image, no background.
+C) Limestone rock FILL texture: 1024 x 1024, pale cream-and-tan Judean limestone blocks,
+   cracks and moss, side view. Seamless on all four edges.
+D) Limestone TOP EDGE strip: 2048 x 256, the weathered top surface of limestone rock with a
+   little grass and moss. Seamless left-to-right. Solid #00FF00 above it.
+E) One-way PLATFORM pieces in one image on #00FF00: a thick old wooden plank / branch platform
+   seen from the side: a LEFT end cap, a MIDDLE piece that repeats seamlessly, and a RIGHT
+   end cap, side by side with a gap between them.
+```
+
+### 2. Background layers (World 1)
+Use the three prompts in **Background layers** above (far, middle, near). Make them **3072 x 1024**.
+
+### 3. The sheepfold gate (end of every stage)
+```
+A low round sheepfold built of stacked fieldstones, seen from the side, with an open gateway
+and one TALL wooden gatepost beside the opening (about three times the wall's height, with a
+small carved top). Solid #00FF00 background. No sheep, no people.
+Separately: the same wooden gate, CLOSED, on its own.
+```
+
+### 4. The World 1 map, for the left page of David's journal
+```
+An illustrated map drawn in ink and soft watercolour on old parchment, like a page in a
+traveller's journal. The hills of Bethlehem: the little town on its hill (top left), pasture,
+olive trees, a stream, rocky outcrops, a cave with two glowing eyes (bottom right). A dotted
+path winds from the town to the cave, passing five small empty circles (the stages) and a few
+tiny landmarks (a campfire, a rock with a goat on it, a hidden meadow). Portrait, 2:3, about
+1024 x 1536. No text, no labels.
+```
+
+### 5. Small items still missing
+A single green olive, a single purple olive and a **golden olive** (glowing a little) · a small clay **oil flask** · a **pomegranate** and a **pomegranate tree** · a **barley** sheaf. All on #00FF00.
+
+### 6. People and animals (Grok video, green screen, one clip each)
+- **Lost sheep:** walking, grazing, and lying on its back with legs kicking (a cast sheep).
+- **Hanan ✦**, an old shepherd in a grey robe with a white beard: standing and talking; sitting by a fire.
+- **The neighbour shepherd ✦** (an old man) and **the shepherd girl ✦** with her goat: standing and talking.
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
