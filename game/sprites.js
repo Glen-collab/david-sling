@@ -372,6 +372,66 @@ window.SPRITE_DATA = {
   "ay": 43,
   "align": "center"
  },
+ "hyena_crouch": {
+  "src": "../assets/sprites/hyena_crouch.png",
+  "frames": 6,
+  "w": 318,
+  "h": 164,
+  "ms": 229,
+  "loop": false,
+  "pingpong": false,
+  "ax": 180,
+  "ay": 162,
+  "align": "feet"
+ },
+ "hyena_laugh": {
+  "src": "../assets/sprites/hyena_laugh.png",
+  "frames": 6,
+  "w": 238,
+  "h": 178,
+  "ms": 139,
+  "loop": true,
+  "pingpong": true,
+  "ax": 180,
+  "ay": 175,
+  "align": "feet"
+ },
+ "hyena_lunge": {
+  "src": "../assets/sprites/hyena_lunge.png",
+  "frames": 8,
+  "w": 331,
+  "h": 163,
+  "ms": 177,
+  "loop": false,
+  "pingpong": false,
+  "ax": 197,
+  "ay": 160,
+  "align": "feet"
+ },
+ "hyena_run": {
+  "src": "../assets/sprites/hyena_run.png",
+  "frames": 10,
+  "w": 276,
+  "h": 150,
+  "ms": 70,
+  "loop": true,
+  "pingpong": true,
+  "ax": 164,
+  "ay": 147,
+  "align": "feet"
+ },
+ "hyena_stalk": {
+  "src": "../assets/sprites/hyena_stalk.png",
+  "frames": 10,
+  "w": 241,
+  "h": 140,
+  "ms": 79,
+  "loop": true,
+  "pingpong": false,
+  "ax": 159,
+  "ay": 137,
+  "align": "feet"
+ },
  "lamb_run": {
   "src": "../assets/sprites/lamb_run.png",
   "frames": 10,

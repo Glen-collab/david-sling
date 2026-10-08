@@ -1,0 +1,19 @@
+{
+  "frames": 6,
+  "frame_w": 318,
+  "frame_h": 164,
+  "ms_per_frame": 229,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 180,
+  "anchor_y": 162,
+  "source": "hyena.mp4",
+  "video_frames": [
+    61,
+    67,
+    74,
+    80,
+    87,
+    93
+  ]
+}
