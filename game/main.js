@@ -653,7 +653,7 @@ function updateStones(dt) {
       g.alive = false; if (!s.power) s.life = 0;
       for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
     }
-    for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - sn.x) < 34 && s.y > sn.y - 70 && s.y < sn.y + 6) {
+    for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - snakeMid(sn)) < (sn.kind === "cobra" ? 48 : 34) && s.y > sn.y - 70 && s.y < sn.y + 6) {
       sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
     }
     if (s.life > 0 && stoneHitsBugs(s)) s.life = 0;
@@ -858,28 +858,41 @@ function drawPickups(camX) {
 const COBRA_STRIKE = [[4, 0.07], [5, 0.16], [6, 0.08], [7, 0.12]];
 // where the tip of the cobra's head is in each frame, in sheet pixels (measured from Glen's sheet)
 const COBRA_HEAD_X = [125, 127, 125, 127, 153, 203, 154, 131];
+// the cobra turns around in place: it flips around the middle of its body, not the tip of its head
+const COBRA_MID_X = 62;   // middle of the body in the sheet (frame 1 spans 0-125)
+function cobraScale() { return SCALE * (TUNE.SPRITE_SIZE.cobra_hood || 1); }
+function cobraMid(s) { return s.x + (COBRA_MID_X - SPR.cobra_hood.ax) * cobraScale(); }   // fixed spot in the level
+function cobraDrawX(s) { return cobraMid(s) - s.facing * (COBRA_MID_X - SPR.cobra_hood.ax) * cobraScale(); }
+function cobraHeadX(s, f) { return cobraDrawX(s) + s.facing * (COBRA_HEAD_X[f] - SPR.cobra_hood.ax) * cobraScale(); }
+function snakeMid(s) { return s.kind === "cobra" && SPR.cobra_hood ? cobraMid(s) : s.x; }
 function cobraStrikeFrame(t) { for (const [f, d] of COBRA_STRIKE) { if (t < d) return f; t -= d; } return 7; }
 // snakes: "cobra" (hood up, sways, lunges when close) and "viper" (coiled, strikes when close)
 function updateSnakes(dt) {
   for (const s of snakes) {
     if (s.gone) { if (s.alpha > 0) { s.alpha -= dt * 1.5; s.y += s.vy * dt; s.vy += 1600 * dt; s.x += s.vx * dt; } continue; }
     s.t += dt;
+    const sameLevel = Math.abs(david.y - s.y) < 70;
+    if (s.kind === "cobra") {
+      if (s.state !== "strike") s.facing = Math.sign(david.x - cobraMid(s)) || s.facing;   // turn in place (never mid-strike)
+      const dx = Math.abs(david.x - cobraHeadX(s, 0));
+      if (s.state === "idle" && dx < TUNE.SNAKE_RANGE && sameLevel) { s.state = "strike"; s.t = 0; }
+      const strikeLen = COBRA_STRIKE.reduce((a, f) => a + f[1], 0);
+      if (s.state === "strike" && s.t > strikeLen) { s.state = "rest"; s.t = 0; }
+      if (s.state === "rest" && s.t > 0.8) { s.state = "idle"; s.t = 0; }
+      if (s.state === "strike") {   // the bite covers from where the head waits to where it is right now
+        const a = cobraHeadX(s, 0), b = cobraHeadX(s, cobraStrikeFrame(s.t)) + s.facing * TUNE.COBRA_BITE_EXTRA;
+        const lo = Math.min(a, b), hi = Math.max(a, b);
+        if (david.x + BODY_W / 2 > lo && david.x - BODY_W / 2 < hi && sameLevel && david.y - david.h < s.y) hurtDavid(snakeMid(s));
+      }
+      continue;
+    }
     s.facing = Math.sign(david.x - s.x) || s.facing;
-    const dx = Math.abs(david.x - s.x), sameLevel = Math.abs(david.y - s.y) < 70;
+    const dx = Math.abs(david.x - s.x);
     if (s.state === "idle" && dx < TUNE.SNAKE_RANGE && sameLevel) { s.state = "strike"; s.t = 0; }
     const strikeLen = s.kind === "cobra" ? COBRA_STRIKE.reduce((a, f) => a + f[1], 0) : 0.7;
     if (s.state === "strike" && s.t > strikeLen) { s.state = "rest"; s.t = 0; }
     if (s.state === "rest" && s.t > 0.8) { s.state = "idle"; s.t = 0; }
     // how far the head reaches right now
-    if (s.kind === "cobra") {
-      // the bite reaches exactly as far as the tip of the head in the frame being shown, and only while striking
-      if (s.state === "strike") {
-        const f = cobraStrikeFrame(s.t);
-        s.reach = (COBRA_HEAD_X[f] - SPR.cobra_hood.ax) * SCALE * (TUNE.SPRITE_SIZE.cobra_hood || 1) + TUNE.COBRA_BITE_EXTRA;
-        if (dx - BODY_W / 2 < s.reach && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
-      }
-      continue;
-    }
     const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
     s.reach = 22 + lunge;
     if (dx < s.reach + BODY_W / 2 && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
@@ -892,7 +905,7 @@ function drawSnakes(camX) {
     if (s.kind === "cobra") {
       // waiting: sway through frames 1-4; strike: Glen's frames 5, 6, 7, then 8 to settle
       const i = s.state === "strike" ? cobraStrikeFrame(s.t) : [0, 1, 2, 3, 2, 1][Math.floor(s.t / 0.16) % 6];
-      drawSprite("cobra_hood", i, x, s.y, s.facing, 1, s.alpha);
+      drawSprite("cobra_hood", i, cobraDrawX(s) - camX, s.y, s.facing, 1, s.alpha);
     } else {
       const n = SPR.snake_strike.frames;
       const i = s.state === "strike" ? Math.round(Math.abs(Math.cos(Math.min(1, s.t / 0.7) * Math.PI)) * (n - 1)) : n - 1;
