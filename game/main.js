@@ -47,6 +47,7 @@ const TUNE = {
   HURT_INVINCIBLE: 1.3,   // seconds of flashing after a hit
   ITEM_SIZE: 0.32,        // food pickups
   SNAKE_RANGE: 120,       // how close before a snake strikes
+  COBRA_BITE_EXTRA: 0,    // + makes the cobra's bite reach farther, - shorter (pixels)
   LION_HP: 6,             // tap stone = 1, charged stone = 2 (only while it's dazed)
   LION_PROWL: 130, LION_RUN: 330,
   LION_POUNCE_RANGE: 360, // how close before it roars and pounces
@@ -855,8 +856,8 @@ function drawPickups(camX) {
 
 // the cobra's strike: [frame index, seconds shown]. Frames 5-7 are the strike, 8 settles back.
 const COBRA_STRIKE = [[4, 0.07], [5, 0.16], [6, 0.08], [7, 0.12]];
-// how far forward the head is in each cobra frame, in sheet pixels, compared with the waiting pose
-const COBRA_REACH = [0, 0, 0, 0, 28, 78, 29, 6];
+// where the tip of the cobra's head is in each frame, in sheet pixels (measured from Glen's sheet)
+const COBRA_HEAD_X = [125, 127, 125, 125, 153, 203, 154, 131];
 function cobraStrikeFrame(t) { for (const [f, d] of COBRA_STRIKE) { if (t < d) return f; t -= d; } return 7; }
 // snakes: "cobra" (hood up, sways, lunges when close) and "viper" (coiled, strikes when close)
 function updateSnakes(dt) {
@@ -870,11 +871,16 @@ function updateSnakes(dt) {
     if (s.state === "strike" && s.t > strikeLen) { s.state = "rest"; s.t = 0; }
     if (s.state === "rest" && s.t > 0.8) { s.state = "idle"; s.t = 0; }
     // how far the head reaches right now
-    let lunge;
-    if (s.kind === "cobra") {   // reach comes from the strike frame being shown (frame 6 = full lunge)
-      const f = s.state === "strike" ? cobraStrikeFrame(s.t) : 0;
-      lunge = COBRA_REACH[f] * SCALE * (TUNE.SPRITE_SIZE.cobra_hood || 1);
-    } else lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
+    if (s.kind === "cobra") {
+      // the bite reaches exactly as far as the tip of the head in the frame being shown, and only while striking
+      if (s.state === "strike") {
+        const f = cobraStrikeFrame(s.t);
+        s.reach = (COBRA_HEAD_X[f] - SPR.cobra_hood.ax) * SCALE * (TUNE.SPRITE_SIZE.cobra_hood || 1) + TUNE.COBRA_BITE_EXTRA;
+        if (dx - BODY_W / 2 < s.reach && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
+      }
+      continue;
+    }
+    const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
     s.reach = 22 + lunge;
     if (dx < s.reach + BODY_W / 2 && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
   }
