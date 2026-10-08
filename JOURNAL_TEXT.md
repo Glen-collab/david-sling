@@ -3,6 +3,7 @@
 Draft text for every checkpoint saying, every journal entry and every psalm line. **Glen edits here first; once a world is locked, he hand-writes its entries** (see JOURNAL.md for the layer rules).
 
 **Rules for the words**
+- Mark every made-up person with ✦ (e.g. Hanan ✦, the shepherd girl ✦). See DESIGN.md §3i.
 - **Checkpoint sayings** are short, practical and in plain speech: one or two sentences about what's just ahead.
 - **David's entries** are in his own words (a paraphrase, never a quotation), from scripture that existed **before** David: Genesis to Deuteronomy, Joshua, Judges, Ruth. The reference goes under each entry.
 - Keep every entry short enough to hand-write: about 15 to 25 words.

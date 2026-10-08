@@ -470,6 +470,24 @@ Made by Glen on Suno, in his own words rather than a Bible translation, so there
 
 **Rights note:** check the Suno plan the song was made on before any commercial release (free-plan songs generally can't be used commercially).
 
+## 3i. Faithfulness: invented people, and a note for parents and pastors *(decided 2026-10-08)*
+
+The game invents supporting people (Hanan, the checkpoint cast, Tobi, the Steward, the shepherd girl…) the way The Chosen, children's Bible storybooks and every nativity play's innkeeper do. These rules keep that on the right side of the line:
+
+- **Never change what the Bible says happened.** Invented events (the Wild Ox, the chariot, the watchtower, the flash flood) only fill gaps the text leaves open, and are labelled as invented.
+- **Never put invented words in God's mouth.** Where God speaks, it's the biblical reference.
+- **Real people stay true to the text.** Eliab, Jesse, Shammah, Abinadab, Samuel and Saul only say things that fit how the Bible shows them (e.g. Eliab's anger, 1 Samuel 17:28).
+- **No magic.** Skills are taught, gifts are given, courage comes from God.
+- **Every verse has its reference; David's own writing uses only scripture from before his time** (§3h).
+- **The song** is presented as *"The Shepherd Leads Me, a song inspired by Psalm 23"*.
+
+**The ✦ mark.** Every made-up person and every invented event carries a small ✦ in the Journal and the Field Guide.
+
+**A note for parents and pastors** (shown in the Journal's first page and in the credits):
+> *Characters and events marked ✦ are imagined, to bring the story to life. Everything else follows 1 Samuel 16–17. Read the real story together: it's even better.*
+
+**A pastor's review before release.** Before the game ships, a pastor reads every checkpoint line, Journal entry and story scene, and signs off. Their name (with permission) goes in the credits as a reviewer, which also reassures church families.
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
@@ -1653,6 +1671,7 @@ After the credits, if you found every lamb:
 - [ ] Is there a pastor willing to record a short reflection on the parable (with written permission)?
 - [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
 - [ ] Part 2 teaser: **parked** until this game is finished.
+- [ ] Pastor's review of all script text before release (§3i).
 - [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
 
 ## 8. Sprite sheet rules (for Photoshop)
