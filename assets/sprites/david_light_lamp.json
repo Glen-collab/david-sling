@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 150,
+  "frame_h": 253,
+  "ms_per_frame": 120,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 74,
+  "anchor_y": 250,
+  "source": "lamp.mp4",
+  "video_frames": [
+    31,
+    36,
+    42,
+    47,
+    53,
+    58,
+    63,
+    69,
+    74,
+    80,
+    85,
+    90,
+    96,
+    101,
+    107,
+    112
+  ]
+}

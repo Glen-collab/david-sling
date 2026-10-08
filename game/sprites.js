@@ -240,6 +240,18 @@ window.SPRITE_DATA = {
   "ay": 219,
   "align": "feet"
  },
+ "david_light_lamp": {
+  "src": "../assets/sprites/david_light_lamp.png",
+  "frames": 16,
+  "w": 150,
+  "h": 253,
+  "ms": 120,
+  "loop": false,
+  "pingpong": false,
+  "ax": 74,
+  "ay": 250,
+  "align": "feet"
+ },
  "david_pickup_lamb": {
   "src": "../assets/sprites/david_pickup_lamb.png",
   "frames": 16,
@@ -372,6 +384,18 @@ window.SPRITE_DATA = {
   "ay": 253,
   "align": "feet"
  },
+ "david_turn_away": {
+  "src": "../assets/sprites/david_turn_away.png",
+  "frames": 8,
+  "w": 137,
+  "h": 253,
+  "ms": 110,
+  "loop": false,
+  "pingpong": false,
+  "ax": 76,
+  "ay": 250,
+  "align": "feet"
+ },
  "david_walk": {
   "src": "../assets/sprites/david_walk.png",
   "frames": 12,
@@ -382,6 +406,30 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 79,
   "ay": 244,
+  "align": "feet"
+ },
+ "david_walk_away": {
+  "src": "../assets/sprites/david_walk_away.png",
+  "frames": 12,
+  "w": 94,
+  "h": 242,
+  "ms": 85,
+  "loop": true,
+  "pingpong": false,
+  "ax": 46,
+  "ay": 240,
+  "align": "feet"
+ },
+ "david_walk_lamp": {
+  "src": "../assets/sprites/david_walk_lamp.png",
+  "frames": 12,
+  "w": 195,
+  "h": 262,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 90,
+  "ay": 259,
   "align": "feet"
  },
  "eagle_peck": {

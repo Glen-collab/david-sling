@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 94,
+  "frame_h": 242,
+  "ms_per_frame": 85,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 46,
+  "anchor_y": 240,
+  "source": "cave_ok.mp4",
+  "video_frames": [
+    48,
+    49,
+    51,
+    52,
+    54,
+    55,
+    56,
+    58,
+    59,
+    61,
+    62,
+    64
+  ]
+}
