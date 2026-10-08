@@ -300,6 +300,30 @@ window.SPRITE_DATA = {
   "ay": 245,
   "align": "feet"
  },
+ "david_run_sling": {
+  "src": "../assets/sprites/david_run_sling.png",
+  "frames": 12,
+  "w": 208,
+  "h": 300,
+  "ms": 62,
+  "loop": true,
+  "pingpong": false,
+  "ax": 134,
+  "ay": 297,
+  "align": "feet"
+ },
+ "david_run_sling_throw": {
+  "src": "../assets/sprites/david_run_sling_throw.png",
+  "frames": 12,
+  "w": 369,
+  "h": 310,
+  "ms": 149,
+  "loop": false,
+  "pingpong": false,
+  "ax": 209,
+  "ay": 307,
+  "align": "feet"
+ },
  "david_sit_harp": {
   "src": "../assets/sprites/david_sit_harp.png",
   "frames": 14,

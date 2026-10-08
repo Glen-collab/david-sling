@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 369,
+  "frame_h": 310,
+  "ms_per_frame": 149,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 209,
+  "anchor_y": 307,
+  "source": "runsling.mp4",
+  "video_frames": [
+    58,
+    62,
+    66,
+    69,
+    73,
+    77,
+    81,
+    85,
+    89,
+    92,
+    96,
+    100
+  ]
+}
