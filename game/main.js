@@ -787,9 +787,15 @@ function drawTiles(camX) {
         const h = TUNE.TER_BASE_H, y = (r + 1) * T - TER_GRASS_CENTER - h * BASE_GRASS_FRAC + TUNE.BASE_DROP, x0 = start * T, x1 = c * T;
         const lw = TER.base_left.naturalWidth * h / (TER.base_left.naturalHeight || 1);
         const rw = TER.base_right.naturalWidth * h / (TER.base_right.naturalHeight || 1);
+        // only the ROCK part shows: cut the pieces off at the grass line so the ground's own soil runs straight through
+        const gy = (r + 1) * T;
+        ctx.save(); ctx.beginPath(); ctx.rect(x0 - lw, -1000, x1 - x0 + lw + rw, gy + 1000 - 2); ctx.clip();
         terStrip("base_mid", x0 + lw * 0.3, x1 - rw * 0.3, y, h, 0.06);
         terPiece("base_left", x0 - lw * 0.35, y, h);
         terPiece("base_right", x1 - rw * 0.65, y, h);
+        ctx.restore();
+        // the meadow's grass grows over the foot of the rocks
+        terStrip("topsoil", x0 - lw * 0.35, x1 + rw * 0.35, gy - TUNE.TER_GRASS_RISE - 2, TUNE.TER_TOPSOIL_H);
         start = -1;
       }
     }
