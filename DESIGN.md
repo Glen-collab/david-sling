@@ -3,7 +3,7 @@
 > Working document. Each world gets locked before anything for it is built.
 > **Look:** **smooth, Pixar-style characters, like Rainbow Unicorn Quest.** No pixel squares on the characters. Sprites come from Grok video clips (see [VIDEO_SPRITES.md](VIDEO_SPRITES.md)). Reference: `FINAL-david_walk_preview.gif` (2026-10-06). Backgrounds may get an SNES-style look later; not decided yet. **Controls:** NES-style (D-pad, A, B, Select, Start).
 
-> Status: **All 8 worlds drafted for review; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
+> Status: **All 8 worlds drafted for review; checkpoint cast, sheepfold finish, and David's Journal & song in §3h; two-player co-op (P2 = the lamb) added in §3e; sprite checklist in [SPRITES.md](SPRITES.md); creatures & Field Guide added; The One and The Song threads, and the SMB3-style map, added. Art prompts in [ART_PROMPTS.md](ART_PROMPTS.md).**
 
 ---
 
@@ -383,6 +383,71 @@ The five smooth stones from the stream (World 7) stay separate. They're the stor
 - **Start with 5 lives.** Losing all your hearts costs a life and puts you back at the last campfire.
 - **Out of lives = back to the start of that stage**, not the start of the world. You keep every special stone, sheep and scroll you've found.
 - **Extra lives:** a full oil flask (100 olives), golden olives hidden in trees, and finding all 5 lost sheep in a stage.
+
+## 3h. The checkpoint cast, the sheepfold finish, and David's Journal & song *(decided 2026-10-08)*
+
+This section **updates §3 and §3c**: Hanan becomes a smaller part, the people David meets become a varied cast, and the Journal becomes David writing his own psalm.
+
+### One checkpoint per stage, with someone different each time
+- Every stage has **one campfire checkpoint at the halfway mark** (like Super Mario World).
+- **Someone different sits at each one**, Castlevania-style: shepherds, a gleaner, a traveller, a potter, a soldier, a grandmother at a well, the brothers. **Hanan is one of them now and then, not the main guide.**
+- Each person gives **one line of practical advice** about what's ahead ("don't eat the striped gourds, they'll make you ill"). That line is a counsel card (§3c) as before.
+
+### What David could have known: scripture from before his time
+David writes only from **books that existed before him**: the Law of Moses (**Genesis to Deuteronomy**), **Joshua, Judges and Ruth**. He would mostly have *heard* them, not read them.
+- **Later books** (Kings, Proverbs, the Prophets, the Gospels, and the rest of the Psalms) can still appear in the **Field Guide and Bible-fact cards**, clearly labelled as later. They are never words David "remembers."
+- *Note:* some verses earlier in this doc (e.g. 2 Kings 4:39 on the gourds, Proverbs) are later books. They stay as Field Guide facts; David's own Journal uses the pre-David references below.
+
+**Starter list: advice → what David remembers**
+
+| Advice at a checkpoint | What David writes, from scripture before him |
+|---|---|
+| "Bring back every stray sheep, even your neighbour's" | Return a neighbour's lost sheep (Deuteronomy 22:1) |
+| "Leave the bees be; there's honey for the patient" | Samson found honey in the lion he had killed (Judges 14:8) |
+| "The lion is Judah's own sign" | Judah, David's tribe, is "a lion's cub" (Genesis 49:9) |
+| "Snakes are crafty; look before you step" | The serpent was the craftiest creature (Genesis 3:1) |
+| "Don't eat what you don't know" | Choose life (Deuteronomy 30:19) |
+| "Be kind to the animals" | Don't muzzle the ox while it treads the grain (Deuteronomy 25:4) |
+| "Leave some for the poor" | Leave the edges of the field for the poor (Leviticus 19:9); David's great-grandmother Ruth gleaned (Ruth 2) |
+| "Be strong, don't be afraid" | Joshua 1:9; Deuteronomy 31:6 |
+| "Don't fear their chariots" | Don't fear horses and chariots (Deuteronomy 20:1). Right before the chariot boss. |
+| "Giants? Our people saw giants before" | The spies felt like grasshoppers beside giants (Numbers 13:33); the last of them stayed in Gath, Goliath's town (Joshua 11:22) |
+| "Remember who helped you" | "Do not be afraid. I am your shield" (Genesis 15:1) |
+
+### The end of every stage: the sheepfold gate (our flagpole)
+Quick, about 3–4 seconds:
+1. The stage ends at a **stone sheepfold** with a tall gatepost.
+2. **Jump and touch the post:** the higher the touch, the more bonus olives.
+3. **The sheep you found trot through the gate**, counted one by one with a chime; **The One** goes last, with a sparkle.
+4. The gate closes. Stage clear.
+
+In stages without sheep it's a **town, palace or camp gate**, and the tally counts whatever that stage's lost things are (§5d onward).
+
+### The end of every world: David's Journal, two pages
+David sits by the fire, pulls out his scroll and writes. A two-page spread fills in while **the instrumental of the song** plays.
+- **Left page: Wisdom.** In David's own words, what he learned from the people he met this world, each with its pre-David scripture.
+- **Right page: The Psalm.** The world's new line of **"The Shepherd Leads Me"** is added under the earlier ones, so the song builds page by page across the game.
+- Skippable after the first time; readable any time from the pause-menu Journal.
+
+### The song: "The Shepherd Leads Me" (Glen's lyrics, a paraphrase of Psalm 23)
+Made by Glen on Suno, in his own words rather than a Bible translation, so there's no copyright issue with the text. **Instrumental only in Worlds 1–7. The full vocal version plays once, at the very end.**
+
+| World | The line(s) David writes |
+|---|---|
+| 1 The Shepherd's Fields | *The Lord is my shepherd, I have everything I need.* |
+| 2 The Wilderness | *He leads me beside the waters, where the troubled waves grow still.* |
+| 3 The Anointing | *He restores my soul again, and guides me where He will.* |
+| 4 The King's Court | *You lead me down the right road… Even when the shadows gather, You remain the same.* |
+| 5 The Road to the Valley | *When the darkness surrounds me, and I cannot see the way, I know Your hand is on me, and Your rod will keep me safe.* |
+| 6 The Valley of Elah | *Through the darkest valley, You will lead me safely home. I will not be afraid.* |
+| 7 The Giant's Shadow | *You set a table before me, even while my enemies stand near… and You replace my fear.* |
+| 8 David and Goliath | *Your mercy keeps on following me…* and the outro. **Then the full song plays with vocals** over the walk home (8-4) and the credits. |
+
+**The 8 Mile moment:** the overlooked kid has been writing all game. After he beats the giant, the finished song finally plays out loud.
+
+**Audio still needed from Glen:** the vocal MP3 (ending) and an instrumental version (Worlds 1–7). Each world's Journal plays a little more of the instrumental than the last.
+
+**Rights note:** check the Suno plan the song was made on before any commercial release (free-plan songs generally can't be used commercially).
 
 ## 4. Controls & moves
 
@@ -1553,7 +1618,7 @@ After the credits, if you found every lamb:
 ---
 
 ## 7. Open questions
-- [ ] Sage's name: "Old Hanan" is a placeholder.
+- [ ] Sage's name: "Old Hanan" is a placeholder. (Now a smaller, occasional role: §3h.)
 - [ ] Hearts: start with 3, 4th from World 1? Max hearts?
 - [x] Lives: Mario-style, 5 lives, out of lives = restart the stage only, keep collectibles (§3g).
 - [x] Look: **smooth Pixar-style characters, like the unicorn game** (decided 2026-10-06 after comparing pixel and smooth versions of the same walk).
