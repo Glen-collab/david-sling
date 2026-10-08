@@ -322,23 +322,45 @@ Use the same white-background asset-sheet style as the food & nature sheet:
 ## NEXT BATCH (2026-10-08): what the levels need now, in priority order
 Upload one of the finished item images (e.g. the olive tree) with each request as the style reference, and add: *"same Pixar-style look as the attached image, side-view game art."*
 
-### 1. Ground textures (most important). These replace the plain brown blocks.
-I build every ground, ledge and platform piece from these in code, so they only need to **tile seamlessly** (the left edge must match the right edge, and for fills, top matches bottom too). Ask for each as its own image:
+### 1. Ground, rock, walls and pits (most important). These replace the plain brown blocks.
+No bricks anywhere: in David's time walls were **dry-stone** (stacked fieldstones, no mortar) and the land is **limestone**. I build every ground, ledge, wall and pit from these pieces in code, so each texture only has to **tile seamlessly**. Upload the World 1 near-layer grass image (image 7) as the style reference so everything matches. One prompt per image:
+
 ```
-A) Grassy ground TOP STRIP for a side-scrolling game: a long horizontal strip, 2048 x 256,
-   seen straight from the side. Golden-green Judean pasture grass and a little soil lip along
-   the top edge, wildflowers here and there. Seamless: the left edge must match the right edge.
-   Solid flat #00FF00 green above the grass. No objects, no text.
-B) Soil FILL texture: 1024 x 1024 square, packed earth with small stones and roots, seen from
-   the side. Seamless on all four edges (tileable). Fills the whole image, no background.
-C) Limestone rock FILL texture: 1024 x 1024, pale cream-and-tan Judean limestone blocks,
-   cracks and moss, side view. Seamless on all four edges.
-D) Limestone TOP EDGE strip: 2048 x 256, the weathered top surface of limestone rock with a
-   little grass and moss. Seamless left-to-right. Solid #00FF00 above it.
-E) One-way PLATFORM pieces in one image on #00FF00: a thick old wooden plank / branch platform
-   seen from the side: a LEFT end cap, a MIDDLE piece that repeats seamlessly, and a RIGHT
-   end cap, side by side with a gap between them.
+A) TOPSOIL / GRASS EDGE strip. Side-scrolling game terrain, seen straight from the side.
+   A long horizontal strip, 2048 x 256: the top edge of the ground: golden-green pasture
+   grass, a few wildflowers, little pebbles, and a thin lip of brown earth along the bottom.
+   Seamless: the left edge must match the right edge exactly. Solid flat #00FF00 green
+   above the grass. No objects, no text.
+
+B) SEDIMENT / EARTH FILL. 1024 x 1024 square texture, the ground seen from the side as a
+   cut-away: packed brown earth in soft layers, small stones, a few roots, warm tones.
+   Seamless on ALL FOUR edges (tileable in every direction). Fills the whole image.
+
+C) LIMESTONE ROCK FILL (for rock ledges, cliffs and the blocks you jump over).
+   1024 x 1024, pale cream-and-tan Judean limestone seen from the side: natural cracked
+   rock faces, weathered layers, a little moss. NOT bricks, NOT cut blocks.
+   Seamless on all four edges.
+
+D) LIMESTONE TOP EDGE strip. 2048 x 256: the weathered, rounded top surface of natural
+   limestone rock, tufts of dry grass and moss on top. Seamless left-to-right.
+   Solid #00FF00 above it.
+
+E) ROCK LEDGE pieces (thin floating shelves you can stand on). One image on #00FF00:
+   a natural limestone shelf seen from the side, about as thick as a person's arm: a LEFT
+   end (rounded, broken-off rock), a MIDDLE piece that repeats seamlessly, and a RIGHT end.
+   The three pieces side by side with a gap between them.
+
+F) DRY-STONE WALL pieces (period-accurate field walls, no mortar). One image on #00FF00:
+   a low wall of stacked rough fieldstones seen from the side: a LEFT end (tapered),
+   a MIDDLE section that repeats seamlessly, and a RIGHT end. Side by side, with gaps.
+
+G) PIT / CREVICE. One image on #00FF00: a deep crack in the ground seen from the side,
+   as a cut-away: rough rock walls on the left and right going down into darkness, getting
+   darker and darker to pure black at the bottom. The top edges have a grassy lip.
+   Make the left wall and the right wall as separate pieces, side by side with a gap,
+   each tall (256 wide x 1024 tall).
 ```
+**Later (World 2):** the same set in **sandstone and dry desert soil** (swap "golden-green pasture grass" for "dry yellow grass and sand", and "pale limestone" for "orange-tan sandstone").
 
 ### 2. Background layers (World 1)
 Use the three prompts in **Background layers** above (far, middle, near). Make them **3072 x 1024**.

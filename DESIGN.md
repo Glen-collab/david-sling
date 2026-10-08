@@ -233,6 +233,11 @@ Filling in every creature is a collection goal of its own.
 | **Thorns** | A sheep's wool catches in a thorn bush and it's stuck. | Clear the thorns with the sling. | |
 | **Pits and crevices** | A sheep falls in. | Find a way down or lower a rope. | Jesus mentions a sheep fallen into a pit (Matthew 12:11). |
 
+### Pits and crevices *(2026-10-08)*
+Two kinds of hole, and they look different so the player can tell:
+- **Deadly pit:** a deep crack that fades to **pure black**. Falling in costs a life (back to the checkpoint).
+- **Crevice with a stuck sheep:** a shallower crack with a **rock shelf partway down** and a lost sheep (or The One) stranded on it. David drops onto the shelf, picks the sheep up (Down), and **double-jumps back out carrying it**. The bottom below the shelf is still a deadly pit, so missing the shelf is a real risk. (Co-op: the lamb can hop down and bleat the sheep up instead.)
+
 ### 5. Thieves and raiders
 - **Rustlers** sneak in to steal sheep. Jesus speaks of the thief who comes to steal (John 10:10). Hit them and they drop the sheep and run. They're scared off, never "killed."
 - **Philistine raiders** in Worlds 5–6.
