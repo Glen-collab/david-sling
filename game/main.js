@@ -35,6 +35,7 @@ const TUNE = {
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
   DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
+  PIT_CLOSE: 0.3,         // how far each crevice wall reaches into a pit (0.3 = 30% of the gap from each side)
   BASE_DROP: 6,           // push the limestone base pieces down into the grass (pixels)
   WALL_SINK: 16,          // how far dry-stone walls sink into the grass (pixels)
   WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
@@ -762,21 +763,6 @@ function drawTiles(camX) {
     ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     ctx.fillRect(c * T, r * T, T + 0.5, T + 0.5);
   }
-  // 3) top edges: grass on earth, weathered rock on limestone (one strip per run of exposed tops)
-  for (let r = 0; r < ROWS; r++) {
-    for (let m of [1, 2]) {
-      let start = -1;
-      for (let c = c0; c <= c1 + 1; c++) {
-        const top = c <= c1 && matAt(c, r) === m && !isSolid(c, r - 1);
-        if (top && start < 0) start = c;
-        if (!top && start >= 0) {
-          if (m === 1) terStrip("topsoil", start * T - 4, c * T + 4, r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
-          else terStrip("limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
-          start = -1;
-        }
-      }
-    }
-  }
   // 3b) where limestone sits on earth, sink it into the soil (Glen's limestone base pieces)
   for (let r = 0; r < ROWS - 1; r++) {
     let start = -1;
@@ -794,8 +780,6 @@ function drawTiles(camX) {
         terPiece("base_left", x0 - lw * 0.35, y, h);
         terPiece("base_right", x1 - rw * 0.65, y, h);
         ctx.restore();
-        // the meadow's grass grows over the foot of the rocks
-        terStrip("topsoil", x0 - lw * 0.35, x1 + rw * 0.35, gy - TUNE.TER_GRASS_RISE - 2, TUNE.TER_TOPSOIL_H);
         start = -1;
       }
     }
@@ -816,11 +800,13 @@ function drawTiles(camX) {
   for (let c = c0; c <= c1; c++) {
     if (isSolid(c, GR) && !isSolid(c + 1, GR) && c + 1 < COLS) {         // ground ends, pit to the right
       const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_left.naturalWidth * h / (TER.pit_left.naturalHeight || 1);
-      terPiece("pit_left", (c + 1) * T - w * 0.92, GR * T - TUNE.TER_GRASS_RISE, h);
+      let gap = 0; while (!isSolid(c + 1 + gap, GR) && c + 1 + gap < COLS) gap++;
+      terPiece("pit_left", (c + 1) * T + gap * T * TUNE.PIT_CLOSE - w, GR * T - TUNE.TER_GRASS_RISE, h);
     }
     if (isSolid(c, GR) && !isSolid(c - 1, GR) && c > 0) {                // pit to the left, ground starts
       const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_right.naturalWidth * h / (TER.pit_right.naturalHeight || 1);
-      terPiece("pit_right", c * T - w * 0.08, GR * T - TUNE.TER_GRASS_RISE, h);
+      let gap = 0; while (!isSolid(c - 1 - gap, GR) && c - 1 - gap > 0) gap++;
+      terPiece("pit_right", c * T - gap * T * TUNE.PIT_CLOSE, GR * T - TUNE.TER_GRASS_RISE, h);
     }
   }
   // 5) dry-stone walls (material 3): end caps + repeated middle, scaled to the wall's height
@@ -839,13 +825,29 @@ function drawTiles(camX) {
     ctx.fillStyle = sg; ctx.fillRect(x0 - 30, groundY - 14, x1 - x0 + 60, 24);
     // colour-match the stones to the limestone and the background walls
     ctx.save(); ctx.filter = TUNE.WALL_FILTER;
+    ctx.beginPath(); ctx.rect(x0 - 200, -1000, x1 - x0 + 400, groundY + 1000); ctx.clip();
     const lw = terPiece("wall_left", x0 - 4, y, hh);
     const rw = TER.wall_right.naturalWidth * hh / (TER.wall_right.naturalHeight || 1);
     terStrip("wall_mid", x0 - 4 + lw * 0.7, x1 + 4 - rw * 0.7, y + hh * 0.13, hh * 0.87);
     terPiece("wall_right", x1 + 4 - rw, y, hh);
     ctx.restore();
-    // grass growing up in front of the base, so it sits IN the meadow
-    terStrip("topsoil", x0 - 14, x1 + 14, groundY - TUNE.TER_GRASS_RISE - 4, TUNE.TER_TOPSOIL_H);
+  }
+  // 3) top edges: grass on earth, weathered rock on limestone (one strip per run of exposed tops)
+  for (let r = 0; r < ROWS; r++) {
+    for (let m of [1, 2]) {
+      let start = -1;
+      for (let c = c0; c <= c1 + 1; c++) {
+        // grass also runs under walls and under limestone sitting on the ground, so their feet stand IN the meadow
+        const above = matAt(c, r - 1), covered = above && !(above === 3 || (m === 1 && above === 2));
+        const top = c <= c1 && matAt(c, r) === m && !covered;
+        if (top && start < 0) start = c;
+        if (!top && start >= 0) {
+          if (m === 1) terStrip("topsoil", start * T - 4, c * T + 4, r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+          else terStrip("limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
+          start = -1;
+        }
+      }
+    }
   }
   // 6) one-way ledges: rock shelf pieces
   for (let r = 0; r < ROWS; r++) {
