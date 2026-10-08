@@ -391,6 +391,12 @@ A single green olive, a single purple olive and a **golden olive** (glowing a li
 - **Hanan ✦**, an old shepherd in a grey robe with a white beard: standing and talking; sitting by a fire.
 - **The neighbour shepherd ✦** (an old man) and **the shepherd girl ✦** with her goat: standing and talking.
 
+### 7. Caves (for later; see DESIGN.md §3j)
+- **Grok clip:** *"This exact boy, seen from BEHIND, walking away from the camera into a dark cave mouth, slowly, full body in frame, green background, locked camera."* And the reverse: walking out toward the camera.
+- **Grok clip:** a bat flying in place (wings flapping), and a bat hanging upside down, on green.
+- **Image:** a small clay oil lamp (an ancient Israelite saucer lamp with a pinched spout and a small flame), on green.
+- **Images:** cave interior background layers (far: deep darkness with faint rock shapes; middle: rock columns and drips, on green; near: rocky floor rubble, on green), and a cave floor/wall terrain set (dark damp limestone, same pieces as the World 1 terrain).
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*

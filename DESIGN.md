@@ -493,6 +493,38 @@ The game invents supporting people (Hanan, the checkpoint cast, Tobi, the Stewar
 
 **A pastor's review before release.** Before the game ships, a pastor reads every checkpoint line, Journal entry and story scene, and signs off. Their name (with permission) goes in the credits as a reviewer, which also reassures church families.
 
+## 3j. Caves *(Glen's idea, 2026-10-08)*
+
+Caves are doorways into small, dark side areas, like Mario's pipes or Castlevania's doors. Art for the entrances is ready: `assets/items/cave_1.png` (a low grassy mound) and `cave_2.png` (a tall cracked limestone opening).
+
+**Going in and out**
+- Stand at a cave mouth and press **Up**. **David turns his back to the camera and walks in**; the screen fades; you're in the cave area.
+- Walk back to the cave mouth inside and press Up to come out where you went in.
+
+**Inside: darkness and the oil lamp**
+- The cave is dark except for a **circle of light around David** from a small clay oil lamp.
+- **The lamp burns oil from the flask** (the olives, §3g). The light slowly shrinks while you're inside; olives found in the cave top it up. If the oil runs out, the light shrinks to a small glow (never total darkness, so you can always find the way out).
+- **Lost sheep bleat**, louder as you get closer, so you can find them by sound. **The One loves caves.**
+- **Bats** flutter up when you pass under them. Harmless: another "look before you throw" (§3d), and a Field Guide card.
+- Caves can hold food, a special stone, and a crevice with a stranded sheep.
+
+**Scripture David knew:** the LORD told Moses to bring **pure oil of pressed olives for the light, so the lamp would keep burning** (Exodus 27:20). A natural Journal entry about light in dark places.
+
+**Where caves go**
+| Stage | Cave |
+|---|---|
+| **1-2 / 1-3** | A short first cave: The One's low cave in 1-2, and the hidden caves of the Rocky Pastures. Teaches the lamp gently. |
+| **2-4, the Bear's Ravine** | A darker, longer cave near the bear's den. |
+| Later worlds | Wherever they fit (the Philistine lookouts' ridge, the streambed banks). |
+| *Part 2* | Hanan's line *"Some day you may need to hide in a cave"* (1-3) sets up David hiding from Saul (1 Samuel 22, 24). |
+
+**Art still needed**
+1. **David walking away from the camera** into darkness, seen from behind (Grok clip); and walking out toward the camera.
+2. **Cave interior background layers** (dark rock, three layers like outdoors).
+3. **Cave floor and wall terrain** (darker, damp limestone).
+4. **A bat**, flying and hanging (Grok clip).
+5. **A small clay oil lamp** that David holds.
+
 ## 4. Controls & moves
 
 NES layout: **D-pad, A, B, Select, Start.**
