@@ -31,6 +31,12 @@ const TUNE = {
   RUN_THROW_TIME: 0.6,    // the throw while running (legs keep running)
   RUN_THROW_SPEED: 120,   // moving faster than this when the throw starts = running throw
   LAMB_SPEED: 380,
+  BG_FAR_SPEED: 0.05,     // background scroll speeds (0 = still, 1 = moves with the ground)
+  BG_MID_SPEED: 0.25,
+  BG_NEAR_SPEED: 0.55,
+  BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
+  BG_NEAR_HEIGHT: 150,
+  BG_FAR_DROP: { w1: -150, w2: 40 },   // per world: push the far layer down (positive) or up (negative)
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -726,6 +732,7 @@ addEventListener("keydown", e => {
   if (e.code === "KeyH") helpT = helpT > 0 ? 0 : 9999;
   if (e.code === "Digit1") { location.hash = ""; location.reload(); }
   if (e.code === "Digit2") { location.hash = "test"; location.reload(); }
+  if (e.code === "Digit3") { bgWorld = bgWorld === "w1" ? "w2" : "w1"; toast(bgWorld === "w1" ? "World 1 background" : "World 2 background (preview)"); }
 });
 
 let helpT = 12;
@@ -737,9 +744,9 @@ function drawHUD() {
     ctx.fillText("Click the game (or press any key) once to turn on sound", W / 2, H - 20); ctx.textAlign = "left";
   }
   if (helpT <= 0) {
-    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 300, 26);
+    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 450, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
-    ctx.fillText("H = controls   1 = World 1-1   2 = movement test", 18, 28);
+    ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background", 18, 28);
   } else drawHelp();
   drawToastAndSetup();
 }
@@ -1234,30 +1241,34 @@ function updateWorld(dt) {
   updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt);
 }
 
-// background layers (stand-ins until there is real background art)
-function drawBackground(camX) {
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#86b8e0"); g.addColorStop(0.55, "#d9e7ea"); g.addColorStop(1, "#f4e2bd");
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  // far ridges
-  ctx.fillStyle = "#cdbf98";
-  for (let i = -1; i < 7; i++) { const x = i * 420 - (camX * 0.12) % 420; ctx.beginPath(); ctx.ellipse(x + 210, 540, 300, 150, 0, Math.PI, 0); ctx.fill(); }
-  // Bethlehem on its hill
-  const bx = 980 - camX * 0.1;
-  ctx.fillStyle = "#bfae82"; ctx.beginPath(); ctx.ellipse(bx, 500, 250, 120, 0, Math.PI, 0); ctx.fill();
-  ctx.fillStyle = "#ead9b2"; for (let k = 0; k < 8; k++) ctx.fillRect(bx - 120 + k * 30, 392 - (k % 3) * 10, 24, 20);
-  // middle hills with faded trees
-  const p2 = camX * 0.35;
-  ctx.fillStyle = "#b5bf82";
-  for (let i = -1; i < 7; i++) { const x = i * 380 - p2 % 380; ctx.beginPath(); ctx.ellipse(x + 190, 610, 260, 120, 0, Math.PI, 0); ctx.fill(); }
-  const trees = ["olive_tree", "date_palm", "fig_tree", "olive_tree"];
-  for (let i = -1; i < 9; i++) {
-    const k = Math.floor((p2 + i * 300) / 300); const x = k * 300 - p2 + 80;
-    drawItem(trees[((k % 4) + 4) % 4], x, 545 + (k % 2) * 12, 0.42, 0.55);
+// background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
+const BG = {};
+for (const w of ["w1", "w2"]) {
+  BG[w] = {};
+  for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
+    total++;
+    const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
+    img.src = `../assets/backgrounds/${w}_${layer}.${ext}?v=${window.BUILD || 0}`; BG[w][layer] = img;
   }
-  // near hills
-  ctx.fillStyle = "#9fb86a";
-  for (let i = -1; i < 7; i++) { const x = i * 360 - (camX * 0.6) % 360; ctx.beginPath(); ctx.ellipse(x + 180, 650, 240, 110, 0, Math.PI, 0); ctx.fill(); }
+}
+let bgWorld = "w1";   // press 3 to swap between World 1 and World 2 backgrounds (to compare)
+function drawLayerRepeating(img, camX, factor, bottomY, height) {
+  if (!img.naturalWidth) return;
+  const w = img.naturalWidth * height / img.naturalHeight;
+  let x = -((camX * factor) % w); if (x > 0) x -= w;
+  for (; x < W; x += w) ctx.drawImage(img, Math.floor(x), bottomY - height, Math.ceil(w) + 1, height);
+}
+function drawBackground(camX) {
+  const L = BG[bgWorld];
+  // far: one image, scaled so it covers the screen plus all the scrolling it will do, bottom-aligned (no repeat)
+  const far = L.far;
+  if (far.naturalWidth) {
+    const scroll = Math.max(0, LEVEL_W - W) * TUNE.BG_FAR_SPEED;
+    const w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
+    ctx.drawImage(far, -camX * TUNE.BG_FAR_SPEED, H - h + (TUNE.BG_FAR_DROP[bgWorld] || 0), w, h);
+  } else { ctx.fillStyle = "#cfe0ea"; ctx.fillRect(0, 0, W, H); }
+  drawLayerRepeating(L.mid, camX, TUNE.BG_MID_SPEED, GR * T + 30, TUNE.BG_MID_HEIGHT);
+  drawLayerRepeating(L.near, camX, TUNE.BG_NEAR_SPEED, GR * T + 22, TUNE.BG_NEAR_HEIGHT);
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
