@@ -36,6 +36,7 @@ const TUNE = {
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
   HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
+  HARP_VOLUME: 0.8,       // volume of the harp music when David plays (0 to 1)
   // size of each of the 14 sit-down frames, measured so his head matches standing David (the clip's camera crept closer)
   SIT_HARP_SIZES: [0.89, 0.87, 0.86, 0.80, 0.75, 0.74, 0.74, 0.72, 0.72, 0.72, 0.71, 0.72, 0.72, 0.72],
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
@@ -730,6 +731,11 @@ addEventListener("keydown", e => {
 let helpT = 12;
 function drawHUD() {
   drawHearts(); drawSpecialCount(); drawLivesAndOil();
+  if (!audioUnlocked) {
+    ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(W / 2 - 230, H - 40, 460, 30);
+    ctx.fillStyle = "#ffe08a"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("Click the game (or press any key) once to turn on sound", W / 2, H - 20); ctx.textAlign = "left";
+  }
   if (helpT <= 0) {
     ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 300, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
@@ -1192,7 +1198,32 @@ function drawBugs(camX) {
   for (const h of hornets) if (h.alpha > 0) drawSprite("hornet_fly", frameOf("hornet_fly", h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.facing, 1, h.alpha);
 }
 
+// harp music: the first 15 seconds of "The Shepherd Leads Me", looping while David sits and plays
+const harpMusic = new Audio("../assets/audio/harp_loop.mp3?v=" + (window.BUILD || 0));
+harpMusic.loop = true; harpMusic.volume = 0;
+let harpVol = 0, harpStarting = false;
+// Browsers only allow sound after the player clicks or presses a key on the page (controller buttons don't count),
+// so the first click or keypress quietly "unlocks" audio.
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  harpMusic.muted = true;
+  harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = true; }).catch(() => {});
+}
+addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlockAudio);
+function updateHarpMusic(dt) {
+  const want = david.harp && (david.state === "kneel" || david.state === "harp");
+  if (want && harpMusic.paused && !harpStarting && audioUnlocked) {
+    harpStarting = true; harpMusic.currentTime = 0; harpVol = 0;
+    harpMusic.play().then(() => { harpStarting = false; }).catch(() => { harpStarting = false; });
+  }
+  harpVol = want ? Math.min(TUNE.HARP_VOLUME, harpVol + dt * 1.5) : Math.max(0, harpVol - dt * 1.2);   // gentle fade in and out
+  harpMusic.volume = harpVol;
+  if (!want && harpVol <= 0 && !harpMusic.paused) harpMusic.pause();
+}
+
 function updateWorld(dt) {
+  updateHarpMusic(dt);
   updateBees(dt); updateHornets(dt);
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);

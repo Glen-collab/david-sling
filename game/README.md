@@ -8,6 +8,8 @@ Double-click `index.html` to play in your browser (Chrome or Edge). No install n
 
 **NES controller:** plug it in and press any button on it. The setup starts by itself the first time; follow the prompts (Up, Down, Left, Right, A, B, Select, Start). To redo it: press **M** on the keyboard, or hold **Select + Start** on the controller for 2 seconds. The mapping is remembered.
 
+**Sound:** click the game (or press a key) once after it opens. Browsers block sound until then, and controller buttons do not count.
+
 **Tuning:** every speed and height is in the `TUNE` block at the top of `main.js`. Change one number, save, reload the page.
 
 After adding new sprite sheets to `assets/sprites/`, run `python tools/make_manifest.py`.
