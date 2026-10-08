@@ -31,6 +31,10 @@ const TUNE = {
   RUN_THROW_TIME: 0.6,    // the throw while running (legs keep running)
   RUN_THROW_SPEED: 120,   // moving faster than this when the throw starts = running throw
   LAMB_SPEED: 380,
+  TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
+  TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
+  TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
+  TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150,
   BG_FAR_SPEED: 0.05,     // background scroll speeds (0 = still, 1 = moves with the ground)
   BG_MID_SPEED: 0.25,
   BG_NEAR_SPEED: 0.55,
@@ -224,6 +228,7 @@ let lionSpawn = null, arenaX = Infinity;
 const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = 1; };
 const block = (c, r, w, h, mat = 1) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
 const rock = (c, r, w, h) => block(c, r, w, h, 2);
+const wall = (c, r, w, h) => block(c, r, w, h, 3);   // dry-stone wall
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
 const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true, hanging });
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
@@ -268,11 +273,11 @@ if (LEVEL_NAME === "test") {
   oliveArc(35, 16, 6); oliveRow(50, 16, 4); oliveArc(64, 16, 4);
   oliveRow(80, 12, 4); oliveRow(86, 9, 3); oliveRow(95, 16, 4); oliveArc(103, 16, 5);
   oliveRow(126, 16, 6); oliveArc(133, 16, 5); oliveRow(144, 16, 3); oliveArc(158, 16, 6);
-  rock(26, 15, 3, 2); rock(30, 13, 3, 4);
+  wall(26, 15, 3, 2); rock(30, 13, 3, 4);
   gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
   snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
   deco("thorn_bush", 43, 16, 0.8, "front");
-  food("poison_berries", 45, 16); rock(47, 15, 3, 2); food("cheese", 48, 14);
+  food("poison_berries", 45, 16); wall(47, 15, 3, 2); food("cheese", 48, 14);
   label(44, 11, "Berries or cheese? Look before you eat.");
   deco("olive_tree", 55, 16, 1.15, "back", "golden_olive");   // jump into it: a shower of olives, and a golden one
   ground(64, 122);
@@ -675,26 +680,117 @@ function updateStones(dt) {
 // ============================================================================
 // Drawing the world
 // ============================================================================
+// ---------------------------------------------------------------------------
+// Terrain art (Glen's World 1 set): earth = sediment + topsoil edge, rock = limestone + limestone top,
+// walls = dry-stone pieces, one-way ledges = rock ledge pieces, pits = dark drop with rock-cliff edges.
+// ---------------------------------------------------------------------------
+const TER = {};
+for (const n of ["topsoil", "sediment", "limestone", "limestone_top", "ledge_left", "ledge_mid", "ledge_right",
+                 "wall_left", "wall_mid", "wall_right", "pit_left", "pit_right"]) {
+  total++;
+  const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
+  img.src = `../assets/terrain/${n}.png?v=${window.BUILD || 0}`; TER[n] = img;
+}
+const terPatterns = {};
+function terPattern(name, scale) {   // a repeating fill, cached, anchored to the level (not the screen)
+  const key = name + scale;
+  if (terPatterns[key]) return terPatterns[key];
+  const img = TER[name]; if (!img || !img.naturalWidth) return null;
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return (terPatterns[key] = ctx.createPattern(c, "repeat-x" === name ? "repeat-x" : "repeat"));
+}
+// draw a strip image repeated along a run, height h, top at y (world coordinates; caller has translated by -camX)
+function terStrip(name, x0, x1, y, h) {
+  const img = TER[name]; if (!img || !img.naturalWidth) return;
+  const w = img.naturalWidth * h / img.naturalHeight;
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y - 2, x1 - x0, h + 4); ctx.clip();
+  for (let x = Math.floor(x0 / w) * w; x < x1; x += w) ctx.drawImage(img, x, y, w + 1, h);
+  ctx.restore();
+}
+function terPiece(name, x, y, h, flip = false) {   // one piece scaled to height h, top-left at x,y; returns its width
+  const img = TER[name]; if (!img || !img.naturalWidth) return 0;
+  const w = img.naturalWidth * h / img.naturalHeight;
+  if (flip) { ctx.save(); ctx.translate(x + w, y); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0, w, h); ctx.restore(); }
+  else ctx.drawImage(img, x, y, w, h);
+  return w;
+}
+const matAt = (c, r) => (r >= 0 && r < ROWS && c >= 0 && c < COLS) ? solid[r][c] : 0;
+
 function drawTiles(camX) {
-  const c0 = Math.floor(camX / T), c1 = Math.ceil((camX + W) / T);
+  const c0 = Math.max(0, Math.floor(camX / T) - 2), c1 = Math.min(COLS - 1, Math.ceil((camX + W) / T) + 2);
+  ctx.save(); ctx.translate(-Math.round(camX), 0);
+  // 1) pits: the gaps in the ground fall away into darkness
+  for (let c = c0; c <= c1; c++) if (!isSolid(c, GR)) {
+    const g = ctx.createLinearGradient(0, GR * T, 0, H);
+    g.addColorStop(0, "#2a1d12"); g.addColorStop(0.5, "#0d0805"); g.addColorStop(1, "#000");
+    ctx.fillStyle = g; ctx.fillRect(c * T, GR * T - 2, T + 1, H - GR * T + 2);
+  }
+  // 2) fills: earth and limestone (walls are drawn as pieces below)
+  const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const x = c * T - camX, y = r * T;
-    if (isSolid(c, r)) {
-      const top = !isSolid(c, r - 1);
-      if (solid[r][c] === 2) {   // limestone
-        ctx.fillStyle = "#c9b48c"; ctx.fillRect(x, y, T, T);
-        ctx.fillStyle = "#b39c74"; ctx.fillRect(x, y + T - 4, T, 4); ctx.fillRect(x + ((r % 2) ? 0 : T / 2), y, 3, T);
-        if (top) { ctx.fillStyle = "#e0cfa8"; ctx.fillRect(x, y, T, 5); ctx.fillStyle = "#7fae4a"; if ((c * 7 + r) % 3 === 0) ctx.fillRect(x + 8, y - 4, 10, 6); }
-        continue;
+    const m = matAt(c, r); if (!m || m === 3) continue;
+    ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
+    ctx.fillRect(c * T, r * T, T + 0.5, T + 0.5);
+  }
+  // 3) top edges: grass on earth, weathered rock on limestone (one strip per run of exposed tops)
+  for (let r = 0; r < ROWS; r++) {
+    for (let m of [1, 2]) {
+      let start = -1;
+      for (let c = c0; c <= c1 + 1; c++) {
+        const top = c <= c1 && matAt(c, r) === m && !isSolid(c, r - 1);
+        if (top && start < 0) start = c;
+        if (!top && start >= 0) {
+          if (m === 1) terStrip("topsoil", start * T - 4, c * T + 4, r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+          else terStrip("limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
+          start = -1;
+        }
       }
-      ctx.fillStyle = "#8b6a3e"; ctx.fillRect(x, y, T, T);
-      ctx.fillStyle = "#77592f"; ctx.fillRect(x + 5, y + 15, 8, 5); ctx.fillRect(x + 21, y + 25, 9, 5);
-      if (top) { ctx.fillStyle = "#6fae3e"; ctx.fillRect(x, y, T, 10); ctx.fillStyle = "#86c650"; ctx.fillRect(x, y, T, 4); }
-    } else if (isOneway(c, r)) {
-      ctx.fillStyle = "#a07a46"; ctx.fillRect(x, y, T, 14);
-      ctx.fillStyle = "#c39a5e"; ctx.fillRect(x, y, T, 4);
     }
   }
+  // 4) cliff edges where the ground meets a pit
+  for (let c = c0; c <= c1; c++) {
+    if (isSolid(c, GR) && !isSolid(c + 1, GR) && c + 1 < COLS) {         // ground ends, pit to the right
+      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_left.naturalWidth * h / (TER.pit_left.naturalHeight || 1);
+      terPiece("pit_left", (c + 1) * T - w * 0.92, GR * T - TUNE.TER_GRASS_RISE, h);
+    }
+    if (isSolid(c, GR) && !isSolid(c - 1, GR) && c > 0) {                // pit to the left, ground starts
+      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_right.naturalWidth * h / (TER.pit_right.naturalHeight || 1);
+      terPiece("pit_right", c * T - w * 0.08, GR * T - TUNE.TER_GRASS_RISE, h);
+    }
+  }
+  // 5) dry-stone walls (material 3): end caps + repeated middle, scaled to the wall's height
+  const seen = new Set();
+  for (let r = 0; r < ROWS; r++) for (let c = c0 - 8; c <= c1; c++) {
+    if (matAt(c, r) !== 3 || seen.has(c + "," + r) || matAt(c, r - 1) === 3 || matAt(c - 1, r) === 3) continue;
+    let w = 0; while (matAt(c + w, r) === 3) w++;
+    let h = 0; while (matAt(c, r + h) === 3) h++;
+    for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) seen.add((c + i) + "," + (r + j));
+    const x0 = c * T, x1 = (c + w) * T, y = r * T - 6, hh = h * T + 8;
+    const lw = terPiece("wall_left", x0 - 4, y, hh);
+    const rw = TER.wall_right.naturalWidth * hh / (TER.wall_right.naturalHeight || 1);
+    terStrip("wall_mid", x0 - 4 + lw * 0.7, x1 + 4 - rw * 0.7, y + hh * 0.13, hh * 0.87);
+    terPiece("wall_right", x1 + 4 - rw, y, hh);
+  }
+  // 6) one-way ledges: rock shelf pieces
+  for (let r = 0; r < ROWS; r++) {
+    let start = -1;
+    for (let c = c0 - 6; c <= c1 + 1; c++) {
+      const on = c <= c1 && isOneway(c, r);
+      if (on && start < 0) start = c;
+      if (!on && start >= 0) {
+        const x0 = start * T, x1 = c * T, y = r * T - 4, h = TUNE.TER_LEDGE_H;
+        const lw = TER.ledge_left.naturalWidth * h / (TER.ledge_left.naturalHeight || 1);
+        const rw = TER.ledge_right.naturalWidth * h / (TER.ledge_right.naturalHeight || 1);
+        terStrip("ledge_mid", x0 + lw * 0.6, x1 - rw * 0.6, y, h);
+        terPiece("ledge_left", x0 - 6, y, h);
+        terPiece("ledge_right", x1 + 6 - rw, y, h);
+        start = -1;
+      }
+    }
+  }
+  ctx.restore();
   // gourds
   for (const g of gourds) if (g.alive) {
     const x = g.x - camX, y = g.y;
