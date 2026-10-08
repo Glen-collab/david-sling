@@ -35,7 +35,7 @@ const TUNE = {
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
   DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
-  PIT_CLOSE: 0.3,         // how far each crevice wall reaches into a pit (0.3 = 30% of the gap from each side)
+  PIT_TRIM: 5,            // the ground's soil stops this many pixels short of a pit, so it never pokes past the cliff face
   BASE_DROP: 6,           // push the limestone base pieces down into the grass (pixels)
   WALL_SINK: 16,          // how far dry-stone walls sink into the grass (pixels)
   WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
@@ -761,7 +761,12 @@ function drawTiles(camX) {
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
     const m = matAt(c, r); if (!m || m === 3 || m === 4) continue;
     ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
-    ctx.fillRect(c * T, r * T, T + 0.5, T + 0.5);
+    let fx = c * T, fw = T + 0.5;
+    if (r >= GR && m === 1) {   // next to a pit: stop short so the soil doesn't show past the cliff face
+      if (!isSolid(c + 1, GR)) fw -= TUNE.PIT_TRIM;
+      if (!isSolid(c - 1, GR)) { fx += TUNE.PIT_TRIM; fw -= TUNE.PIT_TRIM; }
+    }
+    ctx.fillRect(fx, r * T, fw, T + 0.5);
   }
   // 3b) where limestone sits on earth, sink it into the soil (Glen's limestone base pieces)
   for (let r = 0; r < ROWS - 1; r++) {
@@ -796,19 +801,6 @@ function drawTiles(camX) {
     const sc = sedScale(), bw = img.naturalWidth * sc, bh = img.naturalHeight * sc;
     ctx.drawImage(img, (c + w / 2) * T - BOULDER.rockCenterX * sc, boulderTopY((r + h) * T), bw, bh);
   }
-  // 4) cliff edges where the ground meets a pit
-  for (let c = c0; c <= c1; c++) {
-    if (isSolid(c, GR) && !isSolid(c + 1, GR) && c + 1 < COLS) {         // ground ends, pit to the right
-      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_left.naturalWidth * h / (TER.pit_left.naturalHeight || 1);
-      let gap = 0; while (!isSolid(c + 1 + gap, GR) && c + 1 + gap < COLS) gap++;
-      terPiece("pit_left", (c + 1) * T + gap * T * TUNE.PIT_CLOSE - w, GR * T - TUNE.TER_GRASS_RISE, h);
-    }
-    if (isSolid(c, GR) && !isSolid(c - 1, GR) && c > 0) {                // pit to the left, ground starts
-      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_right.naturalWidth * h / (TER.pit_right.naturalHeight || 1);
-      let gap = 0; while (!isSolid(c - 1 - gap, GR) && c - 1 - gap > 0) gap++;
-      terPiece("pit_right", c * T - gap * T * TUNE.PIT_CLOSE, GR * T - TUNE.TER_GRASS_RISE, h);
-    }
-  }
   // 5) dry-stone walls (material 3): end caps + repeated middle, scaled to the wall's height
   const seen = new Set();
   for (let r = 0; r < ROWS; r++) for (let c = c0 - 8; c <= c1; c++) {
@@ -842,11 +834,25 @@ function drawTiles(camX) {
         const top = c <= c1 && matAt(c, r) === m && !covered;
         if (top && start < 0) start = c;
         if (!top && start >= 0) {
-          if (m === 1) terStrip("topsoil", start * T - 4, c * T + 4, r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+          if (m === 1) {
+            const lp = r === GR && !isSolid(start - 1, GR), rp = r === GR && !isSolid(c, GR);   // a pit on that side
+            terStrip("topsoil", start * T + (lp ? TUNE.PIT_TRIM : -4), c * T + (rp ? -TUNE.PIT_TRIM : 4), r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+          }
           else terStrip("limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
           start = -1;
         }
       }
+    }
+  }
+  // 4) cliff edges where the ground meets a pit
+  for (let c = c0; c <= c1; c++) {
+    if (isSolid(c, GR) && !isSolid(c + 1, GR) && c + 1 < COLS) {         // ground ends, pit to the right
+      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_left.naturalWidth * h / (TER.pit_left.naturalHeight || 1);
+      terPiece("pit_left", (c + 1) * T - w * 0.92, GR * T - TUNE.TER_GRASS_RISE, h);
+    }
+    if (isSolid(c, GR) && !isSolid(c - 1, GR) && c > 0) {                // pit to the left, ground starts
+      const h = TUNE.TER_PIT_EDGE_H, w = TER.pit_right.naturalWidth * h / (TER.pit_right.naturalHeight || 1);
+      terPiece("pit_right", c * T - w * 0.08, GR * T - TUNE.TER_GRASS_RISE, h);
     }
   }
   // 6) one-way ledges: rock shelf pieces
