@@ -36,7 +36,7 @@ const TUNE = {
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
   DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
   BASE_DROP: 6,           // push the limestone base pieces down into the grass (pixels)
-  WALL_SINK: 8,           // how far dry-stone walls sink into the grass (pixels)
+  WALL_SINK: 16,          // how far dry-stone walls sink into the grass (pixels)
   WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
   TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150, TER_BASE_H: 84,
   BG_FAR_SPEED: 0.05,     // background scroll speeds (0 = still, 1 = moves with the ground)
