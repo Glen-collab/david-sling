@@ -857,7 +857,7 @@ function drawPickups(camX) {
 // the cobra's strike: [frame index, seconds shown]. Frames 5-7 are the strike, 8 settles back.
 const COBRA_STRIKE = [[4, 0.07], [5, 0.16], [6, 0.08], [7, 0.12]];
 // where the tip of the cobra's head is in each frame, in sheet pixels (measured from Glen's sheet)
-const COBRA_HEAD_X = [125, 127, 125, 125, 153, 203, 154, 131];
+const COBRA_HEAD_X = [125, 127, 125, 127, 153, 203, 154, 131];
 function cobraStrikeFrame(t) { for (const [f, d] of COBRA_STRIKE) { if (t < d) return f; t -= d; } return 7; }
 // snakes: "cobra" (hood up, sways, lunges when close) and "viper" (coiled, strikes when close)
 function updateSnakes(dt) {
