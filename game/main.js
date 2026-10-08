@@ -34,6 +34,7 @@ const TUNE = {
   TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
+  DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
   WALL_SINK: 8,           // how far dry-stone walls sink into the grass (pixels)
   WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
   TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150, TER_BASE_H: 84,
@@ -305,7 +306,9 @@ if (LEVEL_NAME === "test") {
   label(170, 6, "The lion's territory");
 }
 
-const spawn = { x: 3 * T, y: GR * T }, lambSpawn = { x: 5 * T, y: GR * T };
+// "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
+const AT = Number(new URLSearchParams(location.search).get("at")) || 3;
+const spawn = { x: AT * T, y: GR * T }, lambSpawn = { x: (AT + 2) * T, y: GR * T };
 let checkpoint = { ...spawn };
 const isSolid = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && solid[r][c] > 0;
 const isOneway = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && oneway[r][c];
@@ -1432,7 +1435,7 @@ function drawBackground(camX) {
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
-    drawItem(d.name, d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, d.y + 6, d.size * 0.85);
+    drawItem(d.name, d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, d.y + 6 + (TUNE.DECO_DROP[d.name] || 0), d.size * 0.85);
 }
 function drawLivesAndOil() {
   // lives
