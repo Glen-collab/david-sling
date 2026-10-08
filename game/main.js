@@ -35,6 +35,7 @@ const TUNE = {
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
   DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
+  BASE_DROP: 6,           // push the limestone base pieces down into the grass (pixels)
   WALL_SINK: 8,           // how far dry-stone walls sink into the grass (pixels)
   WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
   TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150, TER_BASE_H: 84,
@@ -783,7 +784,7 @@ function drawTiles(camX) {
       const on = c <= c1 && matAt(c, r) === 2 && matAt(c, r + 1) === 1;
       if (on && start < 0) start = c;
       if (!on && start >= 0) {
-        const h = TUNE.TER_BASE_H, y = (r + 1) * T - TER_GRASS_CENTER - h * BASE_GRASS_FRAC, x0 = start * T, x1 = c * T;
+        const h = TUNE.TER_BASE_H, y = (r + 1) * T - TER_GRASS_CENTER - h * BASE_GRASS_FRAC + TUNE.BASE_DROP, x0 = start * T, x1 = c * T;
         const lw = TER.base_left.naturalWidth * h / (TER.base_left.naturalHeight || 1);
         const rw = TER.base_right.naturalWidth * h / (TER.base_right.naturalHeight || 1);
         terStrip("base_mid", x0 + lw * 0.3, x1 - rw * 0.3, y, h, 0.06);
