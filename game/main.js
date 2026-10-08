@@ -524,6 +524,9 @@ function updateDavid(dt) {
   else setState("walk");
 }
 
+// where the sling stone is in each frame of david_run_sling (pixels from his feet: forward, up), so the charge glow follows it
+const RUN_SLING_STONE = [[21, 232], [34, 279], [-28, 278], [-97, 285], [-135, 230], [-129, 171],
+                         [-77, 187], [25, 234], [-31, 278], [-103, 286], [-138, 232], [-127, 185]];
 // the harp clip's camera crept closer as he sat down, so shrink those frames back to his normal size
 function sitHarpScale(i) { const a = TUNE.SIT_HARP_SIZES; return a[Math.min(i, a.length - 1)] ?? 1; }
 function drawDavid(camX) {
@@ -537,7 +540,8 @@ function drawDavid(camX) {
       i = frameOf("david_run_sling", d.t * Math.max(0.7, Math.abs(d.vx) / TUNE.RUN_SPEED));
       drawSprite("david_run_sling", i, x, y, d.facing);
       const sc = SCALE * (TUNE.SPRITE_SIZE.david_run_sling || 1), sp = SPR.david_run_sling;
-      gx = x + d.facing * (165 - sp.ax) * sc; gy = y - (sp.ay - 22) * sc;   // the stone, up above his head
+      const st = RUN_SLING_STONE[i] || RUN_SLING_STONE[0];                 // where the stone is in this frame
+      gx = x + d.facing * st[0] * sc; gy = y - st[1] * sc;
     } else if (!d.charging && d.runThrow && SPR.david_run_sling_throw) {
       i = Math.min(11, Math.floor(d.throwT / TUNE.RUN_THROW_TIME * 12));
       drawSprite("david_run_sling_throw", i, x, y, d.facing);
