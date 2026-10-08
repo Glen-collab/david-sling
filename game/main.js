@@ -34,6 +34,8 @@ const TUNE = {
   TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
+  WALL_SINK: 8,           // how far dry-stone walls sink into the grass (pixels)
+  WALL_FILTER: "brightness(1.18) saturate(0.7) contrast(0.95)",   // lighter, greyer stones, closer to the limestone
   TER_LEDGE_H: 34, TER_PIT_EDGE_H: 150, TER_BASE_H: 84,
   BG_FAR_SPEED: 0.05,     // background scroll speeds (0 = still, 1 = moves with the ground)
   BG_MID_SPEED: 0.25,
@@ -818,11 +820,22 @@ function drawTiles(camX) {
     let w = 0; while (matAt(c + w, r) === 3) w++;
     let h = 0; while (matAt(c, r + h) === 3) h++;
     for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) seen.add((c + i) + "," + (r + j));
-    const x0 = c * T, x1 = (c + w) * T, y = r * T - 6, hh = h * T + 8;
+    const sink = TUNE.WALL_SINK;                               // bury the bottom stones a little in the soil
+    const x0 = c * T, x1 = (c + w) * T, y = r * T - 6 + sink, hh = h * T + 8;
+    const groundY = (r + h) * T;
+    // soft contact shadow on the grass
+    const sg = ctx.createRadialGradient((x0 + x1) / 2, groundY, 4, (x0 + x1) / 2, groundY, (x1 - x0) * 0.7);
+    sg.addColorStop(0, "rgba(40,28,10,0.35)"); sg.addColorStop(1, "rgba(40,28,10,0)");
+    ctx.fillStyle = sg; ctx.fillRect(x0 - 30, groundY - 14, x1 - x0 + 60, 24);
+    // colour-match the stones to the limestone and the background walls
+    ctx.save(); ctx.filter = TUNE.WALL_FILTER;
     const lw = terPiece("wall_left", x0 - 4, y, hh);
     const rw = TER.wall_right.naturalWidth * hh / (TER.wall_right.naturalHeight || 1);
     terStrip("wall_mid", x0 - 4 + lw * 0.7, x1 + 4 - rw * 0.7, y + hh * 0.13, hh * 0.87);
     terPiece("wall_right", x1 + 4 - rw, y, hh);
+    ctx.restore();
+    // grass growing up in front of the base, so it sits IN the meadow
+    terStrip("topsoil", x0 - 14, x1 + 14, groundY - TUNE.TER_GRASS_RISE - 4, TUNE.TER_TOPSOIL_H);
   }
   // 6) one-way ledges: rock shelf pieces
   for (let r = 0; r < ROWS; r++) {

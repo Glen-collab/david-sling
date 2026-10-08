@@ -397,6 +397,19 @@ A single green olive, a single purple olive and a **golden olive** (glowing a li
 - **Image:** a small clay oil lamp (an ancient Israelite saucer lamp with a pinched spout and a small flame), on green.
 - **Images:** cave interior background layers (far: deep darkness with faint rock shapes; middle: rock columns and drips, on green; near: rocky floor rubble, on green), and a cave floor/wall terrain set (dark damp limestone, same pieces as the World 1 terrain).
 
+### 8. Better dry-stone walls (optional upgrade)
+Upload the World 1 middle background (image 6) so the stones match the field walls in it:
+```
+A low dry-stone field wall, the kind shepherds built around Bethlehem: pale grey-cream
+limestone fieldstones of mixed sizes, stacked without mortar, with an UNEVEN, bumpy top line
+(a few stones sticking up, one small gap). Tufts of grass and moss growing in the cracks and
+around the base, a soft shadow on the ground. Seen straight from the side. Same stones and
+colours as the walls in the attached background. Solid #00FF00 background.
+Make 3 different walls side by side with gaps: SHORT (about 1.5x as wide as tall),
+MEDIUM (3x), and LONG (5x).
+```
+Three whole walls look less repetitive than a stretched middle piece.
+
 ## Tips for getting clean results
 - **Ask for one pose per image.** Then put the poses into a sheet yourself in Photoshop, one row per animation (see DESIGN.md §8).
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
