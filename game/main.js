@@ -290,7 +290,7 @@ if (LEVEL_NAME === "test") {
   hornet(108, 11); hornet(131, 10);                     // hornets: they dive at you. Sling them.
   food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
   deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
-  boulder(115, 15, 6, 2);
+  boulder(115, 14, 6, 3);
   ground(126, 232);
   deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
   rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
@@ -720,7 +720,10 @@ function terPiece(name, x, y, h, flip = false) {   // one piece scaled to height
   return w;
 }
 // Glen's boulder: measured on his image (pixels): where the rock is, and which row of the soil texture its soil starts on
-const BOULDER = { rockCenterX: 487, rockTop: 2, soilOffset: 24 };
+const BOULDER = { rockCenterX: 487, grassRow: 320, soilOffset: 24 };   // grassRow: where Glen's topsoil sits on the boulder image
+const BASE_GRASS_FRAC = 0.64;   // where the grass band sits down Glen's base pieces
+const TER_GRASS_CENTER = 3;     // the ground's grass sits this many pixels above the ground line
+function boulderTopY(groundY) { return groundY - TER_GRASS_CENTER - BOULDER.grassRow * sedScale(); }
 function sedScale() { return Math.round(664 * TUNE.TER_FILL_SCALE) / 664; }
 // shift the ground's soil layers so they line up with the first boulder's soil
 let sedimentPhase = null;
@@ -728,7 +731,8 @@ function getSedimentPhase() {
   if (sedimentPhase !== null) return sedimentPhase;
   const P = Math.round(664 * TUNE.TER_FILL_SCALE); sedimentPhase = 0;
   for (let r = 0; r < ROWS && !sedimentPhase; r++) for (let c = 0; c < COLS; c++) if (solid[r][c] === 4) {
-    const y0 = r * T - BOULDER.rockTop * sedScale();
+    let h = 0; while (matAt(c, r + h) === 4) h++;
+    const y0 = boulderTopY((r + h) * T);
     sedimentPhase = ((y0 - BOULDER.soilOffset * sedScale()) % P + P) % P; break;
   }
   return sedimentPhase;
@@ -774,7 +778,7 @@ function drawTiles(camX) {
       const on = c <= c1 && matAt(c, r) === 2 && matAt(c, r + 1) === 1;
       if (on && start < 0) start = c;
       if (!on && start >= 0) {
-        const h = TUNE.TER_BASE_H, y = (r + 1) * T - h * 0.52, x0 = start * T, x1 = c * T;
+        const h = TUNE.TER_BASE_H, y = (r + 1) * T - TER_GRASS_CENTER - h * BASE_GRASS_FRAC, x0 = start * T, x1 = c * T;
         const lw = TER.base_left.naturalWidth * h / (TER.base_left.naturalHeight || 1);
         const rw = TER.base_right.naturalWidth * h / (TER.base_right.naturalHeight || 1);
         terStrip("base_mid", x0 + lw * 0.3, x1 - rw * 0.3, y, h, 0.06);
@@ -794,7 +798,7 @@ function drawTiles(camX) {
     const img = ITEM.boulder_mound; if (!img || !img.naturalWidth) continue;
     // drawn at the ground soil's own scale, rock centred on the block, its soil sunk into the ground (layers line up, see sedimentPhase)
     const sc = sedScale(), bw = img.naturalWidth * sc, bh = img.naturalHeight * sc;
-    ctx.drawImage(img, (c + w / 2) * T - BOULDER.rockCenterX * sc, r * T - BOULDER.rockTop * sc, bw, bh);
+    ctx.drawImage(img, (c + w / 2) * T - BOULDER.rockCenterX * sc, boulderTopY((r + h) * T), bw, bh);
   }
   // 4) cliff edges where the ground meets a pit
   for (let c = c0; c <= c1; c++) {
