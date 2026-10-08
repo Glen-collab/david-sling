@@ -853,6 +853,11 @@ function drawPickups(camX) {
   for (const p of pickups) if (!p.taken) drawItem(p.name, p.x - camX, p.y - 4 + Math.sin(p.t * 3) * 3, TUNE.ITEM_SIZE);
 }
 
+// the cobra's strike: [frame index, seconds shown]. Frames 5-7 are the strike, 8 settles back.
+const COBRA_STRIKE = [[4, 0.07], [5, 0.16], [6, 0.08], [7, 0.12]];
+// how far forward the head is in each cobra frame, in sheet pixels, compared with the waiting pose
+const COBRA_REACH = [0, 0, 0, 0, 28, 78, 29, 6];
+function cobraStrikeFrame(t) { for (const [f, d] of COBRA_STRIKE) { if (t < d) return f; t -= d; } return 7; }
 // snakes: "cobra" (hood up, sways, lunges when close) and "viper" (coiled, strikes when close)
 function updateSnakes(dt) {
   for (const s of snakes) {
@@ -861,10 +866,15 @@ function updateSnakes(dt) {
     s.facing = Math.sign(david.x - s.x) || s.facing;
     const dx = Math.abs(david.x - s.x), sameLevel = Math.abs(david.y - s.y) < 70;
     if (s.state === "idle" && dx < TUNE.SNAKE_RANGE && sameLevel) { s.state = "strike"; s.t = 0; }
-    if (s.state === "strike" && s.t > 0.7) { s.state = "rest"; s.t = 0; }
+    const strikeLen = s.kind === "cobra" ? COBRA_STRIKE.reduce((a, f) => a + f[1], 0) : 0.7;
+    if (s.state === "strike" && s.t > strikeLen) { s.state = "rest"; s.t = 0; }
     if (s.state === "rest" && s.t > 0.8) { s.state = "idle"; s.t = 0; }
     // how far the head reaches right now
-    const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
+    let lunge;
+    if (s.kind === "cobra") {   // reach comes from the strike frame being shown (frame 6 = full lunge)
+      const f = s.state === "strike" ? cobraStrikeFrame(s.t) : 0;
+      lunge = COBRA_REACH[f] * SCALE * (TUNE.SPRITE_SIZE.cobra_hood || 1);
+    } else lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 46 : 0;
     s.reach = 22 + lunge;
     if (dx < s.reach + BODY_W / 2 && Math.sign(david.x - s.x) === s.facing && sameLevel && david.y - david.h < s.y) hurtDavid(s.x);
   }
@@ -874,8 +884,9 @@ function drawSnakes(camX) {
     if (s.alpha <= 0) continue;
     const x = s.x - camX;
     if (s.kind === "cobra") {
-      const lunge = s.state === "strike" ? Math.sin(Math.min(1, s.t / 0.7) * Math.PI) * 30 : 0;
-      drawSprite("cobra_hood", frameOf("cobra_hood", s.t), x + s.facing * lunge, s.y, s.facing, 1, s.alpha);
+      // waiting: sway through frames 1-4; strike: Glen's frames 5, 6, 7, then 8 to settle
+      const i = s.state === "strike" ? cobraStrikeFrame(s.t) : [0, 1, 2, 3, 2, 1][Math.floor(s.t / 0.16) % 6];
+      drawSprite("cobra_hood", i, x, s.y, s.facing, 1, s.alpha);
     } else {
       const n = SPR.snake_strike.frames;
       const i = s.state === "strike" ? Math.round(Math.abs(Math.cos(Math.min(1, s.t / 0.7) * Math.PI)) * (n - 1)) : n - 1;
