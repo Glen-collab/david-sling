@@ -73,6 +73,7 @@ const TUNE = {
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
+    david_sling_throw_up: 1.15,
     david_crawl: 0.92,
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
@@ -455,12 +456,13 @@ function updateDavid(dt) {
   }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
+    if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
   if (d.throwT >= 0) {
     if (!d.charging) d.throwT += dt;
     const dur = d.runThrow ? TUNE.RUN_THROW_TIME : TUNE.THROW_TIME;
-    const relAt = d.runThrow ? dur * 9.5 / 12 : dur * 7 / 12;   // running throw: the stone leaves at frame 10
+    const relAt = d.runThrow ? dur * 9.5 / 12 : d.aimingUp ? dur * 9.5 / 12 : dur * 7 / 12;   // running and upward throws: the stone leaves at frame 10
     if (!d.thrown && d.throwT >= relAt) {
       d.thrown = true;
       const full = Math.min(1, d.charge / TUNE.CHARGE_TIME);
@@ -569,7 +571,8 @@ function drawDavid(camX) {
     } else {
       if (d.charging) i = Math.floor(d.charge * 1000 / 70) % 6;
       else i = Math.min(11, Math.floor(d.throwT / TUNE.THROW_TIME * 12));
-      drawSprite("david_sling_throw", i, x, y, d.facing);
+      const sheet = d.aimingUp && SPR.david_sling_throw_up ? "david_sling_throw_up" : "david_sling_throw";
+      drawSprite(sheet, i, x, y, d.facing);
       gx = x - d.facing * 8; gy = y - 104 * (TUNE.SPRITE_SIZE.david_sling_throw || 1);   // the stone whirls just above and behind his head
     }
     if (d.charging && d.charge >= TUNE.CHARGE_TIME) { // golden glow when fully charged

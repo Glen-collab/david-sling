@@ -375,12 +375,24 @@ window.SPRITE_DATA = {
  "david_sling_throw": {
   "src": "../assets/sprites/david_sling_throw.png",
   "frames": 12,
-  "w": 222,
+  "w": 322,
   "h": 247,
   "ms": 108,
   "loop": false,
   "pingpong": false,
-  "ax": 134,
+  "ax": 184,
+  "ay": 244,
+  "align": "feet"
+ },
+ "david_sling_throw_up": {
+  "src": "../assets/sprites/david_sling_throw_up.png",
+  "frames": 12,
+  "w": 322,
+  "h": 247,
+  "ms": 108,
+  "loop": false,
+  "pingpong": false,
+  "ax": 184,
   "ay": 244,
   "align": "feet"
  },
