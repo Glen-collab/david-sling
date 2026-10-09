@@ -70,10 +70,14 @@ const TUNE = {
   LION_POUNCE_RANGE: 360, // how close before it roars and pounces
   LION_TELL: 0.9,         // seconds of roar warning before the pounce
   LION_JUMP: 820,
-  LION_DAZED: 1.8,
-  LION_TAUNT_RANGE: 420,
-  RESCUE_PET: 2.6,        // seconds David kneels and pets the rescued lamb
-  RESCUE_HOLD: 0.7,       // seconds he holds it up before setting it down  // the lion lets the lamb go when David gets this close        // seconds it stays dazed after landing (your window to hit it)
+  LION_DAZED: 1.8,        // seconds it stays dazed after landing (your window to hit it)
+  LION_TAUNT_RANGE: 420,  // the lion lets the lamb go when David gets this close
+  RESCUE_DELAY: 1.0,      // seconds after the lion is beaten before David walks over to the lamb
+  RESCUE_PET: 2.0,        // seconds David kneels and pets the rescued lamb
+  RESCUE_LIFT: 0.8,       // seconds to lift it into a hug (and the same to set it back down)
+  RESCUE_HOLD: 1.8,       // seconds he hugs it, checking it over
+  GATE_BONUS_MAX: 10,     // olives for touching the very top of the sheepfold gatepost
+  FLOCK_SPEED: 320,       // how fast the sheep trot home through the gate
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
@@ -231,11 +235,11 @@ function toast(t) { toastText = t; toastTime = 4; }
 // ============================================================================
 const LEVEL_NAME = location.hash === "#test" ? "test" : "1-1";
 const T = TUNE.TILE;
-const ROWS = 20, COLS = LEVEL_NAME === "test" ? 150 : 232, GR = 17;
+const ROWS = 20, COLS = LEVEL_NAME === "test" ? 150 : 262, GR = 17;
 const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone
 const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
 const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
-let lionSpawn = null, arenaX = Infinity;
+let lionSpawn = null, arenaX = Infinity, fold = null;
 const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = 1; };
 const block = (c, r, w, h, mat = 2) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
 const rock = (c, r, w, h) => block(c, r, w, h, 2);
@@ -302,16 +306,20 @@ if (LEVEL_NAME === "test") {
   food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
   deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
   boulder(115, 14, 6, 3);
-  ground(126, 232);
+  ground(126, 261);
   deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
   rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
   snake("cobra", 147);
   campfire(155);                                      label(152, 10, "Last campfire before the lion");
   deco("stone_wall", 160, 16, 1.0, "back");
   deco("cave", 214, 16, 1.7);                         // the lion's den
-  rock(226, 4, 6, 13);
+  rock(226, 15, 3, 2);                                // the back of the den: hop over it on the way home
   lionSpawn = { x: 205 * T, y: GR * T }; arenaX = 168 * T;
   label(170, 6, "The lion's territory");
+  // the end of the stage: the family sheepfold (our flagpole). Jump and touch the gatepost.
+  for (let c = 244; c <= 254; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
+  fold = { postC: 240, endC: 255 };
+  rock(256, 4, 6, 13);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -403,21 +411,42 @@ function headroom(b, h) { // can he stand up here?
   return true;
 }
 
-// the rescue: kneel and pet the lamb, lift it, hold it, set it down; then it follows David
+// the rescue: the game walks David to the lamb; he kneels, pets it, lifts it into a hug to check it over,
+// and sets it back down. Then it follows him home.
 const LAMB_IN_PET = 47;   // how far in front of David the lamb is in the pet/lift sheets (sheet pixels)
+const HUG_TOP = 5;        // lift-sheet frame where it's in his arms (after that he stands up, which we don't want)
 function rescueTimes() {
-  const lift = SPR.david_lift_lamb.frames * SPR.david_lift_lamb.ms / 1000;
-  return { pet: TUNE.RESCUE_PET, lift, hold: TUNE.RESCUE_HOLD, down: lift };
+  return { pet: TUNE.RESCUE_PET, lift: TUNE.RESCUE_LIFT, hold: TUNE.RESCUE_HOLD, down: TUNE.RESCUE_LIFT };
+}
+// walk (hopping over anything in the way) toward x; returns true when he's there
+function autoWalk(d, tx, dt) {
+  const dx = tx - d.x;
+  d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
+  if (Math.abs(dx) < 5 && d.onGround) { d.vx = 0; collideBody(d, BODY_W, d.h, dt); return true; }
+  d.facing = Math.sign(dx) || d.facing;
+  d.vx = d.facing * Math.min(TUNE.WALK_SPEED, Math.abs(dx) * 8 + 40);
+  const x0 = d.x;
+  collideBody(d, BODY_W, d.h, dt);
+  if (d.onGround && Math.abs(d.x - x0) < 0.5 * Math.abs(d.vx) * dt) d.vy = -TUNE.JUMP_SPEED;   // blocked: hop up
+  return false;
 }
 function updateDavid(dt) {
   const d = david;
   d.t += dt;
+  if (d.state === "toLamb") {     // the game has the controls: walk over to the lamb
+    const k = takenLamb, tx = k.x - d.rescueSide * LAMB_IN_PET * SCALE;
+    if (autoWalk(d, tx, dt) || d.t > 8) {
+      d.x = tx; d.facing = d.rescueSide; d.vx = 0; k.hidden = true; setState("rescue");
+    }
+    return;
+  }
+  if (d.state === "finish") { updateFinishDavid(d, dt); return; }
   if (d.state === "rescue") {
     d.vx = 0; d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt); collideBody(d, BODY_W, d.h, dt);
     const rt = rescueTimes();
     if (d.t > rt.pet + rt.lift + rt.hold + rt.down) {
       Object.assign(takenLamb, { hidden: false, follow: true, x: d.x + d.facing * LAMB_IN_PET * SCALE, y: d.y, vx: 0, t: 0, facing: d.facing });
-      setState("idle");
+      setState("idle"); d.inv = 1;
       toast("\"I went after it, struck it and rescued the sheep from its mouth.\" (1 Samuel 17:35)");
     }
     return;
@@ -606,12 +635,19 @@ function drawDavid(camX) {
   }
   const t = d.t;
   if (d.state === "rescue") {
-    const rt = rescueTimes(); let name, i;
+    const rt = rescueTimes(); let name = "david_lift_lamb", i;
+    const n = HUG_TOP + 1, t2 = t - rt.pet, t3 = t2 - rt.lift, t4 = t3 - rt.hold;
     if (t < rt.pet) { name = "david_pet_lamb"; i = frameOf(name, t); }
-    else if (t < rt.pet + rt.lift) { name = "david_lift_lamb"; i = Math.min(9, Math.floor((t - rt.pet) / rt.lift * 10)); }
-    else if (t < rt.pet + rt.lift + rt.hold) { name = "david_lift_lamb"; i = 9; }
-    else { name = "david_lift_lamb"; i = Math.max(0, 9 - Math.floor((t - rt.pet - rt.lift - rt.hold) / rt.down * 10)); }   // set it back down
+    else if (t2 < rt.lift) i = Math.min(HUG_TOP, Math.floor(t2 / rt.lift * n));               // lift it into his arms
+    else if (t3 < rt.hold) i = HUG_TOP - 1 + [0, 1, 2, 1][Math.floor(t3 / 0.3) % 4];          // hug: rock it gently, looking it over
+    else i = Math.max(0, HUG_TOP - Math.floor(t4 / rt.down * n));                              // and set it back down
     drawSprite(name, i, x, y, d.facing); return;
+  }
+  if (d.state === "toLamb" || d.state === "finish") {
+    if (!d.onGround) drawSprite("david_jump_air", 5, x, y - d.h / 2 - 6, d.facing);
+    else if (Math.abs(d.vx) > 15) drawSprite("david_walk", frameOf("david_walk", t * Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED)), x, y, d.facing);
+    else drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing);
+    return;
   }
   switch (d.state) {
     case "idle": drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing); break;
@@ -1249,12 +1285,16 @@ function updateLion(dt) {
 function updateTakenLamb(dt) {
   const k = takenLamb; if (!k.active) return;
   k.t += dt;
-  if (!k.follow && !k.hidden && lion && lion.state === "defeated" && david.onGround && david.state !== "rescue" &&
-      Math.abs(david.x - k.x) < 90 && Math.abs(david.y - k.y) < 30) {
-    david.facing = Math.sign(k.x - david.x) || 1;
-    david.x = k.x - david.facing * LAMB_IN_PET * SCALE;     // line the real lamb up with the one in the animation
-    k.hidden = true; setState("rescue"); david.harp = false; david.charging = false; david.throwT = -1;
-    return;
+  const beaten = lion && lion.state === "defeated";
+  if (beaten && !k.follow && !k.hidden) {
+    k.vx *= 0.8;                                             // the lamb stands still and waits
+    if (Math.abs(k.vx) < 5 && k.onGround) k.facing = Math.sign(david.x - k.x) || k.facing;
+    if (lion.t > TUNE.RESCUE_DELAY && david.onGround && david.deadT <= 0 &&
+        david.state !== "toLamb" && david.state !== "rescue") {
+      david.rescueSide = Math.sign(k.x - david.x) || 1;      // come at it from whichever side he's on
+      david.harp = false; david.charging = false; david.throwT = -1; david.carrying = false;
+      david.inv = 99; setState("toLamb");
+    }
   }
   if (k.hidden) return;
   if (k.follow) {   // trots along behind David (behind the other lamb)
@@ -1265,7 +1305,7 @@ function updateTakenLamb(dt) {
     if (k.onGround && (david.y < k.y - 40) && Math.abs(dx) > 60) k.vy = -900;
     if (Math.abs(k.x - david.x) > 700 || k.y > ROWS * T + 100) { k.x = david.x - david.facing * 100; k.y = david.y; k.vy = 0; }
   }
-  if (k.t > 1.4) k.vx *= 0.9;
+  if (k.t > 1.4 && !k.follow) k.vx *= 0.9;
   collideBody(k, 30, 40, dt);
   k.vy = Math.min(TUNE.MAX_FALL, (k.vy || 0) + TUNE.GRAVITY * dt);
 }
@@ -1273,6 +1313,147 @@ function drawTakenLamb(camX) {
   const k = takenLamb; if (!k.active || k.hidden) return;
   const moving = Math.abs(k.vx) > 20;
   drawSprite("lamb_run", moving ? frameOf("lamb_run", k.t) : 2, k.x - camX, k.y, k.facing);
+}
+// ---------------------------------------------------------------------------
+// The end of the stage: the sheepfold gate (our flagpole). Touch the post (higher = more olives),
+// the gate swings open and the flock trots home, counted in one by one; the rescued lamb comes last.
+// ---------------------------------------------------------------------------
+// until sheep-finding is in, this is the flock that comes home at the end of 1-1
+const STAGE_FLOCK = ["sheep", "lamb", "sheepblack", "ram", "lamb", "lambblack", "sheep"];
+const SHEEP_ART = {
+  sheep:      { run: "sheep_trot",     idle: ["sheep_graze", "sheep_stand"] },
+  sheepblack: { run: "sheepblack_run", idle: ["sheepblack_graze", "sheepblack_stand"] },
+  lamb:       { run: "lamb_hop",       idle: ["lamb_graze", "lamb_stand"] },
+  lambblack:  { run: "lambblack_leap", idle: ["lambblack_stand"] },
+  ram:        { run: "ram_walk",       idle: ["ram_graze", "ram_stand"] },
+  rescued:    { run: "lamb_run",       idle: null },
+};
+const finish = { active: false, phase: "", t: 0, gateOpen: 0, bonus: 0, count: 0, flock: [], blocked: 0 };
+const postX = () => fold.postC * T + T / 2;
+let chimeCtx = null;
+function chime(k) {   // a little bell for each sheep counted in
+  try {
+    chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (chimeCtx.state === "suspended") chimeCtx.resume();
+    const t0 = chimeCtx.currentTime, o = chimeCtx.createOscillator(), g = chimeCtx.createGain();
+    o.type = "sine"; o.frequency.value = 660 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16][k % 8] / 12);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+    o.connect(g).connect(chimeCtx.destination); o.start(t0); o.stop(t0 + 0.65);
+  } catch (e) {}
+}
+function updateFinish(dt) {
+  if (!fold) return;
+  const px = postX(), d = david;
+  if (!finish.active) {
+    if (d.x + BODY_W / 2 < px - 6 || d.deadT > 0) return;
+    if (lion && lion.state !== "defeated") {          // the lamb first!
+      d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
+      if (finish.blocked <= 0) toast("Not without the lamb the lion took!");
+      finish.blocked = 3; return;
+    }
+    const touchY = d.y - d.h, top = GR * T - 8 * T;   // the post stands 8 tiles tall
+    const f = Math.max(0, Math.min(1, (GR * T - STAND_H - touchY) / (GR * T - STAND_H - top)));
+    finish.bonus = 1 + Math.round(f * (TUNE.GATE_BONUS_MAX - 1));
+    for (let i = 0; i < finish.bonus; i++) {
+      d.olives++;
+      if (d.olives >= TUNE.OLIVES_PER_LIFE) { d.olives -= TUNE.OLIVES_PER_LIFE; d.lives++; }
+    }
+    toast(`Home! Gatepost bonus: +${finish.bonus} olives`);
+    Object.assign(finish, { active: true, phase: "land", t: 0, count: 0 });
+    d.harp = false; d.charging = false; d.throwT = -1; d.carrying = false; d.inv = 99; d.vx = 0;
+    setState("finish");
+    // the flock, coming in from behind; the rescued lamb last
+    const kinds = STAGE_FLOCK.slice();
+    if (takenLamb.follow) { kinds.push("rescued"); takenLamb.active = false; }
+    finish.flock = kinds.map((kind, i) => ({ kind, i, x: camX - 120 - i * 10, y: GR * T, t: Math.random(), delay: 1.2 + i * 0.55,
+      slot: px + 3.8 * T + ((i * 5) % kinds.length) * (10 * T / kinds.length), state: "wait", counted: false,
+      idle: SHEEP_ART[kind].idle ? SHEEP_ART[kind].idle[i % SHEEP_ART[kind].idle.length] : null, depth: (i % 3) * 5 }));
+    return;
+  }
+  finish.blocked = Math.max(0, finish.blocked - dt);
+  finish.t += dt;
+  const allIn = finish.flock.every(s => s.state === "in");
+  if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; }
+  if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
+  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; } }
+  if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) location.reload();
+  if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
+    s.t += dt;
+    if (s.state === "wait" && finish.phase === "open" && finish.t > s.delay) { s.state = "run"; s.x = Math.min(s.x, camX - 80); }
+    if (s.state === "run") {
+      s.x += TUNE.FLOCK_SPEED * (s.kind === "ram" ? 0.8 : 1) * dt;
+      if (!s.counted && s.x > px) { s.counted = true; finish.count++; chime(finish.count - 1); }
+      if (s.x >= s.slot) { s.x = s.slot; s.state = "in"; s.t = Math.random() * 2; }
+    }
+  }
+}
+function updateFinishDavid(d, dt) {   // drop down, step back beside the post, turn to watch them come
+  d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
+  if (finish.phase === "land") { d.vx = 0; collideBody(d, BODY_W, d.h, dt); return; }
+  if (autoWalk(d, postX() - 1.3 * T, dt)) d.facing = -1;
+}
+// a wooden post: (x, bottom) at the foot, w wide, h tall
+function woodPost(x, bottom, w, h) {
+  const g = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
+  g.addColorStop(0, "#4a2f18"); g.addColorStop(0.35, "#8a6038"); g.addColorStop(0.7, "#6e4a2a"); g.addColorStop(1, "#3c2512");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x - w / 2, bottom - h, w, h + 6, [w / 2, w / 2, 2, 2]); ctx.fill();
+  ctx.strokeStyle = "rgba(40,22,10,0.45)"; ctx.lineWidth = 1.5;
+  for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(x - w / 4 + k * w / 8, bottom - h + 10 + k * 7); ctx.lineTo(x - w / 4 + k * w / 8 + (k % 2 ? 2 : -2), bottom - 4); ctx.stroke(); }
+}
+function drawFold(camX) {
+  if (!fold) return;
+  const px = postX() - camX, by = GR * T;
+  if (px < -400 || px > W + 600) return;
+  ctx.save();
+  // the far gatepost the gate latches to
+  const gl = 3 * T;
+  woodPost(px + gl, by, 12, 2.6 * T);
+  // the gate: three rails and a brace, hinged on the tall post; it swings open toward us
+  ctx.save(); ctx.translate(px, by); ctx.scale(1 - 0.82 * finish.gateOpen, 1);
+  ctx.fillStyle = "#7a5432"; ctx.strokeStyle = "#3c2512"; ctx.lineWidth = 2;
+  for (const yy of [-2.1 * T, -1.35 * T, -0.6 * T]) { ctx.beginPath(); ctx.roundRect(4, yy, gl - 8, 9, 3); ctx.fill(); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(10, -0.6 * T + 6); ctx.lineTo(gl - 14, -2.1 * T + 4); ctx.lineWidth = 7; ctx.strokeStyle = "#6a4628"; ctx.stroke();
+  ctx.fillStyle = "#6a4628"; ctx.fillRect(gl - 16, -2.25 * T, 9, 2.25 * T - 4);
+  ctx.restore();
+  // the tall gatepost (touch it as high as you can)
+  woodPost(px, by, 18, 8 * T);
+  ctx.fillStyle = "#c9a227"; ctx.beginPath(); ctx.arc(px, by - 8 * T - 4, 9, 0, Math.PI * 2); ctx.fill();   // a brass knob on top
+  ctx.restore();
+}
+function drawFlock(camX) {
+  if (!finish.active) return;
+  const list = finish.flock.filter(s => s.state !== "wait").sort((a, b) => b.depth - a.depth);
+  for (const s of list) {
+    const art = SHEEP_ART[s.kind], x = s.x - camX, y = s.y - s.depth;
+    if (s.state === "run") drawSprite(art.run, frameOf(art.run, s.t), x, y, 1);
+    else if (s.idle) drawSprite(s.idle, frameOf(s.idle, s.t), x, y, 1);
+    else drawSprite(art.run, 2, x, y, 1);
+    if (s.kind === "rescued") {   // a little sparkle on the lamb you saved
+      ctx.save(); ctx.globalAlpha = 0.6 + 0.4 * Math.sin(s.t * 6); ctx.fillStyle = "#fff6c0";
+      for (let k = 0; k < 3; k++) { const a = s.t * 2 + k * 2.1; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 26, y - 30 + Math.sin(a) * 14, 3, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+    }
+  }
+}
+function drawFinishBanner() {
+  if (!finish.active) return;
+  if (finish.count > 0 && finish.phase !== "clear") {   // the running tally
+    ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.beginPath(); ctx.roundRect(W / 2 - 110, 60, 220, 44, 10); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(`Sheep home: ${finish.count}`, W / 2, 90); ctx.textAlign = "left";
+  }
+  if (finish.phase !== "clear") return;
+  const a = Math.min(1, finish.t * 2);
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 260, 150, 520, 230, 18); ctx.fill();
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
+  ctx.fillText("Stage 1-1 clear!", W / 2, 215);
+  ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
+  ctx.fillText(`Sheep home: ${finish.count}`, W / 2, 265);
+  ctx.fillText(`Gatepost bonus: +${finish.bonus} olives`, W / 2, 300);
+  ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
+  if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 350);
+  ctx.restore();
 }
 function stoneHitsLion(s) {
   if (!lion || lion.state === "defeated" || !lion.awake) return false;   // before the fight it's busy taunting
@@ -1477,6 +1658,7 @@ let harpVol = 0, harpStarting = false, harpHeldT = 0;
 let audioUnlocked = false;
 function unlockAudio() {
   if (audioUnlocked) return;
+  try { chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)(); chimeCtx.resume(); } catch (e) {}
   harpMusic.muted = true;
   harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = true; }).catch(() => {});
 }
@@ -1500,7 +1682,7 @@ function updateWorld(dt) {
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
-  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt);
+  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateFinish(dt);
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -1587,6 +1769,7 @@ function frame(now) {
   drawBackground(camX);
   drawDecor(camX, "back");
   drawTiles(camX);
+  drawFold(camX);
   drawFires(camX);
   drawPickups(camX);
   drawOlives(camX);
@@ -1595,6 +1778,7 @@ function frame(now) {
   drawBugs(camX);
   drawLion(camX);
   drawTakenLamb(camX);
+  drawFlock(camX);
   drawLamb(camX);
   if (!(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawStones(camX);
@@ -1605,6 +1789,7 @@ function frame(now) {
     ctx.fillStyle = "#fff"; ctx.fillText(`${david.state} vx ${david.vx | 0} vy ${david.vy | 0}`, 20, H - 20);
   }
   drawHUD();
+  drawFinishBanner();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
