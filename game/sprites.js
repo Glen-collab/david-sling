@@ -792,6 +792,30 @@ window.SPRITE_DATA = {
   "ay": 93,
   "align": "feet"
  },
+ "lamb_graze": {
+  "src": "../assets/sprites/lamb_graze.png",
+  "frames": 8,
+  "w": 129,
+  "h": 83,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 72,
+  "ay": 81,
+  "align": "feet"
+ },
+ "lamb_hop": {
+  "src": "../assets/sprites/lamb_hop.png",
+  "frames": 12,
+  "w": 127,
+  "h": 95,
+  "ms": 66,
+  "loop": true,
+  "pingpong": false,
+  "ax": 97,
+  "ay": 93,
+  "align": "feet"
+ },
  "lamb_leap": {
   "src": "../assets/sprites/lamb_leap.png",
   "frames": 12,
@@ -814,6 +838,66 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 79,
   "ay": 91,
+  "align": "feet"
+ },
+ "lamb_stand": {
+  "src": "../assets/sprites/lamb_stand.png",
+  "frames": 10,
+  "w": 103,
+  "h": 94,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 77,
+  "ay": 92,
+  "align": "feet"
+ },
+ "lamb_walk": {
+  "src": "../assets/sprites/lamb_walk.png",
+  "frames": 12,
+  "w": 96,
+  "h": 89,
+  "ms": 66,
+  "loop": true,
+  "pingpong": false,
+  "ax": 76,
+  "ay": 87,
+  "align": "feet"
+ },
+ "lambblack_leap": {
+  "src": "../assets/sprites/lambblack_leap.png",
+  "frames": 12,
+  "w": 207,
+  "h": 98,
+  "ms": 66,
+  "loop": true,
+  "pingpong": false,
+  "ax": 110,
+  "ay": 96,
+  "align": "feet"
+ },
+ "lambblack_stand": {
+  "src": "../assets/sprites/lambblack_stand.png",
+  "frames": 8,
+  "w": 96,
+  "h": 95,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 73,
+  "ay": 93,
+  "align": "feet"
+ },
+ "lambblack_walk": {
+  "src": "../assets/sprites/lambblack_walk.png",
+  "frames": 12,
+  "w": 98,
+  "h": 91,
+  "ms": 49,
+  "loop": true,
+  "pingpong": false,
+  "ax": 76,
+  "ay": 90,
   "align": "feet"
  },
  "lambs2_graze": {
@@ -1104,6 +1188,42 @@ window.SPRITE_DATA = {
   "ay": 185,
   "align": "feet"
  },
+ "ram_graze": {
+  "src": "../assets/sprites/ram_graze.png",
+  "frames": 10,
+  "w": 153,
+  "h": 94,
+  "ms": 142,
+  "loop": true,
+  "pingpong": true,
+  "ax": 72,
+  "ay": 92,
+  "align": "feet"
+ },
+ "ram_stand": {
+  "src": "../assets/sprites/ram_stand.png",
+  "frames": 10,
+  "w": 134,
+  "h": 125,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 101,
+  "ay": 123,
+  "align": "feet"
+ },
+ "ram_walk": {
+  "src": "../assets/sprites/ram_walk.png",
+  "frames": 12,
+  "w": 143,
+  "h": 121,
+  "ms": 42,
+  "loop": true,
+  "pingpong": false,
+  "ax": 111,
+  "ay": 119,
+  "align": "feet"
+ },
  "raven_fly": {
   "src": "../assets/sprites/raven_fly.png",
   "frames": 8,
@@ -1138,6 +1258,102 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 72,
   "ay": 72,
+  "align": "feet"
+ },
+ "sheep_graze": {
+  "src": "../assets/sprites/sheep_graze.png",
+  "frames": 6,
+  "w": 123,
+  "h": 81,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 56,
+  "ay": 79,
+  "align": "feet"
+ },
+ "sheep_stand": {
+  "src": "../assets/sprites/sheep_stand.png",
+  "frames": 10,
+  "w": 129,
+  "h": 111,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 89,
+  "ay": 109,
+  "align": "feet"
+ },
+ "sheep_trot": {
+  "src": "../assets/sprites/sheep_trot.png",
+  "frames": 12,
+  "w": 156,
+  "h": 118,
+  "ms": 76,
+  "loop": true,
+  "pingpong": false,
+  "ax": 116,
+  "ay": 116,
+  "align": "feet"
+ },
+ "sheep_walk": {
+  "src": "../assets/sprites/sheep_walk.png",
+  "frames": 12,
+  "w": 131,
+  "h": 108,
+  "ms": 62,
+  "loop": true,
+  "pingpong": false,
+  "ax": 103,
+  "ay": 106,
+  "align": "feet"
+ },
+ "sheepblack_graze": {
+  "src": "../assets/sprites/sheepblack_graze.png",
+  "frames": 6,
+  "w": 162,
+  "h": 101,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 88,
+  "ay": 100,
+  "align": "feet"
+ },
+ "sheepblack_run": {
+  "src": "../assets/sprites/sheepblack_run.png",
+  "frames": 12,
+  "w": 193,
+  "h": 121,
+  "ms": 76,
+  "loop": true,
+  "pingpong": false,
+  "ax": 144,
+  "ay": 119,
+  "align": "feet"
+ },
+ "sheepblack_stand": {
+  "src": "../assets/sprites/sheepblack_stand.png",
+  "frames": 10,
+  "w": 129,
+  "h": 109,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 95,
+  "ay": 107,
+  "align": "feet"
+ },
+ "sheepblack_walk": {
+  "src": "../assets/sprites/sheepblack_walk.png",
+  "frames": 12,
+  "w": 134,
+  "h": 109,
+  "ms": 52,
+  "loop": true,
+  "pingpong": false,
+  "ax": 101,
+  "ay": 108,
   "align": "feet"
  },
  "snake_strike": {

@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 127,
+  "frame_h": 95,
+  "ms_per_frame": 66,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 97,
+  "anchor_y": 93,
+  "source": "Glen sheep clips (Oct 9): n3.mp4",
+  "video_frames": [
+    108,
+    110,
+    111,
+    113,
+    114,
+    116,
+    118,
+    119,
+    121,
+    122,
+    124,
+    125
+  ]
+}
