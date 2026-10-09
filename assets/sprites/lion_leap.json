@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 272,
+  "frame_h": 179,
+  "ms_per_frame": 115,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 88,
+  "anchor_y": 176,
+  "source": "lion_turn_fighting.mp4",
+  "video_frames": [
+    1,
+    4,
+    7,
+    10,
+    13,
+    16,
+    19,
+    22
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "frames": 6,
+  "frame_w": 140,
+  "frame_h": 139,
+  "ms_per_frame": 170,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 46,
+  "anchor_y": 137,
+  "source": "jackal_sit-to-run.mp4",
+  "video_frames": [
+    1,
+    4,
+    7,
+    10,
+    13,
+    16
+  ],
+  "pingpong": true
+}

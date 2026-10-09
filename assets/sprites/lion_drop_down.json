@@ -1,0 +1,19 @@
+{
+  "frames": 6,
+  "frame_w": 262,
+  "frame_h": 206,
+  "ms_per_frame": 132,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 165,
+  "anchor_y": 203,
+  "source": "lion_standup_hit.mp4",
+  "video_frames": [
+    55,
+    59,
+    62,
+    66,
+    69,
+    73
+  ]
+}

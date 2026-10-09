@@ -1,0 +1,26 @@
+{
+  "frames": 12,
+  "frame_w": 207,
+  "frame_h": 118,
+  "ms_per_frame": 70,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 156,
+  "anchor_y": 116,
+  "source": "jackal_sheep-in-mouth.mp4",
+  "video_frames": [
+    35,
+    37,
+    40,
+    43,
+    45,
+    47,
+    50,
+    53,
+    55,
+    57,
+    60,
+    63
+  ],
+  "pingpong": false
+}

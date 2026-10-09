@@ -612,6 +612,42 @@ window.SPRITE_DATA = {
   "ay": 137,
   "align": "feet"
  },
+ "jackal2_get_up": {
+  "src": "../assets/sprites/jackal2_get_up.png",
+  "frames": 6,
+  "w": 202,
+  "h": 130,
+  "ms": 104,
+  "loop": false,
+  "pingpong": false,
+  "ax": 46,
+  "ay": 128,
+  "align": "feet"
+ },
+ "jackal2_run": {
+  "src": "../assets/sprites/jackal2_run.png",
+  "frames": 12,
+  "w": 230,
+  "h": 120,
+  "ms": 60,
+  "loop": true,
+  "pingpong": false,
+  "ax": 60,
+  "ay": 118,
+  "align": "feet"
+ },
+ "jackal2_sit": {
+  "src": "../assets/sprites/jackal2_sit.png",
+  "frames": 6,
+  "w": 140,
+  "h": 139,
+  "ms": 170,
+  "loop": true,
+  "pingpong": true,
+  "ax": 46,
+  "ay": 137,
+  "align": "feet"
+ },
  "jackal_bite": {
   "src": "../assets/sprites/jackal_bite.png",
   "frames": 10,
@@ -622,6 +658,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 190,
   "ay": 121,
+  "align": "feet"
+ },
+ "jackal_carry_lamb": {
+  "src": "../assets/sprites/jackal_carry_lamb.png",
+  "frames": 12,
+  "w": 207,
+  "h": 118,
+  "ms": 70,
+  "loop": true,
+  "pingpong": false,
+  "ax": 156,
+  "ay": 116,
   "align": "feet"
  },
  "jackal_run": {
@@ -684,6 +732,18 @@ window.SPRITE_DATA = {
   "ay": 99,
   "align": "feet"
  },
+ "lion_carry_lamb": {
+  "src": "../assets/sprites/lion_carry_lamb.png",
+  "frames": 12,
+  "w": 277,
+  "h": 157,
+  "ms": 95,
+  "loop": true,
+  "pingpong": false,
+  "ax": 191,
+  "ay": 155,
+  "align": "feet"
+ },
  "lion_dazed": {
   "src": "../assets/sprites/lion_dazed.png",
   "frames": 10,
@@ -694,6 +754,30 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 178,
   "ay": 181,
+  "align": "feet"
+ },
+ "lion_drop_down": {
+  "src": "../assets/sprites/lion_drop_down.png",
+  "frames": 6,
+  "w": 262,
+  "h": 206,
+  "ms": 132,
+  "loop": false,
+  "pingpong": false,
+  "ax": 165,
+  "ay": 203,
+  "align": "feet"
+ },
+ "lion_leap": {
+  "src": "../assets/sprites/lion_leap.png",
+  "frames": 8,
+  "w": 272,
+  "h": 179,
+  "ms": 115,
+  "loop": false,
+  "pingpong": false,
+  "ax": 88,
+  "ay": 176,
   "align": "feet"
  },
  "lion_pounce": {
@@ -754,6 +838,30 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 212,
   "ay": 181,
+  "align": "feet"
+ },
+ "lion_stand_swipe": {
+  "src": "../assets/sprites/lion_stand_swipe.png",
+  "frames": 12,
+  "w": 212,
+  "h": 200,
+  "ms": 120,
+  "loop": true,
+  "pingpong": true,
+  "ax": 129,
+  "ay": 197,
+  "align": "feet"
+ },
+ "lion_turn": {
+  "src": "../assets/sprites/lion_turn.png",
+  "frames": 10,
+  "w": 409,
+  "h": 188,
+  "ms": 92,
+  "loop": false,
+  "pingpong": false,
+  "ax": 196,
+  "ay": 185,
   "align": "feet"
  },
  "raven_fly": {
