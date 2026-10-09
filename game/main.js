@@ -52,7 +52,7 @@ const TUNE = {
   HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
   HARP_VOLUME: 0.8,       // volume of the harp music when David plays (0 to 1)
-  HARP_MUSIC_DELAY: 1.81, // seconds after pressing Select until his hands start playing; the music starts then
+  HARP_MUSIC_DELAY: 1.7,  // seconds after pressing Select until his hands start playing; the music starts then
   // size of each of the 14 sit-down frames, measured so his head matches standing David (the clip's camera crept closer)
   SIT_HARP_SIZES: [0.89, 0.87, 0.86, 0.80, 0.75, 0.74, 0.74, 0.72, 0.72, 0.72, 0.71, 0.72, 0.72, 0.72],
   LAMB_CATCHUP: 1.2,      // seconds the lamb can be stuck or left behind before it pops back next to David
