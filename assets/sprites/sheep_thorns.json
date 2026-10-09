@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 178,
+  "frame_h": 114,
+  "ms_per_frame": 85,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 115,
+  "anchor_y": 112,
+  "source": "Glen's clip (Oct 9): thorns.mov",
+  "video_frames": [
+    17,
+    18,
+    19,
+    21,
+    22,
+    23,
+    25,
+    26,
+    27,
+    28,
+    29,
+    31
+  ]
+}

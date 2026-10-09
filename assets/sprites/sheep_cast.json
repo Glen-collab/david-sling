@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 137,
+  "frame_h": 59,
+  "ms_per_frame": 153,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 52,
+  "anchor_y": 58,
+  "source": "Glen's clip (Oct 9): cast.mov",
+  "video_frames": [
+    37,
+    41,
+    44,
+    48,
+    52,
+    55,
+    59,
+    63,
+    66,
+    70,
+    74,
+    77
+  ]
+}

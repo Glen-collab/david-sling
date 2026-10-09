@@ -291,7 +291,7 @@ if (LEVEL_NAME === "test") {
   deco("olive_tree", 4, 16, 1.0); deco("date_palm", 15, 16, 1.1);
   label(2, 6, "World 1-1 sample. Eat food to heal, but look before you eat.");
   food("grapes", 10, 16); food("bread", 21, 16);
-  lostSheep("sheep", 19, 16);                           // the first lost sheep: just walk up to it
+  lostSheep("sheepblack", 19, 16);                      // the first lost sheep: just walk up to it
   special(16, 9);                                       // above the date palm: jump + flip
   special(87, 6);                                       // high above the fig platform: flip from the platform
   // the third special stone is hidden in the fig tree (col 114): jump into its branches
@@ -302,13 +302,13 @@ if (LEVEL_NAME === "test") {
   wall(26, 15, 3, 2); rock(30, 13, 3, 4);
   gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
   snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
-  lostSheep("lamb", 43, 16, "thorns");                 // caught in the thorn bush: sling it free
+  lostSheep("sheep", 43, 16, "thorns");                 // caught in the thorn bush: sling it free
   food("poison_berries", 45, 16); wall(47, 15, 3, 2); food("cheese", 48, 14);
   label(44, 11, "Berries or cheese? Look before you eat.");
   deco("olive_tree", 55, 16, 1.15, "back", "golden_olive");   // jump into it: a shower of olives, and a golden one
   ground(64, 122);
   campfire(68); deco("tent", 73, 16, 1.1);            label(64, 10, "Campfire: checkpoint. Sit and play the harp (Select) to rest.");
-  lostSheep("sheepblack", 78, 16, "cast");              // on its back: press Down next to it
+  lostSheep("sheep", 78, 16, "cast");              // on its back: press Down next to it
   plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
   lostSheep("lambblack", 89, 9, "ledge");               // up on the ledge: climb to it, or play the harp below
   snake("viper", 93);
@@ -1466,19 +1466,27 @@ function sheepFrame(sh) {   // which sheet and frame to draw for a sheep right n
   if (!idle) return [art.run, 2];
   return [idle, frameOf(idle, sh.t)];
 }
+// the thorn bush round the tangled sheep: one behind it, and a low one over its legs, so its head and back peek out
+let THORN_BUSH_X = 8, THORN_BUSH_SIZE = 0.42, THORN_FRONT = true, THORN_FRONT_X = 2, THORN_FRONT_SIZE = 0.22;
 function drawSheepOne(sh, camX) {
   const x = sh.x - camX, y = sh.y;
   if (x < -150 || x > W + 150) return;
-  if (sh.how === "cast" && sh.state !== "follow") {   // on its back, legs kicking; rolls over when you help
-    const art = SHEEP_ART[sh.kind], ang = sh.state === "rolling" ? Math.PI * (1 - Math.min(1, sh.rollT / 0.6)) : Math.PI + Math.sin(sh.t * 9) * 0.08;
-    ctx.save(); ctx.translate(x, y - 22); ctx.rotate(ang); ctx.translate(-x, -(y - 22));
-    drawSprite(art.stand, 0, x, y + (sh.state === "rolling" ? 0 : 4), sh.facing); ctx.restore();
+  if (sh.how === "cast" && sh.state === "lost") {          // on its back, legs kicking (Glen's clip)
+    drawSprite("sheep_cast", frameOf("sheep_cast", sh.t), x, y, sh.facing);
+  } else if (sh.how === "cast" && sh.state === "rolling") {  // rolls over onto its belly and gets up
+    const f = Math.min(1, sh.rollT / 0.6), ang = sh.facing * f * Math.PI, lift = Math.sin(f * Math.PI) * 22;
+    ctx.save(); ctx.translate(x, y - 14 - lift); ctx.rotate(ang); ctx.translate(-x, -(y - 14));
+    drawSprite("sheep_cast", 0, x, y, sh.facing, 1, 1 - Math.max(0, f - 0.6) / 0.4); ctx.restore();
+    if (f > 0.6) drawSprite(SHEEP_ART[sh.kind].stand, 0, x, y, sh.facing, 1, (f - 0.6) / 0.4);
+  } else if (sh.how === "thorns" && !sh.freed) {           // tangled in the thorns, peeking out of the bush
+    drawItem("thorn_bush", x + sh.facing * THORN_BUSH_X, y + 8, THORN_BUSH_SIZE);
+    drawSprite("sheep_thorns", frameOf("sheep_thorns", sh.t), x, y, sh.facing);
+    if (THORN_FRONT) drawItem("thorn_bush", x - sh.facing * THORN_FRONT_X, y + 10, THORN_FRONT_SIZE);
   } else {
     const [nm, i] = sheepFrame(sh);
     drawSprite(nm, i, x, y, sh.facing);
   }
   if (sh.one || sh.how === "rescued") sparkle(x, y, sh.t);
-  if (sh.how === "thorns" && !sh.freed) drawItem("thorn_bush", x, y + 8, 0.72);
   if (sh.state !== "follow" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
     ctx.save(); ctx.globalAlpha = Math.min(1, -sh.bleatT * 4, (1 + sh.bleatT) * 4);
     ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.beginPath(); ctx.roundRect(x - 26, y - 84, 52, 24, 10); ctx.fill();
