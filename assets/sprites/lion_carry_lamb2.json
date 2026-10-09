@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 303,
+  "frame_h": 156,
+  "ms_per_frame": 95,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 225,
+  "anchor_y": 153,
+  "source": "lion2.mp4",
+  "video_frames": [
+    35,
+    36,
+    37,
+    39,
+    40,
+    41,
+    43,
+    44,
+    45,
+    46,
+    47,
+    49
+  ]
+}

@@ -756,6 +756,18 @@ window.SPRITE_DATA = {
   "ay": 155,
   "align": "feet"
  },
+ "lion_carry_lamb2": {
+  "src": "../assets/sprites/lion_carry_lamb2.png",
+  "frames": 12,
+  "w": 303,
+  "h": 156,
+  "ms": 95,
+  "loop": true,
+  "pingpong": false,
+  "ax": 225,
+  "ay": 153,
+  "align": "feet"
+ },
  "lion_dazed": {
   "src": "../assets/sprites/lion_dazed.png",
   "frames": 10,
