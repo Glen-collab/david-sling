@@ -69,12 +69,14 @@ const TUNE = {
   LION_POUNCE_RANGE: 360, // how close before it roars and pounces
   LION_TELL: 0.9,         // seconds of roar warning before the pounce
   LION_JUMP: 820,
-  LION_DAZED: 1.8,        // seconds it stays dazed after landing (your window to hit it)
+  LION_DAZED: 1.8,
+  LION_TAUNT_RANGE: 420,  // the lion lets the lamb go when David gets this close        // seconds it stays dazed after landing (your window to hit it)
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
     david_sling_throw_up: 1.15,
     david_crawl: 0.92,
+    lion_prowl_carry_lamb: 1.3, lion_sit_carry_lamb: 1.3, lion_set_lamb_down: 1.24,
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
     bee_fly: 0.6, hornet_fly: 1.0,
@@ -1139,9 +1141,12 @@ function drawFires(camX) {
 // ---------------------------------------------------------------------------
 let lion = lionSpawn ? { x: lionSpawn.x, y: lionSpawn.y } : null;
 function resetLion() {
-  Object.assign(lion, { x: lionSpawn.x, y: lionSpawn.y, vx: 0, vy: 0, onGround: true, state: "sit", t: 0, facing: -1,
+  Object.assign(lion, { x: lionSpawn.x, y: lionSpawn.y, vx: 0, vy: 0, onGround: true, state: "carry", t: 0, facing: -1,
                         hp: TUNE.LION_HP, flash: 0, alpha: 1, told: false, awake: false, pounceCool: 0 });
+  takenLamb.active = false;
 }
+// the lamb the lion carries off (1 Samuel 17:34); once it's let go it runs to safety behind the lion
+const takenLamb = { active: false, x: 0, y: 0, vx: 0, vy: 0, facing: 1, t: 0 };
 if (lion) resetLion();
 function lionBox() {   // body box in world coords
   const sz = TUNE.SPRITE_SIZE.lion_prowl || 1;
@@ -1155,7 +1160,26 @@ function updateLion(dt) {
   const L = lion; L.t += dt; L.flash = Math.max(0, L.flash - dt);
   if (L.state === "defeated") { L.alpha = Math.max(0, L.alpha - dt * 0.5); return; }
   if (!L.awake) {
-    if (david.x > arenaX) { L.awake = true; setLion("intro"); helpT = 0; toast("The lion! Watch for its roar, then dodge the pounce. Hit it while it's dazed."); }
+    const dist0 = Math.abs(david.x - L.x);
+    if (L.state === "carry") {            // pacing near its den with the lamb in its mouth
+      const home = lionSpawn.x, span = 4 * T;
+      if (L.x > home + span) L.facing = -1; else if (L.x < home - span) L.facing = 1;
+      L.vx = L.facing * TUNE.LION_PROWL * 0.7;
+      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0;
+        toast("The lion has one of your lambs!"); }
+    } else if (L.state === "sitTaunt") {   // sits and stares at David, lamb in its jaws
+      L.vx = 0; L.facing = Math.sign(david.x - L.x) || L.facing;
+      if (dist0 < TUNE.LION_TAUNT_RANGE) setLion("release");
+    } else if (L.state === "release") {    // sets the lamb down to face David
+      L.vx = 0;
+      if (animDone("lion_set_lamb_down", L.t)) {
+        Object.assign(takenLamb, { active: true, x: L.x + L.facing * 22 * SCALE * 1.24, y: L.y, vx: -L.facing * 260, vy: 0, facing: -L.facing, t: 0 });
+        L.awake = true; setLion("intro");
+        toast("It let the lamb go! Watch for its roar, then dodge the pounce. Hit it while it's dazed.");
+      }
+    }
+    L.vy = Math.min(TUNE.MAX_FALL, (L.vy || 0) + TUNE.GRAVITY * dt);
+    collideBody(L, 100, 60, dt);
     return;
   }
   const dx = david.x - L.x, dist = Math.abs(dx);
@@ -1195,8 +1219,20 @@ function updateLion(dt) {
     if (david.x + BODY_W / 2 > b.x0 && david.x - BODY_W / 2 < b.x1 && david.y > b.y0 && david.y - david.h < b.y1) hurtDavid(L.x);
   }
 }
+function updateTakenLamb(dt) {
+  const k = takenLamb; if (!k.active) return;
+  k.t += dt;
+  if (k.t > 1.4) k.vx *= 0.9;
+  collideBody(k, 30, 40, dt);
+  k.vy = Math.min(TUNE.MAX_FALL, (k.vy || 0) + TUNE.GRAVITY * dt);
+}
+function drawTakenLamb(camX) {
+  const k = takenLamb; if (!k.active) return;
+  const moving = Math.abs(k.vx) > 20;
+  drawSprite("lamb_run", moving ? frameOf("lamb_run", k.t) : 2, k.x - camX, k.y, k.facing);
+}
 function stoneHitsLion(s) {
-  if (!lion || lion.state === "defeated" || !lion.awake) return false;
+  if (!lion || lion.state === "defeated" || !lion.awake) return false;   // before the fight it's busy taunting
   const b = lionBox();
   if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
   if (s.power && lion.state !== "dazed") {   // the Power Sling knocks it dazed and hurts it
@@ -1215,7 +1251,7 @@ function stoneHitsLion(s) {
 function drawLion(camX) {
   if (!lion || lion.alpha <= 0) return;
   const L = lion, x = L.x - camX, y = L.y;
-  const map = { sit: "lion_sit_roar", intro: "lion_sit_roar", prowl: "lion_prowl", run: "lion_run", tell: "lion_roar", pounce: "lion_pounce", dazed: "lion_dazed", defeated: "lion_dazed" };
+  const map = { carry: "lion_prowl_carry_lamb", sitTaunt: "lion_sit_carry_lamb", release: "lion_set_lamb_down", sit: "lion_sit_roar", intro: "lion_sit_roar", prowl: "lion_prowl", run: "lion_run", tell: "lion_roar", pounce: "lion_pounce", dazed: "lion_dazed", defeated: "lion_dazed" };
   const name = map[L.state];
   let i = frameOf(name, L.t);
   if (L.state === "pounce") i = Math.min(SPR.lion_pounce.frames - 1, 3 + Math.floor(L.t / 0.07));
@@ -1419,7 +1455,7 @@ function updateWorld(dt) {
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
-  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt);
+  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt);
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -1513,6 +1549,7 @@ function frame(now) {
   drawSnakes(camX);
   drawBugs(camX);
   drawLion(camX);
+  drawTakenLamb(camX);
   drawLamb(camX);
   if (!(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawStones(camX);
