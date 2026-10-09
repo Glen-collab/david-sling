@@ -446,7 +446,7 @@ function updateDavid(dt) {
     const rt = rescueTimes();
     if (d.t > rt.pet + rt.lift + rt.hold + rt.down) {
       Object.assign(takenLamb, { hidden: false, follow: true, x: d.x + d.facing * LAMB_IN_PET * SCALE, y: d.y, vx: 0, t: 0, facing: d.facing });
-      setState("idle"); d.inv = 1;
+      setState("idle");
       toast("\"I went after it, struck it and rescued the sheep from its mouth.\" (1 Samuel 17:35)");
     }
     return;
@@ -1057,9 +1057,11 @@ const FOOD_TEXT = {
 // hearts
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
 david.lives = TUNE.LIVES; david.olives = 0;
+// the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
+const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish";
 function hurtDavid(fromX) {
   const d = david;
-  if (d.inv > 0 || d.deadT > 0) return;
+  if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
   d.hearts--; d.inv = TUNE.HURT_INVINCIBLE;
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
@@ -1293,7 +1295,7 @@ function updateTakenLamb(dt) {
         david.state !== "toLamb" && david.state !== "rescue") {
       david.rescueSide = Math.sign(k.x - david.x) || 1;      // come at it from whichever side he's on
       david.harp = false; david.charging = false; david.throwT = -1; david.carrying = false;
-      david.inv = 99; setState("toLamb");
+      setState("toLamb");
     }
   }
   if (k.hidden) return;
@@ -1360,7 +1362,7 @@ function updateFinish(dt) {
     }
     toast(`Home! Gatepost bonus: +${finish.bonus} olives`);
     Object.assign(finish, { active: true, phase: "land", t: 0, count: 0 });
-    d.harp = false; d.charging = false; d.throwT = -1; d.carrying = false; d.inv = 99; d.vx = 0;
+    d.harp = false; d.charging = false; d.throwT = -1; d.carrying = false; d.inv = 0; d.vx = 0;
     setState("finish");
     // the flock, coming in from behind; the rescued lamb last
     const kinds = STAGE_FLOCK.slice();
@@ -1809,7 +1811,7 @@ function frame(now) {
   drawTakenLamb(camX);
   drawFlock(camX);
   drawLamb(camX);
-  if (!(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
+  if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawStones(camX);
   drawDecor(camX, "front");
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
