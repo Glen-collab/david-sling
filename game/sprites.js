@@ -852,6 +852,18 @@ window.SPRITE_DATA = {
   "ay": 153,
   "align": "feet"
  },
+ "lion_set_lamb_down": {
+  "src": "../assets/sprites/lion_set_lamb_down.png",
+  "frames": 10,
+  "w": 272,
+  "h": 174,
+  "ms": 154,
+  "loop": false,
+  "pingpong": false,
+  "ax": 198,
+  "ay": 171,
+  "align": "feet"
+ },
  "lion_sit_roar": {
   "src": "../assets/sprites/lion_sit_roar.png",
   "frames": 8,

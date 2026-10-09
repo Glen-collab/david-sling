@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 272,
+  "frame_h": 174,
+  "ms_per_frame": 154,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 198,
+  "anchor_y": 171,
+  "source": "lion_down.mp4",
+  "video_frames": [
+    37,
+    41,
+    45,
+    49,
+    53,
+    57,
+    61,
+    65,
+    69,
+    73
+  ]
+}
