@@ -455,6 +455,7 @@ function updateDavid(dt) {
     return;
   }
   if (d.state === "finish") { updateFinishDavid(d, dt); return; }
+  if (d.state === "liftSheep") { updateLiftSheep(d, dt); return; }
   if (d.state === "rescue") {
     d.vx = 0; d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt); collideBody(d, BODY_W, d.h, dt);
     const rt = rescueTimes();
@@ -658,7 +659,14 @@ function drawDavid(camX) {
     else i = Math.max(0, HUG_TOP - Math.floor(t4 / rt.down * n));                              // and set it back down
     drawSprite(name, i, x, y, d.facing); return;
   }
-  if (d.state === "toLamb" || d.state === "finish") {
+  if (d.state === "liftSheep" && d.liftPhase) {     // crouch frames 2..7 down, hold, and back up
+    const n0 = 2, n1 = 7, span = n1 - n0;
+    const i = t < LIFT_DOWN ? n0 + Math.min(span, Math.floor(t / LIFT_DOWN * (span + 1)))
+            : t < LIFT_DOWN + LIFT_HOLD ? n1
+            : Math.max(n0, n1 - Math.floor((t - LIFT_DOWN - LIFT_HOLD) / LIFT_UP * (span + 1)));
+    drawSprite("david_crouch", i, x, y, d.facing); return;
+  }
+  if (d.state === "toLamb" || d.state === "finish" || d.state === "liftSheep") {
     if (!d.onGround) drawSprite("david_jump_air", 5, x, y - d.h / 2 - 6, d.facing);
     else if (Math.abs(d.vx) > 15) drawSprite("david_walk", frameOf("david_walk", t * Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED)), x, y, d.facing);
     else drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing);
@@ -1068,7 +1076,7 @@ const FOOD_TEXT = {
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
 david.lives = TUNE.LIVES; david.olives = 0;
 // the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
-const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish";
+const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep";
 function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
@@ -1343,7 +1351,7 @@ const trail = [];         // David's footsteps, newest last
 let rescuedLamb = false;
 function newSheep(o) {
   return Object.assign(o, { x: o.hx, y: o.hy, vx: 0, vy: 0, onGround: true, state: "lost", t: Math.random() * 3, facing: -1,
-    freed: o.how !== "thorns" && o.how !== "cast", rollT: 0, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
+    freed: o.how !== "thorns" && o.how !== "cast", upright: false, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
 }
 function resetAllSheep() {
   for (let i = lost.length - 1; i >= 0; i--) if (lost[i].how === "rescued") lost.splice(i, 1);
@@ -1419,11 +1427,14 @@ function updateSheep(dt) {
     if (sh.state === "follow") continue;
     sh.t += dt; sh.bleatT -= dt; if (sh.bleatT < -1) sh.bleatT = 3 + Math.random() * 2;
     const dx = d.x - sh.x, dy = d.y - sh.y, near = Math.abs(dx) < 56 && Math.abs(dy) < 80;
-    if (sh.state === "rolling") { sh.rollT += dt; if (sh.rollT > 0.6) { sh.freed = true; joinLine(sh); } continue; }
+    if (sh.state === "helped") continue;   // David is lifting it up (updateLiftSheep)
     if (!sh.freed) {
       if (sh.how === "cast" && Math.abs(dx) < 80 && Math.abs(dy) < 80) {
         if (!sh.hinted) { sh.hinted = true; toast("This sheep is cast, stuck on its back. Press Down to roll it back up."); }
-        if (pressed("down")) { sh.state = "rolling"; sh.rollT = 0; d.vx = 0; }
+        if (pressed("down") && d.onGround && !inCutscene()) {
+          sh.state = "helped"; sh.upright = false; d.helpSheep = sh; d.helpSide = Math.sign(sh.x - d.x) || d.facing;
+          d.liftPhase = 0; d.harp = false; d.charging = false; d.throwT = -1; setState("liftSheep");
+        }
       }
       if (sh.how === "thorns" && Math.abs(dx) < 140 && Math.abs(dy) < 80 && !sh.hinted) {
         sh.hinted = true; toast("Its wool is caught in the thorns. Sling the bush to cut it free!");
@@ -1473,11 +1484,9 @@ function drawSheepOne(sh, camX) {
   if (x < -150 || x > W + 150) return;
   if (sh.how === "cast" && sh.state === "lost") {          // on its back, legs kicking (Glen's clip)
     drawSprite("sheep_cast", frameOf("sheep_cast", sh.t), x, y, sh.facing);
-  } else if (sh.how === "cast" && sh.state === "rolling") {  // rolls over onto its belly and gets up
-    const f = Math.min(1, sh.rollT / 0.6), ang = sh.facing * f * Math.PI, lift = Math.sin(f * Math.PI) * 22;
-    ctx.save(); ctx.translate(x, y - 14 - lift); ctx.rotate(ang); ctx.translate(-x, -(y - 14));
-    drawSprite("sheep_cast", 0, x, y, sh.facing, 1, 1 - Math.max(0, f - 0.6) / 0.4); ctx.restore();
-    if (f > 0.6) drawSprite(SHEEP_ART[sh.kind].stand, 0, x, y, sh.facing, 1, (f - 0.6) / 0.4);
+  } else if (sh.how === "cast" && sh.state === "helped") {  // a bit of sleight of hand: on its back, then up while he's bent over it
+    if (sh.upright) drawSprite(SHEEP_ART[sh.kind].stand, 0, x, y, sh.facing);
+    else drawSprite("sheep_cast", frameOf("sheep_cast", sh.t), x, y, sh.facing);
   } else if (sh.how === "thorns" && !sh.freed) {           // tangled in the thorns, peeking out of the bush
     drawItem("thorn_bush", x + sh.facing * THORN_BUSH_X, y + 8, THORN_BUSH_SIZE);
     drawSprite("sheep_thorns", frameOf("sheep_thorns", sh.t), x, y, sh.facing);
@@ -1487,7 +1496,7 @@ function drawSheepOne(sh, camX) {
     drawSprite(nm, i, x, y, sh.facing);
   }
   if (sh.one || sh.how === "rescued") sparkle(x, y, sh.t);
-  if (sh.state !== "follow" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
+  if (sh.state !== "follow" && sh.state !== "helped" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
     ctx.save(); ctx.globalAlpha = Math.min(1, -sh.bleatT * 4, (1 + sh.bleatT) * 4);
     ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.beginPath(); ctx.roundRect(x - 26, y - 84, 52, 24, 10); ctx.fill();
     ctx.beginPath(); ctx.moveTo(x - 4, y - 61); ctx.lineTo(x + 4, y - 61); ctx.lineTo(x, y - 54); ctx.fill();
@@ -1570,6 +1579,22 @@ function updateFinish(dt) {
       if (s.x >= s.slot) { s.x = s.slot; s.state = "in"; s.t = Math.random() * 2; }
     }
   }
+}
+// cast sheep: David steps up, bends down to it, and as he straightens up it's back on its feet
+const CAST_REACH = 58;                              // how far in front of him his hands are at the bottom of the crouch (sheet px)
+const LIFT_DOWN = 0.45, LIFT_HOLD = 0.3, LIFT_UP = 0.45;
+function updateLiftSheep(d, dt) {
+  const sh = d.helpSheep, tx = sh.x - d.helpSide * CAST_REACH * SCALE;
+  if (!d.liftPhase) {                                // walk into place
+    if (autoWalk(d, tx, dt) || d.t > 3) { d.x = tx; d.facing = d.helpSide; d.vx = 0; d.liftPhase = 1; d.t = 0; }
+    return;
+  }
+  d.vx = 0; d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt); collideBody(d, BODY_W, d.h, dt);
+  if (!sh.upright && d.t > LIFT_DOWN + 0.05) {       // the flip happens out of sight, behind his arms
+    sh.upright = true; sh.facing = d.helpSide; sh.stillT = 0;
+    for (let k = 0; k < 10; k++) bits.push({ x: sh.x, y: sh.y - 6, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 220, life: 0.5, color: "#d8c9a4" });
+  }
+  if (d.t > LIFT_DOWN + LIFT_HOLD + LIFT_UP) { d.liftPhase = 0; sh.freed = true; joinLine(sh); setState("idle"); }
 }
 function updateFinishDavid(d, dt) {   // drop down, step back beside the post, turn to watch them come
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
