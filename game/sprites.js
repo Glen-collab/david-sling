@@ -132,6 +132,18 @@ window.SPRITE_DATA = {
   "ay": 265,
   "align": "feet"
  },
+ "david_carry_lamb_arms": {
+  "src": "../assets/sprites/david_carry_lamb_arms.png",
+  "frames": 6,
+  "w": 129,
+  "h": 245,
+  "ms": 110,
+  "loop": true,
+  "pingpong": false,
+  "ax": 62,
+  "ay": 243,
+  "align": "feet"
+ },
  "david_carry_lamb_walk": {
   "src": "../assets/sprites/david_carry_lamb_walk.png",
   "frames": 12,
@@ -252,6 +264,18 @@ window.SPRITE_DATA = {
   "ay": 236,
   "align": "feet"
  },
+ "david_kneel_lamb_down": {
+  "src": "../assets/sprites/david_kneel_lamb_down.png",
+  "frames": 12,
+  "w": 182,
+  "h": 248,
+  "ms": 130,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 245,
+  "align": "feet"
+ },
  "david_land": {
   "src": "../assets/sprites/david_land.png",
   "frames": 6,
@@ -264,6 +288,18 @@ window.SPRITE_DATA = {
   "ay": 219,
   "align": "feet"
  },
+ "david_lift_lamb": {
+  "src": "../assets/sprites/david_lift_lamb.png",
+  "frames": 10,
+  "w": 186,
+  "h": 245,
+  "ms": 100,
+  "loop": false,
+  "pingpong": false,
+  "ax": 114,
+  "ay": 243,
+  "align": "feet"
+ },
  "david_light_lamp": {
   "src": "../assets/sprites/david_light_lamp.png",
   "frames": 16,
@@ -274,6 +310,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 74,
   "ay": 250,
+  "align": "feet"
+ },
+ "david_pet_lamb": {
+  "src": "../assets/sprites/david_pet_lamb.png",
+  "frames": 10,
+  "w": 197,
+  "h": 173,
+  "ms": 200,
+  "loop": true,
+  "pingpong": true,
+  "ax": 108,
+  "ay": 170,
   "align": "feet"
  },
  "david_pickup_lamb": {

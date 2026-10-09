@@ -1,0 +1,24 @@
+{
+  "frames": 10,
+  "frame_w": 197,
+  "frame_h": 173,
+  "ms_per_frame": 200,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 108,
+  "anchor_y": 170,
+  "source": "pickup.mp4",
+  "video_frames": [
+    53,
+    59,
+    65,
+    70,
+    76,
+    82,
+    88,
+    93,
+    99,
+    105
+  ],
+  "pingpong": true
+}

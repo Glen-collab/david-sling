@@ -70,7 +70,9 @@ const TUNE = {
   LION_TELL: 0.9,         // seconds of roar warning before the pounce
   LION_JUMP: 820,
   LION_DAZED: 1.8,
-  LION_TAUNT_RANGE: 420,  // the lion lets the lamb go when David gets this close        // seconds it stays dazed after landing (your window to hit it)
+  LION_TAUNT_RANGE: 420,
+  RESCUE_PET: 2.6,        // seconds David kneels and pets the rescued lamb
+  RESCUE_HOLD: 0.7,       // seconds he holds it up before setting it down  // the lion lets the lamb go when David gets this close        // seconds it stays dazed after landing (your window to hit it)
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
@@ -400,9 +402,25 @@ function headroom(b, h) { // can he stand up here?
   return true;
 }
 
+// the rescue: kneel and pet the lamb, lift it, hold it, set it down; then it follows David
+const LAMB_IN_PET = 47;   // how far in front of David the lamb is in the pet/lift sheets (sheet pixels)
+function rescueTimes() {
+  const lift = SPR.david_lift_lamb.frames * SPR.david_lift_lamb.ms / 1000;
+  return { pet: TUNE.RESCUE_PET, lift, hold: TUNE.RESCUE_HOLD, down: lift };
+}
 function updateDavid(dt) {
   const d = david;
   d.t += dt;
+  if (d.state === "rescue") {
+    d.vx = 0; d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt); collideBody(d, BODY_W, d.h, dt);
+    const rt = rescueTimes();
+    if (d.t > rt.pet + rt.lift + rt.hold + rt.down) {
+      Object.assign(takenLamb, { hidden: false, follow: true, x: d.x + d.facing * LAMB_IN_PET * SCALE, y: d.y, vx: 0, t: 0, facing: d.facing });
+      setState("idle");
+      toast("\"I went after it, struck it and rescued the sheep from its mouth.\" (1 Samuel 17:35)");
+    }
+    return;
+  }
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup";
@@ -586,6 +604,14 @@ function drawDavid(camX) {
     return;
   }
   const t = d.t;
+  if (d.state === "rescue") {
+    const rt = rescueTimes(); let name, i;
+    if (t < rt.pet) { name = "david_pet_lamb"; i = frameOf(name, t); }
+    else if (t < rt.pet + rt.lift) { name = "david_lift_lamb"; i = Math.min(9, Math.floor((t - rt.pet) / rt.lift * 10)); }
+    else if (t < rt.pet + rt.lift + rt.hold) { name = "david_lift_lamb"; i = 9; }
+    else { name = "david_lift_lamb"; i = Math.max(0, 9 - Math.floor((t - rt.pet - rt.lift - rt.hold) / rt.down * 10)); }   // set it back down
+    drawSprite(name, i, x, y, d.facing); return;
+  }
   switch (d.state) {
     case "idle": drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing); break;
     case "walk": {
@@ -1143,7 +1169,7 @@ let lion = lionSpawn ? { x: lionSpawn.x, y: lionSpawn.y } : null;
 function resetLion() {
   Object.assign(lion, { x: lionSpawn.x, y: lionSpawn.y, vx: 0, vy: 0, onGround: true, state: "carry", t: 0, facing: -1,
                         hp: TUNE.LION_HP, flash: 0, alpha: 1, told: false, awake: false, pounceCool: 0 });
-  takenLamb.active = false;
+  Object.assign(takenLamb, { active: false, hidden: false, follow: false });
 }
 // the lamb the lion carries off (1 Samuel 17:34); once it's let go it runs to safety behind the lion
 const takenLamb = { active: false, x: 0, y: 0, vx: 0, vy: 0, facing: 1, t: 0 };
@@ -1222,12 +1248,28 @@ function updateLion(dt) {
 function updateTakenLamb(dt) {
   const k = takenLamb; if (!k.active) return;
   k.t += dt;
+  if (!k.follow && !k.hidden && lion && lion.state === "defeated" && david.onGround && david.state !== "rescue" &&
+      Math.abs(david.x - k.x) < 90 && Math.abs(david.y - k.y) < 30) {
+    david.facing = Math.sign(k.x - david.x) || 1;
+    david.x = k.x - david.facing * LAMB_IN_PET * SCALE;     // line the real lamb up with the one in the animation
+    k.hidden = true; setState("rescue"); david.harp = false; david.charging = false; david.throwT = -1;
+    return;
+  }
+  if (k.hidden) return;
+  if (k.follow) {   // trots along behind David (behind the other lamb)
+    const tx = david.x - david.facing * 120, dx = tx - k.x;
+    const target = Math.abs(dx) > 30 ? Math.sign(dx) * Math.min(TUNE.LAMB_SPEED, Math.abs(dx) * 3) : 0;
+    k.vx += (target - k.vx) * Math.min(1, dt * 8);
+    if (Math.abs(k.vx) > 10) k.facing = Math.sign(k.vx);
+    if (k.onGround && (david.y < k.y - 40) && Math.abs(dx) > 60) k.vy = -900;
+    if (Math.abs(k.x - david.x) > 700 || k.y > ROWS * T + 100) { k.x = david.x - david.facing * 100; k.y = david.y; k.vy = 0; }
+  }
   if (k.t > 1.4) k.vx *= 0.9;
   collideBody(k, 30, 40, dt);
   k.vy = Math.min(TUNE.MAX_FALL, (k.vy || 0) + TUNE.GRAVITY * dt);
 }
 function drawTakenLamb(camX) {
-  const k = takenLamb; if (!k.active) return;
+  const k = takenLamb; if (!k.active || k.hidden) return;
   const moving = Math.abs(k.vx) > 20;
   drawSprite("lamb_run", moving ? frameOf("lamb_run", k.t) : 2, k.x - camX, k.y, k.facing);
 }
