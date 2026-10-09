@@ -828,6 +828,18 @@ window.SPRITE_DATA = {
   "ay": 155,
   "align": "feet"
  },
+ "lion_prowl_carry_lamb": {
+  "src": "../assets/sprites/lion_prowl_carry_lamb.png",
+  "frames": 12,
+  "w": 331,
+  "h": 158,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 234,
+  "ay": 155,
+  "align": "feet"
+ },
  "lion_roar": {
   "src": "../assets/sprites/lion_roar.png",
   "frames": 10,
@@ -862,6 +874,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 198,
   "ay": 171,
+  "align": "feet"
+ },
+ "lion_sit_carry_lamb": {
+  "src": "../assets/sprites/lion_sit_carry_lamb.png",
+  "frames": 9,
+  "w": 311,
+  "h": 184,
+  "ms": 170,
+  "loop": true,
+  "pingpong": true,
+  "ax": 232,
+  "ay": 181,
   "align": "feet"
  },
  "lion_sit_roar": {

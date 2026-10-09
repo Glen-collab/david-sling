@@ -1,0 +1,22 @@
+{
+  "frames": 9,
+  "frame_w": 311,
+  "frame_h": 184,
+  "ms_per_frame": 170,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 232,
+  "anchor_y": 181,
+  "source": "Glen's Photoshop edit of lion_sit_roar",
+  "video_frames": [
+    1,
+    7,
+    12,
+    18,
+    23,
+    29,
+    34,
+    40
+  ],
+  "pingpong": true
+}

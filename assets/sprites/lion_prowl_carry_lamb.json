@@ -1,0 +1,26 @@
+{
+  "frames": 12,
+  "frame_w": 331,
+  "frame_h": 158,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 234,
+  "anchor_y": 155,
+  "source": "Glen's Photoshop edit of lion_prowl",
+  "video_frames": [
+    109,
+    110,
+    111,
+    113,
+    114,
+    115,
+    117,
+    118,
+    119,
+    120,
+    121,
+    123
+  ],
+  "pingpong": false
+}
