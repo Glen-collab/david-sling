@@ -1,0 +1,24 @@
+{
+  "frames": 10,
+  "frame_w": 140,
+  "frame_h": 95,
+  "ms_per_frame": 170,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 84,
+  "anchor_y": 94,
+  "source": "Glen lamb clips (Oct 9): d.mov",
+  "video_frames": [
+    26,
+    30,
+    34,
+    38,
+    42,
+    46,
+    50,
+    54,
+    58,
+    62
+  ],
+  "pingpong": true
+}

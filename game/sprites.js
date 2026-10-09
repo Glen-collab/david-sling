@@ -408,6 +408,18 @@ window.SPRITE_DATA = {
   "ay": 307,
   "align": "feet"
  },
+ "david_shoulder_lamb": {
+  "src": "../assets/sprites/david_shoulder_lamb.png",
+  "frames": 1,
+  "w": 151,
+  "h": 248,
+  "ms": 42,
+  "loop": false,
+  "pingpong": false,
+  "ax": 67,
+  "ay": 245,
+  "align": "feet"
+ },
  "david_sit_harp": {
   "src": "../assets/sprites/david_sit_harp.png",
   "frames": 14,
@@ -549,6 +561,18 @@ window.SPRITE_DATA = {
   "loop": true,
   "pingpong": false,
   "ax": 124,
+  "ay": 97,
+  "align": "feet"
+ },
+ "flock_run": {
+  "src": "../assets/sprites/flock_run.png",
+  "frames": 12,
+  "w": 225,
+  "h": 100,
+  "ms": 66,
+  "loop": true,
+  "pingpong": false,
+  "ax": 151,
   "ay": 97,
   "align": "feet"
  },
@@ -744,6 +768,42 @@ window.SPRITE_DATA = {
   "ay": 120,
   "align": "feet"
  },
+ "lamb_bound": {
+  "src": "../assets/sprites/lamb_bound.png",
+  "frames": 12,
+  "w": 163,
+  "h": 99,
+  "ms": 87,
+  "loop": true,
+  "pingpong": false,
+  "ax": 109,
+  "ay": 96,
+  "align": "feet"
+ },
+ "lamb_bound2": {
+  "src": "../assets/sprites/lamb_bound2.png",
+  "frames": 12,
+  "w": 169,
+  "h": 98,
+  "ms": 59,
+  "loop": true,
+  "pingpong": false,
+  "ax": 109,
+  "ay": 93,
+  "align": "feet"
+ },
+ "lamb_leap": {
+  "src": "../assets/sprites/lamb_leap.png",
+  "frames": 12,
+  "w": 161,
+  "h": 104,
+  "ms": 87,
+  "loop": false,
+  "pingpong": false,
+  "ax": 109,
+  "ay": 100,
+  "align": "feet"
+ },
  "lamb_run": {
   "src": "../assets/sprites/lamb_run.png",
   "frames": 10,
@@ -754,6 +814,78 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 79,
   "ay": 91,
+  "align": "feet"
+ },
+ "lambs2_graze": {
+  "src": "../assets/sprites/lambs2_graze.png",
+  "frames": 8,
+  "w": 150,
+  "h": 89,
+  "ms": 160,
+  "loop": true,
+  "pingpong": true,
+  "ax": 77,
+  "ay": 88,
+  "align": "feet"
+ },
+ "lambs2_stand": {
+  "src": "../assets/sprites/lambs2_stand.png",
+  "frames": 10,
+  "w": 140,
+  "h": 95,
+  "ms": 170,
+  "loop": true,
+  "pingpong": true,
+  "ax": 84,
+  "ay": 94,
+  "align": "feet"
+ },
+ "lambs2_trot": {
+  "src": "../assets/sprites/lambs2_trot.png",
+  "frames": 12,
+  "w": 141,
+  "h": 99,
+  "ms": 49,
+  "loop": true,
+  "pingpong": false,
+  "ax": 82,
+  "ay": 98,
+  "align": "feet"
+ },
+ "lambs3_trot": {
+  "src": "../assets/sprites/lambs3_trot.png",
+  "frames": 12,
+  "w": 178,
+  "h": 97,
+  "ms": 49,
+  "loop": true,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 95,
+  "align": "feet"
+ },
+ "lambs4_graze": {
+  "src": "../assets/sprites/lambs4_graze.png",
+  "frames": 10,
+  "w": 219,
+  "h": 86,
+  "ms": 160,
+  "loop": true,
+  "pingpong": true,
+  "ax": 118,
+  "ay": 84,
+  "align": "feet"
+ },
+ "lambs4_stand": {
+  "src": "../assets/sprites/lambs4_stand.png",
+  "frames": 10,
+  "w": 194,
+  "h": 96,
+  "ms": 170,
+  "loop": true,
+  "pingpong": true,
+  "ax": 117,
+  "ay": 94,
   "align": "feet"
  },
  "leopard_pounce": {

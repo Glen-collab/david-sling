@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 225,
+  "frame_h": 100,
+  "ms_per_frame": 66,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 151,
+  "anchor_y": 97,
+  "source": "Glen lamb clips (Oct 9): b.mp4",
+  "video_frames": [
+    121,
+    123,
+    124,
+    126,
+    127,
+    129,
+    131,
+    132,
+    134,
+    135,
+    137,
+    138
+  ]
+}
