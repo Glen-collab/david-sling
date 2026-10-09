@@ -80,6 +80,7 @@ const TUNE = {
   FLOCK_SPEED: 320,       // how fast the sheep trot home through the gate
   SHEEP_PER_STAGE: 5,     // lost sheep hidden in each stage (plus The One); find them all for an extra life
   SHEEP_GAP: 62,          // spacing of the line of sheep following David (px along his path)
+  LAMB_GAP: 70,           // how far behind David your lamb walks (first in the line)
   HARP_CALL_RANGE: 650,   // how far away lost sheep can hear the harp and come to David (px)
   SHEEP_CALL_SPEED: 150,  // how fast a called sheep walks over
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
@@ -716,20 +717,14 @@ function drawDavid(camX) {
 function updateLamb(dt) {
   if (lamb.carried) { lamb.x = david.x; lamb.y = david.y; return; }
   lamb.t += dt;
-  const dx = david.x - david.facing * 70 - lamb.x;
-  const target = Math.abs(dx) > 40 ? Math.sign(dx) * Math.min(TUNE.LAMB_SPEED, Math.abs(dx) * 3) : 0;
-  lamb.vx += (target - lamb.vx) * Math.min(1, dt * 8);
-  if (Math.abs(lamb.vx) > 10) lamb.facing = Math.sign(lamb.vx);
-  // hop up ledges / gaps if David is above or the way is blocked
-  if (lamb.onGround && (david.y < lamb.y - 40 || lamb.blocked) && Math.abs(dx) > 60) lamb.vy = -900;
-  lamb.vy = Math.min(TUNE.MAX_FALL, lamb.vy + TUNE.GRAVITY * dt);
-  const before = lamb.x;
-  collideBody(lamb, 30, 40, dt);
-  lamb.blocked = Math.abs(lamb.vx) < 5 && Math.abs(target) > 50 && Math.abs(lamb.x - before) < 0.5;
-  // left behind (stuck under a ledge, fell in a pit, too far away): pop back next to David
-  const far = Math.abs(lamb.x - david.x) > 260 || lamb.y - david.y > 110;
-  lamb.lostT = far && david.onGround ? (lamb.lostT || 0) + dt : 0;
-  if (lamb.lostT > TUNE.LAMB_CATCHUP || Math.abs(lamb.x - david.x) > 900 || lamb.y > ROWS * T + 100) popLamb();
+  // the lamb walks in David's footsteps, first in the line: it hops where he hopped, so it never falls in a pit.
+  // (When a second player controls the lamb, it'll get its own physics again.)
+  const tgt = david.deadT > 0 ? null : trailAt(TUNE.LAMB_GAP);
+  if (!tgt) { lamb.vx = 0; lamb.onGround = true; return; }
+  const y0 = lamb.y, far = Math.hypot(tgt.x - lamb.x, tgt.y - lamb.y);
+  moveToward(lamb, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.LAMB_SPEED, far * 5)), dt);
+  lamb.vx = lamb.moved * lamb.facing; lamb.vy = 0;
+  lamb.onGround = Math.abs(lamb.y - y0) < 0.5;
 }
 function popLamb() {
   lamb.x = david.x - david.facing * 55; lamb.y = david.y; lamb.vx = 0; lamb.vy = -300; lamb.lostT = 0;
@@ -1378,7 +1373,10 @@ function trailAt(dist) {
 }
 function sheepToCheckpoint() {   // after a fall, your sheep are waiting at the campfire
   trail.length = 0;
-  line.forEach((sh, i) => { sh.x = checkpoint.x - 70 - i * TUNE.SHEEP_GAP * 0.8; sh.y = checkpoint.y; sh.vy = 0; sh.stillT = 9; sh.facing = 1; });
+  line.forEach((sh, i) => {
+    const back = checkpoint.x - 110 - i * TUNE.SHEEP_GAP * 0.8;      // behind him, or just ahead if he's at the very start
+    sh.x = back > 40 ? back : checkpoint.x + 90 + i * TUNE.SHEEP_GAP * 0.8; sh.y = checkpoint.y; sh.vy = 0; sh.stillT = 9; sh.facing = 1;
+  });
 }
 const REST_SPOTS = [-120, 120, -175, 175, -230, 230, -285, 285];
 function moveToward(sh, tx, ty, speed, dt) {
@@ -1395,23 +1393,23 @@ function groundAhead(sh, dir) {   // is there something to stand on just ahead (
   return false;
 }
 function updateSheep(dt) {
-  if (!lost.length) return;
   const d = david;
   // record David's footsteps
   const last = trail[trail.length - 1];
-  if (d.deadT <= 0 && (!last || Math.hypot(d.x - last.x, d.y - last.y) > 6)) { trail.push({ x: d.x, y: d.y }); if (trail.length > 800) trail.shift(); }
+  // (not while he's dropping into a pit, so the line stops at the edge)
+  if (d.deadT <= 0 && d.y <= GR * T + 6 && (!last || Math.hypot(d.x - last.x, d.y - last.y) > 6)) { trail.push({ x: d.x, y: d.y }); if (trail.length > 800) trail.shift(); }
   const fire = d.state === "harp" ? fires.find(f => Math.abs(f.x - d.x) < 260 && Math.abs(f.y - d.y) < 80) : null;
   // the line
   line.forEach((sh, i) => {
     sh.t += dt;
-    if (finish.active) return;
+    if (finish.active || d.deadT > 0) return;   // David fell: they wait where they are, then at the campfire
     if (fire) {                                 // settle round the campfire while David plays
       const spot = REST_SPOTS[i % REST_SPOTS.length] * (1 + Math.floor(i / REST_SPOTS.length) * 0.25);
       moveToward(sh, fire.x + spot, fire.y, TUNE.WALK_SPEED * 0.7, dt);
       if (sh.stillT > 0.2) sh.facing = Math.sign(fire.x - sh.x) || 1;
       return;
     }
-    const tgt = trailAt(TUNE.SHEEP_GAP * (i + 1) + 40);
+    const tgt = trailAt(TUNE.LAMB_GAP + TUNE.SHEEP_GAP * (i + 1));
     if (!tgt) { sh.moved = 0; sh.stillT += dt; return; }
     const far = Math.hypot(tgt.x - sh.x, tgt.y - sh.y);
     moveToward(sh, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.WALK_SPEED * 1.15, far * 5)), dt);
