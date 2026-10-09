@@ -1,0 +1,26 @@
+{
+  "frames": 12,
+  "frame_w": 129,
+  "frame_h": 124,
+  "ms_per_frame": 100,
+  "loop": true,
+  "align": "center",
+  "anchor_x": 64,
+  "anchor_y": 63,
+  "source": "eagle_left.mp4",
+  "video_frames": [
+    23,
+    26,
+    29,
+    31,
+    34,
+    37,
+    39,
+    42,
+    45,
+    48,
+    51,
+    53
+  ],
+  "pingpong": false
+}

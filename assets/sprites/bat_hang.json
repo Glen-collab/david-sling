@@ -1,0 +1,20 @@
+{
+  "frames": 6,
+  "frame_w": 55,
+  "frame_h": 73,
+  "ms_per_frame": 180,
+  "loop": true,
+  "align": "center",
+  "anchor_x": 27,
+  "anchor_y": 37,
+  "source": "bat_hang.mp4",
+  "video_frames": [
+    1,
+    5,
+    9,
+    14,
+    18,
+    22
+  ],
+  "pingpong": true
+}

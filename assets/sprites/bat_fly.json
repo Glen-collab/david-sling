@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 42,
+  "frame_h": 43,
+  "ms_per_frame": 70,
+  "loop": true,
+  "align": "center",
+  "anchor_x": 21,
+  "anchor_y": 22,
+  "source": "bat_fly.mp4",
+  "video_frames": [
+    8,
+    11,
+    14,
+    16,
+    19,
+    22,
+    24,
+    27
+  ],
+  "pingpong": false
+}

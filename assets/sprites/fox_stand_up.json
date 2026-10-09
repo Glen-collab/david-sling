@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 160,
+  "frame_h": 103,
+  "ms_per_frame": 121,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 131,
+  "anchor_y": 101,
+  "source": "k2.mp4",
+  "video_frames": [
+    12,
+    15,
+    18,
+    21,
+    24,
+    28,
+    31,
+    34,
+    37,
+    40
+  ]
+}
