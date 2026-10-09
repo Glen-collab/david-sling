@@ -983,7 +983,7 @@ addEventListener("keydown", e => {
 
 let helpT = 12;
 function drawHUD() {
-  drawHearts(); drawSpecialCount(); drawLivesAndOil();
+  drawHearts(); drawSpecialCount(); drawLivesAndOil(); drawChargeRing();
   if (!audioUnlocked) {
     ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(W / 2 - 230, H - 40, 460, 30);
     ctx.fillStyle = "#ffe08a"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
@@ -1438,9 +1438,9 @@ function drawFlock(camX) {
 function drawFinishBanner() {
   if (!finish.active) return;
   if (finish.count > 0 && finish.phase !== "clear") {   // the running tally
-    ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.beginPath(); ctx.roundRect(W / 2 - 110, 60, 220, 44, 10); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(`Sheep home: ${finish.count}`, W / 2, 90); ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.beginPath(); ctx.roundRect(W / 2 - 120, 54, 240, 56, 12); ctx.fill();
+    hudIcon("sheep", W / 2 - 108, 58, 48);
+    hudText(`Sheep home: ${finish.count}`, W / 2 - 52, 92, 24);
   }
   if (finish.phase !== "clear") return;
   const a = Math.min(1, finish.t * 2);
@@ -1449,7 +1449,8 @@ function drawFinishBanner() {
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
   ctx.fillText("Stage 1-1 clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
-  ctx.fillText(`Sheep home: ${finish.count}`, W / 2, 265);
+  ctx.fillText(`Sheep home: ${finish.count}`, W / 2 + 20, 265);
+  hudIcon("sheep", W / 2 - 130, 236, 38);
   ctx.fillText(`Gatepost bonus: +${finish.bonus} olives`, W / 2, 300);
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
   if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 350);
@@ -1718,33 +1719,61 @@ function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
     drawItem(d.name, d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, d.y + 6 + (TUNE.DECO_DROP[d.name] || 0), d.size * 0.85);
 }
-function drawLivesAndOil() {
-  // lives
-  ctx.fillStyle = "#fff"; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 3; ctx.font = "bold 20px sans-serif";
-  ctx.fillStyle = "#c98a4a"; ctx.beginPath(); ctx.arc(W - 72, 108, 10, 0, Math.PI * 2); ctx.fill();          // a little face
-  ctx.fillStyle = "#4a2c18"; ctx.beginPath(); ctx.arc(W - 72, 103, 10, Math.PI, 0); ctx.fill();             // curly hair
-  ctx.fillStyle = "#fff"; ctx.strokeText(`× ${david.lives}`, W - 60, 115); ctx.fillText(`× ${david.lives}`, W - 60, 115);
-  // oil flask that fills with olives
-  const x = W - 80, y = 132, h = 30, f = david.olives / TUNE.OLIVES_PER_LIFE;
-  ctx.fillStyle = "#b9763e"; ctx.beginPath(); ctx.ellipse(x + 8, y + 18, 11, 14, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(x + 4, y, 8, 8);
-  ctx.save(); ctx.beginPath(); ctx.ellipse(x + 8, y + 18, 8, 11, 0, 0, Math.PI * 2); ctx.clip();
-  ctx.fillStyle = "#e9c84a"; ctx.fillRect(x - 4, y + 29 - 22 * f, 24, 22 * f); ctx.restore();
-  ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif";
-  ctx.strokeText(`${david.olives}`, W - 60, y + 24); ctx.fillText(`${david.olives}`, W - 60, y + 24);
+// HUD art (Glen's status-bar sheet, cut into assets/hud)
+const HUD = {};
+for (const n of ["heart_full", "heart_half", "heart_empty", "flask_empty", "flask_full", "olive", "face", "stone",
+                 "ring_empty", "ring_full", "sheep", "sheep_one"]) {
+  total++;
+  const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
+  img.src = `../assets/hud/${n}.png?v=${window.BUILD || 0}`; HUD[n] = img;
 }
+function hudIcon(name, x, y, h, alpha = 1) {   // top-left at x,y, scaled to height h; returns its width
+  const img = HUD[name]; if (!img || !img.naturalWidth) return h;
+  const w = img.naturalWidth * h / img.naturalHeight;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(img, x, y, w, h); ctx.restore();
+  return w;
+}
+function hudText(t, x, y, size = 20) {
+  ctx.font = `bold ${size}px sans-serif`; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.65)"; ctx.fillStyle = "#fff";
+  ctx.strokeText(t, x, y); ctx.fillText(t, x, y);
+}
+function drawHearts() {   // right to left; half hearts when it's x.5
+  for (let i = 0; i < david.maxHearts; i++) {
+    const v = david.hearts - i, name = v >= 1 ? "heart_full" : v >= 0.5 ? "heart_half" : "heart_empty";
+    hudIcon(name, W - 50 - (david.maxHearts - 1 - i) * 36, 12, 32);
+  }
+}
+const HUD_X = W - 150;   // the column under the hearts
 function drawSpecialCount() {
   if (!specials.length && !david.specialStones) return;
-  drawSpecialStone(W - 78, 72, 10, david.specialStones > 0);
-  ctx.fillStyle = "#fff"; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 3; ctx.font = "bold 20px sans-serif";
-  ctx.strokeText(`× ${david.specialStones}`, W - 60, 79); ctx.fillText(`× ${david.specialStones}`, W - 60, 79);
+  hudIcon("stone", HUD_X, 52, 34, david.specialStones > 0 ? 1 : 0.45);
+  hudText(`× ${david.specialStones}`, HUD_X + 44, 77);
 }
-function drawHearts() {
-  for (let i = 0; i < david.maxHearts; i++) {
-    const x = W - 40 - i * 34, y = 22, full = i < david.hearts;
-    ctx.fillStyle = full ? "#e0383e" : "rgba(0,0,0,0.3)";
-    ctx.beginPath(); ctx.moveTo(x, y + 8); ctx.bezierCurveTo(x, y, x - 13, y, x - 13, y + 8); ctx.bezierCurveTo(x - 13, y + 16, x, y + 22, x, y + 26);
-    ctx.bezierCurveTo(x, y + 22, x + 13, y + 16, x + 13, y + 8); ctx.bezierCurveTo(x + 13, y, x, y, x, y + 8); ctx.fill();
+function drawLivesAndOil() {
+  hudIcon("face", HUD_X, 92, 36);
+  hudText(`× ${david.lives}`, HUD_X + 44, 118);
+  // the oil flask fills as you pick olives; full = +1 life
+  const f = Math.max(0, Math.min(1, david.olives / TUNE.OLIVES_PER_LIFE)), fh = 52, fy = 134;
+  const fw = hudIcon("flask_empty", HUD_X, fy, fh);
+  const img = HUD.flask_full;
+  if (img && img.naturalWidth && f > 0) {
+    const bot = 0.94, top = 0.42, cut = bot - (bot - top) * f;     // the oil rises from the bottom of the belly
+    ctx.save(); ctx.beginPath(); ctx.rect(HUD_X - 2, fy + fh * cut, fw + 4, fh * (1 - cut) + 2); ctx.clip();
+    ctx.drawImage(img, HUD_X, fy, img.naturalWidth * fh / img.naturalHeight, fh); ctx.restore();
   }
+  hudIcon("olive", HUD_X + 40, fy + 14, 26);
+  hudText(`${david.olives}`, HUD_X + 74, fy + 36, 18);
+}
+// the sling ring over David's head fills while you hold B; gold when the throw is fully charged
+function drawChargeRing() {
+  const d = david; if (!d.charging) return;
+  const f = Math.min(1, d.charge / TUNE.CHARGE_TIME), s = 30;
+  const x = d.x - camX - s / 2, y = d.y - d.h - s - 26;
+  hudIcon("ring_empty", x, y, s, 0.85);
+  const img = HUD.ring_full; if (!img || !img.naturalWidth) return;
+  const w = img.naturalWidth * s / img.naturalHeight, cx = x + w / 2, cy = y + s / 2;
+  ctx.save(); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, s, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.closePath(); ctx.clip();
+  ctx.drawImage(img, x, y, w, s); ctx.restore();
 }
 
 // ============================================================================
