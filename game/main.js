@@ -78,6 +78,10 @@ const TUNE = {
   RESCUE_HOLD: 1.8,       // seconds he hugs it, checking it over
   GATE_BONUS_MAX: 10,     // olives for touching the very top of the sheepfold gatepost
   FLOCK_SPEED: 320,       // how fast the sheep trot home through the gate
+  SHEEP_PER_STAGE: 5,     // lost sheep hidden in each stage (plus The One); find them all for an extra life
+  SHEEP_GAP: 62,          // spacing of the line of sheep following David (px along his path)
+  HARP_CALL_RANGE: 650,   // how far away lost sheep can hear the harp and come to David (px)
+  SHEEP_CALL_SPEED: 150,  // how fast a called sheep walks over
   // Per-sprite size nudges (1 = normal). Some clips came out a little bigger or smaller than the others.
   SPRITE_SIZE: {
     david_sling_throw: 1.15,
@@ -263,6 +267,10 @@ const snake = (kind, c) => snakes.push({ kind, x: c * T + T / 2, y: GR * T, home
 const campfire = (c, r = GR - 1) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false });
 const specials = [];   // hidden special stones (like Mario's dragon coins); saved for the Power Sling
 const special = (c, r) => specials.push({ x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
+// lost sheep. how: "graze" (just reach it), "ledge" (up somewhere), "cast" (on its back: press Down next to it),
+// "thorns" (wool caught in a thorn bush: sling the bush), "one" (The One: the hardest to reach)
+const lost = [];
+const lostSheep = (kind, c, r, how = "graze") => lost.push({ kind, how, one: how === "one", hx: c * T + T / 2, hy: (r + 1) * T });
 
 if (LEVEL_NAME === "test") {
   ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
@@ -282,6 +290,7 @@ if (LEVEL_NAME === "test") {
   deco("olive_tree", 4, 16, 1.0); deco("date_palm", 15, 16, 1.1);
   label(2, 6, "World 1-1 sample. Eat food to heal, but look before you eat.");
   food("grapes", 10, 16); food("bread", 21, 16);
+  lostSheep("sheep", 19, 16);                           // the first lost sheep: just walk up to it
   special(16, 9);                                       // above the date palm: jump + flip
   special(87, 6);                                       // high above the fig platform: flip from the platform
   // the third special stone is hidden in the fig tree (col 114): jump into its branches
@@ -292,13 +301,15 @@ if (LEVEL_NAME === "test") {
   wall(26, 15, 3, 2); rock(30, 13, 3, 4);
   gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
   snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
-  deco("thorn_bush", 43, 16, 0.8, "front");
+  lostSheep("lamb", 43, 16, "thorns");                 // caught in the thorn bush: sling it free
   food("poison_berries", 45, 16); wall(47, 15, 3, 2); food("cheese", 48, 14);
   label(44, 11, "Berries or cheese? Look before you eat.");
   deco("olive_tree", 55, 16, 1.15, "back", "golden_olive");   // jump into it: a shower of olives, and a golden one
   ground(64, 122);
   campfire(68); deco("tent", 73, 16, 1.1);            label(64, 10, "Campfire: checkpoint. Sit and play the harp (Select) to rest.");
+  lostSheep("sheepblack", 78, 16, "cast");              // on its back: press Down next to it
   plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
+  lostSheep("lambblack", 89, 9, "ledge");               // up on the ledge: climb to it, or play the harp below
   snake("viper", 93);
   deco("beehive_tree", 99, 16, 1.2); food("honey", 101, 16);
   for (let k = 0; k < 4; k++) bee(99, k);              // honeybees: harmless. Leave them be and the honey is yours.
@@ -309,9 +320,11 @@ if (LEVEL_NAME === "test") {
   ground(126, 261);
   deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
   rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
+  lostSheep("lamb", 142, 9, "one");                     // The One, up on the high rock
   snake("cobra", 147);
   campfire(155);                                      label(152, 10, "Last campfire before the lion");
   deco("stone_wall", 160, 16, 1.0, "back");
+  lostSheep("ram", 164, 16);                            // the ram, off by the wall: play the harp and he'll come
   deco("cave", 214, 16, 1.7);                         // the lion's den
   rock(226, 15, 3, 2);                                // the back of the den: hop over it on the way home
   lionSpawn = { x: 205 * T, y: GR * T }; arenaX = 168 * T;
@@ -445,7 +458,8 @@ function updateDavid(dt) {
     d.vx = 0; d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt); collideBody(d, BODY_W, d.h, dt);
     const rt = rescueTimes();
     if (d.t > rt.pet + rt.lift + rt.hold + rt.down) {
-      Object.assign(takenLamb, { hidden: false, follow: true, x: d.x + d.facing * LAMB_IN_PET * SCALE, y: d.y, vx: 0, t: 0, facing: d.facing });
+      takenLamb.active = false; rescuedLamb = true;
+      joinLine(newSheep({ kind: "rescued", how: "rescued", hx: d.x + d.facing * LAMB_IN_PET * SCALE, hy: d.y }), true);
       setState("idle");
       toast("\"I went after it, struck it and rescued the sheep from its mouth.\" (1 Samuel 17:35)");
     }
@@ -745,6 +759,7 @@ function updateStones(dt) {
       sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
     }
     if (s.life > 0 && stoneHitsBugs(s)) s.life = 0;
+    if (s.life > 0 && stoneHitsThorns(s)) s.life = 0;
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
     if (s.life > 0 && !s.power && stoneHitsTree(s)) s.life = 0;
   }
@@ -983,7 +998,7 @@ addEventListener("keydown", e => {
 
 let helpT = 12;
 function drawHUD() {
-  drawHearts(); drawSpecialCount(); drawLivesAndOil(); drawChargeRing();
+  drawHearts(); drawSpecialCount(); drawLivesAndOil(); drawSheepCount(); drawChargeRing();
   if (!audioUnlocked) {
     ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(W / 2 - 230, H - 40, 460, 30);
     ctx.fillStyle = "#ffe08a"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
@@ -1080,13 +1095,15 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   for (const b of bees) Object.assign(b, { gone: false, alpha: 1 });
   for (const h of hornets) Object.assign(h, { gone: false, alpha: 1, x: h.hx, y: h.hy, state: "hover", t: 0 });
   beesAngry = false;
+  resetAllSheep();
 }
 function respawn() {
   const d = david;
   if (d.lives <= 0) restartStage();
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
-  if (lion) resetLion();
+  if (lion && !rescuedLamb) resetLion();
+  sheepToCheckpoint();
 }
 
 // food
@@ -1299,14 +1316,6 @@ function updateTakenLamb(dt) {
     }
   }
   if (k.hidden) return;
-  if (k.follow) {   // trots along behind David (behind the other lamb)
-    const tx = david.x - david.facing * 120, dx = tx - k.x;
-    const target = Math.abs(dx) > 30 ? Math.sign(dx) * Math.min(TUNE.LAMB_SPEED, Math.abs(dx) * 3) : 0;
-    k.vx += (target - k.vx) * Math.min(1, dt * 8);
-    if (Math.abs(k.vx) > 10) k.facing = Math.sign(k.vx);
-    if (k.onGround && (david.y < k.y - 40) && Math.abs(dx) > 60) k.vy = -900;
-    if (Math.abs(k.x - david.x) > 700 || k.y > ROWS * T + 100) { k.x = david.x - david.facing * 100; k.y = david.y; k.vy = 0; }
-  }
   if (k.t > 1.4 && !k.follow) k.vx *= 0.9;
   collideBody(k, 30, 40, dt);
   k.vy = Math.min(TUNE.MAX_FALL, (k.vy || 0) + TUNE.GRAVITY * dt);
@@ -1320,16 +1329,181 @@ function drawTakenLamb(camX) {
 // The end of the stage: the sheepfold gate (our flagpole). Touch the post (higher = more olives),
 // the gate swings open and the flock trots home, counted in one by one; the rescued lamb comes last.
 // ---------------------------------------------------------------------------
-// until sheep-finding is in, this is the flock that comes home at the end of 1-1
-const STAGE_FLOCK = ["sheep", "lamb", "sheepblack", "ram", "lamb", "lambblack", "sheep"];
 const SHEEP_ART = {
-  sheep:      { run: "sheep_trot",     idle: ["sheep_graze", "sheep_stand"] },
-  sheepblack: { run: "sheepblack_run", idle: ["sheepblack_graze", "sheepblack_stand"] },
-  lamb:       { run: "lamb_hop",       idle: ["lamb_graze", "lamb_stand"] },
-  lambblack:  { run: "lambblack_leap", idle: ["lambblack_stand"] },
-  ram:        { run: "ram_walk",       idle: ["ram_graze", "ram_stand"] },
-  rescued:    { run: "lamb_run",       idle: null },
+  sheep:      { run: "sheep_trot",     walk: "sheep_walk",      stand: "sheep_stand",      graze: "sheep_graze" },
+  sheepblack: { run: "sheepblack_run", walk: "sheepblack_walk", stand: "sheepblack_stand", graze: "sheepblack_graze" },
+  lamb:       { run: "lamb_hop",       walk: "lamb_walk",       stand: "lamb_stand",       graze: "lamb_graze" },
+  lambblack:  { run: "lambblack_leap", walk: "lambblack_walk",  stand: "lambblack_stand",  graze: "lambblack_stand" },
+  ram:        { run: "ram_walk",       walk: "ram_walk",        stand: "ram_stand",        graze: "ram_graze" },
+  rescued:    { run: "lamb_run",       walk: "lamb_run",        stand: null,               graze: null },
 };
+
+// ---------------------------------------------------------------------------
+// Lost sheep. Reach one (or call it with the harp) and it joins the line behind David, walking his exact path,
+// so it hops where he hopped. Sit and play at a campfire and the line settles round the fire to graze.
+// If David dies they wait for him at the campfire. At the gate, the ones you brought are counted in.
+// ---------------------------------------------------------------------------
+const line = [];          // the sheep following David, in order
+const trail = [];         // David's footsteps, newest last
+let rescuedLamb = false;
+function newSheep(o) {
+  return Object.assign(o, { x: o.hx, y: o.hy, vx: 0, vy: 0, onGround: true, state: "lost", t: Math.random() * 3, facing: -1,
+    freed: o.how !== "thorns" && o.how !== "cast", rollT: 0, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
+}
+function resetAllSheep() {
+  for (let i = lost.length - 1; i >= 0; i--) if (lost[i].how === "rescued") lost.splice(i, 1);
+  for (const sh of lost) newSheep(sh);
+  line.length = 0; trail.length = 0; rescuedLamb = false;
+}
+resetAllSheep();
+const lostCount = () => lost.filter(sh => !sh.one && sh.how !== "rescued").length;
+const foundCount = () => line.filter(sh => !sh.one && sh.how !== "rescued").length;
+function joinLine(sh, quiet) {
+  if (!lost.includes(sh)) lost.push(sh);
+  sh.state = "follow"; sh.freed = true; line.push(sh);
+  if (quiet) return;
+  chime(line.length + 2);
+  if (sh.one) toast("You found The One! \"Rejoice with me; I have found my lost sheep\" (Luke 15:6)");
+  else toast(`Found a lost sheep! (${foundCount()} of ${lostCount()})`);
+}
+// a point on David's path, this far behind him (null if he hasn't walked that far yet)
+function trailAt(dist) {
+  let px = david.x, py = david.y, left = dist;
+  for (let i = trail.length - 1; i >= 0; i--) {
+    const q = trail[i], seg = Math.hypot(px - q.x, py - q.y);
+    if (seg >= left) { const f = left / seg; return { x: px + (q.x - px) * f, y: py + (q.y - py) * f }; }
+    left -= seg; px = q.x; py = q.y;
+  }
+  return null;
+}
+function sheepToCheckpoint() {   // after a fall, your sheep are waiting at the campfire
+  trail.length = 0;
+  line.forEach((sh, i) => { sh.x = checkpoint.x - 70 - i * TUNE.SHEEP_GAP * 0.8; sh.y = checkpoint.y; sh.vy = 0; sh.stillT = 9; sh.facing = 1; });
+}
+const REST_SPOTS = [-120, 120, -175, 175, -230, 230, -285, 285];
+function moveToward(sh, tx, ty, speed, dt) {
+  const dx = tx - sh.x, dy = ty - sh.y, dist = Math.hypot(dx, dy);
+  const step = Math.min(dist, speed * dt);
+  if (dist > 0.5) { sh.x += dx / dist * step; sh.y += dy / dist * step; }
+  if (Math.abs(dx) > 2) sh.facing = Math.sign(dx);
+  sh.moved = step / Math.max(dt, 1e-4);
+  sh.stillT = sh.moved > 25 ? 0 : sh.stillT + dt;
+}
+function groundAhead(sh, dir) {   // is there something to stand on just ahead (not a pit)?
+  const c = Math.floor((sh.x + dir * 26) / T);
+  for (let r = Math.floor((sh.y - 1) / T) + 1; r < ROWS; r++) if (isSolid(c, r) || isOneway(c, r)) return true;
+  return false;
+}
+function updateSheep(dt) {
+  if (!lost.length) return;
+  const d = david;
+  // record David's footsteps
+  const last = trail[trail.length - 1];
+  if (d.deadT <= 0 && (!last || Math.hypot(d.x - last.x, d.y - last.y) > 6)) { trail.push({ x: d.x, y: d.y }); if (trail.length > 800) trail.shift(); }
+  const fire = d.state === "harp" ? fires.find(f => Math.abs(f.x - d.x) < 260 && Math.abs(f.y - d.y) < 80) : null;
+  // the line
+  line.forEach((sh, i) => {
+    sh.t += dt;
+    if (finish.active) return;
+    if (fire) {                                 // settle round the campfire while David plays
+      const spot = REST_SPOTS[i % REST_SPOTS.length] * (1 + Math.floor(i / REST_SPOTS.length) * 0.25);
+      moveToward(sh, fire.x + spot, fire.y, TUNE.WALK_SPEED * 0.7, dt);
+      if (sh.stillT > 0.2) sh.facing = Math.sign(fire.x - sh.x) || 1;
+      return;
+    }
+    const tgt = trailAt(TUNE.SHEEP_GAP * (i + 1) + 40);
+    if (!tgt) { sh.moved = 0; sh.stillT += dt; return; }
+    const far = Math.hypot(tgt.x - sh.x, tgt.y - sh.y);
+    moveToward(sh, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.WALK_SPEED * 1.15, far * 5)), dt);
+  });
+  // lost sheep
+  for (const sh of lost) {
+    if (sh.state === "follow") continue;
+    sh.t += dt; sh.bleatT -= dt; if (sh.bleatT < -1) sh.bleatT = 3 + Math.random() * 2;
+    const dx = d.x - sh.x, dy = d.y - sh.y, near = Math.abs(dx) < 56 && Math.abs(dy) < 80;
+    if (sh.state === "rolling") { sh.rollT += dt; if (sh.rollT > 0.6) { sh.freed = true; joinLine(sh); } continue; }
+    if (!sh.freed) {
+      if (sh.how === "cast" && Math.abs(dx) < 80 && Math.abs(dy) < 80) {
+        if (!sh.hinted) { sh.hinted = true; toast("This sheep is cast, stuck on its back. Press Down to roll it back up."); }
+        if (pressed("down")) { sh.state = "rolling"; sh.rollT = 0; d.vx = 0; }
+      }
+      if (sh.how === "thorns" && Math.abs(dx) < 140 && Math.abs(dy) < 80 && !sh.hinted) {
+        sh.hinted = true; toast("Its wool is caught in the thorns. Sling the bush to cut it free!");
+      }
+      continue;
+    }
+    if (near && d.deadT <= 0) { joinLine(sh); continue; }
+    // the harp: lost sheep within hearing come to David (The One has to be fetched)
+    if (sh.state === "lost" && !sh.one && d.state === "harp" && Math.abs(dx) < TUNE.HARP_CALL_RANGE && Math.abs(dy) < 360) {
+      sh.state = "called";
+      if (!sh.hinted) { sh.hinted = true; toast("A sheep heard the harp and is coming!"); }
+    }
+    if (sh.state === "called") {
+      const dir = Math.sign(dx) || 1;
+      sh.facing = dir;
+      sh.vx = sh.onGround && !groundAhead(sh, dir) ? 0 : dir * TUNE.SHEEP_CALL_SPEED;   // won't walk into a pit
+      const x0 = sh.x;
+      sh.vy = Math.min(TUNE.MAX_FALL, sh.vy + TUNE.GRAVITY * dt);
+      collideBody(sh, 30, 40, dt);
+      if (sh.onGround && sh.vx && Math.abs(sh.x - x0) < 0.3 * Math.abs(sh.vx) * dt) sh.vy = -760;   // hop up a step
+      sh.moved = Math.abs(sh.x - x0) / Math.max(dt, 1e-4);
+      if (Math.abs(dx) < 75 && Math.abs(dy) < 90) joinLine(sh);
+    }
+  }
+}
+// a stone into the thorn bush cuts the sheep free
+function stoneHitsThorns(st) {
+  for (const sh of lost) if (sh.how === "thorns" && !sh.freed && Math.abs(st.x - sh.x) < 46 && st.y > sh.y - 80 && st.y < sh.y + 4) {
+    sh.freed = true; sh.state = "lost";
+    for (let k = 0; k < 14; k++) bits.push({ x: sh.x, y: sh.y - 30, vx: (Math.random() - 0.5) * 520, vy: -Math.random() * 520, life: 0.9, color: k % 2 ? "#5a6b2a" : "#7a5a32" });
+    toast("The thorns are cut away. Go and get it!");
+    return true;
+  }
+  return false;
+}
+function sheepFrame(sh) {   // which sheet and frame to draw for a sheep right now
+  const art = SHEEP_ART[sh.kind];
+  if (sh.moved > 25) { const nm = sh.moved > TUNE.WALK_SPEED * 1.05 ? art.run : art.walk; return [nm, frameOf(nm, sh.t * Math.max(0.7, sh.moved / 260))]; }
+  const idle = sh.stillT > 1.5 || sh.state === "lost" ? (art.graze || art.stand) : art.stand;
+  if (!idle) return [art.run, 2];
+  return [idle, frameOf(idle, sh.t)];
+}
+function drawSheepOne(sh, camX) {
+  const x = sh.x - camX, y = sh.y;
+  if (x < -150 || x > W + 150) return;
+  if (sh.how === "cast" && sh.state !== "follow") {   // on its back, legs kicking; rolls over when you help
+    const art = SHEEP_ART[sh.kind], ang = sh.state === "rolling" ? Math.PI * (1 - Math.min(1, sh.rollT / 0.6)) : Math.PI + Math.sin(sh.t * 9) * 0.08;
+    ctx.save(); ctx.translate(x, y - 22); ctx.rotate(ang); ctx.translate(-x, -(y - 22));
+    drawSprite(art.stand, 0, x, y + (sh.state === "rolling" ? 0 : 4), sh.facing); ctx.restore();
+  } else {
+    const [nm, i] = sheepFrame(sh);
+    drawSprite(nm, i, x, y, sh.facing);
+  }
+  if (sh.one || sh.how === "rescued") sparkle(x, y, sh.t);
+  if (sh.how === "thorns" && !sh.freed) drawItem("thorn_bush", x, y + 8, 0.72);
+  if (sh.state !== "follow" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
+    ctx.save(); ctx.globalAlpha = Math.min(1, -sh.bleatT * 4, (1 + sh.bleatT) * 4);
+    ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.beginPath(); ctx.roundRect(x - 26, y - 84, 52, 24, 10); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x - 4, y - 61); ctx.lineTo(x + 4, y - 61); ctx.lineTo(x, y - 54); ctx.fill();
+    ctx.fillStyle = "#4a3a2a"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center"; ctx.fillText("baa!", x, y - 67);
+    ctx.restore(); ctx.textAlign = "left";
+  }
+}
+function sparkle(x, y, t) {   // the little glints round The One and the rescued lamb
+  ctx.save(); ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 6); ctx.fillStyle = "#fff6c0";
+  for (let k = 0; k < 3; k++) { const a = t * 2 + k * 2.1; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 26, y - 30 + Math.sin(a) * 14, 3, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+function drawSheep(camX) {
+  if (finish.active) { for (const sh of lost) if (sh.state !== "follow") drawSheepOne(sh, camX); return; }
+  for (const sh of lost) drawSheepOne(sh, camX);
+}
+function drawSheepCount() {
+  if (!lostCount()) return;
+  hudIcon("sheep", HUD_X - 4, 194, 36);
+  hudText(`${foundCount()}/${lostCount()}`, HUD_X + 40, 220);
+  if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
+}
 const finish = { active: false, phase: "", t: 0, gateOpen: 0, bonus: 0, count: 0, flock: [], blocked: 0 };
 const postX = () => fold.postC * T + T / 2;
 let chimeCtx = null;
@@ -1364,12 +1538,14 @@ function updateFinish(dt) {
     Object.assign(finish, { active: true, phase: "land", t: 0, count: 0 });
     d.harp = false; d.charging = false; d.throwT = -1; d.carrying = false; d.inv = 0; d.vx = 0;
     setState("finish");
-    // the flock, coming in from behind; the rescued lamb last
-    const kinds = STAGE_FLOCK.slice();
-    if (takenLamb.follow) { kinds.push("rescued"); takenLamb.active = false; }
-    finish.flock = kinds.map((kind, i) => ({ kind, i, x: camX - 120 - i * 10, y: GR * T, t: Math.random(), delay: 1.2 + i * 0.55,
-      slot: px + 3.8 * T + ((i * 5) % kinds.length) * (10 * T / kinds.length), state: "wait", counted: false,
-      idle: SHEEP_ART[kind].idle ? SHEEP_ART[kind].idle[i % SHEEP_ART[kind].idle.length] : null, depth: (i % 3) * 5 }));
+    // the sheep you brought, in through the gate: the rescued lamb, then The One, go last
+    const order = line.filter(sh => !sh.one && sh.how !== "rescued").concat(line.filter(sh => sh.how === "rescued"), line.filter(sh => sh.one));
+    const n = Math.max(1, order.length);
+    finish.flock = order.map((sh, i) => ({ kind: sh.kind, sparkle: sh.one || sh.how === "rescued", i, x: Math.min(sh.x, px - 2 * T), y: GR * T,
+      t: Math.random(), delay: 1.0 + i * 0.55, slot: px + 3.8 * T + ((i * 5) % n) * (10 * T / n), state: "wait", counted: false,
+      depth: (i % 3) * 5, idleName: [SHEEP_ART[sh.kind].graze, SHEEP_ART[sh.kind].stand][i % 2] }));
+    finish.found = foundCount(); finish.total = lostCount(); finish.one = line.some(sh => sh.one);
+    if (finish.total && finish.found === finish.total) { d.lives++; toast(`All ${finish.total} lost sheep found: +1 life!`); }
     return;
   }
   finish.blocked = Math.max(0, finish.blocked - dt);
@@ -1381,7 +1557,7 @@ function updateFinish(dt) {
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) location.reload();
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
     s.t += dt;
-    if (s.state === "wait" && finish.phase === "open" && finish.t > s.delay) { s.state = "run"; s.x = Math.min(s.x, camX - 80); }
+    if (s.state === "wait" && finish.phase === "open" && finish.t > s.delay) s.state = "run";
     if (s.state === "run") {
       s.x += TUNE.FLOCK_SPEED * (s.kind === "ram" ? 0.8 : 1) * dt;
       if (!s.counted && s.x > px) { s.counted = true; finish.count++; chime(finish.count - 1); }
@@ -1424,17 +1600,13 @@ function drawFold(camX) {
 }
 function drawFlock(camX) {
   if (!finish.active) return;
-  const list = finish.flock.filter(s => s.state !== "wait").sort((a, b) => b.depth - a.depth);
+  const list = finish.flock.slice().sort((a, b) => b.depth - a.depth);
   for (const s of list) {
     const art = SHEEP_ART[s.kind], x = s.x - camX, y = s.y - s.depth;
     if (s.state === "run") drawSprite(art.run, frameOf(art.run, s.t), x, y, 1);
-    else if (s.idle) drawSprite(s.idle, frameOf(s.idle, s.t), x, y, 1);
+    else if (s.idleName) drawSprite(s.idleName, frameOf(s.idleName, s.t), x, y, s.state === "wait" ? 1 : 1);
     else drawSprite(art.run, 2, x, y, 1);
-    if (s.kind === "rescued") {   // a little sparkle on the lamb you saved
-      ctx.save(); ctx.globalAlpha = 0.6 + 0.4 * Math.sin(s.t * 6); ctx.fillStyle = "#fff6c0";
-      for (let k = 0; k < 3; k++) { const a = s.t * 2 + k * 2.1; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 26, y - 30 + Math.sin(a) * 14, 3, 0, Math.PI * 2); ctx.fill(); }
-      ctx.restore();
-    }
+    if (s.sparkle) sparkle(x, y, s.t);
   }
 }
 function drawFinishBanner() {
@@ -1447,15 +1619,16 @@ function drawFinishBanner() {
   if (finish.phase !== "clear") return;
   const a = Math.min(1, finish.t * 2);
   ctx.save(); ctx.globalAlpha = a;
-  ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 260, 150, 520, 230, 18); ctx.fill();
+  ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 280, 150, 560, 250, 18); ctx.fill();
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
   ctx.fillText("Stage 1-1 clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
-  ctx.fillText(`Sheep home: ${finish.count}`, W / 2 + 20, 265);
-  hudIcon("sheep", W / 2 - 130, 236, 38);
-  ctx.fillText(`Gatepost bonus: +${finish.bonus} olives`, W / 2, 300);
+  ctx.fillText(`Lost sheep found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
+  hudIcon("sheep", W / 2 - 200, 234, 38);
+  ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
+  ctx.fillText(`Gatepost bonus: +${finish.bonus} olives`, W / 2, 330);
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
-  if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 350);
+  if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 375);
   ctx.restore();
 }
 function stoneHitsLion(s) {
@@ -1685,7 +1858,7 @@ function updateWorld(dt) {
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
-  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateFinish(dt);
+  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -1809,6 +1982,7 @@ function frame(now) {
   drawBugs(camX);
   drawLion(camX);
   drawTakenLamb(camX);
+  drawSheep(camX);
   drawFlock(camX);
   drawLamb(camX);
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);

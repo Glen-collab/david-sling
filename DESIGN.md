@@ -449,8 +449,18 @@ Quick, about 3–4 seconds:
 
 In stages without sheep it's a **town, palace or camp gate**, and the tally counts whatever that stage's lost things are (§5d onward).
 
+### Lost sheep and the harp *(built 2026-10-09)*
+- **5 lost sheep per stage, plus The One.** Each is in a situation: out grazing (just reach it), up on a ledge, **cast** on its back (press ↓ beside it), **caught in thorns** (sling the bush), or far off. The One is always the hardest to reach.
+- **Found sheep join a line behind David** and walk his exact path, so they hop where he hopped.
+- **Play the harp anywhere:** lost sheep within hearing (about a screen and a half) look up and walk to David. Stuck sheep (cast, thorns) still need you to go and help, and The One has to be fetched.
+- **Play the harp at a campfire:** the line settles round the fire and grazes while hearts refill. The chill moment.
+- **If David falls, his sheep wait for him at the campfire.** You never have to find the same sheep twice.
+- **At the gate,** the sheep you brought are counted in; the rescued lamb and The One go last with a sparkle. All 5 found = +1 life.
+- *Art still wanted:* a real "cast sheep" clip (on its back, legs kicking). The game turns a standing sheep upside down for now.
+
 ### The end of every world: David's Journal, two pages
 David sits by the fire, pulls out his scroll and writes. A two-page spread fills in while **the instrumental of the song** plays.
+- **What happened (Glen's idea, 2026-10-09).** David writes the world's big moment in first person, as his own diary, with a small footnote showing where the Bible later records it. This keeps the rule: David isn't quoting 1 Samuel; 1 Samuel is quoting David. World 1 example: *"A lion came today and took a lamb from the flock. I went after it, struck it, and took the lamb out of its mouth. The Lord kept me safe."* Footnote: *David told King Saul about this years later (1 Samuel 17:34–35).*
 - **Left page: Wisdom.** In David's own words, what he learned from the people he met this world, each with its pre-David scripture.
 - **Right page: The Psalm.** The world's new line of **"The Shepherd Leads Me"** is added under the earlier ones, so the song builds page by page across the game.
 - Skippable after the first time; readable any time from the pause-menu Journal.
