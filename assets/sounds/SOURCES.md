@@ -30,3 +30,17 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | fall_pit | fall_in_hole_die.wav | ? |
 | lion_roar (before each pounce) | cat_pharoah_roar.wav | ? |
 | lion_growl (spots you, and when hit) | angry_boss.wav | ? |
+
+## Glen's Oct 10 downloads (originals in Desktop\david-sling-art\sounds\originals)
+
+| Game file | Original download | Used for | Source / licence |
+|---|---|---|---|
+| stone_hit | stone_impacts.wav | every stone that hits something | ? |
+| final_stone | ending_stone_closeup.wav | the stone that beats a boss (slow motion) | ? |
+| final_stone_goliath | ending_stone_goliath.wav | saved for Goliath's last stone | ? |
+| later/river_flowing | flowing_water_noise.wav | rivers (later) | ? |
+| later/horse_running | horse_running.mp3 | later | ? |
+| later/footsteps_tall_grass, _woods, _crunchy | footstesps_tall_grass.wav, footsteps_woods.wav, footsteps_crunchy.wav | later | ? |
+| later/running_forest_1, _2 | running_forest.wav, running_forest (2).wav | later | ? |
+| later/wolf_growl_1, _2 | wolf_growl.wav, wolf_growl (2).mp3 | jackals / wolves (later) | ? |
+| later/bear_growl | bear_monster_growl.wav | the bear (later) | ? |

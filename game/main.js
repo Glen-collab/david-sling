@@ -55,6 +55,9 @@ const TUNE = {
   SFX_VOLUME: 0.8,        // sound effects (0 to 1)
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
   BOSS_MUSIC_VOLUME: 0.6, // the lion fight
+  FINAL_SLOWMO: 0.18,     // the stone that beats a boss: game speed while it flies in (1 = normal)
+  FINAL_LEAD: 0.12,       // game-seconds before that stone lands that slow motion starts
+  FINAL_HOLD: 1.3,        // real seconds the world stays slow after the hit
   BOSS_MUSIC_LEAD: 4,     // tiles before the lion's arena that the boss music starts ("uh oh"), before you can see him
   HARP_MUSIC_DELAY: 1.7,  // seconds after pressing Select until his hands start playing; the music starts then
   // size of each of the 14 sit-down frames, measured so his head matches standing David (the clip's camera crept closer)
@@ -763,18 +766,19 @@ function updateStones(dt) {
     s.life -= dt; s.vy += TUNE.STONE_GRAVITY * dt * (s.power ? 0.08 : s.charged ? 0.45 : 1);
     s.x += s.vx * dt; s.y += s.vy * dt;
     if (s.power) { s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift(); }
-    if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) s.life = 0;
+    if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) { s.life = 0; stoneHit(s); }
     for (const g of gourds) if (g.alive && Math.hypot(s.x - g.x, s.y - (g.y - 24)) < 30) {
-      g.alive = false; if (!s.power) s.life = 0;
+      g.alive = false; if (!s.power) s.life = 0; stoneHit(s);
       for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
     }
     for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - snakeMid(sn)) < 48 && s.y > sn.y - 70 && s.y < sn.y + 6) {
-      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; toast("Driven off!");
+      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; stoneHit(s); toast("Driven off!");
     }
-    if (s.life > 0 && stoneHitsBugs(s)) s.life = 0;
-    if (s.life > 0 && stoneHitsThorns(s)) s.life = 0;
+    if (s.life > 0 && stoneHitsBugs(s)) { s.life = 0; stoneHit(s); }
+    if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
-    if (s.life > 0 && !s.power && stoneHitsTree(s)) s.life = 0;
+    if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
+    if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
   }
   for (let i = stones.length - 1; i >= 0; i--) if (stones[i].life <= 0) stones.splice(i, 1);
   for (const b of bits) { b.life -= dt; b.vy += 1400 * dt; b.x += b.vx * dt; b.y += b.vy * dt; }
@@ -1757,20 +1761,78 @@ function drawFinishBanner() {
   if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 375);
   ctx.restore();
 }
+// ---------------------------------------------------------------------------
+// The last stone. When a stone is about to land the blow that beats a boss, the world slows right down
+// so you watch it fly in, the impact lands with a flash and a shake, then everything eases back to normal.
+// ---------------------------------------------------------------------------
+const stoneHit = (s, vol = 0.7) => sfx("stone_hit", s.x, vol, 0.9 + Math.random() * 0.2);
+const FINAL_PEAK = { final_stone: 0.8, final_stone_goliath: 1.7 };   // seconds into each sound where the impact is
+const finalBlow = { on: false, phase: "", t: 0, stone: null, snd: null, flash: 0, shake: 0, sound: "final_stone" };
+function lionDamage(s) {   // what this stone would do to the lion right now
+  if (!lion || !lion.awake || lion.state === "defeated") return 0;
+  if (s.power && lion.state !== "dazed") return 2;
+  return lion.state === "dazed" ? (s.power ? 3 : s.charged ? 2 : 1) : 0;
+}
+function watchForFinalStone(s) {
+  const dmg = lionDamage(s); if (!dmg || dmg < lion.hp) return;
+  if (lion.state === "dazed" && lion.t > TUNE.LION_DAZED - TUNE.FINAL_LEAD - 0.05) return;   // it'll be up before the stone gets there
+  const b = lionBox(); let x = s.x, y = s.y, vy = s.vy;
+  const g = TUNE.STONE_GRAVITY * (s.power ? 0.08 : s.charged ? 0.45 : 1), step = 1 / 120;
+  for (let t = 0; t < TUNE.FINAL_LEAD; t += step) {
+    vy += g * step; x += s.vx * step; y += vy * step;
+    if (x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1) {
+      Object.assign(finalBlow, { on: true, phase: "fly", t: 0, stone: s });
+      const lead = TUNE.FINAL_LEAD / TUNE.FINAL_SLOWMO;            // real seconds until it lands
+      finalBlow.snd = sfx(finalBlow.sound, undefined, 1);
+      if (finalBlow.snd) try { finalBlow.snd.currentTime = Math.max(0, FINAL_PEAK[finalBlow.sound] - lead); } catch (e) {}
+      return;
+    }
+  }
+}
+function finalHit(s) {
+  if (!finalBlow.on) {   // no warning (thrown point-blank): straight to the impact
+    finalBlow.snd = sfx(finalBlow.sound, undefined, 1);
+    if (finalBlow.snd) try { finalBlow.snd.currentTime = Math.max(0, FINAL_PEAK[finalBlow.sound] - 0.05); } catch (e) {}
+  }
+  Object.assign(finalBlow, { on: true, phase: "hit", t: 0, stone: null, flash: 1, shake: 1 });
+  for (let k = 0; k < 16; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 700, vy: -Math.random() * 600, life: 0.9, color: k % 2 ? "#fff2b0" : "#ffffff" });
+}
+// how fast the game runs this frame (real seconds in, game seconds out)
+function gameSpeed(real) {
+  const f = finalBlow; if (!f.on) return 1;
+  f.t += real; f.flash = Math.max(0, f.flash - real * 1.6); f.shake = Math.max(0, f.shake - real * 1.2);
+  if (f.phase === "fly") {
+    if (!f.stone || f.stone.life <= 0 || f.t > 3) { f.on = false; if (f.snd) f.snd.pause(); return 1; }   // it missed after all
+    return TUNE.FINAL_SLOWMO;
+  }
+  if (f.t < 0.14) return 0;                                    // the hit freezes for a heartbeat
+  if (f.t < 0.14 + TUNE.FINAL_HOLD) return TUNE.FINAL_SLOWMO;
+  const k = (f.t - 0.14 - TUNE.FINAL_HOLD) / 0.6;              // then eases back up to full speed
+  if (k >= 1) { f.on = false; return 1; }
+  return TUNE.FINAL_SLOWMO + (1 - TUNE.FINAL_SLOWMO) * k * k;
+}
+function drawFinalBlow() {
+  const f = finalBlow; if (!f.on && f.flash <= 0) return;
+  // letterbox bars slide in while it's slow
+  const slow = f.phase === "fly" ? Math.min(1, f.t * 5) : Math.max(0, 1 - Math.max(0, f.t - 0.14 - TUNE.FINAL_HOLD) / 0.6);
+  if (f.flash > 0) { ctx.fillStyle = `rgba(255,250,230,${f.flash * 0.75})`; ctx.fillRect(0, 0, W, H); }
+  if (f.on && slow > 0) { ctx.fillStyle = "#000"; const bh = 54 * slow; ctx.fillRect(0, 0, W, bh); ctx.fillRect(0, H - bh, W, bh); }
+}
 function stoneHitsLion(s) {
   if (!lion || lion.state === "defeated" || !lion.awake) return false;   // before the fight it's busy taunting
   const b = lionBox();
   if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
   if (s.power && lion.state !== "dazed") {   // the Power Sling knocks it dazed and hurts it
-    lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed");
+    lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed"); if (lion.hp <= 0) finalHit(s); else stoneHit(s);
     toast("Power Sling! The lion is dazed. Hit it now!");
     if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)"); }
   } else if (lion.state === "dazed") {
-    lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25; sfx("lion_growl", lion.x, 0.8, 1.1);
+    lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25;
+    if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_growl", lion.x, 0.8, 1.1); }
     if (lion.hp <= 0) {
       setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
     }
-  } else if (!lion.told) { lion.told = true; toast("Stones bounce off! Wait until it's dazed after a pounce."); }
+  } else { stoneHit(s, 0.6); if (!lion.told) { lion.told = true; toast("Stones bounce off! Wait until it's dazed after a pounce."); } }
   for (let k = 0; k < 6; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.4, color: lion.state === "dazed" || lion.state === "defeated" ? "#fff2b0" : "#bbb" });
   return true;
 }
@@ -1971,7 +2033,7 @@ addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlock
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
-  "jump", "olive_pickup", "fall_pit", "lion_roar", "lion_growl"];
+  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_growl"];
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }
@@ -2133,8 +2195,9 @@ function drawChargeRing() {
 // ============================================================================
 let camX = 0, last = performance.now();
 function frame(now) {
-  const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
-  if (toastTime > 0) toastTime -= dt;
+  const real = Math.min(1 / 30, (now - last) / 1000); last = now;
+  const dt = real * gameSpeed(real);   // the last stone on a boss slows the world down
+  if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
   if (loaded < total) {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
@@ -2145,7 +2208,9 @@ function frame(now) {
   pollInput();
   if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const targetCam = Math.max(0, Math.min(LEVEL_W - W, david.x - W * 0.4 + david.facing * 80));
-  camX += (targetCam - camX) * Math.min(1, dt * 6);
+  camX += (targetCam - camX) * Math.min(1, real * 6);
+  const shake = finalBlow.shake * finalBlow.shake * 14;
+  ctx.save(); if (shake > 0.3) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
 
   drawBackground(camX);
   drawDecor(camX, "back");
@@ -2165,6 +2230,8 @@ function frame(now) {
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawStones(camX);
   drawDecor(camX, "front");
+  ctx.restore();
+  drawFinalBlow();
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
   if (debug) {
     ctx.strokeStyle = "red"; ctx.strokeRect(david.x - camX - BODY_W / 2, david.y - david.h, BODY_W, david.h);
