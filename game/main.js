@@ -546,7 +546,7 @@ function updateDavid(dt) {
       const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
-      sfx(full >= 1 ? "sling_throw_quick" : "sling_throw", undefined, full >= 1 ? 0.9 : 0.8, 0.95 + Math.random() * 0.1);
+      sfx("sling_throw", undefined, full >= 1 ? 0.95 : 0.8, 0.95 + Math.random() * 0.1);   // always the whip of the throw
     }
     if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; }
   }
@@ -2008,7 +2008,7 @@ function updateSound(dt) {
   ambVol = fadeLoop(ambience, ambVol, calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
   // the sling whirls while you charge it
   const d = david;
-  if (d.charging && d.charge > 0.12 && !d.chargeSnd) d.chargeSnd = sfx("sling_charge", undefined, 0.6);
+  if (d.charging && d.charge > 0.12 && !d.chargeSnd) { d.chargeSnd = sfx("sling_charge", undefined, 0.6); if (d.chargeSnd) d.chargeSnd.loop = true; }   // whirls as long as B is held
   if (!d.charging && d.chargeSnd) { d.chargeSnd.pause(); d.chargeSnd = null; }
 }
 function updateHarpMusic(dt) {
