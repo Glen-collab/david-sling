@@ -828,7 +828,7 @@ function terPiece(name, x, y, h, flip = false) {   // one piece scaled to height
   return w;
 }
 // Glen's boulder: measured on his image (pixels): where the rock is, and which row of the soil texture its soil starts on
-const BOULDER = { rockCenterX: 487, grassRow: 320, soilOffset: 24 };   // grassRow: where Glen's topsoil sits on the boulder image
+const BOULDER = { rockCenterX: 487, grassRow: 320, soilOffset: 24, standRow: 42, widen: 1.15 };   // standRow: the middle of the rock's flat top, where feet land   // grassRow: where Glen's topsoil sits on the boulder image
 const BASE_GRASS_FRAC = 0.64;   // where the grass band sits down Glen's base pieces
 const TER_GRASS_CENTER = 3;     // the ground's grass sits this many pixels above the ground line
 function boulderTopY(groundY) { return groundY - TER_GRASS_CENTER - BOULDER.grassRow * sedScale(); }
@@ -899,8 +899,11 @@ function drawTiles(camX) {
     for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) seenB.add((c + i) + "," + (r + j));
     const img = ITEM.boulder_mound; if (!img || !img.naturalWidth) continue;
     // drawn at the ground soil's own scale, rock centred on the block, its soil sunk into the ground (layers line up, see sedimentPhase)
-    const sc = sedScale(), bw = img.naturalWidth * sc, bh = img.naturalHeight * sc;
-    ctx.drawImage(img, (c + w / 2) * T - BOULDER.rockCenterX * sc, boulderTopY((r + h) * T), bw, bh);
+    // the rock above the grass is stretched so the middle of its top face sits on the top of the block (where you stand), the soil below is left alone
+    const sc = sedScale(), B = BOULDER, sx = sc * B.widen, groundY = (r + h) * T, grassY = groundY - TER_GRASS_CENTER;
+    const ky = (h * T - TER_GRASS_CENTER) / ((B.grassRow - B.standRow) * sc), x0 = (c + w / 2) * T - B.rockCenterX * sx;
+    ctx.drawImage(img, 0, 0, img.naturalWidth, B.grassRow, x0, grassY - B.grassRow * sc * ky, img.naturalWidth * sx, B.grassRow * sc * ky);
+    ctx.drawImage(img, 0, B.grassRow, img.naturalWidth, img.naturalHeight - B.grassRow, x0, grassY, img.naturalWidth * sx, (img.naturalHeight - B.grassRow) * sc);
   }
   // 5) dry-stone walls (material 3): end caps + repeated middle, scaled to the wall's height
   const seen = new Set();
