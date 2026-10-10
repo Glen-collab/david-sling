@@ -52,6 +52,9 @@ const TUNE = {
   HARP_LOOP_MS: 190,      // the calm strumming loop (frames 9-12, back and forth)
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
   HARP_VOLUME: 0.8,       // volume of the harp music when David plays (0 to 1)
+  SFX_VOLUME: 0.8,        // sound effects (0 to 1)
+  AMBIENCE_VOLUME: 0.35,  // birds in the hills
+  BOSS_MUSIC_VOLUME: 0.6, // the lion fight
   HARP_MUSIC_DELAY: 1.7,  // seconds after pressing Select until his hands start playing; the music starts then
   // size of each of the 14 sit-down frames, measured so his head matches standing David (the clip's camera crept closer)
   SIT_HARP_SIZES: [0.89, 0.87, 0.86, 0.80, 0.75, 0.74, 0.74, 0.72, 0.72, 0.72, 0.71, 0.72, 0.72, 0.72],
@@ -522,6 +525,7 @@ function updateDavid(dt) {
     const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
     stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
                   charged: true, power: true, life: 1.6, trail: [] });
+    sfx("sling_power");
     toast(`Power Sling! (${d.specialStones} stone${d.specialStones === 1 ? "" : "s"} of remembrance left)`);
   }
   if (!d.carrying && !d.harp && !busy) {
@@ -542,6 +546,7 @@ function updateDavid(dt) {
       const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
+      sfx(full >= 1 ? "sling_throw_quick" : "sling_throw", undefined, full >= 1 ? 0.9 : 0.8, 0.95 + Math.random() * 0.1);
     }
     if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; }
   }
@@ -1129,7 +1134,7 @@ function updatePickups(dt) {
     if (Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10) {
       p.taken = true;
       const v = FOOD[p.name] ?? 1;
-      if (v < 0) hurtDavid(p.x); else david.hearts = Math.min(david.maxHearts, david.hearts + v);
+      if (v < 0) hurtDavid(p.x); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }
       toast((v < 0 ? "" : "+ ") + (FOOD_TEXT[p.name] || p.name));
       for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });
     }
@@ -1208,7 +1213,7 @@ function updateFires(dt) {
     if (near && !f.lit) { f.lit = true; checkpoint = { x: f.x - 30, y: f.y }; toast("Campfire: checkpoint. Play the harp here (Select) to rest."); }
     if (near && david.state === "harp" && david.hearts < david.maxHearts) {
       f.healT = (f.healT || 0) + dt;
-      if (f.healT > 0.8) { f.healT = 0; david.hearts++; }
+      if (f.healT > 0.8) { f.healT = 0; david.hearts++; sfx("heal", undefined, 0.35); }
     }
   }
 }
@@ -1368,6 +1373,7 @@ const foundCount = () => line.filter(sh => !sh.one && sh.how !== "rescued").leng
 function joinLine(sh, quiet) {
   if (!lost.includes(sh)) lost.push(sh);
   sh.state = "follow"; sh.freed = true; sh.fire = null; line.push(sh);
+  baa(sh.x, 0.9);
   if (quiet) return;
   chime(line.length + 2);
   if (sh.one) toast("You found The One! \"Rejoice with me; I have found my lost sheep\" (Luke 15:6)");
@@ -1442,7 +1448,8 @@ function updateSheep(dt) {
   // lost sheep
   for (const sh of lost) {
     if (line.includes(sh)) continue;   // found: at the campfire, or following
-    sh.t += dt; sh.bleatT -= dt; if (sh.bleatT < -1) sh.bleatT = 3 + Math.random() * 2;
+    sh.t += dt; const b0 = sh.bleatT; sh.bleatT -= dt; if (sh.bleatT < -1) sh.bleatT = 3 + Math.random() * 2;
+    if (b0 >= 0 && sh.bleatT < 0) baa(sh.x, sh.how === "thorns" || sh.how === "cast" ? 0.9 : 0.6);
     const dx = d.x - sh.x, dy = d.y - sh.y, near = Math.abs(dx) < 56 && Math.abs(dy) < 80;
     if (sh.state === "helped") continue;   // David is lifting it up (updateLiftSheep)
     if (!sh.freed) {
@@ -1646,13 +1653,13 @@ function updateFinish(dt) {
       t: Math.random(), delay: 1.0 + i * 0.55, slot: px + 3.8 * T + ((i * 5) % n) * (10 * T / n), state: "wait", counted: false,
       depth: (i % 3) * 5, idleName: [SHEEP_ART[sh.kind].graze, SHEEP_ART[sh.kind].stand][i % 2] }));
     finish.found = foundCount(); finish.total = lostCount(); finish.one = line.some(sh => sh.one);
-    if (finish.total && finish.found === finish.total) { d.lives++; toast(`All ${finish.total} lost sheep found: +1 life!`); }
+    if (finish.total && finish.found === finish.total) { d.lives++; sfx("extra_life"); toast(`All ${finish.total} lost sheep found: +1 life!`); }
     return;
   }
   finish.blocked = Math.max(0, finish.blocked - dt);
   finish.t += dt;
   const allIn = finish.flock.every(s => s.state === "in");
-  if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; }
+  if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; if (finish.flock.length > 1) sfx("flock_baa", undefined, 0.7); }
   if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
   if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; } }
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) location.reload();
@@ -1823,10 +1830,10 @@ function updateOlives(dt) {
     fall(o, dt); o.t += dt;
     if (Math.abs(o.x - david.x) < 24 && o.y > david.y - david.h - 10 && o.y < david.y + 6) {
       o.taken = true;
-      if (o.kind === "golden") { david.lives++; toast("A golden olive! A whole flask of oil: +1 life"); }
+      if (o.kind === "golden") { david.lives++; sfx("extra_life"); toast("A golden olive! A whole flask of oil: +1 life"); }
       else {
         david.olives++;
-        if (david.olives >= TUNE.OLIVES_PER_LIFE) { david.olives -= TUNE.OLIVES_PER_LIFE; david.lives++; toast("The oil flask is full: +1 life!"); }
+        if (david.olives >= TUNE.OLIVES_PER_LIFE) { david.olives -= TUNE.OLIVES_PER_LIFE; david.lives++; sfx("extra_life"); toast("The oil flask is full: +1 life!"); }
       }
       for (let k = 0; k < 4; k++) bits.push({ x: o.x, y: o.y, vx: (Math.random() - 0.5) * 160, vy: -Math.random() * 220, life: 0.35, color: o.kind === "golden" ? "#ffd84a" : "#d7e6a0" });
     }
@@ -1957,6 +1964,59 @@ function unlockAudio() {
   harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = true; }).catch(() => {});
 }
 addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlockAudio);
+// ---------------------------------------------------------------------------
+// Sound effects (Web Audio, so many can overlap) and the looping ambience / boss music.
+// Files are in assets/sounds. Sounds far from the middle of the screen play quieter.
+// ---------------------------------------------------------------------------
+const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
+  "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro"];
+const SFX = {};
+function loadSfx() {
+  if (!chimeCtx) return;
+  for (const n of SFX_FILES) if (!SFX[n]) {
+    SFX[n] = "loading";
+    fetch(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`).then(r => r.arrayBuffer()).then(b => chimeCtx.decodeAudioData(b))
+      .then(buf => { SFX[n] = buf; }).catch(() => { SFX[n] = null; });
+  }
+}
+// play a sound; x (optional) is where it happens in the level, so off-screen things are quieter
+function sfx(name, x, vol = 1, rate = 1) {
+  if (!audioUnlocked || !chimeCtx) return null;
+  const buf = SFX[name]; if (!buf || buf === "loading") return null;
+  let v = vol * TUNE.SFX_VOLUME;
+  if (x !== undefined) { const off = Math.abs(x - (camX + W / 2)); v *= Math.max(0, Math.min(1, 1.25 - off / (W * 0.9))); }
+  if (v <= 0.01) return null;
+  const src = chimeCtx.createBufferSource(), g = chimeCtx.createGain();
+  src.buffer = buf; src.playbackRate.value = rate; g.gain.value = v;
+  src.connect(g).connect(chimeCtx.destination); src.start();
+  return { src, g };
+}
+const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() * 7)), x, vol, 0.92 + Math.random() * 0.16);
+// looping beds
+function loopAudio(name) { const a = new Audio(`../assets/sounds/${name}.mp3?v=${window.BUILD || 0}`); a.loop = true; a.volume = 0; return a; }
+const ambience = loopAudio("ambience_hills"), bossMusic = loopAudio("boss_loop");
+let ambVol = 0, bossVol = 0, bossIntroPlayed = false;
+function fadeLoop(a, cur, want, dt, speed) {
+  const v = want > cur ? Math.min(want, cur + dt * speed) : Math.max(want, cur - dt * speed);
+  a.volume = Math.max(0, Math.min(1, v));
+  if (v > 0 && a.paused && audioUnlocked) a.play().catch(() => {});
+  if (v <= 0 && !a.paused) a.pause();
+  return v;
+}
+function updateSound(dt) {
+  if (!audioUnlocked) return;
+  loadSfx();
+  const fight = lion && lion.awake && lion.state !== "defeated" && david.deadT <= 0;
+  if (lion && lion.state === "intro" && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }
+  if (lion && !lion.awake) bossIntroPlayed = false;
+  bossVol = fadeLoop(bossMusic, bossVol, fight && lion.state !== "intro" ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.8 : 0.4);
+  const calm = !fight && !(david.state === "harp") && !finish.active;
+  ambVol = fadeLoop(ambience, ambVol, calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
+  // the sling whirls while you charge it
+  const d = david;
+  if (d.charging && d.charge > 0.12 && !d.chargeSnd) d.chargeSnd = sfx("sling_charge", undefined, 0.6);
+  if (!d.charging && d.chargeSnd) { try { d.chargeSnd.g.gain.setTargetAtTime(0, chimeCtx.currentTime, 0.03); d.chargeSnd.src.stop(chimeCtx.currentTime + 0.15); } catch (e) {} d.chargeSnd = null; }
+}
 function updateHarpMusic(dt) {
   const sitting = david.harp && (david.state === "kneel" || david.state === "harp");
   harpHeldT = sitting ? harpHeldT + dt : 0;
@@ -1971,7 +2031,7 @@ function updateHarpMusic(dt) {
 }
 
 function updateWorld(dt) {
-  updateHarpMusic(dt);
+  updateHarpMusic(dt); updateSound(dt);
   updateBees(dt); updateHornets(dt);
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
