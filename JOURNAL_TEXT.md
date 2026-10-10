@@ -25,6 +25,10 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 
 **The look:** ink appears word by word with a quiet scratch of the pen. The crossed-out words stay on the page (it's a real draft).
 
+**Rip-outs (Glen's idea, rare on purpose: twice in the whole game).** Scratch-outs fix a word ("that's not quite it"). A rip-out throws away a whole thought ("I shouldn't have written that"). David starts a bitter entry on the left page, stops, tears the page out, crumples it and tosses it into the campfire, where it curls up and burns. Then he writes the real entry. In the pause-menu Journal you can still see the **torn stub** in the binding at those two places.
+- **3-2, left out:** *"Nobody even remembered me. My brothers always…"* → ripped out → the Hagar entry ("the God who sees me").
+- **6-1, Eliab's anger:** *"Eliab thinks he's so…"* → ripped out → the Joseph entry (answer with kindness). The lesson is "answer gently", and the player watches him choose it.
+
 ---
 
 ## World 1: The Shepherd's Fields *(DRAFT, for Glen to edit)*
@@ -151,7 +155,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 | Stage | Lesson | David writes |
 |---|---|---|
 | 3-1 Village chores | Small work matters | *God put the first man in the garden to work it and take care of it. My work is the sheep.* — Genesis 2:15 |
-| 3-2 Left out | God sees me | *Hagar was alone in the desert, and she called Him "the God who sees me." He sees me out here too.* — Genesis 16:13 |
+| 3-2 Left out *(rip-out first)* | God sees me | *Hagar was alone in the desert, and she called Him "the God who sees me." He sees me out here too.* — Genesis 16:13 |
 | 3-3 Called in (the flip) | God chooses the small | *The LORD did not choose our people because we were many. We were the fewest of all.* — Deuteronomy 7:7 |
 | 3-4 The storm, the wild ox | Stay humble | *Gideon said he was the least in his family. The LORD said, "I will be with you."* — Judges 6:15–16 |
 
@@ -201,7 +205,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 ### World 6: The Valley of Elah *(one scratch-out)*
 | Stage | Lesson | David writes |
 |---|---|---|
-| 6-1 Eliab's anger | Answer gently | *Joseph's brothers hurt him, and he answered them with kindness. Eliab was angry. I will not be.* — Genesis 50:20–21 |
+| 6-1 Eliab's anger *(rip-out first)* | Answer gently | *Joseph's brothers hurt him, and he answered them with kindness. Eliab was angry. I will not be.* — Genesis 50:20–21 |
 | 6-2 Goliath seen | Others saw giants and lost heart | *The spies felt like grasshoppers next to the giants. Only Caleb said, "We can do it."* — Numbers 13:30–33 |
 | 6-3 The water carriers | Hold each other up | *When Moses grew tired, Aaron and Hur held up his hands. Today we held each other up.* — Exodus 17:12 |
 | 6-4 The watchtower | Don't be afraid | *Be strong. Do not be afraid. The LORD goes with you, and He will never leave you.* — Deuteronomy 31:6 |
