@@ -25,7 +25,7 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 
 **The look:** ink appears word by word with a quiet scratch of the pen. The crossed-out words stay on the page (it's a real draft).
 
-**Rip-outs (Glen's idea, rare on purpose: twice in the whole game).** Scratch-outs fix a word ("that's not quite it"). A rip-out throws away a whole thought ("I shouldn't have written that"). David starts a bitter entry on the left page, stops, tears the page out, crumples it and tosses it into the campfire, where it curls up and burns. Then he writes the real entry. In the pause-menu Journal you can still see the **torn stub** in the binding at those two places.
+**Rip-outs (Glen's idea, rare on purpose: twice in the whole game).** Scratch-outs fix a word ("that's not quite it"). A rip-out throws away a whole thought ("I shouldn't have written that"). David turns to a fresh page and starts a bitter entry on the **right** page, stops, tears the page out (`assets/journal/journal_tear.png`), and tosses it into the campfire, where it burns (`journal_burn.png`). Then he writes the real lesson on the left page as usual. Paging back later, that spread uses `davids_journal_page_ripped-out.png`, with the torn stub on the right. In the pause-menu Journal you can still see the **torn stub** in the binding at those two places.
 - **3-2, left out:** *"Nobody even remembered me. My brothers always…"* → ripped out → the Hagar entry ("the God who sees me").
 - **6-1, Eliab's anger:** *"Eliab thinks he's so…"* → ripped out → the Joseph entry (answer with kindness). The lesson is "answer gently", and the player watches him choose it.
 
