@@ -1651,6 +1651,8 @@ function updateFinish(dt) {
   if (!fold) return;
   const px = postX(), d = david;
   if (!finish.active) {
+    // the closed gate blocks the way: jump over it (and go for the golden olive while you're up there)
+    if (d.deadT <= 0 && d.y > gateTopAt() + 4 && d.x + BODY_W / 2 > px - 10 && d.x < px) { d.x = px - 10 - BODY_W / 2; d.vx = Math.min(0, d.vx); }
     if (d.x + BODY_W / 2 < px - 6 || d.deadT > 0) return;
     if (lion && lion.state !== "defeated") {          // the lamb first!
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
@@ -1733,7 +1735,7 @@ function updateLiftSheep(d, dt) {
 function updateFinishDavid(d, dt) {   // drop down, step back beside the post, turn to watch them come
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
   if (finish.phase === "land") { d.vx = 0; collideBody(d, BODY_W, d.h, dt); return; }
-  if (autoWalk(d, postX() - 1.3 * T, dt)) d.facing = -1;
+  if (autoWalk(d, postX() + GOAL_GAP + 3.4 * T, dt)) d.facing = -1;   // inside the fold, past the swung-open gate
 }
 // a wooden post: (x, bottom) at the foot, w wide, h tall
 function woodPost(x, bottom, w, h) {
@@ -1747,21 +1749,40 @@ function woodPost(x, bottom, w, h) {
 // The golden olive rides a cord strung between the posts, sliding up and down. The sheepfold gate hangs off the back post.
 const GOAL_GAP = 1.1 * T;   // each post this far from the middle (back post to the right, front post to the left)
 function goalCordY(f) { const by = GR * T; return by - 62 - (TUNE.GATE_POST_TILES * T - 66) * f; }
-function drawFold(camX) {   // the back half: back post, gate, far fence post (drawn behind David)
+const GATE_H = 2.3 * T;   // the gate's height in the middle (David has to jump it)
+// the gate runs from the back post to the front post, like the olive's cord. Opening, its free end swings round
+// on the back post's hinge until it lies along the fold wall. part: "back" (behind David) or "front" (over him)
+function drawGate(camX, part) {
+  const mx = postX() - camX, by = GR * T, bx = mx + GOAL_GAP, bby = by - 22, fx = mx - GOAL_GAP, fby = by + 6;
+  const o = finish.gateOpen, open = o > 0;
+  if (part === "front" && open) return;      // once it's swinging it's all behind David
+  // the free end: closed at the front post, open lying along the wall to the right
+  const ex = fx + (bx + 2.6 * T - fx) * o, ey = fby + (bby - 4 - fby) * o, hb = GATE_H * 0.86, he = GATE_H * (1.14 - 0.28 * o);
+  ctx.save();
+  if (!open) { ctx.beginPath(); if (part === "front") ctx.rect(-1e4, -1e4, mx + 1e4, 2e4); else ctx.rect(mx, -1e4, 2e4, 2e4); ctx.clip(); }
+  if (part === "back") { ctx.filter = "brightness(0.9)"; }
+  const at = (u, v) => [bx + (ex - bx) * u, (bby - hb * v) + ((ey - he * v) - (bby - hb * v)) * u];   // u: hinge->free end, v: bottom->top
+  ctx.lineCap = "round";
+  for (const v of [0.18, 0.55, 0.92]) {                 // three rails
+    const [x0, y0] = at(0.02, v), [x1, y1] = at(0.98, v);
+    ctx.strokeStyle = "#3c2512"; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.strokeStyle = "#7a5432"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+  { const [x0, y0] = at(0.08, 0.18), [x1, y1] = at(0.92, 0.92);   // the brace
+    ctx.strokeStyle = "#6a4628"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); }
+  for (const u of [0.04, 0.96]) {                       // the two stiles (uprights)
+    const [x0, y0] = at(u, 0.05), [x1, y1] = at(u, 1.02);
+    ctx.strokeStyle = "#5a3a1e"; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+  ctx.restore();
+}
+function gateTopAt() { return GR * T - GATE_H; }   // where David must clear it, at the middle
+function drawFold(camX) {   // the back half: back post and the far half of the gate (drawn behind David)
   if (!fold) return;
   const mx = postX() - camX, by = GR * T, ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
   const bx = mx + GOAL_GAP, bby = by - 22;   // the back post stands a little further off, so its foot is higher up the grass
   ctx.save();
-  const gl = 3 * T;
-  woodPost(bx + gl, by, 12, 2.6 * T);       // the far gatepost the gate latches to
-  // the gate: three rails and a brace, hinged on the back post; it swings open toward us
-  ctx.save(); ctx.translate(bx, by); ctx.scale(1 - 0.82 * finish.gateOpen, 1);
-  ctx.fillStyle = "#7a5432"; ctx.strokeStyle = "#3c2512"; ctx.lineWidth = 2;
-  for (const yy of [-2.1 * T, -1.35 * T, -0.6 * T]) { ctx.beginPath(); ctx.roundRect(4, yy, gl - 8, 9, 3); ctx.fill(); ctx.stroke(); }
-  ctx.beginPath(); ctx.moveTo(10, -0.6 * T + 6); ctx.lineTo(gl - 14, -2.1 * T + 4); ctx.lineWidth = 7; ctx.strokeStyle = "#6a4628"; ctx.stroke();
-  ctx.fillStyle = "#6a4628"; ctx.fillRect(gl - 16, -2.25 * T, 9, 2.25 * T - 4);
-  ctx.restore();
   // the back post: a touch thinner and darker (further away)
   ctx.save(); ctx.filter = "brightness(0.68) saturate(0.8)"; woodPost(bx, bby, 13, ph - 22); ctx.restore();
   ctx.fillStyle = "#a88a20"; ctx.beginPath(); ctx.arc(bx, bby - ph + 18, 7, 0, Math.PI * 2); ctx.fill();
@@ -1770,12 +1791,14 @@ function drawFold(camX) {   // the back half: back post, gate, far fence post (d
   sg.addColorStop(0, "rgba(40,28,10,0.3)"); sg.addColorStop(1, "rgba(40,28,10,0)");
   ctx.fillStyle = sg; ctx.fillRect(mx - GOAL_GAP * 1.7, by - 10, GOAL_GAP * 3.4, 18);
   ctx.restore();
+  drawGate(camX, "back");
 }
 function drawFoldFront(camX) {   // the front half: the cord with the golden olive, and the front post (drawn over David)
   if (!fold) return;
   const mx = postX() - camX, by = GR * T, ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
   const fx = mx - GOAL_GAP, fby = by + 8, bx = mx + GOAL_GAP;
+  drawGate(camX, "front");
   ctx.save();
   // the cord and the olive on it, sliding up and down (gone once caught)
   if (!(finish.active && finish.caught)) {

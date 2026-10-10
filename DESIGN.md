@@ -444,7 +444,7 @@ David writes only from **books that existed before him**: the Law of Moses (**Ge
 Quick, about 3–4 seconds:
 1. The stage ends at a **stone sheepfold** with a tall gatepost.
 2. **Catch the golden olive on the gatepost** *(built 2026-10-10, like Super Mario World's goal tape)*:
-   - **Two tall posts, one behind David and one in front,** so he walks *between* them (the front post is drawn over him). The golden olive rides a cord strung between them and **slides up and down** nonstop (10 tiles tall; bottom to top in 1.3 s).
+   - **Two tall posts, one behind David and one in front,** so he passes *between* them (the front post is drawn over him). **The sheepfold gate stands between the posts, angled like the olive's cord, and it's shut: David has to jump it,** and that jump is his try for the golden olive. He lands inside the fold, the gate swings open along the wall, and the sheep run in past him. The golden olive rides a cord strung between them and **slides up and down** nonstop (10 tiles tall; bottom to top in 1.3 s).
    - **Catch it** and the bonus depends on how high it was: **2 olives at the bottom, up to 25.** Caught in the top tenth = a **top catch: the full 25**.
    - **Every 3 top catches = +1 life.** They don't have to be in a row: catch it at the top in 1-1, miss in 1-2, top again in 1-3 and 1-4 = the life. (Counted across stages; kept in the browser until the game has a real save.)
    - **Miss it** and the gate still opens and the stage still ends, with **no bonus**.
