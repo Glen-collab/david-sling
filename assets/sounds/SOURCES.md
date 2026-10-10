@@ -39,9 +39,8 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | final_stone_goliath | ending_stone_goliath.wav | saved for Goliath's last stone | ? |
 | later/river_flowing | flowing_water_noise.wav | rivers (later) | ? |
 | later/horse_running | horse_running.mp3 | later | ? |
-| steps_walk (looped while walking) | footstesps_tall_grass.wav | ? |
 | steps_run (looped while running, first 2.25 s cut) | running_forest.wav | ? |
-| later/footsteps_woods, _crunchy | footsteps_woods.wav, footsteps_crunchy.wav | later | ? |
+| later/footsteps_woods, _crunchy | footsteps_woods.wav, footsteps_crunchy.wav (tall grass tried for walking, dropped) | later | ? |
 | later/running_forest_1, _2 | running_forest.wav, running_forest (2).wav | later | ? |
 | later/wolf_growl_1, _2 | wolf_growl.wav, wolf_growl (2).mp3 | jackals / wolves (later) | ? |
 | later/bear_growl | bear_monster_growl.wav | the bear (later) | ? |
