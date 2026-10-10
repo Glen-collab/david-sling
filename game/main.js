@@ -1481,6 +1481,14 @@ function updateSheep(dt) {
 }
 // a found sheep trots off to the nearest campfire and grazes there (safe from whatever David is up to).
 // If the walk is off-screen, blocked or too long, it's simply there.
+// launch speed to clear the wall or rock just ahead of a sheep (a little over its height)
+function hopFor(sh, dir) {
+  const c = Math.floor((sh.x + dir * 30) / T);
+  let r = Math.floor((sh.y - 1) / T), rise = 0;
+  while (r >= 0 && isSolid(c, r) && rise < 8 * T) { rise += T; r--; }
+  rise = Math.max(rise, T) + 28;
+  return Math.sqrt(2 * TUNE.GRAVITY * rise);
+}
 function nearestFire(x) {
   let best = null;
   for (const f of fires) if (!best || Math.abs(f.x - x) < Math.abs(best.x - x)) best = f;
@@ -1507,7 +1515,10 @@ function updateFireSheep(sh, dt) {
   const x0 = sh.x;
   sh.vy = Math.min(TUNE.MAX_FALL, sh.vy + TUNE.GRAVITY * dt);
   collideBody(sh, 30, 40, dt);
-  if (sh.onGround && Math.abs(sh.x - x0) < 0.3 * TUNE.RUN_SPEED * 0.85 * dt) sh.vy = -820;   // blocked: hop up the step (collideBody zeroes vx, so use the intended speed)
+  if (sh.onGround && Math.abs(sh.x - x0) < 0.3 * TUNE.RUN_SPEED * 0.85 * dt) {   // blocked (collideBody zeroes vx, so use the intended speed)
+    sh.vy = -hopFor(sh, dir);                                    // jump just high enough to clear what's in front
+    sh.x -= dir * 10;                                            // step back off the face so it rises clear of it
+  }
   sh.moved = Math.abs(sh.x - x0) / Math.max(dt, 1e-4); sh.stillT = 0;
 }
 // a stone into the thorn bush cuts the sheep free
