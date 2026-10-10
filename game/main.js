@@ -1264,7 +1264,7 @@ function updateLion(dt) {
       const home = lionSpawn.x, span = 4 * T;
       if (L.x > home + span) L.facing = -1; else if (L.x < home - span) L.facing = 1;
       L.vx = L.facing * TUNE.LION_PROWL * 0.7;
-      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0; sfx("lion_growl", L.x, 1);
+      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0;
         toast("The lion has one of your lambs!"); }
     } else if (L.state === "sitTaunt") {   // sits and stares at David, lamb in its jaws
       L.vx = 0; L.facing = Math.sign(david.x - L.x) || L.facing;
@@ -1273,7 +1273,7 @@ function updateLion(dt) {
       L.vx = 0;
       if (animDone("lion_set_lamb_down", L.t)) {
         Object.assign(takenLamb, { active: true, x: L.x + L.facing * 22 * SCALE * 1.24, y: L.y, vx: -L.facing * 260, vy: 0, facing: -L.facing, t: 0 });
-        L.awake = true; setLion("intro");
+        L.awake = true; setLion("intro"); sfx("lion_roar", L.x, 1);   // lamb down: he roars at David
         toast("It let the lamb go! Watch for its roar, then dodge the pounce. Hit it while it's dazed.");
       }
     }
@@ -1795,6 +1795,7 @@ function finalHit(s) {
     if (finalBlow.snd) try { finalBlow.snd.currentTime = Math.max(0, FINAL_PEAK[finalBlow.sound] - 0.05); } catch (e) {}
   }
   Object.assign(finalBlow, { on: true, phase: "hit", t: 0, stone: null, flash: 1, shake: 1 });
+  sfx("lion_defeated", lion.x, 1);   // the wounded cry
   for (let k = 0; k < 16; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 700, vy: -Math.random() * 600, life: 0.9, color: k % 2 ? "#fff2b0" : "#ffffff" });
 }
 // how fast the game runs this frame (real seconds in, game seconds out)
@@ -1823,12 +1824,12 @@ function stoneHitsLion(s) {
   const b = lionBox();
   if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
   if (s.power && lion.state !== "dazed") {   // the Power Sling knocks it dazed and hurts it
-    lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed"); if (lion.hp <= 0) finalHit(s); else stoneHit(s);
+    lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed"); if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_hit", lion.x, 0.9); }
     toast("Power Sling! The lion is dazed. Hit it now!");
     if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)"); }
   } else if (lion.state === "dazed") {
     lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25;
-    if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_growl", lion.x, 0.8, 1.1); }
+    if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_hit", lion.x, 0.9, 0.95 + Math.random() * 0.1); }
     if (lion.hp <= 0) {
       setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
     }
@@ -2033,7 +2034,7 @@ addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlock
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
-  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_growl"];
+  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated"];
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }

@@ -28,8 +28,7 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | jump | jump.wav | ? |
 | olive_pickup | star_collect.wav | ? |
 | fall_pit | fall_in_hole_die.wav | ? |
-| lion_roar (before each pounce) | cat_pharoah_roar.wav | ? |
-| lion_growl (spots you, and when hit) | angry_boss.wav | ? |
+| lion_roar (when he sets the lamb down, and before each pounce) | cat_pharoah_roar.wav | ? |
 
 ## Glen's Oct 10 downloads (originals in Desktop\david-sling-art\sounds\originals)
 
@@ -44,3 +43,5 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | later/running_forest_1, _2 | running_forest.wav, running_forest (2).wav | later | ? |
 | later/wolf_growl_1, _2 | wolf_growl.wav, wolf_growl (2).mp3 | jackals / wolves (later) | ? |
 | later/bear_growl | bear_monster_growl.wav | the bear (later) | ? |
+| lion_hit | lion_hit-with-stone.wav | every stone that hurts the lion | ? |
+| lion_defeated | lion_sound-finishing-stone.wav | the lion's cry at the final stone | ? |
