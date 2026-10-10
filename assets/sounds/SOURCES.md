@@ -19,3 +19,17 @@ Freesound = check each: CC0 fine, CC-BY needs a credit, skip NonCommercial).
 | boss_loop (lion fight) | heartpump_boss_fight-during.mp3 | ? |
 | ambience_hills (90 s loop) | wr-sound-library-mountain-forest-birds-singing-no-copyright-infinite-556890.mp3 | Pixabay? (WR Sound Library, 556890) |
 | ambience_cave (60 s loop, for caves later) | enter_cave.mp3 | ? |
+
+## Borrowed from Glen's Unicorn game (Glen-collab/Unicorn, sounds/)
+Converted to mp3 with the leading silence trimmed. Same licence question as in the Unicorn game.
+
+| Game file | Unicorn file | Source / licence |
+|---|---|---|
+| jump | jump.wav | ? |
+| double_jump | triple_jump.wav | ? |
+| olive_pickup | star_collect.wav | ? |
+| hurt | shrink_3.wav (Unicorn's "hurt") | ? |
+| death | death_to_character.wav | ? |
+| fall_pit | fall_in_hole_die.wav | ? |
+| lion_roar (before each pounce) | cat_pharoah_roar.wav | ? |
+| lion_growl (spots you, and when hit) | angry_boss.wav | ? |

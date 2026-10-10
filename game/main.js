@@ -55,6 +55,7 @@ const TUNE = {
   SFX_VOLUME: 0.8,        // sound effects (0 to 1)
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
   BOSS_MUSIC_VOLUME: 0.6, // the lion fight
+  BOSS_MUSIC_LEAD: 4,     // tiles before the lion's arena that the boss music starts ("uh oh"), before you can see him
   HARP_MUSIC_DELAY: 1.7,  // seconds after pressing Select until his hands start playing; the music starts then
   // size of each of the 14 sit-down frames, measured so his head matches standing David (the clip's camera crept closer)
   SIT_HARP_SIZES: [0.89, 0.87, 0.86, 0.80, 0.75, 0.74, 0.74, 0.72, 0.72, 0.72, 0.71, 0.72, 0.72, 0.72],
@@ -504,9 +505,9 @@ function updateDavid(dt) {
   if (!busy && !d.harp) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
-      setState(d.carrying ? "carry" : "jump");
+      setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
     } else if (pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
-      d.flipUsed = true;
+      d.flipUsed = true; sfx("double_jump", undefined, 0.5);
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
     }
@@ -1093,6 +1094,7 @@ function hurtDavid(fromX) {
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
   if (d.state !== "carry") setState("jump");
+  sfx(d.hearts <= 0 ? "death" : "hurt", undefined, 0.8);
   if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; toast(d.lives > 0 ? `Ouch! Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage."); }
 }
 function restartStage() {   // out of lives: back to the start of THIS stage; special stones you found are kept
@@ -1259,7 +1261,7 @@ function updateLion(dt) {
       const home = lionSpawn.x, span = 4 * T;
       if (L.x > home + span) L.facing = -1; else if (L.x < home - span) L.facing = 1;
       L.vx = L.facing * TUNE.LION_PROWL * 0.7;
-      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0;
+      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0; sfx("lion_growl", L.x, 1);
         toast("The lion has one of your lambs!"); }
     } else if (L.state === "sitTaunt") {   // sits and stares at David, lamb in its jaws
       L.vx = 0; L.facing = Math.sign(david.x - L.x) || L.facing;
@@ -1285,7 +1287,7 @@ function updateLion(dt) {
       const fast = dist > 520;
       setLion(fast ? "run" : "prowl");
       L.vx = L.facing * (fast ? TUNE.LION_RUN : TUNE.LION_PROWL);
-      if (dist < TUNE.LION_POUNCE_RANGE && L.pounceCool <= 0) { L.vx = 0; setLion("tell"); }
+      if (dist < TUNE.LION_POUNCE_RANGE && L.pounceCool <= 0) { L.vx = 0; setLion("tell"); sfx("lion_roar", L.x, 1); }
       break;
     }
     case "tell":   // the roar: this is the player's warning
@@ -1765,7 +1767,7 @@ function stoneHitsLion(s) {
     toast("Power Sling! The lion is dazed. Hit it now!");
     if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)"); }
   } else if (lion.state === "dazed") {
-    lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25;
+    lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25; sfx("lion_growl", lion.x, 0.8, 1.1);
     if (lion.hp <= 0) {
       setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
     }
@@ -1832,7 +1834,7 @@ function updateOlives(dt) {
       o.taken = true;
       if (o.kind === "golden") { david.lives++; sfx("extra_life"); toast("A golden olive! A whole flask of oil: +1 life"); }
       else {
-        david.olives++;
+        david.olives++; sfx("olive_pickup", undefined, 0.45, 0.95 + Math.random() * 0.1);
         if (david.olives >= TUNE.OLIVES_PER_LIFE) { david.olives -= TUNE.OLIVES_PER_LIFE; david.lives++; sfx("extra_life"); toast("The oil flask is full: +1 life!"); }
       }
       for (let k = 0; k < 4; k++) bits.push({ x: o.x, y: o.y, vx: (Math.random() - 0.5) * 160, vy: -Math.random() * 220, life: 0.35, color: o.kind === "golden" ? "#ffd84a" : "#d7e6a0" });
@@ -1969,7 +1971,8 @@ addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlock
 // Files are in assets/sounds. Sounds far from the middle of the screen play quieter.
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
-  "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro"];
+  "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
+  "jump", "double_jump", "olive_pickup", "hurt", "death", "fall_pit", "lion_roar", "lion_growl"];
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }
@@ -2000,14 +2003,17 @@ function fadeLoop(a, cur, want, dt, speed) {
 function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
-  const fight = lion && lion.awake && lion.state !== "defeated" && david.deadT <= 0;
-  if (lion && lion.state === "intro" && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }
-  if (lion && !lion.awake) bossIntroPlayed = false;
-  bossVol = fadeLoop(bossMusic, bossVol, fight && lion.state !== "intro" ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.8 : 0.4);
+  const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T;
+  const fight = lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0;
+  if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
+  if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
+  bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
   // the sling whirls while you charge it
   const d = david;
+  if (d.y > GR * T + 3 * T && d.deadT <= 0 && !d.fallSnd) { d.fallSnd = true; sfx("fall_pit", undefined, 0.8); }   // dropping into a pit
+  if (d.onGround) d.fallSnd = false;
   if (d.charging && d.charge > 0.12 && !d.chargeSnd) { d.chargeSnd = sfx("sling_charge", undefined, 0.6); if (d.chargeSnd) d.chargeSnd.loop = true; }   // whirls as long as B is held
   if (!d.charging && d.chargeSnd) { d.chargeSnd.pause(); d.chargeSnd = null; }
 }
