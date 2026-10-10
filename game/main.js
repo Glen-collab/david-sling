@@ -1419,6 +1419,7 @@ function updateSheep(dt) {
   // only where he's standing on something (not in the air, not dropping into a pit), so followers never hang in mid-air
   if (d.deadT <= 0 && d.onGround && d.y <= GR * T + 6 && (!last || Math.hypot(d.x - last.x, d.y - last.y) > 6)) { trail.push({ x: d.x, y: d.y }); if (trail.length > 800) trail.shift(); }
   const fire = d.state === "harp" ? fires.find(f => Math.abs(f.x - d.x) < 260 && Math.abs(f.y - d.y) < 80) : null;
+  for (const sh of lost) updateLook(sh, dt);
   // found sheep head for the campfire; the rescued lamb follows David
   let fi = 0;
   line.forEach(sh => {
@@ -1448,6 +1449,7 @@ function updateSheep(dt) {
       if (sh.how === "cast" && Math.abs(dx) < 80 && Math.abs(dy) < 80) {
         if (!sh.hinted) { sh.hinted = true; toast("This sheep is cast, stuck on its back. Press Down to roll it back up."); }
         if (pressed("down") && d.onGround && !inCutscene()) {
+          if (d.carrying || lamb.carried) { d.carrying = false; lamb.carried = false; lamb.x = d.x - d.facing * 50; lamb.y = d.y; }   // Down also means "pick up the lamb"
           sh.state = "helped"; sh.upright = false; d.helpSheep = sh; d.helpSide = Math.sign(sh.x - d.x) || d.facing;
           d.liftPhase = 0; d.harp = false; d.charging = false; d.throwT = -1; setState("liftSheep");
         }
@@ -1495,18 +1497,17 @@ function updateFireSheep(sh, dt) {
   sh.walkT += dt;
   const tx = sh.fire.x + sh.spot, dir = Math.sign(tx - sh.x) || 1;
   const onScreen = sh.x > camX - 60 && sh.x < camX + W + 60;
-  if (Math.abs(tx - sh.x) < 8 || !onScreen || sh.walkT > 6 || sh.stuckT > 0.8) {
+  if (Math.abs(tx - sh.x) < 8 || !onScreen || sh.walkT > 10 || sh.y > GR * T + 60) {
     Object.assign(sh, { x: tx, y: sh.fire.y, vx: 0, vy: 0, state: "atFire", stillT: 9, t: Math.random() * 3, facing: Math.sign(sh.fire.x - tx) || 1 });
     return;
   }
   sh.facing = dir;
-  const ok = !sh.onGround || groundAhead(sh, dir);
-  sh.vx = ok ? dir * TUNE.WALK_SPEED * 0.85 : 0;
-  if (!ok) sh.stuckT += dt;
+  sh.vx = dir * TUNE.RUN_SPEED * 0.85;                        // sprint
+  if (sh.onGround && !groundAhead(sh, dir)) sh.vy = -980;      // leap the pit
   const x0 = sh.x;
   sh.vy = Math.min(TUNE.MAX_FALL, sh.vy + TUNE.GRAVITY * dt);
   collideBody(sh, 30, 40, dt);
-  if (sh.onGround && sh.vx && Math.abs(sh.x - x0) < 0.3 * Math.abs(sh.vx) * dt) { sh.vy = -760; sh.stuckT += dt * 0.5; }
+  if (sh.onGround && Math.abs(sh.x - x0) < 0.3 * TUNE.RUN_SPEED * 0.85 * dt) sh.vy = -820;   // blocked: hop up the step (collideBody zeroes vx, so use the intended speed)
   sh.moved = Math.abs(sh.x - x0) / Math.max(dt, 1e-4); sh.stillT = 0;
 }
 // a stone into the thorn bush cuts the sheep free
@@ -1519,11 +1520,24 @@ function stoneHitsThorns(st) {
   }
   return false;
 }
+// grazing: these first frames of each graze sheet are head-down eating; the rest raise the head
+const GRAZE_EAT = { lamb_graze: 3, sheep_graze: 3, sheepblack_graze: 2, ram_graze: 7 };
+function updateLook(sh, dt) {   // a grazing sheep looks up while David is close ("hey, how you doing?")
+  const near = Math.abs(david.x - sh.x) < 170 && Math.abs(david.y - sh.y) < 120;
+  sh.look = Math.max(0, Math.min(1, (sh.look || 0) + (near ? 2.5 : -2) * dt));
+}
 function sheepFrame(sh) {   // which sheet and frame to draw for a sheep right now
   const art = SHEEP_ART[sh.kind];
   if (sh.moved > 25) { const nm = sh.moved > TUNE.WALK_SPEED * 1.05 ? art.run : art.walk; return [nm, frameOf(nm, sh.t * Math.max(0.7, sh.moved / 260))]; }
   const idle = sh.stillT > 1.5 || sh.state === "lost" ? (art.graze || art.stand) : art.stand;
   if (!idle) return [art.run, 2];
+  const k = GRAZE_EAT[idle];
+  if (k !== undefined) {
+    const last = SPR[idle].frames - 1;
+    if ((sh.look || 0) > 0.01) return [idle, Math.min(last, k + Math.round(sh.look * (last - k)))];
+    const n = Math.floor(sh.t * 1000 / 260) % (2 * k || 1);       // chewing: a slow nod among the head-down frames
+    return [idle, n <= k ? n : 2 * k - n];
+  }
   return [idle, frameOf(idle, sh.t)];
 }
 // the thorn bush round the tangled sheep: one behind it, and a low one over its legs, so its head and back peek out
