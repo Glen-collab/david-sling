@@ -1970,26 +1970,20 @@ addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlock
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro"];
+// (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
-function loadSfx() {
-  if (!chimeCtx) return;
-  for (const n of SFX_FILES) if (!SFX[n]) {
-    SFX[n] = "loading";
-    fetch(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`).then(r => r.arrayBuffer()).then(b => chimeCtx.decodeAudioData(b))
-      .then(buf => { SFX[n] = buf; }).catch(() => { SFX[n] = null; });
-  }
-}
+for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }
+function loadSfx() {}
 // play a sound; x (optional) is where it happens in the level, so off-screen things are quieter
 function sfx(name, x, vol = 1, rate = 1) {
-  if (!audioUnlocked || !chimeCtx) return null;
-  const buf = SFX[name]; if (!buf || buf === "loading") return null;
+  if (!audioUnlocked) return null;
+  const base = SFX[name]; if (!base) return null;
   let v = vol * TUNE.SFX_VOLUME;
   if (x !== undefined) { const off = Math.abs(x - (camX + W / 2)); v *= Math.max(0, Math.min(1, 1.25 - off / (W * 0.9))); }
   if (v <= 0.01) return null;
-  const src = chimeCtx.createBufferSource(), g = chimeCtx.createGain();
-  src.buffer = buf; src.playbackRate.value = rate; g.gain.value = v;
-  src.connect(g).connect(chimeCtx.destination); src.start();
-  return { src, g };
+  const a = base.cloneNode(); a.volume = Math.min(1, v); a.playbackRate = rate; a.preservesPitch = false;
+  a.play().catch(() => {});
+  return a;
 }
 const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() * 7)), x, vol, 0.92 + Math.random() * 0.16);
 // looping beds
@@ -2015,7 +2009,7 @@ function updateSound(dt) {
   // the sling whirls while you charge it
   const d = david;
   if (d.charging && d.charge > 0.12 && !d.chargeSnd) d.chargeSnd = sfx("sling_charge", undefined, 0.6);
-  if (!d.charging && d.chargeSnd) { try { d.chargeSnd.g.gain.setTargetAtTime(0, chimeCtx.currentTime, 0.03); d.chargeSnd.src.stop(chimeCtx.currentTime + 0.15); } catch (e) {} d.chargeSnd = null; }
+  if (!d.charging && d.chargeSnd) { d.chargeSnd.pause(); d.chargeSnd = null; }
 }
 function updateHarpMusic(dt) {
   const sitting = david.harp && (david.state === "kneel" || david.state === "harp");
