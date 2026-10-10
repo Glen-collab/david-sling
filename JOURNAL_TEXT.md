@@ -244,7 +244,15 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 | 8-3 The rout | Now it's the right word | *The LORD is my strength and my song.* — Exodus 15:2 *(the word he crossed out in 1-1, now in its right place)* |
 | 8-4 Home | Where I come from | *Ruth came to Bethlehem with nothing. Her son was Obed, Obed's son was Jesse, and Jesse's son is me.* — Ruth 4:17 |
 
-**The right page:** *Your mercy keeps on following me…* and the outro, written straight through with nothing crossed out. **Needs Glen's lyrics for the outro lines.** Then the full song plays with vocals.
+**The right page, written straight through, nothing crossed out:**
+| After | The right page |
+|---|---|
+| 8-1 | *You fill my cup with goodness, more than I could ever hold.* |
+| 8-2 | *Your mercy keeps on following me, and Your love will never grow old.* |
+| 8-3 | *I will not be afraid, for Your presence is my strength.* (the chorus, and "strength" at last in its right place: not his strength, God's presence) |
+| 8-4 | The outro: *Surely Your goodness will find me, all the days that I am here…* through *I will dwell with You forever.* |
+
+Then the full song plays with vocals over the walk home and the credits. (Full lyrics: SONG.md.)
 
 **What happened:** *The giant fell, and not by sword or spear. When the king asked whose son I was, I said: "I am the son of your servant Jesse of Bethlehem."* <sub>1 Samuel 17:49–58</sub>
 
