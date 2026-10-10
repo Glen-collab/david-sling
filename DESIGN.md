@@ -443,7 +443,11 @@ David writes only from **books that existed before him**: the Law of Moses (**Ge
 ### The end of every stage: the sheepfold gate (our flagpole)
 Quick, about 3–4 seconds:
 1. The stage ends at a **stone sheepfold** with a tall gatepost.
-2. **Jump and touch the post:** the higher the touch, the more bonus olives.
+2. **Jump and touch the post:** the higher the touch, the more bonus olives. *(scoring built 2026-10-10)*
+   - **2 olives** for walking into it, about **18** for a plain jump, up to **25** near the top. The post is 10 tiles tall, so the top needs the flip at the top of the jump.
+   - **A golden olive sits on top of the post: touch the very top = +1 life** (our Mario flagpole 1-up).
+   - **Players are shown it, never told to remember it:** the golden olive is visible from far off; carved notches up the post carry olives that grow bigger toward the top; a "+N" pops up where David touched; a low touch says "Jump higher for more!"; the clear screen says how to reach the golden olive if you missed it. The first stage of the game also has a sign before the gate.
+   - **Every stage's gate gets the same post, notches and golden olive** (town, palace and camp gates too).
 3. **The sheep you found trot through the gate**, counted one by one with a chime; **The One** goes last, with a sparkle.
 4. The gate closes. Stage clear.
 
