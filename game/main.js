@@ -53,6 +53,7 @@ const TUNE = {
   HARP_STANDUP: 0.75,     // seconds to put the harp away and stand up
   HARP_VOLUME: 0.8,       // volume of the harp music when David plays (0 to 1)
   SFX_VOLUME: 0.8,        // sound effects (0 to 1)
+  STEPS_VOLUME: 0.5,      // David's footsteps in the grass (walking and running)
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
   BOSS_MUSIC_VOLUME: 0.6, // the lion fight
   FINAL_SLOWMO: 0.18,     // the stone that beats a boss: game speed while it flies in (1 = normal)
@@ -2054,7 +2055,8 @@ const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() *
 // looping beds
 function loopAudio(name) { const a = new Audio(`../assets/sounds/${name}.mp3?v=${window.BUILD || 0}`); a.loop = true; a.volume = 0; return a; }
 const ambience = loopAudio("ambience_hills"), bossMusic = loopAudio("boss_loop");
-let ambVol = 0, bossVol = 0, bossIntroPlayed = false;
+const stepsWalk = loopAudio("steps_walk"), stepsRun = loopAudio("steps_run");
+let ambVol = 0, bossVol = 0, bossIntroPlayed = false, walkVol = 0, runVol = 0;
 function fadeLoop(a, cur, want, dt, speed) {
   const v = want > cur ? Math.min(want, cur + dt * speed) : Math.max(want, cur - dt * speed);
   a.volume = Math.max(0, Math.min(1, v));
@@ -2072,8 +2074,14 @@ function updateSound(dt) {
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
-  // the sling whirls while you charge it
   const d = david;
+  // footsteps: a walking rustle or a running patter while he's moving on the ground
+  const spd = d.onGround && d.deadT <= 0 && !d.harp ? Math.abs(d.vx) : 0;
+  const running = spd > (TUNE.WALK_SPEED + TUNE.RUN_SPEED) / 2;
+  walkVol = fadeLoop(stepsWalk, walkVol, spd > 40 && !running ? TUNE.STEPS_VOLUME : 0, dt, 6);
+  runVol = fadeLoop(stepsRun, runVol, running ? TUNE.STEPS_VOLUME : 0, dt, 6);
+  if (spd > 40) { stepsWalk.playbackRate = Math.max(0.8, Math.min(1.25, spd / TUNE.WALK_SPEED)); stepsRun.playbackRate = Math.max(0.85, Math.min(1.2, spd / TUNE.RUN_SPEED)); }
+  // the sling whirls while you charge it
   if (d.y > GR * T + 3 * T && d.deadT <= 0 && !d.fallSnd) { d.fallSnd = true; sfx("fall_pit", undefined, 0.8); }   // dropping into a pit
   if (d.onGround) d.fallSnd = false;
   if (d.charging && d.charge > 0.12 && !d.chargeSnd) { d.chargeSnd = sfx("sling_charge", undefined, 0.6); if (d.chargeSnd) d.chargeSnd.loop = true; }   // whirls as long as B is held
