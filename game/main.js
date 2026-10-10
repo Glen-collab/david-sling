@@ -84,10 +84,11 @@ const TUNE = {
   RESCUE_PET: 2.0,        // seconds David kneels and pets the rescued lamb
   RESCUE_LIFT: 0.8,       // seconds to lift it into a hug (and the same to set it back down)
   RESCUE_HOLD: 1.8,       // seconds he hugs it, checking it over
-  GATE_BONUS_MIN: 2,      // olives for touching the sheepfold gatepost at the bottom...
-  GATE_BONUS_MAX: 25,     // ...up to this many near the top
+  GATE_BONUS_MIN: 2,      // the golden olive slides up and down the gatepost (Super Mario World's goal tape):
+  GATE_BONUS_MAX: 25,     //   catch it low = 2 olives, at the top = 25. Miss it = no bonus (the stage still ends)
   GATE_POST_TILES: 10,    // how tall the gatepost is (a plain jump reaches about 70% of it; the top needs the flip)
-  GATE_GOLD_AT: 0.96,     // touch above this fraction of the post = the golden olive on top (+1 life)
+  GATE_OLIVE_TRIP: 1.3,   // seconds for the golden olive to slide from the bottom to the top (and the same back down)
+  GATE_GOLD_AT: 0.9,      // catch it above this fraction of the way up = +1 life as well
   FLOCK_SPEED: 320,       // how fast the sheep trot home through the gate
   SHEEP_PER_STAGE: 5,     // lost sheep hidden in each stage (plus The One); find them all for an extra life
   SHEEP_GAP: 62,          // spacing of the line of sheep following David (px along his path)
@@ -348,7 +349,7 @@ if (LEVEL_NAME === "test") {
   // the end of the stage: the family sheepfold (our flagpole). Jump and touch the gatepost.
   for (let c = 244; c <= 254; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
   fold = { postC: 240, endC: 255 };
-  label(216, 6, "Leap high on the gatepost! Higher = more olives. The golden olive on top = +1 life");
+  label(214, 6, "Catch the golden olive on the gatepost! The higher it is, the more olives. At the top = +1 life");
   rock(256, 4, 6, 13);
 }
 
@@ -1626,6 +1627,11 @@ function drawSheepCount() {
 }
 const finish = { active: false, phase: "", t: 0, gateOpen: 0, bonus: 0, count: 0, flock: [], blocked: 0 };
 const postX = () => fold.postC * T + T / 2;
+function gateOlive() {   // the golden olive on the gatepost: f = 0 at the bottom (head height) up to 1 at the top
+  const low = GR * T - 62, high = GR * T - TUNE.GATE_POST_TILES * T + 4;
+  const k = (performance.now() / 1000 / TUNE.GATE_OLIVE_TRIP) % 2, f = k < 1 ? k : 2 - k;
+  return { x: postX(), y: low + (high - low) * f, f };
+}
 let chimeCtx = null;
 function chime(k) {   // a little bell for each sheep counted in
   try {
@@ -1647,22 +1653,25 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("Not without the lamb the lion took!");
       finish.blocked = 3; return;
     }
-    // like Mario's flagpole: the higher David's head touches the post, the bigger the bonus; the very top has the golden olive
-    const touchY = d.y - d.h, top = GR * T - TUNE.GATE_POST_TILES * T;
-    const f = Math.max(0, Math.min(1, (GR * T - STAND_H - touchY) / (GR * T - STAND_H - top)));
-    finish.bonus = TUNE.GATE_BONUS_MIN + Math.round(f * (TUNE.GATE_BONUS_MAX - TUNE.GATE_BONUS_MIN));
-    finish.gold = f >= TUNE.GATE_GOLD_AT; finish.low = f < 0.5;
-    for (let i = 0; i < finish.bonus; i++) {
-      d.olives++;
-      if (d.olives >= TUNE.OLIVES_PER_LIFE) { d.olives -= TUNE.OLIVES_PER_LIFE; d.lives++; }
+    // Super Mario World's goal tape: catch the golden olive as it slides up and down the post. Higher = more.
+    const go = gateOlive(), caught = Math.abs(go.x - d.x) < BODY_W / 2 + 14 && go.y > d.y - d.h - 14 && go.y < d.y + 6;
+    if (!caught && d.x < px) return;                    // not there yet (he can still snatch it just before the post)
+    finish.caught = caught; finish.bonus = 0; finish.gold = false;
+    if (caught) {
+      finish.bonus = TUNE.GATE_BONUS_MIN + Math.round(go.f * (TUNE.GATE_BONUS_MAX - TUNE.GATE_BONUS_MIN));
+      finish.gold = go.f >= TUNE.GATE_GOLD_AT;
+      for (let i = 0; i < finish.bonus; i++) {
+        d.olives++;
+        if (d.olives >= TUNE.OLIVES_PER_LIFE) { d.olives -= TUNE.OLIVES_PER_LIFE; d.lives++; }
+      }
+      finish.pop = { x: px, y: go.y, t: 0, text: `+${finish.bonus}` };
+      for (let k = 0; k < 14; k++) bits.push({ x: go.x, y: go.y, vx: (Math.random() - 0.5) * 380, vy: -Math.random() * 380, life: 0.8, color: k % 2 ? "#ffd84a" : "#fff2b0" });
+      if (finish.gold) { d.lives++; sfx("extra_life"); toast(`Caught it at the top! +${finish.bonus} olives and +1 life`); }
+      else { sfx("olive_pickup", undefined, 0.8, 0.8); toast(`Caught the golden olive: +${finish.bonus} olives`); }
+    } else {
+      finish.pop = { x: px, y: d.y - d.h, t: 0, text: "Missed!" };
+      toast("Home! You missed the golden olive. Time your jump to catch it high!");
     }
-    const hitY = Math.max(top, Math.min(GR * T - 20, touchY));
-    finish.pop = { x: px, y: hitY, t: 0, text: `+${finish.bonus}` };
-    if (finish.gold) {
-      d.lives++; sfx("extra_life");
-      for (let k = 0; k < 18; k++) bits.push({ x: px, y: top - 14, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 420, life: 0.9, color: k % 2 ? "#ffd84a" : "#fff2b0" });
-      toast(`The golden olive! +1 life, and +${finish.bonus} olives`);
-    } else toast(finish.low ? `Home! +${finish.bonus} olives. Jump higher on the post for more!` : `Home! Gatepost bonus: +${finish.bonus} olives`);
     Object.assign(finish, { active: true, phase: "land", t: 0, count: 0 });
     d.harp = false; d.charging = false; d.throwT = -1; d.carrying = false; d.inv = 0; d.vx = 0;
     setState("finish");
@@ -1749,7 +1758,7 @@ function drawFold(camX) {
     drawOlive(px - 20, y - 2, "green", 0.45 + k * 0.17);
   }
   ctx.fillStyle = "#c9a227"; ctx.beginPath(); ctx.arc(px, by - ph - 4, 9, 0, Math.PI * 2); ctx.fill();   // a brass knob on top
-  if (!(finish.active && finish.gold)) drawOlive(px, by - ph - 26 + Math.sin(performance.now() / 300) * 3, "golden", 1.6);   // the prize
+  if (!(finish.active && finish.caught)) { const go = gateOlive(); drawOlive(px, go.y, "golden", 1.6); }   // the prize, sliding up and down
   ctx.restore();
   // the "+N" where David touched it, floating up
   const pop = finish.pop;
@@ -1758,8 +1767,8 @@ function drawFold(camX) {
     ctx.save(); ctx.globalAlpha = Math.min(1, 2 * (1.6 - pop.t)); ctx.textAlign = "left";
     ctx.font = "bold 34px sans-serif"; ctx.lineWidth = 5; ctx.strokeStyle = "rgba(40,24,10,0.9)";
     const ty = pop.y - pop.t * 40, tx = pop.x - camX + 22;
-    ctx.strokeText(pop.text, tx, ty); ctx.fillStyle = finish.gold ? "#ffd84a" : "#eaf5b0"; ctx.fillText(pop.text, tx, ty);
-    drawOlive(tx + ctx.measureText(pop.text).width + 16, ty - 11, finish.gold ? "golden" : "green", 1.3);
+    ctx.strokeText(pop.text, tx, ty); ctx.fillStyle = !finish.caught ? "#f0d0c0" : finish.gold ? "#ffd84a" : "#eaf5b0"; ctx.fillText(pop.text, tx, ty);
+    if (finish.caught) drawOlive(tx + ctx.measureText(pop.text).width + 16, ty - 11, "golden", 1.3);
     ctx.restore();
   }
 }
@@ -1792,8 +1801,8 @@ function drawFinishBanner() {
   ctx.fillText(`Lost sheep found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
   hudIcon("sheep", W / 2 - 200, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
-  ctx.fillText(finish.gold ? `Gatepost: +${finish.bonus} olives and the golden olive (+1 life!)` : `Gatepost bonus: +${finish.bonus} olives`, W / 2, 330);
-  if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText("Next time: flip at the top of your jump to reach the golden olive!", W / 2, 352); }
+  ctx.fillText(!finish.caught ? "Golden olive: missed" : finish.gold ? `Golden olive caught at the top: +${finish.bonus} olives, +1 life!` : `Golden olive: +${finish.bonus} olives`, W / 2, 330);
+  if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText("Next time: catch it near the top of the post (the very top = +1 life)", W / 2, 352); }
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
   if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 385);
   ctx.restore();
