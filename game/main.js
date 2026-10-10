@@ -507,7 +507,7 @@ function updateDavid(dt) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
       setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
     } else if (pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
-      d.flipUsed = true; sfx("double_jump", undefined, 0.5);
+      d.flipUsed = true; sfx("jump", undefined, 0.5, 1.3);   // the second jump: same sound, higher
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
     }
@@ -1094,7 +1094,6 @@ function hurtDavid(fromX) {
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
   if (d.state !== "carry") setState("jump");
-  sfx(d.hearts <= 0 ? "death" : "hurt", undefined, 0.8);
   if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; toast(d.lives > 0 ? `Ouch! Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage."); }
 }
 function restartStage() {   // out of lives: back to the start of THIS stage; special stones you found are kept
@@ -1972,7 +1971,7 @@ addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlock
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
-  "jump", "double_jump", "olive_pickup", "hurt", "death", "fall_pit", "lion_roar", "lion_growl"];
+  "jump", "olive_pickup", "fall_pit", "lion_roar", "lion_growl"];
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }

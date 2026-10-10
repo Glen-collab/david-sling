@@ -26,10 +26,7 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | Game file | Unicorn file | Source / licence |
 |---|---|---|
 | jump | jump.wav | ? |
-| double_jump | triple_jump.wav | ? |
 | olive_pickup | star_collect.wav | ? |
-| hurt | shrink_3.wav (Unicorn's "hurt") | ? |
-| death | death_to_character.wav | ? |
 | fall_pit | fall_in_hole_die.wav | ? |
 | lion_roar (before each pounce) | cat_pharoah_roar.wav | ? |
 | lion_growl (spots you, and when hit) | angry_boss.wav | ? |
