@@ -33,8 +33,49 @@ If a chat session closes, start here. Last updated 2026-10-11.
 - **Clearing a stage** saves its sheep, The One and stones (`localStorage` `davidProgress`), writes the Journal, then returns to the map, where the next stretch of trail draws itself in.
 - **Testing:** `index.html?cheat` lets B on the map mark a stage cleared.
 
+## World 1 stages 1-1 to 1-4 (built 2026-10-11)
+
+All four stages are playable from the map. Each has 5 lost sheep, The One and 3 stones of remembrance. Layouts are in `main.js` (the `LEVEL_NAME === "1-x"` blocks). The new creatures and pieces are in `game/world1.js`, with their numbers in its `W1` block. `#1-2` in the address opens a stage directly.
+
+- **1-1 The Hills of Bethlehem:**
+  - Teaching: walls, gaps, the gourd rock, hanging gourds (aim up), the date palm.
+  - Snakes: the cobra, then the harmless green **whip snake** next to the viper (Shepherd's Judgment: sling the whip snake and you're told off).
+  - Bees and a hornet, then berries or cheese.
+  - **Eliab and Shammah** speak along the way; **Hanan** is at the campfire.
+- **1-2 The Wandering Flock:**
+  - Hanan's harp lesson at the first fire; the neighbour at the middle fire (his ram is one of your 5).
+  - **Foxes** go for your lamb, a cast sheep, thorns.
+  - **The One is at the back of a low cave** (crawl or roll in; the cave hides its inside until you're in it).
+- **1-3 The Rocky Pastures:** World 2's rocky backgrounds stand in until the new art arrives. It has:
+  - **Crumbling ledges** (they shake, drop, and come back).
+  - **Rope bridges.**
+  - A low passage that teaches the roll.
+  - **Wild rams** that stamp, then charge (stones bounce off; roll under them).
+  - **Ravens.**
+  - A **secret cave behind a crack in the rock** with The One, bread and a stone.
+  - The shepherd girl at the fire.
+- **1-4 The Lion's Territory:**
+  - **Night** (a blue tint, the moon, a cloud now and then).
+  - The **lion pads along the far ridge** and roars in the distance.
+  - **Jackals steal your lamb and run**: sling them to get it back.
+  - Hanan at both fires, then the lion fight and the fold.
+
+**Rules changed:**
+- **Falling into a pit** now costs a heart and puts David back on the last solid ground. It used to send him to the start of the stage.
+- **People's lines** show in a box at the top of the screen.
+
+**Stand-ins until art arrives:**
+- **People:** shown only as a name in the box.
+- **The ram's charge:** its walk clip, sped up.
+- **1-3:** uses World 2's backgrounds.
+- **1-2 and 1-4:** use World 1's (1-4 tinted to night).
+
+**Sounds still needed:** night crickets (1-4 is silent apart from the lion), fox/jackal yelps, the ram's stamp.
+
 ## Next
-**Real stages 1-1 to 1-4** from DESIGN.md, with the lion moved to 1-4. Add each one to `BUILT_STAGES` in `map.js`, and pass its stage number to the Journal (`main.js` still says stage 1).
+- Glen plays all four stages and says what to tune (jump gaps, creature speeds, the night darkness).
+- Swap in the new backgrounds when they arrive: `STAGE_INFO` in `main.js` names each stage's set.
+- Gate and post art from `david-sling-art` (`gate_front.png`, `gate_posts_green.png`).
 
 ## Done in the last session (2026-10-09 to 2026-10-10)
 

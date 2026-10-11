@@ -252,46 +252,83 @@ let toastText = "", toastTime = 0;
 function toast(t) { toastText = t; toastTime = 4; }
 
 // ============================================================================
-// Levels. "1-1" is the World 1 sample; "#test" in the address opens the old movement test.
+// Levels: World 1's four stages ("#1-1" ... "#1-4" in the address), and "#test", the old movement test.
 // Built from simple commands (columns/rows are tiles). Screen is 20 tiles tall; ground surface is row 17.
 // ============================================================================
-const LEVEL_NAME = location.hash === "#test" ? "test" : "1-1";
-// the game opens on the World 1 map; "#play" in the address goes straight into the stage (key 1)
+const STAGE_HASH = (location.hash.match(/^#(\d-\d)$/) || [])[1];
+const LEVEL_NAME = location.hash === "#test" ? "test" : STAGE_HASH || "1-1";
+// the game opens on the World 1 map; a stage in the address ("#1-2") goes straight into it (key 1 = 1-1)
 function backToMap() { history.replaceState(null, "", location.pathname + location.search); location.reload(); }
-const LEVEL_STAGE = "1-1";   // which stage this is (for the Journal and the saved stone count)
+const LEVEL_STAGE = LEVEL_NAME === "test" ? "1-1" : LEVEL_NAME;   // which stage this is (for the Journal, the map and the saved stones)
+const STAGE_NUM = +LEVEL_STAGE.split("-")[1];
+// per stage: how long it is, which background, night or day
+const STAGE_INFO = {
+  test:  { cols: 150, bg: "w1" },
+  "1-1": { cols: 228, bg: "w1", name: "The Hills of Bethlehem" },
+  "1-2": { cols: 228, bg: "w1", name: "The Wandering Flock" },
+  "1-3": { cols: 258, bg: "w2", name: "The Rocky Pastures" },          // World 2's rocky set stands in until Glen's 1-3 art
+  "1-4": { cols: 322, bg: "w1", name: "The Lion's Territory", night: true },
+}[LEVEL_NAME];
 const T = TUNE.TILE;
-const ROWS = 20, COLS = LEVEL_NAME === "test" ? 150 : 262, GR = 17;
-const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone
+const ROWS = 20, COLS = STAGE_INFO.cols, GR = 17;
+const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone, 3 wall, 4 boulder, 5 fake rock (walk through it)
 const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
 const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
 let lionSpawn = null, arenaX = Infinity, fold = null;
 const ground = (c0, c1) => { for (let c = c0; c <= c1; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = 1; };
 const block = (c, r, w, h, mat = 2) => { for (let x = c; x < c + w; x++) for (let y = r; y < r + h; y++) solid[y][x] = mat; };
 const rock = (c, r, w, h) => block(c, r, w, h, 2);
+const pillar = (c, r, w) => block(c, r, w, ROWS - r, 2);   // a rock column standing up out of a pit
 const wall = (c, r, w, h) => block(c, r, w, h, 3);   // dry-stone wall
 const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
+const fakeRock = (c, r, w, h) => block(c, r, w, h, 5); // looks like rock, but you can walk into it (a secret)
+const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
+const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
+// crumbling ledges: shake when you land on them, then drop away (and come back a few seconds later)
+const crumbles = [];
+const crumble = (c, r, w) => { plat(c, r, w); crumbles.push({ c, r, w, state: "solid", t: 0 }); };
+// rope bridges: planks on ropes across a gap (stand on them like a ledge)
+const bridges = [];
+const bridge = (c, r, w) => { plat(c, r, w); bridges.push({ c, r, w }); };
 const gourd = (c, r, hanging = false) => gourds.push({ x: c * T + T / 2, y: (r + 1) * T, alive: true, hanging });
 const label = (c, r, text) => labels.push({ x: c * T, y: r * T, text });
 // decoration: an item image standing on row r (its bottom on the top of row r+1); layer "back" or "front"
 const deco = (name, c, r, size = 1, layer = "back", surprise = null) => decor.push({ name, x: c * T + T / 2, y: (r + 1) * T, size, layer, surprise, shaken: false, shakeT: 0 });
 const bees = [], hornets = [];
 const bee = (c, k) => bees.push({ hx: c * T + T / 2, k, t: k * 1.6, x: 0, y: 0, facing: 1, gone: false, alpha: 1, vx: 0, vy: 0 });
-const hornet = (c, r) => hornets.push({ hx: c * T + T / 2, hy: (r + 1) * T, x: c * T + T / 2, y: (r + 1) * T, state: "hover", t: Math.random() * 3, facing: -1, gone: false, alpha: 1, vx: 0, vy: 0 });
+const hornet = (c, r, kind = "hornet") => hornets.push({ kind, hx: c * T + T / 2, hy: (r + 1) * T, x: c * T + T / 2, y: (r + 1) * T, state: "hover", t: Math.random() * 3, facing: -1, gone: false, alpha: 1, vx: 0, vy: 0 });
+const raven = (c, r) => hornet(c, r, "raven");   // ravens dive at you on open ground, like the hornets but bigger
 let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
 const olive = (x, y, kind) => olives.push({ x, y, kind: kind || (Math.random() < 0.5 ? "green" : "purple"), taken: false, t: Math.random() * 6, vy: 0, falling: false, placed: true });
 const oliveRow = (c0, r, n, step = 1) => { for (let k = 0; k < n; k++) olive(c0 * T + T / 2 + k * step * T, (r + 1) * T - 14); };
 const oliveArc = (c0, r, n) => { for (let k = 0; k < n; k++) { const f = k / (n - 1); olive(c0 * T + T / 2 + k * T, (r + 1) * T - 14 - Math.sin(f * Math.PI) * 110); } };
 const food = (name, c, r) => pickups.push({ name, x: c * T + T / 2, y: (r + 1) * T, t: Math.random() * 6, taken: false });
-const snake = (kind, c) => snakes.push({ kind, x: c * T + T / 2, y: GR * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
-const campfire = (c, r = GR - 1) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false });
+// snakes stand on row r (default: the ground). "whip" = the harmless green whip snake (leave it alone: it eats the rats)
+const snake = (kind, c, r = GR - 1) => snakes.push({ kind, x: c * T + T / 2, y: (r + 1) * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
+// campfires: the checkpoint. who/say: the person sitting there, and what they tell David
+const campfire = (c, r = GR - 1, who = null, say = null) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false, who, say });
+// a word from someone along the way, shown when David reaches this column
+const talks = [];
+const talk = (c, who, say) => talks.push({ x: c * T, who, say, done: false });
+// ground animals: "fox" (goes for your lamb), "jackal" (steals it and runs), "ram" (charges; roll under it)
+const critters = [];
+const critter = (kind, c, r = GR - 1, range = 0) => critters.push({ kind, x: c * T + T / 2, y: (r + 1) * T, y0: (r + 1) * T, home: c * T + T / 2, range: range * T, vx: 0, vy: 0, onGround: true,
+  state: "idle", t: Math.random(), facing: -1, gone: false, alpha: 1 });
 const specials = [];   // hidden special stones (like Mario's dragon coins); saved for the Power Sling
 const special = (c, r) => specials.push({ x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
 // lost sheep. how: "graze" (just reach it), "ledge" (up somewhere), "cast" (on its back: press Down next to it),
 // "thorns" (wool caught in a thorn bush: sling the bush), "one" (The One: the hardest to reach)
 const lost = [];
 const lostSheep = (kind, c, r, how = "graze") => lost.push({ kind, how, one: how === "one", hx: c * T + T / 2, hy: (r + 1) * T });
+// the end of every stage: the family sheepfold, with the gatepost at column p (the fold's walls and the end of the level follow it)
+const sheepfold = p => {
+  ground(p - 12, COLS - 1);
+  for (let c = p + 4; c <= p + 14; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
+  fold = { postC: p, endC: p + 15 };
+  rock(p + 16, 4, COLS - p - 16, 13);
+};
 
 if (LEVEL_NAME === "test") {
   ground(0, 24);   label(2, 7, "Start: walk, then hold a direction to run");
@@ -305,63 +342,164 @@ if (LEVEL_NAME === "test") {
   plat(108, 13, 4); plat(114, 10, 4); gourd(115, 9);
   block(124, 15, 2, 2, 3); block(127, 13, 2, 4); block(130, 11, 2, 6); gourd(131, 10);
   block(140, 9, 6, 8);                              label(133, 6, "end of the test. R = back to the start");
-} else {
-  // ---- 1-1 sample: The Hills of Bethlehem ----
-  ground(0, 60);
-  deco("olive_tree", 4, 16, 1.0); deco("date_palm", 15, 16, 1.1);
-  label(2, 6, "World 1-1 sample. Eat food to heal, but look before you eat.");
-  food("grapes", 10, 16); food("bread", 21, 16);
-  lostSheep("sheepblack", 19, 16);                      // the first lost sheep: just walk up to it
-  special(16, 9);                                       // above the date palm: jump + flip
-  special(87, 6);                                       // high above the fig platform: flip from the platform
-  // the third special stone is hidden in the fig tree (col 114): jump into its branches
-  oliveRow(6, 16, 6); oliveArc(22, 16, 5); oliveRow(26, 14, 3); oliveRow(30, 12, 3);
-  oliveArc(35, 16, 6); oliveRow(50, 16, 4); oliveArc(64, 16, 4);
-  oliveRow(80, 12, 4); oliveRow(86, 9, 3); oliveRow(95, 16, 4); oliveArc(103, 16, 5);
-  oliveRow(126, 16, 6); oliveArc(133, 16, 5); oliveRow(144, 16, 3); oliveArc(158, 16, 6);
-  wall(26, 15, 3, 2); rock(30, 13, 3, 4);
-  gourd(28, 8, true); gourd(33, 7, true);             label(25, 6, "Sling down the hanging wild gourds");
-  snake("cobra", 40);                                  label(37, 10, "Cobra! Sling it before it strikes");
-  lostSheep("sheep", 43, 16, "thorns");                 // caught in the thorn bush: sling it free
-  food("poison_berries", 45, 16); wall(47, 15, 3, 2); food("cheese", 48, 14);
-  label(44, 11, "Berries or cheese? Look before you eat.");
-  deco("olive_tree", 55, 16, 1.15, "back", "golden_olive");   // jump into it: a shower of olives, and a golden one
-  ground(64, 122);
-  campfire(68); deco("tent", 73, 16, 1.1);            label(64, 10, "Campfire: checkpoint. Sit and play the harp (Select) to rest.");
-  lostSheep("sheep", 78, 16, "cast");              // on its back: press Down next to it
-  plat(80, 13, 4); plat(86, 10, 4); food("figs", 87, 9);
-  lostSheep("lambblack", 89, 9, "ledge");               // up on the ledge: climb to it, or play the harp below
-  snake("viper", 93);
-  deco("beehive_tree", 99, 16, 1.2); food("honey", 101, 16);
-  for (let k = 0; k < 4; k++) bee(99, k);              // honeybees: harmless. Leave them be and the honey is yours.
-  hornet(108, 11); hornet(131, 10);                     // hornets: they dive at you. Sling them.
-  food("wild_gourds", 106, 16); food("dates", 109, 16);  label(104, 11, "Wild gourds are poison (2 Kings 4:39)");
-  deco("fig_tree", 114, 16, 1.0, "back", "special");         // figs, and a hidden special stone
-  boulder(115, 14, 6, 3);
-  ground(126, 261);
-  deco("vineyard", 129, 16, 1.2); deco("crops", 135, 16, 1.1);
-  rock(140, 10, 3, 7); food("fig_cake", 141, 9);      label(136, 8, "Flip up for the fig cake");
-  lostSheep("lamb", 142, 9, "one");                     // The One, up on the high rock
-  snake("cobra", 147);
-  campfire(155);                                      label(152, 10, "Last campfire before the lion");
-  deco("stone_wall", 160, 16, 1.0, "back");
-  lostSheep("ram", 164, 16);                            // the ram, off by the wall: play the harp and he'll come
-  deco("cave", 214, 16, 1.7);                         // the lion's den
-  rock(226, 15, 3, 2);                                // the back of the den: hop over it on the way home
-  lionSpawn = { x: 205 * T, y: GR * T }; arenaX = 168 * T;
-  label(170, 6, "The lion's territory");
-  // the end of the stage: the family sheepfold (our flagpole). Jump and touch the gatepost.
-  for (let c = 244; c <= 254; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
-  fold = { postC: 240, endC: 255 };
-  label(214, 6, "Catch the golden olive on the gatepost! The higher, the more olives. 3 top catches = +1 life");
-  rock(256, 4, 6, 13);
+} else if (LEVEL_NAME === "1-1") {
+  // ---- 1-1 The Hills of Bethlehem: run, jump, the sling, aiming up, and "look before you throw" ----
+  ground(0, 30);
+  deco("olive_tree", 4, 16, 1.0); food("grapes", 10, 16);
+  talk(6, "Eliab", "Still playing with that sling, little brother? Sheep don't need a warrior. They need a babysitter.");
+  oliveRow(6, 16, 5); wall(14, 15, 3, 2); oliveArc(13, 14, 5);
+  rock(20, 14, 3, 3); oliveRow(20, 13, 3);                     // a taller step: hold A for a higher jump
+  lostSheep("sheepblack", 26, 16);                             // the first lost sheep: just walk up to it
+  // a tiny gap you can't fail
+  ground(33, 72);
+  talk(36, "Shammah", "Ignore him. Watch: hold Up and press B, and you can hit the high ones.");
+  rock(40, 13, 3, 4); gourd(41, 12);                           // a gourd on the rock: sling it
+  gourd(46, 7, true); gourd(50, 6, true);                      // hanging gourds: aim up
+  special(41, 6);                                              // high over the rock: jump from the top, then flip
+  oliveArc(44, 16, 6);
+  deco("date_palm", 55, 16, 1.1);                              // jump into the branches: dates
+  snake("cobra", 64); food("bread", 68, 16);                   // the first snake: sling it from a distance
+  oliveRow(58, 16, 4);
+  // a wider gap
+  ground(76, 140);
+  campfire(80, GR - 1, "Hanan", "The brown one with the hood will strike you. The thin green one won't hurt a soul, and it eats the rats. Look before you throw, boy.");
+  deco("tent", 85, 16, 1.0);
+  snake("whip", 92);                                           // harmless: leave it be
+  snake("viper", 99);                                          // this one bites
+  lostSheep("sheep", 104, 16, "thorns");                       // caught in the thorns: sling the bush
+  oliveRow(93, 16, 4); oliveArc(100, 16, 5);
+  deco("beehive_tree", 110, 16, 1.2); food("honey", 112, 16);
+  for (let k = 0; k < 4; k++) bee(110, k);                     // honeybees: harmless. Leave them be and the honey is yours.
+  hornet(119, 11);                                             // hornets dive at you: sling them
+  food("poison_berries", 123, 16); wall(125, 15, 3, 2); food("cheese", 126, 14);   // berries or cheese? look before you eat
+  plat(129, 13, 4); plat(135, 10, 4);
+  lostSheep("lambblack", 136, 9, "ledge");                     // up on the ledge: climb to it, or play the harp below
+  special(138, 4);                                             // high above the ledge: flip
+  oliveRow(129, 12, 4); oliveRow(135, 9, 4);
+  // gap
+  ground(146, 200);
+  deco("fig_tree", 150, 16, 1.0, "back", "special");           // jump into it: figs, and a stone of remembrance
+  boulder(153, 14, 6, 3);
+  rock(162, 13, 3, 4); lostSheep("sheep", 167, 16);            // a sheep grazing behind the rock
+  snake("viper", 170);
+  deco("olive_tree", 173, 16, 1.15, "back", "golden_olive");
+  rock(178, 13, 2, 4); rock(182, 9, 3, 8);                      // step up, then the tall rock
+  lostSheep("lamb", 183, 8, "one");                            // The One, up on the high rock
+  food("fig_cake", 184, 8);
+  lostSheep("ram", 192, 16);                                   // the old ram, off by himself: the harp brings him
+  oliveRow(186, 16, 6);
+  sheepfold(206);
+} else if (LEVEL_NAME === "1-2") {
+  // ---- 1-2 The Wandering Flock: the harp gathers them, foxes go for your lamb, a cast sheep, a neighbour's ram ----
+  ground(0, 40);
+  campfire(6, GR - 1, "Hanan", "Count them every morning and every night. Sheep know their shepherd's voice, and they know your song. Play the harp (Select): the lost ones will come to it.");
+  oliveRow(10, 16, 5);
+  lostSheep("ram", 30, 16);                                    // a ram that isn't yours: the neighbour's (bring it home too)
+  critter("fox", 37);
+  ground(44, 98);
+  rock(50, 14, 6, 3); rock(56, 12, 5, 5);
+  lostSheep("sheepblack", 58, 11, "ledge");                    // up on the rocks: play the harp below and it comes down
+  oliveRow(50, 13, 5);
+  deco("olive_tree", 64, 16, 1.1, "back", "golden_olive");
+  talk(66, "Hanan", "A sheep on its back can't get up by itself. Leave it and it dies. Roll it over.");
+  lostSheep("sheep", 72, 16, "cast");                          // cast: press Down next to it
+  critter("fox", 80); oliveArc(76, 16, 6);
+  lostSheep("sheep", 90, 16, "thorns");                        // sling the thorn bush
+  snake("viper", 95);
+  // a gully
+  ground(103, 170);
+  campfire(106, GR - 1, "The neighbour", "That's my ram you've got with yours. Most boys would keep him. If you find your neighbour's sheep, you bring it home.");
+  // a low cave in the hillside: The One is at the back of it (crawl or roll in)
+  rock(117, 11, 15, 4); rock(132, 11, 2, 6); caveDark(117, 15, 15, 2); fakeRock(119, 15, 13, 2);
+  lostSheep("lamb", 130, 16, "one");
+  special(124, 15);
+  oliveRow(118, 16, 10);
+  critter("fox", 140); critter("fox", 152);
+  plat(145, 12, 4); lostSheep("lambblack", 146, 11, "ledge");
+  special(147, 6);
+  deco("fig_tree", 160, 16, 1.0, "back", "special");
+  food("figs", 157, 16);
+  // the gully again
+  ground(175, 200);
+  critter("fox", 190); oliveArc(178, 16, 8);
+  sheepfold(206);
+} else if (LEVEL_NAME === "1-3") {
+  // ---- 1-3 The Rocky Pastures: the roll, crumbling ledges, rope bridges, a charging ram, ravens, a hidden cave ----
+  ground(0, 22);
+  rock(10, 15, 3, 2); rock(15, 13, 3, 4); oliveRow(15, 12, 3);
+  crumble(24, 15, 3);                                          // it shakes when you land: keep moving
+  ground(29, 60);
+  raven(36, 7);
+  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Down + A while running)");
+  rock(42, 11, 10, 4);                                         // a low passage: roll (or crawl) under
+  oliveRow(42, 16, 10);
+  lostSheep("sheep", 56, 16);                                  // on the far side of the passage
+  bridge(61, GR, 6);                                           // a rope bridge over the drop
+  ground(67, 100);
+  rock(69, 15, 3, 2); rock(72, 13, 20, 4);                     // up onto a long rock shelf...
+  critter("ram", 88, 12, 15);                                  // ...where a wild ram charges: roll under it
+  lostSheep("sheepblack", 90, 12, "ledge");
+  special(81, 7); oliveArc(74, 12, 7);
+  // a run of crumbling ledges over a deep drop
+  crumble(102, 14, 2); crumble(106, 12, 2); crumble(110, 14, 2);
+  ground(114, 150);
+  campfire(118, GR - 1, "The shepherd girl", "My grandmother says these rocks were here before anyone. Storms come and go, and they don't move. She says God is like that.");
+  rock(124, 14, 3, 3); rock(128, 11, 3, 6); plat(133, 8, 3); lostSheep("lamb", 134, 7, "ledge");
+  raven(130, 4);
+  // a big rock with a crack in it: the crack is a way in (a hidden cave with The One and food)
+  rock(138, 10, 12, 5); fakeRock(138, 15, 12, 2); rock(150, 10, 1, 7); caveDark(138, 15, 12, 2);   // the whole hollow is "fake": it looks solid until you crawl in
+  label(135, 9, "a crack in the rock...");
+  lostSheep("lamb", 147, 16, "one"); food("bread", 143, 16); oliveRow(141, 16, 6);
+  special(145, 15);
+  // rope bridge between two rock pillars
+  pillar(151, 13, 2); bridge(153, 13, 6); pillar(159, 13, 2);
+  raven(156, 6);
+  ground(161, 205);
+  critter("ram", 180, GR - 1, 14);                            // another ram, on open ground
+  lostSheep("sheep", 190, 16, "thorns");
+  snake("viper", 198); oliveArc(184, 16, 6);
+  crumble(206, 15, 3);
+  ground(211, 230);
+  lostSheep("sheep", 214, 16, "cast");
+  deco("olive_tree", 220, 16, 1.0, "back", "special");
+  sheepfold(236);
+} else if (LEVEL_NAME === "1-4") {
+  // ---- 1-4 The Lion's Territory, at night: jackals steal lambs, vipers in the dark, then the lion ----
+  ground(0, 45);
+  oliveRow(8, 16, 5);
+  critter("jackal", 30);
+  snake("viper", 40);
+  ground(48, 100);
+  lostSheep("sheep", 56, 16);
+  critter("jackal", 64); raven(70, 7);
+  plat(75, 13, 4); lostSheep("sheepblack", 76, 12, "ledge"); special(78, 7);
+  oliveArc(82, 16, 6); food("bread", 92, 16);
+  crumble(102, 15, 2);
+  ground(106, 200);
+  campfire(110, GR - 1, "Hanan", "You hear it? He's been following the flock for three nights.");
+  deco("fig_tree", 120, 16, 1.0, "back", "special");
+  critter("jackal", 128); snake("viper", 134);
+  lostSheep("sheep", 148, 16, "thorns");
+  critter("jackal", 150);
+  lostSheep("sheep", 157, 16, "cast");
+  rock(170, 13, 3, 4); rock(174, 9, 3, 8);
+  lostSheep("lamb", 175, 8, "one"); special(175, 3);
+  lostSheep("ram", 190, 16);
+  oliveRow(178, 16, 8);
+  ground(204, 300);
+  campfire(215, GR - 1, "Hanan", "You're of Judah, and Judah's sign is the lion. Don't run from this one. Watch for the crouch, and the tail.");
+  deco("stone_wall", 220, 16, 1.0, "back");
+  deco("cave", 274, 16, 1.7);                                  // the lion's den
+  rock(286, 15, 3, 2);                                         // the back of the den: hop over it on the way home
+  lionSpawn = { x: 265 * T, y: GR * T }; arenaX = 228 * T;
+  sheepfold(300);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
 const AT = Number(new URLSearchParams(location.search).get("at")) || 3;
 const spawn = { x: AT * T, y: GR * T }, lambSpawn = { x: (AT + 2) * T, y: GR * T };
 let checkpoint = { ...spawn };
-const isSolid = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && solid[r][c] > 0;
+const isSolid = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && solid[r][c] > 0 && solid[r][c] !== 5;
 const isOneway = (c, r) => r >= 0 && r < ROWS && c >= 0 && c < COLS && oneway[r][c];
 const LEVEL_W = COLS * T;
 
@@ -438,7 +576,10 @@ function collideBody(b, w, h, dt) {
     const r = Math.floor((b.y - h) / T);
     for (let c = c0; c <= c1; c++) if (isSolid(c, r)) { b.y = (r + 1) * T + h; b.vy = 0; break; }
   }
-  if (b.y > ROWS * T + 400) { b.x = spawn.x; b.y = spawn.y; b.vx = b.vy = 0; } // fell in a pit: back to start
+  if (b.y > ROWS * T + 400) {   // fell in a pit
+    if (b === david) pitFall();
+    else { b.fell = true; b.vx = b.vy = 0; b.y = ROWS * T + 400; }
+  }
 }
 function headroom(b, h) { // can he stand up here?
   const c0 = Math.floor((b.x - BODY_W / 2 + 2) / T), c1 = Math.floor((b.x + BODY_W / 2 - 2) / T);
@@ -502,7 +643,7 @@ function updateDavid(dt) {
   // --- pick up / put down the lamb (Down, standing still, next to it)
   if (pressed("down") && d.onGround && !busy && !d.harp && Math.abs(d.vx) < 40) {
     if (d.carrying) { setState("putdown"); }
-    else if (Math.abs(lamb.x - d.x) < 95 && Math.abs(lamb.y - d.y) < 70) { setState("pickup"); d.vx = 0; lamb.carried = true; d.facing = Math.sign(lamb.x - d.x) || d.facing; }
+    else if (!lamb.stolen && Math.abs(lamb.x - d.x) < 95 && Math.abs(lamb.y - d.y) < 70) { setState("pickup"); d.vx = 0; lamb.carried = true; d.facing = Math.sign(lamb.x - d.x) || d.facing; }
   }
 
   // --- roll: Down + A while moving on the ground
@@ -612,6 +753,11 @@ function updateDavid(dt) {
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
   const wasAir = !d.onGround, fallSpeed = d.vy;
   collideBody(d, BODY_W, d.h, dt);
+  // remember the last solid ground he stood on (not a ledge that might crumble), for climbing back out of a pit
+  if (d.onGround) {
+    const r = Math.floor(d.y / T), cL = Math.floor((d.x - BODY_W) / T), cR = Math.floor((d.x + BODY_W) / T);
+    if (isSolid(cL, r) && isSolid(cR, r)) d.safe = { x: d.x, y: d.y };
+  }
 
   // --- choose the animation
   if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp" || d.state === "standup") {
@@ -747,6 +893,7 @@ function drawDavid(camX) {
 // ============================================================================
 function updateLamb(dt) {
   if (lamb.carried) { lamb.x = david.x; lamb.y = david.y; return; }
+  if (lamb.stolen) return;   // a jackal has it (world1.js)
   lamb.t += dt;
   // the lamb walks in David's footsteps, first in the line: it hops where he hopped, so it never falls in a pit.
   // (When a second player controls the lamb, it'll get its own physics again.)
@@ -762,7 +909,7 @@ function popLamb() {
   for (let k = 0; k < 14; k++) bits.push({ x: lamb.x, y: lamb.y - 20, vx: (Math.random() - 0.5) * 360, vy: -Math.random() * 420, life: 0.6, color: "#fff7c2" });
 }
 function drawLamb(camX) {
-  if (lamb.carried) return;
+  if (lamb.carried || lamb.stolen) return;
   const moving = Math.abs(lamb.vx) > 20 || !lamb.onGround;
   drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, lamb.x - camX, lamb.y, lamb.facing);
 }
@@ -781,9 +928,12 @@ function updateStones(dt) {
       g.alive = false; if (!s.power) s.life = 0; stoneHit(s);
       for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
     }
-    for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - snakeMid(sn)) < 48 && s.y > sn.y - 70 && s.y < sn.y + 6) {
-      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; stoneHit(s); toast("Driven off!");
+    for (const sn of snakes) if (!sn.gone && s.life > 0 && Math.abs(s.x - (sn.kind === "whip" ? sn.x : snakeMid(sn))) < 48 && s.y > sn.y - 70 && s.y < sn.y + 6) {
+      sn.gone = true; sn.vx = Math.sign(s.vx) * 220; sn.vy = -480; if (!s.power) s.life = 0; stoneHit(s);
+      if (sn.kind === "whip") { david.care = (david.care || 0) + 1; toast("That was the harmless green whip snake! It eats the rats. Look before you throw."); }
+      else toast("Driven off!");
     }
+    if (s.life > 0 && stoneHitsCritters(s)) s.life = 0;
     if (s.life > 0 && stoneHitsBugs(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
@@ -869,7 +1019,7 @@ function drawTiles(camX) {
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3 || m === 4) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5) continue;
     ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
     if (r >= GR && m === 1) {   // next to a pit: stop short so the soil doesn't show past the cliff face
@@ -972,17 +1122,9 @@ function drawTiles(camX) {
   for (let r = 0; r < ROWS; r++) {
     let start = -1;
     for (let c = c0 - 6; c <= c1 + 1; c++) {
-      const on = c <= c1 && isOneway(c, r);
+      const on = c <= c1 && isOneway(c, r) && !specialPlat.has(c + "," + r);   // crumbling ledges and bridges are drawn in world1.js
       if (on && start < 0) start = c;
-      if (!on && start >= 0) {
-        const x0 = start * T, x1 = c * T, y = r * T - 4, h = TUNE.TER_LEDGE_H;
-        const lw = TER.ledge_left.naturalWidth * h / (TER.ledge_left.naturalHeight || 1);
-        const rw = TER.ledge_right.naturalWidth * h / (TER.ledge_right.naturalHeight || 1);
-        terStrip("ledge_mid", x0 + lw * 0.6, x1 - rw * 0.6, y, h);
-        terPiece("ledge_left", x0 - 6, y, h);
-        terPiece("ledge_right", x1 + 6 - rw, y, h);
-        start = -1;
-      }
+      if (!on && start >= 0) { drawLedgeRun(start * T, c * T, r * T - 4); start = -1; }
     }
   }
   ctx.restore();
@@ -996,6 +1138,15 @@ function drawTiles(camX) {
   for (const b of bits) { ctx.fillStyle = b.color || "#d9a441"; ctx.fillRect(b.x - camX - 3, b.y - 3, 6, 6); }
   ctx.fillStyle = "rgba(60,40,20,0.85)"; ctx.font = "bold 16px sans-serif";
   for (const l of labels) ctx.fillText(l.text, l.x - camX, l.y);
+}
+// a rock ledge from x0 to x1 (world coordinates, already translated), its top at y
+function drawLedgeRun(x0, x1, y) {
+  const h = TUNE.TER_LEDGE_H;
+  const lw = TER.ledge_left.naturalWidth * h / (TER.ledge_left.naturalHeight || 1);
+  const rw = TER.ledge_right.naturalWidth * h / (TER.ledge_right.naturalHeight || 1);
+  terStrip("ledge_mid", x0 + lw * 0.6, x1 - rw * 0.6, y, h);
+  terPiece("ledge_left", x0 - 6, y, h);
+  terPiece("ledge_right", x1 + 6 - rw, y, h);
 }
 function drawStones(camX) {
   for (const s of stones) if (s.power) {
@@ -1021,7 +1172,7 @@ addEventListener("keydown", e => {
   if (e.code === "Escape" && setup.active) { setup.active = false; toast("Controller setup cancelled."); }
   if (e.code === "KeyR") { respawn(); }
   if (e.code === "KeyH") helpT = helpT > 0 ? 0 : 9999;
-  if (e.code === "Digit1") { location.hash = "play"; location.reload(); }
+  if (e.code === "Digit1") { location.hash = "1-1"; location.reload(); }
   if (e.code === "Digit5") backToMap();
   if (e.code === "Digit2") { location.hash = "test"; location.reload(); }
   if (e.code === "Digit4") {   // preview the Journal pages
@@ -1044,6 +1195,7 @@ function drawHUD() {
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
     ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal   5 = map", 18, 28);
   } else drawHelp();
+  drawDialog();
   drawToastAndSetup();
 }
 function drawHelp() {
@@ -1118,6 +1270,16 @@ function hurtDavid(fromX) {
   if (d.state !== "carry") setState("jump");
   if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; toast(d.lives > 0 ? `Ouch! Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage."); }
 }
+// a pit costs a heart and puts him back on the last solid ground he stood on (it's never back to the start)
+function pitFall() {
+  const d = david;
+  d.vx = d.vy = 0;
+  if (d.hearts <= 1) { d.x = (d.safe || checkpoint).x; d.y = (d.safe || checkpoint).y; d.inv = 0; d.hearts = 1; hurtDavid(d.x); return; }
+  d.hearts--; d.inv = TUNE.HURT_INVINCIBLE;
+  const s = d.safe || checkpoint; d.x = s.x; d.y = s.y; setState("idle");
+  lamb.x = d.x - d.facing * 50; lamb.y = d.y; trail.length = 0;
+  toast("Ouch! Watch your step.");
+}
 function restartStage() {   // out of lives: back to the start of THIS stage; special stones you found are kept
   const d = david;
   d.lives = TUNE.LIVES; checkpoint = { ...spawn };
@@ -1130,6 +1292,7 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   for (const b of bees) Object.assign(b, { gone: false, alpha: 1 });
   for (const h of hornets) Object.assign(h, { gone: false, alpha: 1, x: h.hx, y: h.hy, state: "hover", t: 0 });
   beesAngry = false;
+  resetCritters(); resetCrumbles();
   resetAllSheep();
 }
 function respawn() {
@@ -1137,6 +1300,8 @@ function respawn() {
   if (d.lives <= 0) restartStage();
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
+  if (lamb.stolen) for (const k of critters) if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) Object.assign(k, { x: k.home, state: "idle", t: 0 });
+  lamb.stolen = false;
   if (lion && !rescuedLamb) resetLion();
   sheepToCheckpoint();
 }
@@ -1186,6 +1351,7 @@ function updateSnakes(dt) {
   for (const s of snakes) {
     if (s.gone) { if (s.alpha > 0) { s.alpha -= dt * 1.5; s.y += s.vy * dt; s.vy += 1600 * dt; s.x += s.vx * dt; } continue; }
     s.t += dt;
+    if (s.kind === "whip") { updateWhipSnake(s, dt); continue; }
     const sameLevel = Math.abs(david.y - s.y) < 70;
     if (snakeArt(s)) {
       if (s.state !== "strike") s.facing = Math.sign(david.x - snakeMid(s)) || s.facing;   // turn in place (never mid-strike)
@@ -1217,6 +1383,10 @@ function drawSnakes(camX) {
   for (const s of snakes) {
     if (s.alpha <= 0) continue;
     const x = s.x - camX;
+    if (s.kind === "whip") {   // slim, green, gliding: the harmless one
+      drawSprite("snake_strike", s.state === "leave" ? [7, 6, 7, 0][Math.floor(s.t / 0.15) % 4] : 7, x, s.y, s.facing, 0.85, s.alpha, WHIP_FILTER);
+      continue;
+    }
     if (snakeArt(s)) {
       // waiting: sway through frames 1-4; strike: Glen's frames 5, 6, 7, then 8 to settle
       const i = s.state === "strike" ? cobraStrikeFrame(s.t) : [0, 1, 2, 3, 2, 1][Math.floor(s.t / 0.16) % 6];
@@ -1233,7 +1403,10 @@ function drawSnakes(camX) {
 function updateFires(dt) {
   for (const f of fires) {
     const near = Math.abs(david.x - f.x) < 70 && Math.abs(david.y - f.y) < 40;
-    if (near && !f.lit) { f.lit = true; checkpoint = { x: f.x - 30, y: f.y }; toast("Campfire: checkpoint. Play the harp here (Select) to rest."); }
+    if (near && !f.lit) {
+      f.lit = true; checkpoint = { x: f.x - 30, y: f.y };
+      if (f.who) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
+    }
     if (near && david.state === "harp" && david.hearts < david.maxHearts) {
       f.healT = (f.healT || 0) + dt;
       if (f.healT > 0.8) { f.healT = 0; david.hearts++; sfx("heal", undefined, 0.35); }
@@ -1717,7 +1890,7 @@ function updateFinish(dt) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length });
-    Journal.open({ world: 1, stage: 1, onClose: () => backToMap() });
+    Journal.open({ world: 1, stage: STAGE_NUM, onClose: () => backToMap() });
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
     s.t += dt;
@@ -1869,7 +2042,7 @@ function drawFinishBanner() {
   ctx.save(); ctx.globalAlpha = a;
   ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 330, 150, 660, 250, 18); ctx.fill();
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
-  ctx.fillText("Stage 1-1 clear!", W / 2, 215);
+  ctx.fillText("Stage " + LEVEL_STAGE + " clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
   ctx.fillText(`Lost sheep found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
   hudIcon("sheep", W / 2 - 200, 234, 38);
@@ -2109,12 +2282,13 @@ function updateHornets(dt) {
       h.x += (h.hx - h.x) * Math.min(1, dt * 1.8); h.y += (h.hy - h.y) * Math.min(1, dt * 1.8);
       if (h.t > 1.2) { h.state = "hover"; h.t = 0; }
     }
-    if (Math.abs(h.x - david.x) < 26 && h.y > david.y - david.h - 10 && h.y < david.y) hurtDavid(h.x);
+    const reach = h.kind === "raven" ? 34 : 26;
+    if (Math.abs(h.x - david.x) < reach && h.y > david.y - david.h - 10 && h.y < david.y) hurtDavid(h.x);
   }
 }
 function stoneHitsBugs(s) {
-  for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < 26) {
-    h.gone = true; h.vx = Math.sign(s.vx) * 160; h.vy = -260; toast("Hornet driven off!"); return !s.power;
+  for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < (h.kind === "raven" ? 36 : 26)) {
+    h.gone = true; h.vx = Math.sign(s.vx) * 160; h.vy = -260; toast(h.kind === "raven" ? "Raven driven off!" : "Hornet driven off!"); return !s.power;
   }
   for (const b of bees) if (!b.gone && Math.hypot(s.x - b.x, s.y - b.y) < 20) {
     b.gone = true; b.vx = Math.sign(s.vx) * 120; b.vy = -200;
@@ -2128,9 +2302,12 @@ function stoneHitsBugs(s) {
   return false;
 }
 function drawBugs(camX) {
-  if (!SPR.bee_fly || !SPR.hornet_fly) return;
+  if (!SPR.bee_fly || !SPR.hornet_fly || !SPR.raven_fly) return;
   for (const b of bees) if (b.alpha > 0) drawSprite("bee_fly", frameOf("bee_fly", b.t * 2), b.x - camX, b.y, b.facing, 1, b.alpha);
-  for (const h of hornets) if (h.alpha > 0) drawSprite("hornet_fly", frameOf("hornet_fly", h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.facing, 1, h.alpha);
+  for (const h of hornets) if (h.alpha > 0) {
+    const nm = h.kind === "raven" ? "raven_fly" : "hornet_fly";
+    drawSprite(nm, frameOf(nm, h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.facing, 1, h.alpha);
+  }
 }
 
 // harp music: the first 15 seconds of "The Shepherd Leads Me", looping while David sits and plays
@@ -2191,7 +2368,7 @@ function updateSound(dt) {
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
-  ambVol = fadeLoop(ambience, ambVol, calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
+  ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
   const spd = d.onGround && d.deadT <= 0 && !d.harp ? Math.abs(d.vx) : 0;
@@ -2224,6 +2401,7 @@ function updateWorld(dt) {
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
   updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
+  updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt);
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -2236,7 +2414,7 @@ for (const w of ["w1", "w2"]) {
     img.src = `../assets/backgrounds/${w}_${layer}.${ext}?v=${window.BUILD || 0}`; BG[w][layer] = img;
   }
 }
-let bgWorld = "w1";   // press 3 to swap between World 1 and World 2 backgrounds (to compare)
+let bgWorld = STAGE_INFO.bg || "w1";   // press 3 to swap between World 1 and World 2 backgrounds (to compare)
 function drawLayerRepeating(img, camX, factor, bottomY, height) {
   if (!img.naturalWidth) return;
   const w = img.naturalWidth * height / img.naturalHeight;
@@ -2321,11 +2499,12 @@ function drawChargeRing() {
 // ============================================================================
 let camX = 0, last = performance.now();
 function frame(now) {
-  const real = Math.min(1 / 30, (now - last) / 1000); last = now;
+  const real = Math.max(0, Math.min(1 / 30, (now - last) / 1000)); last = Math.max(last, now);   // never let time run backwards
   const dt = real * gameSpeed(real);   // the last stone on a boss slows the world down
   if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
-  if (loaded < total) {
+  // (also wait for the other scripts: world1.js, the Journal and the map load after this one)
+  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined") {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
     requestAnimationFrame(frame); return;
@@ -2345,14 +2524,18 @@ function frame(now) {
   ctx.save(); if (shake > 0.3) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
 
   drawBackground(camX);
+  drawLionRidge(camX);
   drawDecor(camX, "back");
+  drawCaveDark(camX);
   drawTiles(camX);
+  drawPlatforms(camX);
   drawFold(camX);
   drawFires(camX);
   drawPickups(camX);
   drawOlives(camX);
   drawSpecials(camX);
   drawSnakes(camX);
+  drawCritters(camX);
   drawBugs(camX);
   drawLion(camX);
   drawTakenLamb(camX);
@@ -2363,7 +2546,9 @@ function frame(now) {
   drawFoldFront(camX);
   drawStones(camX);
   drawDecor(camX, "front");
+  drawFakeRock(camX);
   ctx.restore();
+  drawNight(camX);
   drawFinalBlow();
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
   if (debug) {

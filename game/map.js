@@ -31,7 +31,7 @@ const MAP_WORLDS = {
     cairn: { x: 700, y: 352 },   // where the stones of remembrance stack up when all 12 are found
   },
 };
-const BUILT_STAGES = ["1-1"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }
@@ -226,9 +226,9 @@ const WorldMap = {
   },
 };
 function sfxLater(fn, s) { setTimeout(fn, s * 1000); }
-// start a stage from the map. Only 1-1 (the sample) exists; it's already loaded underneath, so start it fresh.
+// start a stage from the map: "#1-2" in the address loads that stage
 function startStage(id) {
-  if (location.hash !== "#play") { history.replaceState(null, "", location.pathname + location.search + "#play"); }
+  history.replaceState(null, "", location.pathname + location.search + "#" + id);
   location.reload();
 }
 const MAP_CHEAT = new URLSearchParams(location.search).has("cheat");
