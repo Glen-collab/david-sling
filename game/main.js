@@ -45,9 +45,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40, w1_3: 0 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_3: { mid: 400, near: 170 } },
-  BG_MIRROR: { w1_3: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_3: 0, w1_4: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_MIRROR: { w1_3: true, w1_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -269,7 +269,7 @@ const STAGE_INFO = {
   "1-1": { cols: 228, bg: "w1", name: "The Hills of Bethlehem" },
   "1-2": { cols: 228, bg: "w1", name: "The Wandering Flock" },
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
-  "1-4": { cols: 322, bg: "w1", name: "The Lion's Territory", night: true },
+  "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
 }[LEVEL_NAME];
 const T = TUNE.TILE;
 const ROWS = 20, GR = 17;
@@ -2454,9 +2454,12 @@ function updateWorld(dt) {
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
 const BG = {};
-for (const w of ["w1", "w2", "w1_3"]) {
+// a set can borrow layers it doesn't have yet from another set (1-4 night: its own sky, World 1's hills until Glen's arrive)
+const BG_BORROW = {};   // e.g. { w1_4: { near: "w1" } } while a set is still missing a layer
+for (const w of ["w1", "w2", "w1_3", "w1_4"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
+    if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }
     total++;
     const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
     img.src = `../assets/backgrounds/${w}_${layer}.${ext}?v=${window.BUILD || 0}`; BG[w][layer] = img;
@@ -2472,20 +2475,31 @@ function drawLayerRepeating(img, camX, factor, bottomY, height, mirror = false) 
     else ctx.drawImage(img, Math.floor(x), bottomY - height, Math.ceil(w) + 1, height);
   }
 }
+// far: one image, scaled so it covers the screen plus all the scrolling it will do, bottom-aligned (no repeat)
+function drawFarLayer(camX) {
+  const far = BG[bgWorld].far;
+  if (!far.naturalWidth) { ctx.fillStyle = "#cfe0ea"; ctx.fillRect(0, 0, W, H); return; }
+  const scroll = Math.max(0, MAIN_COLS * T - W) * TUNE.BG_FAR_SPEED;
+  let w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
+  if (h < H + 40) { h = H + 40; w = far.naturalWidth * h / far.naturalHeight; }   // a very wide picture: fill the height instead
+  ctx.drawImage(far, -camX * TUNE.BG_FAR_SPEED, H - h + (TUNE.BG_FAR_DROP[bgWorld] || 0), w, h);
+}
 function drawBackground(camX) {
   const L = BG[bgWorld];
-  // far: one image, scaled so it covers the screen plus all the scrolling it will do, bottom-aligned (no repeat)
-  const far = L.far;
-  if (far.naturalWidth) {
-    const scroll = Math.max(0, MAIN_COLS * T - W) * TUNE.BG_FAR_SPEED;
-    let w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
-    if (h < H + 40) { h = H + 40; w = far.naturalWidth * h / far.naturalHeight; }   // a very wide picture: fill the height instead
-    ctx.drawImage(far, -camX * TUNE.BG_FAR_SPEED, H - h + (TUNE.BG_FAR_DROP[bgWorld] || 0), w, h);
-  } else { ctx.fillStyle = "#cfe0ea"; ctx.fillRect(0, 0, W, H); }
-  const LH = TUNE.BG_LAYER_HEIGHTS[bgWorld] || {};
-  const mir = !!TUNE.BG_MIRROR[bgWorld];
-  drawLayerRepeating(L.mid, camX, TUNE.BG_MID_SPEED, GR * T + 30, LH.mid || TUNE.BG_MID_HEIGHT, mir);
-  drawLayerRepeating(L.near, camX, TUNE.BG_NEAR_SPEED, GR * T + 22, LH.near || TUNE.BG_NEAR_HEIGHT, mir);
+  // a painted night sky goes in later, behind everything, so the night tint doesn't darken it again (world1.js drawNight)
+  if (STAGE_INFO.nightSky) { ctx.clearRect(0, 0, W, H); drawMidNear(camX, true); return; }
+  drawFarLayer(camX);
+  drawMidNear(camX);
+}
+// the mid and near layers. A painted night set: borrowedOnly = the borrowed daytime layers (they get the night tint);
+// its own night layers are drawn later, behind the tinted foreground, with the sky (world1.js drawNight)
+function drawMidNear(camX, borrowedOnly = null) {
+  const L = BG[bgWorld], LH = TUNE.BG_LAYER_HEIGHTS[bgWorld] || {}, B = BG_BORROW[bgWorld] || {};
+  for (const [layer, speed, base, hDef] of [["mid", TUNE.BG_MID_SPEED, GR * T + 30, TUNE.BG_MID_HEIGHT], ["near", TUNE.BG_NEAR_SPEED, GR * T + 22, TUNE.BG_NEAR_HEIGHT]]) {
+    if (borrowedOnly !== null && !!B[layer] !== borrowedOnly) continue;
+    const from = B[layer] || bgWorld, lh = (TUNE.BG_LAYER_HEIGHTS[from] || {})[layer] || hDef;
+    drawLayerRepeating(L[layer], camX, speed, base, lh, !!TUNE.BG_MIRROR[from]);
+  }
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)

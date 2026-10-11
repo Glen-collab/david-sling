@@ -312,18 +312,30 @@ function updateNight(dt) {
   ridgeLion.roarT -= dt;
   if (ridgeLion.roarT <= 0) { ridgeLion.roarT = 22 + Math.random() * 14; sfx("lion_roar", undefined, 0.22, 0.85); }   // far off
 }
+const nightCanvas = document.createElement("canvas"); nightCanvas.width = W; nightCanvas.height = H;
 function drawNight(camX) {
-  if (!STAGE_INFO.night) return;
+  if (!STAGE_INFO.night || cave.room) return;
   ctx.save();
-  ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = W1.NIGHT_TINT; ctx.fillRect(0, 0, W, H);
+  if (STAGE_INFO.nightSky) {
+    // tint only what's in front of the sky (the hills, ground, David...), then put Glen's painted sky behind it
+    const g = nightCanvas.getContext("2d");
+    g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, W, H); g.drawImage(ctx.canvas, 0, 0);
+    g.globalCompositeOperation = "multiply"; g.fillStyle = W1.NIGHT_TINT; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = "destination-in"; g.drawImage(ctx.canvas, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+    drawFarLayer(camX); drawMidNear(camX, false); ctx.drawImage(nightCanvas, 0, 0);
+  } else {
+    ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = W1.NIGHT_TINT; ctx.fillRect(0, 0, W, H);
+  }
   ctx.globalCompositeOperation = "source-over";
   const k = (performance.now() / 1000) % W1.CLOUD_EVERY, c = k < W1.CLOUD_TIME ? Math.sin(Math.PI * k / W1.CLOUD_TIME) : 0;
   if (c > 0) { ctx.fillStyle = `rgba(5,8,25,${W1.CLOUD_DARK * c})`; ctx.fillRect(0, 0, W, H); }
-  // the moon's glow, top right
   ctx.globalCompositeOperation = "lighter";
-  const g = ctx.createRadialGradient(W - 160, 90, 10, W - 160, 90, 420);
-  g.addColorStop(0, `rgba(150,170,220,${0.22 * (1 - c * 0.6)})`); g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (!STAGE_INFO.nightSky) {   // the moon's glow, top right (a painted sky has its own moon)
+    const g = ctx.createRadialGradient(W - 160, 90, 10, W - 160, 90, 420);
+    g.addColorStop(0, `rgba(150,170,220,${0.22 * (1 - c * 0.6)})`); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
   // campfires still glow warm in the dark
   for (const f of fires) if (f.lit) {
     const x = f.x - camX, r = 150 + Math.sin(performance.now() / 90) * 10;

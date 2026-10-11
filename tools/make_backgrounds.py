@@ -9,8 +9,9 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 os.makedirs(OUT, exist_ok=True)
 SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w2": ("image (5) world 2.jpg", "image (6) world 2.jpg", "image (7) world 2.jpg"),
-        "w1_3": ("1-3 far.png", "1-3 mid.png", "1-3 near.png")}   # 1-3 The Rocky Pastures
-MIRRORED = {"w1_3"}
+        "w1_3": ("1-3 far.png", "1-3 mid.png", "1-3 near.png"),   # 1-3 The Rocky Pastures
+        "w1_4": ("1-4 far.png", "1-4 mid.png", "1-4 near.png")}   # 1-4 The Lion's Territory (night)
+MIRRORED = {"w1_3", "w1_4"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):
