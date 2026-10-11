@@ -1996,13 +1996,34 @@ function woodPost(x, bottom, w, h) {
 }
 // The goal is two tall posts like Super Mario World's: one behind David, one in front, so he walks between them.
 // The golden olive rides a cord strung between the posts, sliding up and down. The sheepfold gate hangs off the back post.
-const GOAL_GAP = 1.1 * T;   // each post this far from the middle (back post to the right, front post to the left)
+const GOAL_GAP = 1.5 * T;   // each post this far from the middle (back post to the right, front post to the left)
+// Glen's gate and post art. The gate is baked once with a shadow on its hinge side (the far end, away from us).
+let gateShaded = null;
+function gateArt() {
+  if (gateShaded) return gateShaded;
+  const img = ITEM.gate_panel; if (!img || !img.naturalWidth) return null;
+  const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext("2d"); g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = "source-atop";
+  const gr = g.createLinearGradient(0, 0, c.width, 0); gr.addColorStop(0, "rgba(20,10,0,0.42)"); gr.addColorStop(1, "rgba(20,10,0,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
+  return (gateShaded = c);
+}
+// a post: Glen's rope-wrapped post if it's loaded (dark = the far one), otherwise the drawn one
+function gatePost(x, bottom, w, h, dark) {
+  const img = ITEM.gate_post;
+  if (!img || !img.naturalWidth) { if (dark) { ctx.save(); ctx.filter = "brightness(0.68) saturate(0.8)"; woodPost(x, bottom, w, h); ctx.restore(); } else woodPost(x, bottom, w, h); return; }
+  const pw = img.naturalWidth * h / img.naturalHeight * 0.85;
+  ctx.save(); if (dark) ctx.filter = "brightness(0.66) saturate(0.85)";
+  ctx.drawImage(img, x - pw / 2, bottom - h, pw, h + 4); ctx.restore();
+}
 function goalCordY(f) { const by = GR * T; return by - 62 - (TUNE.GATE_POST_TILES * T - 66) * f; }
 const GATE_H = 2.3 * T;   // the gate's height in the middle (David has to jump it)
+const GATE_FAR = { lift: 34, scale: 0.8 };   // the back post stands further away: its foot higher up the grass, and smaller
 // the gate runs from the back post to the front post, like the olive's cord. Opening, its free end swings round
 // on the back post's hinge until it lies along the fold wall. part: "back" (behind David) or "front" (over him)
 function drawGate(camX, part) {
-  const mx = postX() - camX, by = GR * T, bx = mx + GOAL_GAP, bby = by - 22, fx = mx - GOAL_GAP, fby = by + 6;
+  const mx = postX() - camX, by = GR * T, bx = mx + GOAL_GAP, bby = by - GATE_FAR.lift, fx = mx - GOAL_GAP, fby = by + 6;
   const o = finish.gateOpen, open = o > 0;
   if (part === "front" && open) return;      // once it's swinging it's all behind David
   // the free end: closed at the front post, open lying along the wall to the right
@@ -2011,6 +2032,16 @@ function drawGate(camX, part) {
   if (!open) { ctx.beginPath(); if (part === "front") ctx.rect(-1e4, -1e4, mx + 1e4, 2e4); else ctx.rect(mx, -1e4, 2e4, 2e4); ctx.clip(); }
   if (part === "back") { ctx.filter = "brightness(0.9)"; }
   const at = (u, v) => [bx + (ex - bx) * u, (bby - hb * v) + ((ey - he * v) - (bby - hb * v)) * u];   // u: hinge->free end, v: bottom->top
+  const art = gateArt();
+  if (art) {   // Glen's gate, bent between the posts in thin strips so it reads as a gate seen at an angle
+    const N = 36, sw = art.width / N;
+    for (let k = 0; k < N; k++) {
+      const u0 = k / N, u1 = (k + 1) / N, [ax, ay] = at(u0, 1.04), [bx2, by2] = at(u1, 1.04), [cx, cy] = at(u0, -0.02);
+      ctx.save(); ctx.transform((bx2 - ax) / sw, (by2 - ay) / sw, (cx - ax) / art.height, (cy - ay) / art.height, ax, ay);
+      ctx.drawImage(art, k * sw, 0, sw + 0.8, art.height, 0, 0, sw + 0.8, art.height); ctx.restore();
+    }
+    ctx.restore(); return;
+  }
   ctx.lineCap = "round";
   for (const v of [0.18, 0.55, 0.92]) {                 // three rails
     const [x0, y0] = at(0.02, v), [x1, y1] = at(0.98, v);
@@ -2030,11 +2061,11 @@ function drawFold(camX) {   // the back half: back post and the far half of the 
   if (!fold) return;
   const mx = postX() - camX, by = GR * T, ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
-  const bx = mx + GOAL_GAP, bby = by - 22;   // the back post stands a little further off, so its foot is higher up the grass
+  const bx = mx + GOAL_GAP, bby = by - GATE_FAR.lift;   // the back post stands further off, so its foot is higher up the grass
   ctx.save();
   // the back post: a touch thinner and darker (further away)
-  ctx.save(); ctx.filter = "brightness(0.68) saturate(0.8)"; woodPost(bx, bby, 13, ph - 22); ctx.restore();
-  ctx.fillStyle = "#a88a20"; ctx.beginPath(); ctx.arc(bx, bby - ph + 18, 7, 0, Math.PI * 2); ctx.fill();
+  gatePost(bx, bby, 13, ph * GATE_FAR.scale, true);
+  if (!ITEM.gate_post || !ITEM.gate_post.naturalWidth) { ctx.fillStyle = "#a88a20"; ctx.beginPath(); ctx.arc(bx, bby - ph + 18, 7, 0, Math.PI * 2); ctx.fill(); }
   // a soft shadow on the grass between the posts
   const sg = ctx.createRadialGradient(mx, by, 2, mx, by, GOAL_GAP * 1.6);
   sg.addColorStop(0, "rgba(40,28,10,0.3)"); sg.addColorStop(1, "rgba(40,28,10,0)");
@@ -2059,7 +2090,7 @@ function drawFoldFront(camX) {   // the front half: the cord with the golden oli
     drawOlive(mx, y + 2, "golden", 1.6);
   }
   // the front post: thicker and closer, with carved notches whose olives grow bigger toward the top
-  woodPost(fx, fby, 22, ph + 8);
+  gatePost(fx, fby, 22, ph + 8, false);
   const low = goalCordY(0), high = goalCordY(1);
   for (let k = 1; k <= 4; k++) {
     const y = low + (high - low) * k / 5;
@@ -2067,7 +2098,7 @@ function drawFoldFront(camX) {   // the front half: the cord with the golden oli
     ctx.strokeStyle = "rgba(200,160,110,0.5)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(fx - 10, y + 2.5); ctx.lineTo(fx + 10, y + 2.5); ctx.stroke();
     drawOlive(fx - 22, y - 2, "green", 0.45 + k * 0.17);
   }
-  ctx.fillStyle = "#c9a227"; ctx.beginPath(); ctx.arc(fx, fby - ph - 12, 10, 0, Math.PI * 2); ctx.fill();   // brass knob
+  if (!ITEM.gate_post || !ITEM.gate_post.naturalWidth) { ctx.fillStyle = "#c9a227"; ctx.beginPath(); ctx.arc(fx, fby - ph - 12, 10, 0, Math.PI * 2); ctx.fill(); }   // brass knob (drawn post only)
   ctx.restore();
   // the "+N" (or "Missed!") at the goal, floating up
   const pop = finish.pop;
