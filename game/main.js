@@ -1069,7 +1069,8 @@ function drawTiles(camX) {
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
     const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5) continue;
-    ctx.fillStyle = (m === 2 ? lim : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
+    const rockFill = c >= MAIN_COLS ? terPattern("cave_rock_tile", 0.45) || lim : lim;   // in a cave: damp cave rock
+    ctx.fillStyle = (m === 2 ? rockFill : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
     if (r >= GR && m === 1) {   // next to a pit: stop short so the soil doesn't show past the cliff face
       if (!isSolid(c + 1, GR)) fw -= TUNE.PIT_TRIM;
@@ -1150,7 +1151,7 @@ function drawTiles(camX) {
             const lp = r === GR && !isSolid(start - 1, GR), rp = r === GR && !isSolid(c, GR);   // a pit on that side
             terStrip("topsoil", start * T + (lp ? TUNE.PIT_TRIM : -4), c * T + (rp ? -TUNE.PIT_TRIM : 4), r * T - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
           }
-          else terStrip("limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
+          else terStrip(start >= MAIN_COLS && TER.cave_rock_top && TER.cave_rock_top.naturalWidth ? "cave_rock_top" : "limestone_top", start * T - 3, c * T + 3, r * T - TUNE.TER_ROCKTOP_RISE, TUNE.TER_ROCKTOP_H);
           start = -1;
         }
       }
@@ -1294,6 +1295,7 @@ for (const name of window.ITEM_LIST || []) {
   img.src = `../assets/items/${name}.png?v=${window.BUILD || 0}`;
   ITEM[name] = img;
 }
+TER.cave_rock_tile = ITEM.cave_rock_tile; TER.cave_rock_top = ITEM.cave_rock_top;   // Glen's damp cave rock, used inside caves
 function drawItem(name, x, y, size, alpha = 1) {   // (x, y) = bottom-centre
   const img = ITEM[name]; if (!img || !img.naturalWidth) return;
   const w = img.naturalWidth * size, h = img.naturalHeight * size;

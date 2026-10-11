@@ -164,18 +164,19 @@ const WorldMap = {
       if (i > this.openTo || (i === this.openTo && this.reveal < 1)) return;
       const [x, y] = P(st.x, st.y), depth = 0.7 + 0.5 * (st.y / img.naturalHeight), done = this.prog[st.id] && this.prog[st.id].cleared;
       const r = 17 * depth;
-      if (st.id === "home") { this.marker(x, y, r * 0.85, "#c9a46a", "#5a3a1c", "⌂"); return; }
+      if (st.id === "home") { if (!this.stoneMarker("map_stop", x, y, r * 0.85, "")) this.marker(x, y, r * 0.85, "#c9a46a", "#5a3a1c", "⌂"); return; }
       const flash = !done && Math.floor(this.t * 2.5) % 2 === 0;
       if (!done) {   // a soft pulsing glow on the next stage
         const g = ctx.createRadialGradient(x, y, 2, x, y, r * 2.6);
         g.addColorStop(0, `rgba(255,220,120,${0.45 + 0.25 * Math.sin(this.t * 5)})`); g.addColorStop(1, "rgba(255,220,120,0)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, Math.PI * 2); ctx.fill();
       }
-      this.marker(x, y, r, done ? "#e8d9b8" : flash ? "#ffd84a" : "#f7b733", done ? "#3d6b2a" : "#6b3a10", st.id.split("-")[1]);
+      if (!this.stoneMarker(done ? "map_stop_done" : "map_stop_next", x, y, r, done ? "" : st.id.split("-")[1], !done && flash))
+        this.marker(x, y, r, done ? "#e8d9b8" : flash ? "#ffd84a" : "#f7b733", done ? "#3d6b2a" : "#6b3a10", st.id.split("-")[1]);
       if (done) hudIcon(this.prog[st.id].one ? "sheep_one" : "sheep", x + r * 0.55, y - r * 2.1, r * 1.5);   // a sheep: home safe
     });
     // stones of remembrance: all 12 found = a little cairn by the fold
-    if (this.stones >= 12) { const [cx, cy] = P(M.cairn.x, M.cairn.y); for (let k = 0; k < 5; k++) hudIcon("stone", cx - 14 + (k % 3) * 9 - (k > 2 ? -4 : 0), cy - 10 - Math.floor(k / 3) * 9 - (k === 4 ? 9 : 0), 16); }
+    if (this.stones >= 12) { const [cx, cy] = P(M.cairn.x, M.cairn.y); drawItem("map_cairn", cx, cy + 6, 0.12); }
     // David (and his lamb), smaller toward the back of the painting
     const dp = this.at(this.d), lp = this.at(this.lambD);
     const size = y => MTUNE.DAVID_FAR + (MTUNE.DAVID_NEAR - MTUNE.DAVID_FAR) * Math.max(0, Math.min(1, (y - 330) / 400));
@@ -192,6 +193,18 @@ const WorldMap = {
     ctx.globalAlpha = Math.max(0, this.fade);
     this.panel(n);
     ctx.restore();
+  },
+  // Glen's stone markers: plain, finished (wool and olive leaves), next to play (glowing). false = not loaded yet
+  stoneMarker(name, x, y, r, text, bright = false) {
+    const img = ITEM[name]; if (!img || !img.naturalWidth) return false;
+    const w = r * 3.6, h = img.naturalHeight * w / img.naturalWidth;
+    ctx.save(); if (bright) ctx.filter = "brightness(1.25)";
+    ctx.drawImage(img, x - w / 2, y - h * 0.6, w, h); ctx.restore();
+    if (text) {
+      ctx.fillStyle = "rgba(70,45,20,0.85)"; ctx.font = `bold ${Math.round(r * 1.05)}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y - h * 0.2); ctx.textBaseline = "alphabetic";
+    }
+    return true;
   },
   marker(x, y, r, fill, ink, text) {
     ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.beginPath(); ctx.ellipse(x + 2, y + r * 0.55, r * 1.05, r * 0.45, 0, 0, Math.PI * 2); ctx.fill();

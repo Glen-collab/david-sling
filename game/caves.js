@@ -129,6 +129,20 @@ for (const [n, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
   total++; const img = new Image(); img.onload = img.onerror = () => { loaded++; };
   img.src = `../assets/backgrounds/cave_${n}.${ext}?v=${window.BUILD || 0}`; CAVE_BG[n] = img;
 }
+// Glen's cave opening, with its square corners feathered away into the dark (made once)
+let softExitCanvas = null;
+function softExit() {
+  if (softExitCanvas) return softExitCanvas;
+  const img = ITEM.cave_exit; if (!img || !img.naturalWidth) return null;
+  const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext("2d"); g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = "destination-in";
+  g.translate(c.width / 2, c.height * 0.62); g.scale(1, c.height / c.width * 1.15);
+  const rg = g.createRadialGradient(0, 0, c.width * 0.25, 0, 0, c.width * 0.52);
+  rg.addColorStop(0, "rgba(0,0,0,1)"); rg.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = rg; g.fillRect(-c.width, -c.width, c.width * 2, c.width * 2);
+  return (softExitCanvas = c);
+}
 // stalactites and stalagmites dotted through each cave (placed once, the same every time)
 const CAVE_SPIKES = [];
 for (const room of rooms) for (let c = room.c0 + 3, k = 0; c < room.c0 + room.w - 2; c += 5 + (k * 7) % 4, k++) {
@@ -153,6 +167,9 @@ function drawCaveBackdrop(camX) {
   drawLayerRepeating(CAVE_BG.mid, rel, 0.35, H, H, true);
   drawLayerRepeating(CAVE_BG.near, rel, 0.65, GR * T + 40, 160, true);
   drawCaveSpikes(camX);
+  // the way out, seen from inside: Glen's daylit opening against the cave's left wall
+  const exitArt = softExit();
+  if (exitArt) { const h = 250, w = exitArt.width * h / exitArt.height; ctx.drawImage(exitArt, cave.room.exitX - camX - w * 0.45, GR * T + 8 - h, w, h); }
   const ex = cave.room.exitX - camX;   // the way out: a warm patch of daylight on the left
   const lg = ctx.createRadialGradient(ex, GR * T - 60, 10, ex, GR * T - 60, 220);
   lg.addColorStop(0, "rgba(255,236,190,0.95)"); lg.addColorStop(0.35, "rgba(255,210,140,0.45)"); lg.addColorStop(1, "rgba(255,200,120,0)");
