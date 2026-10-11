@@ -165,7 +165,7 @@ function drawCaveBackdrop(camX) {
   const far = CAVE_BG.far;
   if (far.naturalWidth) { const w = far.naturalWidth * H / far.naturalHeight; ctx.drawImage(far, -rel * 0.08 - 40, 0, w, H); }
   drawLayerRepeating(CAVE_BG.mid, rel, 0.35, H, H, true);
-  drawLayerRepeating(CAVE_BG.near, rel, 0.65, GR * T + 40, 160, true);
+  drawLayerRepeating(CAVE_BG.near, rel, 0.65, GR * T + 40, 260, true);
   drawCaveSpikes(camX);
   // the way out, seen from inside: Glen's daylit opening against the cave's left wall
   const exitArt = softExit();
