@@ -21,9 +21,20 @@ If a chat session closes, start here. Last updated 2026-10-11.
 - `gate_front.png`: the straight-on sheepfold gate with two posts. Its edges have a red fringe from the background removal; clean it in code.
 - `gate_posts_green.png`: two posts with a crossbar, on green.
 
-## Next (agreed 2026-10-11)
-1. **World 1 map**, SMB3 style, on `assets/maps/world1_map.png` (the Bethlehem painting). Flashing stops: start = the sheepfold by the town, 1-1 = the campfire, 1-2 = the flower meadow, 1-3 = the rock with the goat, 1-4 = the cave (the map turns to night). Small David walks between stops; a stone cairn appears near the fold when all 12 stones are found.
-2. **Real stages 1-1 to 1-4** from DESIGN.md, with the lion moved to 1-4. Each stage clear: Journal (stage n), then back to the map.
+## World 1 map (built 2026-10-11)
+
+- `game/map.js`. **The game now opens on the map.** Key 1 still goes straight into the stage, and 5 brings the map back.
+- **Stops:** the sheepfold (home), 1-1 the campfire, 1-2 the flower meadow, 1-3 the goat's rock, 1-4 the cave. The trail coordinates are in `MAP_WORLDS`, in the painting's pixels.
+- **On the map:**
+  - Left/Right walks David (and the lamb) between stops. He shrinks walking into the distance and shows his back when he walks up into the picture.
+  - The next stage flashes. A cleared stage turns green with a sheep (a gold-star sheep if The One was found).
+  - The map turns to night on the walk to the cave.
+  - A plays the stop (only 1-1 is built). Select reads the Journal so far.
+- **Clearing a stage** saves its sheep, The One and stones (`localStorage` `davidProgress`), writes the Journal, then returns to the map, where the next stretch of trail draws itself in.
+- **Testing:** `index.html?cheat` lets B on the map mark a stage cleared.
+
+## Next
+**Real stages 1-1 to 1-4** from DESIGN.md, with the lion moved to 1-4. Add each one to `BUILT_STAGES` in `map.js`, and pass its stage number to the Journal (`main.js` still says stage 1).
 
 ## Done in the last session (2026-10-09 to 2026-10-10)
 

@@ -256,8 +256,10 @@ const Journal = {
     // the spreads, in order. After stage 4 there are two to write: the last lesson, then the world's spread.
     this.pages = [{ spread: "draft", step: Math.min(4, opts.stage) }];
     if (opts.stage >= 4 && !opts.noEnd) this.pages.push({ spread: "end", step: 5 });
+    if (opts.read && opts.stage < 4) this.pages[0].step = opts.stage;
+    this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
-    this.cur = 0; this.phase = "write"; this.fade = 0; this.closing = false; this.time = 0;
+    this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
     this.view = 0; this.viewWant = 0; this.turn = null;
     this.active = true;
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
@@ -270,7 +272,7 @@ const Journal = {
     for (const pg of this.pages) {
       const S = this.P[pg.spread];
       pg.lay = { left: layoutPage(S.left, "left", pg.step, this.stones), right: layoutPage(S.right, "right", pg.step, this.stones) };
-      pg.tl = buildTimeline(pg.lay, pg.step); pg.t = 0; pg.nextAct = 0;
+      pg.tl = buildTimeline(pg.lay, pg.step); pg.t = this.read ? pg.tl.total : 0; pg.nextAct = this.read ? pg.tl.acts.length : 0;
     }
     this.fontOk = caveatReady;   // laid out before the font arrived? do it again once it has
   },
