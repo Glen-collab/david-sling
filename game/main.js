@@ -45,7 +45,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40 },   // per world: push the far layer down (positive) or up (negative)
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_3: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_3: { mid: 400, near: 170 } },
+  BG_MIRROR: { w1_3: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -266,7 +268,7 @@ const STAGE_INFO = {
   test:  { cols: 150, bg: "w1" },
   "1-1": { cols: 228, bg: "w1", name: "The Hills of Bethlehem" },
   "1-2": { cols: 228, bg: "w1", name: "The Wandering Flock" },
-  "1-3": { cols: 258, bg: "w2", name: "The Rocky Pastures" },          // World 2's rocky set stands in until Glen's 1-3 art
+  "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1", name: "The Lion's Territory", night: true },
 }[LEVEL_NAME];
 const T = TUNE.TILE;
@@ -2452,7 +2454,7 @@ function updateWorld(dt) {
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
 const BG = {};
-for (const w of ["w1", "w2"]) {
+for (const w of ["w1", "w2", "w1_3"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
     total++;
@@ -2461,11 +2463,14 @@ for (const w of ["w1", "w2"]) {
   }
 }
 let bgWorld = STAGE_INFO.bg || "w1";   // press 3 to swap between World 1 and World 2 backgrounds (to compare)
-function drawLayerRepeating(img, camX, factor, bottomY, height) {
+function drawLayerRepeating(img, camX, factor, bottomY, height, mirror = false) {
   if (!img.naturalWidth) return;
   const w = img.naturalWidth * height / img.naturalHeight;
-  let x = -((camX * factor) % w); if (x > 0) x -= w;
-  for (; x < W; x += w) ctx.drawImage(img, Math.floor(x), bottomY - height, Math.ceil(w) + 1, height);
+  const k0 = Math.floor(camX * factor / w);
+  for (let k = k0, x = k0 * w - camX * factor; x < W; k++, x += w) {
+    if (mirror && k % 2) { ctx.save(); ctx.translate(Math.floor(x) + Math.ceil(w) + 1, 0); ctx.scale(-1, 1); ctx.drawImage(img, 0, bottomY - height, Math.ceil(w) + 1, height); ctx.restore(); }
+    else ctx.drawImage(img, Math.floor(x), bottomY - height, Math.ceil(w) + 1, height);
+  }
 }
 function drawBackground(camX) {
   const L = BG[bgWorld];
@@ -2473,11 +2478,14 @@ function drawBackground(camX) {
   const far = L.far;
   if (far.naturalWidth) {
     const scroll = Math.max(0, MAIN_COLS * T - W) * TUNE.BG_FAR_SPEED;
-    const w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
+    let w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
+    if (h < H + 40) { h = H + 40; w = far.naturalWidth * h / far.naturalHeight; }   // a very wide picture: fill the height instead
     ctx.drawImage(far, -camX * TUNE.BG_FAR_SPEED, H - h + (TUNE.BG_FAR_DROP[bgWorld] || 0), w, h);
   } else { ctx.fillStyle = "#cfe0ea"; ctx.fillRect(0, 0, W, H); }
-  drawLayerRepeating(L.mid, camX, TUNE.BG_MID_SPEED, GR * T + 30, TUNE.BG_MID_HEIGHT);
-  drawLayerRepeating(L.near, camX, TUNE.BG_NEAR_SPEED, GR * T + 22, TUNE.BG_NEAR_HEIGHT);
+  const LH = TUNE.BG_LAYER_HEIGHTS[bgWorld] || {};
+  const mir = !!TUNE.BG_MIRROR[bgWorld];
+  drawLayerRepeating(L.mid, camX, TUNE.BG_MID_SPEED, GR * T + 30, LH.mid || TUNE.BG_MID_HEIGHT, mir);
+  drawLayerRepeating(L.near, camX, TUNE.BG_NEAR_SPEED, GR * T + 22, LH.near || TUNE.BG_NEAR_HEIGHT, mir);
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
