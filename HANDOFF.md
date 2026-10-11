@@ -131,7 +131,6 @@ All sound files are in `assets/sounds`, credited in `SOURCES.md`.
 - **Real gate art (optional):** a sheepfold gate drawn flat and straight-on with rails and a brace, plus one tall wooden post, both on transparent backgrounds. Claude angles them in the game and uses the post for both posts.
 - **Licenses:** fill in the blanks in `SOURCES.md`.
 - **Sounds still needed:** real hurt and death sounds, jackal, eagle, snake, bees, gate creak, campfire crackle.
-- **Unknown file:** what is the untracked `assets/items/Bethlethem_art.png` in the Desktop clone for? A copy is already in the repo as `assets/maps/world1_map.png`.
 
 ## Next big pieces (pick one)
 
