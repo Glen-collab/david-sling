@@ -305,6 +305,10 @@ const caveDoor = (name, c, size, room) => {
   const m = CAVE_MOUTH[name], x = c * T + T / 2 + (m.at - 0.5) * m.w * size * 0.85;
   const door = { x, y: GR * T, room }; room.door = door; doors.push(door); return door;
 };
+// rock inside a cave, drawn with Glen's art instead of square tiles (material 6: solid, but the tile drawing skips it)
+const caveFeatures = [];
+const hangRock = (c, r, w, h) => { block(c, r, w, h, 6); caveFeatures.push({ kind: "hang", c, r, w, h }); };    // stalactites
+const slabRock = (c, r, w, h) => { block(c, r, w, h, 6); caveFeatures.push({ kind: "slabs", c, r, w, h }); };   // stacked cave ledges
 const bat = (c, r = 3) => caveBats.push({ x: c * T + T / 2, y: r * T + 16, hx: c * T + T / 2, hy: r * T + 16, state: "hang", t: Math.random() * 2, vx: 0, vy: 0, alpha: 1, facing: 1 });
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
 // crumbling ledges: shake when you land on them, then drop away (and come back a few seconds later)
@@ -438,10 +442,10 @@ if (LEVEL_NAME === "test") {
     caveDoor("cave_1", 121, 0.5, R);
     oliveRow(c + 5, 16, 6);                                     // olives: oil for the lamp
     bat(c + 9); bat(c + 17); bat(c + 26); bat(c + 34);
-    rock(c + 11, 3, 2, 2); rock(c + 24, 3, 3, 3); rock(c + 36, 3, 2, 2);   // the rock hangs down from the ceiling
-    rock(c + 14, 15, 3, 2); rock(c + 20, 13, 4, 4); plat(c + 27, 11, 4); oliveRow(c + 27, 10, 4);
+    hangRock(c + 11, 3, 2, 2); hangRock(c + 24, 3, 3, 3); hangRock(c + 36, 3, 2, 2);   // stalactites hang down from the ceiling
+    slabRock(c + 14, 15, 3, 2); slabRock(c + 20, 13, 4, 4); plat(c + 27, 11, 4); oliveRow(c + 27, 10, 4);
     special(c + 29, 6);                                         // above the ledge: flip
-    rock(c + 38, 12, 6, 5);
+    slabRock(c + 38, 12, 6, 5);
     lostSheep("lamb", c + 41, 11, "one");                       // The One, at the very back
     food("figs", c + 33, 16);
   }
@@ -489,13 +493,13 @@ if (LEVEL_NAME === "test") {
     const R = caveRoom(52), c = R.c0;
     caveDoor("cave_2", 167, 0.42, R);
     oliveRow(c + 4, 16, 5); bat(c + 8); bat(c + 15); bat(c + 22); bat(c + 31); bat(c + 40);
-    rock(c + 10, 3, 2, 3); rock(c + 30, 3, 3, 2);
-    rock(c + 10, 14, 3, 3);
+    hangRock(c + 10, 3, 2, 3); hangRock(c + 30, 3, 3, 2);
+    slabRock(c + 10, 14, 3, 3);
     for (let k = c + 16; k <= c + 21; k++) for (let r = GR; r < ROWS; r++) solid[r][k] = 0;   // a drop in the cave floor...
     crumble(c + 17, 15, 2); oliveArc(c + 15, 14, 7);           // ...with a crumbling ledge over it
-    rock(c + 25, 12, 4, 5); plat(c + 31, 9, 4); food("bread", c + 32, 8);
+    slabRock(c + 25, 12, 4, 5); plat(c + 31, 9, 4); food("bread", c + 32, 8);
     special(c + 33, 4);
-    rock(c + 38, 13, 3, 4); rock(c + 43, 10, 9, 7);
+    slabRock(c + 38, 13, 3, 4); slabRock(c + 43, 10, 9, 7);
     lostSheep("lamb", c + 48, 9, "one");                        // The One, up at the back
   }
   critter("ram", 182, GR - 1, 14);                            // another ram, on open ground
@@ -1068,7 +1072,7 @@ function drawTiles(camX) {
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6) continue;
     const rockFill = c >= MAIN_COLS ? terPattern("cave_rock_tile", 0.45) || lim : lim;   // in a cave: damp cave rock
     ctx.fillStyle = (m === 2 ? rockFill : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
@@ -2613,6 +2617,7 @@ function frame(now) {
   drawCaveDark(camX);
   drawCaveDoors(camX);
   drawTiles(camX);
+  drawCaveFeatures(camX);
   drawPlatforms(camX);
   drawFold(camX);
   drawFires(camX);

@@ -143,6 +143,33 @@ function softExit() {
   g.fillStyle = rg; g.fillRect(-c.width, -c.width, c.width * 2, c.width * 2);
   return (softExitCanvas = c);
 }
+// the rock inside caves: stalactite clusters hanging from the ceiling, and Glen's mossy cave ledge stacked into
+// rock towers you can climb (flat on top, where you stand), with a stalagmite at the foot of the big ones
+function drawCaveFeatures(camX) {
+  if (!cave.room) return;
+  const st = ITEM.stalactite, slab = ITEM.cave_ledge, sm = ITEM.stalagmite;
+  for (const f of caveFeatures) {
+    const x0 = f.c * T - camX, w = f.w * T, y0 = f.r * T, h = f.h * T;
+    if (x0 > W + 60 || x0 + w < -60) continue;
+    if (f.kind === "hang" && st && st.naturalWidth) {
+      const n = Math.max(1, Math.round(w / 40));
+      for (let k = 0; k < n; k++) {   // a cluster: the middle ones longest
+        const mid = 1 - Math.abs(k - (n - 1) / 2) / n, sw = w / n + 14, sh = (h + 14) * (0.75 + 0.25 * mid);
+        ctx.drawImage(st, x0 - 7 + k * (w / n), y0 - 10, sw, sh + 10);
+      }
+    }
+    if (f.kind === "slabs" && slab && slab.naturalWidth) {
+      const sw = w + 14, sh = slab.naturalHeight * sw / slab.naturalWidth, step = Math.max(26, sh * 0.62);
+      const n = Math.max(1, Math.ceil((h - sh * 0.4) / step) + 1);
+      for (let k = n - 1; k >= 0; k--) {   // bottom slab first, the top one last (its flat top is where you stand)
+        const y = k === 0 ? y0 - sh * 0.1 : Math.min(y0 + h - sh * 0.75, y0 - sh * 0.1 + k * step);
+        const nudge = k === 0 ? 0 : ((f.c * 7 + k * 13) % 3 - 1) * 5;   // a little uneven, like stacked stone
+        ctx.drawImage(slab, x0 - 7 + nudge, y, sw, sh);
+      }
+      if (f.w >= 4 && sm && sm.naturalWidth) { const mh = Math.min(90, h * 0.7), mw = sm.naturalWidth * mh / sm.naturalHeight; ctx.drawImage(sm, x0 - mw * 0.6, y0 + h - mh + 4, mw, mh); }
+    }
+  }
+}
 // stalactites and stalagmites dotted through each cave (placed once, the same every time)
 const CAVE_SPIKES = [];
 for (const room of rooms) for (let c = room.c0 + 3, k = 0; c < room.c0 + room.w - 2; c += 5 + (k * 7) % 4, k++) {
