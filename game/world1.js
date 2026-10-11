@@ -22,7 +22,7 @@ const dialog = { who: "", say: "", t: 0 };
 function sayLine(who, say) { Object.assign(dialog, { who, say, t: Math.max(W1.DIALOG_SECS, say.split(" ").length * 0.33) }); toastTime = 0; }
 function updateTalks(dt) {
   dialog.t = Math.max(0, dialog.t - dt);
-  for (const k of talks) if (!k.done && david.x > k.x && david.deadT <= 0) { k.done = true; sayLine(k.who, k.say); }
+  for (const k of talks) if (!k.done && david.x > k.x && david.x < MAIN_COLS * T && david.deadT <= 0) { k.done = true; sayLine(k.who, k.say); }
 }
 function drawDialog() {
   if (dialog.t <= 0) return;

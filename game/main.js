@@ -270,7 +270,9 @@ const STAGE_INFO = {
   "1-4": { cols: 322, bg: "w1", name: "The Lion's Territory", night: true },
 }[LEVEL_NAME];
 const T = TUNE.TILE;
-const ROWS = 20, COLS = STAGE_INFO.cols, GR = 17;
+const ROWS = 20, GR = 17;
+const MAIN_COLS = STAGE_INFO.cols;          // the stage itself...
+const COLS = MAIN_COLS + 120;               // ...and, past its end, space for its caves (separate rooms you go into)
 const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone, 3 wall, 4 boulder, 5 fake rock (walk through it)
 const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
 const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
@@ -284,6 +286,24 @@ const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
 const fakeRock = (c, r, w, h) => block(c, r, w, h, 5); // looks like rock, but you can walk into it (a secret)
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
 const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
+// Caves (like Mario's pipes): a cave-mouth picture in the stage, and a separate dark room built past the stage's end.
+// Press Up at the mouth to go in; Up at the daylight inside to come back out.
+const rooms = [], doors = [], caveBats = [];
+let roomNext = MAIN_COLS + 6;
+const caveRoom = w => {   // returns the room; build its insides with c0 + offsets. Floor is row 17, ceiling rows 0-2.
+  const c0 = roomNext; roomNext += w + 8;
+  rock(c0 - 3, 0, 3, ROWS); rock(c0 + w, 0, 3, ROWS); rock(c0, 0, w, 3); block(c0, GR, w, ROWS - GR, 2);
+  const room = { c0, w, exitX: (c0 + 2) * T };
+  rooms.push(room); return room;
+};
+// where the opening is in each cave picture (fraction of its width from the left), and the picture's width in pixels
+const CAVE_MOUTH = { cave_1: { at: 0.69, w: 857 }, cave_2: { at: 0.76, w: 684 } };
+const caveDoor = (name, c, size, room) => {
+  deco(name, c, 16, size);
+  const m = CAVE_MOUTH[name], x = c * T + T / 2 + (m.at - 0.5) * m.w * size * 0.85;
+  const door = { x, y: GR * T, room }; room.door = door; doors.push(door); return door;
+};
+const bat = (c, r = 3) => caveBats.push({ x: c * T + T / 2, y: r * T + 16, hx: c * T + T / 2, hy: r * T + 16, state: "hang", t: Math.random() * 2, vx: 0, vy: 0, alpha: 1, facing: 1 });
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
 // crumbling ledges: shake when you land on them, then drop away (and come back a few seconds later)
 const crumbles = [];
@@ -324,10 +344,10 @@ const lost = [];
 const lostSheep = (kind, c, r, how = "graze") => lost.push({ kind, how, one: how === "one", hx: c * T + T / 2, hy: (r + 1) * T });
 // the end of every stage: the family sheepfold, with the gatepost at column p (the fold's walls and the end of the level follow it)
 const sheepfold = p => {
-  ground(p - 12, COLS - 1);
+  ground(p - 12, MAIN_COLS - 1);
   for (let c = p + 4; c <= p + 14; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
   fold = { postC: p, endC: p + 15 };
-  rock(p + 16, 4, COLS - p - 16, 13);
+  rock(p + 16, 4, MAIN_COLS - p - 16, 13);
 };
 
 if (LEVEL_NAME === "test") {
@@ -409,11 +429,20 @@ if (LEVEL_NAME === "test") {
   // a gully
   ground(103, 170);
   campfire(106, GR - 1, "The neighbour", "That's my ram you've got with yours. Most boys would keep him. If you find your neighbour's sheep, you bring it home.");
-  // a low cave in the hillside: The One is at the back of it (crawl or roll in)
-  rock(117, 11, 15, 4); rock(132, 11, 2, 6); caveDark(117, 15, 15, 2); fakeRock(119, 15, 13, 2);
-  lostSheep("lamb", 130, 16, "one");
-  special(124, 15);
-  oliveRow(118, 16, 10);
+  // a cave in the hillside: The One is somewhere at the back of it (press Up at the mouth)
+  {
+    const R = caveRoom(46), c = R.c0;
+    caveDoor("cave_1", 121, 0.5, R);
+    oliveRow(c + 5, 16, 6);                                     // olives: oil for the lamp
+    bat(c + 9); bat(c + 17); bat(c + 26); bat(c + 34);
+    rock(c + 11, 3, 2, 2); rock(c + 24, 3, 3, 3); rock(c + 36, 3, 2, 2);   // the rock hangs down from the ceiling
+    rock(c + 14, 15, 3, 2); rock(c + 20, 13, 4, 4); plat(c + 27, 11, 4); oliveRow(c + 27, 10, 4);
+    special(c + 29, 6);                                         // above the ledge: flip
+    rock(c + 38, 12, 6, 5);
+    lostSheep("lamb", c + 41, 11, "one");                       // The One, at the very back
+    food("figs", c + 33, 16);
+  }
+  oliveRow(110, 16, 6);
   critter("fox", 140); critter("fox", 152);
   plat(145, 12, 4); lostSheep("lambblack", 146, 11, "ledge");
   special(147, 6);
@@ -446,16 +475,26 @@ if (LEVEL_NAME === "test") {
   campfire(118, GR - 1, "The shepherd girl", "My grandmother says these rocks were here before anyone. Storms come and go, and they don't move. She says God is like that.");
   rock(124, 14, 3, 3); rock(128, 11, 3, 6); plat(133, 8, 3); lostSheep("lamb", 134, 7, "ledge");
   raven(130, 4);
-  // a big rock with a crack in it: the crack is a way in (a hidden cave with The One and food)
-  rock(138, 10, 12, 5); fakeRock(138, 15, 12, 2); rock(150, 10, 1, 7); caveDark(138, 15, 12, 2);   // the whole hollow is "fake": it looks solid until you crawl in
-  label(135, 9, "a crack in the rock...");
-  lostSheep("lamb", 147, 16, "one"); food("bread", 143, 16); oliveRow(141, 16, 6);
-  special(145, 15);
+  rock(138, 10, 13, 7); oliveRow(139, 9, 10);                   // a big rock to cross
   // rope bridge between two rock pillars
   pillar(151, 13, 2); bridge(153, 13, 6); pillar(159, 13, 2);
   raven(156, 6);
   ground(161, 205);
-  critter("ram", 180, GR - 1, 14);                            // another ram, on open ground
+  // a tall cave in the limestone: a bigger cave with a drop inside, and The One at the back
+  {
+    const R = caveRoom(52), c = R.c0;
+    caveDoor("cave_2", 167, 0.42, R);
+    oliveRow(c + 4, 16, 5); bat(c + 8); bat(c + 15); bat(c + 22); bat(c + 31); bat(c + 40);
+    rock(c + 10, 3, 2, 3); rock(c + 30, 3, 3, 2);
+    rock(c + 10, 14, 3, 3);
+    for (let k = c + 16; k <= c + 21; k++) for (let r = GR; r < ROWS; r++) solid[r][k] = 0;   // a drop in the cave floor...
+    crumble(c + 17, 15, 2); oliveArc(c + 15, 14, 7);           // ...with a crumbling ledge over it
+    rock(c + 25, 12, 4, 5); plat(c + 31, 9, 4); food("bread", c + 32, 8);
+    special(c + 33, 4);
+    rock(c + 38, 13, 3, 4); rock(c + 43, 10, 9, 7);
+    lostSheep("lamb", c + 48, 9, "one");                        // The One, up at the back
+  }
+  critter("ram", 182, GR - 1, 14);                            // another ram, on open ground
   lostSheep("sheep", 190, 16, "thorns");
   snake("viper", 198); oliveArc(184, 16, 6);
   crumble(206, 15, 3);
@@ -609,6 +648,7 @@ function autoWalk(d, tx, dt) {
 function updateDavid(dt) {
   const d = david;
   d.t += dt;
+  if (caveDavid(d, dt)) return;   // walking into or out of a cave (world1.js)
   if (d.state === "toLamb") {     // the game has the controls: walk over to the lamb
     const k = takenLamb, tx = k.x - d.rescueSide * LAMB_IN_PET * SCALE;
     if (autoWalk(d, tx, dt) || d.t > 8) {
@@ -789,6 +829,7 @@ const RUN_SLING_STONE = [[21, 232], [34, 279], [-28, 278], [-97, 285], [-135, 23
 function sitHarpScale(i) { const a = TUNE.SIT_HARP_SIZES; return a[Math.min(i, a.length - 1)] ?? 1; }
 function drawDavid(camX) {
   const d = david, x = d.x - camX, y = d.y;
+  if (drawCaveDavid(d, x, y)) return;
   // the sling throw is drawn on top of whatever the legs are doing when standing; in the air we use the throw frames too
   if (d.throwT >= 0 && d.state !== "roll" && d.state !== "flip") {
     let i, gx, gy;
@@ -842,10 +883,13 @@ function drawDavid(camX) {
     return;
   }
   switch (d.state) {
-    case "idle": drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing); break;
+    case "idle":
+      if (cave.room) drawSprite("david_light_lamp", 15, x, y, d.facing);   // in a cave: holding up the lamp
+      else drawSprite("david_idle", frameOf("david_idle", t), x, y, d.facing);
+      break;
     case "walk": {
-      const rate = Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED);
-      drawSprite("david_walk", frameOf("david_walk", t * rate), x, y, d.facing); break;
+      const rate = Math.max(0.6, Math.abs(d.vx) / TUNE.WALK_SPEED), nm = cave.room ? "david_walk_lamp" : "david_walk";
+      drawSprite(nm, frameOf(nm, t * rate), x, y, d.facing); break;
     }
     case "run": drawSprite("david_run", frameOf("david_run", t, 50), x, y, d.facing); break;
     case "stop": drawSprite("david_stop", frameOf("david_stop", t, 60), x, y, d.facing); break;
@@ -934,6 +978,7 @@ function updateStones(dt) {
       else toast("Driven off!");
     }
     if (s.life > 0 && stoneHitsCritters(s)) s.life = 0;
+    if (s.life > 0 && stoneHitsBats(s)) { s.life = 0; stoneHit(s, 0.4); }
     if (s.life > 0 && stoneHitsBugs(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
@@ -1260,7 +1305,7 @@ const FOOD_TEXT = {
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
 david.lives = TUNE.LIVES; david.olives = 0;
 // the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
-const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep";
+const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep" || david.state === "cave";
 function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
@@ -1292,11 +1337,12 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   for (const b of bees) Object.assign(b, { gone: false, alpha: 1 });
   for (const h of hornets) Object.assign(h, { gone: false, alpha: 1, x: h.hx, y: h.hy, state: "hover", t: 0 });
   beesAngry = false;
-  resetCritters(); resetCrumbles();
+  resetCritters(); resetCrumbles(); resetCaves();
   resetAllSheep();
 }
 function respawn() {
   const d = david;
+  leaveCaveNow();
   if (d.lives <= 0) restartStage();
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
@@ -1455,7 +1501,7 @@ function updateLion(dt) {
       const home = lionSpawn.x, span = 4 * T;
       if (L.x > home + span) L.facing = -1; else if (L.x < home - span) L.facing = 1;
       L.vx = L.facing * TUNE.LION_PROWL * 0.7;
-      if (david.x > arenaX) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0;
+      if (david.x > arenaX && david.x < MAIN_COLS * T) { L.vx = 0; L.facing = Math.sign(david.x - L.x) || -1; setLion("sitTaunt"); helpT = 0;
         toast("The lion has one of your lambs!"); }
     } else if (L.state === "sitTaunt") {   // sits and stares at David, lamb in its jaws
       L.vx = 0; L.facing = Math.sign(david.x - L.x) || L.facing;
@@ -1708,7 +1754,7 @@ function updateFireSheep(sh, dt) {
   sh.walkT += dt;
   const tx = sh.fire.x + sh.spot, dir = Math.sign(tx - sh.x) || 1;
   const onScreen = sh.x > camX - 60 && sh.x < camX + W + 60;
-  if (Math.abs(tx - sh.x) < 8 || !onScreen || sh.walkT > 10 || sh.y > GR * T + 60) {
+  if (Math.abs(tx - sh.x) < 8 || !onScreen || sh.walkT > 10 || sh.y > GR * T + 60 || sh.x > MAIN_COLS * T) {
     Object.assign(sh, { x: tx, y: sh.fire.y, vx: 0, vy: 0, state: "atFire", stillT: 9, t: Math.random() * 3, facing: Math.sign(sh.fire.x - tx) || 1 });
     return;
   }
@@ -1829,7 +1875,7 @@ function chime(k) {   // a little bell for each sheep counted in
   } catch (e) {}
 }
 function updateFinish(dt) {
-  if (!fold) return;
+  if (!fold || (!finish.active && david.x > MAIN_COLS * T)) return;   // (past the stage's end = in a cave)
   const px = postX(), d = david;
   if (!finish.active) {
     // the closed gate blocks the way: jump over it (and go for the golden olive while you're up there)
@@ -2362,13 +2408,13 @@ function fadeLoop(a, cur, want, dt, speed) {
 function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
-  const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T;
+  const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
   const fight = lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0;
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
-  ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
+  ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night || cave.room ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
   const spd = d.onGround && d.deadT <= 0 && !d.harp ? Math.abs(d.vx) : 0;
@@ -2401,7 +2447,7 @@ function updateWorld(dt) {
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
   updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
-  updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt);
+  updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -2426,7 +2472,7 @@ function drawBackground(camX) {
   // far: one image, scaled so it covers the screen plus all the scrolling it will do, bottom-aligned (no repeat)
   const far = L.far;
   if (far.naturalWidth) {
-    const scroll = Math.max(0, LEVEL_W - W) * TUNE.BG_FAR_SPEED;
+    const scroll = Math.max(0, MAIN_COLS * T - W) * TUNE.BG_FAR_SPEED;
     const w = W + scroll, h = far.naturalHeight * w / far.naturalWidth;
     ctx.drawImage(far, -camX * TUNE.BG_FAR_SPEED, H - h + (TUNE.BG_FAR_DROP[bgWorld] || 0), w, h);
   } else { ctx.fillStyle = "#cfe0ea"; ctx.fillRect(0, 0, W, H); }
@@ -2504,7 +2550,7 @@ function frame(now) {
   if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
   // (also wait for the other scripts: world1.js, the Journal and the map load after this one)
-  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined") {
+  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined") {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
     requestAnimationFrame(frame); return;
@@ -2518,15 +2564,17 @@ function frame(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
-  const targetCam = Math.max(0, Math.min(LEVEL_W - W, david.x - W * 0.4 + david.facing * 80));
+  const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
+  const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
   camX += (targetCam - camX) * Math.min(1, real * 6);
   const shake = finalBlow.shake * finalBlow.shake * 14;
   ctx.save(); if (shake > 0.3) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
 
-  drawBackground(camX);
+  if (cave.room) drawCaveBackdrop(camX); else drawBackground(camX);
   drawLionRidge(camX);
   drawDecor(camX, "back");
   drawCaveDark(camX);
+  drawCaveDoors(camX);
   drawTiles(camX);
   drawPlatforms(camX);
   drawFold(camX);
@@ -2549,6 +2597,7 @@ function frame(now) {
   drawFakeRock(camX);
   ctx.restore();
   drawNight(camX);
+  drawCaveDarkness(camX);
   drawFinalBlow();
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
   if (debug) {

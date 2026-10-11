@@ -534,6 +534,8 @@ Caves are doorways into small, dark side areas, like Mario's pipes or Castlevani
 | Later worlds | Wherever they fit (the Philistine lookouts' ridge, the streambed banks). |
 | *Part 2* | Hanan's line *"Some day you may need to hide in a cave"* (1-3) sets up David hiding from Saul (1 Samuel 22, 24). |
 
+**Built 2026-10-11** (`game/caves.js`): entering and leaving, the lamp burning olives, bats, the daylight way out; caves in 1-2 and 1-3. Cave interiors use the limestone terrain and a dark backdrop for now.
+
 **Art still needed**
 1. **David walking away from the camera** into darkness, seen from behind (Grok clip); and walking out toward the camera.
 2. **Cave interior background layers** (dark rock, three layers like outdoors).

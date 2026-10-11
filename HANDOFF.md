@@ -60,6 +60,14 @@ All four stages are playable from the map. Each has 5 lost sheep, The One and 3 
   - **Jackals steal your lamb and run**: sling them to get it back.
   - Hanan at both fires, then the lion fight and the fold.
 
+**Caves (Mario-pipe style, `game/caves.js`, numbers in its `CAVE` block):**
+- A cave mouth (Glen's `cave_1` mound in 1-2, the tall `cave_2` in 1-3) shows an ↑ when David is near.
+- Up: he turns his back, walks in, and the screen fades into a separate dark room. The rooms are built past the stage's end with `caveRoom()` / `caveDoor()`.
+- The first time inside, he lights his oil lamp. Only a circle around him is lit, and it burns 1 olive every 4 s; with no oil the light shrinks but never goes out. The olives inside top it up.
+- Bats flutter off when he passes. Sling one and you're told they're harmless.
+- The way out glows with daylight: Up there takes him back to the mouth.
+- The One for 1-2 and for 1-3 is in these caves. (The old "crack in the rock" secret is gone from 1-3; the fake-rock code is still there for later.)
+
 **Rules changed:**
 - **Falling into a pit** now costs a heart and puts David back on the last solid ground. It used to send him to the start of the stage.
 - **People's lines** show in a box at the top of the screen.
