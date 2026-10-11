@@ -256,6 +256,7 @@ function toast(t) { toastText = t; toastTime = 4; }
 // Built from simple commands (columns/rows are tiles). Screen is 20 tiles tall; ground surface is row 17.
 // ============================================================================
 const LEVEL_NAME = location.hash === "#test" ? "test" : "1-1";
+const LEVEL_STAGE = "1-1";   // which stage this is (for the Journal and the saved stone count)
 const T = TUNE.TILE;
 const ROWS = 20, COLS = LEVEL_NAME === "test" ? 150 : 262, GR = 17;
 const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone
@@ -1020,6 +1021,10 @@ addEventListener("keydown", e => {
   if (e.code === "KeyH") helpT = helpT > 0 ? 0 : 9999;
   if (e.code === "Digit1") { location.hash = ""; location.reload(); }
   if (e.code === "Digit2") { location.hash = "test"; location.reload(); }
+  if (e.code === "Digit4") {   // preview the Journal pages
+    if (Journal.active && Journal.preview) Journal.close();
+    else if (!Journal.active) Journal.openPreview(1);
+  }
   if (e.code === "Digit3") { bgWorld = bgWorld === "w1" ? "w2" : "w1"; toast(bgWorld === "w1" ? "World 1 background" : "World 2 background (preview)"); }
 });
 
@@ -1032,9 +1037,9 @@ function drawHUD() {
     ctx.fillText("Click the game (or press any key) once to turn on sound", W / 2, H - 20); ctx.textAlign = "left";
   }
   if (helpT <= 0) {
-    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 450, 26);
+    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 540, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
-    ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background", 18, 28);
+    ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal", 18, 28);
   } else drawHelp();
   drawToastAndSetup();
 }
@@ -1705,7 +1710,11 @@ function updateFinish(dt) {
   if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; if (finish.flock.length > 1) sfx("flock_baa", undefined, 0.7); }
   if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
   if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; } }
-  if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) location.reload();
+  if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
+    // David writes in his Journal, then the stage starts again (until the map exists)
+    saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
+    Journal.open({ world: 1, stage: 1, onClose: () => location.reload() });
+  }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
     s.t += dt;
     if (s.state === "wait" && finish.phase === "open" && finish.t > s.delay) s.state = "run";
@@ -1864,7 +1873,7 @@ function drawFinishBanner() {
   ctx.fillText(!finish.caught ? "Golden olive: missed" : finish.life ? `Golden olive caught at the top: +${finish.bonus} olives. Third top catch: +1 life!` : finish.gold ? `Golden olive caught at the top: +${finish.bonus} olives (${gateTops} of ${TUNE.GATE_TOPS_FOR_LIFE} for a life)` : `Golden olive: +${finish.bonus} olives`, W / 2, 330);
   if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(`Next time: catch it at the very top for 25 (every ${TUNE.GATE_TOPS_FOR_LIFE} top catches = +1 life)`, W / 2, 352); }
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
-  if (finish.t > 1) ctx.fillText("Press A to play again", W / 2, 385);
+  if (finish.t > 1) ctx.fillText("Press A to write in the Journal", W / 2, 385);
   ctx.restore();
 }
 // ---------------------------------------------------------------------------
@@ -2315,6 +2324,10 @@ function frame(now) {
   if (loaded < total) {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
+    requestAnimationFrame(frame); return;
+  }
+  if (Journal.active) {   // the Journal covers the screen; the game waits underneath
+    pollInput(); Journal.update(real); Journal.draw(); drawToastAndSetup();
     requestAnimationFrame(frame); return;
   }
   if (setup.active) updateSetup(dt); else checkCombo(dt);

@@ -1,13 +1,29 @@
 # Where we left off
 
-If a chat session closes, start here. Last updated 2026-10-10 (commit 681cfec and this file).
+If a chat session closes, start here. Last updated 2026-10-11.
 
 ## How to play and test
 
-- **Play:** open `Desktop\david-sling\game\index.html` directly. Keys: 1 = 1-1 sample, 2 = movement test, 3 = swap backgrounds, H = help.
+- **Play:** open `Desktop\david-sling\game\index.html` directly. Keys: 1 = 1-1 sample, 2 = movement test, 3 = swap backgrounds, 4 = Journal preview, H = help.
 - **Update the Desktop copy:** run `git pull` in `Desktop\david-sling`. First run `git status` there in case you edited art inside it. Untracked files with the same name block the pull.
 - **Tuning:** the numbers are in the `TUNE` block at the top of `game/main.js`.
 - **Art drop folder:** `Desktop\david-sling-art`. Duplicate "copy" sprites went to `my_edits\old_copies`.
+
+## Done 2026-10-11: the Journal screen
+
+- World 1 Journal text **locked** by Glen.
+- `game/journal.js`: after the 1-1 sample's gate, A opens the Journal. See JOURNAL.md "How it plays".
+- Glen's night scene (David reading by the lamp, the flock, Bethlehem) is the Journal's main view; Up leans in to the full-screen book.
+- Two spreads per world (draft, then the world's spread after 1-4), with a page turn between them.
+- Test switches in the address: `?journal=1..5`, `&jbook` (start leaned in), `&jt=6&jfreeze` (jump 6 s ahead and hold), `&jauto` (turn pages by itself).
+
+**Glen's new art, saved but not wired in yet** (`Desktop\david-sling-art`):
+- `gate_front.png`: the straight-on sheepfold gate with two posts. Its edges have a red fringe from the background removal; clean it in code.
+- `gate_posts_green.png`: two posts with a crossbar, on green.
+
+## Next (agreed 2026-10-11)
+1. **World 1 map**, SMB3 style, on `assets/maps/world1_map.png` (the Bethlehem painting). Flashing stops: start = the sheepfold by the town, 1-1 = the campfire, 1-2 = the flower meadow, 1-3 = the rock with the goat, 1-4 = the cave (the map turns to night). Small David walks between stops; a stone cairn appears near the fold when all 12 stones are found.
+2. **Real stages 1-1 to 1-4** from DESIGN.md, with the lion moved to 1-4. Each stage clear: Journal (stage n), then back to the map.
 
 ## Done in the last session (2026-10-09 to 2026-10-10)
 

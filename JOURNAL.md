@@ -19,8 +19,16 @@ The book is `assets/items/davids_journal.png` (1536 × 1024). Glen hand-writes e
 
 Put them in `assets/journal/`.
 
-## How it plays (planned)
-At the end of each world David sits by the fire and opens the book. Earlier entries are already there; this world's new entries write themselves in one after another, the left page first, then the psalm line on the right, while the song's instrumental plays. The right page keeps every psalm line from earlier worlds, so the song builds page by page.
+## How it plays (built 2026-10-11)
+The handwriting is now the **Caveat font** (no hand-written layers needed), bent onto the pages with the page-edge points. Code: `game/journal.js`; the words are in `JOURNAL_PAGES` at its top (World 1 is locked and in).
+
+- **After every stage**, Glen's scene `assets/journal/w1_reading.jpg` (David reading by the lamp at night, the flock behind him, Bethlehem in the distance) fades in. He writes that stage's lesson on the left page and works on the song line on the right, word by word with a soft pen scratch, while the harp plays. A = skip the writing, then A = continue.
+- **Up = lean in:** the book fills the screen (`davids_journal.png`) so it's easy to read. **Down = sit back.** **Left / Right** page back through the spreads.
+- **Two spreads per world:** the *draft* spread fills up stage by stage (the four lessons; the song line with its crossed-out words). After 1-4, A turns the page to the *world's* spread: "What happened", the Samson entry, the stone count, the clean song line. The 1 Samuel footnote shows under the book.
+- **Preview:** press **4** in the game (Select = next preview page, 4 = close), or open `game/index.html?journal=1` … `?journal=5`.
+
+### A scene per world
+Each world can have its own reading scene (same pose, different place: World 2 by a wilderness fire, and so on). Add it to `SCENES` in `journal.js` with the six points along the top and bottom edges of each page (in the art's pixels) and where the lamp flame is. Same idea as the red and blue dots.
 
 ## Text to write
 The exact sayings, verses and psalm lines are being settled world by world: see DESIGN.md §3h and the per-world tables.
