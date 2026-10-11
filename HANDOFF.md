@@ -76,7 +76,7 @@ All four stages are playable from the map. Each has 5 lost sheep, The One and 3 
 - **People:** shown only as a name in the box.
 - **The ram's charge:** its walk clip, sped up.
 - **1-3:** has its own backgrounds now (Glen, 2026-10-11).
-- **1-2:** uses World 1's. **1-4:** has Glen's own night set (2026-10-11); the night tint only darkens what's in front of it.
+- **1-2:** has Glen's own morning set (2026-10-11; its near strip was keyed by colour distance, since its grass is close to the screen green). **1-4:** has Glen's own night set (2026-10-11); the night tint only darkens what's in front of it.
 
 **Sounds still needed:** night crickets (1-4 is silent apart from the lion), fox/jackal yelps, the ram's stamp.
 
