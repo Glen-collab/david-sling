@@ -122,15 +122,22 @@ function stoneHitsBats(s) {
 function resetCaves() { for (const b of caveBats) Object.assign(b, { x: b.hx, y: b.hy, state: "hang", alpha: 1, t: Math.random() * 2 }); }
 
 // ---- drawing ----
-function drawCaveBackdrop(camX) {   // deep dark rock, a little texture, and daylight at the way out
+// Glen's cave layers (assets/backgrounds/cave_*): the chamber's back wall with a beam of light, columns and
+// stalactites, and the rubbly floor. The darkness and the lamp go over them (drawCaveDarkness).
+const CAVE_BG = {};
+for (const [n, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
+  total++; const img = new Image(); img.onload = img.onerror = () => { loaded++; };
+  img.src = `../assets/backgrounds/cave_${n}.${ext}?v=${window.BUILD || 0}`; CAVE_BG[n] = img;
+}
+function drawCaveBackdrop(camX) {
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#1c140d"); g.addColorStop(1, "#0b0705");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  const lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
-  if (lim) {
-    ctx.save(); ctx.globalAlpha = 0.18; ctx.translate(-Math.round(camX * 0.5), 0);
-    ctx.fillStyle = lim; ctx.fillRect(Math.round(camX * 0.5) - 40, 0, W + 80, H); ctx.restore();
-  }
+  const rel = camX - cave.room.c0 * T;   // how far into this cave the camera is
+  const far = CAVE_BG.far;
+  if (far.naturalWidth) { const w = far.naturalWidth * H / far.naturalHeight; ctx.drawImage(far, -rel * 0.08 - 40, 0, w, H); }
+  drawLayerRepeating(CAVE_BG.mid, rel, 0.35, H, H, true);
+  drawLayerRepeating(CAVE_BG.near, rel, 0.65, GR * T + 40, 160, true);
   const ex = cave.room.exitX - camX;   // the way out: a warm patch of daylight on the left
   const lg = ctx.createRadialGradient(ex, GR * T - 60, 10, ex, GR * T - 60, 220);
   lg.addColorStop(0, "rgba(255,236,190,0.95)"); lg.addColorStop(0.35, "rgba(255,210,140,0.45)"); lg.addColorStop(1, "rgba(255,200,120,0)");
