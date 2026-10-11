@@ -129,6 +129,20 @@ for (const [n, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
   total++; const img = new Image(); img.onload = img.onerror = () => { loaded++; };
   img.src = `../assets/backgrounds/cave_${n}.${ext}?v=${window.BUILD || 0}`; CAVE_BG[n] = img;
 }
+// stalactites and stalagmites dotted through each cave (placed once, the same every time)
+const CAVE_SPIKES = [];
+for (const room of rooms) for (let c = room.c0 + 3, k = 0; c < room.c0 + room.w - 2; c += 5 + (k * 7) % 4, k++) {
+  CAVE_SPIKES.push({ name: "stalactite", x: c * T + 10, top: 3 * T - 4, h: 60 + (k * 37) % 50 });
+  if (k % 2) CAVE_SPIKES.push({ name: "stalagmite", x: c * T + 50, bottom: GR * T + 4, h: 50 + (k * 23) % 40 });
+}
+function drawCaveSpikes(camX) {
+  for (const s of CAVE_SPIKES) {
+    const img = ITEM[s.name]; if (!img || !img.naturalWidth) continue;
+    const w = img.naturalWidth * s.h / img.naturalHeight, x = s.x - camX - w / 2;
+    if (x > W || x + w < 0) continue;
+    ctx.drawImage(img, x, s.top !== undefined ? s.top : s.bottom - s.h, w, s.h);
+  }
+}
 function drawCaveBackdrop(camX) {
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#1c140d"); g.addColorStop(1, "#0b0705");
@@ -138,6 +152,7 @@ function drawCaveBackdrop(camX) {
   if (far.naturalWidth) { const w = far.naturalWidth * H / far.naturalHeight; ctx.drawImage(far, -rel * 0.08 - 40, 0, w, H); }
   drawLayerRepeating(CAVE_BG.mid, rel, 0.35, H, H, true);
   drawLayerRepeating(CAVE_BG.near, rel, 0.65, GR * T + 40, 160, true);
+  drawCaveSpikes(camX);
   const ex = cave.room.exitX - camX;   // the way out: a warm patch of daylight on the left
   const lg = ctx.createRadialGradient(ex, GR * T - 60, 10, ex, GR * T - 60, 220);
   lg.addColorStop(0, "rgba(255,236,190,0.95)"); lg.addColorStop(0.35, "rgba(255,210,140,0.45)"); lg.addColorStop(1, "rgba(255,200,120,0)");
@@ -181,6 +196,8 @@ function drawCaveDarkness(camX) {
     const wg = ctx.createRadialGradient(lx, ly, 4, lx, ly, R * 0.8);
     wg.addColorStop(0, "rgba(255,170,70,0.28)"); wg.addColorStop(1, "rgba(255,140,40,0)");
     ctx.fillStyle = wg; ctx.fillRect(lx - R, ly - R, R * 2, R * 2); ctx.restore();
+    // the lamp beside the oil flask on the HUD: lit while there's oil
+    drawItem(david.olives > 0 ? "lamp_lit" : "lamp_unlit", HUD_X - 34, 188, 0.27, david.olives > 0 ? 1 : 0.6);
   }
   if (cave.fade > 0) { ctx.fillStyle = `rgba(0,0,0,${cave.fade})`; ctx.fillRect(0, 0, W, H); }
 }

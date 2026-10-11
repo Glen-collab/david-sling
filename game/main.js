@@ -394,6 +394,7 @@ if (LEVEL_NAME === "test") {
   for (let k = 0; k < 4; k++) bee(110, k);                     // honeybees: harmless. Leave them be and the honey is yours.
   hornet(119, 11);                                             // hornets dive at you: sling them
   food("poison_berries", 123, 16); wall(125, 15, 3, 2); food("cheese", 126, 14);   // berries or cheese? look before you eat
+  food("barley", 117, 16);                                     // Ruth gleaned barley in these fields
   plat(129, 13, 4); plat(135, 10, 4);
   lostSheep("lambblack", 136, 9, "ledge");                     // up on the ledge: climb to it, or play the harp below
   special(138, 4);                                             // high above the ledge: flip
@@ -452,6 +453,7 @@ if (LEVEL_NAME === "test") {
   food("figs", 157, 16);
   // the gully again
   ground(175, 200);
+  deco("pomegranate_tree", 196, 16, 0.75);                     // jump into it: pomegranates
   critter("fox", 190); oliveArc(178, 16, 8);
   sheepfold(206);
 } else if (LEVEL_NAME === "1-3") {
@@ -1188,6 +1190,11 @@ function drawTiles(camX) {
 }
 // a rock ledge from x0 to x1 (world coordinates, already translated), its top at y
 function drawLedgeRun(x0, x1, y) {
+  const cl = ITEM.cave_ledge;
+  if (x0 > MAIN_COLS * T && cl && cl.naturalWidth) {   // inside a cave: Glen's damp, mossy cave ledge, stretched to fit
+    const w = x1 - x0 + 16, h = Math.min(90, cl.naturalHeight * w / cl.naturalWidth);
+    ctx.drawImage(cl, x0 - 8, y - h * 0.1, w, h); return;
+  }
   const h = TUNE.TER_LEDGE_H;
   const lw = TER.ledge_left.naturalWidth * h / (TER.ledge_left.naturalHeight || 1);
   const rw = TER.ledge_right.naturalWidth * h / (TER.ledge_right.naturalHeight || 1);
@@ -1295,12 +1302,14 @@ function drawItem(name, x, y, size, alpha = 1) {   // (x, y) = bottom-centre
 
 const FOOD = {   // heal amount; negative = poison
   grapes: 1, olives: 1, dates: 1, figs: 1, raisins: 1, bread: 1, cheese: 1, roasted_grain: 1, lentils: 2,
-  fig_cake: 3, honey: 99, poison_berries: -1, wild_gourds: -1,
+  fig_cake: 3, honey: 99, poison_berries: -1, wild_gourds: -1, pomegranate: 1, barley: 1,
 };
 const FOOD_TEXT = {
   bread: "Bread", cheese: "Sheep's cheese", grapes: "Grapes", figs: "Figs", dates: "Dates", honey: "Honey: his eyes brightened (1 Samuel 14:27)",
   fig_cake: "Fig cake (1 Samuel 25:18)", poison_berries: "Poison berries!", wild_gourds: "Wild gourds: death in the pot! (2 Kings 4:39-40)",
   lentils: "Lentils", raisins: "Raisins", olives: "Olives", roasted_grain: "Roasted grain",
+  pomegranate: "Pomegranate: the spies brought them back from the promised land (Numbers 13:23)",
+  barley: "Barley: Ruth gleaned it in these very fields of Bethlehem (Ruth 2)",
 };
 
 // hearts
@@ -2220,6 +2229,8 @@ function drawSpecialStone(x, y, r, glow) {
     const g = ctx.createRadialGradient(x, y, 2, x, y, r * 2.6); g.addColorStop(0, "rgba(255,225,130,0.75)"); g.addColorStop(1, "rgba(255,200,80,0)");
     ctx.fillStyle = g; ctx.fillRect(x - r * 3, y - r * 3, r * 6, r * 6); ctx.restore();
   }
+  const img = ITEM.stone_remembrance;
+  if (img && img.naturalWidth) { const w = r * 2.6, h = img.naturalHeight * w / img.naturalWidth; ctx.drawImage(img, x - w / 2, y - h / 2, w, h); return; }
   ctx.fillStyle = "#e9e1cf"; ctx.beginPath(); ctx.ellipse(x, y, r * 1.15, r * 0.9, -0.3, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#c7bca4"; ctx.beginPath(); ctx.ellipse(x + r * 0.25, y + r * 0.25, r * 0.8, r * 0.5, -0.3, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#fffdf6"; ctx.beginPath(); ctx.ellipse(x - r * 0.4, y - r * 0.35, r * 0.35, r * 0.2, -0.3, 0, Math.PI * 2); ctx.fill();
@@ -2250,6 +2261,8 @@ function drawOlive(x, y, kind, size = 1) {
     const g = ctx.createRadialGradient(x, y, 1, x, y, 20 * size); g.addColorStop(0, "rgba(255,220,90,0.7)"); g.addColorStop(1, "rgba(255,200,60,0)");
     ctx.fillStyle = g; ctx.fillRect(x - 22 * size, y - 22 * size, 44 * size, 44 * size); ctx.restore();
   }
+  const img = ITEM["olive_" + (kind === "golden" ? "golden" : kind === "purple" ? "purple" : "green")];
+  if (img && img.naturalWidth) { const h = 19 * size, w = img.naturalWidth * h / img.naturalHeight; ctx.drawImage(img, x - w / 2, y - h / 2, w, h); return; }
   ctx.fillStyle = col[1]; ctx.beginPath(); ctx.ellipse(x + 1, y + 1, 6 * size, 8 * size, 0.35, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = col[0]; ctx.beginPath(); ctx.ellipse(x, y, 6 * size, 8 * size, 0.35, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.beginPath(); ctx.ellipse(x - 2 * size, y - 3 * size, 1.6 * size, 2.6 * size, 0.35, 0, Math.PI * 2); ctx.fill();
@@ -2261,7 +2274,7 @@ function drawOlives(camX) {
 }
 
 // trees drop their fruit when you jump into the branches or sling a stone into them
-const TREE_DROPS = { olive_tree: "olives", fig_tree: "figs", date_palm: "dates", grape_vine: "grapes", beehive_tree: "honey" };
+const TREE_DROPS = { olive_tree: "olives", fig_tree: "figs", date_palm: "dates", grape_vine: "grapes", beehive_tree: "honey", pomegranate_tree: "pomegranate" };
 function canopy(t) {   // the leafy top part of a tree, in world coordinates
   const img = ITEM[t.name]; if (!img || !img.naturalWidth) return null;
   const w = img.naturalWidth * t.size * 0.85, h = img.naturalHeight * t.size * 0.85, bottom = t.y + 6;

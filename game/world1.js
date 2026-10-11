@@ -70,19 +70,34 @@ function drawPlatforms(camX) {
     const x0 = p.c * T, x1 = (p.c + p.w) * T;
     if (x1 < camX - 50 || x0 > camX + W + 50) continue;
     if (p.state === "fallen") {
-      if (p.t < 0.9) { ctx.save(); ctx.globalAlpha = 1 - p.t / 0.9; drawLedgeRun(x0, x1, p.r * T - 4 + p.fy); ctx.restore(); }
-      else if (p.t > W1.CRUMBLE_BACK - 0.5) { ctx.save(); ctx.globalAlpha = Math.min(1, (p.t - W1.CRUMBLE_BACK + 0.5) * 2) * 0.6; drawLedgeRun(x0, x1, p.r * T - 4); ctx.restore(); }
+      if (p.t < 0.9) {   // it breaks into Glen's four chunks, which tumble down
+        ctx.save(); ctx.globalAlpha = 1 - p.t / 0.9;
+        for (let k = 0; k < 4; k++) {
+          const img = ITEM["ledge_chunk_" + (k + 1)], cw = (x1 - x0 + 12) / 4;
+          if (!img || !img.naturalWidth) continue;
+          const ch = img.naturalHeight * cw / img.naturalWidth, cx = x0 - 6 + k * cw + (k - 1.5) * p.t * 40, cy = p.r * T - 8 + p.fy * (0.85 + k * 0.1);
+          ctx.save(); ctx.translate(cx + cw / 2, cy + ch / 2); ctx.rotate((k - 1.5) * p.t * 0.9); ctx.drawImage(img, -cw / 2, -ch / 2, cw, ch); ctx.restore();
+        }
+        ctx.restore();
+      }
+      else if (p.t > W1.CRUMBLE_BACK - 0.5) { ctx.save(); ctx.globalAlpha = Math.min(1, (p.t - W1.CRUMBLE_BACK + 0.5) * 2) * 0.6; drawCrumbleLedge(x0, x1, p.r * T); ctx.restore(); }
       continue;
     }
     const shake = p.state === "shake" ? Math.sin(p.t * 70) * 3 : 0;
-    drawLedgeRun(x0 + shake, x1 + shake, p.r * T - 4 + Math.abs(shake) * 0.5);
-    // cracks, so you can tell these ledges apart
-    ctx.strokeStyle = "rgba(60,40,20,0.6)"; ctx.lineWidth = 2;
-    for (let x = x0 + 14; x < x1 - 8; x += 26) { ctx.beginPath(); ctx.moveTo(x + shake, p.r * T + 2); ctx.lineTo(x + 6 + shake, p.r * T + 12); ctx.lineTo(x + 2 + shake, p.r * T + 22); ctx.stroke(); }
+    drawCrumbleLedge(x0 + shake, x1 + shake, p.r * T + Math.abs(shake) * 0.5);
   }
   for (const b of bridges) {
     const x0 = b.c * T - 6, x1 = (b.c + b.w) * T + 6, y = b.r * T, sag = 5;
     if (x1 < camX - 50 || x0 > camX + W + 50) continue;
+    const br = ITEM.rope_bridge, post = ITEM.bridge_post;
+    if (br && br.naturalWidth && post && post.naturalWidth) {   // Glen's rope bridge, stretched across, with a post at each end
+      const w = x1 - x0 + 10, h = br.naturalHeight * w / br.naturalWidth * 0.8;
+      ctx.drawImage(br, x0 - 5, y - h * 0.77, w, h);
+      const ph = 74, pw = post.naturalWidth * ph / post.naturalHeight;
+      ctx.drawImage(post, x0 - pw * 0.7, y - ph + 10, pw, ph);
+      ctx.save(); ctx.translate(x1 + pw * 0.7, 0); ctx.scale(-1, 1); ctx.drawImage(post, 0, y - ph + 10, pw, ph); ctx.restore();
+      continue;
+    }
     // posts at each end
     for (const px of [x0 - 4, x1 - 6]) { ctx.fillStyle = "#6b4423"; ctx.fillRect(px, y - 52, 10, 66); ctx.fillStyle = "#8a5a30"; ctx.fillRect(px + 2, y - 52, 4, 66); }
     // hand ropes
@@ -109,6 +124,13 @@ function drawCaveDark(camX) {
     g.addColorStop(0, "#2a1d12"); g.addColorStop(1, "#0c0805");
     ctx.fillStyle = g; ctx.fillRect(x, y - 4, w, h + 6);
   }
+}
+// a crumbling ledge: Glen's cracked ledge, stretched to the ledge's width, its flat top at y
+function drawCrumbleLedge(x0, x1, y) {
+  const img = ITEM.ledge_cracked;
+  if (!img || !img.naturalWidth) { drawLedgeRun(x0, x1, y - 4); return; }
+  const w = x1 - x0 + 14, h = Math.min(70, img.naturalHeight * w / img.naturalWidth);
+  ctx.drawImage(img, x0 - 7, y - h * 0.12, w, h);
 }
 // ---------------------------------------------------------------------------
 // Fake rock (material 5): looks like the rest of the rock, but David can walk into it. It turns see-through
