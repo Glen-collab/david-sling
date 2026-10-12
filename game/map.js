@@ -10,7 +10,9 @@ const MTUNE = {
   REVEAL_TIME: 1.4,       // seconds for a newly opened stretch of trail to draw itself
   DOT_GAP: 26,            // spacing of the trail dots (map pixels)
   NIGHT: 0.9,             // how dark the map gets at the lion's cave (0 = not at all)
-  AMBIENCE_VOLUME: 0.3,
+  AMBIENCE_VOLUME: 0.15,   // the hills, quietly under the theme
+  THEME_VOLUME: 0.55,      // "Hush Little Seed" (Glen's harp): the title screen and the maps
+  THEME_REST: 2,           // seconds of quiet before it plays again
 };
 
 // Map pixels are the painting's own (1672 x 941). Each stop has the trail that leads to it from the stop before.
@@ -65,6 +67,20 @@ function stageCleared(id, info) {
   saveProgress(p);
 }
 
+// Glen's harp theme, "Hush Little Seed" (the first 23 seconds): plays on the title screen and the maps,
+// fades out for a stage, the courtyard or the Journal (main.js frame decides when it's wanted)
+const themeMusic = new Audio(`../assets/audio/title_loop.mp3?v=${window.BUILD || 0}`); themeMusic._music = true; themeMusic.volume = 0;
+let themeVol = 0, themeRestT = 0;
+themeMusic.addEventListener("ended", () => { themeRestT = MTUNE.THEME_REST; });
+function updateTheme(dt, want) {
+  if (typeof audioUnlocked === "undefined" || !audioUnlocked) return;
+  themeVol = want ? Math.min(MTUNE.THEME_VOLUME, themeVol + dt * 0.4) : Math.max(0, themeVol - dt * 0.8);
+  themeMusic.volume = themeVol;
+  if (themeRestT > 0) { themeRestT -= dt; if (themeRestT <= 0 && want) { themeMusic.currentTime = 0; themeMusic.play().catch(() => {}); } return; }
+  if (want && themeMusic.paused && !themeMusic.ended) themeMusic.play().catch(() => {});
+  if (want && themeMusic.ended) themeRestT = MTUNE.THEME_REST;
+  if (!want && themeVol <= 0 && !themeMusic.paused) themeMusic.pause();
+}
 const mapAmbience = new Audio(`../assets/sounds/ambience_hills.mp3?v=${window.BUILD || 0}`); mapAmbience.loop = true; mapAmbience._music = true; mapAmbience.volume = 0;
 
 const WorldMap = {

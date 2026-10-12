@@ -78,6 +78,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 - **People as Grok clips:** Jesse on the bench, the trader at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbour. Today they're names over their lines.
 - **The ram's charge** clip (it uses its walk, sped up).
 - **World 2,** when Glen is ready: the bear, Hanan teaching the charged sling in 2-1, the bigger cave in 2-4.
+- **Music:** "Hush Little Seed" (Glen's harp, first 23 s, `assets/audio/title_loop.mp3`) plays on the title and the maps; full song in `david-sling-art`.
 - **Sounds still needed:** real hurt and death sounds, night crickets for 1-4, fox and jackal yelps, the ram's stamp, gate creak, campfire crackle, bees, snake, eagle.
 - **Licenses:** fill in the blanks in `assets/sounds/SOURCES.md`.
 

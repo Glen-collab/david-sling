@@ -2716,6 +2716,7 @@ function frame(now) {
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
     // Start on a map or in the courtyard: the pause menu (settings)
     if (!Menu.active && pressed("start") && ((WorldMap.active && !WorldMap.leaving) || (Courtyard.active && !Courtyard.leaving && !Courtyard.mode))) { Menu.open("pause"); Menu.draw(); requestAnimationFrame(frame); return; }
+    updateTheme(real, Menu.active ? (!Menu.snap || Menu.under === "map") : WorldMap.active && !WorldMap.leaving);
     if (Menu.active) { Menu.update(real); Menu.draw(); }
     else if (Journal.active) { Journal.update(real); Journal.draw(); }
     else if (WorldMap.active) { WorldMap.update(real); WorldMap.draw(); }
