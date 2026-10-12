@@ -1233,6 +1233,7 @@ addEventListener("keydown", e => {
   if (e.code === "KeyH") helpT = helpT > 0 ? 0 : 9999;
   if (e.code === "Digit1") { location.hash = "1-1"; location.reload(); }
   if (e.code === "Digit5") backToMap();
+  if (e.code === "Digit6" && typeof WorldMap !== "undefined") { if (Journal.active) return; WorldMap.open("journey"); }
   if (e.code === "Digit2") { location.hash = "test"; location.reload(); }
   if (e.code === "Digit4") {   // preview the Journal pages
     if (Journal.active && Journal.preview) Journal.close();

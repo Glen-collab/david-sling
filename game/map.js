@@ -30,7 +30,24 @@ const MAP_WORLDS = {
     ],
     cairn: { x: 700, y: 352 },   // where the stones of remembrance stack up when all 12 are found
   },
+  // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
+  // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
+  journey: {
+    name: "The Journey", src: "../assets/maps/journey_map.jpg", journey: true,
+    david: { far: 0.36, near: 0.6, y0: 250, y1: 950 },
+    stops: [
+      { id: "w1", world: 1, label: "The Shepherd's Fields", x: 420, y: 935 },
+      { id: "w2", world: 2, label: "The Wilderness", x: 800, y: 795, trail: [[540, 880], [650, 830]] },
+      { id: "w3", world: 3, label: "The Anointing", x: 985, y: 695, trail: [[880, 760], [930, 720]] },
+      { id: "w4", world: 4, label: "The King's Court", x: 875, y: 370, trail: [[900, 620], [770, 545], [790, 450]] },
+      { id: "w5", world: 5, label: "The Road to the Valley", x: 1740, y: 690, trail: [[1010, 430], [1260, 470], [1300, 560], [1520, 640]] },
+      { id: "w6", world: 6, label: "The Valley of Elah", x: 1555, y: 345, trail: [[1730, 560], [1640, 480], [1580, 420]] },
+      { id: "w7", world: 7, label: "The Giant's Shadow", x: 1770, y: 405, trail: [[1650, 380]] },
+      { id: "w8", world: 8, label: "David and Goliath", x: 1790, y: 240, trail: [[1720, 330]] },
+    ],
+  },
 };
+const BUILT_WORLDS = [1];   // worlds you can go into from the journey map so far
 const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
@@ -42,6 +59,7 @@ function stageCleared(id, info) {
   p[id] = { cleared: true, sheep: Math.max(old.sheep || 0, info.sheep || 0), total: info.total || old.total || 0,
             one: !!(old.one || info.one), stones: Math.max(old.stones || 0, info.stones || 0) };
   p.justCleared = id; p.at = id;
+  if (id.endsWith("-4")) { p.view = "journey"; p.justWorld = true; p.jat = "w" + id[0]; }   // a world beaten: back out to the journey map
   saveProgress(p);
 }
 
@@ -54,6 +72,7 @@ const WorldMap = {
     if (!M.img) { M.img = new Image(); M.img.src = M.src + "?v=" + (window.BUILD || 0); }
     this.M = M; this.world = world; this.active = true; this.fade = 0; this.t = 0; this.leaving = null;
     this.prog = loadProgress();
+    if (this.prog.view !== world) { this.prog.view = world; saveProgress(this.prog); }   // reopen this map next time
     // the full trail as one line: each stop's index along it
     this.pts = []; this.stopAt = [];
     for (const s of M.stops) {
@@ -63,17 +82,17 @@ const WorldMap = {
     this.dist = [0];
     for (let i = 1; i < this.pts.length; i++) this.dist.push(this.dist[i - 1] + Math.hypot(this.pts[i].x - this.pts[i - 1].x, this.pts[i].y - this.pts[i - 1].y));
     // how far the trail is open: up to the first stage not cleared
-    const cleared = id => this.prog[id] && this.prog[id].cleared;
-    this.openTo = M.stops.findIndex((s, i) => i > 0 && !cleared(s.id)); if (this.openTo < 0) this.openTo = M.stops.length - 1;
-    // a stage just cleared? walk the new stretch of trail in
+    this.openTo = M.journey ? M.stops.findIndex(s => !this.isCleared(s)) : M.stops.findIndex((s, i) => i > 0 && !this.isCleared(s));
+    if (this.openTo < 0) this.openTo = M.stops.length - 1;
+    // a stage (or on the journey map, a world) just cleared? walk the new stretch of trail in
     this.reveal = 1;
-    const just = this.prog.justCleared;
-    if (just) { delete this.prog.justCleared; saveProgress(this.prog); this.reveal = 0; sfxLater(() => chime(4), 0.3); }
-    const atI = Math.max(0, M.stops.findIndex(s => s.id === (this.prog.at || "home")));
+    const justKey = M.journey ? "justWorld" : "justCleared";
+    if (this.prog[justKey]) { delete this.prog[justKey]; if (M.journey) delete this.prog.justCleared; saveProgress(this.prog); this.reveal = this.openTo > 0 ? 0 : 1; sfxLater(() => chime(4), 0.3); }
+    const atI = Math.max(0, M.stops.findIndex(s => s.id === (M.journey ? this.prog.jat || "w1" : this.prog.at || "home")));
     this.cur = Math.min(atI, this.openTo);
     this.d = this.dist[this.stopAt[this.cur]]; this.target = this.cur; this.facing = 1; this.walkT = 0;
     this.lambD = this.d; this.lambFacing = 1;
-    this.stones = stonesFound(world);
+    this.stones = M.journey ? 0 : stonesFound(world);
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) mapAmbience.play().catch(() => {});
   },
   // a point (and direction) at distance d along the trail
@@ -84,6 +103,10 @@ const WorldMap = {
     return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, dx: b.x - a.x, dy: b.y - a.y };
   },
   stopD(i) { return this.dist[this.stopAt[i]]; },
+  isCleared(st) {   // a stage, or on the journey map a whole world (its boss stage)
+    const id = st.world ? `${st.world}-4` : st.id;
+    return !!(this.prog[id] && this.prog[id].cleared);
+  },
   update(dt) {
     this.t += dt;
     mapAmbience.volume = Math.max(0, Math.min(MTUNE.AMBIENCE_VOLUME * (1 - this.night()), mapAmbience.volume + (this.leaving ? -dt : dt * 0.5)));
@@ -104,7 +127,7 @@ const WorldMap = {
       const p = this.at(this.d); this.dirX = p.dx * dir; this.dirY = p.dy * dir;
       if (Math.abs(this.dirX) > 4) this.facing = Math.sign(this.dirX);
       this.walkT += dt;
-      if (Math.abs(want - this.d) <= 0.5) { this.d = want; this.cur = this.target; this.walkT = 0; chime(this.cur); this.prog.at = this.M.stops[this.cur].id; saveProgress(this.prog); }
+      if (Math.abs(want - this.d) <= 0.5) { this.d = want; this.cur = this.target; this.walkT = 0; chime(this.cur); this.prog[this.M.journey ? "jat" : "at"] = this.M.stops[this.cur].id; saveProgress(this.prog); }
     }
     // the lamb trots along behind him on the trail
     if (moving) this.lastDir = Math.sign(want - this.d) || this.lastDir;
@@ -117,19 +140,28 @@ const WorldMap = {
     if ((pressed("left") || pressed("up")) && this.cur > 0) this.target = this.cur - 1;
     const stop = this.M.stops[this.cur];
     if (pressed("select")) { this.readJournal(); return; }
-    if (MAP_CHEAT && pressed("b") && stop.id !== "home") {   // ?cheat: B marks this stage cleared (testing the map)
-      stageCleared(stop.id, {}); this.open(this.world); return;
+    if (this.M.journey) {   // the journey map: A goes into a world
+      if (pressed("a") || pressed("start")) {
+        if (BUILT_WORLDS.includes(stop.world)) this.leaving = () => this.open(stop.world);
+        else toast(`World ${stop.world}: ${stop.label} isn't built yet.`);
+      }
+      return;
     }
+    if (MAP_CHEAT && pressed("b") && stop.id !== "home") {   // ?cheat: B marks this stage cleared (testing the map)
+      stageCleared(stop.id, {}); this.open(this.prog.view === "journey" ? "journey" : this.world); return;
+    }
+    if (!MAP_CHEAT && pressed("b")) { this.leaving = () => this.open("journey"); return; }   // B: back out to the journey map
     if ((pressed("a") || pressed("start")) && stop.id !== "home") {
       if (BUILT_STAGES.includes(stop.id)) this.leaving = () => startStage(stop.id);
       else toast(`${stop.id} ${stop.label} isn't built yet. It's next!`);
     }
   },
   readJournal() {   // Select: page through what David has written so far
-    const p = this.prog, last = [4, 3, 2, 1].find(k => p[`${this.world}-${k}`] && p[`${this.world}-${k}`].cleared);
+    const world = this.M.journey ? Math.max(1, ...BUILT_WORLDS.filter(w => this.prog[`${w}-1`])) : this.world;
+    const p = this.prog, last = [4, 3, 2, 1].find(k => p[`${world}-${k}`] && p[`${world}-${k}`].cleared);
     if (!last) { toast("Nothing in the Journal yet. Clear 1-1 first."); return; }
     this.active = false;
-    Journal.open({ world: this.world, stage: last, read: true, onClose: () => { this.active = true; this.fade = 0; } });
+    Journal.open({ world, stage: last, read: true, onClose: () => { this.active = true; this.fade = 0; } });
   },
   night() {   // the walk toward the lion's cave turns the map to night
     const i = this.M.stops.findIndex(s => s.night); if (i < 1) return 0;
@@ -162,7 +194,7 @@ const WorldMap = {
     // the stops
     M.stops.forEach((st, i) => {
       if (i > this.openTo || (i === this.openTo && this.reveal < 1)) return;
-      const [x, y] = P(st.x, st.y), depth = 0.7 + 0.5 * (st.y / img.naturalHeight), done = this.prog[st.id] && this.prog[st.id].cleared;
+      const [x, y] = P(st.x, st.y), depth = 0.7 + 0.5 * (st.y / img.naturalHeight), done = this.isCleared(st), num = st.world ? String(st.world) : st.id.split("-")[1];
       const r = 17 * depth;
       if (st.id === "home") { if (!this.stoneMarker("map_stop", x, y, r * 0.85, "")) this.marker(x, y, r * 0.85, "#c9a46a", "#5a3a1c", "⌂"); return; }
       const flash = !done && Math.floor(this.t * 2.5) % 2 === 0;
@@ -171,15 +203,16 @@ const WorldMap = {
         g.addColorStop(0, `rgba(255,220,120,${0.45 + 0.25 * Math.sin(this.t * 5)})`); g.addColorStop(1, "rgba(255,220,120,0)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, Math.PI * 2); ctx.fill();
       }
-      if (!this.stoneMarker(done ? "map_stop_done" : "map_stop_next", x, y, r, done ? "" : st.id.split("-")[1], !done && flash))
-        this.marker(x, y, r, done ? "#e8d9b8" : flash ? "#ffd84a" : "#f7b733", done ? "#3d6b2a" : "#6b3a10", st.id.split("-")[1]);
-      if (done) hudIcon(this.prog[st.id].one ? "sheep_one" : "sheep", x + r * 0.55, y - r * 2.1, r * 1.5);   // a sheep: home safe
+      if (!this.stoneMarker(done ? "map_stop_done" : "map_stop_next", x, y, r, done ? "" : num, !done && flash))
+        this.marker(x, y, r, done ? "#e8d9b8" : flash ? "#ffd84a" : "#f7b733", done ? "#3d6b2a" : "#6b3a10", num);
+      if (done && !M.journey) hudIcon(this.prog[st.id].one ? "sheep_one" : "sheep", x + r * 0.55, y - r * 2.1, r * 1.5);   // a sheep: home safe
     });
     // stones of remembrance: all 12 found = a little cairn by the fold
-    if (this.stones >= 12) { const [cx, cy] = P(M.cairn.x, M.cairn.y); drawItem("map_cairn", cx, cy + 6, 0.12); }
+    if (M.cairn && this.stones >= 12) { const [cx, cy] = P(M.cairn.x, M.cairn.y); drawItem("map_cairn", cx, cy + 6, 0.12); }
     // David (and his lamb), smaller toward the back of the painting
     const dp = this.at(this.d), lp = this.at(this.lambD);
-    const size = y => MTUNE.DAVID_FAR + (MTUNE.DAVID_NEAR - MTUNE.DAVID_FAR) * Math.max(0, Math.min(1, (y - 330) / 400));
+    const DV = M.david || { far: MTUNE.DAVID_FAR, near: MTUNE.DAVID_NEAR, y0: 330, y1: 730 };
+    const size = y => DV.far + (DV.near - DV.far) * Math.max(0, Math.min(1, (y - DV.y0) / (DV.y1 - DV.y0)));
     const moving = this.walkT > 0, away = moving && this.dirY < -Math.abs(this.dirX) * 0.6;   // walking up into the picture: his back to us
     const [lx, ly] = P(lp.x, lp.y), [dx, dy] = P(dp.x, dp.y);
     const drawLambTok = () => drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), lx, ly, this.lambFacing, size(lp.y) * 1.35, ctx.globalAlpha);
@@ -215,6 +248,7 @@ const WorldMap = {
   },
   panel() {
     const st = this.M.stops[this.cur], p = this.prog[st.id] || {};
+    if (this.M.journey) { this.journeyPanel(st); return; }
     // top left: the world
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(14, 12, 330, 64, 12); ctx.fill();
     ctx.textAlign = "left"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 22px sans-serif"; ctx.fillText(`World ${this.world}`, 28, 38);
@@ -235,7 +269,20 @@ const WorldMap = {
     if (p.cleared) line += "     A: play again";
     ctx.fillText(line, W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
-    ctx.fillText(`Left / Right: walk    Select: Journal${MAP_CHEAT ? "    B: mark cleared (cheat)" : ""}`, W - 14, H - 10);
+    ctx.fillText(`Left / Right: walk    Select: Journal    ${MAP_CHEAT ? "B: mark cleared (cheat)" : "B: the journey map"}`, W - 14, H - 10);
+  },
+  journeyPanel(st) {
+    const done = this.M.stops.filter(s => this.isCleared(s)).length;
+    ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(14, 12, 330, 64, 12); ctx.fill();
+    ctx.textAlign = "left"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 22px sans-serif"; ctx.fillText("The Journey", 28, 38);
+    ctx.fillStyle = "#fff"; ctx.font = "18px sans-serif"; ctx.fillText(`Bethlehem to the Valley of Elah  ·  ${done}/8`, 28, 62);
+    const w = 560, x = (W - w) / 2, y = H - 92;
+    ctx.fillStyle = "rgba(25,14,6,0.76)"; ctx.beginPath(); ctx.roundRect(x, y, w, 78, 14); ctx.fill();
+    ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`World ${st.world}: ${st.label}`, W / 2, y + 32);
+    ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
+    ctx.fillText(!BUILT_WORLDS.includes(st.world) ? "Coming soon" : this.isCleared(st) ? "Cleared  ·  A: go back in" : "A: enter", W / 2, y + 58);
+    ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
+    ctx.fillText("Left / Right: walk    A: enter    Select: Journal", W - 14, H - 10);
   },
 };
 function sfxLater(fn, s) { setTimeout(fn, s * 1000); }
