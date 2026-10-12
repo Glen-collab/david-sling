@@ -32,6 +32,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 | `game/journal.js` | The Journal: words, layout, "The Throw" page |
 | `game/map.js` | The journey map and the World 1 map |
 | `game/home.js` | Jesse's courtyard: Jesse, the practice wall, the shelf, the market |
+| `game/menu.js` | Title screen (Continue / New game / Settings), pause menu (Start), Settings: controller pictures, set up a controller, music and sound volume |
 
 ## Built 2026-10-11
 
