@@ -34,7 +34,8 @@ const TUNE = {
   TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
   TER_ROCKTOP_H: 40, TER_ROCKTOP_RISE: 12,
-  DECO_DROP: { stone_wall: 7 },   // push a decoration down into the grass (pixels)
+  DECO_DROP: { stone_wall: 7, cave_1: 26, cave_2: 22 },   // push a decoration down into the grass (pixels)
+  DECO_TILT: { cave_1: 5, cave_2: 5 },                    // lean a decoration to the right (degrees, about its foot)
   PIT_TRIM: 5,            // the ground's soil stops this many pixels short of a pit, so it never pokes past the cliff face
   BASE_DROP: 6,           // push the limestone base pieces down into the grass (pixels)
   WALL_SINK: 16,          // how far dry-stone walls sink into the grass (pixels)
@@ -167,7 +168,12 @@ function padControl(p, m) {
   if (!m) return false;
   if (m.type === "button") return !!(p.buttons[m.index] && p.buttons[m.index].pressed);
   if (m.type === "axis") { const v = p.axes[m.index] || 0; return m.sign > 0 ? v > 0.5 : v < -0.5; }
-  if (m.type === "hat") { const v = p.axes[m.index]; return v !== undefined && Math.abs(v - m.value) < 0.15; }
+  if (m.type === "hat") {   // a POV hat: 8 positions 2/7 apart; a diagonal counts for both of its directions
+    const v = p.axes[m.index]; if (v === undefined) return false;
+    const pos = Math.round((v + 1) * 3.5), want = Math.round((m.value + 1) * 3.5);
+    if (pos < 0 || pos > 7 || Math.abs(v + 1 - pos / 3.5) > 0.12) return false;
+    const gap = Math.abs(pos - want) % 8; return Math.min(gap, 8 - gap) <= 1;
+  }
   return false;
 }
 function defaultPadState(p) {
@@ -179,7 +185,7 @@ function defaultPadState(p) {
     left: (p.buttons[14] && p.buttons[14].pressed) || ax[0] < -0.5,
     right: (p.buttons[15] && p.buttons[15].pressed) || ax[0] > 0.5,
     a: !!(p.buttons[0] && p.buttons[0].pressed),
-    b: !!(p.buttons[2] && p.buttons[2].pressed) || !!(p.buttons[1] && p.buttons[1].pressed && !p.buttons[0]),
+    b: !!(p.buttons[1] && p.buttons[1].pressed) || !!(p.buttons[2] && p.buttons[2].pressed),
     select: !!(p.buttons[8] && p.buttons[8].pressed),
     start: !!(p.buttons[9] && p.buttons[9].pressed),
   };
@@ -346,7 +352,7 @@ const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, tea
 // Moves are taught by people, never found (DESIGN §3c). Learned skills are kept in the save ("davidProgress".skills).
 //   aimUp: Shammah, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
 // The movement test (#test) and "?allskills" have everything.
-const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: Down + A while running", charge: "Charged sling: hold B" };
+const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: hold Down, then press A", charge: "Charged sling: hold B" };
 const skills = new Set();
 try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
@@ -487,7 +493,7 @@ if (LEVEL_NAME === "test") {
   crumble(24, 15, 3);                                          // it shakes when you land: keep moving
   ground(29, 60);
   raven(36, 7);
-  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Down + A while running)", "roll");
+  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Hold Down, then press A)", "roll");
   rock(42, 11, 10, 4);                                         // a low passage: roll (or crawl) under
   oliveRow(42, 16, 10);
   lostSheep("sheep", 56, 16);                                  // on the far side of the passage
@@ -724,8 +730,9 @@ function updateDavid(dt) {
     else if (!lamb.stolen && Math.abs(lamb.x - d.x) < 95 && Math.abs(lamb.y - d.y) < 70) { setState("pickup"); d.vx = 0; lamb.carried = true; d.facing = Math.sign(lamb.x - d.x) || d.facing; }
   }
 
-  // --- roll: Down + A while moving on the ground
-  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && held("down") && pressed("a") && (Math.abs(d.vx) > 60 || held("left") || held("right"))) {
+  // --- roll: Down + A on the ground (running, or from a crouch: he rolls the way he's facing)
+  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && held("down") && pressed("a")) {
+    if (dir) d.facing = dir;
     setState("roll"); d.rollT = 0; d.vx = d.facing * TUNE.ROLL_SPEED; d.jumpBuf = 0;
   }
 
@@ -1278,7 +1285,7 @@ function drawHUD() {
   if (!audioUnlocked) {
     ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(W / 2 - 230, H - 40, 460, 30);
     ctx.fillStyle = "#ffe08a"; ctx.font = "15px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("Click the game (or press any key) once to turn on sound", W / 2, H - 20); ctx.textAlign = "left";
+    ctx.fillText("Click the game once to turn on sound (the controller can't)", W / 2, H - 20); ctx.textAlign = "left";
   }
   if (helpT <= 0) {
     ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 600, 26);
@@ -1295,7 +1302,7 @@ function drawHelp() {
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump" + (CAN_DOUBLE_JUMP ? ", again in the air = flip" : ""),
     "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
-    "Down + A while moving: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
+    "Hold Down + A: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
     "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
@@ -1706,6 +1713,16 @@ function sheepToCheckpoint() {   // after a fall, the lamb you rescued is waitin
   });
 }
 const REST_SPOTS = [-120, 120, -175, 175, -230, 230, -285, 285];
+// the k-th resting place by a fire with unbroken ground between it and the fire (never over or across a pit or a gully)
+function restSpot(fire, k) {
+  const r = Math.round(fire.y / T), under = x => { const c = Math.floor((fire.x + x) / T); return isSolid(c, r) || isOneway(c, r); };
+  const ok = x => { for (let o = 0; Math.abs(o) <= Math.abs(x) + 24; o += Math.sign(x) * 8) if (!under(o)) return false; return true; };
+  for (let n = 0, found = -1; n < 40; n++) {
+    const x = REST_SPOTS[n % REST_SPOTS.length] * (1 + Math.floor(n / REST_SPOTS.length) * 0.25);
+    if (ok(x) && ++found === k) return x;
+  }
+  return 60;
+}
 function moveToward(sh, tx, ty, speed, dt) {
   const dx = tx - sh.x, dy = ty - sh.y, dist = Math.hypot(dx, dy);
   const step = Math.min(dist, speed * dt);
@@ -1736,7 +1753,7 @@ function updateSheep(dt) {
     const i = fi++;
     if (d.deadT > 0) return;                    // David fell: it waits where it is, then at the campfire
     if (fire) {                                 // settle round the campfire while David plays
-      const spot = REST_SPOTS[i % REST_SPOTS.length] * (1 + Math.floor(i / REST_SPOTS.length) * 0.25);
+      const spot = restSpot(fire, i);
       moveToward(sh, fire.x + spot, fire.y, TUNE.WALK_SPEED * 0.7, dt);
       if (sh.stillT > 0.2) sh.facing = Math.sign(fire.x - sh.x) || 1;
       return;
@@ -1806,7 +1823,7 @@ function updateFireSheep(sh, dt) {
   if (!sh.fire) {
     sh.fire = nearestFire(sh.x);
     const k = line.filter(o => o !== sh && o.fire === sh.fire).length;
-    sh.spot = REST_SPOTS[k % REST_SPOTS.length] * (1 + Math.floor(k / REST_SPOTS.length) * 0.25);
+    sh.spot = restSpot(sh.fire, k);
     sh.state = "toFire"; sh.walkT = 0; sh.stuckT = 0;
   }
   if (sh.state === "atFire") { sh.moved = 0; sh.stillT += dt; return; }
@@ -2408,12 +2425,12 @@ function updateHornets(dt) {
       h.x += (h.hx - h.x) * Math.min(1, dt * 1.8); h.y += (h.hy - h.y) * Math.min(1, dt * 1.8);
       if (h.t > 1.2) { h.state = "hover"; h.t = 0; }
     }
-    const reach = h.kind === "raven" ? 34 : 26;
+    const reach = h.kind === "raven" ? 52 : 26;
     if (Math.abs(h.x - david.x) < reach && h.y > david.y - david.h - 10 && h.y < david.y) hurtDavid(h.x);
   }
 }
 function stoneHitsBugs(s) {
-  for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < (h.kind === "raven" ? 36 : 26)) {
+  for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < (h.kind === "raven" ? 60 : 26)) {
     h.gone = true; h.vx = Math.sign(s.vx) * 160; h.vy = -260; toast(h.kind === "raven" ? "Raven driven off!" : "Hornet driven off!"); return !s.power;
   }
   for (const b of bees) if (!b.gone && Math.hypot(s.x - b.x, s.y - b.y) < 20) {
@@ -2450,6 +2467,7 @@ function unlockAudio() {
   harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = true; }).catch(() => {});
 }
 addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlockAudio);
+unlockAudio();   // when the browser already allows sound (the "Play David" launcher), it's on from the start
 // ---------------------------------------------------------------------------
 // Sound effects (Web Audio, so many can overlap) and the looping ambience / boss music.
 // Files are in assets/sounds. Sounds far from the middle of the screen play quieter.
@@ -2581,7 +2599,11 @@ function drawMidNear(camX, borrowedOnly = null) {
 }
 function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
-    drawItem(d.name, d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, d.y + 6 + (TUNE.DECO_DROP[d.name] || 0), d.size * 0.85);
+  {
+    const x = d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, y = d.y + 6 + (TUNE.DECO_DROP[d.name] || 0), tilt = TUNE.DECO_TILT[d.name] || 0;
+    if (!tilt) { drawItem(d.name, x, y, d.size * 0.85); continue; }
+    ctx.save(); ctx.translate(x, y); ctx.rotate(tilt * Math.PI / 180); drawItem(d.name, 0, 0, d.size * 0.85); ctx.restore();
+  }
 }
 // HUD art (Glen's status-bar sheet, cut into assets/hud)
 const HUD = {};
@@ -2656,7 +2678,9 @@ function frame(now) {
     requestAnimationFrame(frame); return;
   }
   if (Journal.active || WorldMap.active || (typeof Courtyard !== "undefined" && Courtyard.active)) {   // the Journal, a map or the home base covers the screen
+    if (setup.active) updateSetup(real); else checkCombo(real);
     pollInput();
+    if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
     if (Journal.active) { Journal.update(real); Journal.draw(); }
     else if (WorldMap.active) { WorldMap.update(real); WorldMap.draw(); }
     else { Courtyard.update(real); Courtyard.draw(); }
