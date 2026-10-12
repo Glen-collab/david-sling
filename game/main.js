@@ -1329,8 +1329,7 @@ function drawHUD() {
   drawToastAndSetup();
 }
 function drawHelp() {
-  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 760, 118);
-  ctx.fillStyle = "#fff"; ctx.font = "15px sans-serif";
+  ctx.font = "15px sans-serif";
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump" + (CAN_DOUBLE_JUMP ? ", again in the air = flip" : ""),
     "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
@@ -1338,13 +1337,20 @@ function drawHelp() {
     "Shift = Select (SNES Y): play the harp   R: back to the campfire   M: set up a controller (NES or SNES)   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
+  ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, Math.max(...lines.map(l => ctx.measureText(l).width)) + 22, 14 + lines.length * 21);   // as wide as the longest line
+  ctx.fillStyle = "#fff";
   lines.forEach((l, i) => ctx.fillText(l, 20, 32 + i * 21));
 }
 function drawToastAndSetup() {
   if (toastTime > 0) {
-    ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.fillRect(W / 2 - 330, H - 70, 660, 44);
-    ctx.fillStyle = "#ffe08a"; ctx.font = "18px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(toastText, W / 2, H - 42); ctx.textAlign = "left";
+    ctx.font = "18px sans-serif";   // wrapped like a subtitle, the box sized to the words
+    const words = toastText.split(" "), tl = []; let cur = "";
+    for (const w of words) { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > 900) { tl.push(cur); cur = w; } else cur = t; }
+    tl.push(cur);
+    const bw = Math.max(660, Math.max(...tl.map(l => ctx.measureText(l).width)) + 48), bh = 20 + tl.length * 24;
+    ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, H - 40 - bh, bw, bh, 8); ctx.fill();
+    ctx.fillStyle = "#ffe08a"; ctx.textAlign = "center";
+    tl.forEach((l, i) => ctx.fillText(l, W / 2, H - 40 - bh + 28 + i * 24)); ctx.textAlign = "left";
   }
   if (setup.active) {
     ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0, 0, W, H);
@@ -1470,6 +1476,12 @@ function updatePickups(dt) {
       toast((v < 0 ? "" : "+ ") + (FOOD_TEXT[p.name] || p.name));
       for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });
     }
+  }
+}
+function updateGourds() {   // walking into a gourd picks it up, like food, and it's poison (2 Kings 4:39-40). Sling them instead.
+  for (const g of gourds) if (g.alive && !g.hanging && Math.abs(g.x - david.x) < 34 && david.y > g.y - 50 && david.y - david.h < g.y && david.deadT <= 0 && david.inv <= 0) {
+    g.alive = false; toast(FOOD_TEXT.wild_gourds); hurtDavid(g.x);   // (a hurt that ends a life puts its own message up)
+    for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: "#7a2" });
   }
 }
 function drawPickups(camX) {
@@ -2577,7 +2589,7 @@ function updateWorld(dt) {
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
-  updatePickups(dt); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
+  updatePickups(dt); updateGourds(); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
 }
 
