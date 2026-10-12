@@ -631,6 +631,8 @@ Olives are the game's money. They're gathered in stages and from trees, and spen
 - **Bread, figs, raisins** to carry and eat later (heal).
 - **A better sling pouch** (stones fly a little straighter). One upgrade per world at most.
 
+**Settled (Glen, 2026-10-11):** olives carry over between stages, and 100 olives still fills the flask for +1 life. Caves burn 1 oil every 4 seconds (`CAVE.OIL_EVERY` in `game/caves.js`); slow it down if the caves drain the purse too fast.
+
 ### The throw: a code built world by world (Glen's idea)
 Goliath falls to one stone (§5h, phase 3). To throw it perfectly, the player enters a code during the slow-motion opening. **Every world teaches one piece** (bosses must be beaten to move on anyway), given at the home base at the end of the world. **The whole code is the Konami code:**
 
