@@ -2000,15 +2000,15 @@ function woodPost(x, bottom, w, h) {
 // near post and reaches back to the far one; opening, it swings into the fold along the wall.
 const GOAL_GAP = 1.5 * T;   // each post this far from the middle (far post to the left, near post to the right)
 const GATE_FAR = { lift: 22, scale: 0.9, filter: "brightness(1.12) saturate(0.55) contrast(0.8)" };   // the far post: a little higher up the grass, smaller, hazier
-// Glen's gate art, baked once with a shadow on the end that's further away from us
+// Glen's gate art, baked once with a shadow on its hinge end (the far post, further away from us)
 let gateShaded = null;
 function gateArt() {
   if (gateShaded) return gateShaded;
   const img = ITEM.gate_panel; if (!img || !img.naturalWidth) return null;
   const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
   const g = c.getContext("2d"); g.drawImage(img, 0, 0);
-  g.globalCompositeOperation = "source-atop";   // the art's hinges are on its left: that end is near us, the right end far
-  const gr = g.createLinearGradient(0, 0, c.width, 0); gr.addColorStop(0, "rgba(20,10,0,0)"); gr.addColorStop(1, "rgba(20,10,0,0.38)");
+  g.globalCompositeOperation = "source-atop";   // the art's hinges are on its left, the far post's side
+  const gr = g.createLinearGradient(0, 0, c.width, 0); gr.addColorStop(0, "rgba(20,10,0,0.38)"); gr.addColorStop(1, "rgba(20,10,0,0)");
   g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
   return (gateShaded = c);
 }
@@ -2027,25 +2027,27 @@ function goalSpots(camX) {
   const mx = postX() - camX, by = GR * T;
   return { mx, by, nx: mx + GOAL_GAP, nby: by + 6, fx: mx - GOAL_GAP, fby: by - GATE_FAR.lift };   // n = near post (right), f = far post (left)
 }
-// the gate: hinged on the near post, its free end at the far post. part: "back" (behind David) or "front" (over him)
-function drawGate(camX, part) {
-  const { mx, nx, nby, fx, fby } = goalSpots(camX);
-  const o = finish.gateOpen, open = o > 0;
-  if (part === "front" && open) return;      // once it's swinging it's all behind David
-  // the free end: closed at the far post; open, swung round into the fold, lying along the wall to the right
-  const ex = fx + (nx + 2.6 * T - fx) * o, ey = fby + (nby - 4 - fby) * o, hn = GATE_H * 1.14, he = GATE_H * (0.86 + 0.2 * o);
-  ctx.save();
-  if (!open) { ctx.beginPath(); if (part === "front") ctx.rect(mx, -1e4, 2e4, 2e4); else ctx.rect(-1e4, -1e4, mx + 1e4, 2e4); ctx.clip(); }
-  const at = (u, v) => [nx + (ex - nx) * u, (nby - hn * v) + ((ey - he * v) - (nby - hn * v)) * u];   // u: hinge->free end, v: bottom->top
+// the gate: hinged on the far (left) post, its free end at the near (right) post when closed. It opens to the
+// back, swinging away from us into the fold, so it's always drawn behind David and the sheep; the near post is in
+// front of everything, so they pass between the posts.
+function drawGate(camX) {
+  const { nx, nby, fx, fby } = goalSpots(camX);
+  const o = finish.gateOpen, k = o * o * (3 - 2 * o);
+  // the free end: closed at the near post; open, swung back to stand edge-on, just behind and to the right of the hinge
+  const ex = nx + (fx + 0.35 * T - nx) * k, ey = nby + (fby - 30 - nby) * k;
+  const hh = GATE_H * 0.86, he = GATE_H * (1.14 - 0.38 * k);   // the far end is shorter (further away)
+  const at = (u, v) => [fx + (ex - fx) * u, (fby - hh * v) + ((ey - he * v) - (fby - hh * v)) * u];   // u: hinge->free end, v: bottom->top
   const art = gateArt();
+  ctx.save();
+  if (k > 0) ctx.filter = `brightness(${1 - 0.25 * k})`;   // turning away from the light as it swings back
   if (art) {   // Glen's gate, bent between the posts in thin strips so it reads as a gate seen at an angle
     const N = 36, sw = art.width / N;
-    for (let k = 0; k < N; k++) {
-      const u0 = k / N, u1 = (k + 1) / N, [ax, ay] = at(u0, 1.04), [bx2, by2] = at(u1, 1.04), [cx, cy] = at(u0, -0.02);
+    for (let n = 0; n < N; n++) {
+      const u0 = n / N, u1 = (n + 1) / N, [ax, ay] = at(u0, 1.04), [bx2, by2] = at(u1, 1.04), [cx, cy] = at(u0, -0.02);
       ctx.save(); ctx.transform((bx2 - ax) / sw, (by2 - ay) / sw, (cx - ax) / art.height, (cy - ay) / art.height, ax, ay);
-      ctx.drawImage(art, k * sw, 0, sw + 0.8, art.height, 0, 0, sw + 0.8, art.height); ctx.restore();
+      ctx.drawImage(art, n * sw, 0, sw + 0.8, art.height, 0, 0, sw + 0.8, art.height); ctx.restore();
     }
-  } else {   // (until the art loads) three rails, a brace and two stiles
+  } else {   // (until the art loads) three rails and two stiles
     ctx.lineCap = "round";
     for (const v of [0.18, 0.55, 0.92]) {
       const [x0, y0] = at(0.02, v), [x1, y1] = at(0.98, v);
@@ -2057,7 +2059,7 @@ function drawGate(camX, part) {
   ctx.restore();
 }
 function gateTopAt() { return GR * T - GATE_H; }   // where David must clear it, at the middle
-function drawFold(camX) {   // behind David: the far post and the far half of the gate
+function drawFold(camX) {   // behind David and the sheep: the far post and the gate
   if (!fold) return;
   const { mx, by, fx, fby } = goalSpots(camX), ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
@@ -2065,13 +2067,12 @@ function drawFold(camX) {   // behind David: the far post and the far half of th
   const sg = ctx.createRadialGradient(mx, by, 2, mx, by, GOAL_GAP * 1.6);   // a soft shadow on the grass between the posts
   sg.addColorStop(0, "rgba(40,28,10,0.3)"); sg.addColorStop(1, "rgba(40,28,10,0)");
   ctx.fillStyle = sg; ctx.fillRect(mx - GOAL_GAP * 1.7, by - 10, GOAL_GAP * 3.4, 18);
-  drawGate(camX, "back");
+  drawGate(camX);
 }
-function drawFoldFront(camX) {   // over David: the near half of the gate, the cord with the golden olive, and the near post
+function drawFoldFront(camX) {   // in front of everything: the cord with the golden olive, and the near post
   if (!fold) return;
   const { mx, nx, nby, fx } = goalSpots(camX), ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
-  drawGate(camX, "front");
   ctx.save();
   // the cord and the olive on it, sliding up and down (gone once caught)
   if (!(finish.active && finish.caught)) {
