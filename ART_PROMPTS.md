@@ -391,6 +391,11 @@ A single green olive, a single purple olive and a **golden olive** (glowing a li
 - **Hanan ✦**, an old shepherd in a grey robe with a white beard: standing and talking; sitting by a fire.
 - **The neighbour shepherd ✦** (an old man) and **the shepherd girl ✦** with her goat: standing and talking.
 
+### 6b. Jesse's courtyard people (Grok video, green screen)
+Make one **reference image** of each person first, then upload it with every clip so they always match. Converter: `python tools/vid2sprite.py <clip> <out> --height 300` (adults stand taller than David's 240).
+- **Jesse** (David's father, old, kind, a farmer; long grey-white beard, cream-and-brown wool robe, striped head cloth, rope belt with a sling tucked in). He waits by the bullseye wall and coaches the throw. Clips: `jesse_idle` (standing, breathing, small nod), `jesse_talk` (explaining with one hand, warm), `jesse_point` (points at the target, then at his eye: "watch it"), `jesse_throw` (whirls a sling once and lets go, slowly, like showing a child), `jesse_cheer` (claps once and laughs, proud).
+- **The trader** (invented, a cheerful villager who sells olives, oil and fig cakes; Glen picks man or woman). Stands beside the stall. Clips: `trader_idle`, `trader_talk`, `trader_offer` (holds out a small clay oil flask).
+
 ### 7. Caves (for later; see DESIGN.md §3j)
 - **Grok clip:** *"This exact boy, seen from BEHIND, walking away from the camera into a dark cave mouth, slowly, full body in frame, green background, locked camera."* And the reverse: walking out toward the camera.
 - **Grok clip:** a bat flying in place (wings flapping), and a bat hanging upside down, on green.
