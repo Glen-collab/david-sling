@@ -5,7 +5,7 @@
 // Settings are saved in localStorage "davidSettings" (SETTINGS in main.js). Up/Down choose, Left/Right change,
 // A or Start picks, B goes back.
 
-const MENU_TITLE_BG = "../assets/maps/journey_map.jpg";
+const MENU_TITLE_BG = "../assets/backgrounds/title.jpg";   // Glen's painting: David and the flock at sunset above Bethlehem
 const CONTROLLERS = ["keyboard", "nes", "snes"];
 const CONTROLLER_NAMES = { keyboard: "Keyboard", nes: "NES controller", snes: "SNES controller" };
 
@@ -100,18 +100,23 @@ const Menu = {
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
     if (this.snap) { ctx.drawImage(this.snap, 0, 0); ctx.fillStyle = "rgba(10,6,2,0.62)"; ctx.fillRect(0, 0, W, H); }
     else if (this.bg && this.bg.naturalWidth) {
-      const img = this.bg, s = Math.max(W / img.naturalWidth, H / img.naturalHeight), drift = Math.sin(this.t * 0.05) * 30;
-      ctx.drawImage(img, (W - img.naturalWidth * s) / 2 + drift, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
-      const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(10,6,2,0.25)"); g.addColorStop(1, "rgba(10,6,2,0.75)");
+      // a very slow push in, like a film opening
+      const img = this.bg, s = Math.max(W / img.naturalWidth, H / img.naturalHeight) * (1.02 + 0.03 * Math.min(1, this.t / 40));
+      ctx.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+      if (this.screen !== "title") { ctx.fillStyle = "rgba(10,6,2,0.45)"; ctx.fillRect(0, 0, W, H); }   // settings over it: dimmer
+      const g = ctx.createLinearGradient(0, H * 0.75, 0, H); g.addColorStop(0, "rgba(10,6,2,0)"); g.addColorStop(1, "rgba(10,6,2,0.5)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
     ctx.textAlign = "center";
     if (this.screen === "controls") { this.drawControls(); ctx.restore(); return; }
     const title = this.screen === "title" || (this.screen === "confirm");
     if (title) {
-      ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.font = "bold 92px Georgia, serif"; ctx.fillText("David", W / 2 + 4, 178);
-      ctx.fillStyle = "#ffe08a"; ctx.fillText("David", W / 2, 174);
-      ctx.fillStyle = "#fff4d6"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("The Shepherd's Sling", W / 2, 226);
+      // gold letters with a dark outline and a soft glow, so they read against the bright sunset sky
+      ctx.lineJoin = "round"; ctx.shadowColor = "rgba(60,30,5,0.6)"; ctx.shadowBlur = 18;
+      ctx.font = "bold 96px Georgia, serif"; ctx.lineWidth = 10; ctx.strokeStyle = "#4a2a10"; ctx.strokeText("David", W / 2, 150);
+      ctx.shadowBlur = 0; ctx.fillStyle = "#ffd76a"; ctx.fillText("David", W / 2, 150);
+      ctx.font = "italic bold 36px Georgia, serif"; ctx.lineWidth = 7; ctx.strokeText("The Shepherd's Sling", W / 2, 202);
+      ctx.fillStyle = "#fff4d6"; ctx.fillText("The Shepherd's Sling", W / 2, 202);
     } else {
       ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : "Settings", W / 2, 150);
     }
