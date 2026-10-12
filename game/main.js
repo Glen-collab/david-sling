@@ -2570,11 +2570,18 @@ function updateSound(dt) {
   if (d.charging && d.charge > 0.12 && !d.chargeSnd) { d.chargeSnd = sfx("sling_charge", undefined, 0.6); if (d.chargeSnd) d.chargeSnd.loop = true; }   // whirls as long as B is held
   if (!d.charging && d.chargeSnd) { d.chargeSnd.pause(); d.chargeSnd = null; }
 }
+// everything quiet: The One's card and the pause menu stop the footsteps, the hills, the lion music and the harp.
+// They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
+function hushLoops() {
+  for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();
+  if (david.chargeSnd) { david.chargeSnd.pause(); david.chargeSnd = null; }
+}
 function updateHarpMusic(dt) {
   const sitting = david.harp && (david.state === "kneel" || david.state === "harp");
   harpHeldT = sitting ? harpHeldT + dt : 0;
   const want = sitting && harpHeldT >= TUNE.HARP_MUSIC_DELAY;   // wait for his hands, not the harp coming out
-  if (want && harpMusic.paused && !harpStarting && audioUnlocked) {
+  if (harpVol > 0 && harpMusic.paused && !harpStarting && audioUnlocked) harpMusic.play().catch(() => {});   // back from a pause: carry on where it was
+  else if (want && harpMusic.paused && !harpStarting && audioUnlocked) {
     harpStarting = true; harpMusic.currentTime = 0; harpVol = 0;
     harpMusic.play().then(() => { harpStarting = false; }).catch(() => { harpStarting = false; });
   }
@@ -2739,8 +2746,8 @@ function frame(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
-  if (pressed("start") && !setup.active && !oneMoment.active && !finish.active && !codeEntry.active && david.deadT <= 0) { Menu.open("pause", true); requestAnimationFrame(frame); return; }
-  if (oneMoment.active) updateOneMoment(real);
+  if (pressed("start") && !setup.active && !oneMoment.active && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
+  if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
