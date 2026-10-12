@@ -4,7 +4,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## How to play and test
 
-- **Play:** open `Desktop\david-sling\game\index.html`. It opens on the **journey map** (or whichever map you were last on).
+- **Play:** double-click `Play David.bat`: the game opens in its own Chrome window with sound on and no click needed, so a controller is enough. It opens on the **journey map** (or whichever map you were last on).
 - **Getting around:** journey map → A at Bethlehem → World 1 map → A at the home stop (Jesse's courtyard) or a stage. B on a world map goes back out to the journey map.
 - **Keys:** 1 = 1-1, 2 = movement test, 3 = swap backgrounds, 4 = Journal preview, 5 = World 1 map, 6 = journey map, H = help.
 - **Address switches for testing:**
