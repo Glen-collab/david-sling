@@ -1,155 +1,91 @@
 # Where we left off
 
-If a chat session closes, start here. Last updated 2026-10-11.
+If a chat session closes, start here. Last updated 2026-10-11 (end of a long session).
 
 ## How to play and test
 
-- **Play:** open `Desktop\david-sling\game\index.html` directly. Keys: 1 = 1-1 sample, 2 = movement test, 3 = swap backgrounds, 4 = Journal preview, H = help.
-- **Update the Desktop copy:** run `git pull` in `Desktop\david-sling`. First run `git status` there in case you edited art inside it. Untracked files with the same name block the pull.
-- **Tuning:** the numbers are in the `TUNE` block at the top of `game/main.js`.
-- **Art drop folder:** `Desktop\david-sling-art`. Duplicate "copy" sprites went to `my_edits\old_copies`.
+- **Play:** open `Desktop\david-sling\game\index.html`. It opens on the **journey map** (or whichever map you were last on).
+- **Getting around:** journey map → A at Bethlehem → World 1 map → A at the home stop (Jesse's courtyard) or a stage. B on a world map goes back out to the journey map.
+- **Keys:** 1 = 1-1, 2 = movement test, 3 = swap backgrounds, 4 = Journal preview, 5 = World 1 map, 6 = journey map, H = help.
+- **Address switches for testing:**
 
-## Done 2026-10-11: the Journal screen
+  | Switch | What it does |
+  |---|---|
+  | `#1-3` | Open a stage directly |
+  | `?cheat` | B on a map marks a stage cleared |
+  | `?flip` | Turn on the double jump |
+  | `?allskills` | Every taught move |
+  | `?journal=1..5` (with `&jbook`, `&jt=6&jfreeze`, `&jauto`) | Journal previews |
 
-- World 1 Journal text **locked** by Glen.
-- `game/journal.js`: after the 1-1 sample's gate, A opens the Journal. See JOURNAL.md "How it plays".
-- Glen's night scene (David reading by the lamp, the flock, Bethlehem) is the Journal's main view; Up leans in to the full-screen book.
-- Two spreads per world (draft, then the world's spread after 1-4), with a page turn between them.
-- Test switches in the address: `?journal=1..5`, `&jbook` (start leaned in), `&jt=6&jfreeze` (jump 6 s ahead and hold), `&jauto` (turn pages by itself).
+- **Progress** is saved in the browser: `localStorage` `davidProgress`. It holds cleared stages, sheep, The One, stones, olives, lamp oil, fig cake, skills, throw pieces given, and which map you're on. Clear it to start over.
+- **Update the Desktop copy:** `git pull` in `Desktop\david-sling`. Run `git status` first in case art was edited there.
+- **Tuning:** the `TUNE` block in `game/main.js`, `W1` in `game/world1.js`, `CAVE` in `game/caves.js`, `HOME` in `game/home.js`, `MTUNE` in `game/map.js`.
+- **Art drop folder:** `Desktop\david-sling-art`.
 
-**Glen's new art, saved but not wired in yet** (`Desktop\david-sling-art`):
-- `gate_front.png`: the straight-on sheepfold gate with two posts. Its edges have a red fringe from the background removal; clean it in code.
-- `gate_posts_green.png`: two posts with a crossbar, on green.
+## The code, file by file
 
-## World 1 map (built 2026-10-11)
+| File | What's in it |
+|---|---|
+| `game/main.js` | Engine, David, the four World 1 stage layouts (`LEVEL_NAME === "1-x"`), the lion, sheep, the goal, the HUD |
+| `game/world1.js` | Foxes, jackals, rams, ravens, crumbling ledges, rope bridges, carved walls (the throw code), the night, people's lines, The One's verse card |
+| `game/caves.js` | Caves like Mario's pipes: lamp, oil, bats, cave art |
+| `game/journal.js` | The Journal: words, layout, "The Throw" page |
+| `game/map.js` | The journey map and the World 1 map |
+| `game/home.js` | Jesse's courtyard: Jesse, the practice wall, the shelf, the market |
 
-- `game/map.js`. **The game now opens on the map.** Key 1 still goes straight into the stage, and 5 brings the map back.
-- **Stops:** the sheepfold (home), 1-1 the campfire, 1-2 the flower meadow, 1-3 the goat's rock, 1-4 the cave. The trail coordinates are in `MAP_WORLDS`, in the painting's pixels.
-- **On the map:**
-  - Left/Right walks David (and the lamb) between stops. He shrinks walking into the distance and shows his back when he walks up into the picture.
-  - The next stage flashes. A cleared stage turns green with a sheep (a gold-star sheep if The One was found).
-  - The map turns to night on the walk to the cave.
-  - A plays the stop (only 1-1 is built). Select reads the Journal so far.
-- **Clearing a stage** saves its sheep, The One and stones (`localStorage` `davidProgress`), writes the Journal, then returns to the map, where the next stretch of trail draws itself in.
-- **Testing:** `index.html?cheat` lets B on the map mark a stage cleared.
+## Built 2026-10-11
 
-## World 1 stages 1-1 to 1-4 (built 2026-10-11)
+- **Journal screen.** Glen's night scene of David reading by the lamp; Up leans in. World 1 text is locked.
+  - The world spread says *"There's still a lamb out there..."* until all of that world's Ones are home, then *"Every one of them is home."*
+- **Journey map** (Glen's painting, 8 stops) and the **World 1 map** (the Bethlehem painting, stone markers, cairn).
+- **All four World 1 stages,** each with Glen's own backgrounds (1-1 afternoon, 1-2 morning, 1-3 rocky, 1-4 night).
+- **Caves** in 1-2 and 1-3, with Glen's cave layers, stalactites and stacked-ledge towers.
+- **Glen's asset sheets wired in:** cracked ledges that break into chunks, rope bridge and posts, olives, stones, lamp, pomegranate tree, barley.
+- **Sheepfold goal,** Super Mario World style:
+  - The far post (hazy) is on the left; the gate hangs on it and swings back into the fold.
+  - The near post (bold, plain) is on the right, in front of everything.
+  - The golden olive rides the cord between them. The posts are 8 tiles, so a full single jump just reaches the top.
+- **Jesse's courtyard** (home base, Castlevania-town style):
+  - **Jesse** gives one piece of the throw per world beaten.
+  - **The practice wall** drills the code.
+  - **The shelf** opens the Journal.
+  - **The market** sells lamp oil (20 olives → 30 oil) and a fig cake (15 olives → +1 heart next stage).
+  - Olives and lamp oil carry over between stages; 100 olives still fills the flask for +1 life.
+- **The throw code** (DESIGN §4c): the Konami code, one piece per world, for Goliath's final stone. "The Throw" is the last page of the Journal when read from the courtyard or a map.
+- **Come-back secrets** (Castlevania-style):
+  - **1-1:** The One is on a high shelf (needs the double jump, World 5).
+  - **1-4:** The One is behind a one-mark carved wall (opens once Jesse gives ↑ for the lion).
+  - **1-3:** a two-mark carved hollow with a golden olive (after World 2).
+- **Finding The One** pauses the game for Luke 15:4.
+- **Bible text:** the World English Bible (public domain) everywhere, not the NIV.
+- **Moves are taught,** saved once learned:
+  - aim up: Shammah, 1-1
+  - the harp calling sheep: Hanan, 1-2 (playing and healing work from the start)
+  - the roll: Shammah, 1-3
+  - full charged sling: World 2
+  - double jump: Tobi, World 5. There's no aerial flip any more; the World 3 ox fight uses the roll.
+- **World 1 checked for single-jump reach:** every required sheep, stone and goal can be reached with one jump.
 
-All four stages are playable from the map. Each has 5 lost sheep, The One and 3 stones of remembrance. Layouts are in `main.js` (the `LEVEL_NAME === "1-x"` blocks). The new creatures and pieces are in `game/world1.js`, with their numbers in its `W1` block. `#1-2` in the address opens a stage directly.
+## Not checked by hand yet (Glen)
 
-- **1-1 The Hills of Bethlehem:**
-  - Teaching: walls, gaps, the gourd rock, hanging gourds (aim up), the date palm.
-  - Snakes: the cobra, then the harmless green **whip snake** next to the viper (Shepherd's Judgment: sling the whip snake and you're told off).
-  - Bees and a hornet, then berries or cheese.
-  - **Eliab and Shammah** speak along the way; **Hanan** is at the campfire.
-- **1-2 The Wandering Flock:**
-  - Hanan's harp lesson at the first fire; the neighbour at the middle fire (his ram is one of your 5).
-  - **Foxes** go for your lamb, a cast sheep, thorns.
-  - **The One is at the back of a low cave** (crawl or roll in; the cave hides its inside until you're in it).
-- **1-3 The Rocky Pastures:** World 2's rocky backgrounds stand in until the new art arrives. It has:
-  - **Crumbling ledges** (they shake, drop, and come back).
-  - **Rope bridges.**
-  - A low passage that teaches the roll.
-  - **Wild rams** that stamp, then charge (stones bounce off; roll under them).
-  - **Ravens.**
-  - A **secret cave behind a crack in the rock** with The One, bread and a stone.
-  - The shepherd girl at the fire.
-- **1-4 The Lion's Territory:**
-  - **Night** (a blue tint, the moon, a cloud now and then).
-  - The **lion pads along the far ridge** and roars in the distance.
-  - **Jackals steal your lamb and run**: sling them to get it back.
-  - Hanan at both fires, then the lion fight and the fold.
-
-**Caves (Mario-pipe style, `game/caves.js`, numbers in its `CAVE` block):**
-- A cave mouth (Glen's `cave_1` mound in 1-2, the tall `cave_2` in 1-3) shows an ↑ when David is near.
-- Up: he turns his back, walks in, and the screen fades into a separate dark room. The rooms are built past the stage's end with `caveRoom()` / `caveDoor()`.
-- The first time inside, he lights his oil lamp. Only a circle around him is lit, and it burns 1 olive every 4 s; with no oil the light shrinks but never goes out. The olives inside top it up.
-- Bats flutter off when he passes. Sling one and you're told they're harmless.
-- The way out glows with daylight: Up there takes him back to the mouth.
-- The One for 1-2 and for 1-3 is in these caves. (The old "crack in the rock" secret is gone from 1-3; the fake-rock code is still there for later.)
-
-**Rules changed:**
-- **Falling into a pit** now costs a heart and puts David back on the last solid ground. It used to send him to the start of the stage.
-- **People's lines** show in a box at the top of the screen.
-
-**Stand-ins until art arrives:**
-- **People:** shown only as a name in the box.
-- **The ram's charge:** its walk clip, sped up.
-- **1-3:** has its own backgrounds now (Glen, 2026-10-11).
-- **1-2:** has Glen's own morning set (2026-10-11; its near strip was keyed by colour distance, since its grass is close to the screen green). **1-4:** has Glen's own night set (2026-10-11); the night tint only darkens what's in front of it.
-
-**Sounds still needed:** night crickets (1-4 is silent apart from the lion), fox/jackal yelps, the ram's stamp.
+- A full play-through of each stage with a controller: the feel of jumps, creature speeds, the night, the cave oil burn rate (`CAVE.OIL_EVERY`).
+- Whether the lion fight still feels right without the full-power charged sling (tap stones only, 6 HP).
+- Olives carrying over from a real stage clear into the market.
 
 ## Next
-- Glen plays all four stages and says what to tune (jump gaps, creature speeds, the night darkness).
-- Swap in the new backgrounds when they arrive: `STAGE_INFO` in `main.js` names each stage's set.
-- Gate and post art from `david-sling-art` (`gate_front.png`, `gate_posts_green.png`).
 
-## Done in the last session (2026-10-09 to 2026-10-10)
-
-### Sounds
-
-All sound files are in `assets/sounds`, credited in `SOURCES.md`.
-
-- **Sling:** a build-up loop plays while B is held. Release plays the whip.
-- **Jump:** taken from the unicorn game. The double jump is the same sound, pitched up.
-- **Pickups and falls:** olive pickup, and a pit-fall sound.
-- **Removed:** the cartoony hurt and death sounds.
-- **Stone impacts:** stones hitting walls, gourds, snakes, bugs, thorns, trees and the lion make an impact sound.
-- **Lion:**
-  - The boss music starts 4 tiles before the arena, before you see him (the "uh oh").
-  - He roars the moment he sets the lamb down, and again at his tell.
-  - Each stone that hits him plays a hit sound.
-  - The final stone plays his wounded cry.
-  - The growl was removed.
-- **Final blow (Mortal Kombat style):**
-  - The game checks in advance when the next stone will finish a boss.
-  - Slow motion and the `final_stone` sound start just before that stone lands.
-  - On impact: a short freeze, a white flash, letterbox bars and screen shake, then the speed eases back to normal.
-  - `final_stone_goliath` is saved for Goliath.
-  - Tune it with `FINAL_*` in TUNE.
-- **Footsteps:** running footsteps only. Walking steps were removed.
-- **Saved for later** in `assets/sounds/later/`: river, horse, woods and crunchy footsteps, wolf growls, bear growl.
-
-### Fixes
-
-- **Boulder by the fig tree:** David and the lamb now stand on its flat top instead of floating. A tiny gap remains at the far left edge. Tune it with the `BOULDER` numbers.
-
-### Sheepfold goal (Super Mario World style)
-
-- **Layout:** two posts, one behind David and one in front, so he walks between them.
-- **The gate:** a wooden gate stands between the posts at an angle, like the olive's cord. David has to jump it. It swings open along the fold wall for the sheep.
-- **The golden olive:** it slides up and down a gold cord between the posts.
-  - Catch it low for 2 olives, up to 25 at the top.
-  - Miss it and you get no bonus, but the stage still ends.
-- **Extra life:** every 3 top catches (any stages, not in a row) gives +1 life. The count is saved in the browser (`davidGateTops`).
-- **Showing the player:** a sign before the goal, plus notches on the front post with olives that grow toward the top.
-- **Placeholder art:** the gate and posts are drawn shapes for now.
-
-## Glen's to-dos
-
-- **Licenses:** fill in the blanks in `SOURCES.md`.
-- **Sounds still needed:** real hurt and death sounds, jackal, eagle, snake, bees, gate creak, campfire crackle.
-
-## Next big pieces (pick one)
-
-1. **Journal screen:**
-   - Caveat font warped to the page using Glen's marks, with ink writing, strike-throughs and rip-out/burn pages.
-   - Words are drafted in `JOURNAL_TEXT.md`, the plan is in `JOURNAL.md`, the song is in `SONG.md`.
-2. **Real World 1 stages 1-1 to 1-4:**
-   - Lay out the real stages from DESIGN.md. The lion boss moves to 1-4.
-   - Then place jackals, sheep, caves and the rest.
-3. **Later:** wire up the stored river, horse, wolf and bear sounds when those levels exist.
+- **People as Grok clips:** Jesse on the bench, the trader at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbour. Today they're names over their lines.
+- **The ram's charge** clip (it uses its walk, sped up).
+- **World 2,** when Glen is ready: the bear, Hanan teaching the charged sling in 2-1, the bigger cave in 2-4.
+- **Sounds still needed:** real hurt and death sounds, night crickets for 1-4, fox and jackal yelps, the ram's stamp, gate creak, campfire crackle, bees, snake, eagle.
+- **Licenses:** fill in the blanks in `assets/sounds/SOURCES.md`.
 
 ## Other docs
 
 | File | What it holds |
-|------|---------------|
-| `DESIGN.md` | The story and level bible, all 8 worlds |
-| `SPRITES.md` | Sprite lists per world |
-| `VIDEO_SPRITES.md` | The Grok video to sprite sheet pipeline |
-| `ART_PROMPTS.md` | Background and cave art prompts |
-| `JOURNAL.md` | The Journal screen plan |
-| `JOURNAL_TEXT.md` | The Journal's words |
-| `SONG.md` | The song "The Shepherd Leads Me" |
+|---|---|
+| `DESIGN.md` | The story and level bible, all 8 worlds. §4c: journey map, home base, olives, the throw code, the double jump plan |
+| `JOURNAL.md` / `JOURNAL_TEXT.md` | How the Journal plays / its words |
+| `SONG.md` | "The Shepherd Leads Me" (Glen's song; stays as is) |
+| `SPRITES.md`, `VIDEO_SPRITES.md`, `ART_PROMPTS.md` | Sprite lists, the Grok-to-sprite pipeline, art prompts |
 | `assets/sounds/SOURCES.md` | Where each sound came from |
