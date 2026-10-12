@@ -687,7 +687,7 @@ function updateDavid(dt) {
       takenLamb.active = false; rescuedLamb = true;
       joinLine(newSheep({ kind: "rescued", how: "rescued", hx: d.x + d.facing * LAMB_IN_PET * SCALE, hy: d.y }), true);
       setState("idle");
-      toast("\"I went after it, struck it and rescued the sheep from its mouth.\" (1 Samuel 17:35)");
+      toast("\"I went out after him, and struck him, and rescued it out of his mouth.\" (1 Samuel 17:35)");
     }
     return;
   }
@@ -2223,12 +2223,12 @@ function stoneHitsLion(s) {
   if (s.power && lion.state !== "dazed") {   // the Power Sling knocks it dazed and hurts it
     lion.hp -= 2; lion.flash = 0.3; lion.vx = 0; setLion("dazed"); if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_hit", lion.x, 0.9); }
     toast("Power Sling! The lion is dazed. Hit it now!");
-    if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)"); }
+    if (lion.hp <= 0) { setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and cobra\" (Psalm 91:13)"); }
   } else if (lion.state === "dazed") {
     lion.hp -= s.power ? 3 : s.charged ? 2 : 1; lion.flash = 0.25;
     if (lion.hp <= 0) finalHit(s); else { stoneHit(s); sfx("lion_hit", lion.x, 0.9, 0.95 + Math.random() * 0.1); }
     if (lion.hp <= 0) {
-      setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and the cobra\" (Psalm 91:13)");
+      setLion("defeated"); toast("The lion is beaten! \"You will tread on the lion and cobra\" (Psalm 91:13)");
     }
   } else { stoneHit(s, 0.6); if (!lion.told) { lion.told = true; toast("Stones bounce off! Wait until it's dazed after a pounce."); } }
   for (let k = 0; k < 6; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.4, color: lion.state === "dazed" || lion.state === "defeated" ? "#fff2b0" : "#bbb" });

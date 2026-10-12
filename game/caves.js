@@ -54,7 +54,7 @@ function caveDavid(d, dt) {
     if (tr.t >= walkEnd && !tr.inside) {   // through: now he's in the cave
       tr.inside = true; tr.tIn = tr.t; cave.room = tr.door.room; d.facing = 1;
       moveParty((cave.room.c0 + 4) * T, GR * T);
-      if (!cave.told) { cave.told = true; toast("The lamp burns olive oil from your flask. \"Pure oil of pressed olives for the light\" (Exodus 27:20)"); }
+      if (!cave.told) { cave.told = true; toast("The lamp burns olive oil from your flask. \"Pure olive oil beaten for the light\" (Exodus 27:20)"); }
     }
     if (tr.inside) {
       const k = tr.t - tr.tIn;

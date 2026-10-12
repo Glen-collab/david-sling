@@ -7,6 +7,8 @@
 
 ---
 
+> **Bible text (decided by Glen, 2026-10-11):** the game quotes the **World English Bible (WEB)**, which is public domain, so whole verses can be shown with no permission or limits. Not the NIV (copyrighted, with a quoting limit). David's own Journal entries stay as paraphrases in his own words.
+
 ## 1. The heart of the game
 
 **Theme:** God prepares David in the quiet places long before the world sees him.
@@ -39,7 +41,7 @@ Five layers, from always-on to fully optional:
 |---|---|---|
 | **Campfires** | Checkpoints. At some of them the **Sage** (or a brother) is sitting by the fire. Walk up and press A to hear 2–4 short lines. | Yes. Just walk past. |
 | **Family & people** | Brothers, Jesse, villagers say one or two lines as you pass. Helping someone gives a reward (a shortcut, a heart, a hidden cache). | Mostly |
-| **Scrolls** | One hidden scroll per stage. Each holds an NIV verse that ties to that stage. | Yes. They're collectibles. |
+| **Scrolls** | One hidden scroll per stage. Each holds a verse (World English Bible) that ties to that stage. | Yes. They're collectibles. |
 | **Shepherd's Journal** | Pause menu. Every scroll, fact and lesson you've found, plus your sheep count. It's the game's "museum". | Yes |
 | **End-of-world reflection** | A short scene: one verse and one sentence on what David learned. | Can be skipped after you've seen it once |
 
@@ -72,7 +74,7 @@ The other four brothers aren't named in Samuel. They appear only as background f
 
 ### Thread 1 — The One (the lost sheep)
 
-> "Suppose one of you has a hundred sheep and loses one of them. Doesn't he leave the ninety-nine in the open country and go after the lost sheep until he finds it?" — **Luke 15:4** (NIV)
+> "Which of you men, if you had one hundred sheep, and lost one of them, wouldn't leave the ninety-nine in the wilderness, and go after the one that was lost, until he found it?" — **Luke 15:4** (WEB)
 
 Jesus told this parable about a thousand years after David. The game connects them honestly, through history:
 - Jesus was born in **Bethlehem**, David's town (Luke 2:4). He was called the **Son of David** (Matthew 1:1).
@@ -105,7 +107,7 @@ Jesus told this parable about a thousand years after David. The game connects th
 ### Thread 2 — The Song (David's harp)
 
 David was a musician *before* he was a warrior or a king. The servant who recommends him to Saul lists music first: "a son of Jesse of Bethlehem who knows how to play the lyre. He is a brave man and a warrior…And the LORD is with him" (1 Sam 16:18).
-- **Fact for the Journal:** the NIV says **lyre**, a small hand-held harp. Older Bibles say "harp". The game calls it **David's harp** with a Journal note. (Kids know the word "harp".)
+- **Fact for the Journal:** many modern translations say **lyre**, a small hand-held harp. The World English Bible and older Bibles say "harp". The game calls it **David's harp** with a Journal note. (Kids know the word "harp".)
 - **Fact:** 73 of the Psalms are titled "of David". Psalm 23 sounds like it was written by someone who kept sheep, because it was.
 
 **In gameplay:**
@@ -679,7 +681,7 @@ Four short screens, no more:
   > "You're Jesse's youngest? I've seen you practice with that sling. Good. A shepherd who can't defend his sheep is just a man standing in a field."
   > "Did you know the men of Benjamin could sling a stone at a hair and not miss? Seven hundred of them. It's in the Book of Judges."
   > "That doesn't happen by luck. It happens one stone at a time."
-  - *Journal fact unlocked:* **Judges 20:16** — the slingers of Benjamin. (NIV: "...each of whom could sling a stone at a hair and not miss.")
+  - *Journal fact unlocked:* **Judges 20:16** — the slingers of Benjamin. (WEB: "...every one could sling a stone at a hair and not miss.")
 - **Second half:** first vipers. Learn to sling them from a distance instead of jumping over them.
 - **First Shepherd's Judgment:** a **whip snake** slides across the path right after the first viper. Shammah: *"Not that one! The thin dark ones don't hurt anybody. They eat the rats. Look at the head."* Hitting it lowers your Care score; leaving it alone, it slides into a rat hole and the rats blocking a ledge scatter. Both snakes go into the **Field Guide**.
 - **Scroll:** behind a bush on a high ledge → **Psalm 23:1** "The LORD is my shepherd, I lack nothing."
@@ -934,7 +936,7 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 ## 5c. World 3 — The Anointing *(DRAFT FOR REVIEW)*
 
 **Bible:** 1 Samuel 16:1–13.
-**Verse text note:** from World 3 on, this doc gives the **reference plus a short phrase**. The exact NIV wording is pasted in from Bible Gateway at build time.
+**Verse text note:** from World 3 on, this doc gives the **reference plus a short phrase**. The exact World English Bible wording is pasted in at build time (public domain, so whole verses are fine).
 **The big idea:** David is **this world's lost one.** The prophet comes to Bethlehem to anoint a king, every brother is presented, and David isn't even invited. He's out with the sheep. Samuel refuses to sit down until the overlooked youngest son is brought in (16:11). The player lives that: you're out in the far hills while the town gathers without you.
 **Key verse:** **1 Samuel 16:7**: people look at the outward appearance, but the LORD looks at the heart.
 **David learns:** no new move this world (the double jump waits for World 5); that God sees what people don't; and humility, because after he's anointed he goes straight back to the sheep.
@@ -1728,7 +1730,7 @@ No campfires, no helpers, no bonus spot. Nothing between David and the giant.
 ### Credits
 - **David's song** plays over the credits: **the full song if you found every Psalm piece**, or the parts you found if not. The Psalm 23 page in the Journal is shown alongside it, filled in as far as you got.
 - **Credits art:** scenes from each world, with the people from each one.
-- **Scripture credit:** the NIV notice (see README).
+- **Scripture credit:** "Scripture quotations are from the World English Bible (public domain)." No permission or notice is required; the credit is a courtesy.
 - **Final score:** sheep saved, The One found (out of 32), creatures spared, soldiers lifted, counsel heard, and the Shepherd's Care rating.
 
 ### Secret ending (all 32 of The One)
@@ -1793,7 +1795,7 @@ After the credits, if you found every lamb:
 - [x] World 8 structure: Goliath at the end of 8-2, then the rout and the trip home. **Approved.**
 - [ ] Part 2 teaser: **parked** until this game is finished.
 - [ ] Pastor's review of all script text before release (§3i).
-- [ ] Verify every NIV quotation word-for-word before it ships, and keep the total well inside Biblica's free-use limit.
+- [ ] Verify every quotation word-for-word against the World English Bible (ebible.org) before it ships.
 
 ## 8. Sprite sheet rules (for Photoshop)
 
