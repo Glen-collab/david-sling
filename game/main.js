@@ -2082,15 +2082,8 @@ function drawFoldFront(camX) {   // over David: the near half of the gate, the c
     ctx.beginPath(); ctx.moveTo(fx, y - 10); ctx.quadraticCurveTo(mx, y + 10, nx, y + 8); ctx.stroke();
     drawOlive(mx, y + 2, "golden", 1.6);
   }
-  // the near post, with carved notches whose olives grow bigger toward the top
+  // the near post, plain: David passes behind it, so nothing on it should get in the way of the illusion
   gatePost(nx, nby, 22, ph + 8, false);
-  const low = goalCordY(0), high = goalCordY(1);
-  for (let k = 1; k <= 4; k++) {
-    const y = low + (high - low) * k / 5;
-    ctx.strokeStyle = "rgba(40,24,10,0.85)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(nx - 10, y); ctx.lineTo(nx + 10, y); ctx.stroke();
-    ctx.strokeStyle = "rgba(200,160,110,0.5)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(nx - 10, y + 2.5); ctx.lineTo(nx + 10, y + 2.5); ctx.stroke();
-    drawOlive(nx + 24, y - 2, "green", 0.45 + k * 0.17);
-  }
   ctx.restore();
   // the "+N" (or "Missed!") at the goal, floating up
   const pop = finish.pop;
