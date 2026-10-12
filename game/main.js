@@ -143,6 +143,8 @@ for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
 // ============================================================================
 const keys = {};
 addEventListener("keydown", e => {
+  // playing on the keyboard: any key closes the controller setup (M or F2 opens it again)
+  if (setup.active && e.code !== "KeyM" && e.code !== "F2") { setup.active = false; toast("Using the keyboard. Press M to set up a controller."); return; }
   keys[e.code] = true;
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) e.preventDefault();
 });
