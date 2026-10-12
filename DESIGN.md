@@ -175,7 +175,7 @@ All counsel numbers live in one tuning table in the code, so "make the lion easi
 ### Gifts from people, not superpowers
 | Kind | Example | Effect |
 |---|---|---|
-| A skill someone teaches | Hanan / Shammah teach the roll, the long-shot wind-up (charged sling), the flip | Moves exist, but someone taught them to David. No magic. |
+| A skill someone teaches | Hanan / Shammah teach the roll and the long-shot wind-up (charged sling); Tobi teaches the double jump | Moves exist, but someone taught them to David. No magic. |
 | A gift of gear | Jesse's water skin; Shammah's sling pouch | Small, believable boosts: +1 heart, a slightly faster reload |
 | Trust | The shepherd girl's shortcut; a soldier opens the back way into camp | New routes on the map |
 
@@ -556,7 +556,6 @@ NES layout: **D-pad, A, B, Select, Start.**
 | Select | **Play the harp:** lost sheep within hearing come to David; at campfires, rest and refill hearts (see Thread 2) | 1-2 |
 | Hold B, release | **Charged sling** | World 2 |
 | A + B together | **Power Sling** (uses a special stone, §3f) | World 1 |
-| A at the top of a jump, after a roll | **Aerial flip** | World 3 |
 | A in mid-air | **Double jump** | World 5 |
 
 **Lost sheep:** each stage hides 5 lost sheep. Found sheep follow behind David in a line. If David gets hit, they scatter a few tiles and wait (they never vanish). Bring them to the fold at the end of the stage. The running total is shown in the Journal. Finding all of them in every stage is the 100% goal. (They do not cost you anything if you skip them.)
@@ -652,7 +651,7 @@ Goliath falls to one stone (§5h, phase 3). To throw it perfectly, the player en
 ### To build
 - **Lock each move until it's taught.** Right now David can do everything from 1-1 (the build started from the movement test).
   - **Done for the double jump (2026-10-11):** it's off until World 5 (Tobi). World 1 was checked stage by stage: every sheep, stone and goal is reachable with a single jump (at most 4 tiles up), and the gateposts are 8 tiles so a full jump just reaches the top olive. **Every stage in Worlds 1-4, and the lion, bear, ox and Saul fights, must be beatable with one jump.**
-  - **To settle:** the design also has an *aerial flip* taught in 3-3 (A at the top of a jump, after a roll or run) that the World 3 ox fight uses. In the game today the flip *is* the double jump. Either the 3-3 flip becomes a smaller move of its own, or the ox fight is redesigned for one jump.
+  - **Settled (Glen, 2026-10-11):** no aerial flip in World 3. The double jump in World 5 is the only extra jump in the game, Castlevania-style: a big moment when you finally get it. The World 3 ox fight uses the roll instead. See "Making the double jump worth it" below.
 - The journey map, Jesse's courtyard, the market stall, the practice wall, "The Throw" Journal page.
 
 ---
@@ -938,7 +937,7 @@ Wooded hills in the west, a dry wadi cutting through the middle, cliffs and a wa
 **Verse text note:** from World 3 on, this doc gives the **reference plus a short phrase**. The exact NIV wording is pasted in from Bible Gateway at build time.
 **The big idea:** David is **this world's lost one.** The prophet comes to Bethlehem to anoint a king, every brother is presented, and David isn't even invited. He's out with the sheep. Samuel refuses to sit down until the overlooked youngest son is brought in (16:11). The player lives that: you're out in the far hills while the town gathers without you.
 **Key verse:** **1 Samuel 16:7**: people look at the outward appearance, but the LORD looks at the heart.
-**David learns:** the **aerial flip** (taught by Shammah); that God sees what people don't; and humility, because after he's anointed he goes straight back to the sheep.
+**David learns:** no new move this world (the double jump waits for World 5); that God sees what people don't; and humility, because after he's anointed he goes straight back to the sheep.
 **Enemies:** crows in the barley, stray dogs, rats in the granary, hornets, **rustlers**, and in the storm, the wild ox. **Harmless:** whip snake (in the granary). **Chores:** oiling sheep pestered by flies. (See §3d.)
 
 ### World 3 map
@@ -996,15 +995,14 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 - **The One:** across the stream in a thorny thicket; clear the thorns with charged shots.
 - **End of stage:** Shammah comes running over the hill, out of breath.
 
-### 3-3 · We Will Not Sit Down — *the run back to town; learn the flip*
+### 3-3 · We Will Not Sit Down — *the run back to town*
 - **Story:** Samuel has asked Jesse, *"Are these all the sons you have?"* Jesse: there is still the youngest, tending the sheep. Samuel: *"Send for him; we will not sit down until he arrives"* (16:11). Shammah has come to get you.
-- **Shammah teaches the aerial flip** at the start, so you can keep up:
-  > "Remember rolling down the hills when we were little? Do it in the air. Jump, then roll."
-  - 🎓 **Skill: aerial flip** (A again at the top of a jump, after a roll or a run). A little extra height and air control.
-- **Level:** a fast, joyful run from the hills, through the fields and up into town: stone walls, fences, barley rows, then the rooftops again with the flip opening new routes. **Shammah runs alongside** and points out the way. **No timer.** The whole town is waiting, and the music speeds up as you get close.
+- **Shammah runs ahead** to show you the quick way:
+  > "Remember rolling down the hills when we were little? Under the fences, not over them. Come on!"
+- **Level:** a fast, joyful run from the hills, through the fields and up into town: stone walls, fences to roll under, barley rows, then the rooftops again. Everything is reachable with one jump and the roll. **Shammah runs alongside** and points out the way. **No timer.** The whole town is waiting, and the music speeds up as you get close.
 - **The flock comes too,** following you into town.
 - **Scroll:** **Psalm 78:70**: he chose David his servant and took him from the sheep pens.
-- **The One:** a flip-only route over the town wall.
+- **The One:** through a low drain under the town wall: roll in.
 
 ### ⭐ The Anointing — a story scene, not a fight
 1. David walks into the gathering, dusty from the fields. Everyone turns. The Bible describes him as glowing with health, with a fine appearance (16:12).
@@ -1029,19 +1027,19 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 ### BOSS · The Wild Ox (end of 3-4)
 **Not killed: driven off.** The Bible doesn't describe this fight; it's invented, so the game can choose. Not every animal needs to die. The ox gives up and runs off into the storm. Kids will notice that difference.
 
-**How it plays:** the Lion was dodging, the Bear was distance, and the Ox is **using the arena and the new flip.**
+**How it plays:** the Lion was dodging, the Bear was distance, and the Ox is **using the arena and the roll** (the move the ram taught you in 1-3).
 
 **Arena:** a muddy hillside in the rain with **three big trees**, a low stone wall and the flock huddled on the far left.
 
 **Phase 1 — Turn it from the flock.** The ox is charging at the flock. Hit it with charged shots to make it turn toward you instead.
 
 **Phase 2 — Use the trees.**
-- **Charge:** tell = it paws the ground three times and lowers its horns (with tier-1 counsel, its eyes flash). Stand in front of a tree and **flip over the ox** at the last second. Its **horns stick in the trunk** and it's stuck for a few seconds. Hit it then.
+- **Charge:** tell = it paws the ground three times and lowers its horns (with tier-1 counsel, its eyes flash). Stand in front of a tree and **roll under its lowered horns** at the last second, like the ram in 1-3. Its **horns stick in the trunk** and it's stuck for a few seconds. Hit it then.
 - **Lightning:** a strike hits a tree, and a branch falls; move.
 - **Mud slide:** it skids if it misses you on wet ground, so the next charge comes from a strange angle.
 - 3 trees, 3 good stuck-in-a-tree hits. Each time a tree splits and falls.
 
-**Phase 3 — No trees left.** It charges back and forth along the open slope, faster. Flip over every charge; hit it while it skids to turn. 3 hits. Then it stops, shakes its head, snorts, and **runs off into the rain.**
+**Phase 3 — No trees left.** It charges back and forth along the open slope, faster. Roll under every charge; hit it while it skids to turn. 3 hits. Then it stops, shakes its head, snorts, and **runs off into the rain.**
 
 **Counsel tier 2** (Hanan: *"Sit down. Tell me what happened."*): the ox paws one extra time before each charge, horns stay stuck +0.5 s, and you get +1 heart.
 
@@ -1059,7 +1057,7 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 |---|---|---|---|---|
 | 3-1 | Village rooftops, chores as level goals | 5 + The One | Jesse, Eliab, Shammah | Micah 5:2 |
 | 3-2 | Being left out, cut-in scenes of the brothers before Samuel | 5 + The One | (cut-ins) | Psalm 139:1 |
-| 3-3 | **Aerial flip**, joyful run back to town with Shammah | 5 + The One | Shammah | Psalm 78:70 |
+| 3-3 | Joyful run back to town with Shammah (roll under the fences) | 5 + The One | Shammah | Psalm 78:70 |
 | ⭐ | **The Anointing** (story scene) | | Samuel, Jesse, all the brothers | |
 | 3-4 end | Storm: wind, mud, lightning; **Boss:** the Wild Ox, driven off | 5 + The One | **Hanan** | Psalm 29:3–4 |
 
@@ -1069,7 +1067,7 @@ Bethlehem up close: the village on its hill, barley fields and a threshing floor
 | 3-1 | Jesse | 🧭 Story: take the flock to the far pasture | |
 | Map: 🙋 The gleaner | Old widow *(made up)* | 🗝️ Secret: the hollow under the fallen oak in 3-4 (The One) · 📜 Leviticus 19:9–10 | Trust: a heart refill whenever you pass |
 | 3-2 campfire | (David alone) | 📜 Psalm 139:1 | Harp adds a phrase to David's song |
-| 3-3 | Shammah | 🎓 Skill: aerial flip | |
+| 3-3 | Shammah | Shows the quick way home | |
 | ⭐ | Samuel | 📜 1 Samuel 16:7 · Journal: what "anointing" means | |
 | 3-4 campfire | Hanan | 👁️ Warning (tier 1): the ox's charge and the trees · 📜 Proverbs 22:4 | Tier 2 after a loss: longer tell, horns stuck longer, +1 heart |
 | End of World 3 | Hanan | | **Gift:** Hanan's shepherd's staff, +1 max heart |
@@ -1283,6 +1281,14 @@ David carries the provisions through every stage. **If he's hit, a loaf or a che
 - **Scroll:** **Psalm 4:8**: in peace I will lie down and sleep.
 - **The One:** on a high shelf above the trail that needs the new double jump. It's the first lamb the double jump is for.
 
+### Making the double jump worth it *(Glen, 2026-10-11)*
+It's the only extra jump in the game and it arrives late, so the last four worlds have to show it off, and the first four have to make you want it.
+- **Before World 5, the player sees what they can't reach yet.** Every stage in Worlds 1–4 has one or two **high places**: an olive cache, a golden olive, a Field Guide card or a Psalm piece on a ledge just out of single-jump reach. Nothing needed (every sheep, The One and every stone of remembrance stays reachable with one jump, rule 2), but you remember them.
+- **The moment you get it (5-2):** Tobi teaches it, the music swells, and the very next screen is a cliff you could never have climbed. The One for 5-2 is up there.
+- **Going back pays off.** Cleared stages stay open on the maps (§4b), so after World 5 you can return to Worlds 1–4 for the high places. The journey map shows a small star on any world with high places left.
+- **Worlds 5–8 are built around it:** 5-3's ridge has high routes past the lookouts; the chariot (5-4) is jumped over; the watchtower (6-4) is climbed; the shield-bearer (7-4) is double-jumped over; Goliath's spear sweeps (8-2, phase 1) are dodged forward through the air, which is how you "run to meet him".
+- **The gateposts grow** from World 5 on, so the top olive needs the double jump.
+
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
 - **Lookouts (light stealth):** each one watches a stretch of ridge with a torchlight cone. If he sees you, he shouts and lights a **signal fire**, and a few extra raiders come. **Being seen is never a fail state**, just a harder few seconds. Sneaking past (or knocking the torch out of his hand with a quick shot) earns a "Not seen" bonus.
@@ -1350,7 +1356,7 @@ David carries the provisions through every stage. **If he's hit, a loaf or a che
 **The lost one:** **the whole army.** For forty days they've heard the giant morning and evening (17:16), and they've lost heart.
 **The big idea:** courage is catching. David's harp and his words lift frightened soldiers, and soldiers who've been lifted help in return.
 **Invented, and labelled so:** the Philistine watchtower and the water carriers. The Bible goes straight from Eliab's rebuke to Saul sending for David. The game puts a few hours of camp life in between, then picks the story back up at 17:31.
-**David learns:** no new move this world. The new thing is **encouraging soldiers** with the harp (Thread 2), and the game now expects you to **combine** everything: roll, flip, double jump, quick release, charged shots.
+**David learns:** no new move this world. The new thing is **encouraging soldiers** with the harp (Thread 2), and the game now expects you to **combine** everything: roll, double jump, quick release, charged shots.
 **Enemies:** Philistine archers and slingers on the far slope (driven off), Philistine skirmishers, vipers and scorpions in the streambed, vultures. **Harmless:** camp donkeys and oxen, hedgehog (callback), the soldiers' dogs.
 
 ### World 6 map
@@ -1427,7 +1433,7 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
   > "Those towers are top-heavy. Knock the pins out of the front wheels and it'll lean. Lean it far enough and it goes over."
 - **5 frightened soldiers:** the water carriers who refused to go. Lift them and they join the line.
 - **Scroll:** **Psalm 23:2**: he leads me beside quiet waters.
-- **The One:** in the reeds at the deepest pool, reached by a flip across the water.
+- **The One:** in the reeds at the deepest pool, reached by a double jump across the water.
 
 ### 6-4 · The Tower's Shadow — *toward the tower*
 - **Level:** along the streambed toward the tower, then up the bank under it. The tower **rolls forward slowly** along the edge of the valley as you go, and its shadow falls across the level. Archers' volleys get tighter. Philistine skirmishers come down to block the path.
@@ -1523,7 +1529,7 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 
 ### 7-1 · Saul's Armor — *the stage you win by taking it off*
 - **"He tried walking around"** (17:39). The stage starts in the armor, in the camp beside Saul's tent: a little training course of crates, a low wall, a ditch, a ladder.
-- **In the armor, David can only:** walk slowly (clank, clank), make a tiny hop, and land with a thud. **No sling** (you can't swing it in a coat of armor), no roll, no flip, no double jump. Every few steps the **helmet slips down over his eyes** and the top of the screen goes dark for a moment. The sword drags and catches on things. It's funny, and it's frustrating on purpose.
+- **In the armor, David can only:** walk slowly (clank, clank), make a tiny hop, and land with a thud. **No sling** (you can't swing it in a coat of armor), no roll, no double jump. Every few steps the **helmet slips down over his eyes** and the top of the screen goes dark for a moment. The sword drags and catches on things. It's funny, and it's frustrating on purpose.
 - **Armor hearts:** the armor shows as 3 extra grey hearts. It's the one time the game offers *more protection*, and it's exactly what David should give up.
 - **You can take it off at any moment:** stand still and **press Select.** A small prompt shows it from the start. Most players will try to push on in the armor first. The course is built so that **you can get a little way, but not to the end**: the last gap needs a real jump, and the exit is a narrow gap between tents you can't fit through in the armor.
 - **When you take it off**, David says it: *"I cannot go in these, because I am not used to them."* (17:39) He sets the armor down carefully and bows to Saul. **Saul nods.** He isn't offended.
@@ -1580,7 +1586,7 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 
 **The arena:** the open valley floor. The shield-bearer pushes forward, so **the space shrinks** toward the stream behind you.
 
-**Phase 1 — The wall.** He walks forward behind the shield. Stones bounce off it. Tell: he **lifts the shield to slam it down** (with tier-1 counsel, the shield's bronze rim flashes). The slam sends a shockwave along the ground: be in the air. While he's lifting it again, **flip or double jump over him** and hit him from behind. 3 hits.
+**Phase 1 — The wall.** He walks forward behind the shield. Stones bounce off it. Tell: he **lifts the shield to slam it down** (with tier-1 counsel, the shield's bronze rim flashes). The slam sends a shockwave along the ground: be in the air. While he's lifting it again, **double jump over him** and hit him from behind. 3 hits.
 **Phase 2 — The shove.** He charges, shield first, to knock you into the stream. **Roll** under the edge of the shield as he comes, or get high. He peeks over the top to find you: a **quick-release** shot at the shield's edge as he peeks knocks it sideways. 3 times.
 **Phase 3 — The shield falls.** One **charged shot** to the shield's edge while it's tilted knocks it out of his hands. It falls flat with a huge crash. He stares at it, looks back at Goliath, and **backs away**. Goliath laughs at him.
 
@@ -1759,7 +1765,7 @@ After the credits, if you found every lamb:
 | # | World | Bible | Unlock | Boss (draft) |
 |---|---|---|---|---|
 | 2 | The Wilderness | 1 Sam 17:34–36 | Charged sling | The Bear. **Detailed in §5b.** |
-| 3 | The Anointing | 1 Sam 16:1–13 | Aerial flip | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
+| 3 | The Anointing | 1 Sam 16:1–13 | — (the roll, against the ox) | **The Wild Ox. Detailed in §5c.** A charging wild ox in a storm on the way home. A real animal of the region; "save me from the horns of the wild oxen" (Psalm 22:21). |
 | 4 | The King's Court | 1 Sam 16:14–23 | Quick release | **Saul's Torment. Detailed in §5d.** The only boss you win with music, not the sling: a harp rhythm fight while dodging the shadows of Saul's distress. Saul is never the enemy; his torment is. |
 | 5 | The Road to the Valley | 1 Sam 17:1–24 | Double jump | **The Philistine Chariot. Detailed in §5e.** A chase along the supply road. The Philistines had chariots (1 Sam 13:5). A vehicle fight, not another big soldier. |
 | 6 | The Valley of Elah | 1 Sam 17:25–37 | — (harp lifts soldiers) | **The Philistine Watchtower. Detailed in §5f.** Climb a wooden siege tower while archers and slingers fire from it. Eliab's rebuke (17:28) happens in this world. |
