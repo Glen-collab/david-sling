@@ -337,10 +337,24 @@ const food = (name, c, r) => pickups.push({ name, x: c * T + T / 2, y: (r + 1) *
 // snakes stand on row r (default: the ground). "whip" = the harmless green whip snake (leave it alone: it eats the rats)
 const snake = (kind, c, r = GR - 1) => snakes.push({ kind, x: c * T + T / 2, y: (r + 1) * T, home: c * T + T / 2, state: "idle", t: 0, facing: -1, gone: false, alpha: 1 });
 // campfires: the checkpoint. who/say: the person sitting there, and what they tell David
-const campfire = (c, r = GR - 1, who = null, say = null) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false, who, say });
+const campfire = (c, r = GR - 1, who = null, say = null, teach = null) => fires.push({ x: c * T + T / 2, y: (r + 1) * T, lit: false, who, say, teach });
 // a word from someone along the way, shown when David reaches this column
 const talks = [];
-const talk = (c, who, say) => talks.push({ x: c * T, who, say, done: false });
+const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, teach, done: false });
+// Moves are taught by people, never found (DESIGN §3c). Learned skills are kept in the save ("davidProgress".skills).
+//   aimUp: Shammah, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
+// The movement test (#test) and "?allskills" have everything.
+const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: Down + A while running", charge: "Charged sling: hold B" };
+const skills = new Set();
+try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
+const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
+const hasSkill = k => ALL_SKILLS || skills.has(k);
+function learnSkill(k) {
+  if (!k || skills.has(k)) return;
+  skills.add(k);
+  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.skills = [...skills]; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  setTimeout(() => { toast("New skill: " + SKILL_NAMES[k]); if (typeof chime === "function") { chime(4); setTimeout(() => chime(7), 150); } }, 2500);
+}
 // ground animals: "fox" (goes for your lamb), "jackal" (steals it and runs), "ram" (charges; roll under it)
 const critters = [];
 const critter = (kind, c, r = GR - 1, range = 0) => critters.push({ kind, x: c * T + T / 2, y: (r + 1) * T, y0: (r + 1) * T, home: c * T + T / 2, range: range * T, vx: 0, vy: 0, onGround: true,
@@ -381,7 +395,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheepblack", 26, 16);                             // the first lost sheep: just walk up to it
   // a tiny gap you can't fail
   ground(33, 72);
-  talk(36, "Shammah", "Ignore him. Watch: hold Up and press B, and you can hit the high ones.");
+  talk(36, "Shammah", "Ignore him. Watch: hold Up and press B, and you can hit the high ones.", "aimUp");
   rock(40, 13, 3, 4); gourd(41, 12);                           // a gourd on the rock: sling it
   gourd(46, 7, true); gourd(50, 6, true);                      // hanging gourds: aim up
   special(41, 6);                                              // high over the rock: jump from the top, then flip
@@ -423,7 +437,7 @@ if (LEVEL_NAME === "test") {
 } else if (LEVEL_NAME === "1-2") {
   // ---- 1-2 The Wandering Flock: the harp gathers them, foxes go for your lamb, a cast sheep, a neighbour's ram ----
   ground(0, 40);
-  campfire(6, GR - 1, "Hanan", "Count them every morning and every night. Sheep know their shepherd's voice, and they know your song. Play the harp (Select): the lost ones will come to it.");
+  campfire(6, GR - 1, "Hanan", "Count them every morning and every night. Sheep know their shepherd's voice, and they know your song. Play the harp (Select): the lost ones will come to it.", "harpCall");
   oliveRow(10, 16, 5);
   lostSheep("ram", 30, 16);                                    // a ram that isn't yours: the neighbour's (bring it home too)
   critter("fox", 37);
@@ -471,7 +485,7 @@ if (LEVEL_NAME === "test") {
   crumble(24, 15, 3);                                          // it shakes when you land: keep moving
   ground(29, 60);
   raven(36, 7);
-  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Down + A while running)");
+  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Down + A while running)", "roll");
   rock(42, 11, 10, 4);                                         // a low passage: roll (or crawl) under
   oliveRow(42, 16, 10);
   lostSheep("sheep", 56, 16);                                  // on the far side of the passage
@@ -709,7 +723,7 @@ function updateDavid(dt) {
   }
 
   // --- roll: Down + A while moving on the ground
-  if (!d.carrying && !d.harp && d.onGround && !busy && held("down") && pressed("a") && (Math.abs(d.vx) > 60 || held("left") || held("right"))) {
+  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && held("down") && pressed("a") && (Math.abs(d.vx) > 60 || held("left") || held("right"))) {
     setState("roll"); d.rollT = 0; d.vx = d.facing * TUNE.ROLL_SPEED; d.jumpBuf = 0;
   }
 
@@ -738,7 +752,7 @@ function updateDavid(dt) {
     d.specialStones--;
     d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
     d.throwT = d.runThrow ? TUNE.RUN_THROW_TIME * 9 / 12 : TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
-    const aimUp = held("up"), aimDown = held("down") && !d.onGround;   // Down only aims while in the air (on the ground it's crouch)
+    const aimUp = held("up") && hasSkill("aimUp"), aimDown = held("down") && !d.onGround;   // Down only aims while in the air (on the ground it's crouch)
     const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
     stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
                   charged: true, power: true, life: 1.6, trail: [] });
@@ -747,7 +761,7 @@ function updateDavid(dt) {
   }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
-    if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up");   // aim decided up to the moment the stone leaves
+    if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
   if (d.throwT >= 0) {
@@ -756,9 +770,9 @@ function updateDavid(dt) {
     const relAt = d.runThrow ? dur * 9.5 / 12 : d.aimingUp ? dur * 9.5 / 12 : dur * 7 / 12;   // running and upward throws: the stone leaves at frame 10
     if (!d.thrown && d.throwT >= relAt) {
       d.thrown = true;
-      const full = Math.min(1, d.charge / TUNE.CHARGE_TIME);
+      const full = hasSkill("charge") ? Math.min(1, d.charge / TUNE.CHARGE_TIME) : 0;   // full power is taught in World 2
       const sp = full >= 1 ? TUNE.STONE_SPEED_CHARGED : TUNE.STONE_SPEED;
-      const aimUp = held("up"), straightUp = aimUp && !(held("left") || held("right"));
+      const aimUp = held("up") && hasSkill("aimUp"), straightUp = aimUp && !(held("left") || held("right"));
       const aimDown = held("down") && !d.onGround;   // Down + B in the air: throw diagonally down
       const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
@@ -873,7 +887,7 @@ function drawDavid(camX) {
       drawSprite(sheet, i, x, y, d.facing);
       gx = x - d.facing * 8; gy = y - 104 * (TUNE.SPRITE_SIZE.david_sling_throw || 1);   // the stone whirls just above and behind his head
     }
-    if (d.charging && d.charge >= TUNE.CHARGE_TIME) { // golden glow when fully charged
+    if (d.charging && d.charge >= TUNE.CHARGE_TIME && hasSkill("charge")) { // golden glow when fully charged
       ctx.save(); ctx.globalCompositeOperation = "lighter";
       const g = ctx.createRadialGradient(gx, gy, 2, gx, gy, 30);
       g.addColorStop(0, "rgba(255,215,100,0.85)"); g.addColorStop(1, "rgba(255,180,40,0)");
@@ -1494,6 +1508,7 @@ function updateFires(dt) {
     if (near && !f.lit) {
       f.lit = true; checkpoint = { x: f.x - 30, y: f.y };
       if (f.who) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
+      learnSkill(f.teach);
     }
     if (near && david.state === "harp" && david.hearts < david.maxHearts) {
       f.healT = (f.healT || 0) + dt;
@@ -1753,7 +1768,7 @@ function updateSheep(dt) {
     }
     if (near && d.deadT <= 0) { joinLine(sh); continue; }
     // the harp: lost sheep within hearing come to David (The One has to be fetched)
-    if (sh.state === "lost" && !sh.one && d.state === "harp" && Math.abs(dx) < TUNE.HARP_CALL_RANGE && Math.abs(dy) < 360) {
+    if (hasSkill("harpCall") && sh.state === "lost" && !sh.one && d.state === "harp" && Math.abs(dx) < TUNE.HARP_CALL_RANGE && Math.abs(dy) < 360) {
       sh.state = "called";
       if (!sh.hinted) { sh.hinted = true; toast("A sheep heard the harp and is coming!"); }
     }
@@ -2613,7 +2628,7 @@ function drawLivesAndOil() {
 }
 // the sling ring over David's head fills while you hold B; gold when the throw is fully charged
 function drawChargeRing() {
-  const d = david; if (!d.charging) return;
+  const d = david; if (!d.charging || !hasSkill("charge")) return;
   const f = Math.min(1, d.charge / TUNE.CHARGE_TIME), s = 30;
   const x = d.x - camX - s / 2, y = d.y - d.h - s - 26;
   hudIcon("ring_empty", x, y, s, 0.85);

@@ -270,6 +270,9 @@ const Journal = {
     this.pages = [{ spread: "draft", step: Math.min(4, opts.stage) }];
     if (opts.stage >= 4 && !opts.noEnd) this.pages.push({ spread: "end", step: 5 });
     if (opts.read && opts.stage < 4) this.pages[0].step = opts.stage;
+    // reading the Journal later: a page with the pieces of the throw Father has given you (DESIGN §4c)
+    const learned = typeof throwLearned === "function" ? throwLearned() : 0;
+    if (opts.read && learned > 0) { this.P = Object.assign({}, this.P, { throw: throwSpread(learned) }); this.pages.push({ spread: "throw", step: 5 }); }
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
     this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
@@ -460,3 +463,22 @@ const JOURNAL_FREEZE = new URLSearchParams(location.search).has("jfreeze");
 const JOURNAL_SIM = Number(new URLSearchParams(location.search).get("jt")) || 0;
 const JOURNAL_AT = Number(new URLSearchParams(location.search).get("journal"));
 if (JOURNAL_AT) Journal.openPreview(JOURNAL_AT);
+
+// "The Throw": the pieces Jesse has given, in David's hand, in words (the handwriting font has no arrow signs)
+const THROW_LINES = [
+  "Up. Look up: the LORD goes ahead of me, as He did with the lion.",
+  "Up again. The same help, again, with the bear.",
+  "Down. Kneel: stay humble.",
+  "Down again. Bow: I serve the king.",
+  "Left, right. Steady steps on the road, even in the dark.",
+  "Left, right again. In the valley, don't run either way.",
+  "B. The sling my hands know.",
+  "A. Faith: the battle is the LORD's.",
+];
+function throwSpread(n) {
+  const left = [{ at: 5, size: "entry", segs: [{ text: "The throw, the way Father taught me:", at: 5 }] }];
+  for (let k = 0; k < n; k++) left.push({ at: 5, size: "small", segs: [{ text: THROW_LINES[k], at: 5 }] });
+  const right = [{ at: 5, size: "entry", segs: [{ text: n >= 8 ? "That's all of it. I know it by heart now." : "There's more to it. Father says I'll learn the rest on the way.", at: 5 }] },
+                 { at: 5, size: "small", segs: [{ text: "When the giant's head is open, I will need every piece, in the right order, without stopping to think.", at: 5 }] }];
+  return { left, right };
+}
