@@ -65,7 +65,7 @@ function stageCleared(id, info) {
   saveProgress(p);
 }
 
-const mapAmbience = new Audio(`../assets/sounds/ambience_hills.mp3?v=${window.BUILD || 0}`); mapAmbience.loop = true; mapAmbience.volume = 0;
+const mapAmbience = new Audio(`../assets/sounds/ambience_hills.mp3?v=${window.BUILD || 0}`); mapAmbience.loop = true; mapAmbience._music = true; mapAmbience.volume = 0;
 
 const WorldMap = {
   active: false,
@@ -272,7 +272,7 @@ const WorldMap = {
     if (p.cleared) line += "     A: play again";
     ctx.fillText(line, W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
-    ctx.fillText(`Left / Right: walk    Select: Journal    ${MAP_CHEAT ? "B: mark cleared (cheat)" : "B: the journey map"}`, W - 14, H - 10);
+    ctx.fillText(`Left / Right: walk    Select: Journal    Start: menu    ${MAP_CHEAT ? "B: mark cleared (cheat)" : "B: the journey map"}`, W - 14, H - 10);
   },
   journeyPanel(st) {
     const done = this.M.stops.filter(s => this.isCleared(s)).length;
@@ -285,7 +285,7 @@ const WorldMap = {
     ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
     ctx.fillText(!BUILT_WORLDS.includes(st.world) ? "Coming soon" : this.isCleared(st) ? "Cleared  ·  A: go back in" : "A: enter", W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
-    ctx.fillText("Left / Right: walk    A: enter    Select: Journal", W - 14, H - 10);
+    ctx.fillText("Left / Right: walk    A: enter    Select: Journal    Start: menu", W - 14, H - 10);
   },
 };
 function sfxLater(fn, s) { setTimeout(fn, s * 1000); }

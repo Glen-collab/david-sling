@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>David: The Shepherd's Sling — movement test</title>
+<title>David: The Shepherd's Sling</title>
 <style>
   html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
   body { display: flex; align-items: center; justify-content: center; }
@@ -17,7 +17,7 @@
   window.BUILD = Date.now();
   document.write('<script src="sprites.js?v=' + BUILD + '"><\/script><script src="main.js?v=' + BUILD + '"><\/script><script src="world1.js?v=' + BUILD + '"><\/script><script src="caves.js?v=' + BUILD + '"><\/script>'
     + '<script src="journal_font.js?v=' + BUILD + '"><\/script><script src="journal.js?v=' + BUILD + '"><\/script>'
-    + '<script src="map.js?v=' + BUILD + '"><\/script><script src="home.js?v=' + BUILD + '"><\/script><script>if (!location.hash && !JOURNAL_AT) WorldMap.open(loadProgress().view || \"journey\");<\/script>');
+    + '<script src="map.js?v=' + BUILD + '"><\/script><script src="home.js?v=' + BUILD + '"><\/script><script src="menu.js?v=' + BUILD + '"><\/script><script>if (!location.hash && !JOURNAL_AT) Menu.boot();<\/script>');
 </script>
 </body>
 </html>

@@ -142,6 +142,22 @@ for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
 // ============================================================================
 // Input: keyboard + gamepad (with a button-setup screen for NES controllers)
 // ============================================================================
+// Settings (menu.js): which controller's pictures to show, and the music / sound volumes (0-10).
+const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10 }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
+function saveSettings() { try { localStorage.setItem("davidSettings", JSON.stringify(SETTINGS)); } catch (e) {} applyVolumes(); }
+const sfxMul = () => SETTINGS.sfx / 10, musicMul = () => SETTINGS.music / 10;
+// Every <audio> keeps working with its own 0-1 volume; the setting scales what you actually hear.
+// Music elements are marked with ._music (the harp, ambience, boss music, map and Journal music); the rest are sounds.
+const volumed = new Set();
+{
+  const vd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "volume");
+  Object.defineProperty(HTMLMediaElement.prototype, "volume", {
+    configurable: true,
+    get() { return this._rawVol !== undefined ? this._rawVol : vd.get.call(this); },
+    set(v) { this._rawVol = v; volumed.add(this); vd.set.call(this, Math.max(0, Math.min(1, v * (this._music ? musicMul() : sfxMul())))); },
+  });
+}
+function applyVolumes() { for (const a of volumed) a.volume = a._rawVol; }
 const keys = {};
 addEventListener("keydown", e => {
   // playing on the keyboard: any key closes the controller setup (M or F2 opens it again)
@@ -157,7 +173,7 @@ const BUTTONS = ["up", "down", "left", "right", "a", "b", "select", "start", "x"
 const NES_BUTTONS = 8;   // the setup can stop after Start for a controller without X and Y
 const KEYMAP = {
   up: ["ArrowUp", "KeyW"], down: ["ArrowDown", "KeyS"], left: ["ArrowLeft", "KeyA"], right: ["ArrowRight", "KeyD"],
-  a: ["KeyZ", "Space", "KeyK"], b: ["KeyX", "KeyJ"], select: ["ShiftLeft", "ShiftRight", "KeyC"], start: ["Enter"],
+  a: ["KeyZ", "Space", "KeyK"], b: ["KeyX", "KeyJ"], select: ["ShiftLeft", "ShiftRight", "KeyC"], start: ["Enter", "Escape"],
   x: ["KeyV"], y: [],
 };
 // each controller's buttons are remembered separately (an NES and a SNES controller can both be set up)
@@ -1963,7 +1979,7 @@ function chime(k) {   // a little bell for each sheep counted in
     if (chimeCtx.state === "suspended") chimeCtx.resume();
     const t0 = chimeCtx.currentTime, o = chimeCtx.createOscillator(), g = chimeCtx.createGain();
     o.type = "sine"; o.frequency.value = 660 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16][k % 8] / 12);
-    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.25 * sfxMul()), t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
     o.connect(g).connect(chimeCtx.destination); o.start(t0); o.stop(t0 + 0.65);
   } catch (e) {}
 }
@@ -2472,7 +2488,7 @@ function drawBugs(camX) {
 
 // harp music: the first 15 seconds of "The Shepherd Leads Me", looping while David sits and plays
 const harpMusic = new Audio("../assets/audio/harp_loop.mp3?v=" + (window.BUILD || 0));
-harpMusic.loop = true; harpMusic.volume = 0;
+harpMusic.loop = true; harpMusic._music = true; harpMusic.volume = 0;
 let harpVol = 0, harpStarting = false, harpHeldT = 0;
 // Browsers only allow sound after the player clicks or presses a key on the page (controller buttons don't count),
 // so the first click or keypress quietly "unlocks" audio.
@@ -2509,9 +2525,9 @@ function sfx(name, x, vol = 1, rate = 1) {
 }
 const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() * 7)), x, vol, 0.92 + Math.random() * 0.16);
 // looping beds
-function loopAudio(name) { const a = new Audio(`../assets/sounds/${name}.mp3?v=${window.BUILD || 0}`); a.loop = true; a.volume = 0; return a; }
+function loopAudio(name, music = true) { const a = new Audio(`../assets/sounds/${name}.mp3?v=${window.BUILD || 0}`); a.loop = true; a._music = music; a.volume = 0; return a; }
 const ambience = loopAudio("ambience_hills"), bossMusic = loopAudio("boss_loop");
-const stepsRun = loopAudio("steps_run");
+const stepsRun = loopAudio("steps_run", false);
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0;
 function fadeLoop(a, cur, want, dt, speed) {
   const v = want > cur ? Math.min(want, cur + dt * speed) : Math.max(want, cur - dt * speed);
@@ -2689,16 +2705,19 @@ function frame(now) {
   if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
   // (also wait for the other scripts: world1.js, the Journal and the map load after this one)
-  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined" || typeof Courtyard === "undefined") {
+  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined" || typeof Courtyard === "undefined" || typeof Menu === "undefined") {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
     requestAnimationFrame(frame); return;
   }
-  if (Journal.active || WorldMap.active || (typeof Courtyard !== "undefined" && Courtyard.active)) {   // the Journal, a map or the home base covers the screen
+  if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
-    if (Journal.active) { Journal.update(real); Journal.draw(); }
+    // Start on a map or in the courtyard: the pause menu (settings)
+    if (!Menu.active && pressed("start") && ((WorldMap.active && !WorldMap.leaving) || (Courtyard.active && !Courtyard.leaving && !Courtyard.mode))) { Menu.open("pause"); Menu.draw(); requestAnimationFrame(frame); return; }
+    if (Menu.active) { Menu.update(real); Menu.draw(); }
+    else if (Journal.active) { Journal.update(real); Journal.draw(); }
     else if (WorldMap.active) { WorldMap.update(real); WorldMap.draw(); }
     else { Courtyard.update(real); Courtyard.draw(); }
     drawToastAndSetup();
@@ -2706,6 +2725,8 @@ function frame(now) {
   }
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
+  // Start in a stage: pause (resume, settings, back to the map)
+  if (pressed("start") && !setup.active && !oneMoment.active && !finish.active && !codeEntry.active && david.deadT <= 0) { Menu.open("pause", true); requestAnimationFrame(frame); return; }
   if (oneMoment.active) updateOneMoment(real);
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)

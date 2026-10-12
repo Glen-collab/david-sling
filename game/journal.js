@@ -224,7 +224,7 @@ function penScratch(dur, loud = 1) {
     if (!noiseBuf) { noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
     const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(), t0 = ac.currentTime;
     src.buffer = noiseBuf; bp.type = "bandpass"; bp.frequency.value = 2600 + Math.random() * 1400; bp.Q.value = 0.9;
-    const v = 0.05 * JTUNE.PEN_VOLUME * loud;
+    const v = Math.max(0.0003, 0.05 * JTUNE.PEN_VOLUME * loud * sfxMul());
     g.gain.setValueAtTime(0.0001, t0);
     // little strokes inside the word, not one long hiss
     const n = Math.max(1, Math.round(dur / 0.07));
@@ -233,7 +233,7 @@ function penScratch(dur, loud = 1) {
     src.start(t0, Math.random() * 0.5); src.stop(t0 + dur + 0.05);
   } catch (e) {}
 }
-const journalMusic = new Audio(`../assets/audio/harp_loop.mp3?v=${window.BUILD || 0}`); journalMusic.loop = true; journalMusic.volume = 0;
+const journalMusic = new Audio(`../assets/audio/harp_loop.mp3?v=${window.BUILD || 0}`); journalMusic.loop = true; journalMusic._music = true; journalMusic.volume = 0;
 
 // ----------------------------------------------------------------------------
 // The Journal screen
