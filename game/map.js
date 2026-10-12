@@ -59,6 +59,8 @@ function stageCleared(id, info) {
   p[id] = { cleared: true, sheep: Math.max(old.sheep || 0, info.sheep || 0), total: info.total || old.total || 0,
             one: !!(old.one || info.one), stones: Math.max(old.stones || 0, info.stones || 0) };
   p.justCleared = id; p.at = id;
+  if (info.olives !== undefined) p.olives = info.olives;   // what's in the purse now (spent at the market, §4c)
+  if (info.lampOil !== undefined) p.lampOil = info.lampOil;
   if (id.endsWith("-4")) { p.view = "journey"; p.justWorld = true; p.jat = "w" + id[0]; }   // a world beaten: back out to the journey map
   saveProgress(p);
 }
@@ -151,6 +153,7 @@ const WorldMap = {
       stageCleared(stop.id, {}); this.open(this.prog.view === "journey" ? "journey" : this.world); return;
     }
     if (!MAP_CHEAT && pressed("b")) { this.leaving = () => this.open("journey"); return; }   // B: back out to the journey map
+    if ((pressed("a") || pressed("start")) && stop.id === "home") { this.leaving = () => Courtyard.open(this.world); return; }   // home: Jesse's courtyard
     if ((pressed("a") || pressed("start")) && stop.id !== "home") {
       if (BUILT_STAGES.includes(stop.id)) this.leaving = () => startStage(stop.id);
       else toast(`${stop.id} ${stop.label} isn't built yet. It's next!`);
@@ -259,8 +262,8 @@ const WorldMap = {
     ctx.fillStyle = "rgba(25,14,6,0.76)"; ctx.beginPath(); ctx.roundRect(x, y, w, 78, 14); ctx.fill();
     ctx.textAlign = "center";
     if (st.id === "home") {
-      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText("Home: the family sheepfold", W / 2, y + 32);
-      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText("Right: walk out to the hills", W / 2, y + 60);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText("Home: Jesse's house", W / 2, y + 32);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText("A: go into the courtyard    Right: walk out to the hills", W / 2, y + 60);
       return;
     }
     ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`${st.id}  ${st.label}`, W / 2, y + 32);

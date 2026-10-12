@@ -97,9 +97,9 @@ function updateCave(dt) {
   if (!cave.room) return;
   if (cave.lit && !cave.trans) {
     cave.oilT += dt;
-    if (cave.oilT >= CAVE.OIL_EVERY) { cave.oilT = 0; if (david.olives > 0) david.olives--; }
+    if (cave.oilT >= CAVE.OIL_EVERY) { cave.oilT = 0; if (david.lampOil > 0) david.lampOil--; else if (david.olives > 0) david.olives--; }   // bought lamp oil burns first
   }
-  const want = david.olives > 0 ? CAVE.LAMP : CAVE.LAMP_DIM;
+  const want = david.olives > 0 || david.lampOil > 0 ? CAVE.LAMP : CAVE.LAMP_DIM;
   cave.R += (want - cave.R) * Math.min(1, dt * 1.5);
   // bats: hang until David passes under, then flutter off up and away
   for (const b of caveBats) {
@@ -241,7 +241,9 @@ function drawCaveDarkness(camX) {
     wg.addColorStop(0, "rgba(255,170,70,0.28)"); wg.addColorStop(1, "rgba(255,140,40,0)");
     ctx.fillStyle = wg; ctx.fillRect(lx - R, ly - R, R * 2, R * 2); ctx.restore();
     // the lamp beside the oil flask on the HUD: lit while there's oil
-    drawItem(david.olives > 0 ? "lamp_lit" : "lamp_unlit", HUD_X - 34, 188, 0.27, david.olives > 0 ? 1 : 0.6);
+    const lit = david.olives > 0 || david.lampOil > 0;
+    drawItem(lit ? "lamp_lit" : "lamp_unlit", HUD_X - 34, 188, 0.27, lit ? 1 : 0.6);
+    if (david.lampOil > 0) hudText(`${david.lampOil}`, HUD_X - 52, 214, 15);   // bought lamp oil left
   }
   if (cave.fade > 0) { ctx.fillStyle = `rgba(0,0,0,${cave.fade})`; ctx.fillRect(0, 0, W, H); }
 }

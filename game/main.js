@@ -1321,7 +1321,16 @@ const FOOD_TEXT = {
 
 // hearts
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
-david.lives = TUNE.LIVES; david.olives = 0;
+david.lives = TUNE.LIVES; david.olives = 0; david.lampOil = 0;
+// olives, lamp oil and a fig cake bought at the market carry over from the home base (map.js progress)
+try {
+  const pr = JSON.parse(localStorage.getItem("davidProgress") || "{}");
+  david.olives = pr.olives || 0; david.lampOil = pr.lampOil || 0;
+  if (pr.figCake > 0 && LEVEL_NAME !== "test") {   // eaten now: one extra heart for this stage
+    david.maxHearts++; david.hearts++; pr.figCake--; localStorage.setItem("davidProgress", JSON.stringify(pr));
+    setTimeout(() => toast("You ate the fig cake: an extra heart for this stage."), 1500);
+  }
+} catch (e) {}
 // the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
 const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep" || david.state === "cave";
 function hurtDavid(fromX) {
@@ -1953,7 +1962,7 @@ function updateFinish(dt) {
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
-    stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length });
+    stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil });
     Journal.open({ world: 1, stage: STAGE_NUM, onClose: () => backToMap() });
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -2609,14 +2618,16 @@ function frame(now) {
   if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
   // (also wait for the other scripts: world1.js, the Journal and the map load after this one)
-  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined") {
+  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined" || typeof Courtyard === "undefined") {
     ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
     requestAnimationFrame(frame); return;
   }
-  if (Journal.active || WorldMap.active) {   // the Journal or the map covers the screen; the game waits underneath
+  if (Journal.active || WorldMap.active || (typeof Courtyard !== "undefined" && Courtyard.active)) {   // the Journal, a map or the home base covers the screen
     pollInput();
-    if (Journal.active) { Journal.update(real); Journal.draw(); } else { WorldMap.update(real); WorldMap.draw(); }
+    if (Journal.active) { Journal.update(real); Journal.draw(); }
+    else if (WorldMap.active) { WorldMap.update(real); WorldMap.draw(); }
+    else { Courtyard.update(real); Courtyard.draw(); }
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
   }
