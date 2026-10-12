@@ -48,6 +48,9 @@ const JOURNAL_PAGES = {
           segs: [{ text: "A lion came today and took a lamb from the flock. I went after it, struck it, and took the lamb out of its mouth. The Lord kept me safe.", at: 5 }] },
         ...E(5, "Samson met a lion too, and the LORD gave him strength. Tonight He gave me mine.", "Judges 14:5–6"),
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        // The One: a line that changes once you've gone back for every lamb in this world
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
       ],
       right: [
         { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }] },
@@ -100,13 +103,22 @@ function drawBent(g, flat, e, alpha = 1) {
 const measureCtx = document.createElement("canvas").getContext("2d");
 const fontPx = (kind, k) => Math.round({ entry: JTUNE.SIZE_ENTRY, ref: JTUNE.SIZE_REF, psalm: JTUNE.SIZE_PSALM, small: JTUNE.SIZE_SMALL }[kind] * k);
 const WRAP_INDENT = { ref: 16, psalm: 34 };   // a wrapped line of the song is indented, like poetry
+// which conditional lines show (set when the Journal opens): "missingOne" or "allOnes" for this world's The One lambs
+let journalFlags = {};
+function onesFlags(world) {
+  try {
+    const p = JSON.parse(localStorage.getItem("davidProgress") || "{}");
+    const all = [1, 2, 3, 4].every(k => p[`${world}-${k}`] && p[`${world}-${k}`].one);
+    return { allOnes: all, missingOne: !all };
+  } catch (e) { return { missingOne: true }; }
+}
 function layoutPage(blocks, side, step, stones) {
   const pad = PAGE_EDGES[side].pad, x0 = pad[0], x1 = FW - pad[1], maxY = FH - pad[3];
   for (let k = 1; k >= 0.6; k -= 0.05) {   // shrink the writing if a page gets too full
     const words = [], notes = [];
     let y = pad[2], prevKind = null, ok = true;
     for (const b of blocks) {
-      if (b.at > step) continue;
+      if (b.at > step || (b.onlyIf && !journalFlags[b.onlyIf])) continue;
       const px = fontPx(b.size, k), lh = px * (b.size === "psalm" ? 1.35 : 1.12);
       y += prevKind === null ? 0 : b.size === "ref" ? px * 0.05 : px * 0.75;   // a gap between entries, none before a reference
       let x = x0 + (b.size === "ref" ? 16 * k : 0); y += px;
@@ -253,6 +265,7 @@ const Journal = {
     const P = JOURNAL_PAGES[opts.world]; if (!P) { opts.onClose && opts.onClose(); return; }
     this.P = P; this.world = opts.world; this.onClose = opts.onClose || null; this.preview = !!opts.preview;
     this.stones = opts.stones ?? stonesFound(opts.world);
+    journalFlags = onesFlags(opts.world);
     // the spreads, in order. After stage 4 there are two to write: the last lesson, then the world's spread.
     this.pages = [{ spread: "draft", step: Math.min(4, opts.stage) }];
     if (opts.stage >= 4 && !opts.noEnd) this.pages.push({ spread: "end", step: 5 });

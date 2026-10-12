@@ -116,6 +116,9 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 - **Right page (the Psalm):** the finished first line of the song:
 > *The Lord is my shepherd,*
 > *I have everything I need.*
+- **The One (Glen, 2026-10-11):** a line that changes as you go back for the come-back lambs:
+  - While any of this world's Ones is still missing: *"There's still a lamb out there. I can hear it at night. I won't stop until I bring it home."*
+  - Once all four are home: *"Every one of them is home. Not one was left behind."*
 - **The stone count:** *"Stones of remembrance: 9 of 12"* (how many of World 1's 12 you found). All 12 raises a stone cairn on the World 1 map.
 - **Music:** the harp opening of the song (the first 15 seconds).
 
