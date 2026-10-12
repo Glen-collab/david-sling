@@ -88,7 +88,7 @@ const TUNE = {
   RESCUE_HOLD: 1.8,       // seconds he hugs it, checking it over
   GATE_BONUS_MIN: 2,      // the golden olive slides up and down the gatepost (Super Mario World's goal tape):
   GATE_BONUS_MAX: 25,     //   catch it low = 2 olives, at the top = 25. Miss it = no bonus (the stage still ends)
-  GATE_POST_TILES: 10,    // how tall the gatepost is (a plain jump reaches about 70% of it; the top needs the flip)
+  GATE_POST_TILES: 8,     // how tall the gatepost is: a full single jump just reaches the top (raise it once David has the double jump)
   GATE_OLIVE_TRIP: 1.3,   // seconds for the golden olive to slide from the bottom to the top (and the same back down)
   GATE_GOLD_AT: 0.9,      // catch it above this fraction of the way up = a top catch: the full 25 olives...
   GATE_TOPS_FOR_LIFE: 3,  // ...and every 3rd top catch (across stages) = +1 life
@@ -451,7 +451,7 @@ if (LEVEL_NAME === "test") {
   }
   oliveRow(110, 16, 6);
   critter("fox", 140); critter("fox", 152);
-  plat(145, 12, 4); lostSheep("lambblack", 146, 11, "ledge");
+  plat(145, 13, 4); lostSheep("lambblack", 146, 12, "ledge");   // 4 tiles up: a single jump (no double jump until World 5)
   special(147, 6);
   deco("fig_tree", 160, 16, 1.0, "back", "special");
   food("figs", 157, 16);
@@ -590,6 +590,9 @@ const david = {
 const stones = [];
 const lamb = { x: lambSpawn.x, y: lambSpawn.y, vx: 0, vy: 0, facing: 1, onGround: false, t: 0, carried: false };
 
+// The second jump in the air (the flip) is Tobi's "scout's leap", taught in World 5 (DESIGN §5e, 5-2).
+// Until then David has one jump, and World 1-4 must never need two. "?flip" in the address turns it on for testing.
+const CAN_DOUBLE_JUMP = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("flip");   // (the movement test keeps it)
 function setState(s) { if (david.state !== s) { david.state = s; david.t = 0; } }
 
 function collideBody(b, w, h, dt) {
@@ -708,7 +711,7 @@ function updateDavid(dt) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
       setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
-    } else if (pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
+    } else if (CAN_DOUBLE_JUMP && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
       d.flipUsed = true; sfx("jump", undefined, 0.5, 1.3);   // the second jump: same sound, higher
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
@@ -1262,7 +1265,7 @@ function drawHelp() {
   ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, 760, 118);
   ctx.fillStyle = "#fff"; ctx.font = "15px sans-serif";
   const lines = [
-    "Arrows: move (hold to run)   Z / Space = A: jump, again in the air = flip",
+    "Arrows: move (hold to run)   Z / Space = A: jump" + (CAN_DOUBLE_JUMP ? ", again in the air = flip" : ""),
     "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
     "Down + A while moving: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
     "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",

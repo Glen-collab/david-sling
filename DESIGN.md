@@ -651,6 +651,8 @@ Goliath falls to one stone (§5h, phase 3). To throw it perfectly, the player en
 
 ### To build
 - **Lock each move until it's taught.** Right now David can do everything from 1-1 (the build started from the movement test).
+  - **Done for the double jump (2026-10-11):** it's off until World 5 (Tobi). World 1 was checked stage by stage: every sheep, stone and goal is reachable with a single jump (at most 4 tiles up), and the gateposts are 8 tiles so a full jump just reaches the top olive. **Every stage in Worlds 1-4, and the lion, bear, ox and Saul fights, must be beatable with one jump.**
+  - **To settle:** the design also has an *aerial flip* taught in 3-3 (A at the top of a jump, after a roll or run) that the World 3 ox fight uses. In the game today the flip *is* the double jump. Either the 3-3 flip becomes a smaller move of its own, or the ox fight is redesigned for one jump.
 - The journey map, Jesse's courtyard, the market stall, the practice wall, "The Throw" Journal page.
 
 ---
