@@ -465,3 +465,39 @@ function drawNight(camX) {
   }
   ctx.restore();
 }
+
+// ---------------------------------------------------------------------------
+// Finding The One: the game stops for a moment, and a card shows what Jesus said about the one lost sheep.
+// World English Bible (public domain). Jesus told it about a thousand years after David (DESIGN §3b).
+// ---------------------------------------------------------------------------
+const ONE_VERSE = "“Which of you men, if you had one hundred sheep, and lost one of them, wouldn’t leave the ninety-nine in the wilderness, and go after the one that was lost, until he found it?”";
+const ONE_CREDIT = "Jesus, Luke 15:4. He told this story about a thousand years after David.";
+const oneMoment = { active: false, t: 0 };
+function startOneMoment() {
+  Object.assign(oneMoment, { active: true, t: 0 });
+  chime(5); setTimeout(() => chime(9), 180); setTimeout(() => chime(12), 380);
+}
+function updateOneMoment(real) {
+  oneMoment.t += real;
+  if (oneMoment.t > 1.2 && (pressed("a") || pressed("b") || pressed("start"))) oneMoment.active = false;
+}
+function drawOneMoment() {
+  if (!oneMoment.active) return;
+  const a = Math.min(1, oneMoment.t * 2);
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = "rgba(10,6,2,0.55)"; ctx.fillRect(0, 0, W, H);
+  const w = 760, x = W / 2 - w / 2, y = 150;
+  const g = ctx.createLinearGradient(0, y, 0, y + 330); g.addColorStop(0, "rgba(58,36,14,0.96)"); g.addColorStop(1, "rgba(30,18,7,0.96)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, w, 330, 20); ctx.fill();
+  ctx.strokeStyle = "rgba(255,214,120,0.6)"; ctx.lineWidth = 2; ctx.stroke();
+  hudIcon("sheep_one", W / 2 - 34, y + 20, 68);
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffd98a"; ctx.font = "bold 28px sans-serif"; ctx.fillText("You found The One!", W / 2, y + 122);
+  ctx.fillStyle = "#fff6e2"; ctx.font = "italic 22px Georgia, serif";
+  const words = ONE_VERSE.split(" "), lines = []; let cur = "";
+  for (const wd of words) { const t = cur ? cur + " " + wd : wd; if (ctx.measureText(t).width > w - 90) { lines.push(cur); cur = wd; } else cur = t; }
+  lines.push(cur);
+  lines.forEach((l, i) => ctx.fillText(l, W / 2, y + 168 + i * 32));
+  ctx.fillStyle = "#d8c4a0"; ctx.font = "16px sans-serif"; ctx.fillText(ONE_CREDIT, W / 2, y + 180 + lines.length * 32 + 10);
+  if (oneMoment.t > 1.2) { ctx.fillStyle = "rgba(255,240,215,0.75)"; ctx.font = "15px sans-serif"; ctx.fillText("A: continue", W / 2, y + 315); }
+  ctx.restore();
+}

@@ -1660,7 +1660,7 @@ function joinLine(sh, quiet) {
   baa(sh.x, 0.9);
   if (quiet) return;
   chime(line.length + 2);
-  if (sh.one) toast("You found The One! \"Rejoice with me; I have found my lost sheep\" (Luke 15:6)");
+  if (sh.one) startOneMoment();   // the game pauses for Jesus' words about the one (world1.js)
   else toast(`Found a lost sheep! (${foundCount()} of ${lostCount()})`);
 }
 // a point on David's path, this far behind him (null if he hasn't walked that far yet). While he's in the air
@@ -2648,7 +2648,8 @@ function frame(now) {
   }
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
-  if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
+  if (oneMoment.active) updateOneMoment(real);
+  else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
   camX += (targetCam - camX) * Math.min(1, real * 6);
@@ -2693,6 +2694,7 @@ function frame(now) {
   }
   drawHUD();
   drawFinishBanner();
+  drawOneMoment();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
