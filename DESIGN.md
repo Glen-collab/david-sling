@@ -602,6 +602,57 @@ Golden grass hills, olive trees, stone walls, the village of Bethlehem on its hi
 
 ---
 
+## 4c. The journey map, the home base, and the throw *(decided 2026-10-11)*
+
+### Two levels of map
+- **The journey map** (Castlevania-style): the whole route from Bethlehem to the Valley of Elah, one stop per world. Shown when a world opens or ends; David walks to the next stop. Glen's painting, wired into the game like the World 1 map.
+- **Each world's own map** (SMB3-style, §4b): its four stages, the home base and the story dots. World 1's is the Bethlehem painting.
+
+### The home base travels with David
+A walk-in place, side view, like a Castlevania town. The first stop on every world map.
+
+| Worlds | Home base |
+|---|---|
+| 1–3 | **Jesse's courtyard**, Bethlehem |
+| 4 | David's quarters at Saul's court, Gibeah |
+| 5–8 | A camp tent on the road, then in the Israelite camp at Elah |
+
+Every home base has the same four things, with different people:
+1. **Someone from home who gives the world's piece of the throw** (Jesse in Worlds 1–3; whoever fits later). It goes into the Journal's "The Throw" page.
+2. **The practice wall:** a target to practise the throw code as often as you like (the Madden "Coach" drill). The only place to practise before Goliath.
+3. **The brothers** (or the people of that place). Their lines change as the story moves; Eliab grows sharper before Goliath.
+4. **The Journal shelf:** every page so far, The One, the Field Guide, the stones count.
+
+**New moves are not learned here.** They're still taught in the stages, at the moment you need them (§3c).
+
+### Olives: gather, trade, spend
+Olives are the game's money. They're gathered in stages and from trees, and spent at a **market stall** in each home base, which trades olives for **gifts, never powers**:
+- **Lamp oil** for caves. Caves burn the flask (§3j); more caves later = oil matters. You can also still press olives into the flask as before (100 = a full flask = +1 life).
+- **Bread, figs, raisins** to carry and eat later (heal).
+- **A better sling pouch** (stones fly a little straighter). One upgrade per world at most.
+
+### The throw: a code built world by world (Glen's idea)
+Goliath falls to one stone (§5h, phase 3). To throw it perfectly, the player enters a code during the slow-motion opening. **Every world teaches one piece** (bosses must be beaten to move on anyway), given at the home base at the end of the world. **The whole code is the Konami code:**
+
+| World | Piece | What it remembers |
+|---|---|---|
+| 1 | ↑ | Look up: the lion. "The LORD goes ahead of me." |
+| 2 | ↑ | The bear: the same help, again |
+| 3 | ↓ | Kneel: the anointing. Stay humble. |
+| 4 | ↓ | Bow: serving the king |
+| 5 | ← → | The road: steady steps through the dark |
+| 6 | ← → | The valley: don't run either way |
+| 7 | B | The sling, without Saul's armour |
+| 8 | A | Faith: "the battle is the LORD's". The throw itself. |
+
+**In the fight:** when Goliath's forehead opens and time slows, enter the code from memory. Each correct input lights up and winds the sling tighter; a wrong one restarts the code while the opening lasts. The full code = the perfect stone. Run out of time = a miss, and he opens up again later (rule 2). Saved stones of remembrance already lengthen the opening (§3f), so they buy time to enter the code. The Journal always shows the pieces you've earned.
+
+### To build
+- **Lock each move until it's taught.** Right now David can do everything from 1-1 (the build started from the movement test).
+- The journey map, Jesse's courtyard, the market stall, the practice wall, "The Throw" Journal page.
+
+---
+
 ## 5. World 1 — The Shepherd's Fields *(DRAFT FOR REVIEW)*
 
 **Bible:** 1 Samuel 16:11 (David "tending the sheep"), 17:34–37 (the lion and the bear), Psalm 23.
