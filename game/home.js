@@ -1,8 +1,8 @@
 // The home base (DESIGN.md §4c): a walk-in courtyard, side view, like a Castlevania town. For Worlds 1-3 it's
 // Jesse's courtyard in Bethlehem (Glen's painting, assets/backgrounds/courtyard_w1.jpg). Walk with Left / Right;
 // press Up at a spot:
-//   the target      Jesse waits by the bullseye: after each world he asks for the tithe of your olives, then gives
-//                   that world's piece of the throw; after that, Up here practises the code
+//   the target      Jesse waits by the bullseye with each world's piece of the throw; after that, Up here practises
+//                   the code. (Coming home after a world, David first sets aside the tithe: see TITHE_STORY.)
 //   the shelf       the Journal
 //   the stall       trade olives for lamp oil and food
 //   the gate        back out to the map
@@ -14,12 +14,26 @@ const HOME = {
   REACH: 90,                     // how close (px on screen) David must be to use a spot
   PRACTICE_TIME: 8,              // seconds to enter the code at the practice wall
 };
-// The tithe (decided 2026-10-12): after each world Jesse asks David to set aside a tenth of the olives he gathered
-// in it, for the family's offering. It's a choice, never forced, and nothing is paid back for it. Jesse tells it
-// from Abraham and Jacob, taking turns by world. (The tenth of the flock, Leviticus 27:32, is saved for the end.)
+// The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
+// else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
+// up, not what's left in the purse). Nobody asks him; Jesse only receives it. A choice, never forced, nothing paid
+// back. David remembers Abraham and Jacob, taking turns by world. (The tenth of the flock, Leviticus 27:32, is saved
+// for the end of the game.)
 const TITHE_STORY = [
   { ref: "Genesis 14:20", text: "When Abraham came home from the battle, he gave Melchizedek, the priest of God Most High, a tenth of everything. He knew who had won it for him." },
-  { ref: "Genesis 28:22", text: "Jacob slept with his head on a stone at Bethel, and when he woke he promised God: \"Of all that you will give me I will surely give a tenth to you.\"" },
+  { ref: "Genesis 28:22", text: "Jacob slept with his head on a stone at Bethel, and in the morning he promised God: \"Of all that you will give me I will surely give a tenth to you.\"" },
+];
+// what David thinks, in his own words (one per world). In the spirit of Jesus' teaching (the rich fool's barns,
+// Luke 12), but never quoting Him: David lived a thousand years before.
+const TITHE_THOUGHT = [
+  "They grew on His trees, not mine. The first of them should go back to Him.",
+  "My basket is full and the flock is safe. God can use these more than I can.",
+  "If I keep every one, I'll only want a bigger basket. The first tenth is His.",
+  "He gave me the strength to gather them. Giving the first part back is how I remember that.",
+  "The fields gave me more than I need. Someone in Bethlehem needs it more than I do.",
+  "A lighter pouch and a full heart. That's a good trade.",
+  "He fed me in the wilderness when I had nothing. The first tenth is the least I can give back.",
+  "Tomorrow I face the giant. Whatever happens, the first tenth is His.",
 ];
 // spots, as fractions of the picture's width
 const HOME_SPOTS = [
@@ -56,6 +70,14 @@ const Courtyard = {
     this.prog = loadProgress();
     // a world beaten since Jesse last spoke to you? he's waiting with its piece
     this.earned = [1, 2, 3, 4, 5, 6, 7, 8].filter(w => this.prog[`${w}-4`] && this.prog[`${w}-4`].cleared).length;
+    // a world beaten and its tithe not yet offered? that comes first
+    const tithes = this.prog.tithes || {};
+    const w = [1, 2, 3, 4, 5, 6, 7, 8].find(k => this.prog[`${k}-4`] && this.prog[`${k}-4`].cleared && !(k in tithes));
+    if (w) {
+      const gathered = this.prog["gathered" + w] || 0, tenth = Math.min(gathered ? Math.max(1, Math.floor(gathered / 10)) : 0, this.prog.olives || 0);   // 143 gathered: 14
+      if (tenth > 0) { this.mode = "tithe"; this.tw = { world: w, gathered, tenth, story: TITHE_STORY[(w - 1) % TITHE_STORY.length] }; this.pick = 0; }
+      else { tithes[w] = 0; this.prog.tithes = tithes; this.save(); }
+    }
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) mapAmbience.play().catch(() => {});
   },
   sceneW() { return this.img && this.img.naturalWidth ? this.img.naturalWidth * H / this.img.naturalHeight : W * 3; },
@@ -97,12 +119,6 @@ const Courtyard = {
     if (this.earned <= given) {   // nothing new: practise
       this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME; this.result = null; return;
     }
-    const w = given + 1, tithes = this.prog.tithes || {};
-    if (!(w in tithes)) {   // first the tithe of the olives from that world
-      const gathered = this.prog["gathered" + w] || 0, tenth = Math.min(gathered ? Math.max(1, Math.floor(gathered / 10)) : 0, this.prog.olives || 0);   // 143 gathered: 14
-      if (tenth > 0) { this.mode = "tithe"; this.tw = { world: w, gathered, tenth, story: TITHE_STORY[(w - 1) % TITHE_STORY.length] }; this.pick = 0; return; }
-      tithes[w] = 0; this.prog.tithes = tithes;
-    }
     this.givePiece();
   },
   updateTithe() {
@@ -113,12 +129,11 @@ const Courtyard = {
     if (this.pick === 0) {
       this.prog.olives = (this.prog.olives || 0) - tw.tenth;
       sfx("olive_pickup", undefined, 0.8); if (typeof chime === "function") { chime(3); setTimeout(() => chime(5), 160); }
-      this.say("Jesse", `${tw.tenth} olives, set apart for the LORD. They'll go in with the family's offering. Now, come here. I have something for you.`, 5);
-    } else {
-      this.say("Jesse", "It's yours to give, son, not mine to take. Now, come here. I have something for you.", 5);
+      this.say("Jesse", `You thought of that before I said a word. ${tw.tenth} olives for the LORD; they'll go in with the family's offering. When you're ready, come and find me at the target. I have something for you.`, 8);
+    } else if (this.earned > (this.prog.throwGiven || 0)) {
+      this.say("Jesse", "Welcome home, son. When you're ready, come and find me at the target. I have something for you.", 6);
     }
     this.save();
-    setTimeout(() => this.givePiece(), 4200);
   },
   givePiece() {
     const given = this.prog.throwGiven || 0;
@@ -223,17 +238,17 @@ const Courtyard = {
   drawTithe() {
     const tw = this.tw, x = W / 2 - 360, w = 720, y = 150;
     ctx.save(); ctx.font = "19px sans-serif";
-    const text = `${tw.story.text}  You gathered ${tw.gathered} olives out there. Will you set aside the tenth?`;
+    const text = `${tw.story.text}  I gathered ${tw.gathered} olives out there. ${TITHE_THOUGHT[(tw.world - 1) % TITHE_THOUGHT.length]}`;
     const words = text.split(" "), lines = []; let cur = "";
     for (const wd of words) { const t = cur ? cur + " " + wd : wd; if (ctx.measureText(t).width > w - 60) { lines.push(cur); cur = wd; } else cur = t; }
     lines.push(cur);
     const h = 84 + lines.length * 27 + 2 * 50 + 20;
     ctx.fillStyle = "rgba(25,14,6,0.9)"; ctx.beginPath(); ctx.roundRect(x, y, w, h, 16); ctx.fill();
-    ctx.textAlign = "left"; ctx.fillStyle = "#ffd98a"; ctx.font = "bold 20px sans-serif"; ctx.fillText("Jesse", x + 30, y + 36);
+    ctx.textAlign = "left"; ctx.fillStyle = "#ffd98a"; ctx.font = "bold 20px sans-serif"; ctx.fillText("David", x + 30, y + 36);
     ctx.textAlign = "right"; ctx.fillStyle = "#cdbb98"; ctx.font = "italic 15px Georgia, serif"; ctx.fillText(tw.story.ref, x + w - 30, y + 36);
     ctx.textAlign = "left"; ctx.fillStyle = "#fff"; ctx.font = "19px sans-serif";
     lines.forEach((l, i) => ctx.fillText(l, x + 30, y + 70 + i * 27));
-    const opts = [`Give the tenth: ${tw.tenth} olives`, "Not this time"], oy = y + 84 + lines.length * 27;
+    const opts = [`Set aside the first tenth: ${tw.tenth} olives`, "Not this time"], oy = y + 84 + lines.length * 27;
     opts.forEach((o, i) => {
       const iy = oy + i * 50;
       if (i === this.pick) { ctx.fillStyle = "rgba(255,220,120,0.18)"; ctx.beginPath(); ctx.roundRect(x + 18, iy, w - 36, 42, 10); ctx.fill(); }
