@@ -151,13 +151,21 @@ addEventListener("keydown", e => {
 });
 addEventListener("keyup", e => { keys[e.code] = false; });
 
-const BUTTONS = ["up", "down", "left", "right", "a", "b", "select", "start"];
+// NES: the D-pad, A, B, Select, Start. A SNES controller adds X and Y as one-button shortcuts:
+//   X = roll (same as Down + A)   Y = the harp (same as Select)
+const BUTTONS = ["up", "down", "left", "right", "a", "b", "select", "start", "x", "y"];
+const NES_BUTTONS = 8;   // the setup can stop after Start for a controller without X and Y
 const KEYMAP = {
   up: ["ArrowUp", "KeyW"], down: ["ArrowDown", "KeyS"], left: ["ArrowLeft", "KeyA"], right: ["ArrowRight", "KeyD"],
   a: ["KeyZ", "Space", "KeyK"], b: ["KeyX", "KeyJ"], select: ["ShiftLeft", "ShiftRight", "KeyC"], start: ["Enter"],
+  x: ["KeyV"], y: [],
 };
+// each controller's buttons are remembered separately (an NES and a SNES controller can both be set up)
+let padMaps = {};
+try { padMaps = JSON.parse(localStorage.getItem("david-padmaps")) || {}; } catch (e) {}
 let padMap = null;
-try { padMap = JSON.parse(localStorage.getItem("david-padmap")); } catch (e) {}
+try { localStorage.removeItem("david-padmap"); } catch (e) {}   // the old single setup: each controller is set up again
+function mapFor(p) { return p ? padMaps[p.id] || null : null; }
 
 function readPad() {
   const pads = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -188,6 +196,8 @@ function defaultPadState(p) {
     b: !!(p.buttons[1] && p.buttons[1].pressed) || !!(p.buttons[2] && p.buttons[2].pressed),
     select: !!(p.buttons[8] && p.buttons[8].pressed),
     start: !!(p.buttons[9] && p.buttons[9].pressed),
+    x: !!(p.buttons[3] && p.buttons[3].pressed),
+    y: false,
   };
 }
 
@@ -197,6 +207,7 @@ function pollInput() {
   const s = {};
   for (const b of BUTTONS) s[b] = KEYMAP[b].some(k => keys[k]);
   const p = readPad();
+  padMap = mapFor(p);
   if (p && !setup.active) {
     const ps = padMap ? Object.fromEntries(BUTTONS.map(b => [b, padControl(p, padMap[b])])) : defaultPadState(p);
     for (const b of BUTTONS) s[b] = s[b] || ps[b];
@@ -235,22 +246,27 @@ function updateSetup(dt) {
     }
   });
   if (got) {
-    setup.map[BUTTONS[setup.step]] = got;
-    setup.step++;
+    // asked for X or Y and Start came again: an NES controller, so stop here
+    const skip = setup.step >= NES_BUTTONS && JSON.stringify(got) === JSON.stringify(setup.map.start);
+    // a button already given to something else doesn't count (pressing Up twice would make Down the same as Up)
+    if (!skip && Object.values(setup.map).some(m => JSON.stringify(m) === JSON.stringify(got))) { setup.wait = 0.2; return; }
+    if (!skip) setup.map[BUTTONS[setup.step]] = got;
+    setup.step = skip ? BUTTONS.length : setup.step + 1;
     setup.wait = 0.35;
     if (setup.step >= BUTTONS.length) {
-      padMap = setup.map; setup.active = false;
-      try { localStorage.setItem("david-padmap", JSON.stringify(padMap)); } catch (e) {}
-      toast("Controller saved.");
+      padMaps[p.id] = padMap = setup.map; setup.active = false;
+      try { localStorage.setItem("david-padmaps", JSON.stringify(padMaps)); } catch (e) {}
+      toast(setup.map.x ? "Controller saved. X rolls, Y plays the harp." : "Controller saved.");
     }
   }
 }
 // Start the setup by itself the first time a controller shows up with no saved buttons.
-addEventListener("gamepadconnected", () => { if (!padMap && !setup.active) setTimeout(startSetup, 300); });
+addEventListener("gamepadconnected", e => { if (!padMaps[e.gamepad.id] && !setup.active) setTimeout(startSetup, 300); });
 // Holding Select + Start on the controller (default layout) for 2 seconds also starts it.
 let comboT = 0;
 function checkCombo(dt) {
   const p = readPad(); if (!p || setup.active) { comboT = 0; return; }
+  padMap = mapFor(p);
   const pressedCount = p.buttons.filter(b => b.pressed).length;
   const sel = padMap ? padControl(p, padMap.select) : !!(p.buttons[8] && p.buttons[8].pressed);
   const st = padMap ? padControl(p, padMap.start) : !!(p.buttons[9] && p.buttons[9].pressed);
@@ -718,7 +734,7 @@ function updateDavid(dt) {
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup";
 
   // --- harp (Select): kneel and play while standing still
-  if (pressed("select") && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
+  if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
     if (d.harp) { d.harp = false; setState("standup"); } else { d.harp = true; setState("kneel"); }
   }
   // Up, any direction, A or B: put the harp away and stand up
@@ -731,7 +747,7 @@ function updateDavid(dt) {
   }
 
   // --- roll: Down + A on the ground (running, or from a crouch: he rolls the way he's facing)
-  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && held("down") && pressed("a")) {
+  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && ((held("down") && pressed("a")) || pressed("x"))) {
     if (dir) d.facing = dir;
     setState("roll"); d.rollT = 0; d.vx = d.facing * TUNE.ROLL_SPEED; d.jumpBuf = 0;
   }
@@ -1302,8 +1318,8 @@ function drawHelp() {
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump" + (CAN_DOUBLE_JUMP ? ", again in the air = flip" : ""),
     "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
-    "Hold Down + A: roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
-    "Shift = Select: play the harp   R: back to the campfire   M: set up the NES controller   H: hide this",
+    "Hold Down + A (or V, SNES X): roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
+    "Shift = Select (SNES Y): play the harp   R: back to the campfire   M: set up a controller (NES or SNES)   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
   lines.forEach((l, i) => ctx.fillText(l, 20, 32 + i * 21));
@@ -1319,10 +1335,11 @@ function drawToastAndSetup() {
     ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.font = "34px sans-serif";
     ctx.fillText("Controller setup", W / 2, H / 2 - 60);
     ctx.font = "28px sans-serif"; ctx.fillStyle = "#ffe08a";
-    const names = { up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT", a: "A", b: "B", select: "SELECT", start: "START" };
+    const names = { up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT", a: "A", b: "B", select: "SELECT", start: "START", x: "X (roll)", y: "Y (harp)" };
     ctx.fillText("Press " + names[BUTTONS[setup.step]] + " on the controller", W / 2, H / 2);
     ctx.font = "18px sans-serif"; ctx.fillStyle = "#ccc";
     ctx.fillText(`(${setup.step + 1} of ${BUTTONS.length})   Esc on the keyboard to cancel`, W / 2, H / 2 + 40);
+    if (setup.step >= NES_BUTTONS) ctx.fillText("No X or Y (an NES controller)? Press START to finish.", W / 2, H / 2 + 70);
     ctx.textAlign = "left";
   }
 }
