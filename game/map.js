@@ -154,9 +154,22 @@ const WorldMap = {
     this.lambD += (lambWant - this.lambD) * Math.min(1, dt * 5);
     this.lambFacing = this.facing;
     if (moving) return;
-    // choose a stop: forward = Right / Down, back = Left / Up (only as far as the trail is open)
-    if ((pressed("right") || pressed("down")) && this.cur < this.openTo) this.target = this.cur + 1;
-    if ((pressed("left") || pressed("up")) && this.cur > 0) this.target = this.cur - 1;
+    // choose a stop: press the way the next (or last) stop lies on the painting, Up, Down, Left or Right
+    // (only as far as the trail is open). If neither stop lies that way, Right = forward and Left = back.
+    const press = ["up", "down", "left", "right"].find(k => pressed(k));
+    if (press) {
+      const v = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[press], here = this.M.stops[this.cur];
+      let best = null, bestDot = 0.3;   // within about 70 degrees of the pressed way
+      for (const i of [this.cur + 1, this.cur - 1]) {
+        if (i < 0 || i > this.openTo || i >= this.M.stops.length) continue;
+        const st = this.M.stops[i], dx = st.x - here.x, dy = st.y - here.y, len = Math.hypot(dx, dy) || 1;
+        const dot = (dx * v[0] + dy * v[1]) / len;
+        if (dot > bestDot) { bestDot = dot; best = i; }
+      }
+      if (best === null && press === "right" && this.cur < this.openTo) best = this.cur + 1;
+      if (best === null && press === "left" && this.cur > 0) best = this.cur - 1;
+      if (best !== null) this.target = best;
+    }
     const stop = this.M.stops[this.cur];
     if (pressed("select")) { this.readJournal(); return; }
     if (this.M.journey) {   // the journey map: A goes into a world
@@ -289,7 +302,7 @@ const WorldMap = {
     if (p.cleared) line += "     A: play again";
     ctx.fillText(line, W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
-    ctx.fillText(`Left / Right: walk    Select: Journal    Start: menu    ${MAP_CHEAT ? "B: mark cleared (cheat)" : "B: the journey map"}`, W - 14, H - 10);
+    ctx.fillText(`Arrows: walk    Select: Journal    Start: menu    ${MAP_CHEAT ? "B: mark cleared (cheat)" : "B: the journey map"}`, W - 14, H - 10);
   },
   journeyPanel(st) {
     const done = this.M.stops.filter(s => this.isCleared(s)).length;
@@ -302,7 +315,7 @@ const WorldMap = {
     ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
     ctx.fillText(!BUILT_WORLDS.includes(st.world) ? "Coming soon" : this.isCleared(st) ? "Cleared  ·  A: go back in" : "A: enter", W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
-    ctx.fillText("Left / Right: walk    A: enter    Select: Journal    Start: menu", W - 14, H - 10);
+    ctx.fillText("Arrows: walk    A: enter    Select: Journal    Start: menu", W - 14, H - 10);
   },
 };
 function sfxLater(fn, s) { setTimeout(fn, s * 1000); }
