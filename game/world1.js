@@ -133,6 +133,103 @@ function drawCrumbleLedge(x0, x1, y) {
   ctx.drawImage(img, x0 - 7, y - h * 0.12, w, h);
 }
 // ---------------------------------------------------------------------------
+// Carved walls (material 7): Castlevania-style secrets. Stand at one and press Up; enter the first `need` pieces of
+// the throw from memory (Jesse teaches one per world beaten, DESIGN §4c) and the stone cracks open.
+// ---------------------------------------------------------------------------
+const THROW_CODE = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"];
+const THROW_PIECE_LEN = [1, 1, 1, 1, 2, 2, 1, 1];   // how many buttons each world's piece adds
+const ARROWS = { up: "↑", down: "↓", left: "←", right: "→", a: "A", b: "B" };
+function throwLearned() {   // how many pieces Jesse has given you (= worlds beaten)
+  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); return Math.min(p.throwGiven || 0, [1, 2, 3, 4, 5, 6, 7, 8].filter(w => p[`${w}-4`] && p[`${w}-4`].cleared).length); } catch (e) { return 0; }
+}
+const codeEntry = { active: false, wall: null, code: [], got: 0, t: 0, result: null };
+function nearCodeWall() {
+  const d = david;
+  return codeWalls.find(w => !w.open && d.onGround && d.x < w.c * T && d.x > w.c * T - 2 * T && d.y > w.r * T && d.y <= (w.r + w.h) * T + 2);
+}
+function updateCodeEntry(d, dt) {
+  if (!codeEntry.active) {
+    const w = nearCodeWall();
+    if (!w || !pressed("up") || d.harp || d.throwT >= 0) return false;
+    const learned = throwLearned();
+    if (learned < w.need) {
+      sayLine("David", w.need === 1 ? "There's a carving on this stone, like an arrow. I don't understand it yet. Maybe Father would." : `The carving has ${w.need} marks on it. I only know ${learned} piece${learned === 1 ? "" : "s"} of the throw so far.`);
+      baa(d.x + 3 * T, 0.7);
+      return false;
+    }
+    const n = THROW_PIECE_LEN.slice(0, w.need).reduce((a, b) => a + b, 0);
+    Object.assign(codeEntry, { active: true, wall: w, code: THROW_CODE.slice(0, n), got: 0, t: 6, result: null });
+    d.vx = 0; setState("idle");
+    return true;
+  }
+  d.vx = 0;
+  if (codeEntry.result) {
+    codeEntry.result.t -= dt;
+    if (codeEntry.result.t <= 0) { if (codeEntry.result.ok) openCodeWall(codeEntry.wall); codeEntry.active = false; }
+    return true;
+  }
+  codeEntry.t -= dt;
+  for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
+    if (b === codeEntry.code[codeEntry.got]) { codeEntry.got++; chime(codeEntry.got); }
+    else codeEntry.got = b === codeEntry.code[0] ? 1 : 0;
+    break;
+  }
+  if (codeEntry.got >= codeEntry.code.length) codeEntry.result = { ok: true, t: 0.6 };
+  else if (codeEntry.t <= 0) { codeEntry.result = { ok: false, t: 1.2 }; }
+  if (pressed("select")) codeEntry.active = false;
+  return true;
+}
+function openCodeWall(w) {
+  w.open = true;
+  for (let x = w.c; x < w.c + w.w; x++) for (let r = w.r; r < w.r + w.h; r++) solid[r][x] = 0;
+  for (let k = 0; k < 26; k++) bits.push({ x: (w.c + 0.5) * T, y: (w.r + Math.random() * w.h) * T, vx: (Math.random() - 0.2) * 420, vy: -Math.random() * 420, life: 1.1, color: k % 3 ? "#d8cbb0" : "#a8977a" });
+  sfx("stone_hit", w.c * T, 1, 0.6); sfx("final_stone", undefined, 0.5);
+  toast("The carved stone cracks open!");
+}
+function resetCodeWalls() {
+  for (const w of codeWalls) { w.open = false; for (let x = w.c; x < w.c + w.w; x++) for (let r = w.r; r < w.r + w.h; r++) solid[r][x] = 7; }
+}
+function drawCodeWalls(camX) {
+  const lim = terPattern("limestone", TUNE.TER_FILL_SCALE), learned = throwLearned();
+  for (const w of codeWalls) {
+    if (w.open) continue;
+    const x = w.c * T - camX, y = w.r * T, ww = w.w * T, hh = w.h * T;
+    if (x > W + 40 || x + ww < -40) continue;
+    ctx.save();
+    ctx.fillStyle = lim || "#c9b48c"; ctx.fillRect(x - 3, y - 2, ww + 6, hh + 4);
+    ctx.fillStyle = "rgba(60,40,20,0.25)"; ctx.fillRect(x - 3, y - 2, ww + 6, hh + 4);
+    // the carving: one mark per piece it needs, glowing softly once you know enough of the throw
+    const ready = learned >= w.need, glow = ready ? 0.55 + 0.35 * Math.sin(performance.now() / 300) : 0;
+    ctx.font = "bold 20px sans-serif"; ctx.textAlign = "center";
+    for (let k = 0; k < w.need; k++) {
+      const cy = y + 22 + k * 26;
+      if (ready) { ctx.shadowColor = `rgba(255,210,110,${glow})`; ctx.shadowBlur = 12; }
+      ctx.fillStyle = ready ? "#f3d27a" : "rgba(70,45,20,0.85)"; ctx.fillText("↑", x + ww / 2, cy);
+      ctx.shadowBlur = 0;
+    }
+    ctx.strokeStyle = "rgba(50,32,15,0.6)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x + 4, y + hh * 0.55); ctx.lineTo(x + ww * 0.6, y + hh * 0.7); ctx.lineTo(x + ww - 3, y + hh * 0.66); ctx.stroke();
+    ctx.restore();
+    if (Math.abs(david.x - x - camX) < 2.5 * T && !codeEntry.active && nearCodeWall() === w) upHint(x + ww / 2, y - 40);
+  }
+}
+function drawCodeEntry() {
+  if (!codeEntry.active) return;
+  const n = codeEntry.code.length, box = 54, gap = 10, tw = n * box + (n - 1) * gap, bw = Math.max(tw + 60, 440), y = 180;
+  ctx.fillStyle = "rgba(25,14,6,0.88)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, y - 64, bw, box + 120, 16); ctx.fill();
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 21px sans-serif"; ctx.fillText("The carved stone", W / 2, y - 30);
+  for (let i = 0; i < n; i++) {
+    const bx = W / 2 - tw / 2 + i * (box + gap), done = i < codeEntry.got;
+    ctx.fillStyle = done ? "#e8b84a" : "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(bx, y, box, box, 10); ctx.fill();
+    ctx.fillStyle = done ? "#3a2410" : "rgba(255,255,255,0.35)"; ctx.font = "bold 28px sans-serif";
+    ctx.fillText(done ? ARROWS[codeEntry.code[i]] : "?", bx + box / 2, y + 37);
+  }
+  ctx.font = "16px sans-serif"; ctx.fillStyle = "#e9dcc4";
+  const r = codeEntry.result;
+  ctx.fillText(r ? (r.ok ? "Crack!" : "Nothing happens. Try again (Up).") : `Enter the throw from memory  ·  ${Math.max(0, codeEntry.t).toFixed(1)} s  ·  Select: stop`, W / 2, y + box + 36);
+  ctx.textAlign = "left";
+}
+// ---------------------------------------------------------------------------
 // Fake rock (material 5): looks like the rest of the rock, but David can walk into it. It turns see-through
 // while he's inside, so you can see what you found.
 // ---------------------------------------------------------------------------

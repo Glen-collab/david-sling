@@ -286,6 +286,9 @@ const pillar = (c, r, w) => block(c, r, w, ROWS - r, 2);   // a rock column stan
 const wall = (c, r, w, h) => block(c, r, w, h, 3);   // dry-stone wall
 const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
 const fakeRock = (c, r, w, h) => block(c, r, w, h, 5); // looks like rock, but you can walk into it (a secret)
+// a carved wall (material 7): solid until you enter the first `need` pieces of the throw at it (world1.js)
+const codeWalls = [];
+const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
 const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
 // Caves (like Mario's pipes): a cave-mouth picture in the stage, and a separate dark room built past the stage's end.
@@ -410,9 +413,10 @@ if (LEVEL_NAME === "test") {
   rock(162, 13, 3, 4); lostSheep("sheep", 167, 16);            // a sheep grazing behind the rock
   snake("viper", 170);
   deco("olive_tree", 173, 16, 1.15, "back", "golden_olive");
-  rock(178, 13, 2, 4); rock(182, 9, 3, 8);                      // step up, then the tall rock
-  lostSheep("lamb", 183, 8, "one");                            // The One, up on the high rock
-  food("fig_cake", 184, 8);
+  rock(178, 13, 2, 4); food("fig_cake", 179, 12);              // step up onto the rock
+  plat(182, 5, 3);                                             // a shelf 8 tiles above the rock: out of reach of one jump (the double jump reaches ~9)
+  lostSheep("lamb", 183, 4, "one");                            // The One, bleating up there. Come back with the double jump (World 5)
+  talk(176, "David", "I can hear a lamb up there... It's too high to reach from here. Some day.");
   lostSheep("ram", 192, 16);                                   // the old ram, off by himself: the harp brings him
   oliveRow(186, 16, 6);
   sheepfold(206);
@@ -483,7 +487,10 @@ if (LEVEL_NAME === "test") {
   campfire(118, GR - 1, "The shepherd girl", "My grandmother says these rocks were here before anyone. Storms come and go, and they don't move. She says God is like that.");
   rock(124, 14, 3, 3); rock(128, 11, 3, 6); plat(133, 8, 3); lostSheep("lamb", 134, 7, "ledge");
   raven(130, 4);
-  rock(138, 10, 13, 7); oliveRow(139, 9, 10);                   // a big rock to cross
+  rock(138, 10, 13, 7); oliveRow(139, 9, 10);                   // a big rock to cross...
+  for (let x = 139; x <= 146; x++) for (let r = 13; r <= 16; r++) solid[r][x] = 0;   // ...with a hollow inside it
+  codeWall(138, 13, 1, 4, 2);                                  // sealed with a carving: the first two pieces of the throw (after World 2)
+  olive(143 * T + T / 2, 16 * T + 4, "golden"); oliveRow(140, 16, 3); oliveRow(144, 16, 3);
   // rope bridge between two rock pillars
   pillar(151, 13, 2); bridge(153, 13, 6); pillar(159, 13, 2);
   raven(156, 6);
@@ -529,10 +536,13 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheep", 148, 16, "thorns");
   critter("jackal", 150);
   lostSheep("sheep", 157, 16, "cast");
-  rock(170, 13, 3, 4); rock(174, 9, 3, 8);
-  lostSheep("lamb", 175, 8, "one"); special(175, 3);
-  lostSheep("ram", 190, 16);
-  oliveRow(178, 16, 8);
+  rock(170, 13, 3, 4); rock(174, 9, 3, 8); special(175, 3);
+  // a little shelter of stone with a carving on its door: The One is inside. The first piece of the throw opens it,
+  // which Jesse gives you for beating the lion, so you can come straight back for it.
+  rock(185, 12, 8, 1); codeWall(185, 13, 1, 4, 1); rock(192, 13, 1, 4);
+  lostSheep("lamb", 189, 16, "one");
+  lostSheep("ram", 197, 16);
+  oliveRow(178, 16, 6);
   ground(204, 300);
   campfire(215, GR - 1, "Hanan", "You're of Judah, and Judah's sign is the lion. Don't run from this one. Watch for the crouch, and the tail.");
   deco("stone_wall", 220, 16, 1.0, "back");
@@ -660,6 +670,7 @@ function updateDavid(dt) {
   const d = david;
   d.t += dt;
   if (caveDavid(d, dt)) return;   // walking into or out of a cave (world1.js)
+  if (updateCodeEntry(d, dt)) return;   // entering the throw at a carved wall (world1.js)
   if (d.state === "toLamb") {     // the game has the controls: walk over to the lamb
     const k = takenLamb, tx = k.x - d.rescueSide * LAMB_IN_PET * SCALE;
     if (autoWalk(d, tx, dt) || d.t > 8) {
@@ -1075,7 +1086,7 @@ function drawTiles(camX) {
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6 || m === 7) continue;
     const rockFill = c >= MAIN_COLS ? terPattern("cave_rock_tile", 0.45) || lim : lim;   // in a cave: damp cave rock
     ctx.fillStyle = (m === 2 ? rockFill : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
@@ -1259,6 +1270,7 @@ function drawHUD() {
     ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal   5 = map", 18, 28);
   } else drawHelp();
   drawDialog();
+  drawCodeEntry();
   drawToastAndSetup();
 }
 function drawHelp() {
@@ -1367,7 +1379,7 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   for (const b of bees) Object.assign(b, { gone: false, alpha: 1 });
   for (const h of hornets) Object.assign(h, { gone: false, alpha: 1, x: h.hx, y: h.hy, state: "hover", t: 0 });
   beesAngry = false;
-  resetCritters(); resetCrumbles(); resetCaves();
+  resetCritters(); resetCrumbles(); resetCaves(); resetCodeWalls();
   resetAllSheep();
 }
 function respawn() {
@@ -2669,6 +2681,7 @@ function frame(now) {
   drawStones(camX);
   drawDecor(camX, "front");
   drawFakeRock(camX);
+  drawCodeWalls(camX);
   ctx.restore();
   drawNight(camX);
   drawCaveDarkness(camX);
