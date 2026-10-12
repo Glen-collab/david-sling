@@ -63,6 +63,7 @@ function stageCleared(id, info) {
   p.justCleared = id; p.at = id;
   if (info.olives !== undefined) p.olives = info.olives;   // what's in the purse now (spent at the market, §4c)
   if (info.lampOil !== undefined) p.lampOil = info.lampOil;
+  if (info.gathered) { const k = "gathered" + id[0]; p[k] = (p[k] || 0) + info.gathered; }   // olives picked up in this world, for the tithe (home.js)
   if (id.endsWith("-4")) { p.view = "journey"; p.justWorld = true; p.jat = "w" + id[0]; }   // a world beaten: back out to the journey map
   saveProgress(p);
 }

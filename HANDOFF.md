@@ -47,11 +47,11 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   - The near post (bold, plain) is on the right, in front of everything.
   - The golden olive rides the cord between them. The posts are 8 tiles, so a full single jump just reaches the top.
 - **Jesse's courtyard** (home base, Castlevania-town style):
-  - **Jesse** gives one piece of the throw per world beaten.
-  - **The practice wall** drills the code.
+  - **Jesse waits by the bullseye.** After each world he first asks for **the tithe**: a tenth of the olives gathered in that world (Give / Not this time; never forced, nothing paid back), told from Abraham (Gen 14:20) and Jacob (Gen 28:22) in turn. Then he gives that world's piece of the throw. After that, Up at the target practises the code.
+  - The tenth of the flock (Lev 27:32) is saved for the end of the game.
   - **The shelf** opens the Journal.
   - **The market** sells lamp oil (20 olives → 30 oil) and a fig cake (15 olives → +1 heart next stage).
-  - Olives and lamp oil carry over between stages; 100 olives still fills the flask for +1 life.
+  - Olives and lamp oil carry over between stages (`gathered1`.. in the save counts every olive picked up per world, for the tithe); 100 olives still fills the flask for +1 life.
 - **The throw code** (DESIGN §4c): the Konami code, one piece per world, for Goliath's final stone. "The Throw" is the last page of the Journal when read from the courtyard or a map.
 - **Come-back secrets** (Castlevania-style):
   - **1-1:** The One is on a high shelf (needs the double jump, World 5).

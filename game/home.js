@@ -1,8 +1,8 @@
 // The home base (DESIGN.md §4c): a walk-in courtyard, side view, like a Castlevania town. For Worlds 1-3 it's
 // Jesse's courtyard in Bethlehem (Glen's painting, assets/backgrounds/courtyard_w1.jpg). Walk with Left / Right;
 // press Up at a spot:
-//   the bench       Jesse gives you the world's piece of the throw (one per world you've beaten)
-//   the target      practise the throw code
+//   the target      Jesse waits by the bullseye: after each world he asks for the tithe of your olives, then gives
+//                   that world's piece of the throw; after that, Up here practises the code
 //   the shelf       the Journal
 //   the stall       trade olives for lamp oil and food
 //   the gate        back out to the map
@@ -14,10 +14,16 @@ const HOME = {
   REACH: 90,                     // how close (px on screen) David must be to use a spot
   PRACTICE_TIME: 8,              // seconds to enter the code at the practice wall
 };
+// The tithe (decided 2026-10-12): after each world Jesse asks David to set aside a tenth of the olives he gathered
+// in it, for the family's offering. It's a choice, never forced, and nothing is paid back for it. Jesse tells it
+// from Abraham and Jacob, taking turns by world. (The tenth of the flock, Leviticus 27:32, is saved for the end.)
+const TITHE_STORY = [
+  { ref: "Genesis 14:20", text: "When Abraham came home from the battle, he gave Melchizedek, the priest of God Most High, a tenth of everything. He knew who had won it for him." },
+  { ref: "Genesis 28:22", text: "Jacob slept with his head on a stone at Bethel, and when he woke he promised God: \"Of all that you will give me I will surely give a tenth to you.\"" },
+];
 // spots, as fractions of the picture's width
 const HOME_SPOTS = [
-  { id: "bench", x: 0.27, label: "Jesse" },
-  { id: "wall", x: 0.41, label: "The practice wall" },
+  { id: "wall", x: 0.41, label: "Jesse, by the target" },
   { id: "shelf", x: 0.545, label: "The Journal" },
   { id: "stall", x: 0.705, label: "The market" },
   { id: "gate", x: 0.915, label: "Out to the fields" },
@@ -67,6 +73,7 @@ const Courtyard = {
     this.fade = Math.min(1, this.fade + dt * 2);
     if (this.mode === "market") { this.updateMarket(); return; }
     if (this.mode === "practice") { this.updatePractice(dt); return; }
+    if (this.mode === "tithe") { this.updateTithe(); return; }
     // walking
     const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
     if (dir) { this.facing = dir; this.x = Math.max(0.17, Math.min(0.95, this.x + dir * HOME.WALK * dt / this.sceneW())); this.walkT += dt; } else this.walkT = 0;
@@ -75,11 +82,7 @@ const Courtyard = {
     if (!spot || !pressed("up")) return;
     if (spot.id === "gate") { this.leaving = () => WorldMap.open(this.world); return; }
     if (spot.id === "shelf") { this.useShelf(); return; }
-    if (spot.id === "bench") { this.useBench(); return; }
-    if (spot.id === "wall") {
-      if (!this.earned) { this.say("Jesse", "Practise all you like, son. But I haven't shown you the throw yet. Come back once you've faced the lion."); return; }
-      this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME; this.result = null; return;
-    }
+    if (spot.id === "wall") { this.useJesse(); return; }
     if (spot.id === "stall") { this.mode = "market"; this.pick = 0; }
   },
   useShelf() {
@@ -88,16 +91,42 @@ const Courtyard = {
     this.active = false;
     Journal.open({ world: this.world, stage: last, read: true, onClose: () => { this.active = true; this.fade = 0; } });
   },
-  useBench() {
+  useJesse() {
+    if (!this.earned) { this.say("Jesse", "The lion's been near the flock, David. When you've faced it, come and find me here at the target. There's something I want to teach you about the throw."); return; }
+    const given = this.prog.throwGiven || 0;
+    if (this.earned <= given) {   // nothing new: practise
+      this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME; this.result = null; return;
+    }
+    const w = given + 1, tithes = this.prog.tithes || {};
+    if (!(w in tithes)) {   // first the tithe of the olives from that world
+      const gathered = this.prog["gathered" + w] || 0, tenth = Math.min(gathered ? Math.max(1, Math.floor(gathered / 10)) : 0, this.prog.olives || 0);   // 143 gathered: 14
+      if (tenth > 0) { this.mode = "tithe"; this.tw = { world: w, gathered, tenth, story: TITHE_STORY[(w - 1) % TITHE_STORY.length] }; this.pick = 0; return; }
+      tithes[w] = 0; this.prog.tithes = tithes;
+    }
+    this.givePiece();
+  },
+  updateTithe() {
+    if (pressed("up") || pressed("down")) this.pick = 1 - this.pick;
+    if (!pressed("a")) return;
+    const tw = this.tw; this.mode = null;
+    this.prog.tithes = Object.assign(this.prog.tithes || {}, { [tw.world]: this.pick === 0 ? tw.tenth : 0 });
+    if (this.pick === 0) {
+      this.prog.olives = (this.prog.olives || 0) - tw.tenth;
+      sfx("olive_pickup", undefined, 0.8); if (typeof chime === "function") { chime(3); setTimeout(() => chime(5), 160); }
+      this.say("Jesse", `${tw.tenth} olives, set apart for the LORD. They'll go in with the family's offering. Now, come here. I have something for you.`, 5);
+    } else {
+      this.say("Jesse", "It's yours to give, son, not mine to take. Now, come here. I have something for you.", 5);
+    }
+    this.save();
+    setTimeout(() => this.givePiece(), 4200);
+  },
+  givePiece() {
     const given = this.prog.throwGiven || 0;
     if (this.earned > given) {   // a new piece
       const k = given; this.prog.throwGiven = k + 1; this.save();
       this.say("Jesse", `${THROW_WORDS[k]}  (The throw: ${THROW_PIECES[k].map(b => ARROW[b]).join(" ")})`, 9);
       if (typeof chime === "function") chime(7);
-      return;
     }
-    if (!this.earned) { this.say("Jesse", "The lion's been near the flock, David. When you've faced it, come and sit with me. There's something I want to teach you about the throw."); return; }
-    this.say("Jesse", `So far: ${THROW_PIECES.slice(0, this.earned).flat().map(b => ARROW[b]).join(" ")}. Practise it at the wall. When the giant's head is open, you'll need every piece.`, 7);
   },
   updatePractice(dt) {
     if (this.result) { this.result.t -= dt; if (this.result.t <= 0 || pressed("start")) this.mode = null; return; }
@@ -149,9 +178,10 @@ const Courtyard = {
     this.drawPurse();
     if (this.mode === "market") this.drawMarket();
     if (this.mode === "practice") this.drawPractice();
+    if (this.mode === "tithe") this.drawTithe();
     if (this.msg) this.drawMsg();
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,245,225,0.9)";
-    ctx.fillText(this.mode === "market" ? "Up / Down: choose    A: trade    B: leave" : this.mode === "practice" ? "Enter the throw    Select: stop" : "Left / Right: walk    Up: use    Select: Journal", W - 14, H - 10);
+    ctx.fillText(this.mode === "market" ? "Up / Down: choose    A: trade    B: leave" : this.mode === "practice" ? "Enter the throw    Select: stop" : this.mode === "tithe" ? "Up / Down: choose    A: answer" : "Left / Right: walk    Up: use    Select: Journal", W - 14, H - 10);
     ctx.restore();
   },
   drawPurse() {
@@ -189,6 +219,28 @@ const Courtyard = {
       ctx.textAlign = "right"; ctx.fillStyle = "#cfe39a"; ctx.font = "bold 18px sans-serif"; ctx.fillText(`${it.cost} olives`, x + w - 30, iy + 34);
       ctx.globalAlpha = 1;
     });
+  },
+  drawTithe() {
+    const tw = this.tw, x = W / 2 - 360, w = 720, y = 150;
+    ctx.save(); ctx.font = "19px sans-serif";
+    const text = `${tw.story.text}  You gathered ${tw.gathered} olives out there. Will you set aside the tenth?`;
+    const words = text.split(" "), lines = []; let cur = "";
+    for (const wd of words) { const t = cur ? cur + " " + wd : wd; if (ctx.measureText(t).width > w - 60) { lines.push(cur); cur = wd; } else cur = t; }
+    lines.push(cur);
+    const h = 84 + lines.length * 27 + 2 * 50 + 20;
+    ctx.fillStyle = "rgba(25,14,6,0.9)"; ctx.beginPath(); ctx.roundRect(x, y, w, h, 16); ctx.fill();
+    ctx.textAlign = "left"; ctx.fillStyle = "#ffd98a"; ctx.font = "bold 20px sans-serif"; ctx.fillText("Jesse", x + 30, y + 36);
+    ctx.textAlign = "right"; ctx.fillStyle = "#cdbb98"; ctx.font = "italic 15px Georgia, serif"; ctx.fillText(tw.story.ref, x + w - 30, y + 36);
+    ctx.textAlign = "left"; ctx.fillStyle = "#fff"; ctx.font = "19px sans-serif";
+    lines.forEach((l, i) => ctx.fillText(l, x + 30, y + 70 + i * 27));
+    const opts = [`Give the tenth: ${tw.tenth} olives`, "Not this time"], oy = y + 84 + lines.length * 27;
+    opts.forEach((o, i) => {
+      const iy = oy + i * 50;
+      if (i === this.pick) { ctx.fillStyle = "rgba(255,220,120,0.18)"; ctx.beginPath(); ctx.roundRect(x + 18, iy, w - 36, 42, 10); ctx.fill(); }
+      ctx.textAlign = "left"; ctx.fillStyle = i === this.pick ? "#ffe08a" : "#e9dcc4"; ctx.font = "bold 19px sans-serif"; ctx.fillText((i === this.pick ? "▶  " : "    ") + o, x + 34, iy + 28);
+    });
+    ctx.textAlign = "right"; ctx.fillStyle = "#cfe39a"; ctx.font = "15px sans-serif"; ctx.fillText(`You have ${this.prog.olives || 0} olives`, x + w - 30, oy + 28);
+    ctx.restore();
   },
   drawPractice() {
     const n = this.code.length, box = 58, gap = 10, tw = n * box + (n - 1) * gap, x0 = W / 2 - tw / 2, y = 250;

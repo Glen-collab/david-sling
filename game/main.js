@@ -1392,7 +1392,7 @@ const FOOD_TEXT = {
 
 // hearts
 david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
-david.lives = TUNE.LIVES; david.olives = 0; david.lampOil = 0;
+david.lives = TUNE.LIVES; david.olives = 0; david.lampOil = 0; david.gathered = 0;   // gathered: every olive picked up this stage (for the tithe, home.js)
 // olives, lamp oil and a fig cake bought at the market carry over from the home base (map.js progress)
 try {
   const pr = JSON.parse(localStorage.getItem("davidProgress") || "{}");
@@ -2009,7 +2009,7 @@ function updateFinish(dt) {
         saveGateTops();
       }
       for (let i = 0; i < finish.bonus; i++) {
-        d.olives++;
+        d.olives++; d.gathered++;
         if (d.olives >= TUNE.OLIVES_PER_LIFE) { d.olives -= TUNE.OLIVES_PER_LIFE; d.lives++; }
       }
       finish.pop = { x: px, y: go.y, t: 0, text: `+${finish.bonus}` };
@@ -2044,7 +2044,7 @@ function updateFinish(dt) {
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
-    stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil });
+    stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
     Journal.open({ world: 1, stage: STAGE_NUM, onClose: () => backToMap() });
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -2362,7 +2362,7 @@ function updateOlives(dt) {
       o.taken = true;
       if (o.kind === "golden") { david.lives++; sfx("extra_life"); toast("A golden olive! A whole flask of oil: +1 life"); }
       else {
-        david.olives++; sfx("olive_pickup", undefined, 0.45, 0.95 + Math.random() * 0.1);
+        david.olives++; david.gathered++; sfx("olive_pickup", undefined, 0.45, 0.95 + Math.random() * 0.1);
         if (david.olives >= TUNE.OLIVES_PER_LIFE) { david.olives -= TUNE.OLIVES_PER_LIFE; david.lives++; sfx("extra_life"); toast("The oil flask is full: +1 life!"); }
       }
       for (let k = 0; k < 4; k++) bits.push({ x: o.x, y: o.y, vx: (Math.random() - 0.5) * 160, vy: -Math.random() * 220, life: 0.35, color: o.kind === "golden" ? "#ffd84a" : "#d7e6a0" });
