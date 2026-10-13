@@ -145,6 +145,10 @@ function updateDonkey(k, dx, sameLevel, dt) {
   }
   if (k.state === "calm") { fall(); if (k.t > 2.4) setCrit(k, "graze"); return; }
   if (k.state === "graze" || k.state === "follow") {   // stays near David, grazing whenever he stops
+    if (flood.on && !k.waits) {   // the water's coming: he bolts up the riverbed ahead of it (he's waiting on the bank)
+      setCrit(k, "follow"); k.gone = true; k.facing = 1; k.vx = 480; return;
+    }
+    if (k.waits && david.x < k.x - 6 * T) { setCrit(k, "graze"); fall(); return; }   // on the bank: grazing till David's out
     if (Math.abs(dx) > W2.DONKEY_FOLLOW * T && sameLevel) { k.facing = Math.sign(dx); setCrit(k, "follow"); runCritter(k, W2.DONKEY_WALK + Math.min(220, Math.abs(dx) - W2.DONKEY_FOLLOW * T), dt); }
     else if (Math.abs(dx) < (W2.DONKEY_FOLLOW - 1) * T || !sameLevel) { setCrit(k, "graze"); fall(); }
     else runCritter(k, W2.DONKEY_WALK, dt);
@@ -305,4 +309,186 @@ function drawHarpDuel() {
             : g.state === "done" ? "He's calm." : "Press each note as it reaches the harp  ·  Select: stop";
   ctx.fillText(msg, W / 2, y0 + ph - 16);
   ctx.restore(); ctx.textAlign = "left";
+}
+
+// ---------------------------------------------------------------------------
+// 2-2's second half: the flash flood, and the boy from Tekoa (DESIGN 2-2). Placed in the level with setPiece() (main.js):
+//   setPiece("flood", c, r, { end })  past column c the riverbed floods: a wall of muddy water chases David from the
+//                                     left until he's out of the riverbed at column `end`, where it spreads out and drains
+//   setPiece("boy", c, r)             the boy, stranded on a rock: reach him and he follows in your footsteps
+//   setPiece("stones", c)             on the bank after the flood: "Why do you carry those stones?"
+// ---------------------------------------------------------------------------
+Object.assign(W2, {
+  FLOOD_SPEED: 250,      // px/s: a little slower than walking (270), so you stay ahead if you keep moving
+  FLOOD_BEHIND: 13,      // tiles: it never falls further behind David than this (just inside the left of the screen)
+  FLOOD_START: 18,       // tiles behind David where it appears
+  FLOOD_HEIGHT: 9,       // tiles of water above the riverbed
+  FLOOD_DRAIN: 4,        // seconds for it to spread out and drain once David is out of the riverbed
+  BOY_GAP: 40,           // how far behind David the boy walks (px along his path; the lamb is at 70)
+});
+const piece = kind => setPieces.find(p => p.kind === kind);
+const flood = { on: false, x: 0, level: 1, done: false, startT: 0, told: false };
+let floodNoise = null;   // the roar: brown noise through a low filter (Web Audio)
+function floodRoar(vol) {
+  try {
+    if (!floodNoise) {
+      if (!audioUnlocked || vol <= 0) return;
+      chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const n = chimeCtx.sampleRate * 3, buf = chimeCtx.createBuffer(1, n, chimeCtx.sampleRate), ch = buf.getChannelData(0);
+      let last = 0; for (let i = 0; i < n; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; ch[i] = last * 3.5; }
+      const src = chimeCtx.createBufferSource(); src.buffer = buf; src.loop = true;
+      const lp = chimeCtx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 420;
+      const g = chimeCtx.createGain(); g.gain.value = 0;
+      src.connect(lp).connect(g).connect(chimeCtx.destination); src.start();
+      floodNoise = g;
+    }
+    floodNoise.gain.setTargetAtTime(Math.max(0, vol) * sfxMul(), chimeCtx.currentTime, 0.15);
+  } catch (e) {}
+}
+function hushFlood() { if (floodNoise) try { floodNoise.gain.setValueAtTime(0, chimeCtx.currentTime); } catch (e) {} }
+function floodTop(x) {   // the water's surface at x: full height behind the front, curling down to a foaming tip
+  const base = GR * T - W2.FLOOD_HEIGHT * T * flood.level, back = flood.x - x;
+  const nose = back < 170 ? (1 - back / 170) ** 2 * W2.FLOOD_HEIGHT * T * 0.75 * flood.level : 0;
+  return base + nose + Math.sin(x * 0.02 + performance.now() / 260) * 9;
+}
+function updateFlood(dt) {
+  const fp = piece("flood"); if (!fp) return;
+  const d = david, endX = fp.end * T;
+  if (!flood.on && !flood.done) {
+    if (d.x > fp.x && d.deadT <= 0 && d.x < endX) {
+      flood.startT += dt;
+      if (!flood.told) { flood.told = true; toast("A rumble, far up the valley... The riverbed is flooding! Run!"); }
+      floodRoar(0.25 * Math.min(1, flood.startT));
+      if (flood.startT > 1.4) { flood.on = true; flood.level = 1; flood.x = d.x - W2.FLOOD_START * T; }
+    }
+    return;
+  }
+  if (flood.done) {   // out of the riverbed: the water spreads out and sinks away
+    flood.level = Math.max(0, flood.level - dt / W2.FLOOD_DRAIN);
+    floodRoar(0.4 * flood.level);
+    if (flood.level <= 0) flood.on = false;
+    return;
+  }
+  flood.x = Math.min(endX - 3 * T, Math.max(flood.x + W2.FLOOD_SPEED * dt, d.x - W2.FLOOD_BEHIND * T));
+  if (d.x > endX + 2 * T) { flood.done = true; toast("Out of the riverbed! The water spreads out and slows."); }
+  const near = Math.max(0, 1 - (d.x - flood.x) / (W * 0.9));
+  floodRoar(0.25 + 0.45 * near);
+  for (let k = 0; k < 2; k++) bits.push({ x: flood.x - Math.random() * 40, y: floodTop(flood.x - 30) + Math.random() * 30, vx: 120 + Math.random() * 260, vy: -200 - Math.random() * 300, life: 0.5, color: k ? "#efe6d2" : "#b89a72" });
+  // in the water: swept away (back to the campfire)
+  if (d.deadT <= 0 && !inCutscene() && d.x - BODY_W / 2 < flood.x - 14 && d.y > floodTop(d.x) + 24) {
+    d.hearts = 1; d.inv = 0; hurtDavid(d.x + 200);
+    toast("The flood swept you away! Back to the campfire...");
+  }
+}
+function drawFlood(camX) {
+  if (!flood.on) return;
+  const x1 = Math.min(W + 10, flood.x - camX); if (x1 < -10) return;
+  ctx.save();
+  const top = GR * T - W2.FLOOD_HEIGHT * T * flood.level;
+  const g = ctx.createLinearGradient(0, top - 20, 0, H);
+  g.addColorStop(0, "rgba(150,112,70,0.96)"); g.addColorStop(0.35, "rgba(110,80,48,0.97)"); g.addColorStop(1, "rgba(62,44,26,0.98)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-10, H);
+  for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX));
+  ctx.lineTo(x1 + 18, GR * T + 6); ctx.lineTo(x1 + 18, H); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.clip();   // the current: pale streaks racing along inside the water
+  const tnow = performance.now() / 1000;
+  for (let k = 0; k < 16; k++) {
+    const sy = top + 30 + k * ((H - top) / 16), len = 60 + (k * 37) % 90, sx0 = ((k * 173 + tnow * (260 + (k % 4) * 60)) % (x1 + 300)) - 150;
+    ctx.strokeStyle = `rgba(225,205,170,${0.18 + (k % 3) * 0.07})`; ctx.lineWidth = 3; ctx.beginPath();
+    for (let u = 0; u <= len; u += 10) ctx.lineTo(sx0 + u, sy + Math.sin((sx0 + u) * 0.03 + k) * 5);
+    ctx.stroke();
+  }
+  ctx.restore();
+  // foam along the top and the curling front
+  const now = performance.now() / 1000;
+  ctx.strokeStyle = "rgba(240,232,214,0.75)"; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.beginPath();
+  for (let sx = -10; sx <= x1; sx += 8) { const y = floodTop(sx + camX) + 3; sx === -10 ? ctx.moveTo(sx, y) : ctx.lineTo(sx, y); }
+  ctx.stroke();
+  for (let k = 0; k < 14; k++) {   // churning foam at the tip
+    const a = k * 2.4 + now * 3, fx = x1 - 20 - (k % 5) * 18 + Math.sin(a) * 8, fy = floodTop(flood.x - 20 - (k % 5) * 18) + 10 + (k * 13) % 60 + Math.cos(a) * 6;
+    ctx.fillStyle = `rgba(245,238,222,${0.45 + 0.3 * Math.sin(a)})`; ctx.beginPath(); ctx.arc(fx, fy, 6 + (k % 3) * 3, 0, Math.PI * 2); ctx.fill();
+  }
+  for (let k = 0; k < 6; k++) {   // branches tumbling in the water
+    const bx = ((k * 211 + now * 140) % (x1 + 200)) - 100, by = floodTop(bx + camX) + 30 + (k * 37) % 120;
+    if (bx > x1 - 10) continue;
+    ctx.save(); ctx.translate(bx, by); ctx.rotate(now * (k % 2 ? 1.2 : -0.9) + k);
+    ctx.fillStyle = "#4a3320"; ctx.fillRect(-26, -3, 52, 6); ctx.fillRect(4, -3, 4, -14); ctx.restore();
+  }
+  ctx.restore();
+}
+
+// --- the boy from Tekoa
+const boy = { state: "none", x: 0, y: 0, t: 0, facing: -1, moved: 0, stillT: 0 };
+function resetBoy() {
+  const bp = piece("boy"); if (!bp) return;
+  Object.assign(boy, { state: "stranded", x: bp.x, y: bp.y, t: 0, facing: -1, moved: 0, stillT: 0 });
+}
+resetBoy();
+function updateBoy(dt) {
+  if (boy.state === "none") return;
+  const d = david; boy.t += dt;
+  if (boy.state === "stranded") {
+    boy.facing = Math.sign(d.x - boy.x) || -1;
+    if (Math.abs(d.x - boy.x) < 60 && Math.abs(d.y - boy.y) < 50 && d.deadT <= 0) {
+      boy.state = "follow"; boy.t = 0; sfx("heal", undefined, 0.5);
+      sayLine("The boy", "I was taking our donkey to market and the water came out of nowhere! Please, don't leave me here!");
+    }
+    return;
+  }
+  if (boy.state === "follow") {   // in David's footsteps, like the lamb: he hops where David hopped
+    const tgt = d.deadT > 0 ? null : trailAt(W2.BOY_GAP);
+    if (!tgt) { boy.moved = 0; return; }
+    const far = Math.hypot(tgt.x - boy.x, tgt.y - boy.y);
+    if (far > 9 * T) { boy.x = tgt.x; boy.y = tgt.y; }   // left far behind: he catches up
+    moveToward(boy, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.WALK_SPEED * 1.1, far * 6)), dt);
+  }
+}
+function drawBoy(camX) {
+  if (boy.state === "none") return;
+  const x = boy.x - camX; if (x < -200 || x > W + 200) return;
+  let name, i;
+  if (boy.state === "stranded") { name = "boy_scared"; i = frameOf(name, boy.t); }
+  else if (boy.state === "stone") { name = "boy_stone"; i = Math.min(SPR[name].frames - 1, Math.floor(boy.t * 1000 / SPR[name].ms)); }
+  else if (dialog.t > 0 && dialog.who === "The boy") { name = "boy_talk"; i = frameOf(name, boy.t); }
+  else if (boy.moved > 25) { name = "boy_walk"; i = frameOf(name, boy.t * Math.max(0.8, boy.moved / 200)); }
+  else { name = "boy_idle"; i = frameOf(name, boy.t); }
+  drawSprite(name, i, x, boy.y, boy.facing);
+}
+
+// --- on the bank: "Why do you carry those stones?" (Joshua 4:6-7). The game holds the controls until it's said.
+const stonesTalk = { step: -1, t: 0 };
+const STONES_LINES = [
+  ["The boy", "Look! Our donkey! He got out of the riverbed too!"],
+  ["The boy", "Why do you carry those stones around?"],
+  ["David", "Joshua stacked twelve of them by the Jordan, so that when children asked what they meant, someone would tell them what God did. Each of mine is a time He helped me. Like today."],
+];
+function updateStonesTalk(d, dt) {   // true = the scene has the controls
+  const sp = piece("stones");
+  if (!sp || boy.state === "none") return false;
+  if (stonesTalk.step < 0) {
+    if (boy.state !== "follow" || d.x < sp.x || !d.onGround || d.deadT > 0) return false;
+    stonesTalk.step = 0; sayLine(...STONES_LINES[0]); d.vx = 0; setState("idle");
+  }
+  if (stonesTalk.step >= STONES_LINES.length + 1) return false;   // all said
+  d.vx = 0; d.facing = Math.sign(boy.x - d.x) || -1; boy.facing = -d.facing;
+  if (pressed("a") || pressed("b")) dialog.t = Math.min(dialog.t, 0.01);   // A or B: next line
+  if (stonesTalk.step < STONES_LINES.length) {
+    if (dialog.t > 0.01) return true;
+    stonesTalk.step++;
+    if (stonesTalk.step < STONES_LINES.length) sayLine(...STONES_LINES[stonesTalk.step]);
+    else { boy.state = "stone"; boy.t = 0; toast("The boy picks up a smooth stone from the riverbed, and keeps it."); }
+    return true;
+  }
+  if (boy.t > SPR.boy_stone.frames * SPR.boy_stone.ms / 1000 + 0.6) { boy.state = "follow"; stonesTalk.step++; }
+  return true;
+}
+
+const boyMissing = () => boy.state === "stranded";   // the gate won't open without him (main.js updateFinish)
+function updateWorld2(dt) {
+  if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); } updateFlood(dt); updateBoy(dt); }
+function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
+function resetWorld2(restart) {   // after a fall (restart: out of lives, back to the start of the stage)
+  Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1 }); hushFlood();
+  if (restart) { resetBoy(); stonesTalk.step = -1; }
+  else if (boy.state === "follow" || boy.state === "stone") { boy.x = david.x - 40; boy.y = david.y; boy.state = "follow"; }
 }

@@ -311,7 +311,7 @@ const STAGE_INFO = {
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
   "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },
-  "2-2": { cols: 170, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "2-2": { cols: 266, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -333,6 +333,9 @@ const fakeRock = (c, r, w, h) => block(c, r, w, h, 5); // looks like rock, but y
 const codeWalls = [];
 // a deadfall (material 8): dead branches piled across the trail, too tall to jump; a full charged stone breaks it (world2.js)
 const deadfalls = [];
+// World 2's set pieces, run by world2.js: the flood, the boy from Tekoa, the talk about the stones (see world2.js)
+const setPieces = [];
+const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
@@ -654,8 +657,8 @@ if (LEVEL_NAME === "test") {
   snake("viper", 213); oliveRow(196, 16, 4);
   sheepfold(218);
 } else if (LEVEL_NAME === "2-2") {
-  // ---- 2-2 The Dry Riverbed, first half (the flood and the boy from Tekoa come next): a dry wadi of sandstone,
-  //      Hanan's warning about flash floods, and the boy's donkey, bolting in a narrow way under the rock ----
+  // ---- 2-2 The Dry Riverbed: a dry wadi of sandstone, Hanan's warning about flash floods, the boy's donkey bolting in
+  //      a narrow way under the rock (the harp calms him); then the flash flood, and the boy from Tekoa on a rock ----
   ground(0, 38);
   oliveRow(6, 16, 5);
   rock(16, 15, 3, 2); oliveArc(15, 14, 5);                     // a boulder in the riverbed: hop over
@@ -680,10 +683,24 @@ if (LEVEL_NAME === "test") {
   oliveRow(108, 12, 3); oliveRow(112, 9, 3);
   special(118, 16);
   bridge(131, GR, 4);
-  ground(135, 170);
+  ground(135, 168);
   lostSheep("sheep", 140, 16, "cast");                         // on its back: roll it over (Down)
   lostSheep("lambblack", 146, 16);
-  sheepfold(150);
+  campfire(151);                                               // the checkpoint before the flood
+  // the flash flood: past column 156 a wall of water comes down the riverbed behind you. Keep moving.
+  setPiece("flood", 156, GR - 1, { end: 228 });
+  rock(161, 15, 2, 2); oliveRow(164, 16, 3);
+  ground(172, 205);                                            // (a gap to jump at 169-171)
+  rock(176, 14, 3, 3); oliveArc(175, 13, 4);
+  rock(184, 13, 3, 4); setPiece("boy", 185, 12);              // the boy from Tekoa, stranded on a rock: jump up to him
+  plat(190, 13, 3); special(191, 10);
+  rock(195, 15, 2, 2); oliveRow(198, 16, 4);
+  ground(209, 266);                                            // (a gap at 206-208)
+  rock(214, 14, 2, 3); rock(219, 14, 2, 3); rock(222, 12, 3, 5);   // up out of the riverbed
+  // the bank: the water spreads out and drains. The boy's donkey is waiting, and the boy asks about the stones.
+  setPiece("stones", 231);
+  critter("donkey", 235); critters[critters.length - 1].calmed = critters[critters.length - 1].waits = true;
+  sheepfold(244);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -806,6 +823,7 @@ function updateDavid(dt) {
   if (caveDavid(d, dt)) return;   // walking into or out of a cave (world1.js)
   if (updateCodeEntry(d, dt)) return;   // entering the throw at a carved wall (world1.js)
   if (typeof updateHarpDuel === "function" && updateHarpDuel(d, dt)) return;   // playing the harp for a frightened animal (world2.js)
+  if (typeof updateSceneDavid === "function" && updateSceneDavid(d, dt)) return;   // a talk that holds the controls (world2.js)
   if (d.state === "toLamb") {     // the game has the controls: walk over to the lamb
     const k = takenLamb, tx = k.x - d.rescueSide * LAMB_IN_PET * SCALE;
     if (autoWalk(d, tx, dt) || d.t > 8) {
@@ -1528,6 +1546,7 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   beesAngry = false;
   resetCritters(); resetCrumbles(); resetCaves(); resetCodeWalls();
   resetAllSheep();
+  if (typeof resetWorld2 === "function") resetWorld2(true);
 }
 function respawn() {
   const d = david;
@@ -1539,6 +1558,7 @@ function respawn() {
   lamb.stolen = false;
   if (lion && !rescuedLamb) resetLion();
   sheepToCheckpoint();
+  if (typeof resetWorld2 === "function") resetWorld2(false);
 }
 
 // food
@@ -2090,6 +2110,11 @@ function updateFinish(dt) {
     if (lion && lion.state !== "defeated") {          // the lamb first!
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast("Not without the lamb the lion took!");
+      finish.blocked = 3; return;
+    }
+    if (typeof boyMissing === "function" && boyMissing()) {   // 2-2: not without the boy from Tekoa (world2.js)
+      d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
+      if (finish.blocked <= 0) toast("Not without the boy! He's still on the rock in the riverbed.");
       finish.blocked = 3; return;
     }
     // Super Mario World's goal tape: catch the golden olive as it slides up and down the post. Higher = more.
@@ -2660,6 +2685,7 @@ function updateSound(dt) {
 function hushLoops() {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
+  if (typeof hushFlood === "function") hushFlood();
   if (david.chargeSnd) { david.chargeSnd.pause(); david.chargeSnd = null; }
 }
 function updateHarpMusic(dt) {
@@ -2685,6 +2711,7 @@ function updateWorld(dt) {
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
   updatePickups(dt); updateGourds(); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
+  if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -2862,10 +2889,10 @@ function frame(now) {
   drawTakenLamb(camX);
   drawSheep(camX);
   drawFlock(camX);
-  drawLamb(camX);
+  drawLamb(camX); if (typeof drawBoy === "function") drawBoy(camX);
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawFoldFront(camX);
-  drawStones(camX);
+  drawStones(camX); if (typeof drawFlood === "function") drawFlood(camX);
   drawDecor(camX, "front");
   drawFakeRock(camX);
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
