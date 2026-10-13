@@ -52,6 +52,21 @@ const HOME_SPOTS = [
 ];
 // the throw: one piece per world (§4c). Together it's the Konami code.
 const THROW_PIECES = [["up"], ["up"], ["down"], ["down"], ["left", "right"], ["left", "right"], ["b"], ["a"]];
+// What Jesse says after a practice throw, taking turns. Jesse in 1 Samuel is a busy farmer: when Samuel came he nearly
+// forgot his youngest (16:11, "he is keeping the sheep"), and he's always sending David back to the flock or off on an
+// errand (17:15-20). So he's proud, but brief, and the sheep come first.
+const JESSE_AFTER_HIT = [
+  "That's my boy. Now, the sheep won't keep themselves. Back out to the fields with you.",
+  "Right in the middle. The LORD has given you a steady hand, son. Use it for the flock.",
+  "When Samuel came to Bethlehem, I nearly forgot to send for you. I won't make that mistake again.",
+  "Your brothers never threw like that. Don't tell them I said so. Go on, the flock is waiting.",
+  "Good. Keep your eyes on the mark and your heart on the LORD, and the rest will follow.",
+];
+const JESSE_AFTER_MISS = [
+  "Close. Breathe first, then throw. Again.",
+  "Don't hurry it, son. A stone goes where you send it, not where you hope.",
+  "Every shepherd misses before he hits. Again.",
+];
 const THROW_WORDS = [
   "Look up, son. The LORD goes ahead of you, the way He did against the lion.",
   "Up again. The same help as with the lion, against the bear.",
@@ -168,7 +183,11 @@ const Courtyard = {
     for (const b of this.bits) { b.vy += 900 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; }
     this.bits = this.bits.filter(b => b.life > 0);
     if (this.sling) this.updateSling(dt);
-    if (this.result) { this.result.t -= dt; if (this.result.t <= 0 || pressed("start")) { this.mode = null; this.sling = null; } return; }
+    if (this.result) { this.result.t -= dt; if (this.result.t <= 0 || pressed("start")) {
+        const lines = this.result.ok ? JESSE_AFTER_HIT : JESSE_AFTER_MISS, k = this.result.ok ? "hitK" : "missK";
+        this.say("Jesse", lines[(this[k] = ((this[k] ?? -1) + 1)) % lines.length], 6);
+        this.mode = null; this.sling = null;
+      } return; }
     if (this.sling) return;   // the stone is in the air
     this.pt -= dt;
     for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
