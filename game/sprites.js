@@ -648,6 +648,54 @@ window.SPRITE_DATA = {
   "ay": 259,
   "align": "feet"
  },
+ "donkey_bolt": {
+  "src": "../assets/sprites/donkey_bolt.png",
+  "frames": 12,
+  "w": 272,
+  "h": 210,
+  "ms": 69,
+  "loop": true,
+  "pingpong": false,
+  "ax": 212,
+  "ay": 207,
+  "align": "feet"
+ },
+ "donkey_graze": {
+  "src": "../assets/sprites/donkey_graze.png",
+  "frames": 12,
+  "w": 270,
+  "h": 155,
+  "ms": 160,
+  "loop": true,
+  "pingpong": true,
+  "ax": 123,
+  "ay": 152,
+  "align": "feet"
+ },
+ "donkey_idle": {
+  "src": "../assets/sprites/donkey_idle.png",
+  "frames": 16,
+  "w": 276,
+  "h": 211,
+  "ms": 378,
+  "loop": true,
+  "pingpong": true,
+  "ax": 201,
+  "ay": 208,
+  "align": "feet"
+ },
+ "donkey_walk": {
+  "src": "../assets/sprites/donkey_walk.png",
+  "frames": 12,
+  "w": 259,
+  "h": 211,
+  "ms": 73,
+  "loop": true,
+  "pingpong": false,
+  "ax": 218,
+  "ay": 208,
+  "align": "feet"
+ },
  "eagle_fly": {
   "src": "../assets/sprites/eagle_fly.png",
   "frames": 12,

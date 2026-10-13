@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 259,
+  "frame_h": 211,
+  "ms_per_frame": 73,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 218,
+  "anchor_y": 208,
+  "source": "donkey_walk.mp4",
+  "video_frames": [
+    37,
+    39,
+    41,
+    42,
+    44,
+    46,
+    47,
+    49,
+    51,
+    53,
+    55,
+    56
+  ]
+}

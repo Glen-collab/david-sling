@@ -1,0 +1,30 @@
+{
+  "frames": 16,
+  "frame_w": 276,
+  "frame_h": 211,
+  "ms_per_frame": 378,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 201,
+  "anchor_y": 208,
+  "source": "donkey_stand.mp4",
+  "video_frames": [
+    1,
+    11,
+    20,
+    30,
+    39,
+    49,
+    59,
+    68,
+    78,
+    87,
+    97,
+    107,
+    116,
+    126,
+    135,
+    145
+  ],
+  "pingpong": true
+}
