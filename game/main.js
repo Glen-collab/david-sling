@@ -47,7 +47,7 @@ const TUNE = {
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
   BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 560 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
   BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
