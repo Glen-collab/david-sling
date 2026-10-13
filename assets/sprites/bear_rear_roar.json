@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 192,
+  "frame_h": 222,
+  "ms_per_frame": 240,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 130,
+  "anchor_y": 218,
+  "source": "bear_rear_growl.mp4",
+  "video_frames": [
+    1,
+    7,
+    13,
+    20,
+    26,
+    32,
+    38,
+    44,
+    50,
+    57,
+    63,
+    69
+  ]
+}

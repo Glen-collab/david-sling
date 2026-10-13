@@ -786,7 +786,7 @@ if (LEVEL_NAME === "test") {
   bridge(111, GR, 4);
   ground(115, 258);
   campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.");
-  talk(127, "Hanan", "When it sits back on its haunches and roars, that's your moment: a full charged stone. Then it brings its paws down and the ground shakes. Be off the ground.");
+  talk(127, "Hanan", "When it rears up on its back legs and roars, that's your moment: a full charged stone. Then it comes down hard and the ground shakes. Be off the ground.");
   lostSheep("sheep", 133, 16, "cast");                         // on its back: roll it over (Down)
   rock(137, 14, 3, 3); setPiece("claws", 138, 14);
   lostSheep("sheep", 144, 16, "thorns");                       // caught in the thorns: sling the bush

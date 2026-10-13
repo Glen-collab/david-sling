@@ -48,6 +48,18 @@ window.SPRITE_DATA = {
   "ay": 220,
   "align": "feet"
  },
+ "bear_growl": {
+  "src": "../assets/sprites/bear_growl.png",
+  "frames": 10,
+  "w": 261,
+  "h": 162,
+  "ms": 192,
+  "loop": true,
+  "pingpong": true,
+  "ax": 117,
+  "ay": 158,
+  "align": "feet"
+ },
  "bear_lunge": {
   "src": "../assets/sprites/bear_lunge.png",
   "frames": 8,
@@ -58,6 +70,30 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 236,
   "ay": 184,
+  "align": "feet"
+ },
+ "bear_rear_roar": {
+  "src": "../assets/sprites/bear_rear_roar.png",
+  "frames": 12,
+  "w": 192,
+  "h": 222,
+  "ms": 240,
+  "loop": false,
+  "pingpong": false,
+  "ax": 130,
+  "ay": 218,
+  "align": "feet"
+ },
+ "bear_rear_slam": {
+  "src": "../assets/sprites/bear_rear_slam.png",
+  "frames": 8,
+  "w": 283,
+  "h": 222,
+  "ms": 109,
+  "loop": false,
+  "pingpong": false,
+  "ax": 148,
+  "ay": 218,
   "align": "feet"
  },
  "bear_stand_roar": {

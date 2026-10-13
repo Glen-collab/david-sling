@@ -690,12 +690,15 @@ Object.assign(W2, {
   BEAR_SIZE: 1.7,
   BEAR_WALK: 120, BEAR_CHARGE: 540, BEAR_CHARGE_RUN: 11,   // px/s, and the most tiles one charge runs
   BEAR_TELL: 1.0,        // the scrape before a charge
-  BEAR_ROAR: 1.5,        // it sits back and roars (the opening: a full charged stone now staggers it), then slams
+  BEAR_ROAR: 1.5,        // it rears up on its hind legs and roars (the opening: a full charged stone now staggers it), then slams
+  BEAR_SLAM_DROP: 0.4,   // seconds from the top of the rear to its paws hitting the ground
+  BEAR_SLAM_SHAKE: 1.6,  // how hard the screen shakes when it lands
   BEAR_TURN: 0.9,        // slow to turn round
   BEAR_DAZED: 3.0, BEAR_REST: 1.2,
   BEAR_SLAM_REACH: 9,    // tiles: the slam shakes the ground this far; be in the air
 });
 Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
+  bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE,
   bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
 CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
 const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera)
@@ -764,7 +767,7 @@ const bearFight = () => bear.on && bear.state !== "defeated" && (bear.state !== 
 const bearBlocking = () => bear.on && bear.state !== "defeated";
 function setBear(s) { if (bear.state !== s) { bear.state = s; bear.t = 0; } }
 function bearBox() {
-  const tall = bear.state === "roar" || bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;
+  const tall = bear.state === "roar" ? 185 : bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;   // reared up, it's taller than David
   return { x0: bear.x - 85, x1: bear.x + 85, y0: bear.y - tall, y1: bear.y };
 }
 function updateBear(dt) {
@@ -791,7 +794,7 @@ function updateBear(dt) {
       B.vx = B.facing * W2.BEAR_WALK * (late ? 1.25 : 1);
       if (B.atkT <= 0) {
         B.vx = 0;
-        if (dist < 2.6 * T) setBear(Math.random() < 0.6 ? "lunge" : "roar");   // up close: a swipe, or it sits back to roar
+        if (dist < 2.6 * T) setBear(Math.random() < 0.6 ? "lunge" : "roar");   // up close: a swipe, or it rears up to roar
         else if (dist < 13 * T && Math.random() < 0.55) { setBear("tell"); }
         else setBear("roar");
       }
@@ -807,8 +810,10 @@ function updateBear(dt) {
     case "roar": B.vx = 0; if (B.t > W2.BEAR_ROAR * (late ? 0.8 : 1)) { setBear("slam"); } break;   // the opening
     case "slam": {   // down on its front paws: the ground shakes, and rocks come down from the ravine walls
       B.vx = 0;
-      if (!B.slammed && B.t > 0.45) {
-        B.slammed = true; w2Shake.v = 1; sfx("stone_hit", B.x, 1, 0.4);
+      if (!B.slammed && B.t > W2.BEAR_SLAM_DROP) {   // it comes down HARD
+        B.slammed = true; w2Shake.v = W2.BEAR_SLAM_SHAKE; sfx("stone_hit", B.x, 1, 0.3); sfx("fall_pit", B.x, 0.9, 0.45);
+        const px = B.x + B.facing * 60;
+        for (let k = 0; k < 26; k++) bits.push({ x: px + (Math.random() - 0.5) * 120, y: B.y - 4, vx: (Math.random() - 0.5) * 520, vy: -Math.random() * 420, life: 0.8, color: k % 3 ? "#7a6248" : "#a48a68" });
         if (d.onGround && dist < W2.BEAR_SLAM_REACH * T) hurtDavid(B.x);
         for (let k = 0; k < (late ? 4 : 3); k++) fallingRocks.push({ x: d.x + (k - 1) * 2.2 * T + (Math.random() - 0.5) * T, y: -40 - k * 90, vy: 0, t: 0 });
       }
@@ -837,12 +842,12 @@ function stoneHitsBear(s) {   // called from updateStones (main.js)
   if (B.state === "pen") {
     if (s.charged || s.power) {   // it lets go of the sheep and turns on David
       stoneHit(s); B.sheepFreed = true; B.facing = -1; setBear("turn"); B.atkT = 2;
-      toast("It let the sheep go! Keep your distance. Hit it with a full charged stone when it sits back to roar.");
+      toast("It let the sheep go! Keep your distance. Hit it with a full charged stone when it rears up to roar.");
     } else { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("The bear doesn't even notice a tap stone. Hold B until the ring turns gold."); } }
     return true;
   }
   const dmg = bearDamage(s);
-  if (!dmg) { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("Stones bounce off its thick coat! Wait until it sits back to roar, then a full charged stone."); } return true; }
+  if (!dmg) { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("Stones bounce off its thick coat! Wait until it rears up to roar, then a full charged stone."); } return true; }
   B.hp -= dmg; B.flash = 0.3;
   if (B.state !== "dazed") { setBear("dazed"); toast(B.hp > 0 ? "It's staggered! Hit it again while it's down." : ""); }
   for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
@@ -890,10 +895,11 @@ function drawBear(camX) {
     case "pen": name = "bear_lunge"; i = frameOf(name, B.t * 0.8); break;   // clawing at the wall
     case "walk": i = frameOf(name, B.t); break;
     case "turn": case "rest": i = 0; break;
-    case "tell": i = 0; filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;
+    case "tell": name = "bear_growl"; i = frameOf(name, B.t * 1.6); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;   // head down, growling
     case "charge": name = "bear_charge"; i = frameOf(name, B.t); break;
-    case "roar": name = "bear_stand_roar"; i = frameOf(name, B.t); filter = "drop-shadow(0 0 12px rgba(255,200,60,0.95))"; break;
-    case "slam": case "lunge": name = "bear_lunge"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / 0.12)); break;
+    case "roar": name = "bear_rear_roar"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / (W2.BEAR_ROAR * (bear.hp <= W2.BEAR_HP / 2 ? 0.8 : 1)) * SPR[name].frames)); filter = "drop-shadow(0 0 12px rgba(255,200,60,0.95))"; break;
+    case "slam": name = "bear_rear_slam"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / W2.BEAR_SLAM_DROP * (SPR[name].frames - 1))); break;
+    case "lunge": name = "bear_lunge"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / 0.12)); break;
     case "dazed": case "defeated": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
   }
   const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
