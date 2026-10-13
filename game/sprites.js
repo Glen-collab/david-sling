@@ -792,6 +792,18 @@ window.SPRITE_DATA = {
   "ay": 305,
   "align": "feet"
  },
+ "jesse_talk": {
+  "src": "../assets/sprites/jesse_talk.png",
+  "frames": 30,
+  "w": 194,
+  "h": 309,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 115,
+  "ay": 306,
+  "align": "feet"
+ },
  "lamb_bound": {
   "src": "../assets/sprites/lamb_bound.png",
   "frames": 12,

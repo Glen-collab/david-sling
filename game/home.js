@@ -89,7 +89,7 @@ const Courtyard = {
   sceneW() { return this.img && this.img.naturalWidth ? this.img.naturalWidth * H / this.img.naturalHeight : W * 3; },
   near() { const px = this.x * this.sceneW(); return HOME_SPOTS.find(s => Math.abs(s.x * this.sceneW() - px) < HOME.REACH) || null; },
   save() { saveProgress(this.prog); },
-  say(who, text, t = 6) { this.msg = { who, text, t }; },
+  say(who, text, t = 6) { this.msg = { who, text, t, at: this.t }; },
   update(dt) {
     this.t += dt; if (this.msg) { this.msg.t -= dt; if (this.msg.t <= 0) this.msg = null; }
     mapAmbience.volume = Math.max(0, Math.min(MTUNE.AMBIENCE_VOLUME, mapAmbience.volume + (this.leaving ? -dt : dt * 0.5)));
@@ -221,9 +221,10 @@ const Courtyard = {
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);
-    // Jesse, just right of the target, facing David: idle, or pointing and laughing after a hit (or a new piece)
+    // Jesse, just right of the target, facing David: idle, talking while his words are up, or pointing and laughing after a hit
     const jx = HOME_SPOTS.find(s => s.id === "jesse").x * SW - cam, ct = this.cheerAt === null ? 1e9 : this.t - this.cheerAt;
     if (!animDone("jesse_cheer", ct)) drawSprite("jesse_cheer", frameOf("jesse_cheer", ct), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
+    else if (this.msg && this.msg.who === "Jesse") drawSprite("jesse_talk", frameOf("jesse_talk", this.t - this.msg.at), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     else drawSprite("jesse_idle", frameOf("jesse_idle", this.t), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
