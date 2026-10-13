@@ -48,7 +48,7 @@ def key_magenta(img, strict=False):
     out = Image.fromarray(a.clip(0, 255).astype(np.uint8)).convert("RGBA"); out.putalpha(al)
     return out
 
-NO_PINK = {"w2_3"}   # sets with nothing pink in them, so any pink tinge is cleaned off (2-2's oleanders are pink: not in here)
+NO_PINK = {"w2_3", "w2s"}   # sets with nothing pink in them, so any pink tinge is cleaned off (2-2's oleanders are pink: not in here)
 def key_backdrop(img, name=""):   # green or magenta, whichever the corners are
     c = np.asarray(img.convert("RGB"))[2:12, 2:12].reshape(-1, 3).mean(0)
     return key_magenta(img, name in NO_PINK) if c[0] > 150 and c[2] > 150 and c[1] < 120 else key_green(img)

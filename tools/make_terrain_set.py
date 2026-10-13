@@ -48,12 +48,19 @@ if have(1): save(strip(key_backdrop(op(1), name), 218), "topsoil")
 if have(2): save(fill(op(2)), "sediment")
 if have(3): save(fill(op(3)), "limestone")
 if have(4): save(strip(key_backdrop(op(4), name), 364), "limestone_top")
+# some of Glen's images need a hand: (fraction of the height to keep from the top) for ledges drawn over a ground strip
+LEDGE_TOP = {"w2s": 0.66}
 if have(5):
-    for nm, p in zip(("ledge_left", "ledge_mid", "ledge_right"), pieces(key_backdrop(op(5), name), 3)): save(p, nm)
+    im5 = op(5)
+    if name in LEDGE_TOP: im5 = im5.crop((0, 0, im5.width, round(im5.height * LEDGE_TOP[name])))
+    for nm, p in zip(("ledge_left", "ledge_mid", "ledge_right"), pieces(key_backdrop(im5, name), 3)): save(p, nm)
 if have(6):
     for nm, p in zip(("wall_left", "wall_mid", "wall_right"), pieces(key_backdrop(op(6), name), 3)): save(p, nm)
 if have(7):
-    pl = pieces(key_backdrop(op(7), name), 2); save(pl[0], "pit_left"); save(pl[1], "pit_right")
+    k7 = key_backdrop(op(7), name); pl = pieces(k7, 2)
+    if len(pl) < 2 or pl[1].width < k7.width * 0.15:   # drawn as one joined crevice: split it down the middle (each side keeps its wall)
+        w = k7.width; pl = [crop(k7.crop((0, 0, round(w * 0.47), k7.height))), crop(k7.crop((round(w * 0.53), 0, w, k7.height)))]
+    save(pl[0], "pit_left"); save(pl[1], "pit_right")
 if have(8):
     for nm, p in zip(("base_left", "base_mid", "base_right"), pieces(key_backdrop(op(8), name), 3)): save(p, nm)
 json.dump(info, open(os.path.join(OUT, "terrain.json"), "w"), indent=1)

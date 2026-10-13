@@ -1,0 +1,62 @@
+{
+ "topsoil": [
+  1048,
+  114
+ ],
+ "sediment": [
+  1048,
+  664
+ ],
+ "limestone": [
+  1048,
+  664
+ ],
+ "limestone_top": [
+  1048,
+  120
+ ],
+ "ledge_left": [
+  750,
+  198
+ ],
+ "ledge_mid": [
+  772,
+  198
+ ],
+ "ledge_right": [
+  754,
+  198
+ ],
+ "wall_left": [
+  846,
+  494
+ ],
+ "wall_mid": [
+  760,
+  494
+ ],
+ "wall_right": [
+  815,
+  494
+ ],
+ "pit_left": [
+  507,
+  2151
+ ],
+ "pit_right": [
+  499,
+  2155
+ ],
+ "base_left": [
+  924,
+  683
+ ],
+ "base_mid": [
+  842,
+  683
+ ],
+ "base_right": [
+  896,
+  683
+ ]
+}
