@@ -310,7 +310,9 @@ const STAGE_INFO = {
   "1-2": { cols: 228, bg: "w1_2", name: "The Wandering Flock" },
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
+  "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
+const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
 const ROWS = 20, GR = 17;
 const MAIN_COLS = STAGE_INFO.cols;          // the stage itself...
@@ -328,6 +330,9 @@ const boulder = (c, r, w, h) => block(c, r, w, h, 4); // half-buried boulder
 const fakeRock = (c, r, w, h) => block(c, r, w, h, 5); // looks like rock, but you can walk into it (a secret)
 // a carved wall (material 7): solid until you enter the first `need` pieces of the throw at it (world1.js)
 const codeWalls = [];
+// a deadfall (material 8): dead branches piled across the trail, too tall to jump; a full charged stone breaks it (world2.js)
+const deadfalls = [];
+const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
 const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
@@ -605,6 +610,48 @@ if (LEVEL_NAME === "test") {
   rock(286, 15, 3, 2);                                         // the back of the den: hop over it on the way home
   lionSpawn = { x: 265 * T, y: GR * T }; arenaX = 228 * T;
   sheepfold(300);
+} else if (LEVEL_NAME === "2-1") {
+  // ---- 2-1 The Forest Trail: Hanan teaches the charged sling (a deadfall you can't get past without it), wild boars,
+  //      branches to climb, a hornet nest by a honeybee hive, and The One up in the treetops ----
+  ground(0, 34);
+  talk(5, "Abinadab", "Wild pigs out here. Don't try to out-run them. They're faster than you look.");
+  oliveRow(8, 16, 5);
+  wall(14, 15, 3, 2); oliveArc(13, 14, 5);                     // a fallen log: hop over
+  talk(22, "Abinadab", "There's a cave behind the falls up in the high cliffs. I found it when I was your age. Don't tell Eliab.");
+  lostSheep("sheep", 27, 16);                                  // the first one: just walk up to it
+  special(36, 12);                                             // over the first gap: grab it mid-jump
+  ground(38, 100);
+  campfire(44, GR - 1, "Hanan", "You throw like a boy in a hurry. Let it swing. Longer. Feel it pull. Hold B until the ring turns gold, then let go. Patience puts the power in the stone.", "charge");
+  deadfall(52, 10, 2, 7);                                      // dead branches piled across the trail: too tall to jump, a tap stone bounces off
+  oliveRow(57, 16, 4);
+  critter("boar", 68, GR - 1, 14);                             // the first boar: it scrapes, then charges
+  plat(72, 13, 4); plat(78, 10, 4); plat(84, 7, 3);           // up into the branches
+  oliveRow(72, 12, 4); oliveRow(78, 9, 4);
+  lostSheep("lambblack", 85, 6, "ledge");                      // up in the branches: climb, or play the harp below
+  special(86, 2);                                              // above it: jump from the branch, then flip
+  hornet(91, 11);                                              // the grey paper nest's hornets: sling them
+  deco("beehive_tree", 96, 16, 1.2); food("honey", 98, 16);   // the golden comb: leave the bees be and the honey is yours
+  for (let k = 0; k < 4; k++) bee(96, k);
+  bridge(101, GR, 4);
+  ground(105, 160);
+  wall(110, 15, 4, 2); lostSheep("sheepblack", 112, 14, "ledge");   // standing on a fallen log
+  oliveArc(116, 16, 5);
+  critter("boar", 124, GR - 1, 12);
+  lostSheep("sheep", 132, 16, "thorns");                       // caught in the thorns: sling the bush
+  food("bread", 136, 16);
+  // the trail runs under an overhang of rock, its mouth choked with dead branches: a charged stone again
+  rock(146, 9, 11, 4); deadfall(146, 13, 1, 4);
+  special(151, 16); food("fig_cake", 154, 16); oliveRow(148, 16, 3);
+  ground(164, 240);
+  campfire(168, GR - 1, "Hanan", "A boar won't turn once it starts. Step aside, or stop it. Don't stand and argue with it.");
+  // The One: up in the treetops, branch by branch
+  plat(175, 13, 3); plat(180, 10, 3); plat(185, 7, 3); plat(191, 4, 3);
+  lostSheep("lamb", 192, 3, "one");
+  oliveRow(175, 12, 3); oliveRow(180, 9, 3); oliveRow(185, 6, 3);
+  critter("boar", 202, GR - 1, 10);
+  lostSheep("sheep", 208, 16, "cast");                         // on its back: roll it over (Down)
+  snake("viper", 213); oliveRow(196, 16, 4);
+  sheepfold(218);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1045,7 +1092,7 @@ function updateStones(dt) {
     s.life -= dt; s.vy += TUNE.STONE_GRAVITY * dt * (s.power ? 0.08 : s.charged ? 0.45 : 1);
     s.x += s.vx * dt; s.y += s.vy * dt;
     if (s.power) { s.trail.push([s.x, s.y]); if (s.trail.length > 10) s.trail.shift(); }
-    if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) { s.life = 0; stoneHit(s); }
+    if (isSolid(Math.floor(s.x / T), Math.floor(s.y / T))) { s.life = 0; if (!(typeof stoneHitsDeadfall === "function" && stoneHitsDeadfall(s))) stoneHit(s); }
     for (const g of gourds) if (g.alive && Math.hypot(s.x - g.x, s.y - (g.y - 24)) < 30) {
       g.alive = false; if (!s.power) s.life = 0; stoneHit(s);
       for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 24, vx: (Math.random() - 0.5) * 500, vy: -Math.random() * 500, life: 0.8, color: "#c8c040" });
@@ -1146,7 +1193,7 @@ function drawTiles(camX) {
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6 || m === 7) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6 || m === 7 || m === 8) continue;
     const rockFill = c >= MAIN_COLS ? terPattern("cave_rock_tile", 0.45) || lim : lim;   // in a cave: damp cave rock
     ctx.fillStyle = (m === 2 ? rockFill : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
@@ -1207,7 +1254,7 @@ function drawTiles(camX) {
     sg.addColorStop(0, "rgba(40,28,10,0.35)"); sg.addColorStop(1, "rgba(40,28,10,0)");
     ctx.fillStyle = sg; ctx.fillRect(x0 - 30, groundY - 14, x1 - x0 + 60, 24);
     // colour-match the stones to the limestone and the background walls
-    ctx.save(); ctx.filter = TUNE.WALL_FILTER;
+    ctx.save(); ctx.filter = STAGE_INFO.ter ? "none" : TUNE.WALL_FILTER;   // World 1's stones are colour-matched to its limestone; other sets come as drawn
     ctx.beginPath(); ctx.rect(x0 - 200, -1000, x1 - x0 + 400, groundY + 1000); ctx.clip();
     const lw = terPiece("wall_left", x0 - 4, y, hh);
     const rw = TER.wall_right.naturalWidth * hh / (TER.wall_right.naturalHeight || 1);
@@ -2062,7 +2109,7 @@ function updateFinish(dt) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
-    Journal.open({ world: 1, stage: STAGE_NUM, onClose: () => backToMap() });
+    Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
     s.t += dt;
@@ -2769,7 +2816,7 @@ function frame(now) {
   drawCaveFeatures(camX);
   drawPlatforms(camX);
   drawFold(camX);
-  drawFires(camX);
+  drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
   drawPickups(camX);
   drawOlives(camX);
   drawSpecials(camX);
@@ -2786,7 +2833,7 @@ function frame(now) {
   drawStones(camX);
   drawDecor(camX, "front");
   drawFakeRock(camX);
-  drawCodeWalls(camX);
+  drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
   ctx.restore();
   drawNight(camX);
   drawCaveDarkness(camX);

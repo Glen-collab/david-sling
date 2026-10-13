@@ -32,6 +32,18 @@ const MAP_WORLDS = {
     ],
     cairn: { x: 700, y: 352 },   // where the stones of remembrance stack up when all 12 are found
   },
+  // World 2: a STAND-IN until Glen paints the World 2 map: his general World 2 background, stops placed across it
+  2: {
+    name: "The Wilderness", src: "../assets/backgrounds/w2_far.jpg",
+    david: { far: 0.6, near: 0.85, y0: 300, y1: 760 },
+    stops: [
+      { id: "home", label: "Jesse's house", x: 140, y: 560 },   // home is still Jesse's courtyard (the tithe, the throw)
+      { id: "2-1", label: "The Forest Trail", x: 330, y: 520, trail: [[200, 575], [270, 545]] },
+      { id: "2-2", label: "The Dry Riverbed", x: 600, y: 570, trail: [[420, 530], [520, 570]] },
+      { id: "2-3", label: "The High Cliffs", x: 880, y: 500, trail: [[700, 570], [800, 530]] },
+      { id: "2-4", label: "The Bear's Ravine", x: 1060, y: 560, trail: [[960, 500], [1010, 540]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -49,8 +61,8 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1];   // worlds you can go into from the journey map so far
-const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_WORLDS = [1, 2];   // worlds you can go into from the journey map so far
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }
