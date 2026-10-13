@@ -1,0 +1,30 @@
+{
+  "frames": 16,
+  "frame_w": 303,
+  "frame_h": 180,
+  "ms_per_frame": 208,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 208,
+  "anchor_y": 177,
+  "source": "boar_stunned.mp4",
+  "video_frames": [
+    66,
+    71,
+    77,
+    82,
+    87,
+    92,
+    98,
+    103,
+    108,
+    113,
+    119,
+    124,
+    129,
+    134,
+    140,
+    145
+  ],
+  "pingpong": true
+}

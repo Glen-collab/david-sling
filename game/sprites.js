@@ -132,6 +132,18 @@ window.SPRITE_DATA = {
   "ay": 155,
   "align": "feet"
  },
+ "boar_stunned": {
+  "src": "../assets/sprites/boar_stunned.png",
+  "frames": 16,
+  "w": 303,
+  "h": 180,
+  "ms": 208,
+  "loop": true,
+  "pingpong": true,
+  "ax": 208,
+  "ay": 177,
+  "align": "feet"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,
