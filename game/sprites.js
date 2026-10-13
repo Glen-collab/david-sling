@@ -1428,6 +1428,42 @@ window.SPRITE_DATA = {
   "ay": 74,
   "align": "feet"
  },
+ "trader_idle": {
+  "src": "../assets/sprites/trader_idle.png",
+  "frames": 8,
+  "w": 116,
+  "h": 280,
+  "ms": 180,
+  "loop": true,
+  "pingpong": true,
+  "ax": 59,
+  "ay": 276,
+  "align": "feet"
+ },
+ "trader_offer": {
+  "src": "../assets/sprites/trader_offer.png",
+  "frames": 12,
+  "w": 214,
+  "h": 281,
+  "ms": 200,
+  "loop": false,
+  "pingpong": false,
+  "ax": 88,
+  "ay": 277,
+  "align": "feet"
+ },
+ "trader_talk": {
+  "src": "../assets/sprites/trader_talk.png",
+  "frames": 30,
+  "w": 177,
+  "h": 283,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 99,
+  "ay": 279,
+  "align": "feet"
+ },
  "wolf_run": {
   "src": "../assets/sprites/wolf_run.png",
   "frames": 12,

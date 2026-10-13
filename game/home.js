@@ -18,6 +18,8 @@ const HOME = {
   STONE_FLIGHT: 0.42,             // seconds from the sling to the wall
   MISS_BY: 110,                   // how far off a too-slow throw lands (px)
   JESSE_SIZE: 1.2,                // Jesse next to David (a grown man stands a head taller)
+  TRADER_X: 0.75,                 // where the trader stands, just in front of his stall
+  TRADER_SIZE: 1.2,
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -71,7 +73,7 @@ const Courtyard = {
   active: false,
   open(world = 1) {
     if (!this.img) { this.img = new Image(); this.img.src = `../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`; }
-    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null;
+    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null; this.offerAt = null;
     this.x = 0.82; this.facing = -1; this.walkT = 0; this.mode = null; this.msg = null;
     this.prog = loadProgress();
     // a world beaten since Jesse last spoke to you? he's waiting with its piece
@@ -113,7 +115,7 @@ const Courtyard = {
     if (spot.id === "shelf") { this.useShelf(); return; }
     if (spot.id === "jesse") { this.useJesse(); return; }
     if (spot.id === "throw") { this.startPractice(); return; }
-    if (spot.id === "stall") { this.mode = "market"; this.pick = 0; }
+    if (spot.id === "stall") { this.mode = "market"; this.pick = 0; this.offerAt = this.t; }   // he waves at what he has
   },
   useShelf() {
     const last = [4, 3, 2, 1].find(k => this.prog[`${this.world}-${k}`] && this.prog[`${this.world}-${k}`].cleared);
@@ -226,6 +228,11 @@ const Courtyard = {
     if (!animDone("jesse_cheer", ct)) drawSprite("jesse_cheer", frameOf("jesse_cheer", ct), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     else if (this.msg && this.msg.who === "Jesse") drawSprite("jesse_talk", frameOf("jesse_talk", this.t - this.msg.at), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     else drawSprite("jesse_idle", frameOf("jesse_idle", this.t), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
+    // the trader at his stall, facing David: idle, talking while his words are up, or showing off his goods when the market opens
+    const tx = HOME.TRADER_X * SW - cam, ot = this.offerAt === null ? 1e9 : this.t - this.offerAt, tsz = HOME.SIZE * HOME.TRADER_SIZE;
+    if (!animDone("trader_offer", ot)) drawSprite("trader_offer", frameOf("trader_offer", ot), tx, floor, -1, tsz, ctx.globalAlpha);
+    else if (this.msg && this.msg.who === "The trader") drawSprite("trader_talk", frameOf("trader_talk", this.t - this.msg.at), tx, floor, -1, tsz, ctx.globalAlpha);
+    else drawSprite("trader_idle", frameOf("trader_idle", this.t), tx, floor, -1, tsz, ctx.globalAlpha);
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
     drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), dx - this.facing * 70, floor, this.facing, HOME.SIZE, ctx.globalAlpha);

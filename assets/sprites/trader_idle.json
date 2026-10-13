@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 116,
+  "frame_h": 280,
+  "ms_per_frame": 180,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 59,
+  "anchor_y": 276,
+  "source": "trader_talk.mp4",
+  "video_frames": [
+    1,
+    5,
+    10,
+    14,
+    19,
+    23,
+    28,
+    32
+  ],
+  "pingpong": true
+}
