@@ -49,6 +49,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 - **Jesse's courtyard** (home base, Castlevania-town style):
   - **The tithe:** the first thing on coming home after a world, before the market, **David** offers the first tenth of the olives he gathered in that world (Set aside / Not this time). Nobody asks him; Jesse only receives it. Never forced, nothing paid back. David remembers Abraham (Gen 14:20) and Jacob (Gen 28:22) in turn.
   - **Jesse stands just right of the bullseye** with that world's piece of the throw.
+  - **Jesse's sprites:** `jesse_idle`, and `jesse_cheer` (he points at the target and laughs; it plays on a centre hit). He's drawn facing left at `HOME.JESSE_SIZE` (1.2x David). The clips are in `david-sling-art/video/jesse_*`, and the reference image is `david-sling-art/jesse_ref.jpg`. Still to do: jesse_talk, and the trader.
   - **The practice throw:** Up at the spot by the bench (left of the target). David stands side on, like facing Goliath; enter the code and he slings a stone into the centre of the bullseye (too slow: it goes wide). `HOME.TARGET`, `THROW_FROM`, `STONE_FLIGHT`, `MISS_BY` in home.js.
   - The tenth of the flock (Lev 27:32) is saved for the end of the game.
   - **The shelf** opens the Journal.
@@ -77,7 +78,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## Next
 
-- **People as Grok clips:** Jesse on the bench, the trader at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbour. Today they're names over their lines.
+- **People as Grok clips:** (Jesse done) the trader at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbour. Today they're names over their lines.
 - **The ram's charge** clip (it uses its walk, sped up).
 - **World 2,** when Glen is ready: the bear, Hanan teaching the charged sling in 2-1, the bigger cave in 2-4.
 - **Music:** "Hush Little Seed" (Glen's harp, first 23 s, `assets/audio/title_loop.mp3`) plays on the title and the maps; full song in `david-sling-art`.
