@@ -50,6 +50,7 @@ const Menu = {
     if (this.screen === "pause") return [
       { label: "Resume", act: () => this.close() },
       { label: "Settings", act: () => this.go("settings") },
+      ...(this.under === "stage" ? [{ label: "Start the stage again", act: () => startStage(LEVEL_NAME) }] : []),   // stuck somewhere? start over (sheep and olives from this try are lost)
       this.under === "stage" ? { label: "Back to the map", act: () => backToMap() }
                              : { label: "Title screen", act: () => { this.under = null; this.open("title"); } },
     ];
