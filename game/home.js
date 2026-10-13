@@ -1,7 +1,7 @@
 // The home base (DESIGN.md §4c): a walk-in courtyard, side view, like a Castlevania town. For Worlds 1-3 it's
 // Jesse's courtyard in Bethlehem (Glen's painting, assets/backgrounds/courtyard_w1.jpg). Walk with Left / Right;
 // press Up at a spot:
-//   the target      Jesse waits by the bullseye with each world's piece of the throw; after that, Up here practises
+//   the target      Jesse waits by the bullseye with each world's piece of the throw; after that, Up here practices
 //                   the code. (Coming home after a world, David first sets aside the tithe: see TITHE_STORY.)
 //   the shelf       the Journal
 //   the stall       trade olives for lamp oil and food
@@ -44,7 +44,7 @@ const TITHE_THOUGHT = [
 ];
 // spots, as fractions of the picture's width
 const HOME_SPOTS = [
-  { id: "throw", x: 0.30, label: "Practise the throw" },
+  { id: "throw", x: 0.30, label: "Practice the throw" },
   { id: "jesse", x: 0.47, label: "Jesse" },
   { id: "shelf", x: 0.545, label: "The Journal" },
   { id: "stall", x: 0.705, label: "The market" },
@@ -152,7 +152,7 @@ const Courtyard = {
     if ((this.prog.throwGiven || 0) < this.earned) { this.say("Jesse", "Come here first, David. I have something for you."); return; }
     this.x = HOME.THROW_FROM; this.facing = 1; this.walkT = 0;
     this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME;
-    this.result = null; this.sling = null; this.bits = [];
+    this.result = null; this.sling = null; this.bits = []; this.wrong = false;
   },
   throwStone(hit) {   // the throw animation starts; the stone leaves at frame 7 of 12
     const a = Math.random() * Math.PI * 2;
@@ -192,7 +192,7 @@ const Courtyard = {
     this.pt -= dt;
     for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
       if (b === this.code[this.got]) { this.got++; if (typeof chime === "function") chime(this.got); }
-      else this.got = b === this.code[0] ? 1 : 0;   // wrong: start again (a fresh first input counts)
+      else { this.wrong = true; this.throwStone(false); return; }   // the wrong move: he lets fly anyway, and it goes wide
       break;
     }
     if (this.got >= this.code.length) this.throwStone(true);          // the whole throw: right in the middle
@@ -373,7 +373,7 @@ const Courtyard = {
       ctx.fillText(done ? ARROW[this.code[i]] : "?", bx + box / 2, y + 40);   // from memory: the pieces only show once you've entered them
     }
     ctx.font = "17px sans-serif"; ctx.fillStyle = "#e9dcc4";
-    const msg = this.result ? (this.result.ok ? "Thwack! Right in the middle of the target." : "Too slow, and it went wide. Try again.") : this.sling ? "" : `Enter the throw from memory  ·  ${Math.max(0, this.pt).toFixed(1)} s`;
+    const msg = this.result ? (this.result.ok ? "Thwack! Right in the middle of the target." : (this.wrong ? "Wrong move, and it went wide. Try again." : "Too slow, and it went wide. Try again.")) : this.sling ? "" : `Enter the throw from memory  ·  ${Math.max(0, this.pt).toFixed(1)} s`;
     ctx.fillText(msg, W / 2, y + box + 40);
   },
 };

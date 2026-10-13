@@ -620,7 +620,7 @@ A walk-in place, side view, like a Castlevania town. The first stop on every wor
 
 Every home base has the same four things, with different people:
 1. **Someone from home who gives the world's piece of the throw** (Jesse in Worlds 1–3; whoever fits later). It goes into the Journal's "The Throw" page.
-2. **The practice wall:** a target to practise the throw code as often as you like (the Madden "Coach" drill). The only place to practise before Goliath.
+2. **The practice wall:** a target to practice the throw code as often as you like (the Madden "Coach" drill). The only place to practice before Goliath.
 3. **The brothers** (or the people of that place). Their lines change as the story moves; Eliab grows sharper before Goliath.
 4. **The Journal shelf:** every page so far, The One, the Field Guide, the stones count.
 
