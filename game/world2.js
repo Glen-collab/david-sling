@@ -490,10 +490,179 @@ function updateStonesTalk(d, dt) {   // true = the scene has the controls
 
 const boyMissing = () => boy.state === "stranded";   // the gate won't open without him (main.js updateFinish)
 function updateWorld2(dt) {
-  if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); } updateFlood(dt); updateBoy(dt); }
+  if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); }
+  updateFlood(dt); updateBoy(dt);
+  updateEagles(dt); updateIbexes(dt); updateWind(dt);   // 2-3 (below)
+}
 function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
 function resetWorld2(restart) {   // after a fall (restart: out of lives, back to the start of the stage)
   Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1, lastX: undefined }); hushFlood();
+  resetEagles();
   if (restart) { resetBoy(); stonesTalk.step = -1; }
   else if (boy.state === "follow" || boy.state === "stone") { boy.x = david.x - 40; boy.y = david.y; boy.state = "follow"; }
+}
+
+// ---------------------------------------------------------------------------
+// 2-3 The High Cliffs (DESIGN 2-3): eagles that snatch your lamb, ibex that show you the safe path, wind gusts on the
+// heights, and the waterfall over the hidden spring. Placed with setPiece() in main.js:
+//   setPiece("eagle", c, r)                  circles here; dives at your lamb (or at David if he's carrying it)
+//   setPiece("ibex", c, r, { path })         waits on a ledge, leaps to the next spot on its path as David comes near
+//   setPiece("wind", c, r, { end })          gusts blow from the right between these columns (crouch to brace)
+//   setPiece("falls", c, r, { w, bottom })   a waterfall pouring from row r down to `bottom`, w tiles wide
+// ---------------------------------------------------------------------------
+Object.assign(W2, {
+  EAGLE_SEE: 9,          // tiles: how close your lamb (or David) has to come before an eagle dives
+  EAGLE_DIVE: 560,       // px/s
+  EAGLE_REST: 2.6,       // seconds circling between dives
+  EAGLE_SIZE: 0.9,
+  IBEX_NEAR: 4.5,        // tiles: how close David comes before the ibex leaps on
+  IBEX_LEAP: 0.9,        // seconds in the air
+  WIND_CALM: 2.6, WIND_WARN: 0.8, WIND_GUST: 1.7,   // seconds: the gust cycle
+  WIND_PUSH: 300,        // px/s pushing David back (walking is 270): crouch (hold Down) on the ground and it can't move him
+});
+Object.assign(TUNE.SPRITE_SIZE, { eagle_fly: W2.EAGLE_SIZE });
+const eagles = setPieces.filter(p => p.kind === "eagle").map(p => ({ hx: p.x, hy: p.y, x: p.x, y: p.y, t: Math.random() * 6, state: "soar", vx: 0, vy: 0, facing: -1, carry: false, gone: false, alpha: 1 }));
+function resetEagles() { for (const e of eagles) Object.assign(e, { x: e.hx, y: e.hy, state: "soar", t: Math.random() * 2, carry: false, gone: false, alpha: 1 }); }
+const lambDrop = { on: false, vy: 0 };   // the lamb tumbling down after an eagle lets go
+function updateLambDrop(dt) {
+  if (!lambDrop.on) return;
+  if (lamb.carried || lamb.stolen) { lambDrop.on = false; return; }
+  lambDrop.vy = Math.min(1100, lambDrop.vy + TUNE.GRAVITY * 0.8 * dt);
+  const y1 = lamb.y + lambDrop.vy * dt, c = Math.floor(lamb.x / T);
+  for (let r = Math.floor(lamb.y / T); r <= Math.floor(y1 / T); r++)
+    if (lambDrop.vy > 0 && r >= 0 && (isSolid(c, r) || isOneway(c, r)) && lamb.y <= r * T + 1) { lamb.y = r * T; lambDrop.on = false; trail.length = 0; return; }
+  lamb.y = y1;
+  if (lamb.y > ROWS * T) { lambDrop.on = false; lamb.x = david.x - david.facing * 50; lamb.y = david.y; trail.length = 0; toast("Your lamb scrambled back up to you."); }
+}
+function updateEagles(dt) {
+  updateLambDrop(dt);
+  const d = david;
+  for (const e of eagles) {
+    if (e.gone) { if (e.alpha > 0) { e.alpha -= dt * 0.8; e.x += e.vx * dt; e.y += e.vy * dt; } continue; }
+    e.t += dt;
+    const lambFree = !lamb.carried && !lamb.stolen && d.deadT <= 0;
+    if (e.state === "soar" || e.state === "carry") {   // wide slow circles round its spot (higher, and slower, with the lamb)
+      const k = e.state === "carry" ? 0.6 : 1;
+      const tx = e.hx + Math.sin(e.t * 0.7 * k) * 160, ty = e.hy - (e.carry ? 30 : 0) + Math.cos(e.t * 1.4 * k) * 30;
+      e.facing = tx > e.x ? 1 : -1;
+      e.x += (tx - e.x) * Math.min(1, dt * 2); e.y += (ty - e.y) * Math.min(1, dt * 2);
+      if (e.state === "carry") { lamb.x = e.x; lamb.y = e.y + 62; continue; }
+      const tgt = lambFree ? { x: lamb.x, y: lamb.y - 20 } : { x: d.x, y: d.y - 60 };
+      if (e.t > W2.EAGLE_REST && Math.abs(tgt.x - e.x) < W2.EAGLE_SEE * T && tgt.y > e.y + 40) {
+        const dx = tgt.x - e.x, dy = tgt.y - e.y, n = Math.hypot(dx, dy);
+        e.state = "dive"; e.t = 0; e.vx = dx / n * W2.EAGLE_DIVE; e.vy = dy / n * W2.EAGLE_DIVE; e.facing = Math.sign(dx) || 1;
+        if (!e.screeched) { e.screeched = true; toast("An eagle! It's after your lamb. Hold Up and throw to hit it in the air."); }
+      }
+    } else if (e.state === "dive") {
+      e.x += e.vx * dt; e.y += e.vy * dt;
+      if (lambFree && Math.hypot(lamb.x - e.x, lamb.y - 20 - e.y) < 46) {   // got it: up and away with the lamb
+        e.state = "carry"; e.carry = true; e.t = 0; lamb.stolen = true; baa(lamb.x, 1);
+        toast("The eagle took your lamb! Hit it with a stone (hold Up to aim up) and it will let go.");
+      } else if (Math.abs(e.x - d.x) < 44 && e.y > d.y - d.h - 10 && e.y < d.y) { hurtDavid(e.x); e.state = "climb"; e.t = 0; }
+      else if (e.t > 1.3 || e.y > GR * T) { e.state = "climb"; e.t = 0; }
+    } else {   // climbing back up to its spot
+      e.x += (e.hx - e.x) * Math.min(1, dt * 1.5); e.y += (e.hy - e.y) * Math.min(1, dt * 1.5); e.facing = e.hx > e.x ? 1 : -1;
+      if (e.t > 1.4) { e.state = "soar"; e.t = 0; }
+    }
+  }
+}
+function stoneHitsEagles(s) {   // called first in stoneHitsBugs (main.js)
+  for (const e of eagles) if (!e.gone && Math.hypot(s.x - e.x, s.y - (e.y - 20)) < 62) {
+    e.gone = true; e.vx = Math.sign(s.vx || 1) * 220; e.vy = -320;
+    if (e.carry) {   // it lets go: the lamb tumbles down to you
+      lamb.stolen = false; lamb.x = e.x; lamb.y = e.y + 60; trail.length = 0; baa(lamb.x, 1);
+      lambDrop.on = true; lambDrop.vy = -200;
+      for (let i = 0; i < 12; i++) bits.push({ x: e.x, y: e.y + 40, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.7, color: "#fff7c2" });
+      toast("The eagle let go! Your lamb is safe.");
+    } else toast("Eagle driven off!");
+    stoneHit(s); return !s.power;
+  }
+  return false;
+}
+function drawEagles(camX) {
+  for (const e of eagles) {
+    if (e.alpha <= 0) continue;
+    const x = e.x - camX; if (x < -200 || x > W + 200) continue;
+    if (e.carry && !e.gone) drawSprite("lamb_run", 2, x, e.y + 62, e.facing);   // dangling from its talons
+    drawSprite("eagle_fly", frameOf("eagle_fly", e.t * (e.state === "dive" ? 0.6 : 1)), x, e.y, e.facing, 1, e.alpha);
+  }
+}
+
+// --- ibex: the wild goats know every safe path (Hanan). Each one leaps ahead along its path as David comes near.
+const ibexes = setPieces.filter(p => p.kind === "ibex").map(p => ({ path: [[p.c, p.r], ...(p.path || [])], i: 0, x: p.x, y: p.y, t: Math.random() * 3, leap: null, facing: 1 }));
+const ibexSpot = ([c, r]) => ({ x: c * T + T / 2, y: (r + 1) * T });
+function updateIbexes(dt) {
+  for (const b of ibexes) {
+    b.t += dt;
+    if (b.leap) {
+      const L = b.leap, k = Math.min(1, b.t / W2.IBEX_LEAP);
+      b.x = L.x0 + (L.x1 - L.x0) * k; b.y = L.y0 + (L.y1 - L.y0) * k - Math.sin(k * Math.PI) * (110 + Math.max(0, L.y0 - L.y1) * 0.6);
+      if (k >= 1) { b.leap = null; b.t = 0; }
+      continue;
+    }
+    const near = Math.abs(david.x - b.x) < W2.IBEX_NEAR * T && Math.abs(david.y - b.y) < 6 * T;
+    if (near && b.i < b.path.length - 1 && b.t > 0.8) {
+      const a = ibexSpot(b.path[b.i]), z = ibexSpot(b.path[++b.i]);
+      b.leap = { x0: a.x, y0: a.y, x1: z.x, y1: z.y }; b.t = 0; b.facing = Math.sign(z.x - a.x) || 1;
+    } else b.facing = b.i < b.path.length - 1 ? Math.sign(ibexSpot(b.path[b.i + 1]).x - b.x) || 1 : b.facing;
+  }
+}
+function drawIbexes(camX) {
+  for (const b of ibexes) {
+    const x = b.x - camX; if (x < -300 || x > W + 300) continue;
+    if (b.leap) { const n = SPR.ram_leap.frames; drawSprite("ram_leap", Math.min(n - 1, 3 + Math.floor(b.t / W2.IBEX_LEAP * (n - 5))), x, b.y, b.facing); }
+    else drawSprite("ram_stand", frameOf("ram_stand", b.t), x, b.y, b.facing);
+  }
+}
+
+// --- wind on the heights: a gust every few seconds from the right. Streaks warn you first; crouch to brace.
+const wind = { t: 0, phase: "calm", streaks: [], told: false };
+function windZone() { const w = piece("wind"); return w && david.x > w.x && david.x < w.end * T ? w : null; }
+function updateWind(dt) {
+  if (!piece("wind")) return;
+  const cyc = W2.WIND_CALM + W2.WIND_WARN + W2.WIND_GUST, t = (wind.t = (wind.t + dt) % cyc);
+  wind.phase = t < W2.WIND_CALM ? "calm" : t < W2.WIND_CALM + W2.WIND_WARN ? "warn" : "gust";
+  const on = windZone(), d = david;
+  if (on && wind.phase !== "calm" && Math.random() < (wind.phase === "gust" ? 0.9 : 0.3))
+    wind.streaks.push({ x: camX + W + 40, y: Math.random() * H * 0.8, len: 60 + Math.random() * 120, v: 900 + Math.random() * 500, life: 1.6 });
+  for (const s of wind.streaks) { s.x -= s.v * dt; s.life -= dt; }
+  wind.streaks = wind.streaks.filter(s => s.life > 0);
+  if (!on || wind.phase !== "gust" || d.deadT > 0 || d.harp || inCutscene()) return;
+  const braced = d.onGround && held("down");
+  if (!wind.told) { wind.told = true; toast("Wind! When you see it coming, crouch (hold Down) to brace yourself."); }
+  if (!braced) { const push = W2.WIND_PUSH * (d.onGround ? 1 : 0.8) * dt, x0 = d.x; d.x -= push; if (bumpsWall(d)) d.x = x0; }
+}
+function bumpsWall(d) {   // would standing here put him inside rock?
+  const c = Math.floor((d.x - BODY_W / 2) / T);
+  for (let r = Math.floor((d.y - d.h) / T); r <= Math.floor((d.y - 1) / T); r++) if (isSolid(c, r)) return true;
+  return false;
+}
+function drawWind() {
+  if (!wind.streaks.length) return;
+  ctx.save(); ctx.strokeStyle = "rgba(255,250,235,0.55)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+  for (const s of wind.streaks) { const x = s.x - camX; ctx.globalAlpha = Math.min(1, s.life); ctx.beginPath(); ctx.moveTo(x, s.y); ctx.lineTo(x + s.len, s.y + 4); ctx.stroke(); }
+  ctx.restore();
+}
+
+// --- the waterfall over the hidden spring (painted here until there's art for it)
+function drawFalls(camX) {
+  for (const f of setPieces.filter(p => p.kind === "falls")) {
+    const x0 = f.c * T - camX, w = f.w * T, y0 = f.r * T, y1 = f.bottom * T; if (x0 > W + 50 || x0 + w < -50) continue;
+    const now = performance.now() / 1000;
+    ctx.save();
+    const g = ctx.createLinearGradient(x0, 0, x0 + w, 0);
+    g.addColorStop(0, "rgba(170,215,235,0.55)"); g.addColorStop(0.5, "rgba(225,245,252,0.8)"); g.addColorStop(1, "rgba(170,215,235,0.55)");
+    ctx.fillStyle = g; ctx.fillRect(x0, y0, w, y1 - y0);
+    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 2;
+    for (let k = 0; k < 9; k++) {   // falling streaks
+      const sx = x0 + 6 + (k * 37) % (w - 10), len = 50 + (k * 23) % 60, sy = y0 + ((now * 520 + k * 97) % (y1 - y0 + len)) - len;
+      ctx.beginPath(); ctx.moveTo(sx, Math.max(y0, sy)); ctx.lineTo(sx, Math.min(y1, sy + len)); ctx.stroke();
+    }
+    for (let k = 0; k < 10; k++) {   // white water where it lands
+      const a = now * 4 + k * 1.7;
+      ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.3 * Math.sin(a)})`;
+      ctx.beginPath(); ctx.arc(x0 - 10 + (k / 9) * (w + 20), y1 - 4 - Math.abs(Math.sin(a)) * 14, 9 + (k % 3) * 3, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
 }

@@ -311,7 +311,8 @@ const STAGE_INFO = {
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
   "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },
-  "2-2": { cols: 306, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "2-2": { cols: 306, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },
+  "2-3": { cols: 196, bg: "w2_3", ter: "w2s", name: "The High Cliffs" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -707,6 +708,59 @@ if (LEVEL_NAME === "test") {
   setPiece("stones", 271);
   critter("donkey", 275); critters[critters.length - 1].calmed = critters[critters.length - 1].waits = true;
   sheepfold(284);
+} else if (LEVEL_NAME === "2-3") {
+  // ---- 2-3 The High Cliffs: up a cliffside of rock columns over deep drops, crumbling ledges, eagles that go for your
+  //      lamb, ibex that know the safe paths (one leads to The One), wind on the heights, then down to a hidden spring ----
+  ground(0, 21);
+  campfire(6, GR - 1, "Hanan", "Watch the wild goats. They know every safe path on these cliffs. And keep your lamb close: eagles nest up here.");
+  oliveRow(9, 16, 4);
+  lostSheep("sheep", 15, 16);
+  setPiece("ibex", 19, 16, { path: [[24, 13], [31, 10], [37, 10]] });   // the first ibex shows the way up
+  pillar(22, 14, 5);
+  pillar(29, 11, 4); oliveArc(27, 10, 3);
+  pillar(35, 11, 6);
+  lostSheep("sheepblack", 39, 10);
+  crumble(42, 9, 3); crumble(46, 9, 2);                        // crumbling ledges over the drop
+  special(45, 5);
+  setPiece("eagle", 47, 2);
+  pillar(49, 8, 8);
+  // the secret: this ibex leaps up onto a high route only the goats use, to The One
+  setPiece("ibex", 54, 7, { path: [[59, 3], [64, 1], [69, 1], [74, 1], [78, 2]] });
+  plat(58, 4, 3); plat(63, 2, 3); plat(68, 2, 3); plat(73, 2, 3); plat(77, 3, 3);
+  lostSheep("lamb", 78, 2, "one");
+  oliveRow(58, 3, 3); oliveRow(63, 1, 3); oliveRow(73, 1, 3);
+  // the main way: down a little, then on up
+  pillar(59, 11, 5);
+  plat(65, 9, 3); special(66, 6);
+  pillar(69, 7, 6);
+  campfire(71, 6);                                             // checkpoint
+  crumble(76, 8, 2);
+  // the heights: the wind gusts from the right
+  setPiece("wind", 80, GR - 1, { end: 128 });
+  pillar(80, 9, 5);
+  crumble(86, 9, 3);
+  pillar(90, 9, 3); oliveRow(90, 8, 3);
+  pillar(95, 6, 5);
+  lostSheep("sheep", 98, 5, "cast");                           // on its back up here: roll it over (Down)
+  setPiece("eagle", 101, 1);
+  pillar(102, 8, 4);
+  plat(108, 7, 3); plat(113, 6, 3); oliveRow(108, 6, 3); oliveRow(113, 5, 3);
+  pillar(118, 5, 8);                                           // the top of the cliffs
+  campfire(120, 4);
+  lostSheep("lambblack", 124, 4);
+  special(124, 0);
+  // down into the hidden spring
+  pillar(129, 7, 4);
+  pillar(135, 9, 4); oliveArc(133, 8, 3);
+  setPiece("eagle", 140, 3);
+  pillar(141, 11, 4);
+  special(146, 9);
+  pillar(147, 13, 4);
+  ground(151, 175);
+  lostSheep("sheep", 157, 16, "thorns");                       // caught in the thorns by the water: sling the bush
+  snake("viper", 162);
+  sheepfold(175);
+  // (the spring's waterfalls are in Glen's background painting; setPiece("falls", ...) can paint one if a stage needs it)
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1122,6 +1176,7 @@ function drawDavid(camX) {
 function updateLamb(dt) {
   if (lamb.carried) { lamb.x = david.x; lamb.y = david.y; return; }
   if (lamb.stolen) return;   // a jackal has it (world1.js)
+  if (typeof lambDrop !== "undefined" && lambDrop.on) return;   // tumbling down after an eagle let go (world2.js)
   lamb.t += dt;
   // the lamb walks in David's footsteps, first in the line: it hops where he hopped, so it never falls in a pit.
   // (When a second player controls the lamb, it'll get its own physics again.)
@@ -2598,6 +2653,7 @@ function updateHornets(dt) {
   }
 }
 function stoneHitsBugs(s) {
+  if (typeof stoneHitsEagles === "function" && stoneHitsEagles(s)) return true;   // world2.js (2-3)
   for (const h of hornets) if (!h.gone && Math.hypot(s.x - h.x, s.y - h.y) < (h.kind === "raven" ? 60 : 26)) {
     h.gone = true; h.vx = Math.sign(s.vx) * 160; h.vy = -260; toast(h.kind === "raven" ? "Raven driven off!" : "Hornet driven off!"); return !s.power;
   }
@@ -2902,10 +2958,10 @@ function frame(now) {
   drawTakenLamb(camX);
   drawSheep(camX);
   drawFlock(camX);
-  drawLamb(camX); if (typeof drawBoy === "function") drawBoy(camX);
+  drawLamb(camX); if (typeof drawBoy === "function") { drawBoy(camX); drawIbexes(camX); }   // world2.js
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawFoldFront(camX);
-  drawStones(camX); if (typeof drawFlood === "function") drawFlood(camX);
+  drawStones(camX); if (typeof drawFlood === "function") { drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js
   drawDecor(camX, "front");
   drawFakeRock(camX);
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
