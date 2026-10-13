@@ -1,0 +1,11 @@
+{
+  "frames": 32,
+  "frame_w": 463,
+  "frame_h": 300,
+  "ms_per_frame": 83,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 281,
+  "anchor_y": 0,
+  "source": "waterfall.mp4"
+}

@@ -1728,6 +1728,18 @@ window.SPRITE_DATA = {
   "ay": 279,
   "align": "feet"
  },
+ "waterfall": {
+  "src": "../assets/sprites/waterfall.png",
+  "frames": 32,
+  "w": 463,
+  "h": 300,
+  "ms": 83,
+  "loop": true,
+  "pingpong": false,
+  "ax": 281,
+  "ay": 0,
+  "align": "feet"
+ },
  "wolf_run": {
   "src": "../assets/sprites/wolf_run.png",
   "frames": 12,

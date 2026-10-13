@@ -644,9 +644,16 @@ function drawWind() {
   ctx.restore();
 }
 
-// --- the waterfall over the hidden spring (painted here until there's art for it)
+// --- the waterfall over the hidden spring: Glen's Grok clip (sprite "waterfall": its anchor is the lip at the top),
+//     stretched to fall from row r to `bottom`. Without the sprite, a painted stand-in.
 function drawFalls(camX) {
   for (const f of setPieces.filter(p => p.kind === "falls")) {
+    if (SPR.waterfall && SPR.waterfall.img.naturalWidth) {
+      const x = f.c * T - camX; if (x < -900 || x > W + 400) continue;
+      const k = (f.bottom - f.r) * T / (SPR.waterfall.h * SCALE);
+      drawSprite("waterfall", frameOf("waterfall", performance.now() / 1000), x + (f.dx || 0), f.r * T, 1, k);
+      continue;
+    }
     const x0 = f.c * T - camX, w = f.w * T, y0 = f.r * T, y1 = f.bottom * T; if (x0 > W + 50 || x0 + w < -50) continue;
     const now = performance.now() / 1000;
     ctx.save();

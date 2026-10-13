@@ -760,7 +760,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheep", 157, 16, "thorns");                       // caught in the thorns by the water: sling the bush
   snake("viper", 162);
   sheepfold(175);
-  // (the spring's waterfalls are in Glen's background painting; setPiece("falls", ...) can paint one if a stage needs it)
+  setPiece("falls", 191, 4, { bottom: GR, dx: 110 });         // the spring: Glen's waterfall pours off the cliff behind the fold
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
