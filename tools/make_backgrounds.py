@@ -12,8 +12,9 @@ SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w1_2": ("1-2 far.png", "1-2 mid.png", "1-2 near.png"),   # 1-2 The Wandering Flock (morning)
         "w1_3": ("1-3 far.png", "1-3 mid.png", "1-3 near.png"),   # 1-3 The Rocky Pastures
         "w1_4": ("1-4 far.png", "1-4 mid.png", "1-4 near.png"),   # 1-4 The Lion's Territory (night)
-        "w2_1": ("2-1 far.png", "2-1 mid.png", "2-1 near.png")}   # 2-1 The Forest Trail (morning; magenta, not green)
-MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1"}
+        "w2_1": ("2-1 far.png", "2-1 mid.png", "2-1 near.png"),   # 2-1 The Forest Trail (morning; magenta, not green)
+        "w2_2": ("2-2 far.png", "2-2 mid.png", "2-2 near.png")}   # 2-2 The Dry Riverbed (midday, a storm far off)
+MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):
