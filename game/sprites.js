@@ -900,6 +900,18 @@ window.SPRITE_DATA = {
   "ay": 299,
   "align": "feet"
  },
+ "hedgehog_walk": {
+  "src": "../assets/sprites/hedgehog_walk.png",
+  "frames": 12,
+  "w": 156,
+  "h": 87,
+  "ms": 62,
+  "loop": true,
+  "pingpong": false,
+  "ax": 69,
+  "ay": 84,
+  "align": "feet"
+ },
  "hornet_fly": {
   "src": "../assets/sprites/hornet_fly.png",
   "frames": 8,
@@ -1594,6 +1606,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 72,
   "ay": 72,
+  "align": "feet"
+ },
+ "scorpion_walk": {
+  "src": "../assets/sprites/scorpion_walk.png",
+  "frames": 12,
+  "w": 138,
+  "h": 94,
+  "ms": 56,
+  "loop": true,
+  "pingpong": false,
+  "ax": 14,
+  "ay": 92,
   "align": "feet"
  },
  "sheep_cast": {

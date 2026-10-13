@@ -664,12 +664,15 @@ if (LEVEL_NAME === "test") {
   ground(0, 38);
   oliveRow(6, 16, 5);
   rock(16, 15, 3, 2); oliveArc(15, 14, 5);                     // a boulder in the riverbed: hop over
-  deco("boulder_tan", 9, 16, 0.22); deco("rubble_stones", 36, 16, 0.3); deco("rock_pile_tan", 52, 16, 0.3); deco("rubble_mound", 96, 16, 0.28);
+  deco("boulder_tan", 9, 16, 0.22); deco("rubble_stones", 36, 16, 0.3); deco("rock_pile_tan", 63, 16, 0.3); deco("rubble_mound", 96, 16, 0.28);
   lostSheep("sheep", 25, 16);
   rock(30, 13, 2, 4); special(31, 10);                         // a tall rock: the special stone on top
   ground(42, 130);
   campfire(46, GR - 1, "Hanan", "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look.");
-  snake("viper", 56);
+  // a low gap under the rock (crawl through it) with scorpions in it, and a hedgehog that eats them: leave it be
+  critter("hedgehog", 42);
+  rock(50, 11, 8, 4);
+  critter("scorpion", 52, GR - 1, 1.2); critter("scorpion", 55, GR - 1, 1.2);
   plat(60, 13, 4); plat(65, 10, 4);
   lostSheep("sheepblack", 67, 9, "ledge");                     // up on the rocks: climb, or play the harp below
   oliveRow(60, 12, 4);
@@ -1020,7 +1023,7 @@ function updateDavid(dt) {
       const aimUp = held("up") && hasSkill("aimUp"), straightUp = aimUp && !(held("left") || held("right"));
       const aimDown = held("down") && !d.onGround;   // Down + B in the air: throw diagonally down
       const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
-      stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
+      stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : d.h === LOW_H ? 40 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
       sfx("sling_throw", undefined, full >= 1 ? 0.95 : 0.8, 0.95 + Math.random() * 0.1);   // always the whip of the throw
     }

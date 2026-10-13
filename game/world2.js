@@ -961,3 +961,47 @@ function drawBear(camX) {
     ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center"; ctx.fillText("THE BEAR", W / 2, 38); ctx.textAlign = "left";
   }
 }
+
+// ---------------------------------------------------------------------------
+// 2-2's low passage: yellow scorpions in a gap under the rock you have to crawl through, and a hedgehog that eats them
+// (DESIGN 2-2). Leave the hedgehog be and it trundles in and clears the nest; hit it and it runs off, and the
+// scorpions are yours to deal with (crouch and throw: the stone flies low).
+// ---------------------------------------------------------------------------
+Object.assign(W2, { SCORPION_WALK: 40, HEDGEHOG_WALK: 70, HEDGEHOG_WAKE: 7, HEDGEHOG_GOES: 16 });
+function spriteBox(k, name, h) {   // the body box from the sprite's own frame (for small animals whose anchor isn't the head)
+  const s = SPR[name], sc = SCALE * (TUNE.SPRITE_SIZE[name] || 1);
+  if (!s) return { x0: k.x - 30, x1: k.x + 30, y0: k.y - h, y1: k.y };
+  const a = k.x - k.facing * s.ax * sc, b = k.x + k.facing * (s.w - s.ax) * sc;
+  return { x0: Math.min(a, b) + 6, x1: Math.max(a, b) - 6, y0: k.y - h, y1: k.y };
+}
+CRITTER_ART.scorpion = { idle: "scorpion_walk", move: "scorpion_walk", len: 60, h: 30, box: k => spriteBox(k, "scorpion_walk", 30) };
+CRITTER_ART.hedgehog = { idle: "hedgehog_walk", move: "hedgehog_walk", len: 60, h: 36, box: k => spriteBox(k, "hedgehog_walk", 36) };
+function updateScorpion(k, dx, sameLevel, dt) {   // scuttles back and forth in its gap; touching it stings
+  if (!runCritter(k, W2.SCORPION_WALK, dt) || (k.range && Math.abs(k.x - k.home) > k.range && Math.sign(k.x - k.home) === k.facing)) k.facing = -k.facing;
+  if (touchesDavid(critterBox(k))) hurtDavid(k.x);
+}
+function stoneHitsScorpion(k, s) { k.gone = true; k.vx = 0; stoneHit(s, 0.5); toast("Scorpion squashed!"); return !s.power; }
+function updateHedgehog(k, dx, sameLevel, dt) {
+  const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 40, 30, dt); };
+  if (k.state === "idle") { fall(); k.facing = 1; if (Math.abs(dx) < W2.HEDGEHOG_WAKE * T) setCrit(k, "walk"); return; }
+  if (k.state === "walk") {   // trundles along, snapping up any scorpion it meets
+    k.facing = 1; runCritter(k, W2.HEDGEHOG_WALK, dt);
+    const b = critterBox(k);
+    for (const s of critters) if (s.kind === "scorpion" && !s.gone) {
+      const sb = critterBox(s);
+      if (sb.x0 < b.x1 && sb.x1 > b.x0) { s.gone = true; s.vx = 0; s.alpha = 0.6; if (!k.ate) { k.ate = true; toast("The hedgehog snapped up a scorpion! Hedgehogs eat them."); } }
+    }
+    if (k.x > k.home + W2.HEDGEHOG_GOES * T) setCrit(k, "rest");
+    return;
+  }
+  fall();   // rest: done for the day, snuffling about
+}
+function stoneHitsHedgehog(k, s) {
+  k.gone = true; k.facing = -1; k.vx = -320; stoneHit(s, 0.4);
+  toast("You hit the hedgehog! It ran off. The scorpions are yours now: crouch (Down) and throw, and the stone flies low.");
+  return true;
+}
+function drawSmallCritter(k, x, name) {
+  const moving = k.state !== "idle" && k.state !== "rest" || k.kind === "scorpion" || k.gone;
+  drawSprite(name, moving ? frameOf(name, k.t) : 0, x, k.y, k.facing, 1, k.alpha);
+}

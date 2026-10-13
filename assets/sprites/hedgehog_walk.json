@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 156,
+  "frame_h": 87,
+  "ms_per_frame": 62,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 69,
+  "anchor_y": 84,
+  "source": "hedgehog.mp4",
+  "video_frames": [
+    31,
+    33,
+    34,
+    35,
+    37,
+    39,
+    40,
+    41,
+    43,
+    45,
+    46,
+    47
+  ]
+}

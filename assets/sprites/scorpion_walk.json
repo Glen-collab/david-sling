@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 138,
+  "frame_h": 94,
+  "ms_per_frame": 56,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 14,
+  "anchor_y": 92,
+  "source": "scorpion.mp4",
+  "video_frames": [
+    30,
+    31,
+    33,
+    34,
+    35,
+    37,
+    38,
+    39,
+    41,
+    42,
+    43,
+    45
+  ]
+}

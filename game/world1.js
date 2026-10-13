@@ -262,7 +262,8 @@ const CRITTER_ART = {
   ram:    { idle: "ram_stand",   move: "ram_run",   tell: "ram_butt", len: 95, h: 70 },
 };
 function critterBox(k) {   // the anchor is the head; the body runs back from it
-  const a = CRITTER_ART[k.kind], front = k.x + k.facing * 8, back = k.x - k.facing * a.len;
+  const a = CRITTER_ART[k.kind]; if (a.box) return a.box(k);   // (small animals: from the sprite, world2.js)
+  const front = k.x + k.facing * 8, back = k.x - k.facing * a.len;
   return { x0: Math.min(front, back), x1: Math.max(front, back), y0: k.y - a.h, y1: k.y };
 }
 const touchesDavid = b => david.x + BODY_W / 2 > b.x0 && david.x - BODY_W / 2 < b.x1 && david.y > b.y0 && david.y - david.h < b.y1;
@@ -287,6 +288,8 @@ function updateCritters(dt) {
     else if (k.kind === "boar") updateBoar(k, dx, sameLevel, dt);   // world2.js
     else if (k.kind === "donkey") updateDonkey(k, dx, sameLevel, dt);
     else if (k.kind === "wolf") updateWolf(k, dx, sameLevel, dt);
+    else if (k.kind === "scorpion") updateScorpion(k, dx, sameLevel, dt);
+    else if (k.kind === "hedgehog") updateHedgehog(k, dx, sameLevel, dt);
   }
 }
 function updateFox(k, dx, sameLevel, dt) {
@@ -377,6 +380,8 @@ function stoneHitsCritters(s) {
     if (k.kind === "boar") return stoneHitsBoar(k, s);   // world2.js
     if (k.kind === "donkey") return stoneHitsDonkey(k, s);
     if (k.kind === "wolf") return stoneHitsWolf(k, s);
+    if (k.kind === "scorpion") return stoneHitsScorpion(k, s);
+    if (k.kind === "hedgehog") return stoneHitsHedgehog(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: hold Down, then press A."); }
@@ -400,6 +405,7 @@ function drawCritters(camX) {
     if (k.kind === "boar") { drawBoar(k, x); continue; }   // world2.js
     if (k.kind === "donkey") { drawDonkey(k, x); continue; }
     if (k.kind === "wolf") { drawWolf(k, x); continue; }
+    if (k.kind === "scorpion" || k.kind === "hedgehog") { drawSmallCritter(k, x, k.kind + "_walk"); continue; }
     const a = CRITTER_ART[k.kind];
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);
