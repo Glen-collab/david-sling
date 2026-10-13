@@ -1,0 +1,28 @@
+{
+  "frames": 14,
+  "frame_w": 108,
+  "frame_h": 154,
+  "ms_per_frame": 256,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 40,
+  "anchor_y": 150,
+  "source": "boy_sit.mp4",
+  "video_frames": [
+    60,
+    67,
+    73,
+    80,
+    86,
+    93,
+    99,
+    106,
+    112,
+    119,
+    125,
+    132,
+    138,
+    145
+  ],
+  "pingpong": true
+}

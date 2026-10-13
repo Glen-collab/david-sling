@@ -1,0 +1,30 @@
+{
+  "frames": 16,
+  "frame_w": 91,
+  "frame_h": 139,
+  "ms_per_frame": 250,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 41,
+  "anchor_y": 136,
+  "source": "boy_scared.mp4",
+  "video_frames": [
+    50,
+    56,
+    63,
+    69,
+    75,
+    82,
+    88,
+    94,
+    101,
+    107,
+    113,
+    120,
+    126,
+    132,
+    139,
+    145
+  ],
+  "pingpong": true
+}

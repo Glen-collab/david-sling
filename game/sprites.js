@@ -144,6 +144,78 @@ window.SPRITE_DATA = {
   "ay": 177,
   "align": "feet"
  },
+ "boy_idle": {
+  "src": "../assets/sprites/boy_idle.png",
+  "frames": 8,
+  "w": 84,
+  "h": 199,
+  "ms": 156,
+  "loop": true,
+  "pingpong": true,
+  "ax": 44,
+  "ay": 196,
+  "align": "feet"
+ },
+ "boy_scared": {
+  "src": "../assets/sprites/boy_scared.png",
+  "frames": 16,
+  "w": 91,
+  "h": 139,
+  "ms": 250,
+  "loop": true,
+  "pingpong": true,
+  "ax": 41,
+  "ay": 136,
+  "align": "feet"
+ },
+ "boy_sit": {
+  "src": "../assets/sprites/boy_sit.png",
+  "frames": 14,
+  "w": 108,
+  "h": 154,
+  "ms": 256,
+  "loop": true,
+  "pingpong": true,
+  "ax": 40,
+  "ay": 150,
+  "align": "feet"
+ },
+ "boy_stone": {
+  "src": "../assets/sprites/boy_stone.png",
+  "frames": 30,
+  "w": 153,
+  "h": 199,
+  "ms": 201,
+  "loop": false,
+  "pingpong": false,
+  "ax": 91,
+  "ay": 196,
+  "align": "feet"
+ },
+ "boy_talk": {
+  "src": "../assets/sprites/boy_talk.png",
+  "frames": 30,
+  "w": 109,
+  "h": 200,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 56,
+  "ay": 197,
+  "align": "feet"
+ },
+ "boy_walk": {
+  "src": "../assets/sprites/boy_walk.png",
+  "frames": 12,
+  "w": 122,
+  "h": 199,
+  "ms": 194,
+  "loop": true,
+  "pingpong": false,
+  "ax": 66,
+  "ay": 196,
+  "align": "feet"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,

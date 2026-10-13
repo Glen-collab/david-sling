@@ -1,0 +1,22 @@
+{
+  "frames": 8,
+  "frame_w": 84,
+  "frame_h": 199,
+  "ms_per_frame": 156,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 44,
+  "anchor_y": 196,
+  "source": "boy_talk.mp4",
+  "video_frames": [
+    1,
+    5,
+    9,
+    13,
+    18,
+    22,
+    26,
+    30
+  ],
+  "pingpong": true
+}
