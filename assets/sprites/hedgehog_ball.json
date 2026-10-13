@@ -1,0 +1,26 @@
+{
+  "frames": 12,
+  "frame_w": 73,
+  "frame_h": 68,
+  "ms_per_frame": 110,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 38,
+  "anchor_y": 67,
+  "source": "hedgehog_ball.mp4",
+  "video_frames": [
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113
+  ],
+  "pingpong": true
+}

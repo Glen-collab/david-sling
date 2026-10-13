@@ -967,7 +967,8 @@ function drawBear(camX) {
 // (DESIGN 2-2). Leave the hedgehog be and it trundles in and clears the nest; hit it and it runs off, and the
 // scorpions are yours to deal with (crouch and throw: the stone flies low).
 // ---------------------------------------------------------------------------
-Object.assign(W2, { SCORPION_WALK: 40, HEDGEHOG_WALK: 70, HEDGEHOG_WAKE: 7, HEDGEHOG_GOES: 16 });
+Object.assign(W2, { SCORPION_WALK: 40, HEDGEHOG_WALK: 95, HEDGEHOG_RUN: 320, HEDGEHOG_WAKE: 7, HEDGEHOG_GOES: 16,
+  HEDGEHOG_TUCKED: 1.8 });   // seconds curled up in a ball after a stone, before it uncurls and runs
 function spriteBox(k, name, h) {   // the body box from the sprite's own frame (for small animals whose anchor isn't the head)
   const s = SPR[name], sc = SCALE * (TUNE.SPRITE_SIZE[name] || 1);
   if (!s) return { x0: k.x - 30, x1: k.x + 30, y0: k.y - h, y1: k.y };
@@ -994,14 +995,29 @@ function updateHedgehog(k, dx, sameLevel, dt) {
     if (k.x > k.home + W2.HEDGEHOG_GOES * T) setCrit(k, "rest");
     return;
   }
+  if (k.state === "curl") { fall(); if (k.t > SPR.hedgehog_curl.frames * SPR.hedgehog_curl.ms / 1000) setCrit(k, "ball"); return; }
+  if (k.state === "ball") { fall(); if (k.t > W2.HEDGEHOG_TUCKED) setCrit(k, "uncurl"); return; }
+  if (k.state === "uncurl") {   // the curl played backwards, then off it runs the way it came
+    fall(); if (k.t > SPR.hedgehog_curl.frames * SPR.hedgehog_curl.ms / 1000 * 0.6) { k.gone = true; k.facing = -1; k.vx = -W2.HEDGEHOG_RUN; }
+    return;
+  }
   fall();   // rest: done for the day, snuffling about
 }
-function stoneHitsHedgehog(k, s) {
-  k.gone = true; k.facing = -1; k.vx = -320; stoneHit(s, 0.4);
-  toast("You hit the hedgehog! It ran off. The scorpions are yours now: crouch (Down) and throw, and the stone flies low.");
+function stoneHitsHedgehog(k, s) {   // it curls up into a spiky ball; then it uncurls and runs off, and won't be back
+  stoneHit(s, 0.4);
+  if (k.state === "curl" || k.state === "ball" || k.state === "uncurl") return true;
+  k.vx = 0; setCrit(k, "curl");
+  toast("You hit the hedgehog! It curled up into a ball... now it'll run. The scorpions are yours: crouch (Down) and throw, the stone flies low.");
   return true;
 }
 function drawSmallCritter(k, x, name) {
-  const moving = k.state !== "idle" && k.state !== "rest" || k.kind === "scorpion" || k.gone;
-  drawSprite(name, moving ? frameOf(name, k.t) : 0, x, k.y, k.facing, 1, k.alpha);
+  if (k.kind === "hedgehog") {
+    const c = SPR.hedgehog_curl, n = c ? c.frames : 1, curlT = n * (c ? c.ms : 100) / 1000;
+    if (k.state === "curl" && !k.gone) { drawSprite("hedgehog_curl", Math.min(n - 1, Math.floor(k.t / curlT * n)), x, k.y, k.facing, 1, k.alpha); return; }
+    if (k.state === "uncurl" && !k.gone) { drawSprite("hedgehog_curl", Math.max(0, n - 1 - Math.floor(k.t / (curlT * 0.6) * n)), x, k.y, k.facing, 1, k.alpha); return; }
+    if (k.state === "ball" && !k.gone) { drawSprite("hedgehog_ball", frameOf("hedgehog_ball", k.t), x, k.y, k.facing, 1, k.alpha); return; }
+    if (k.gone) { drawSprite(name, frameOf(name, performance.now() / 1000 * 3), x, k.y, k.facing, 1, k.alpha); return; }   // running: the walk, skipping frames
+    drawSprite(name, k.state === "walk" ? frameOf(name, k.t * 1.5) : 0, x, k.y, k.facing, 1, k.alpha); return;
+  }
+  drawSprite(name, frameOf(name, k.t), x, k.y, k.facing, 1, k.alpha);
 }

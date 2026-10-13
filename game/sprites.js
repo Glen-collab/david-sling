@@ -900,6 +900,30 @@ window.SPRITE_DATA = {
   "ay": 299,
   "align": "feet"
  },
+ "hedgehog_ball": {
+  "src": "../assets/sprites/hedgehog_ball.png",
+  "frames": 12,
+  "w": 73,
+  "h": 68,
+  "ms": 110,
+  "loop": true,
+  "pingpong": true,
+  "ax": 38,
+  "ay": 67,
+  "align": "feet"
+ },
+ "hedgehog_curl": {
+  "src": "../assets/sprites/hedgehog_curl.png",
+  "frames": 10,
+  "w": 122,
+  "h": 97,
+  "ms": 146,
+  "loop": false,
+  "pingpong": false,
+  "ax": 54,
+  "ay": 95,
+  "align": "feet"
+ },
  "hedgehog_walk": {
   "src": "../assets/sprites/hedgehog_walk.png",
   "frames": 12,
