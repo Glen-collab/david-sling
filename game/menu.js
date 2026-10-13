@@ -28,6 +28,7 @@ const Menu = {
       this.snap.getContext("2d").drawImage(canvas, 0, 0);
       this.under = WorldMap.active ? "map" : Courtyard.active ? "courtyard" : "stage";
       WorldMap.active = false; Courtyard.active = false;   // paused; they come back on Resume
+      themeMusic.pause(); mapAmbience.pause();   // paused means quiet: the theme and the hills stop (they fade back in on Resume)
     }
     this.home = screen; this.go(screen);
   },

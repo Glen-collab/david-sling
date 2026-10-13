@@ -87,6 +87,7 @@ const Courtyard = {
   update(dt) {
     this.t += dt; if (this.msg) { this.msg.t -= dt; if (this.msg.t <= 0) this.msg = null; }
     mapAmbience.volume = Math.max(0, Math.min(MTUNE.AMBIENCE_VOLUME, mapAmbience.volume + (this.leaving ? -dt : dt * 0.5)));
+    if (mapAmbience.paused && typeof audioUnlocked !== "undefined" && audioUnlocked && !this.leaving) mapAmbience.play().catch(() => {});   // back from a pause
     if (this.leaving) {
       this.fade -= dt * 2;
       if (this.fade <= 0) { this.active = false; mapAmbience.pause(); const go = this.leaving; this.leaving = null; go(); }
