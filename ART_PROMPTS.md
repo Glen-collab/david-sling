@@ -286,6 +286,36 @@ solid flat bright green (#00FF00).
 
 **Night versions** (1-4, the lion's territory): the same three prompts with "moonlit night, deep blue sky, stars, silver moonlight".
 
+## World 2 stage backgrounds (one set of three layers per stage)
+**World 2 uses MAGENTA (#FF00FF) instead of green** for the middle and near layers: the woods are full of green leaves, and a green key would eat them. Paste the style block first, then this, then the layer:
+```
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for
+example 3072 x 1024). Seen straight from the side, no perspective tilt. The left and right
+edges must match so the image can repeat seamlessly. No characters, no animals, no text.
+```
+
+### 2-1 The Forest Trail (morning)
+- **Far:** `World 2, the wilderness hills of Judah in fresh early morning light. A pale clear sky with soft pink and gold near the horizon. Along the bottom half: far-away wooded ridges of oak and pine, layer behind layer, misty blue-green and hazy, with pale limestone showing on the slopes.`
+- **Middle:** `World 2 middle distance: steep hillsides covered in oak and pine trees, mossy limestone boulders, a few fallen logs, shafts of morning sunlight through the trees. Softer and a little hazy compared with the foreground. EVERYTHING above the treetops is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 2 foreground strip, the bottom quarter only: ferns, tree roots, pine needles, mossy stones and the trunks of two or three big oaks rising out of frame, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+### 2-2 The Dry Riverbed (hot midday)
+- **Far:** `World 2, the Judean wilderness at hot midday. A wide pale-blue sky, bleached near the horizon, with dark grey storm clouds gathering far away on the left and faint rain falling from them onto distant hills. Along the bottom half: bare tan and ochre desert hills, very hazy.`
+- **Middle:** `World 2 middle distance: the steep sandy-orange banks of a dry wadi (riverbed), layered rock walls, a few scrubby acacia trees and pink-flowered oleander bushes along the banks, dried mud cracked in the sun. EVERYTHING above the banks is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 2 foreground strip, the bottom quarter only: smooth round river stones, pebbles, dry driftwood and sun-bleached reeds, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+### 2-3 The High Cliffs (afternoon)
+- **Far:** `World 2, high above the Judean wilderness in clear afternoon light. A deep blue sky with a few high white clouds. Along the bottom third: a vast view down over hazy tan desert canyons, and far in the distance a thin silver line of the Dead Sea with pale mountains beyond.`
+- **Middle:** `World 2 middle distance: tall golden-tan limestone cliffs with ledges and caves, a tall white waterfall pouring down into a green spring pool fringed with palms and reeds, ibex-shaped dark crevices in the rock. EVERYTHING above the cliff tops is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 2 foreground strip, the bottom quarter only: rough cliff-edge rocks, wind-bent desert shrubs and a few tufts of dry grass, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+### 2-4 The Bear's Ravine (dusk)
+- **Far:** `World 2, a deep wooded ravine at dusk. A sky glowing deep orange and purple, the first stars appearing at the top. Along the bottom half: dark silhouetted ridges of oak and pine, deep blue-purple shadow.`
+- **Middle:** `World 2 middle distance at dusk: the steep sides of a dark ravine, twisted oaks and pines, big tree trunks with deep claw marks, a broken fallen tree, overturned rocks, long blue shadows with the last orange light on the treetops. EVERYTHING above the ravine edge is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 2 foreground strip at dusk, the bottom quarter only: dark tangled roots, torn-up logs, ferns and stones in deep shadow with a little orange rim light, sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+**Save as** `david-sling-art\2-1 far.png`, `2-1 mid.png`, `2-1 near.png`, and the same for 2-2, 2-3, 2-4.
+
 ## Big scenes (full-screen art for the ending)
 Use the style block, plus: *"Format: one full-screen game scene, wide 16:9, no characters' faces in close-up."*
 

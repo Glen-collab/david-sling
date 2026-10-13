@@ -624,6 +624,54 @@ window.SPRITE_DATA = {
   "ay": 102,
   "align": "feet"
  },
+ "hanan_counsel": {
+  "src": "../assets/sprites/hanan_counsel.png",
+  "frames": 30,
+  "w": 192,
+  "h": 257,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 117,
+  "ay": 255,
+  "align": "feet"
+ },
+ "hanan_idle": {
+  "src": "../assets/sprites/hanan_idle.png",
+  "frames": 8,
+  "w": 183,
+  "h": 302,
+  "ms": 208,
+  "loop": true,
+  "pingpong": true,
+  "ax": 96,
+  "ay": 298,
+  "align": "feet"
+ },
+ "hanan_sit": {
+  "src": "../assets/sprites/hanan_sit.png",
+  "frames": 30,
+  "w": 150,
+  "h": 231,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 79,
+  "ay": 227,
+  "align": "feet"
+ },
+ "hanan_talk": {
+  "src": "../assets/sprites/hanan_talk.png",
+  "frames": 30,
+  "w": 230,
+  "h": 304,
+  "ms": 201,
+  "loop": true,
+  "pingpong": false,
+  "ax": 109,
+  "ay": 299,
+  "align": "feet"
+ },
  "hornet_fly": {
   "src": "../assets/sprites/hornet_fly.png",
   "frames": 8,
