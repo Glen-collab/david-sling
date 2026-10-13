@@ -137,9 +137,12 @@ function updateDonkey(k, dx, sameLevel, dt) {
     const moved = runCritter(k, W2.DONKEY_BOLT * spook * (1 - 0.55 * (duel ? duel.calm : 0)), dt);
     if (!moved || (k.range && Math.abs(k.x - k.home) > k.range && Math.sign(k.x - k.home) === k.facing)) k.facing = -k.facing;
     const b = critterBox(k);
-    if (touchesDavid(b) && david.deadT <= 0) {   // it won't let him by: shoved back the way he came
-      david.x = david.x < (b.x0 + b.x1) / 2 ? b.x0 - BODY_W / 2 - 1 : b.x1 + BODY_W / 2 + 1;
-      if (!k.told) { k.told = true; toast("The donkey is too frightened to let anyone by. Sit and play the harp for it (Select)."); }
+    if (touchesDavid(b) && david.deadT <= 0) {   // trampled: it hurts, he's knocked back the way he came, and it wheels round
+      const side = david.x < k.home + k.range + 3 * T ? -1 : 1;   // back the way he came (from the left), never through
+      if (david.inv <= 0) hurtDavid(k.x);
+      david.x = side < 0 ? b.x0 - BODY_W / 2 - 2 : b.x1 + BODY_W / 2 + 2;   // never carried along, never let through
+      k.facing = -side;
+      if (!k.told) { k.told = true; toast("The donkey is wild with fear! Keep back, sit, and play the harp for him (Select)."); }
     }
     return;
   }
@@ -222,7 +225,7 @@ function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = 
     return false;
   }
   d.vx = 0;
-  if (d.deadT > 0) { endHarpDuel(); return false; }
+  if (d.deadT > 0 || d.state !== "harp") { endHarpDuel(); return false; }   // knocked off his seat (trampled): the song stops
   for (const h of g.hits) h.t += dt;
   g.hits = g.hits.filter(h => h.t < 0.5);
   const stop = () => { endHarpDuel(); d.harp = false; setState("standup"); };
@@ -369,6 +372,8 @@ function updateFlood(dt) {
     if (flood.level <= 0) flood.on = false;
     return;
   }
+  if (flood.lastX !== undefined && d.x < flood.lastX - 2 * T) flood.x = Math.min(flood.x, d.x - 10 * T);   // fell in a pit and was put back: a fair head start
+  flood.lastX = d.x;
   flood.x = Math.min(endX - 3 * T, Math.max(flood.x + W2.FLOOD_SPEED * dt, d.x - W2.FLOOD_BEHIND * T));
   if (d.x > endX + 2 * T) { flood.done = true; toast("Out of the riverbed! The water spreads out and slows."); }
   const near = Math.max(0, 1 - (d.x - flood.x) / (W * 0.9));
@@ -488,7 +493,7 @@ function updateWorld2(dt) {
   if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); } updateFlood(dt); updateBoy(dt); }
 function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
 function resetWorld2(restart) {   // after a fall (restart: out of lives, back to the start of the stage)
-  Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1 }); hushFlood();
+  Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1, lastX: undefined }); hushFlood();
   if (restart) { resetBoy(); stonesTalk.step = -1; }
   else if (boy.state === "follow" || boy.state === "stone") { boy.x = david.x - 40; boy.y = david.y; boy.state = "follow"; }
 }

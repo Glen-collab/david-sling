@@ -1,11 +1,11 @@
-# Where we left off
+﻿# Where we left off
 
 If a chat session closes, start here. Last updated 2026-10-11 (end of a long session).
 
 ## How to play and test
 
 - **Play:** double-click `Play David.bat`: the game opens in its own Chrome window with sound on and no click needed, so a controller is enough. It opens on the **journey map** (or whichever map you were last on).
-- **Getting around:** journey map → A at Bethlehem → World 1 map → A at the home stop (Jesse's courtyard) or a stage. B on a world map goes back out to the journey map.
+- **Getting around:** journey map â†’ A at Bethlehem â†’ World 1 map â†’ A at the home stop (Jesse's courtyard) or a stage. B on a world map goes back out to the journey map.
 - **Keys:** 1 = 1-1, 2 = movement test, 3 = swap backgrounds, 4 = Journal preview, 5 = World 1 map, 6 = journey map, H = help.
 - **Address switches for testing:**
 
@@ -53,12 +53,12 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   - **The practice throw:** Up at the spot by the bench (left of the target). David stands side on, like facing Goliath; enter the code and he slings a stone into the centre of the bullseye (too slow: it goes wide). `HOME.TARGET`, `THROW_FROM`, `STONE_FLIGHT`, `MISS_BY` in home.js.
   - The tenth of the flock (Lev 27:32) is saved for the end of the game.
   - **The shelf** opens the Journal.
-  - **The market** sells lamp oil (20 olives → 30 oil) and a fig cake (15 olives → +1 heart next stage).
+  - **The market** sells lamp oil (20 olives â†’ 30 oil) and a fig cake (15 olives â†’ +1 heart next stage).
   - Olives and lamp oil carry over between stages (`gathered1`.. in the save counts every olive picked up per world, for the tithe); 100 olives still fills the flask for +1 life.
-- **The throw code** (DESIGN §4c): the Konami code, one piece per world, for Goliath's final stone. "The Throw" is the last page of the Journal when read from the courtyard or a map.
+- **The throw code** (DESIGN Â§4c): the Konami code, one piece per world, for Goliath's final stone. "The Throw" is the last page of the Journal when read from the courtyard or a map.
 - **Come-back secrets** (Castlevania-style):
   - **1-1:** The One is on a high shelf (needs the double jump, World 5).
-  - **1-4:** The One is behind a one-mark carved wall (opens once Jesse gives ↑ for the lion).
+  - **1-4:** The One is behind a one-mark carved wall (opens once Jesse gives â†‘ for the lion).
   - **1-3:** a two-mark carved hollow with a golden olive (after World 2).
 - **Finding The One** pauses the game for Luke 15:4.
 - **Bible text:** the World English Bible (public domain) everywhere, not the NIV.
@@ -84,9 +84,9 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   - **2-1 The Forest Trail is built** (main.js, `LEVEL_NAME === "2-1"`): Abinadab's two lines, Hanan's fire teaches the charged sling right before the first deadfall, three boars, branches up to a ledge lamb, hornets by a honeybee hive, a second deadfall under a rock overhang, The One at the top of a treetop climb. Ground set `assets/terrain/w2f` (forest), background `w2_1`.
   - **The World 2 map** is Glen's painting (`assets/maps/world2_map.jpg`): camp, woods + campfire, wadi, Tekoa, cliffs + spring, the bear's ravine and pen. Home is still Jesse's courtyard.
   - **No Journal pages for World 2 yet** (locked text needs Glen): clearing 2-1 goes straight back to the map.
-  - **2-2 first half** is in: dry wadi (`w2_2` / `w2s`), Hanan's flood warning, the boy's donkey bolting under an overhang (col 74-89). Sit and play the harp near it → **the harp duel** (world2.js): Glen's harp recording plays, notes slide in on six strings (low Down … high Up), a wrong/late note stops the harp and restarts that tune; 3 tunes calm the donkey, who then grazes and follows David.
-  - Harp songs: `python tools/make_harp_chart.py <song.mp3> <name> --start S --end E --gap G --phrases 4,5,6` → `assets/audio/harp_<name>.mp3` + `game/harp_songs.js`. Donkey = Morning Meditation 2, 28–62s, gap 1.0 (originals in david-sling-art/audio). Saul later: tighter `window`, faster `speed` in HARP_DUEL, plus the rage/peace meter. Plan agreed with Glen: Saul's torment = **Harp of the Deep** (david-sling-art/audio; dark, drums, builds at 75s) playing underneath; David's notes are charted from **Morning Meditation 1** (clean harp). Streaks crossfade David's harp up and the dark song down; misses let the dark song swell back; rage peaks = the spear.
-  - **2-2 second half** is in: checkpoint campfire at 151; past col 156 the flash flood (world2.js `updateFlood`) chases from the left at 250 px/s, never more than 13 tiles behind; touching it = swept back to the campfire. The boy from Tekoa is stranded on a rock at 185 (jump up to him), then follows in David's footsteps (`trailAt`). Out of the riverbed at col 228 the water drains; on the bank his donkey waits, then "Why do you carry those stones?" (holds the controls; A skips a line) and the boy picks up a stone. The gate won't open without the boy. Fold at 244. Tuning: W2.FLOOD_*. Placed with `setPiece()` in main.js.
+  - **2-2 first half** is in: dry wadi (`w2_2` / `w2s`), Hanan's flood warning, the boy's donkey bolting under an overhang (col 74-89). Sit and play the harp near it â†’ **the harp duel** (world2.js): Glen's harp recording plays, notes slide in on six strings (low Down â€¦ high Up), a wrong/late note stops the harp and restarts that tune; 3 tunes calm the donkey, who then grazes and follows David.
+  - Harp songs: `python tools/make_harp_chart.py <song.mp3> <name> --start S --end E --gap G --phrases 4,5,6` â†’ `assets/audio/harp_<name>.mp3` + `game/harp_songs.js`. Donkey = Morning Meditation 2, 28â€“62s, gap 1.0 (originals in david-sling-art/audio). Saul later: tighter `window`, faster `speed` in HARP_DUEL, plus the rage/peace meter. Plan agreed with Glen: Saul's torment = **Harp of the Deep** (david-sling-art/audio; dark, drums, builds at 75s) playing underneath; David's notes are charted from **Morning Meditation 1** (clean harp). Streaks crossfade David's harp up and the dark song down; misses let the dark song swell back; rage peaks = the spear.
+  - **2-2 second half** is in: checkpoint campfire at 151; past col 156 the flash flood (world2.js `updateFlood`) chases from the left at 250 px/s, never more than 13 tiles behind; touching it = swept back to the campfire. The boy from Tekoa is stranded on a rock at 185 (jump up to him), then follows in David's footsteps (`trailAt`). Out of the riverbed at col 268 the water drains; on the bank his donkey waits, then "Why do you carry those stones?" (holds the controls; A skips a line) and the boy picks up a stone. The gate won't open without the boy. Fold at 284. The frightened donkey tramples (a heart, knocked back toward the left, never through). Tuning: W2.FLOOD_*. Placed with `setPiece()` in main.js.
   - Not yet in 2-2: oleander, the tortoise, hedgehog vs scorpions (need art), the Psalm 18:16 scroll, World 2 Journal pages., 2-3 (cliffs, ibex), 2-4 (ravine, wolves, the bear). Sandstone ground set `w2s` is ready for 2-2 and 2-3; backgrounds `w2_2`..`w2_4` are in.
 - **Music:** "Hush Little Seed" (Glen's harp, first 23 s, `assets/audio/title_loop.mp3`) plays on the title and the maps; full song in `david-sling-art`.
 - **Sounds still needed:** real hurt and death sounds, night crickets for 1-4, fox and jackal yelps, the ram's stamp, gate creak, campfire crackle, bees, snake, eagle.
@@ -96,7 +96,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 | File | What it holds |
 |---|---|
-| `DESIGN.md` | The story and level bible, all 8 worlds. §4c: journey map, home base, olives, the throw code, the double jump plan |
+| `DESIGN.md` | The story and level bible, all 8 worlds. Â§4c: journey map, home base, olives, the throw code, the double jump plan |
 | `JOURNAL.md` / `JOURNAL_TEXT.md` | How the Journal plays / its words |
 | `SONG.md` | "The Shepherd Leads Me" (Glen's song; stays as is) |
 | `SPRITES.md`, `VIDEO_SPRITES.md`, `ART_PROMPTS.md` | Sprite lists, the Grok-to-sprite pipeline, art prompts |

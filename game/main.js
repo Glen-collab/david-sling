@@ -311,7 +311,7 @@ const STAGE_INFO = {
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
   "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },
-  "2-2": { cols: 266, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "2-2": { cols: 306, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -688,19 +688,25 @@ if (LEVEL_NAME === "test") {
   lostSheep("lambblack", 146, 16);
   campfire(151);                                               // the checkpoint before the flood
   // the flash flood: past column 156 a wall of water comes down the riverbed behind you. Keep moving.
-  setPiece("flood", 156, GR - 1, { end: 228 });
+  setPiece("flood", 156, GR - 1, { end: 268 });
   rock(161, 15, 2, 2); oliveRow(164, 16, 3);
   ground(172, 205);                                            // (a gap to jump at 169-171)
   rock(176, 14, 3, 3); oliveArc(175, 13, 4);
   rock(184, 13, 3, 4); setPiece("boy", 185, 12);              // the boy from Tekoa, stranded on a rock: jump up to him
   plat(190, 13, 3); special(191, 10);
   rock(195, 15, 2, 2); oliveRow(198, 16, 4);
-  ground(209, 266);                                            // (a gap at 206-208)
-  rock(214, 14, 2, 3); rock(219, 14, 2, 3); rock(222, 12, 3, 5);   // up out of the riverbed
+  ground(209, 238);                                            // (a gap at 206-208)
+  rock(213, 15, 2, 2); oliveRow(216, 16, 3);
+  rock(220, 13, 2, 4); plat(224, 11, 3); rock(229, 14, 3, 3);    // up over a jumble of boulders and a ledge
+  oliveArc(223, 10, 4);
+  plat(239, 14, 3); plat(244, 14, 3);                          // stepping logs over a deep cut (238-248)
+  ground(249, 306);
+  oliveRow(250, 16, 3);
+  rock(254, 14, 2, 3); rock(259, 14, 2, 3); rock(262, 12, 3, 5);   // up out of the riverbed
   // the bank: the water spreads out and drains. The boy's donkey is waiting, and the boy asks about the stones.
-  setPiece("stones", 231);
-  critter("donkey", 235); critters[critters.length - 1].calmed = critters[critters.length - 1].waits = true;
-  sheepfold(244);
+  setPiece("stones", 271);
+  critter("donkey", 275); critters[critters.length - 1].calmed = critters[critters.length - 1].waits = true;
+  sheepfold(284);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
