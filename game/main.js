@@ -310,7 +310,8 @@ const STAGE_INFO = {
   "1-2": { cols: 228, bg: "w1_2", name: "The Wandering Flock" },
   "1-3": { cols: 258, bg: "w1_3", name: "The Rocky Pastures" },
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
-  "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },
+  "2-2": { cols: 170, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -652,6 +653,37 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheep", 208, 16, "cast");                         // on its back: roll it over (Down)
   snake("viper", 213); oliveRow(196, 16, 4);
   sheepfold(218);
+} else if (LEVEL_NAME === "2-2") {
+  // ---- 2-2 The Dry Riverbed, first half (the flood and the boy from Tekoa come next): a dry wadi of sandstone,
+  //      Hanan's warning about flash floods, and the boy's donkey, bolting in a narrow way under the rock ----
+  ground(0, 38);
+  oliveRow(6, 16, 5);
+  rock(16, 15, 3, 2); oliveArc(15, 14, 5);                     // a boulder in the riverbed: hop over
+  lostSheep("sheep", 25, 16);
+  rock(30, 13, 2, 4); special(31, 10);                         // a tall rock: the special stone on top
+  ground(42, 130);
+  campfire(46, GR - 1, "Hanan", "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look.");
+  snake("viper", 56);
+  plat(60, 13, 4); plat(65, 10, 4);
+  lostSheep("sheepblack", 67, 9, "ledge");                     // up on the rocks: climb, or play the harp below
+  oliveRow(60, 12, 4);
+  // the narrow way: under an overhang of rock, the boy's donkey bolting back and forth. Sit and play the harp for him.
+  talk(68, "David", "Someone's donkey, wild with fear. He won't let me by. Maybe the harp will calm him.");
+  rock(74, 3, 16, 10);                                         // too high to climb over
+  critter("donkey", 82, GR - 1, 4);
+  food("fig_cake", 92, 16);
+  lostSheep("sheep", 100, 16, "thorns");                       // caught in the thorns: sling the bush
+  oliveArc(104, 16, 5);
+  // The One: high on the canyon wall
+  plat(108, 13, 3); plat(112, 10, 3); plat(116, 7, 3); plat(121, 4, 3);
+  lostSheep("lamb", 122, 3, "one");
+  oliveRow(108, 12, 3); oliveRow(112, 9, 3);
+  special(118, 16);
+  bridge(131, GR, 4);
+  ground(135, 170);
+  lostSheep("sheep", 140, 16, "cast");                         // on its back: roll it over (Down)
+  lostSheep("lambblack", 146, 16);
+  sheepfold(150);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -773,6 +805,7 @@ function updateDavid(dt) {
   d.t += dt;
   if (caveDavid(d, dt)) return;   // walking into or out of a cave (world1.js)
   if (updateCodeEntry(d, dt)) return;   // entering the throw at a carved wall (world1.js)
+  if (typeof updateHarpDuel === "function" && updateHarpDuel(d, dt)) return;   // playing the harp for a frightened animal (world2.js)
   if (d.state === "toLamb") {     // the game has the controls: walk over to the lamb
     const k = takenLamb, tx = k.x - d.rescueSide * LAMB_IN_PET * SCALE;
     if (autoWalk(d, tx, dt) || d.t > 8) {
@@ -1377,7 +1410,7 @@ function drawHUD() {
     ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal   5 = map", 18, 28);
   } else drawHelp();
   drawDialog();
-  drawCodeEntry();
+  drawCodeEntry(); if (typeof drawHarpDuel === "function") drawHarpDuel();
   drawToastAndSetup();
 }
 function drawHelp() {
@@ -2626,12 +2659,14 @@ function updateSound(dt) {
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
 function hushLoops() {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();
+  if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
   if (david.chargeSnd) { david.chargeSnd.pause(); david.chargeSnd = null; }
 }
 function updateHarpMusic(dt) {
   const sitting = david.harp && (david.state === "kneel" || david.state === "harp");
   harpHeldT = sitting ? harpHeldT + dt : 0;
-  const want = sitting && harpHeldT >= TUNE.HARP_MUSIC_DELAY;   // wait for his hands, not the harp coming out
+  const duel = typeof harpDuel !== "undefined" && harpDuel.active;   // the harp duel plays its own song (world2.js)
+  const want = sitting && !duel && harpHeldT >= TUNE.HARP_MUSIC_DELAY;   // wait for his hands, not the harp coming out
   if (harpVol > 0 && harpMusic.paused && !harpStarting && audioUnlocked) harpMusic.play().catch(() => {});   // back from a pause: carry on where it was
   else if (want && harpMusic.paused && !harpStarting && audioUnlocked) {
     harpStarting = true; harpMusic.currentTime = 0; harpVol = 0;
