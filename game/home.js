@@ -13,6 +13,10 @@ const HOME = {
   FLOOR: 0.905,                  // where the floor is, as a fraction of the picture's height
   REACH: 90,                     // how close (px on screen) David must be to use a spot
   PRACTICE_TIME: 8,              // seconds to enter the code at the practice wall
+  TARGET: { x: 0.411, y: 0.678 }, // the bullseye's centre in the painting (fractions of its width and height)
+  THROW_FROM: 0.30,               // where David stands to throw at it (side on, like facing Goliath)
+  STONE_FLIGHT: 0.42,             // seconds from the sling to the wall
+  MISS_BY: 110,                   // how far off a too-slow throw lands (px)
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -37,7 +41,8 @@ const TITHE_THOUGHT = [
 ];
 // spots, as fractions of the picture's width
 const HOME_SPOTS = [
-  { id: "wall", x: 0.41, label: "Jesse, by the target" },
+  { id: "throw", x: 0.30, label: "Practise the throw" },
+  { id: "jesse", x: 0.47, label: "Jesse" },
   { id: "shelf", x: 0.545, label: "The Journal" },
   { id: "stall", x: 0.705, label: "The market" },
   { id: "gate", x: 0.915, label: "Out to the fields" },
@@ -105,7 +110,8 @@ const Courtyard = {
     if (!spot || !pressed("up")) return;
     if (spot.id === "gate") { this.leaving = () => WorldMap.open(this.world); return; }
     if (spot.id === "shelf") { this.useShelf(); return; }
-    if (spot.id === "wall") { this.useJesse(); return; }
+    if (spot.id === "jesse") { this.useJesse(); return; }
+    if (spot.id === "throw") { this.startPractice(); return; }
     if (spot.id === "stall") { this.mode = "market"; this.pick = 0; }
   },
   useShelf() {
@@ -117,10 +123,56 @@ const Courtyard = {
   useJesse() {
     if (!this.earned) { this.say("Jesse", "The lion's been near the flock, David. When you've faced it, come and find me here at the target. There's something I want to teach you about the throw."); return; }
     const given = this.prog.throwGiven || 0;
-    if (this.earned <= given) {   // nothing new: practise
-      this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME; this.result = null; return;
-    }
+    if (this.earned <= given) { this.say("Jesse", "Stand back by the bench and throw at the mark from the side, the way you'll face the giant. Don't watch the sling, son. Watch the target."); return; }
     this.givePiece();
+  },
+  // the practice throw: David stands to the left of the target, side on, enters the throw, and slings a stone at it
+  startPractice() {
+    if (!this.earned) { this.say("Jesse", "Throw all you like, son. But I haven't shown you the throw yet. Come and find me once you've faced the lion."); return; }
+    if ((this.prog.throwGiven || 0) < this.earned) { this.say("Jesse", "Come here first, David. I have something for you."); return; }
+    this.x = HOME.THROW_FROM; this.facing = 1; this.walkT = 0;
+    this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME;
+    this.result = null; this.sling = null; this.bits = [];
+  },
+  throwStone(hit) {   // the throw animation starts; the stone leaves at frame 7 of 12
+    const a = Math.random() * Math.PI * 2;
+    this.sling = { t: 0, hit, released: false, landed: false, off: hit ? [0, 0] : [Math.cos(a) * HOME.MISS_BY, Math.sin(a) * HOME.MISS_BY * 0.6] };
+  },
+  updateSling(dt) {
+    const s = this.sling, SW = this.sceneW(); s.t += dt;
+    const rel = TUNE.THROW_TIME * 7 / 12;
+    if (!s.released && s.t >= rel) {
+      s.released = true; s.ft = 0; sfx("sling_throw", undefined, 0.9);
+      s.x0 = HOME.THROW_FROM * SW + 30 * HOME.SIZE; s.y0 = H * HOME.FLOOR - 78 * HOME.SIZE;
+      s.x1 = HOME.TARGET.x * SW + s.off[0]; s.y1 = HOME.TARGET.y * H + s.off[1];
+    }
+    if (s.released && !s.landed) {
+      s.ft += dt;
+      if (s.ft >= HOME.STONE_FLIGHT) {
+        s.landed = true; s.ringT = 0;
+        sfx("stone_hit", undefined, s.hit ? 0.9 : 0.6);
+        if (s.hit && typeof chime === "function") { chime(5); setTimeout(() => chime(9), 140); }
+        for (let k = 0; k < 14; k++) this.bits.push({ x: s.x1, y: s.y1, vx: (Math.random() - 0.5) * 340, vy: -Math.random() * 300, life: 0.7, color: k % 2 ? "#e9dcc4" : "#b89a72" });
+        this.result = { ok: s.hit, t: s.hit ? 2.2 : 1.8 };
+      }
+    }
+    if (s.landed) s.ringT += dt;
+  },
+  updatePractice(dt) {
+    for (const b of this.bits) { b.vy += 900 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; }
+    this.bits = this.bits.filter(b => b.life > 0);
+    if (this.sling) this.updateSling(dt);
+    if (this.result) { this.result.t -= dt; if (this.result.t <= 0 || pressed("start")) { this.mode = null; this.sling = null; } return; }
+    if (this.sling) return;   // the stone is in the air
+    this.pt -= dt;
+    for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
+      if (b === this.code[this.got]) { this.got++; if (typeof chime === "function") chime(this.got); }
+      else this.got = b === this.code[0] ? 1 : 0;   // wrong: start again (a fresh first input counts)
+      break;
+    }
+    if (this.got >= this.code.length) this.throwStone(true);          // the whole throw: right in the middle
+    else if (this.pt <= 0) this.throwStone(false);                      // too slow: he throws anyway, and it goes wide
+    if (pressed("select")) this.mode = null;
   },
   updateTithe() {
     if (pressed("up") || pressed("down")) this.pick = 1 - this.pick;
@@ -144,18 +196,7 @@ const Courtyard = {
       if (typeof chime === "function") chime(7);
     }
   },
-  updatePractice(dt) {
-    if (this.result) { this.result.t -= dt; if (this.result.t <= 0 || pressed("start")) this.mode = null; return; }
-    this.pt -= dt;
-    for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
-      if (b === this.code[this.got]) { this.got++; if (typeof chime === "function") chime(this.got); }
-      else this.got = b === this.code[0] ? 1 : 0;   // wrong: start again (a fresh first input counts)
-      break;
-    }
-    if (this.got >= this.code.length) { this.result = { ok: true, t: 1.6 }; sfx("sling_throw", undefined, 0.9); sfx("stone_hit", undefined, 0.8); }
-    else if (this.pt <= 0) { this.result = { ok: false, t: 1.4 }; }
-    if (pressed("select")) this.mode = null;
-  },
+
   updateMarket() {
     if (pressed("up")) this.pick = (this.pick + MARKET.length - 1) % MARKET.length;
     if (pressed("down")) this.pick = (this.pick + 1) % MARKET.length;
@@ -181,7 +222,10 @@ const Courtyard = {
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
     drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), dx - this.facing * 70, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
-    drawSprite(moving ? "david_walk" : "david_idle", frameOf(moving ? "david_walk" : "david_idle", moving ? this.walkT : this.t), dx, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
+    const sl = this.mode === "practice" && this.sling;
+    if (sl && sl.t < TUNE.THROW_TIME) drawSprite("david_sling_throw", Math.min(11, Math.floor(sl.t / TUNE.THROW_TIME * 12)), dx, floor, 1, HOME.SIZE, ctx.globalAlpha);
+    else drawSprite(moving ? "david_walk" : "david_idle", frameOf(moving ? "david_walk" : "david_idle", moving ? this.walkT : this.t), dx, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
+    if (this.mode === "practice") this.drawStone(cam);
     // the spot David is at
     const spot = this.mode ? null : this.near();
     if (spot) {
@@ -258,11 +302,26 @@ const Courtyard = {
     ctx.textAlign = "right"; ctx.fillStyle = "#cfe39a"; ctx.font = "15px sans-serif"; ctx.fillText(`You have ${this.prog.olives || 0} olives`, x + w - 30, oy + 28);
     ctx.restore();
   },
+  drawStone(cam) {
+    const s = this.sling;
+    if (s && s.released) {
+      if (!s.landed) {   // a low arc to the wall
+        const k = s.ft / HOME.STONE_FLIGHT, x = s.x0 + (s.x1 - s.x0) * k - cam, y = s.y0 + (s.y1 - s.y0) * k - Math.sin(k * Math.PI) * 40;
+        ctx.fillStyle = "#cfc6b4"; ctx.strokeStyle = "#6d6253"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(x, y, 8, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else if (s.ringT < 1.2) {   // where it struck: a ring that spreads (gold for the middle)
+        const r = 10 + s.ringT * 70, a = Math.max(0, 1 - s.ringT / 1.2);
+        ctx.save(); ctx.globalAlpha = a; ctx.lineWidth = 5; ctx.strokeStyle = s.hit ? "#ffd84a" : "#fff";
+        ctx.beginPath(); ctx.arc(s.x1 - cam, s.y1, r, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+      }
+    }
+    for (const b of this.bits || []) { ctx.fillStyle = b.color; ctx.fillRect(b.x - cam - 3, b.y - 3, 6, 6); }
+  },
   drawPractice() {
-    const n = this.code.length, box = 58, gap = 10, tw = n * box + (n - 1) * gap, x0 = W / 2 - tw / 2, y = 250;
+    const n = this.code.length, box = 58, gap = 10, tw = n * box + (n - 1) * gap, x0 = W / 2 - tw / 2, y = 100;   // up top: the target stays in view
     const bw = Math.max(tw + 60, 460);   // wide enough for the words even with one piece
     ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, y - 70, bw, box + 130, 16); ctx.fill();
-    ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 22px sans-serif"; ctx.fillText("The practice wall", W / 2, y - 34);
+    ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 22px sans-serif"; ctx.fillText("The practice throw", W / 2, y - 34);
     for (let i = 0; i < n; i++) {
       const bx = x0 + i * (box + gap), done = i < this.got;
       ctx.fillStyle = done ? "#e8b84a" : "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(bx, y, box, box, 10); ctx.fill();
@@ -270,7 +329,7 @@ const Courtyard = {
       ctx.fillText(done ? ARROW[this.code[i]] : "?", bx + box / 2, y + 40);   // from memory: the pieces only show once you've entered them
     }
     ctx.font = "17px sans-serif"; ctx.fillStyle = "#e9dcc4";
-    const msg = this.result ? (this.result.ok ? "Thwack! Right in the middle of the target." : "Too slow. Try again.") : `Enter the throw from memory  ·  ${Math.max(0, this.pt).toFixed(1)} s`;
+    const msg = this.result ? (this.result.ok ? "Thwack! Right in the middle of the target." : "Too slow, and it went wide. Try again.") : this.sling ? "" : `Enter the throw from memory  ·  ${Math.max(0, this.pt).toFixed(1)} s`;
     ctx.fillText(msg, W / 2, y + box + 40);
   },
 };

@@ -48,7 +48,8 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   - The golden olive rides the cord between them. The posts are 8 tiles, so a full single jump just reaches the top.
 - **Jesse's courtyard** (home base, Castlevania-town style):
   - **The tithe:** the first thing on coming home after a world, before the market, **David** offers the first tenth of the olives he gathered in that world (Set aside / Not this time). Nobody asks him; Jesse only receives it. Never forced, nothing paid back. David remembers Abraham (Gen 14:20) and Jacob (Gen 28:22) in turn.
-  - **Jesse waits by the bullseye** with that world's piece of the throw. After that, Up at the target practises the code.
+  - **Jesse stands just right of the bullseye** with that world's piece of the throw.
+  - **The practice throw:** Up at the spot by the bench (left of the target). David stands side on, like facing Goliath; enter the code and he slings a stone into the centre of the bullseye (too slow: it goes wide). `HOME.TARGET`, `THROW_FROM`, `STONE_FLIGHT`, `MISS_BY` in home.js.
   - The tenth of the flock (Lev 27:32) is saved for the end of the game.
   - **The shelf** opens the Journal.
   - **The market** sells lamp oil (20 olives → 30 oil) and a fig cake (15 olives → +1 heart next stage).
