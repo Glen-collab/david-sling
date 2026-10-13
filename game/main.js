@@ -799,7 +799,7 @@ if (LEVEL_NAME === "test") {
   deco("log_long", 106, 16, 0.38); deco("stump_cut", 118, 16, 0.26); deco("rubble_mound", 141, 16, 0.3);
   bridge(111, GR, 4);
   ground(115, 258);
-  campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.");
+  campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.", "charge");   // (teaches the charge again, in case 2-1's was missed)
   talk(127, "Hanan", "When it rears up on its back legs and roars, that's your moment: a full charged stone. Then it comes down hard and the ground shakes. Be off the ground.");
   lostSheep("sheep", 133, 16, "cast");                         // on its back: roll it over (Down)
   rock(137, 14, 3, 3); setPiece("claws", 138, 14);

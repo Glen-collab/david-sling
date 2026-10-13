@@ -780,11 +780,22 @@ function updateBear(dt) {
     if (r.kind === "boulder") {   // thrown: arcs over (crashing through the ledges), bounces once, rolls on along the ground
       r.x += r.vx * dt;
       const c = Math.floor(r.x / T), row = Math.floor(r.y / T);
-      if (r.vy > 0 && isSolid(c, row) && r.y - r.vy * dt <= row * T + 2) { r.y = row * T; r.bounced = (r.bounced || 0) + 1; r.vy = r.bounced === 1 ? -320 : 0; r.vx *= 0.75; r.rollT = r.rollT || 0; w2Shake.v = Math.max(w2Shake.v, 0.4); }
+      if (r.vy > 0 && isSolid(c, row) && r.y - r.vy * dt <= row * T + 2) {
+        r.y = row * T;
+        if (r.vy > 120) { r.bounced = (r.bounced || 0) + 1; r.vy = r.bounced === 1 ? -320 : 0; r.vx *= 0.75; r.rollT = r.rollT || 0; w2Shake.v = Math.max(w2Shake.v, 0.4); }   // a real landing
+        else { r.vy = 0; r.bounced = Math.max(2, r.bounced || 0); r.rollT = r.rollT || 0; }   // already on the ground: just rolling
+      }
       if (isSolid(Math.floor((r.x + Math.sign(r.vx) * r.r) / T), Math.floor((r.y - r.r) / T))) r.vx = 0;
-      if (r.bounced >= 2) r.rollT += dt;
-      if (!r.hit && Math.abs(r.x - d.x) < r.r + 14 && r.y - r.r * 2 < d.y && r.y > d.y - d.h) { r.hit = true; hurtDavid(r.x); }
-      if (r.rollT > W2.BOULDER_ROLL || r.y > ROWS * T + 100) r.landed = true;
+      if (r.bounced >= 2) { r.rollT += dt; r.vx *= Math.pow(0.35, dt); }   // rolling, slowing down
+      const moving = r.bounced < 2 || Math.abs(r.vx) > 90;
+      // it only hurts while it's flying or rolling; it crumbles away before it comes to rest (Glen: never a still boulder that hurts)
+      if (moving && !r.fading && !r.hit && Math.abs(r.x - d.x) < r.r + 14 && r.y - r.r * 2 < d.y && r.y > d.y - d.h) { r.hit = true; hurtDavid(r.x); }
+      if (!r.fading && (r.rollT > W2.BOULDER_ROLL || (r.bounced >= 2 && !moving))) {
+        r.fading = 0.01;
+        for (let k = 0; k < 10; k++) bits.push({ x: r.x, y: r.y - r.r, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 260, life: 0.5, color: r.item === "log_short" ? "#7a5634" : "#8a8378" });
+      }
+      if (r.fading) { r.fading += dt; if (r.fading > 0.35) r.landed = true; }
+      if (r.y > ROWS * T + 100) r.landed = true;
       continue;
     }
     if (!r.hit && Math.abs(r.x - d.x) < 26 && r.y > d.y - d.h && r.y < d.y + 10) { r.hit = true; hurtDavid(r.x); }
@@ -796,7 +807,17 @@ function updateBear(dt) {
   const physics = () => { B.vy = Math.min(TUNE.MAX_FALL, B.vy + TUNE.GRAVITY * dt); collideBody(B, 120, 90, dt); };
   if (B.state === "pen") {   // clawing at the pen wall, a sheep pinned under its paw
     B.vx = 0; physics();
-    if (!B.toldPen && d.x > bearPiece.arena * T) { B.toldPen = true; helpT = 0; toast("The bear has a sheep pinned at the pen wall! Tap stones won't turn it. A full charged stone will."); }
+    if (d.x > bearPiece.arena * T && d.deadT <= 0) {
+      B.penT = (B.penT || 0) + dt;
+      if (!B.toldPen || B.penT > 9) {   // (and again every so often, in case it was missed)
+        B.toldPen = true; B.penT = 0; helpT = 0;
+        toast("The bear has a sheep pinned at the pen wall! Hold B until the ring turns gold, then let go: a full charged stone to its back will turn it.");
+      }
+      if (dist < 3.5 * T) {   // too close: it lets the sheep go and turns on David anyway
+        B.sheepFreed = true; B.facing = Math.sign(dx) || -1; setBear("turn"); B.atkT = 1.5;
+        toast("Too close! It let the sheep go, and now it's coming for you. Keep your distance!");
+      }
+    }
     return;
   }
   B.atkT -= dt; B.backCool = (B.backCool || 0) - dt;
@@ -936,7 +957,7 @@ function drawBear(camX) {
   }
   let name = "bear_walk", i, filter = "";
   switch (B.state) {
-    case "pen": name = "bear_lunge"; i = frameOf(name, B.t * 0.8); break;   // clawing at the wall
+    case "pen": { name = "bear_lunge"; const n = SPR[name].frames, k = Math.floor(B.t * 1000 / SPR[name].ms * 0.8) % (2 * n - 2); i = k < n ? k : 2 * n - 2 - k; break; }   // clawing at the wall, over and over
     case "walk": i = frameOf(name, B.t); break;
     case "turn": case "rest": i = 0; break;
     case "tell": name = "bear_growl"; i = frameOf(name, B.t * 1.6); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;   // head down, growling
@@ -953,7 +974,7 @@ function drawBear(camX) {
   drawSprite(name, i, x + shake, B.y, B.facing, 1, B.alpha, filter);
   if ((B.state === "throw" || B.state === "throwBack") && !B.thrown && i >= 3) drawBoulder(x + B.facing * 40, B.y - 165, 24, 0, B.throwItem);   // up in its paws
   for (const r of fallingRocks) {
-    if (r.kind === "boulder") { drawBoulder(r.x - camX, r.y - r.r, r.r, r.x / r.r, r.item); continue; }
+    if (r.kind === "boulder") { ctx.save(); if (r.fading) ctx.globalAlpha = Math.max(0, 1 - r.fading / 0.35); drawBoulder(r.x - camX, r.y - r.r, r.r, r.x / r.r, r.item); ctx.restore(); continue; }
     ctx.fillStyle = "#8a8378"; ctx.strokeStyle = "#4e4840"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, 16, 13, r.t * 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
   if (B.state !== "pen" && B.state !== "defeated") {   // its strength, top of the screen
