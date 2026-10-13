@@ -795,13 +795,13 @@ window.SPRITE_DATA = {
  "father_give": {
   "src": "../assets/sprites/father_give.png",
   "frames": 14,
-  "w": 123,
-  "h": 274,
+  "w": 259,
+  "h": 288,
   "ms": 307,
   "loop": false,
   "pingpong": false,
-  "ax": 54,
-  "ay": 272,
+  "ax": 122,
+  "ay": 286,
   "align": "feet"
  },
  "father_idle": {
