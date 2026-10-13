@@ -838,13 +838,14 @@ function updateBear(dt) {
     case "lunge": B.vx = B.facing * (B.t < 0.5 ? 260 : 0); if (B.t > 1.1) setBear("rest"); break;
     case "throw": case "throwBack": {   // wind up with a boulder, then let it fly (back: over its shoulder, and it ends up facing you)
       B.vx = 0;
+      if (B.t <= dt) B.throwItem = BEAR_THROWS[Math.floor(Math.random() * BEAR_THROWS.length)];   // a boulder, or a log
       const nm = B.state === "throw" ? "bear_throw" : "bear_throw_back", s = SPR[nm], len = s.frames * s.ms / 1000 / W2.BEAR_THROW_SPEED;
       const rel = B.state === "throw" ? 10 : 9, f = Math.floor(B.t / len * s.frames);
       if (!B.thrown && f >= rel) {
         B.thrown = true;
         const dir = B.state === "throw" ? B.facing : -B.facing, sx = B.x + dir * 70, sy = B.y - 150;
         const flight = Math.max(0.6, Math.min(1.2, Math.abs(d.x - sx) / 520));
-        fallingRocks.push({ kind: "boulder", x: sx, y: sy, vx: (d.x - sx) / flight, vy: (d.y - 40 - sy) / flight - 0.5 * 1500 * flight, t: 0, r: 26 });
+        fallingRocks.push({ kind: "boulder", item: B.throwItem, x: sx, y: sy, vx: (d.x - sx) / flight, vy: (d.y - 40 - sy) / flight - 0.5 * 1500 * flight, t: 0, r: 26 });
         sfx("sling_throw_quick", B.x, 0.8, 0.5);
       }
       if (B.t >= len) { B.thrown = false; if (B.state === "throwBack") B.facing = -B.facing; setBear("rest"); }
@@ -911,7 +912,13 @@ function watchBearFinal(s) {   // slow the world down if this stone is going to 
     }
   }
 }
-function drawBoulder(x, y, r, spin) {   // a rough grey boulder (it rolls: spin follows how far it's gone)
+const BEAR_THROWS = ["boulder_tan", "boulder_grey", "log_short"];   // Glen's rocks-and-logs sheet (assets/items)
+function drawBoulder(x, y, r, spin, item) {   // what the bear throws (it rolls: spin follows how far it's gone)
+  const img = item && ITEM[item];
+  if (img && img.naturalWidth) {
+    const w = r * 2.5, h = w * img.naturalHeight / img.naturalWidth;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(spin); ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore(); return;
+  }
   ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
   ctx.fillStyle = "#857d71"; ctx.strokeStyle = "#4a443c"; ctx.lineWidth = 3;
   ctx.beginPath(); for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, rr = r * (0.86 + 0.14 * Math.sin(k * 2.3)); ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -943,9 +950,9 @@ function drawBear(camX) {
   const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
   if (B.flash > 0) filter = "brightness(1.8)";
   drawSprite(name, i, x + shake, B.y, B.facing, 1, B.alpha, filter);
-  if ((B.state === "throw" || B.state === "throwBack") && !B.thrown && i >= 3) drawBoulder(x + B.facing * 40, B.y - 165, 24, 0);   // up in its paws
+  if ((B.state === "throw" || B.state === "throwBack") && !B.thrown && i >= 3) drawBoulder(x + B.facing * 40, B.y - 165, 24, 0, B.throwItem);   // up in its paws
   for (const r of fallingRocks) {
-    if (r.kind === "boulder") { drawBoulder(r.x - camX, r.y - r.r, r.r, r.x / r.r); continue; }
+    if (r.kind === "boulder") { drawBoulder(r.x - camX, r.y - r.r, r.r, r.x / r.r, r.item); continue; }
     ctx.fillStyle = "#8a8378"; ctx.strokeStyle = "#4e4840"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, 16, 13, r.t * 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
   if (B.state !== "pen" && B.state !== "defeated") {   // its strength, top of the screen

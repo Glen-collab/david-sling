@@ -664,6 +664,7 @@ if (LEVEL_NAME === "test") {
   ground(0, 38);
   oliveRow(6, 16, 5);
   rock(16, 15, 3, 2); oliveArc(15, 14, 5);                     // a boulder in the riverbed: hop over
+  deco("boulder_tan", 9, 16, 0.22); deco("rubble_stones", 36, 16, 0.3); deco("rock_pile_tan", 52, 16, 0.3); deco("rubble_mound", 96, 16, 0.28);
   lostSheep("sheep", 25, 16);
   rock(30, 13, 2, 4); special(31, 10);                         // a tall rock: the special stone on top
   ground(42, 130);
@@ -715,7 +716,7 @@ if (LEVEL_NAME === "test") {
   ground(0, 21);
   campfire(6, GR - 1, "Hanan", "Watch the wild goats. They know every safe path on these cliffs. And keep your lamb close: eagles nest up here.");
   oliveRow(9, 16, 4);
-  lostSheep("sheep", 15, 16);
+  lostSheep("sheep", 15, 16); deco("rock_pile_tan", 3, 16, 0.3); deco("boulder_tan", 12, 16, 0.2);
   setPiece("ibex", 19, 16, { path: [[24, 13], [31, 10], [37, 10]] });   // the first ibex shows the way up
   pillar(22, 14, 5);
   pillar(29, 11, 4); oliveArc(27, 10, 3);
@@ -759,6 +760,7 @@ if (LEVEL_NAME === "test") {
   pillar(147, 13, 4);
   ground(151, 175);
   lostSheep("sheep", 157, 16, "thorns");                       // caught in the thorns by the water: sling the bush
+  deco("rubble_mound", 153, 16, 0.28); deco("rock_pile_tan", 166, 16, 0.3);
   snake("viper", 162);
   sheepfold(175);
   setPiece("falls", 191, 4, { bottom: GR, dx: 110 });         // the spring: Glen's waterfall pours off the cliff behind the fold
@@ -770,12 +772,13 @@ if (LEVEL_NAME === "test") {
   oliveRow(6, 16, 5);
   lostSheep("sheep", 14, 16);
   rock(20, 13, 3, 4); setPiece("claws", 21, 13);               // claw marks on the rock: something big passed this way
+  deco("stump_roots", 10, 16, 0.32); deco("log_broken", 27, 16, 0.4); deco("rubble_sticks", 38, 16, 0.3);   // torn-up logs, overturned rocks
   special(21, 9);
   wolfPair(32);
   ground(44, 110);                                             // (a gap at 41-43)
   plat(50, 13, 4); lostSheep("sheepblack", 51, 12, "ledge");  // up on the ledge: climb, or play the harp below
   deadfall(60, 10, 2, 7);                                      // a torn-up log pile: a full charged stone breaks it
-  setPiece("claws", 64, 15);
+  setPiece("claws", 64, 15); deco("rubble_dirt", 57, 16, 0.3); deco("rock_pile_grey", 70, 16, 0.3);
   oliveArc(66, 16, 5);
   wolfPair(74);
   // The One: up the ravine wall, ledge by ledge
@@ -783,6 +786,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("lamb", 96, 3, "one");
   oliveRow(80, 12, 3); oliveRow(85, 9, 3); special(91, 4);
   setPiece("crash", 102);                                      // CRACK: a tree comes down somewhere ahead
+  deco("log_long", 106, 16, 0.38); deco("stump_cut", 118, 16, 0.26); deco("rubble_mound", 141, 16, 0.3);
   bridge(111, GR, 4);
   ground(115, 258);
   campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.");
@@ -793,7 +797,8 @@ if (LEVEL_NAME === "test") {
   wolfPair(152);
   lostSheep("sheep", 164, 16);
   plat(172, 13, 4); special(174, 10); oliveRow(172, 12, 4);
-  setPiece("claws", 184, 15);
+  setPiece("claws", 184, 15); deco("boulder_grey", 162, 16, 0.24); deco("stump_roots", 180, 16, 0.3); deco("rubble_stones", 194, 16, 0.3);
+  deco("log_broken", 208, 16, 0.34); deco("rubble_sticks", 221, 16, 0.32);
   // the arena in front of the pen: ledges to get above a charge
   plat(201, 13, 5); plat(213, 13, 5); plat(207, 9, 4);
   setPiece("bear", 226, GR - 1, { arena: 198 });               // at the pen wall, a sheep pinned under its paw
