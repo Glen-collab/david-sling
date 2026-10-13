@@ -1202,9 +1202,11 @@ const ending = {
       if (k < 1 || this.step === 4) drawPouch(px, py, this.step === 4 && k >= 1 ? 0.5 + 0.5 * Math.sin(now * 4) : 0);
       if (this.step === 4 && this.stepT > 1.2) {
         ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - 1.2) * 2);
-        ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 340, 90, 680, 96, 16); ctx.fill();
-        ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The leather sling pouch", W / 2, 128);
-        ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Made by the leatherworker of Tekoa. Your charged shot charges a little faster.", W / 2, 162);
+        ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 400, 80, 800, 116, 16); ctx.fill();
+        drawPouch(W / 2 - 330, 138, 0, 104);
+        ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The leather sling pouch", W / 2 + 50, 126);
+        ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Made by the leatherworker of Tekoa.", W / 2 + 50, 158);
+        ctx.fillText("Your charged shot charges a little faster.", W / 2 + 50, 182);
         ctx.restore(); ctx.textAlign = "left";
       }
     }
@@ -1231,7 +1233,13 @@ function caption(text, a, small) {
   ctx.fillStyle = "#fff6dc"; ctx.font = small ? "17px sans-serif" : "italic 26px Georgia, serif";
   ctx.fillText(text, W / 2, small ? H - 24 : 70); ctx.restore(); ctx.textAlign = "left";
 }
-function drawPouch(x, y, glow) {   // a small leather pouch on a cord (no art yet)
+function drawPouch(x, y, glow, size = 56) {   // Glen's leather sling pouch (assets/items/sling_pouch.png); a drawn one if it's missing
+  const img = ITEM.sling_pouch;
+  if (img && img.naturalWidth) {
+    const w = size, h = w * img.naturalHeight / img.naturalWidth;
+    ctx.save(); if (glow) { ctx.shadowColor = `rgba(255,220,120,${glow})`; ctx.shadowBlur = 20; }
+    ctx.drawImage(img, x - w / 2, y - h / 2, w, h); ctx.restore(); return;
+  }
   ctx.save(); ctx.translate(x, y);
   if (glow) { ctx.shadowColor = `rgba(255,220,120,${glow})`; ctx.shadowBlur = 18; }
   ctx.fillStyle = "#8a5a2e"; ctx.strokeStyle = "#4a2c12"; ctx.lineWidth = 2;
