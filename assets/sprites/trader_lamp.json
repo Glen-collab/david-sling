@@ -1,0 +1,23 @@
+{
+  "frames": 9,
+  "frame_w": 186,
+  "frame_h": 274,
+  "ms_per_frame": 250,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 64,
+  "anchor_y": 272,
+  "source": "trader_hold.mp4",
+  "video_frames": [
+    1,
+    8,
+    14,
+    21,
+    27,
+    34,
+    41,
+    47,
+    54
+  ],
+  "pingpong": true
+}

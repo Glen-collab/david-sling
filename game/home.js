@@ -64,8 +64,8 @@ const THROW_WORDS = [
 ];
 const ARROW = { up: "↑", down: "↓", left: "←", right: "→", a: "A", b: "B" };
 const MARKET = [
-  { id: "oil", name: "Lamp oil", cost: 20, what: "+30 oil for the lamp in caves (it burns before your olives)" },
-  { id: "fig", name: "Fig cake", cost: 15, what: "An extra heart for your next stage" },
+  { id: "oil", name: "Lamp oil", cost: 20, holds: "lamp", what: "+30 oil for the lamp in caves (it burns before your olives)" },
+  { id: "fig", name: "Fig cake", cost: 15, holds: "fig_cake", what: "An extra heart for your next stage" },
   { id: "pouch", name: "A better sling pouch", cost: 60, what: "Stones fly a little straighter (from World 2)", later: true },
 ];
 
@@ -228,9 +228,16 @@ const Courtyard = {
     if (!animDone("jesse_cheer", ct)) drawSprite("jesse_cheer", frameOf("jesse_cheer", ct), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     else if (this.msg && this.msg.who === "Jesse") drawSprite("jesse_talk", frameOf("jesse_talk", this.t - this.msg.at), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     else drawSprite("jesse_idle", frameOf("jesse_idle", this.t), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
-    // the trader at his stall, facing David: idle, talking while his words are up, or showing off his goods when the market opens
+    // the trader at his stall, facing David: idle, talking while his words are up, showing off his goods when the market opens,
+    // then holding up whatever David's looking at (the lamp is in his clip; anything else is drawn on his open palm)
     const tx = HOME.TRADER_X * SW - cam, ot = this.offerAt === null ? 1e9 : this.t - this.offerAt, tsz = HOME.SIZE * HOME.TRADER_SIZE;
     if (!animDone("trader_offer", ot)) drawSprite("trader_offer", frameOf("trader_offer", ot), tx, floor, -1, tsz, ctx.globalAlpha);
+    else if (this.mode === "market" && MARKET[this.pick].holds === "lamp") drawSprite("trader_lamp", frameOf("trader_lamp", this.t), tx, floor, -1, tsz, ctx.globalAlpha);
+    else if (this.mode === "market" && MARKET[this.pick].holds) {
+      const f = frameOf("trader_palm", this.t), s = SCALE * tsz, sp = SPR.trader_palm;
+      drawSprite("trader_palm", f, tx, floor, -1, tsz, ctx.globalAlpha);
+      drawItem(MARKET[this.pick].holds, tx - (150 - sp.ax) * s, floor + (130 - sp.ay) * s, 48 * s / 195, ctx.globalAlpha);   // on his palm (sheet px 150,130)
+    }
     else if (this.msg && this.msg.who === "The trader") drawSprite("trader_talk", frameOf("trader_talk", this.t - this.msg.at), tx, floor, -1, tsz, ctx.globalAlpha);
     else drawSprite("trader_idle", frameOf("trader_idle", this.t), tx, floor, -1, tsz, ctx.globalAlpha);
     // David (and his lamb behind him)

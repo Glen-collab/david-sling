@@ -1440,6 +1440,18 @@ window.SPRITE_DATA = {
   "ay": 276,
   "align": "feet"
  },
+ "trader_lamp": {
+  "src": "../assets/sprites/trader_lamp.png",
+  "frames": 9,
+  "w": 186,
+  "h": 274,
+  "ms": 250,
+  "loop": true,
+  "pingpong": true,
+  "ax": 64,
+  "ay": 272,
+  "align": "feet"
+ },
  "trader_offer": {
   "src": "../assets/sprites/trader_offer.png",
   "frames": 12,
@@ -1450,6 +1462,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 88,
   "ay": 277,
+  "align": "feet"
+ },
+ "trader_palm": {
+  "src": "../assets/sprites/trader_palm.png",
+  "frames": 10,
+  "w": 174,
+  "h": 274,
+  "ms": 225,
+  "loop": true,
+  "pingpong": true,
+  "ax": 58,
+  "ay": 272,
   "align": "feet"
  },
  "trader_talk": {

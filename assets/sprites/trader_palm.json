@@ -1,0 +1,24 @@
+{
+  "frames": 10,
+  "frame_w": 174,
+  "frame_h": 274,
+  "ms_per_frame": 225,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 58,
+  "anchor_y": 272,
+  "source": "trader_hold.mp4 (frames 92-145, olives erased: the item is drawn on the palm in home.js)",
+  "video_frames": [
+    92,
+    98,
+    104,
+    110,
+    116,
+    121,
+    127,
+    133,
+    139,
+    145
+  ],
+  "pingpong": true
+}
