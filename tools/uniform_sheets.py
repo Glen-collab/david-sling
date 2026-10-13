@@ -39,6 +39,12 @@ for n, (j, im) in sheets.items():
         fr = im.crop((k * j["frame_w"], 0, (k + 1) * j["frame_w"], j["frame_h"]))
         out.alpha_composite(fr, (k * fw + ax - j["anchor_x"], ay - j["anchor_y"]))
     out.save(os.path.join(args.dir, n + ".png"))
+    gp = os.path.join(args.dir, n + "_green.png")   # vid2sprite --green: the original frames get the same layout
+    if os.path.exists(gp):
+        g = Image.open(gp).convert("RGBA"); gout = Image.new("RGBA", out.size, (53, 188, 54, 255))
+        for k in range(j["frames"]):
+            gout.alpha_composite(g.crop((k * j["frame_w"], 0, (k + 1) * j["frame_w"], j["frame_h"])), (k * fw + ax - j["anchor_x"], ay - j["anchor_y"]))
+        gout.convert("RGB").save(gp)
     j.update(frame_w=fw, frame_h=fh, anchor_x=ax, anchor_y=ay)
     json.dump(j, open(os.path.join(args.dir, n + ".json"), "w"), indent=2)
     print(f"{n}: {j['frames']} frames of {fw}x{fh}, anchor {ax},{ay}")

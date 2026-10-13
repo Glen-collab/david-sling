@@ -12,12 +12,17 @@ usage:
             or ground (tumbling on the floor: rolls).
   --mirror  flip left-right (most animal clips face left; every sheet should face right).
   --ref     start:end frames where the character is seen at full height, for consistent scale (default 4:end).
+  --soft    a gentler key for furry, greenish characters (the ram): only clearly green screen is removed, and holes
+            inside the body (green eyes, spill in the fur) are filled back in.
+  --green   also write <out_prefix>_green.png: the same frames, same layout, straight from the video (green screen
+            and all), for borrowing parts in Photoshop.
 
 Writes <out_prefix>_sheet.png (one row, transparent), <out_prefix>_preview.gif and <out_prefix>.json.
 Needs ffmpeg on the PATH, numpy and Pillow.
 """
 import argparse, glob, json, os, subprocess, tempfile
 import numpy as np
+from scipy import ndimage
 from PIL import Image, ImageFilter
 
 ap = argparse.ArgumentParser()
@@ -27,6 +32,7 @@ ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", t
 ap.add_argument("--start", type=int, default=1); ap.add_argument("--end", type=int, default=0)
 ap.add_argument("--align", choices=["feet", "center", "ground"], default="feet")
 ap.add_argument("--mirror", action="store_true", help="flip left-right so the character faces right (the game's convention)")
+ap.add_argument("--soft", action="store_true"); ap.add_argument("--green", action="store_true")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 args = ap.parse_args()
 
@@ -48,8 +54,15 @@ def key(path):
     a = np.asarray(Image.open(path).convert("RGB")).astype(float)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     ex = g - np.maximum(r, b)
-    alpha = np.clip(1 - (ex - 15) / 45, 0, 1)
-    alpha[green_mask(a)] = 0
+    raw = Image.fromarray(a.astype(np.uint8)).convert("RGBA")
+    if args.soft:   # only the screen itself goes: its green is far above red and blue (fur with green spill stays)
+        alpha = np.clip(1 - (ex - 45) / 55, 0, 1)
+        alpha[(ex > 85) & (g > 110)] = 0
+        inside = ndimage.binary_fill_holes(alpha > 0.5)   # green eyes, gaps in the fur: back in
+        alpha[inside] = np.maximum(alpha[inside], 1.0)
+    else:
+        alpha = np.clip(1 - (ex - 15) / 45, 0, 1)
+        alpha[green_mask(a)] = 0
     a[..., 1] = np.minimum(g, np.maximum(r, b) + 6)          # remove green spill on edges
     al = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
     alpha = np.asarray(al).copy()
@@ -59,6 +72,7 @@ def key(path):
     ys, xs = np.where(m)
     if len(ys):
         im = Image.fromarray(a.clip(0, 255).astype(np.uint8)).convert("RGBA"); im.putalpha(Image.fromarray(alpha))
+        im.raw = raw
         return im
     return None
 
@@ -135,6 +149,12 @@ if args.mirror:
 sheet = Image.new("RGBA", (cw * N, ch))
 for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, 0))
 sheet.save(args.out + "_sheet.png")
+if args.green:   # the untouched video frames, cut and laid out exactly like the sheet
+    gf = [im.raw.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + B)).resize((cw, ch), Image.LANCZOS) for im, a in sel]
+    if args.mirror: gf = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in gf]
+    gs = Image.new("RGBA", (cw * N, ch), (53, 188, 54, 255))
+    for k, f in enumerate(gf): gs.alpha_composite(f, (k * cw, 0))
+    gs.save(args.out + "_green.png")
 
 ms = round(1000 * (length / fps) / N)
 gif = []
