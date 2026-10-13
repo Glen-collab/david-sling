@@ -286,6 +286,7 @@ function updateCritters(dt) {
     else if (k.kind === "ram") updateRam(k, dx, sameLevel, dt);
     else if (k.kind === "boar") updateBoar(k, dx, sameLevel, dt);   // world2.js
     else if (k.kind === "donkey") updateDonkey(k, dx, sameLevel, dt);
+    else if (k.kind === "wolf") updateWolf(k, dx, sameLevel, dt);
   }
 }
 function updateFox(k, dx, sameLevel, dt) {
@@ -375,6 +376,7 @@ function stoneHitsCritters(s) {
     if (s.x < b.x0 - 6 || s.x > b.x1 + 6 || s.y < b.y0 - 34 || s.y > b.y1 + 4) continue;   // generous on top: they're low, and stones leave his hand at chest height
     if (k.kind === "boar") return stoneHitsBoar(k, s);   // world2.js
     if (k.kind === "donkey") return stoneHitsDonkey(k, s);
+    if (k.kind === "wolf") return stoneHitsWolf(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: hold Down, then press A."); }
@@ -397,6 +399,7 @@ function drawCritters(camX) {
     const x = k.x - camX; if (x < -300 || x > W + 300) continue;
     if (k.kind === "boar") { drawBoar(k, x); continue; }   // world2.js
     if (k.kind === "donkey") { drawDonkey(k, x); continue; }
+    if (k.kind === "wolf") { drawWolf(k, x); continue; }
     const a = CRITTER_ART[k.kind];
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

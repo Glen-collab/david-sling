@@ -312,7 +312,8 @@ const STAGE_INFO = {
   "1-4": { cols: 322, bg: "w1_4", name: "The Lion's Territory", night: true, nightSky: true },   // nightSky: Glen's own night sky (not tinted)
   "2-1": { cols: 240, bg: "w2_1", ter: "w2f", name: "The Forest Trail" },
   "2-2": { cols: 306, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },
-  "2-3": { cols: 196, bg: "w2_3", ter: "w2s", name: "The High Cliffs" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "2-3": { cols: 196, bg: "w2_3", ter: "w2s", name: "The High Cliffs" },
+  "2-4": { cols: 258, bg: "w2_4", ter: "w2f", name: "The Bear's Ravine" },   // ter: the stage's own ground set (assets/terrain/w2f)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -761,6 +762,43 @@ if (LEVEL_NAME === "test") {
   snake("viper", 162);
   sheepfold(175);
   setPiece("falls", 191, 4, { bottom: GR, dx: 110 });         // the spring: Glen's waterfall pours off the cliff behind the fold
+} else if (LEVEL_NAME === "2-4") {
+  // ---- 2-4 The Bear's Ravine, at dusk: wolves hunting in pairs, claw marks, a tree crashing down off in the trees,
+  //      Hanan's last campfire, then the Bear at the pen wall ----
+  const wolfPair = (c, gap = 3) => { critter("wolf", c); critter("wolf", c + gap); critters[critters.length - 1].delay = 0.7; };
+  ground(0, 40);
+  oliveRow(6, 16, 5);
+  lostSheep("sheep", 14, 16);
+  rock(20, 13, 3, 4); setPiece("claws", 21, 13);               // claw marks on the rock: something big passed this way
+  special(21, 9);
+  wolfPair(32);
+  ground(44, 110);                                             // (a gap at 41-43)
+  plat(50, 13, 4); lostSheep("sheepblack", 51, 12, "ledge");  // up on the ledge: climb, or play the harp below
+  deadfall(60, 10, 2, 7);                                      // a torn-up log pile: a full charged stone breaks it
+  setPiece("claws", 64, 15);
+  oliveArc(66, 16, 5);
+  wolfPair(74);
+  // The One: up the ravine wall, ledge by ledge
+  plat(80, 13, 3); plat(85, 10, 3); plat(90, 7, 3); plat(95, 4, 3);
+  lostSheep("lamb", 96, 3, "one");
+  oliveRow(80, 12, 3); oliveRow(85, 9, 3); special(91, 4);
+  setPiece("crash", 102);                                      // CRACK: a tree comes down somewhere ahead
+  bridge(111, GR, 4);
+  ground(115, 258);
+  campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.");
+  talk(127, "Hanan", "When it sits back on its haunches and roars, that's your moment: a full charged stone. Then it brings its paws down and the ground shakes. Be off the ground.");
+  lostSheep("sheep", 133, 16, "cast");                         // on its back: roll it over (Down)
+  rock(137, 14, 3, 3); setPiece("claws", 138, 14);
+  lostSheep("sheep", 144, 16, "thorns");                       // caught in the thorns: sling the bush
+  wolfPair(152);
+  lostSheep("sheep", 164, 16);
+  plat(172, 13, 4); special(174, 10); oliveRow(172, 12, 4);
+  setPiece("claws", 184, 15);
+  // the arena in front of the pen: ledges to get above a charge
+  plat(201, 13, 5); plat(213, 13, 5); plat(207, 9, 4);
+  setPiece("bear", 226, GR - 1, { arena: 198 });               // at the pen wall, a sheep pinned under its paw
+  deco("stone_wall", 230, 16, 1.15, "back");
+  sheepfold(238);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1221,8 +1259,10 @@ function updateStones(dt) {
     if (s.life > 0 && stoneHitsBugs(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
+    if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
   }
   for (let i = stones.length - 1; i >= 0; i--) if (stones[i].life <= 0) stones.splice(i, 1);
   for (const b of bits) { b.life -= dt; b.vy += 1400 * dt; b.x += b.vx * dt; b.y += b.vy * dt; }
@@ -2175,6 +2215,11 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("Not without the lamb the lion took!");
       finish.blocked = 3; return;
     }
+    if (typeof bearBlocking === "function" && bearBlocking()) {   // 2-4: the bear first (world2.js)
+      d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
+      if (finish.blocked <= 0) toast("The bear is between you and the pen!");
+      finish.blocked = 3; return;
+    }
     if (typeof boyMissing === "function" && boyMissing()) {   // 2-2: not without the boy from Tekoa (world2.js)
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast("Not without the boy! He's still on the rock in the riverbed.");
@@ -2731,9 +2776,10 @@ function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
   const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
-  const fight = lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0;
+  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight());
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
+  if (!fight && typeof bear !== "undefined" && bear.on && bear.state === "pen") bossIntroPlayed = false;
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night || cave.room ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
@@ -2935,7 +2981,7 @@ function frame(now) {
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
   camX += (targetCam - camX) * Math.min(1, real * 6);
-  const shake = finalBlow.shake * finalBlow.shake * 14;
+  const shake = finalBlow.shake * finalBlow.shake * 14 + (typeof w2Shake !== "undefined" ? w2Shake.v * w2Shake.v * 12 : 0);   // + the bear's slam (world2.js)
   ctx.save(); if (shake > 0.3) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
 
   if (cave.room) drawCaveBackdrop(camX); else drawBackground(camX);
@@ -2958,7 +3004,7 @@ function frame(now) {
   drawTakenLamb(camX);
   drawSheep(camX);
   drawFlock(camX);
-  drawLamb(camX); if (typeof drawBoy === "function") { drawBoy(camX); drawIbexes(camX); }   // world2.js
+  drawLamb(camX); if (typeof drawBoy === "function") { drawClaws(camX); drawBoy(camX); drawIbexes(camX); drawBear(camX); }   // world2.js
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawFoldFront(camX);
   drawStones(camX); if (typeof drawFlood === "function") { drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js

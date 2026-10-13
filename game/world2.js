@@ -493,11 +493,13 @@ function updateWorld2(dt) {
   if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); }
   updateFlood(dt); updateBoy(dt);
   updateEagles(dt); updateIbexes(dt); updateWind(dt);   // 2-3 (below)
+  updateCrash(); updateBear(dt); w2Shake.v = Math.max(0, w2Shake.v - dt * 1.6);   // 2-4 (below)
 }
 function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
 function resetWorld2(restart) {   // after a fall (restart: out of lives, back to the start of the stage)
   Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1, lastX: undefined }); hushFlood();
   resetEagles();
+  if (bear.on && bear.state !== "defeated") resetBear();
   if (restart) { resetBoy(); stonesTalk.step = -1; }
   else if (boy.state === "follow" || boy.state === "stone") { boy.x = david.x - 40; boy.y = david.y; boy.state = "follow"; }
 }
@@ -671,5 +673,236 @@ function drawFalls(camX) {
       ctx.beginPath(); ctx.arc(x0 - 10 + (k / 9) * (w + 20), y1 - 4 - Math.abs(Math.sin(a)) * 14, 9 + (k % 3) * 3, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 2-4 The Bear's Ravine (DESIGN 2-4): wolves that hunt in pairs, claw marks, a tree crashing down somewhere off in the
+// dusk, and the Bear at the pen wall. Placed with setPiece() / critter() in main.js:
+//   critter("wolf", c)               sits until David comes near, then runs at him; a stone drives it off
+//   setPiece("claws", c, r)          claw marks gouged into rock or bark
+//   setPiece("crash", c)             past here: a tree crashes down somewhere ahead
+//   setPiece("bear", c, r, { arena }) the Bear, at the pen wall with a sheep pinned; the fight starts past `arena`
+// ---------------------------------------------------------------------------
+Object.assign(W2, {
+  WOLF_SEE: 9, WOLF_RUN: 400, WOLF_SIZE: 1.25,
+  BEAR_HP: 8,            // a stagger (full charged stone while it roars) = 2; while dazed: tap 1, charged 2, Power 3
+  BEAR_SIZE: 1.7,
+  BEAR_WALK: 120, BEAR_CHARGE: 540, BEAR_CHARGE_RUN: 11,   // px/s, and the most tiles one charge runs
+  BEAR_TELL: 1.0,        // the scrape before a charge
+  BEAR_ROAR: 1.5,        // it sits back and roars (the opening: a full charged stone now staggers it), then slams
+  BEAR_TURN: 0.9,        // slow to turn round
+  BEAR_DAZED: 3.0, BEAR_REST: 1.2,
+  BEAR_SLAM_REACH: 9,    // tiles: the slam shakes the ground this far; be in the air
+});
+Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
+  bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
+CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
+const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera)
+
+// --- wolves
+function updateWolf(k, dx, sameLevel, dt) {
+  const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); };
+  if (k.state === "idle") {
+    fall(); k.facing = Math.sign(dx) || k.facing;
+    if (sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { setCrit(k, "rise"); k.t = -(k.delay || 0); }
+    return;
+  }
+  if (k.state === "rise") { fall(); if (k.t > 0.8) setCrit(k, "hunt"); return; }
+  if (k.state === "hunt") {
+    k.facing = Math.sign(dx) || k.facing;
+    if (!runCritter(k, W2.WOLF_RUN, dt) && k.t > 0.3) { setCrit(k, "wait"); }
+    if (touchesDavid(critterBox(k))) { hurtDavid(k.x); setCrit(k, "pass"); }
+    return;
+  }
+  if (k.state === "pass") { runCritter(k, W2.WOLF_RUN, dt); if (k.t > 0.9) setCrit(k, "hunt"); return; }   // runs on past, then wheels round
+  if (k.state === "wait") { fall(); k.facing = Math.sign(dx) || k.facing; if (k.t > 1.0) setCrit(k, "hunt"); }
+}
+function stoneHitsWolf(k, s) {
+  k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 460; stoneHit(s);
+  toast("Wolf driven off!"); return !s.power;
+}
+function drawWolf(k, x) {
+  let name = "wolf_run", i;
+  if (k.state === "idle") { name = "wolf_sit"; i = frameOf(name, k.t); }
+  else if (k.state === "rise") { name = "wolf_stand_up"; i = Math.max(0, Math.min(SPR[name].frames - 1, Math.floor(k.t * 1000 / SPR[name].ms))); }
+  else if (k.state === "wait") { name = "wolf_walk"; i = 0; }
+  else i = frameOf(name, k.t);
+  drawSprite(name, i, x, k.y, k.facing, 1, k.alpha);
+}
+
+// --- claw marks, and the tree that crashes down off in the dusk
+function drawClaws(camX) {
+  for (const p of setPieces) if (p.kind === "claws") {
+    const x = p.x - camX, y = p.r * T; if (x < -80 || x > W + 80) continue;
+    ctx.save(); ctx.strokeStyle = "rgba(35,20,10,0.75)"; ctx.lineWidth = 5; ctx.lineCap = "round";
+    for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(x - 24 + k * 14, y); ctx.quadraticCurveTo(x - 18 + k * 14, y + 34, x - 28 + k * 15, y + 64); ctx.stroke(); }
+    ctx.strokeStyle = "rgba(240,215,170,0.35)"; ctx.lineWidth = 2;
+    for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(x - 21 + k * 14, y + 4); ctx.quadraticCurveTo(x - 15 + k * 14, y + 36, x - 25 + k * 15, y + 62); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+function updateCrash() {
+  const p = piece("crash"); if (!p || p.done || david.x < p.x) return;
+  p.done = true; w2Shake.v = 0.9;
+  sfx("stone_hit", undefined, 1, 0.35); setTimeout(() => sfx("fall_pit", undefined, 0.8, 0.5), 250);
+  toast("CRACK... a tree came crashing down somewhere ahead. Something big is out there.");
+}
+
+// --- the Bear
+const bearPiece = piece("bear");
+const bear = { on: !!bearPiece };
+const fallingRocks = [];
+function resetBear() {
+  if (!bear.on) return;
+  Object.assign(bear, { x: bearPiece.x, y: bearPiece.y, vx: 0, vy: 0, onGround: true, facing: 1, state: "pen", t: 0, hp: W2.BEAR_HP,
+                        flash: 0, alpha: 1, atkT: 1.5, told: false, toldPen: false, sheepFreed: false, sheepX: bearPiece.x + 120, sheepT: 0 });
+  fallingRocks.length = 0;
+}
+resetBear();
+const bearFight = () => bear.on && bear.state !== "defeated" && (bear.state !== "pen" || david.x > bearPiece.arena * T - TUNE.BOSS_MUSIC_LEAD * T) && david.deadT <= 0;
+const bearBlocking = () => bear.on && bear.state !== "defeated";
+function setBear(s) { if (bear.state !== s) { bear.state = s; bear.t = 0; } }
+function bearBox() {
+  const tall = bear.state === "roar" || bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;
+  return { x0: bear.x - 85, x1: bear.x + 85, y0: bear.y - tall, y1: bear.y };
+}
+function updateBear(dt) {
+  if (!bear.on) return;
+  const B = bear, d = david; B.t += dt; B.flash = Math.max(0, B.flash - dt);
+  for (const r of fallingRocks) { r.vy += 1500 * dt; r.y += r.vy * dt; r.t += dt;
+    if (!r.hit && Math.abs(r.x - d.x) < 26 && r.y > d.y - d.h && r.y < d.y + 10) { r.hit = true; hurtDavid(r.x); }
+    if (r.y > GR * T && !r.landed) { r.landed = true; for (let k = 0; k < 6; k++) bits.push({ x: r.x, y: GR * T - 4, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 250, life: 0.5, color: "#8a8378" }); } }
+  for (let i = fallingRocks.length - 1; i >= 0; i--) if (fallingRocks[i].landed) fallingRocks.splice(i, 1);
+  if (B.sheepFreed) B.sheepT += dt;
+  if (B.state === "defeated") { B.alpha = Math.max(0, B.alpha - dt * 0.4); return; }
+  const dx = d.x - B.x, dist = Math.abs(dx), late = B.hp <= W2.BEAR_HP / 2;   // the last half: quicker
+  const physics = () => { B.vy = Math.min(TUNE.MAX_FALL, B.vy + TUNE.GRAVITY * dt); collideBody(B, 120, 90, dt); };
+  if (B.state === "pen") {   // clawing at the pen wall, a sheep pinned under its paw
+    B.vx = 0; physics();
+    if (!B.toldPen && d.x > bearPiece.arena * T) { B.toldPen = true; helpT = 0; toast("The bear has a sheep pinned at the pen wall! Tap stones won't turn it. A full charged stone will."); }
+    return;
+  }
+  B.atkT -= dt;
+  switch (B.state) {
+    case "turn": B.vx = 0; if (B.t > W2.BEAR_TURN * (late ? 0.7 : 1)) { B.facing = Math.sign(dx) || B.facing; setBear("walk"); } break;
+    case "walk": {
+      if (Math.sign(dx) !== B.facing && dist > 30) { setBear("turn"); break; }   // slow to turn round
+      B.vx = B.facing * W2.BEAR_WALK * (late ? 1.25 : 1);
+      if (B.atkT <= 0) {
+        B.vx = 0;
+        if (dist < 2.6 * T) setBear(Math.random() < 0.6 ? "lunge" : "roar");   // up close: a swipe, or it sits back to roar
+        else if (dist < 13 * T && Math.random() < 0.55) { setBear("tell"); }
+        else setBear("roar");
+      }
+      break;
+    }
+    case "tell": B.vx = 0; if (B.t > W2.BEAR_TELL * (late ? 0.8 : 1)) { setBear("charge"); B.startX = B.x; } break;   // the scrape: get above it, or out of the way
+    case "charge": {
+      B.vx = B.facing * W2.BEAR_CHARGE;
+      const x0 = B.x; physics();
+      if (Math.abs(B.x - x0) < 0.2 * W2.BEAR_CHARGE * dt || Math.abs(B.x - B.startX) > W2.BEAR_CHARGE_RUN * T || !groundAhead(B, B.facing)) { B.vx = 0; setBear("rest"); w2Shake.v = Math.max(w2Shake.v, 0.3); }
+      break;
+    }
+    case "roar": B.vx = 0; if (B.t > W2.BEAR_ROAR * (late ? 0.8 : 1)) { setBear("slam"); } break;   // the opening
+    case "slam": {   // down on its front paws: the ground shakes, and rocks come down from the ravine walls
+      B.vx = 0;
+      if (!B.slammed && B.t > 0.45) {
+        B.slammed = true; w2Shake.v = 1; sfx("stone_hit", B.x, 1, 0.4);
+        if (d.onGround && dist < W2.BEAR_SLAM_REACH * T) hurtDavid(B.x);
+        for (let k = 0; k < (late ? 4 : 3); k++) fallingRocks.push({ x: d.x + (k - 1) * 2.2 * T + (Math.random() - 0.5) * T, y: -40 - k * 90, vy: 0, t: 0 });
+      }
+      if (B.t > 1.0) { B.slammed = false; setBear("rest"); }
+      break;
+    }
+    case "lunge": B.vx = B.facing * (B.t < 0.5 ? 260 : 0); if (B.t > 1.1) setBear("rest"); break;
+    case "rest": B.vx = 0; if (B.t > W2.BEAR_REST) { B.atkT = (late ? 1.2 : 1.8) + Math.random(); setBear("walk"); } break;
+    case "dazed": B.vx = 0; if (B.t > W2.BEAR_DAZED) { B.atkT = 1.5; setBear("walk"); } break;
+  }
+  if (B.state !== "charge") physics();
+  if (B.state !== "dazed" && B.state !== "turn" && d.deadT <= 0) {
+    const b = bearBox();
+    if (d.x + BODY_W / 2 > b.x0 && d.x - BODY_W / 2 < b.x1 && d.y > b.y0 && d.y - d.h < b.y1) hurtDavid(B.x);
+  }
+}
+function bearDamage(s) {   // what this stone would do right now (0 = bounces off)
+  const B = bear; if (!B.on || B.state === "defeated" || B.state === "pen") return 0;
+  if (B.state === "dazed") return s.power ? 3 : s.charged ? 2 : 1;
+  if (s.power || (s.charged && B.state === "roar")) return 2;
+  return 0;
+}
+function stoneHitsBear(s) {   // called from updateStones (main.js)
+  const B = bear; if (!B.on || B.state === "defeated") return false;
+  const b = bearBox(); if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
+  if (B.state === "pen") {
+    if (s.charged || s.power) {   // it lets go of the sheep and turns on David
+      stoneHit(s); B.sheepFreed = true; B.facing = -1; setBear("turn"); B.atkT = 2;
+      toast("It let the sheep go! Keep your distance. Hit it with a full charged stone when it sits back to roar.");
+    } else { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("The bear doesn't even notice a tap stone. Hold B until the ring turns gold."); } }
+    return true;
+  }
+  const dmg = bearDamage(s);
+  if (!dmg) { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("Stones bounce off its thick coat! Wait until it sits back to roar, then a full charged stone."); } return true; }
+  B.hp -= dmg; B.flash = 0.3;
+  if (B.state !== "dazed") { setBear("dazed"); toast(B.hp > 0 ? "It's staggered! Hit it again while it's down." : ""); }
+  for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
+  if (B.hp <= 0) {
+    setBear("defeated"); bearFinalHit(s);
+    toast("The bear is beaten! \"God is our refuge and strength, an ever-present help in trouble.\" (Psalm 46:1)");
+  } else { stoneHit(s); sfx("lion_hit", B.x, 0.9, 0.8); }
+  return true;
+}
+function bearFinalHit(s) {   // the last stone: the same freeze, flash and slow-motion as the lion (main.js finalBlow)
+  if (!finalBlow.on) {
+    finalBlow.snd = sfx(finalBlow.sound, undefined, 1);
+    if (finalBlow.snd) try { finalBlow.snd.currentTime = Math.max(0, FINAL_PEAK[finalBlow.sound] - 0.05); } catch (e) {}
+  }
+  Object.assign(finalBlow, { on: true, phase: "hit", t: 0, stone: null, flash: 1, shake: 1 });
+  sfx("lion_defeated", bear.x, 1, 0.75);
+  for (let k = 0; k < 16; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 700, vy: -Math.random() * 600, life: 0.9, color: k % 2 ? "#fff2b0" : "#ffffff" });
+}
+function watchBearFinal(s) {   // slow the world down if this stone is going to be the last one (like the lion)
+  const dmg = bearDamage(s); if (!dmg || dmg < bear.hp) return;
+  if (bear.state === "dazed" && bear.t > W2.BEAR_DAZED - TUNE.FINAL_LEAD - 0.05) return;
+  if (bear.state === "roar" && bear.t > W2.BEAR_ROAR - TUNE.FINAL_LEAD) return;
+  const b = bearBox(); let x = s.x, y = s.y, vy = s.vy;
+  const g = TUNE.STONE_GRAVITY * (s.power ? 0.08 : s.charged ? 0.45 : 1), step = 1 / 120;
+  for (let t = 0; t < TUNE.FINAL_LEAD; t += step) {
+    vy += g * step; x += s.vx * step; y += vy * step;
+    if (x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1) {
+      Object.assign(finalBlow, { on: true, phase: "fly", t: 0, stone: s });
+      finalBlow.snd = sfx(finalBlow.sound, undefined, 1);
+      if (finalBlow.snd) try { finalBlow.snd.currentTime = Math.max(0, FINAL_PEAK[finalBlow.sound] - TUNE.FINAL_LEAD / TUNE.FINAL_SLOWMO); } catch (e) {}
+      return;
+    }
+  }
+}
+function drawBear(camX) {
+  if (!bear.on || bear.alpha <= 0) return;
+  const B = bear, x = B.x - camX; if (x < -400 || x > W + 400) return;
+  if (!B.sheepFreed || B.sheepT < 2.5) {   // the pinned sheep: freed, it bolts for the pen and is gone
+    const sx = B.sheepFreed ? B.sheepX + B.sheepT * 260 : B.sheepX, a = B.sheepFreed ? Math.max(0, 1 - B.sheepT / 2.5) : 1;
+    if (B.sheepFreed) drawSprite("sheep_trot", frameOf("sheep_trot", B.sheepT), sx - camX, B.y, 1, 1, a);
+    else drawSprite("sheep_cast", frameOf("sheep_cast", B.t), sx - camX, B.y, -1);
+  }
+  let name = "bear_walk", i, filter = "";
+  switch (B.state) {
+    case "pen": name = "bear_lunge"; i = frameOf(name, B.t * 0.8); break;   // clawing at the wall
+    case "walk": i = frameOf(name, B.t); break;
+    case "turn": case "rest": i = 0; break;
+    case "tell": i = 0; filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;
+    case "charge": name = "bear_charge"; i = frameOf(name, B.t); break;
+    case "roar": name = "bear_stand_roar"; i = frameOf(name, B.t); filter = "drop-shadow(0 0 12px rgba(255,200,60,0.95))"; break;
+    case "slam": case "lunge": name = "bear_lunge"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / 0.12)); break;
+    case "dazed": case "defeated": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
+  }
+  const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
+  if (B.flash > 0) filter = "brightness(1.8)";
+  drawSprite(name, i, x + shake, B.y, B.facing, 1, B.alpha, filter);
+  for (const r of fallingRocks) { ctx.fillStyle = "#8a8378"; ctx.strokeStyle = "#4e4840"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, 16, 13, r.t * 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  if (B.state !== "pen" && B.state !== "defeated") {   // its strength, top of the screen
+    ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(W / 2 - 162, 22, 324, 22);
+    ctx.fillStyle = "#b5702e"; ctx.fillRect(W / 2 - 158, 26, 316 * Math.max(0, B.hp) / W2.BEAR_HP, 14);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center"; ctx.fillText("THE BEAR", W / 2, 38); ctx.textAlign = "left";
   }
 }
