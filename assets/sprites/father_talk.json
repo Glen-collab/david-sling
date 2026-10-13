@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 92,
+  "frame_h": 270,
+  "ms_per_frame": 167,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 51,
+  "anchor_y": 269,
+  "source": "father_talk.mp4",
+  "video_frames": [
+    138,
+    142,
+    146,
+    150,
+    154,
+    158,
+    162,
+    166,
+    170,
+    174,
+    178,
+    182
+  ]
+}

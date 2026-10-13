@@ -792,6 +792,54 @@ window.SPRITE_DATA = {
   "ay": 97,
   "align": "feet"
  },
+ "father_give": {
+  "src": "../assets/sprites/father_give.png",
+  "frames": 14,
+  "w": 123,
+  "h": 274,
+  "ms": 307,
+  "loop": false,
+  "pingpong": false,
+  "ax": 54,
+  "ay": 272,
+  "align": "feet"
+ },
+ "father_idle": {
+  "src": "../assets/sprites/father_idle.png",
+  "frames": 6,
+  "w": 84,
+  "h": 274,
+  "ms": 167,
+  "loop": false,
+  "pingpong": false,
+  "ax": 46,
+  "ay": 273,
+  "align": "feet"
+ },
+ "father_talk": {
+  "src": "../assets/sprites/father_talk.png",
+  "frames": 12,
+  "w": 92,
+  "h": 270,
+  "ms": 167,
+  "loop": true,
+  "pingpong": false,
+  "ax": 51,
+  "ay": 269,
+  "align": "feet"
+ },
+ "father_walk": {
+  "src": "../assets/sprites/father_walk.png",
+  "frames": 12,
+  "w": 150,
+  "h": 273,
+  "ms": 160,
+  "loop": true,
+  "pingpong": false,
+  "ax": 82,
+  "ay": 271,
+  "align": "feet"
+ },
  "flock_run": {
   "src": "../assets/sprites/flock_run.png",
   "frames": 12,

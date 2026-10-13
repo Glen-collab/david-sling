@@ -1,0 +1,27 @@
+{
+  "frames": 14,
+  "frame_w": 123,
+  "frame_h": 274,
+  "ms_per_frame": 307,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 54,
+  "anchor_y": 272,
+  "source": "father_give.mp4",
+  "video_frames": [
+    18,
+    26,
+    34,
+    42,
+    49,
+    57,
+    65,
+    73,
+    81,
+    89,
+    96,
+    104,
+    112,
+    120
+  ]
+}
