@@ -96,6 +96,42 @@ window.SPRITE_DATA = {
   "ay": 41,
   "align": "center"
  },
+ "boar_charge": {
+  "src": "../assets/sprites/boar_charge.png",
+  "frames": 12,
+  "w": 315,
+  "h": 158,
+  "ms": 56,
+  "loop": true,
+  "pingpong": false,
+  "ax": 173,
+  "ay": 155,
+  "align": "feet"
+ },
+ "boar_scrape": {
+  "src": "../assets/sprites/boar_scrape.png",
+  "frames": 16,
+  "w": 276,
+  "h": 155,
+  "ms": 193,
+  "loop": true,
+  "pingpong": false,
+  "ax": 122,
+  "ay": 153,
+  "align": "feet"
+ },
+ "boar_stand": {
+  "src": "../assets/sprites/boar_stand.png",
+  "frames": 8,
+  "w": 265,
+  "h": 158,
+  "ms": 161,
+  "loop": true,
+  "pingpong": true,
+  "ax": 140,
+  "ay": 155,
+  "align": "feet"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,

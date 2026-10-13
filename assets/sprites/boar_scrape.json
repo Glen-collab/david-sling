@@ -1,0 +1,30 @@
+{
+  "frames": 16,
+  "frame_w": 276,
+  "frame_h": 155,
+  "ms_per_frame": 193,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 122,
+  "anchor_y": 153,
+  "source": "boar_scrape.mp4",
+  "video_frames": [
+    72,
+    77,
+    82,
+    87,
+    91,
+    96,
+    101,
+    106,
+    111,
+    116,
+    121,
+    126,
+    130,
+    135,
+    140,
+    145
+  ],
+  "pingpong": false
+}
