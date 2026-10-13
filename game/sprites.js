@@ -108,6 +108,30 @@ window.SPRITE_DATA = {
   "ay": 192,
   "align": "feet"
  },
+ "bear_throw": {
+  "src": "../assets/sprites/bear_throw.png",
+  "frames": 16,
+  "w": 205,
+  "h": 204,
+  "ms": 90,
+  "loop": false,
+  "pingpong": false,
+  "ax": 130,
+  "ay": 201,
+  "align": "feet"
+ },
+ "bear_throw_back": {
+  "src": "../assets/sprites/bear_throw_back.png",
+  "frames": 14,
+  "w": 283,
+  "h": 220,
+  "ms": 146,
+  "loop": false,
+  "pingpong": false,
+  "ax": 130,
+  "ay": 217,
+  "align": "feet"
+ },
  "bear_walk": {
   "src": "../assets/sprites/bear_walk.png",
   "frames": 12,

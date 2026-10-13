@@ -696,9 +696,11 @@ Object.assign(W2, {
   BEAR_TURN: 0.9,        // slow to turn round
   BEAR_DAZED: 3.0, BEAR_REST: 1.2,
   BEAR_SLAM_REACH: 9,    // tiles: the slam shakes the ground this far; be in the air
+  BEAR_THROW_SPEED: 0.9, // how fast the throws play (1 = the clip's own speed)
+  BOULDER_ROLL: 1.6,     // seconds a thrown boulder rolls along the ground after it lands: jump it or roll under it
 });
 Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
-  bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE,
+  bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE, bear_throw: W2.BEAR_SIZE, bear_throw_back: W2.BEAR_SIZE,
   bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
 CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
 const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera)
@@ -774,6 +776,16 @@ function updateBear(dt) {
   if (!bear.on) return;
   const B = bear, d = david; B.t += dt; B.flash = Math.max(0, B.flash - dt);
   for (const r of fallingRocks) { r.vy += 1500 * dt; r.y += r.vy * dt; r.t += dt;
+    if (r.kind === "boulder") {   // thrown: arcs over (crashing through the ledges), bounces once, rolls on along the ground
+      r.x += r.vx * dt;
+      const c = Math.floor(r.x / T), row = Math.floor(r.y / T);
+      if (r.vy > 0 && isSolid(c, row) && r.y - r.vy * dt <= row * T + 2) { r.y = row * T; r.bounced = (r.bounced || 0) + 1; r.vy = r.bounced === 1 ? -320 : 0; r.vx *= 0.75; r.rollT = r.rollT || 0; w2Shake.v = Math.max(w2Shake.v, 0.4); }
+      if (isSolid(Math.floor((r.x + Math.sign(r.vx) * r.r) / T), Math.floor((r.y - r.r) / T))) r.vx = 0;
+      if (r.bounced >= 2) r.rollT += dt;
+      if (!r.hit && Math.abs(r.x - d.x) < r.r + 14 && r.y - r.r * 2 < d.y && r.y > d.y - d.h) { r.hit = true; hurtDavid(r.x); }
+      if (r.rollT > W2.BOULDER_ROLL || r.y > ROWS * T + 100) r.landed = true;
+      continue;
+    }
     if (!r.hit && Math.abs(r.x - d.x) < 26 && r.y > d.y - d.h && r.y < d.y + 10) { r.hit = true; hurtDavid(r.x); }
     if (r.y > GR * T && !r.landed) { r.landed = true; for (let k = 0; k < 6; k++) bits.push({ x: r.x, y: GR * T - 4, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 250, life: 0.5, color: "#8a8378" }); } }
   for (let i = fallingRocks.length - 1; i >= 0; i--) if (fallingRocks[i].landed) fallingRocks.splice(i, 1);
@@ -786,17 +798,20 @@ function updateBear(dt) {
     if (!B.toldPen && d.x > bearPiece.arena * T) { B.toldPen = true; helpT = 0; toast("The bear has a sheep pinned at the pen wall! Tap stones won't turn it. A full charged stone will."); }
     return;
   }
-  B.atkT -= dt;
+  B.atkT -= dt; B.backCool = (B.backCool || 0) - dt;
   switch (B.state) {
     case "turn": B.vx = 0; if (B.t > W2.BEAR_TURN * (late ? 0.7 : 1)) { B.facing = Math.sign(dx) || B.facing; setBear("walk"); } break;
     case "walk": {
-      if (Math.sign(dx) !== B.facing && dist > 30) { setBear("turn"); break; }   // slow to turn round
+      if (Math.sign(dx) !== B.facing && dist > 30) {   // David got behind it (jumped over): slow to turn... or it grabs a rock and hurls it back over its shoulder
+        setBear(dist < 9 * T && B.backCool <= 0 && Math.random() < 0.6 ? "throwBack" : "turn"); B.backCool = 5; break;
+      }
       B.vx = B.facing * W2.BEAR_WALK * (late ? 1.25 : 1);
       if (B.atkT <= 0) {
         B.vx = 0;
-        if (dist < 2.6 * T) setBear(Math.random() < 0.6 ? "lunge" : "roar");   // up close: a swipe, or it rears up to roar
-        else if (dist < 13 * T && Math.random() < 0.55) { setBear("tell"); }
-        else setBear("roar");
+        const r = Math.random();
+        if (dist < 2.6 * T) setBear(r < 0.6 ? "lunge" : "roar");   // up close: a swipe, or it rears up to roar
+        else if (dist < 13 * T) setBear(r < 0.4 ? "tell" : r < 0.7 ? "roar" : "throw");
+        else setBear(r < 0.5 ? "throw" : "roar");   // far off: it hurls a boulder at you
       }
       break;
     }
@@ -821,6 +836,20 @@ function updateBear(dt) {
       break;
     }
     case "lunge": B.vx = B.facing * (B.t < 0.5 ? 260 : 0); if (B.t > 1.1) setBear("rest"); break;
+    case "throw": case "throwBack": {   // wind up with a boulder, then let it fly (back: over its shoulder, and it ends up facing you)
+      B.vx = 0;
+      const nm = B.state === "throw" ? "bear_throw" : "bear_throw_back", s = SPR[nm], len = s.frames * s.ms / 1000 / W2.BEAR_THROW_SPEED;
+      const rel = B.state === "throw" ? 10 : 9, f = Math.floor(B.t / len * s.frames);
+      if (!B.thrown && f >= rel) {
+        B.thrown = true;
+        const dir = B.state === "throw" ? B.facing : -B.facing, sx = B.x + dir * 70, sy = B.y - 150;
+        const flight = Math.max(0.6, Math.min(1.2, Math.abs(d.x - sx) / 520));
+        fallingRocks.push({ kind: "boulder", x: sx, y: sy, vx: (d.x - sx) / flight, vy: (d.y - 40 - sy) / flight - 0.5 * 1500 * flight, t: 0, r: 26 });
+        sfx("sling_throw_quick", B.x, 0.8, 0.5);
+      }
+      if (B.t >= len) { B.thrown = false; if (B.state === "throwBack") B.facing = -B.facing; setBear("rest"); }
+      break;
+    }
     case "rest": B.vx = 0; if (B.t > W2.BEAR_REST) { B.atkT = (late ? 1.2 : 1.8) + Math.random(); setBear("walk"); } break;
     case "dazed": B.vx = 0; if (B.t > W2.BEAR_DAZED) { B.atkT = 1.5; setBear("walk"); } break;
   }
@@ -882,6 +911,13 @@ function watchBearFinal(s) {   // slow the world down if this stone is going to 
     }
   }
 }
+function drawBoulder(x, y, r, spin) {   // a rough grey boulder (it rolls: spin follows how far it's gone)
+  ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+  ctx.fillStyle = "#857d71"; ctx.strokeStyle = "#4a443c"; ctx.lineWidth = 3;
+  ctx.beginPath(); for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, rr = r * (0.86 + 0.14 * Math.sin(k * 2.3)); ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.beginPath(); ctx.ellipse(-r * 0.3, -r * 0.35, r * 0.35, r * 0.2, -0.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
 function drawBear(camX) {
   if (!bear.on || bear.alpha <= 0) return;
   const B = bear, x = B.x - camX; if (x < -400 || x > W + 400) return;
@@ -900,12 +936,18 @@ function drawBear(camX) {
     case "roar": name = "bear_rear_roar"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / (W2.BEAR_ROAR * (bear.hp <= W2.BEAR_HP / 2 ? 0.8 : 1)) * SPR[name].frames)); filter = "drop-shadow(0 0 12px rgba(255,200,60,0.95))"; break;
     case "slam": name = "bear_rear_slam"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / W2.BEAR_SLAM_DROP * (SPR[name].frames - 1))); break;
     case "lunge": name = "bear_lunge"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / 0.12)); break;
+    case "throw": case "throwBack": name = B.state === "throw" ? "bear_throw" : "bear_throw_back";
+      i = Math.min(SPR[name].frames - 1, Math.floor(B.t * W2.BEAR_THROW_SPEED * 1000 / SPR[name].ms)); break;
     case "dazed": case "defeated": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
   }
   const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
   if (B.flash > 0) filter = "brightness(1.8)";
   drawSprite(name, i, x + shake, B.y, B.facing, 1, B.alpha, filter);
-  for (const r of fallingRocks) { ctx.fillStyle = "#8a8378"; ctx.strokeStyle = "#4e4840"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, 16, 13, r.t * 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  if ((B.state === "throw" || B.state === "throwBack") && !B.thrown && i >= 3) drawBoulder(x + B.facing * 40, B.y - 165, 24, 0);   // up in its paws
+  for (const r of fallingRocks) {
+    if (r.kind === "boulder") { drawBoulder(r.x - camX, r.y - r.r, r.r, r.x / r.r); continue; }
+    ctx.fillStyle = "#8a8378"; ctx.strokeStyle = "#4e4840"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(r.x - camX, r.y, 16, 13, r.t * 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
   if (B.state !== "pen" && B.state !== "defeated") {   // its strength, top of the screen
     ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(W / 2 - 162, 22, 324, 22);
     ctx.fillStyle = "#b5702e"; ctx.fillRect(W / 2 - 158, 26, 316 * Math.max(0, B.hp) / W2.BEAR_HP, 14);
