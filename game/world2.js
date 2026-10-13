@@ -1209,13 +1209,20 @@ const ending = {
       ctx.fillStyle = `rgba(255,250,225,${0.35 + 0.6 * tw})`; ctx.fillRect(sx, sy, k % 7 ? 2 : 3, k % 7 ? 2 : 3);
     }
     // the pen: sheep inside, the stone wall David sits on
-    for (let x = 50; x <= 530; x += 96) drawItem("stone_wall", x, gy - 14, 0.68);   // the back wall of the pen
+    {   // the back wall of the pen (Glen's pieces): David sits on the pillar at the end
+      const s = 0.2;
+      for (const p of penWallLayout(40, 5, s)) {
+        if (p.flip) { ctx.save(); ctx.translate(p.cx, 0); ctx.scale(-1, 1); drawItem(p.name, 0, gy - 8, s); ctx.restore(); }
+        else drawItem(p.name, p.cx, gy - 8, s);
+        if (p.end) { this.seatX = p.cx; this.seatY = gy - 8 - WALL_PIECES[p.name][1] * s * 0.86; }
+      }
+    }
     const sheep = [["sheep_graze", 130, 1], ["sheepblack_graze", 330, -1], ["sheep_stand", 420, 1], ["lamb_graze", 250, 1], ["sheep_graze", 80, -1], ["sheep_stand", 190, -1]];
     for (const [nm, x, f] of sheep) if (SPR[nm]) drawSprite(nm, frameOf(nm, now + x), x, gy, f);
     // David on the wall: sitting with the harp, playing at the end
     let i = 7;
     if (this.step >= 8) { const k = Math.floor(now * 1000 / TUNE.HARP_LOOP_MS) % 6; i = 8 + (k < 4 ? k : 6 - k); }
-    drawSprite("david_play_harp", i, 560, gy - 64, -1);   // sitting on the end of the wall
+    drawSprite("david_play_harp", i, this.seatX || 494, (this.seatY || gy - 74) + 14, -1);   // sitting on the pillar at the end of the wall
     if (this.step >= 1 && this.boyX < W + 50) {   // the boy from Tekoa
       const walking = this.step === 1, talking = dialog.t > 0 && dialog.who === "The boy";
       const nm = walking ? "boy_walk" : talking ? "boy_talk" : "boy_idle";
@@ -1232,7 +1239,7 @@ const ending = {
       drawSprite(nm, frameOf(nm, now), this.hananX, gy, -1);
     }
     if (this.pouch) {   // the leather sling pouch, from the father's hands to David's
-      const sx = this.fatherX() - 40, k = Math.min(1, this.pouch.t / 1.2), px = sx + (590 - sx) * k, py = gy - 110 - Math.sin(k * Math.PI) * 70 + k * 10;
+      const sx = this.fatherX() - 40, k = Math.min(1, this.pouch.t / 1.2), px = sx + ((this.seatX || 494) + 30 - sx) * k, py = gy - 110 - Math.sin(k * Math.PI) * 70 + k * 10;
       if (k < 1 || this.step === 4) drawPouch(px, py, this.step === 4 && k >= 1 ? 0.5 + 0.5 * Math.sin(now * 4) : 0);
       if (this.step === 4 && this.pouch && this.pouch.t > 1.2) {
         ctx.save(); ctx.globalAlpha = Math.min(1, (this.pouch.t - 1.2) * 2);

@@ -417,9 +417,41 @@ const special = (c, r) => specials.push({ x: c * T + T / 2, y: (r + 1) * T, take
 const lost = [];
 const lostSheep = (kind, c, r, how = "graze") => lost.push({ kind, how, one: how === "one", hx: c * T + T / 2, hy: (r + 1) * T });
 // the end of every stage: the family sheepfold, with the gatepost at column p (the fold's walls and the end of the level follow it)
+// Glen's dry-stone wall pieces (assets/items), laid edge to edge: [width, height] of each picture, for spacing them
+const WALL_PIECES = {
+  fold_wall_end_l: [374, 216], fold_wall_mid_1: [334, 218], fold_wall_mid_2: [319, 220], fold_wall_post: [295, 294],
+  fold_wall_mid_3: [335, 236], fold_wall_end_r: [349, 218],
+  pen_pillar_l: [221, 402], pen_wall_1: [525, 390], pen_wall_2: [504, 392], pen_pillar_r: [224, 396], pen_post_tall: [273, 494], pen_wall_low: [251, 200],
+};
+// a run of wall pieces from x0 (px), each scaled by s, overlapping a little where the ferns meet; returns where it ends
+const wallRow = (x0, names, s, r = 16, layer = "back") => {
+  let x = x0;
+  for (const n of names) { const w = WALL_PIECES[n][0] * s; deco(n, (x + w / 2 - T / 2) / T, r, s / 0.85, layer); x += w * 0.8; }   // (the ferns at the ends overlap)
+  return x;
+};
+// A seamless dry-stone wall (Glen's idea): the same wall piece, every other one mirrored, so each join meets its own
+// mirror image and the stones line up; a pillar at each end. Stone edges measured in the pictures (not their ferns).
+// Returns the pieces to draw: { name, cx (centre, px), flip, w (px), h (px) }, pillars last (they sit in front).
+const PEN_STONE = { pen_wall_1: [55, 484], pen_pillar_l: [52, 201], pen_pillar_r: [32, 149] };
+function penWallLayout(x0, n, s) {
+  const out = [], [W0] = WALL_PIECES.pen_wall_1, [L, R] = PEN_STONE.pen_wall_1;
+  let x = x0;   // where the stone of the next piece starts
+  for (let k = 0; k < n; k++) {
+    const flip = k % 2 === 1, l = flip ? W0 - R : L, r = flip ? W0 - L : R;   // a mirrored piece has its stone edges swapped
+    out.push({ name: "pen_wall_1", cx: x - l * s + W0 * s / 2, flip, w: W0 * s });
+    x += (r - l) * s - 1;
+  }
+  const pl = PEN_STONE.pen_pillar_l, pr = PEN_STONE.pen_pillar_r, wl = WALL_PIECES.pen_pillar_l[0], wr = WALL_PIECES.pen_pillar_r[0];
+  out.push({ name: "pen_pillar_l", cx: x0 + 14 * s - pl[1] * s + wl * s / 2, flip: false, w: wl * s });
+  out.push({ name: "pen_pillar_r", cx: x - 14 * s - pr[0] * s + wr * s / 2, flip: false, w: wr * s, end: true });
+  return out;
+}
+const penWall = (x0, n, s, r = 16, layer = "back") => {
+  for (const p of penWallLayout(x0, n, s)) { deco(p.name, (p.cx - T / 2) / T, r, s / 0.85, layer); decor[decor.length - 1].flip = p.flip; }
+};
 const sheepfold = p => {
   ground(p - 12, MAIN_COLS - 1);
-  for (let c = p + 4; c <= p + 14; c += 3.4) deco("stone_wall", c, 16, 1.15, "back");
+  penWall((p + 3.3) * T, 3, 0.26);   // Glen's dry-stone wall, seamless, a pillar at each end
   fold = { postC: p, endC: p + 15 };
   rock(p + 16, 4, MAIN_COLS - p - 16, 13);
 };
@@ -812,7 +844,7 @@ if (LEVEL_NAME === "test") {
   // the arena in front of the pen: ledges to get above a charge
   plat(201, 13, 5); plat(213, 13, 5); plat(207, 9, 4);
   setPiece("bear", 226, GR - 1, { arena: 198 });               // at the pen wall, a sheep pinned under its paw
-  deco("stone_wall", 230, 16, 1.15, "back");
+  wallRow(228.5 * T, ["pen_wall_2"], 0.27);                       // the pen's wall, cracked where the bear's been at it
   sheepfold(238);
 }
 
@@ -2900,6 +2932,7 @@ function drawDecor(camX, layer) {
   for (const d of decor) if (d.layer === layer && d.x - camX > -300 && d.x - camX < W + 300)
   {
     const x = d.x - camX + Math.sin(performance.now() / 25) * 5 * d.shakeT, y = d.y + 6 + (TUNE.DECO_DROP[d.name] || 0), tilt = TUNE.DECO_TILT[d.name] || 0;
+    if (d.flip) { ctx.save(); ctx.translate(x, 0); ctx.scale(-1, 1); drawItem(d.name, 0, y, d.size * 0.85); ctx.restore(); continue; }   // mirrored (seamless walls)
     if (!tilt) { drawItem(d.name, x, y, d.size * 0.85); continue; }
     ctx.save(); ctx.translate(x, y); ctx.rotate(tilt * Math.PI / 180); drawItem(d.name, 0, 0, d.size * 0.85); ctx.restore();
   }
