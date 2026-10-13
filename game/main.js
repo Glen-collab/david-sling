@@ -1080,8 +1080,12 @@ for (const n of ["topsoil", "sediment", "limestone", "limestone_top", "ledge_lef
                  "base_left", "base_mid", "base_right",
                  "wall_left", "wall_mid", "wall_right", "pit_left", "pit_right"]) {
   total++;
-  const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
-  img.src = `../assets/terrain/${n}.png?v=${window.BUILD || 0}`; TER[n] = img;
+  const img = new Image(); img.onload = () => { loaded++; };
+  // a stage's own ground set (STAGE_INFO.ter, e.g. "w2f" = World 2's forest) in its own folder; any piece it doesn't
+  // have yet falls back to World 1's. (?ter=w2f in the address tries a set on any stage.)
+  const dir = new URLSearchParams(location.search).get("ter") || STAGE_INFO.ter;
+  img.onerror = () => { if (dir && !img._fallback) { img._fallback = true; img.src = `../assets/terrain/${n}.png?v=${window.BUILD || 0}`; } else loaded++; };
+  img.src = `../assets/terrain/${dir ? dir + "/" : ""}${n}.png?v=${window.BUILD || 0}`; TER[n] = img;
 }
 const terPatterns = {};
 function terPattern(name, scale) {   // a repeating fill, cached, anchored to the level (not the screen)
