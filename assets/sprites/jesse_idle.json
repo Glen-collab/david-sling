@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 153,
+  "frame_h": 308,
+  "ms_per_frame": 156,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 102,
+  "anchor_y": 305,
+  "source": "jesse_idle.mov",
+  "video_frames": [
+    13,
+    17,
+    21,
+    24,
+    28,
+    32,
+    35,
+    39,
+    43,
+    47,
+    51,
+    54
+  ]
+}

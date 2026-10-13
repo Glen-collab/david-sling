@@ -768,6 +768,30 @@ window.SPRITE_DATA = {
   "ay": 120,
   "align": "feet"
  },
+ "jesse_cheer": {
+  "src": "../assets/sprites/jesse_cheer.png",
+  "frames": 30,
+  "w": 199,
+  "h": 309,
+  "ms": 201,
+  "loop": false,
+  "pingpong": false,
+  "ax": 85,
+  "ay": 306,
+  "align": "feet"
+ },
+ "jesse_idle": {
+  "src": "../assets/sprites/jesse_idle.png",
+  "frames": 12,
+  "w": 153,
+  "h": 308,
+  "ms": 156,
+  "loop": true,
+  "pingpong": false,
+  "ax": 102,
+  "ay": 305,
+  "align": "feet"
+ },
  "lamb_bound": {
   "src": "../assets/sprites/lamb_bound.png",
   "frames": 12,

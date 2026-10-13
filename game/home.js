@@ -17,6 +17,7 @@ const HOME = {
   THROW_FROM: 0.30,               // where David stands to throw at it (side on, like facing Goliath)
   STONE_FLIGHT: 0.42,             // seconds from the sling to the wall
   MISS_BY: 110,                   // how far off a too-slow throw lands (px)
+  JESSE_SIZE: 1.2,                // Jesse next to David (a grown man stands a head taller)
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -70,7 +71,7 @@ const Courtyard = {
   active: false,
   open(world = 1) {
     if (!this.img) { this.img = new Image(); this.img.src = `../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`; }
-    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0;
+    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null;
     this.x = 0.82; this.facing = -1; this.walkT = 0; this.mode = null; this.msg = null;
     this.prog = loadProgress();
     // a world beaten since Jesse last spoke to you? he's waiting with its piece
@@ -154,6 +155,7 @@ const Courtyard = {
         if (s.hit && typeof chime === "function") { chime(5); setTimeout(() => chime(9), 140); }
         for (let k = 0; k < 14; k++) this.bits.push({ x: s.x1, y: s.y1, vx: (Math.random() - 0.5) * 340, vy: -Math.random() * 300, life: 0.7, color: k % 2 ? "#e9dcc4" : "#b89a72" });
         this.result = { ok: s.hit, t: s.hit ? 2.2 : 1.8 };
+        if (s.hit) this.cheerAt = this.t;   // Jesse points at it and laughs
       }
     }
     if (s.landed) s.ringT += dt;
@@ -219,6 +221,10 @@ const Courtyard = {
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);
+    // Jesse, just right of the target, facing David: idle, or pointing and laughing after a hit (or a new piece)
+    const jx = HOME_SPOTS.find(s => s.id === "jesse").x * SW - cam, ct = this.cheerAt === null ? 1e9 : this.t - this.cheerAt;
+    if (!animDone("jesse_cheer", ct)) drawSprite("jesse_cheer", frameOf("jesse_cheer", ct), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
+    else drawSprite("jesse_idle", frameOf("jesse_idle", this.t), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
     drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), dx - this.facing * 70, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
