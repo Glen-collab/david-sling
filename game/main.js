@@ -862,7 +862,7 @@ function updateDavid(dt) {
   if (d.harp && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }
 
   // --- pick up / put down the lamb (Down, standing still, next to it)
-  if (pressed("down") && d.onGround && !busy && !d.harp && Math.abs(d.vx) < 40) {
+  if (pressed("down") && d.onGround && !busy && !d.harp && d.throwT < 0 && Math.abs(d.vx) < 40) {   // (not mid-throw: Down while charging is a crouch)
     if (d.carrying) { setState("putdown"); }
     else if (!lamb.stolen && Math.abs(lamb.x - d.x) < 95 && Math.abs(lamb.y - d.y) < 70) { setState("pickup"); d.vx = 0; lamb.carried = true; d.facing = Math.sign(lamb.x - d.x) || d.facing; }
   }
@@ -910,6 +910,8 @@ function updateDavid(dt) {
     if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
+  // a throw that hasn't left his hand is dropped if he picks up the lamb or the harp (or it would hang there, whirling, forever)
+  if ((d.carrying || d.harp) && d.throwT >= 0 && !d.thrown) { d.charging = false; d.throwT = -1; d.runThrow = false; }
   if (d.throwT >= 0) {
     if (!d.charging) d.throwT += dt;
     const dur = d.runThrow ? TUNE.RUN_THROW_TIME : TUNE.THROW_TIME;
@@ -2340,15 +2342,20 @@ function drawFinishBanner() {
   if (finish.phase !== "clear") return;
   const a = Math.min(1, finish.t * 2);
   ctx.save(); ctx.globalAlpha = a;
-  ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 330, 150, 660, 250, 18); ctx.fill();
+  const olive = !finish.caught ? "Golden olive: missed" : finish.life ? `Golden olive caught at the top: +${finish.bonus} olives. Third top catch: +1 life!` : finish.gold ? `Golden olive caught at the top: +${finish.bonus} olives (${gateTops} of ${TUNE.GATE_TOPS_FOR_LIFE} for a life)` : `Golden olive: +${finish.bonus} olives`;
+  const next = `Next time: catch it at the very top for 25 (every ${TUNE.GATE_TOPS_FOR_LIFE} top catches = +1 life)`;
+  ctx.font = "24px sans-serif"; let bw = ctx.measureText(olive).width;
+  ctx.font = "18px sans-serif"; if (!finish.gold) bw = Math.max(bw, ctx.measureText(next).width);
+  bw = Math.min(W - 40, Math.max(660, bw + 70));   // wide enough for the longest line
+  ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, 150, bw, 250, 18); ctx.fill();
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
   ctx.fillText("Stage " + LEVEL_STAGE + " clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
   ctx.fillText(`Lost sheep found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
   hudIcon("sheep", W / 2 - 200, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
-  ctx.fillText(!finish.caught ? "Golden olive: missed" : finish.life ? `Golden olive caught at the top: +${finish.bonus} olives. Third top catch: +1 life!` : finish.gold ? `Golden olive caught at the top: +${finish.bonus} olives (${gateTops} of ${TUNE.GATE_TOPS_FOR_LIFE} for a life)` : `Golden olive: +${finish.bonus} olives`, W / 2, 330);
-  if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(`Next time: catch it at the very top for 25 (every ${TUNE.GATE_TOPS_FOR_LIFE} top catches = +1 life)`, W / 2, 352); }
+  ctx.fillText(olive, W / 2, 330);
+  if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(next, W / 2, 352); }
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
   if (finish.t > 1) ctx.fillText("Press A to write in the Journal", W / 2, 385);
   ctx.restore();
