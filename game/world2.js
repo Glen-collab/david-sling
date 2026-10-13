@@ -805,18 +805,19 @@ function updateBear(dt) {
   if (B.state === "defeated") { B.alpha = Math.max(0, B.alpha - dt * 0.4); return; }
   const dx = d.x - B.x, dist = Math.abs(dx), late = B.hp <= W2.BEAR_HP / 2;   // the last half: quicker
   const physics = () => { B.vy = Math.min(TUNE.MAX_FALL, B.vy + TUNE.GRAVITY * dt); collideBody(B, 120, 90, dt); };
-  if (B.state === "pen") {   // clawing at the pen wall, a sheep pinned under its paw
+  if (B.state === "pen") {   // clawing at the pen wall, a sheep pinned under its paw. Like the lion with the lamb: it
+    B.vx = 0; physics();         // notices David coming, turns, growls, lets the sheep go, and comes for him
+    if (d.x > bearPiece.arena * T && d.deadT <= 0 && (dist < 14 * T || (B.penT = (B.penT || 0) + dt) > 1.2)) {
+      B.facing = Math.sign(dx) || -1; setBear("notice"); helpT = 0;
+      toast("The bear! It's seen you.");
+    }
+    return;
+  }
+  if (B.state === "notice") {   // head down, growling at David; then it lets go of the sheep and comes on
     B.vx = 0; physics();
-    if (d.x > bearPiece.arena * T && d.deadT <= 0) {
-      B.penT = (B.penT || 0) + dt;
-      if (!B.toldPen || B.penT > 9) {   // (and again every so often, in case it was missed)
-        B.toldPen = true; B.penT = 0; helpT = 0;
-        toast("The bear has a sheep pinned at the pen wall! Hold B until the ring turns gold, then let go: a full charged stone to its back will turn it.");
-      }
-      if (dist < 3.5 * T) {   // too close: it lets the sheep go and turns on David anyway
-        B.sheepFreed = true; B.facing = Math.sign(dx) || -1; setBear("turn"); B.atkT = 1.5;
-        toast("Too close! It let the sheep go, and now it's coming for you. Keep your distance!");
-      }
+    if (B.t > 1.3) {
+      B.sheepFreed = true; B.atkT = 1.6; setBear("walk");
+      toast("It let the sheep go, and it's coming for you! Keep your distance. When it rears up and roars: a full charged stone.");
     }
     return;
   }
@@ -957,6 +958,7 @@ function drawBear(camX) {
   }
   let name = "bear_walk", i, filter = "";
   switch (B.state) {
+    case "notice": name = "bear_growl"; i = frameOf(name, B.t * 1.6); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;
     case "pen": { name = "bear_lunge"; const n = SPR[name].frames, k = Math.floor(B.t * 1000 / SPR[name].ms * 0.8) % (2 * n - 2); i = k < n ? k : 2 * n - 2 - k; break; }   // clawing at the wall, over and over
     case "walk": i = frameOf(name, B.t); break;
     case "turn": case "rest": i = 0; break;
