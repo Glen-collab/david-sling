@@ -32,16 +32,17 @@ const MAP_WORLDS = {
     ],
     cairn: { x: 700, y: 352 },   // where the stones of remembrance stack up when all 12 are found
   },
-  // World 2: a STAND-IN until Glen paints the World 2 map: his general World 2 background, stops placed across it
+  // World 2: Glen's painting of the wilderness (2048 x 1152): the summer camp bottom-left, the oak woods with Hanan's
+  // campfire, the dry riverbed, Tekoa on its hill, the cliffs and the spring, and the bear's ravine bottom-right.
   2: {
-    name: "The Wilderness", src: "../assets/backgrounds/w2_far.jpg",
-    david: { far: 0.6, near: 0.85, y0: 300, y1: 760 },
+    name: "The Wilderness", src: "../assets/maps/world2_map.jpg",
+    david: { far: 0.6, near: 0.95, y0: 300, y1: 1050 },
     stops: [
-      { id: "home", label: "Jesse's house", x: 140, y: 560 },   // home is still Jesse's courtyard (the tithe, the throw)
-      { id: "2-1", label: "The Forest Trail", x: 330, y: 520, trail: [[200, 575], [270, 545]] },
-      { id: "2-2", label: "The Dry Riverbed", x: 600, y: 570, trail: [[420, 530], [520, 570]] },
-      { id: "2-3", label: "The High Cliffs", x: 880, y: 500, trail: [[700, 570], [800, 530]] },
-      { id: "2-4", label: "The Bear's Ravine", x: 1060, y: 560, trail: [[960, 500], [1010, 540]] },
+      { id: "home", label: "Jesse's house", x: 350, y: 990 },   // the summer camp (home is still Jesse's courtyard)
+      { id: "2-1", label: "The Forest Trail", x: 540, y: 790, trail: [[440, 960], [500, 900], [500, 840]] },
+      { id: "2-2", label: "The Dry Riverbed", x: 900, y: 560, trail: [[520, 700], [600, 600], [720, 560], [800, 560]] },
+      { id: "2-3", label: "The High Cliffs", x: 1290, y: 560, trail: [[980, 640], [1100, 690], [1230, 640]] },
+      { id: "2-4", label: "The Bear's Ravine", x: 1500, y: 950, trail: [[1330, 680], [1380, 800], [1440, 900]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,

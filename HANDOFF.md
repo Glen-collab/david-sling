@@ -82,7 +82,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 - **The ram's charge** clip (it uses its walk, sped up).
 - **World 2 (started 2026-10-13):** `game/world2.js` (loaded from world1.js, not index.html, so a cached index.html can't miss it) has the wild boar (scrape = the warning, then a straight charge; tap stones bounce, a full charged stone stuns it and it runs off), deadfalls (material 8, `deadfall()` in main.js: piled logs too tall to jump, only a charged stone breaks them) and Hanan sitting at his campfires (`hanan_sit`).
   - **2-1 The Forest Trail is built** (main.js, `LEVEL_NAME === "2-1"`): Abinadab's two lines, Hanan's fire teaches the charged sling right before the first deadfall, three boars, branches up to a ledge lamb, hornets by a honeybee hive, a second deadfall under a rock overhang, The One at the top of a treetop climb. Ground set `assets/terrain/w2f` (forest), background `w2_1`.
-  - **The World 2 map is a STAND-IN** (map.js `MAP_WORLDS[2]` on the old general World 2 background) until Glen paints one. Home is still Jesse's courtyard.
+  - **The World 2 map** is Glen's painting (`assets/maps/world2_map.jpg`): camp, woods + campfire, wadi, Tekoa, cliffs + spring, the bear's ravine and pen. Home is still Jesse's courtyard.
   - **No Journal pages for World 2 yet** (locked text needs Glen): clearing 2-1 goes straight back to the map.
   - Still to build: 2-2 (flood, the boy from Tekoa, the donkey), 2-3 (cliffs, ibex), 2-4 (ravine, wolves, the bear). Sandstone ground set `w2s` is ready for 2-2 and 2-3; backgrounds `w2_2`..`w2_4` are in.
 - **Music:** "Hush Little Seed" (Glen's harp, first 23 s, `assets/audio/title_loop.mp3`) plays on the title and the maps; full song in `david-sling-art`.
