@@ -248,7 +248,7 @@ const WorldMap = {
     const size = y => DV.far + (DV.near - DV.far) * Math.max(0, Math.min(1, (y - DV.y0) / (DV.y1 - DV.y0)));
     const moving = this.walkT > 0, away = moving && this.dirY < -Math.abs(this.dirX) * 0.6;   // walking up into the picture: his back to us
     const [lx, ly] = P(lp.x, lp.y), [dx, dy] = P(dp.x, dp.y);
-    const drawLambTok = () => drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), lx, ly, this.lambFacing, size(lp.y) * 1.35, ctx.globalAlpha);
+    const drawLambTok = () => drawSprite("lamb_run", moving ? frameOf("lamb_run", this.t) : 2, lx, ly, this.lambFacing, size(lp.y) * 1.35, ctx.globalAlpha);
     const drawDavidTok = () => {
       ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.ellipse(dx, dy, 18 * size(dp.y), 5 * size(dp.y), 0, 0, Math.PI * 2); ctx.fill();
       const name = !moving ? "david_idle" : away ? "david_walk_away" : "david_walk";

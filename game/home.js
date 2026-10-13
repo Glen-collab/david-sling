@@ -242,7 +242,8 @@ const Courtyard = {
     else drawSprite("trader_idle", frameOf("trader_idle", this.t), tx, floor, -1, tsz, ctx.globalAlpha);
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
-    drawSprite(moving ? "lamb_run" : "lamb_stand", frameOf(moving ? "lamb_run" : "lamb_stand", this.t), dx - this.facing * 70, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
+    drawSprite("lamb_run", moving ? frameOf("lamb_run", this.t) : 2,   // standing: a still of his own lamb (lamb_stand is a different, greyer lamb)
+      dx - this.facing * 70, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
     const sl = this.mode === "practice" && this.sling;
     if (sl && sl.t < TUNE.THROW_TIME) drawSprite("david_sling_throw", Math.min(11, Math.floor(sl.t / TUNE.THROW_TIME * 12)), dx, floor, 1, HOME.SIZE, ctx.globalAlpha);
     else drawSprite(moving ? "david_walk" : "david_idle", frameOf(moving ? "david_walk" : "david_idle", moving ? this.walkT : this.t), dx, floor, this.facing, HOME.SIZE, ctx.globalAlpha);
