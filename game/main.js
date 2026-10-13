@@ -541,6 +541,7 @@ if (LEVEL_NAME === "test") {
   campfire(118, GR - 1, "The shepherd girl", "My grandmother says these rocks were here before anyone. Storms come and go, and they don't move. She says God is like that.");
   rock(124, 14, 3, 3); rock(128, 11, 3, 6); plat(133, 8, 3); lostSheep("lamb", 134, 7, "ledge");
   raven(130, 4);
+  rock(134, 14, 2, 3);                                         // a step up, so the big rock can be climbed from the ground too
   rock(138, 10, 13, 7); oliveRow(139, 9, 10);                   // a big rock to cross...
   for (let x = 139; x <= 146; x++) for (let r = 13; r <= 16; r++) solid[r][x] = 0;   // ...with a hollow inside it
   codeWall(138, 13, 1, 4, 2);                                  // sealed with a carving: the first two pieces of the throw (after World 2)
