@@ -2475,7 +2475,7 @@ function drawFinishBanner() {
   ctx.fillText(olive, W / 2, 330);
   if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(next, W / 2, 352); }
   ctx.fillStyle = "#ccc"; ctx.font = "18px sans-serif";
-  if (finish.t > 1) ctx.fillText("Press A to write in the Journal", W / 2, 385);
+  if (finish.t > 1) ctx.fillText(typeof JOURNAL_PAGES !== "undefined" && JOURNAL_PAGES[WORLD] ? "Press A to write in the Journal" : "Press A to continue", W / 2, 385);   // (World 2's Journal pages aren't written yet)
   ctx.restore();
 }
 // ---------------------------------------------------------------------------

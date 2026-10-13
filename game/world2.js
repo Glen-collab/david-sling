@@ -1199,13 +1199,15 @@ const ending = {
     ctx.fillStyle = "#0d1426"; ctx.fillRect(0, 0, W, H);
     if (L.far && L.far.naturalWidth) ctx.drawImage(L.far, 0, 0, W, H);
     if (L.mid && L.mid.naturalWidth) ctx.drawImage(L.mid, 0, gy - 380, W, 380 * 1.0);
-    ctx.fillStyle = "rgba(10,18,52,0.62)"; ctx.fillRect(0, 0, W, H);   // night
+    if (L.near && L.near.naturalWidth) { const nh = (TUNE.BG_LAYER_HEIGHTS.w2_4 || {}).near || 230; drawLayerRepeating(L.near, 0, 1, gy + 22, nh, true); }
+    // the ground: the stage's own soil and topsoil (2-4's forest set)
+    ctx.fillStyle = terPattern("sediment", TUNE.TER_FILL_SCALE) || "#3a3326"; ctx.fillRect(0, gy - 2, W, H - gy + 2);
+    terStrip("topsoil", -4, W + 4, gy - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+    ctx.fillStyle = "rgba(10,18,52,0.62)"; ctx.fillRect(0, 0, W, H);   // night, over the land and the ground
     for (let k = 0; k < 70; k++) {   // stars
       const sx = (k * 197) % W, sy = (k * 89) % 300, tw = 0.5 + 0.5 * Math.sin(now * (1 + k % 3) + k);
       ctx.fillStyle = `rgba(255,250,225,${0.35 + 0.6 * tw})`; ctx.fillRect(sx, sy, k % 7 ? 2 : 3, k % 7 ? 2 : 3);
     }
-    const g = ctx.createLinearGradient(0, gy, 0, H); g.addColorStop(0, "#3a3326"); g.addColorStop(1, "#16120c");
-    ctx.fillStyle = g; ctx.fillRect(0, gy, W, H - gy);
     // the pen: sheep inside, the stone wall David sits on
     for (let x = 50; x <= 530; x += 96) drawItem("stone_wall", x, gy - 14, 0.68);   // the back wall of the pen
     const sheep = [["sheep_graze", 130, 1], ["sheepblack_graze", 330, -1], ["sheep_stand", 420, 1], ["lamb_graze", 250, 1], ["sheep_graze", 80, -1], ["sheep_stand", 190, -1]];
@@ -1253,7 +1255,7 @@ const ending = {
       ctx.fillStyle = "#ffe08a"; ctx.font = "20px Georgia, serif"; ctx.fillText("Psalm 18:1-2  ·  a psalm of David", W / 2, 420);
       ctx.restore(); ctx.textAlign = "left";
     }
-    if (this.step === 8 && this.stepT > 3) caption("Press A to write in the Journal", 1, true);
+    if (this.step === 8 && this.stepT > 3) caption(typeof JOURNAL_PAGES !== "undefined" && JOURNAL_PAGES[WORLD] ? "Press A to write in the Journal" : "Press A to continue", 1, true);
     else if ((this.step === 2 || this.step === 3 || this.step === 6) || (this.step === 4 && this.pouch && this.pouch.t > 2.6) || (this.step === 7 && this.stepT > 1.5)) caption("A: next", 0.8, true);
     if (dialog.t > 0) drawDialog();
     if (this.fade < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - this.fade})`; ctx.fillRect(0, 0, W, H); }
