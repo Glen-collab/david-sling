@@ -1088,3 +1088,155 @@ function drawPools(camX) {   // shallow green-brown water, in front of the torto
     ctx.restore();
   }
 }
+
+// ---------------------------------------------------------------------------
+// Oleander (2-2, DESIGN): pink-flowered and poisonous to livestock. Walk past one and your lamb wanders over to nibble
+// it: pick the lamb up (Down) or play the harp and it comes back. If it gets there, it's sick, and that costs a heart.
+//   setPiece("oleander", c)
+// ---------------------------------------------------------------------------
+Object.assign(W2, { OLEANDER_PULL: 4, OLEANDER_WALK: 70 });
+const oleanders = setPieces.filter(p => p.kind === "oleander").map(p => ({ x: p.x, y: p.y, done: false, coolT: 0 }));
+const drift = { bush: null, told: false };
+function lambDrift(dt) {   // called from updateLamb (main.js): true = the lamb is wandering off to the oleander
+  const d = david;
+  for (const b of oleanders) b.coolT = Math.max(0, b.coolT - dt);
+  if (!drift.bush) {
+    const b = oleanders.find(b => !b.done && b.coolT <= 0 && Math.abs(lamb.x - b.x) < W2.OLEANDER_PULL * T && Math.abs(lamb.y - b.y) < 60);
+    if (!b || d.deadT > 0) return false;
+    drift.bush = b;
+    if (!drift.told) { drift.told = true; toast("Your lamb is wandering off to the oleander! It's poisonous. Pick the lamb up (Down), or play the harp to call it back."); }
+  }
+  const b = drift.bush;
+  if (d.state === "harp" || d.state === "kneel") {   // the harp: it comes trotting back
+    drift.bush = null; b.coolT = 6; baa(lamb.x, 0.8); toast("Your lamb came back to the harp."); return false;
+  }
+  lamb.t += dt;
+  moveToward(lamb, b.x - 20 * Math.sign(b.x - lamb.x || 1), b.y, W2.OLEANDER_WALK, dt);
+  lamb.vx = lamb.moved * lamb.facing; lamb.onGround = true;
+  if (Math.abs(lamb.x - b.x) < 26) {   // it ate some
+    b.done = true; drift.bush = null; trail.length = 0;
+    d.hearts = Math.max(1, d.hearts - 1); sfx("fall_pit", lamb.x, 0.4, 1.4); baa(lamb.x, 1);
+    toast("Your lamb ate oleander leaves and got sick. (-1 heart) Keep it away from the pink flowers.");
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// The end of World 2 (DESIGN "End of World 2"): night at the pen after the bear. The boy from Tekoa brings his father's
+// gift (the father has no sprite yet), Hanan's word, Psalm 18:1-2, and David plays. Then the Journal.
+// The gift: the leather sling pouch, saved in davidProgress.slingPouch: the charged shot charges a little faster.
+// ---------------------------------------------------------------------------
+const SLING_POUCH_CHARGE = 0.8;   // charge time x this, once David has the pouch
+try { if (JSON.parse(localStorage.getItem("davidProgress") || "{}").slingPouch) TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } catch (e) {}
+const ending = {
+  active: false, t: 0, step: 0, stepT: 0, done: null, boyX: W + 60, hananX: W + 80, pouch: null, fade: 0,
+  lines: [
+    ["The boy", "David! My father sent me back with something for you."],
+    ["The boy", "He's a leatherworker in Tekoa. He made it himself. He said: \"For the one who brought my son home.\""],
+    ["Hanan", "A lion, and now a bear. People will call you brave. Remember who gave you the strength."],
+  ],
+  start(done) {
+    Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, boyX: W + 60, hananX: W + 80, pouch: null, fade: 0, gave: false });
+    hushLoops(); dialog.t = 0;
+  },
+  next() { this.step++; this.stepT = 0; },
+  update(dt) {
+    this.t += dt; this.stepT += dt; this.fade = Math.min(1, this.t / 1.5);
+    const A = pressed("a") || pressed("b") || pressed("start");
+    const say = i => { dialog.who = this.lines[i][0]; dialog.say = this.lines[i][1]; dialog.t = 90; };   // (stays up until A)
+    switch (this.step) {
+      case 0: if (this.stepT > 2.5) this.next(); break;                                            // the pen under the stars
+      case 1: this.boyX = Math.max(680, this.boyX - 170 * dt); if (this.boyX <= 680) { say(0); this.next(); } break;   // the boy comes up
+      case 2: if (A) { say(1); this.next(); } break;
+      case 3: if (A) { dialog.t = 0; this.pouch = { t: 0 }; this.next(); } break;
+      case 4:   // the pouch goes from the boy's hands to David's
+        this.pouch.t += dt;
+        if (this.stepT > 1.2 && !this.gave) {
+          this.gave = true; sfx("extra_life", undefined, 0.7);
+          try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); if (!p.slingPouch) { p.slingPouch = true; TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+        }
+        if (this.stepT > 3.2 && A) this.next();
+        break;
+      case 5: this.hananX = Math.max(900, this.hananX - 120 * dt); if (this.hananX <= 900) { say(2); this.next(); } break;   // Hanan, watching
+      case 6: if (A) { dialog.t = 0; this.next(); } break;
+      case 7: if (this.stepT > 1.5 && A) this.next(); break;                                        // Psalm 18:1-2
+      case 8:   // David plays
+        if (this.stepT < 0.1 && audioUnlocked && harpMusic.paused) { harpMusic.currentTime = 0; harpMusic.volume = 0; harpMusic.play().catch(() => {}); }
+        harpMusic.volume = Math.min(TUNE.HARP_VOLUME, harpMusic.volume + dt * 0.4);
+        if (this.stepT > 3 && A) this.next();
+        break;
+      case 9: harpMusic.volume = Math.max(0, harpMusic.volume - dt * 0.8); if (this.stepT > 1.2) { harpMusic.pause(); this.active = false; const cb = this.done; this.done = null; cb && cb(); } break;
+    }
+  },
+  draw() {
+    const now = performance.now() / 1000, gy = 560, L = BG.w2_4 || {};
+    ctx.fillStyle = "#0d1426"; ctx.fillRect(0, 0, W, H);
+    if (L.far && L.far.naturalWidth) ctx.drawImage(L.far, 0, 0, W, H);
+    if (L.mid && L.mid.naturalWidth) ctx.drawImage(L.mid, 0, gy - 380, W, 380 * 1.0);
+    ctx.fillStyle = "rgba(10,18,52,0.62)"; ctx.fillRect(0, 0, W, H);   // night
+    for (let k = 0; k < 70; k++) {   // stars
+      const sx = (k * 197) % W, sy = (k * 89) % 300, tw = 0.5 + 0.5 * Math.sin(now * (1 + k % 3) + k);
+      ctx.fillStyle = `rgba(255,250,225,${0.35 + 0.6 * tw})`; ctx.fillRect(sx, sy, k % 7 ? 2 : 3, k % 7 ? 2 : 3);
+    }
+    const g = ctx.createLinearGradient(0, gy, 0, H); g.addColorStop(0, "#3a3326"); g.addColorStop(1, "#16120c");
+    ctx.fillStyle = g; ctx.fillRect(0, gy, W, H - gy);
+    // the pen: sheep inside, the stone wall David sits on
+    for (let x = 50; x <= 530; x += 96) drawItem("stone_wall", x, gy - 14, 0.68);   // the back wall of the pen
+    const sheep = [["sheep_graze", 130, 1], ["sheepblack_graze", 330, -1], ["sheep_stand", 420, 1], ["lamb_graze", 250, 1], ["sheep_graze", 80, -1], ["sheep_stand", 190, -1]];
+    for (const [nm, x, f] of sheep) if (SPR[nm]) drawSprite(nm, frameOf(nm, now + x), x, gy, f);
+    // David on the wall: sitting with the harp, playing at the end
+    let i = 7;
+    if (this.step >= 8) { const k = Math.floor(now * 1000 / TUNE.HARP_LOOP_MS) % 6; i = 8 + (k < 4 ? k : 6 - k); }
+    drawSprite("david_play_harp", i, 560, gy - 64, -1);   // sitting on the end of the wall
+    if (this.step >= 1 && this.boyX < W + 50) {   // the boy from Tekoa
+      const walking = this.step === 1, talking = dialog.t > 0 && dialog.who === "The boy";
+      const nm = walking ? "boy_walk" : talking ? "boy_talk" : "boy_idle";
+      drawSprite(nm, frameOf(nm, now), this.boyX, gy, -1);
+    }
+    if (this.step >= 5) {   // Hanan
+      const nm = this.step === 5 ? "hanan_idle" : dialog.t > 0 && dialog.who === "Hanan" ? "hanan_talk" : "hanan_idle";
+      drawSprite(nm, frameOf(nm, now), this.hananX, gy, -1);
+    }
+    if (this.pouch) {   // the leather sling pouch, from the boy's hands to David's
+      const k = Math.min(1, this.pouch.t / 1.2), px = this.boyX - 30 + (560 + 30 - this.boyX + 30) * k, py = gy - 70 - Math.sin(k * Math.PI) * 60 - k * 30;
+      if (k < 1 || this.step === 4) drawPouch(px, py, this.step === 4 && k >= 1 ? 0.5 + 0.5 * Math.sin(now * 4) : 0);
+      if (this.step === 4 && this.stepT > 1.2) {
+        ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - 1.2) * 2);
+        ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 340, 90, 680, 96, 16); ctx.fill();
+        ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The leather sling pouch", W / 2, 128);
+        ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Made by the leatherworker of Tekoa. Your charged shot charges a little faster.", W / 2, 162);
+        ctx.restore(); ctx.textAlign = "left";
+      }
+    }
+    if (this.step === 0 && this.stepT < 2.5) caption("That night, the flock was safe in the pen.", Math.min(1, this.stepT * 1.5) * Math.min(1, (2.5 - this.stepT) * 2));
+    if (this.step === 7) {   // Psalm 18:1-2
+      ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 1.5);
+      ctx.fillStyle = "rgba(8,10,24,0.72)"; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = "center"; ctx.fillStyle = "#fff6dc"; ctx.font = "italic 30px Georgia, serif";
+      ctx.fillText("\"I love you, LORD, my strength.", W / 2, 270);
+      ctx.fillText("The LORD is my rock, my fortress and my deliverer;", W / 2, 318);
+      ctx.fillText("my God is my rock, in whom I take refuge.\"", W / 2, 366);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "20px Georgia, serif"; ctx.fillText("Psalm 18:1-2  ·  a psalm of David", W / 2, 420);
+      ctx.restore(); ctx.textAlign = "left";
+    }
+    if (this.step === 8 && this.stepT > 3) caption("Press A to write in the Journal", 1, true);
+    else if ((this.step === 2 || this.step === 3 || this.step === 6) || (this.step === 4 && this.stepT > 3.2) || (this.step === 7 && this.stepT > 1.5)) caption("A: next", 0.8, true);
+    if (dialog.t > 0) drawDialog();
+    if (this.fade < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - this.fade})`; ctx.fillRect(0, 0, W, H); }
+    if (this.step === 9) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, this.stepT / 1.2)})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+function caption(text, a, small) {
+  ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center";
+  ctx.fillStyle = "#fff6dc"; ctx.font = small ? "17px sans-serif" : "italic 26px Georgia, serif";
+  ctx.fillText(text, W / 2, small ? H - 24 : 70); ctx.restore(); ctx.textAlign = "left";
+}
+function drawPouch(x, y, glow) {   // a small leather pouch on a cord (no art yet)
+  ctx.save(); ctx.translate(x, y);
+  if (glow) { ctx.shadowColor = `rgba(255,220,120,${glow})`; ctx.shadowBlur = 18; }
+  ctx.fillStyle = "#8a5a2e"; ctx.strokeStyle = "#4a2c12"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(0, 6, 15, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0; ctx.fillStyle = "#a8743e"; ctx.fillRect(-10, -8, 20, 8);
+  ctx.strokeStyle = "#5a3818"; ctx.beginPath(); ctx.moveTo(-14, -6); ctx.quadraticCurveTo(0, -28, 14, -6); ctx.stroke();
+  ctx.restore();
+}

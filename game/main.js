@@ -666,6 +666,7 @@ if (LEVEL_NAME === "test") {
   rock(16, 15, 3, 2); oliveArc(15, 14, 5);                     // a boulder in the riverbed: hop over
   deco("boulder_tan", 9, 16, 0.22); deco("rubble_stones", 36, 16, 0.3); deco("rock_pile_tan", 63, 16, 0.3); deco("rubble_mound", 96, 16, 0.28);
   lostSheep("sheep", 25, 16);
+  setPiece("oleander", 22); deco("oleander", 22, 16, 0.75);   // pink and poisonous: your lamb wanders over to nibble it
   rock(30, 13, 2, 4); special(31, 10);                         // a tall rock: the special stone on top
   ground(42, 130);
   campfire(46, GR - 1, "Hanan", "Rain in the hills miles away can fill this riverbed in moments. When you hear it, climb. Don't stop to look.");
@@ -681,6 +682,7 @@ if (LEVEL_NAME === "test") {
   rock(74, 3, 16, 10);                                         // too high to climb over
   critter("donkey", 82, GR - 1, 4);
   food("fig_cake", 92, 16);
+  setPiece("oleander", 95); deco("oleander", 95, 16, 0.75);
   lostSheep("sheep", 100, 16, "thorns");                       // caught in the thorns: sling the bush
   // a pool too wide to jump, and a tortoise plodding along its bottom: ride across on its shell
   for (let c = 104; c <= 114; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = r >= 19 ? 1 : 0;
@@ -696,6 +698,7 @@ if (LEVEL_NAME === "test") {
   ground(135, 168);
   lostSheep("sheep", 140, 16, "cast");                         // on its back: roll it over (Down)
   lostSheep("lambblack", 146, 16);
+  setPiece("oleander", 137); deco("oleander", 137, 16, 0.75);
   campfire(151);                                               // the checkpoint before the flood
   // the flash flood: past column 156 a wall of water comes down the riverbed behind you. Keep moving.
   setPiece("flood", 156, GR - 1, { end: 268 });
@@ -1227,6 +1230,7 @@ function updateLamb(dt) {
   if (lamb.carried) { lamb.x = david.x; lamb.y = david.y; return; }
   if (lamb.stolen) return;   // a jackal has it (world1.js)
   if (typeof lambDrop !== "undefined" && lambDrop.on) return;   // tumbling down after an eagle let go (world2.js)
+  if (typeof lambDrift === "function" && lambDrift(dt)) return;   // wandering off to the oleander (world2.js)
   lamb.t += dt;
   // the lamb walks in David's footsteps, first in the line: it hops where he hopped, so it never falls in a pit.
   // (When a second player controls the lamb, it'll get its own physics again.)
@@ -2287,7 +2291,9 @@ function updateFinish(dt) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
-    Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
+    const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
+    if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
+    else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
     s.t += dt;
@@ -2983,6 +2989,9 @@ function frame(now) {
     else { Courtyard.update(real); Courtyard.draw(); }
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
+  }
+  if (typeof ending !== "undefined" && ending.active) {   // the end-of-world scene (world2.js) has the screen
+    pollInput(); ending.update(real); ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
