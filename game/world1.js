@@ -259,7 +259,7 @@ function drawFakeRock(camX) {
 const CRITTER_ART = {
   fox:    { idle: "fox_sit",     move: "fox_trot",  len: 110, h: 50 },
   jackal: { idle: "jackal2_sit", move: "jackal_run", carry: "jackal_carry_lamb", len: 120, h: 55 },
-  ram:    { idle: "ram_stand",   move: "ram_walk",  len: 95, h: 70 },
+  ram:    { idle: "ram_stand",   move: "ram_run",   tell: "ram_butt", len: 95, h: 70 },
 };
 function critterBox(k) {   // the anchor is the head; the body runs back from it
   const a = CRITTER_ART[k.kind], front = k.x + k.facing * 8, back = k.x - k.facing * a.len;
@@ -402,9 +402,10 @@ function drawCritters(camX) {
     if (k.gone) i = frameOf(name, k.t * 1.5);
     else if (k.state === "idle") { name = a.idle; i = frameOf(name, k.t); }
     else if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) { name = a.carry; i = k.state === "wait" ? 0 : frameOf(name, k.t); }
-    else if (k.kind === "ram" && (k.state === "tell" || k.state === "rest")) { name = a.idle; i = 0; }
-    else i = frameOf(name, k.t * (k.kind === "ram" && k.state === "charge" ? 2.2 : 1));
-    const shake = k.kind === "ram" && k.state === "tell" ? Math.sin(k.t * 60) * 3 : 0;
+    else if (k.kind === "ram" && k.state === "tell") { name = a.tell; i = Math.min(SPR[name].frames - 2, Math.floor(k.t * 1000 / SPR[name].ms)); }   // head down, horns first
+    else if (k.kind === "ram" && k.state === "rest") { name = a.idle; i = 0; }
+    else i = frameOf(name, k.t * (k.kind === "ram" && k.state === "charge" ? 1.4 : 1));
+    const shake = 0;
     const filter = k.kind === "ram" && k.state === "tell" ? "drop-shadow(0 0 8px rgba(255,200,60,0.9))" : "";
     drawSprite(name, i, x + shake, k.y, k.facing, 1, k.alpha, filter);
   }

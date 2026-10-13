@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 478,
+  "frame_h": 306,
+  "ms_per_frame": 171,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 302,
+  "anchor_y": 302,
+  "source": "ram_run_butt.mp4",
+  "video_frames": [
+    98,
+    102,
+    107,
+    111,
+    116,
+    120,
+    125,
+    129,
+    134,
+    138
+  ]
+}

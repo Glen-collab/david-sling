@@ -112,7 +112,7 @@ const TUNE = {
     // lambs are about two-thirds the size of a grown sheep
     lamb_run: 0.75, lamb_hop: 0.75, lamb_walk: 0.75, lamb_stand: 0.75, lamb_graze: 0.75,
     lamb_bound: 0.75, lamb_bound2: 0.75, lamb_leap: 0.75, lambblack_stand: 0.75, lambblack_walk: 0.75, lambblack_leap: 0.75,
-    ram_walk: 1.08, ram_stand: 1.08, ram_graze: 1.08,
+    ram_walk: 1, ram_stand: 1, ram_run: 1, ram_butt: 1, ram_leap: 1,   // Glen's ram clips (one shared sheet size: tools/uniform_sheets.py)
   },
 };
 
@@ -1784,7 +1784,7 @@ const SHEEP_ART = {
   sheepblack: { run: "sheepblack_run", walk: "sheepblack_walk", stand: "sheepblack_stand", graze: "sheepblack_graze" },
   lamb:       { run: "lamb_hop",       walk: "lamb_walk",       stand: "lamb_stand",       graze: "lamb_graze" },
   lambblack:  { run: "lambblack_leap", walk: "lambblack_walk",  stand: "lambblack_stand",  graze: "lambblack_stand" },
-  ram:        { run: "ram_walk",       walk: "ram_walk",        stand: "ram_stand",        graze: "ram_graze" },
+  ram:        { run: "ram_run",        walk: "ram_walk",        stand: "ram_stand" },
   rescued:    { run: "lamb_run",       walk: "lamb_run",        stand: null,               graze: null },
 };
 
@@ -1987,7 +1987,7 @@ function stoneHitsThorns(st) {
   return false;
 }
 // grazing: these first frames of each graze sheet are head-down eating; the rest raise the head
-const GRAZE_EAT = { lamb_graze: 3, sheep_graze: 3, sheepblack_graze: 2, ram_graze: 7 };
+const GRAZE_EAT = { lamb_graze: 3, sheep_graze: 3, sheepblack_graze: 2 };
 function updateLook(sh, dt) {   // a grazing sheep looks up while David is close ("hey, how you doing?")
   const near = Math.abs(david.x - sh.x) < 170 && Math.abs(david.y - sh.y) < 120;
   sh.look = Math.max(0, Math.min(1, (sh.look || 0) + (near ? 2.5 : -2) * dt));
