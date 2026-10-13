@@ -682,7 +682,11 @@ if (LEVEL_NAME === "test") {
   critter("donkey", 82, GR - 1, 4);
   food("fig_cake", 92, 16);
   lostSheep("sheep", 100, 16, "thorns");                       // caught in the thorns: sling the bush
-  oliveArc(104, 16, 5);
+  // a pool too wide to jump, and a tortoise plodding along its bottom: ride across on its shell
+  for (let c = 104; c <= 114; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = r >= 19 ? 1 : 0;
+  setPiece("pool", 104, GR, { w: 11 });
+  critter("tortoise", 109, 18, 4);
+  oliveArc(104, 14, 5);
   // The One: high on the canyon wall
   plat(108, 13, 3); plat(112, 10, 3); plat(116, 7, 3); plat(121, 4, 3);
   lostSheep("lamb", 122, 3, "one");
@@ -3015,7 +3019,7 @@ function frame(now) {
   drawLamb(camX); if (typeof drawBoy === "function") { drawClaws(camX); drawBoy(camX); drawIbexes(camX); drawBear(camX); }   // world2.js
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   drawFoldFront(camX);
-  drawStones(camX); if (typeof drawFlood === "function") { drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js
+  drawStones(camX); if (typeof drawFlood === "function") { drawPools(camX); drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js
   drawDecor(camX, "front");
   drawFakeRock(camX);
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);

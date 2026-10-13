@@ -290,6 +290,7 @@ function updateCritters(dt) {
     else if (k.kind === "wolf") updateWolf(k, dx, sameLevel, dt);
     else if (k.kind === "scorpion") updateScorpion(k, dx, sameLevel, dt);
     else if (k.kind === "hedgehog") updateHedgehog(k, dx, sameLevel, dt);
+    else if (k.kind === "tortoise") updateTortoise(k, dx, sameLevel, dt);
   }
 }
 function updateFox(k, dx, sameLevel, dt) {
@@ -382,6 +383,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "wolf") return stoneHitsWolf(k, s);
     if (k.kind === "scorpion") return stoneHitsScorpion(k, s);
     if (k.kind === "hedgehog") return stoneHitsHedgehog(k, s);
+    if (k.kind === "tortoise") return stoneHitsTortoise(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: hold Down, then press A."); }
@@ -406,6 +408,7 @@ function drawCritters(camX) {
     if (k.kind === "donkey") { drawDonkey(k, x); continue; }
     if (k.kind === "wolf") { drawWolf(k, x); continue; }
     if (k.kind === "scorpion" || k.kind === "hedgehog") { drawSmallCritter(k, x, k.kind + "_walk"); continue; }
+    if (k.kind === "tortoise") { drawTortoise(k, x); continue; }
     const a = CRITTER_ART[k.kind];
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

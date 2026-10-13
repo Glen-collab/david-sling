@@ -493,6 +493,7 @@ function updateWorld2(dt) {
   if (boy.state === "stranded" && david.x > boy.x + 4 * T && !boy.nagged) { boy.nagged = true; sayLine("The boy", "Wait! Don't leave me here! Please!"); }
   updateFlood(dt); updateBoy(dt);
   updateEagles(dt); updateIbexes(dt); updateWind(dt);   // 2-3 (below)
+  updatePools();
   updateCrash(); updateBear(dt); w2Shake.v = Math.max(0, w2Shake.v - dt * 1.6);   // 2-4 (below)
 }
 function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
@@ -984,6 +985,10 @@ function updateScorpion(k, dx, sameLevel, dt) {   // scuttles back and forth in 
 function stoneHitsScorpion(k, s) { k.gone = true; k.vx = 0; stoneHit(s, 0.5); toast("Scorpion squashed!"); return !s.power; }
 function updateHedgehog(k, dx, sameLevel, dt) {
   const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 40, 30, dt); };
+  const calm = k.state === "idle" || k.state === "walk" || k.state === "rest";
+  if (calm && sameLevel && Math.abs(dx) < 2.6 * T && Math.abs(david.vx) > TUNE.WALK_SPEED * 1.05 && david.deadT <= 0) {   // startled: David came running
+    k.after = k.state === "idle" ? "walk" : k.state; k.vx = 0; setCrit(k, "curl"); return;
+  }
   if (k.state === "idle") { fall(); k.facing = 1; if (Math.abs(dx) < W2.HEDGEHOG_WAKE * T) setCrit(k, "walk"); return; }
   if (k.state === "walk") {   // trundles along, snapping up any scorpion it meets
     k.facing = 1; runCritter(k, W2.HEDGEHOG_WALK, dt);
@@ -996,17 +1001,20 @@ function updateHedgehog(k, dx, sameLevel, dt) {
     return;
   }
   if (k.state === "curl") { fall(); if (k.t > SPR.hedgehog_curl.frames * SPR.hedgehog_curl.ms / 1000) setCrit(k, "ball"); return; }
-  if (k.state === "ball") { fall(); if (k.t > W2.HEDGEHOG_TUCKED) setCrit(k, "uncurl"); return; }
-  if (k.state === "uncurl") {   // the curl played backwards, then off it runs the way it came
-    fall(); if (k.t > SPR.hedgehog_curl.frames * SPR.hedgehog_curl.ms / 1000 * 0.6) { k.gone = true; k.facing = -1; k.vx = -W2.HEDGEHOG_RUN; }
+  if (k.state === "ball") { fall(); if (k.t > W2.HEDGEHOG_TUCKED * (k.after ? 0.7 : 1) && (!k.after || Math.abs(dx) > 2 * T)) setCrit(k, "uncurl"); return; }   // startled: stays tucked while David's close
+  if (k.state === "uncurl") {   // the curl played backwards. Hit: off it runs the way it came. Startled: back to what it was doing
+    fall();
+    if (k.t > SPR.hedgehog_curl.frames * SPR.hedgehog_curl.ms / 1000 * 0.6) {
+      if (k.after) { setCrit(k, k.after); k.after = null; } else { k.gone = true; k.facing = -1; k.vx = -W2.HEDGEHOG_RUN; }
+    }
     return;
   }
   fall();   // rest: done for the day, snuffling about
 }
 function stoneHitsHedgehog(k, s) {   // it curls up into a spiky ball; then it uncurls and runs off, and won't be back
   stoneHit(s, 0.4);
-  if (k.state === "curl" || k.state === "ball" || k.state === "uncurl") return true;
-  k.vx = 0; setCrit(k, "curl");
+  if ((k.state === "curl" || k.state === "ball" || k.state === "uncurl") && !k.after) return true;
+  k.vx = 0; k.after = null; setCrit(k, "curl");
   toast("You hit the hedgehog! It curled up into a ball... now it'll run. The scorpions are yours: crouch (Down) and throw, the stone flies low.");
   return true;
 }
@@ -1020,4 +1028,63 @@ function drawSmallCritter(k, x, name) {
     drawSprite(name, k.state === "walk" ? frameOf(name, k.t * 1.5) : 0, x, k.y, k.facing, 1, k.alpha); return;
   }
   drawSprite(name, frameOf(name, k.t), x, k.y, k.facing, 1, k.alpha);
+}
+
+// ---------------------------------------------------------------------------
+// 2-2's pool and the tortoise (DESIGN 2-2: "leave it and it becomes a stepping stone"). The pool is too wide to jump;
+// the tortoise plods back and forth along its bottom with its shell at the waterline, and carries David across.
+// Hit it with a stone and it pulls into its shell for a while (Glen's clip). Fall in the water: back to the bank, a heart.
+//   setPiece("pool", c, GR, { w })   water over columns c..c+w-1 (the level clears the ground there, keeping a floor)
+// ---------------------------------------------------------------------------
+Object.assign(W2, { TORTOISE_WALK: 48, TORTOISE_HIDE: 3.2 });
+CRITTER_ART.tortoise = { idle: "tortoise_walk", move: "tortoise_walk", len: 100, h: 70, box: k => spriteBox(k, "tortoise_walk", 70) };
+function shellSpan(k) {   // the columns the shell covers (its back is a stepping stone)
+  const b = critterBox(k), pad = (b.x1 - b.x0) * 0.16;
+  return [Math.floor((b.x0 + pad) / T), Math.floor((b.x1 - pad) / T)];
+}
+function updateTortoise(k, dx, sameLevel, dt) {
+  const x0 = k.x;
+  k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt);
+  if (k.state === "idle") setCrit(k, "walk");
+  if (k.state === "walk") {
+    if (!runCritter(k, W2.TORTOISE_WALK, dt) || (k.range && Math.abs(k.x - k.home) > k.range && Math.sign(k.x - k.home) === k.facing)) k.facing = -k.facing;
+  } else { k.vx = 0; collideBody(k, 40, 30, dt); if (k.state === "hide" && k.t > W2.TORTOISE_HIDE) setCrit(k, "peek"); if (k.state === "peek" && k.t > 1.2) setCrit(k, "walk"); }
+  // the shell as a stepping stone: one-way tiles at the waterline under it, and David rides along
+  const pool = setPieces.find(p => p.kind === "pool" && k.x > p.c * T && k.x < (p.c + p.w) * T);
+  for (const c of k.tiles || []) oneway[GR][c] = false;
+  k.tiles = [];
+  if (pool) { const [c0, c1] = shellSpan(k); for (let c = Math.max(c0, pool.c); c <= Math.min(c1, pool.c + pool.w - 1); c++) { oneway[GR][c] = true; k.tiles.push(c); } }
+  const d = david, ride = d.onGround && Math.abs(d.y - GR * T) < 3 && k.tiles.includes(Math.floor(d.x / T));
+  if (ride) d.x += k.x - x0;
+}
+function stoneHitsTortoise(k, s) {
+  stoneHit(s, 0.5);
+  if (k.state !== "hide") { setCrit(k, "hide"); toast("The tortoise pulled into its shell. Leave it be, and it will carry you across."); }
+  return true;
+}
+function drawTortoise(k, x) {
+  const h = SPR.tortoise_hide, n = h ? h.frames : 1;
+  if (k.state === "hide") drawSprite("tortoise_hide", Math.min(n - 1, Math.floor(k.t / 1.0 * n)), x, k.y, k.facing);
+  else if (k.state === "peek") drawSprite("tortoise_hide", Math.max(0, n - 1 - Math.floor(k.t / 1.2 * n)), x, k.y, k.facing);
+  else drawSprite("tortoise_walk", frameOf("tortoise_walk", k.t), x, k.y, k.facing);
+}
+function updatePools() {
+  const d = david;
+  for (const p of setPieces) if (p.kind === "pool" && d.deadT <= 0 && !inCutscene() && d.x > p.c * T && d.x < (p.c + p.w) * T && d.y > GR * T + 34) {
+    pitFall(); toast("Splash! Into the pool. The tortoise will carry you, if you let it.");
+  }
+}
+function drawPools(camX) {   // shallow green-brown water, in front of the tortoise's legs
+  const now = performance.now() / 1000;
+  for (const p of setPieces) if (p.kind === "pool") {
+    const x0 = p.c * T - camX, w = p.w * T; if (x0 > W || x0 + w < 0) continue;
+    const top = GR * T + 34;   // low enough that the top of the tortoise's shell shows
+    ctx.save();
+    const g = ctx.createLinearGradient(0, top, 0, ROWS * T);
+    g.addColorStop(0, "rgba(96,140,130,0.6)"); g.addColorStop(1, "rgba(44,70,62,0.92)");
+    ctx.fillStyle = g; ctx.fillRect(x0, top, w, ROWS * T - top);
+    ctx.strokeStyle = "rgba(230,245,235,0.55)"; ctx.lineWidth = 2;
+    for (let k = 0; k < 3; k++) { ctx.beginPath(); for (let sx = 0; sx <= w; sx += 8) ctx.lineTo(x0 + sx, top + 4 + k * 14 + Math.sin(sx * 0.05 + now * 2 + k) * 2.5); ctx.stroke(); }
+    ctx.restore();
+  }
 }

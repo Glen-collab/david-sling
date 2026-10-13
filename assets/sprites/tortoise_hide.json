@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 331,
+  "frame_h": 162,
+  "ms_per_frame": 338,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 148,
+  "anchor_y": 159,
+  "source": "tortoise_hide.mp4",
+  "video_frames": [
+    40,
+    49,
+    58,
+    67,
+    76,
+    84,
+    93,
+    102,
+    111,
+    120
+  ]
+}

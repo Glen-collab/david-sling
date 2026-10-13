@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 331,
+  "frame_h": 162,
+  "ms_per_frame": 198,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 148,
+  "anchor_y": 159,
+  "source": "tortoise.mp4",
+  "video_frames": [
+    22,
+    27,
+    32,
+    36,
+    41,
+    46,
+    50,
+    55,
+    60,
+    65,
+    70,
+    74
+  ]
+}

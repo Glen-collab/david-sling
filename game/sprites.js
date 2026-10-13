@@ -1776,6 +1776,30 @@ window.SPRITE_DATA = {
   "ay": 74,
   "align": "feet"
  },
+ "tortoise_hide": {
+  "src": "../assets/sprites/tortoise_hide.png",
+  "frames": 10,
+  "w": 331,
+  "h": 162,
+  "ms": 338,
+  "loop": false,
+  "pingpong": false,
+  "ax": 148,
+  "ay": 159,
+  "align": "feet"
+ },
+ "tortoise_walk": {
+  "src": "../assets/sprites/tortoise_walk.png",
+  "frames": 12,
+  "w": 331,
+  "h": 162,
+  "ms": 198,
+  "loop": true,
+  "pingpong": false,
+  "ax": 148,
+  "ay": 159,
+  "align": "feet"
+ },
  "trader_idle": {
   "src": "../assets/sprites/trader_idle.png",
   "frames": 8,
