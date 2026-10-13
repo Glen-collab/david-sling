@@ -73,7 +73,7 @@ const Courtyard = {
   active: false,
   open(world = 1) {
     if (!this.img) { this.img = new Image(); this.img.src = `../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`; }
-    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null; this.offerAt = null;
+    this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null; this.offerAt = null; this.greetAt = null;
     this.x = 0.82; this.facing = -1; this.walkT = 0; this.mode = null; this.msg = null;
     this.prog = loadProgress();
     // a world beaten since Jesse last spoke to you? he's waiting with its piece
@@ -94,6 +94,8 @@ const Courtyard = {
   say(who, text, t = 6) { this.msg = { who, text, t, at: this.t }; },
   update(dt) {
     this.t += dt; if (this.msg) { this.msg.t -= dt; if (this.msg.t <= 0) this.msg = null; }
+    const atStall = !this.mode && (this.near() || {}).id === "stall";   // the trader chats only while David is at his stall
+    if (atStall && this.greetAt === null) this.greetAt = this.t; else if (!atStall) this.greetAt = null;
     mapAmbience.volume = Math.max(0, Math.min(MTUNE.AMBIENCE_VOLUME, mapAmbience.volume + (this.leaving ? -dt : dt * 0.5)));
     if (mapAmbience.paused && typeof audioUnlocked !== "undefined" && audioUnlocked && !this.leaving) mapAmbience.play().catch(() => {});   // back from a pause
     if (this.leaving) {
@@ -239,7 +241,8 @@ const Courtyard = {
       drawItem(MARKET[this.pick].holds, tx - (150 - sp.ax) * s, floor + (130 - sp.ay) * s, 48 * s / 195, ctx.globalAlpha);   // on his palm (sheet px 150,130)
     }
     else if (this.msg && this.msg.who === "The trader") drawSprite("trader_talk", frameOf("trader_talk", this.t - this.msg.at), tx, floor, -1, tsz, ctx.globalAlpha);
-    else drawSprite("trader_idle", frameOf("trader_idle", this.t), tx, floor, -1, tsz, ctx.globalAlpha);
+    else if (this.greetAt !== null) drawSprite("trader_talk", frameOf("trader_talk", this.t - this.greetAt), tx, floor, -1, tsz, ctx.globalAlpha);   // David walked up: he chats
+    else drawSprite("trader_idle", 0, tx, floor, -1, tsz, ctx.globalAlpha);   // nobody near: he just stands
     // David (and his lamb behind him)
     const dx = px - cam, moving = this.walkT > 0;
     drawSprite("lamb_run", moving ? frameOf("lamb_run", this.t) : 2,   // standing: a still of his own lamb (lamb_stand is a different, greyer lamb)
