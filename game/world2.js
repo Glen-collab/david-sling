@@ -107,11 +107,24 @@ function drawDeadfalls(camX) {   // logs stacked up the pile, a little crooked, 
 // ---------------------------------------------------------------------------
 // Hanan at his campfires: sitting on a rock to the left of the fire, talking (Glen's Grok clips).
 // ---------------------------------------------------------------------------
+Object.assign(TUNE.SPRITE_SIZE, { eliab_walk: 1.08, eliab_arms_crossed: 1.08, eliab_draw_sword: 1.08 });   // the eldest: a bit taller than David
 function drawCampfirePeople(camX) {
+  const now = performance.now() / 1000;
   for (const f of fires) {
-    if (f.who !== "Hanan" || !SPR.hanan_sit) continue;
     const x = f.x - camX - 62; if (x < -200 || x > W + 200) continue;
-    drawSprite("hanan_sit", frameOf("hanan_sit", performance.now() / 1000), x, f.y, 1);
+    if (f.who === "Hanan" && SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), x, f.y, 1);
+    if (f.who === "The shepherd girl" && SPR.girl_sit_talk) {   // sitting by her fire; she talks while her words are up
+      const talking = dialog.t > 0 && dialog.who === f.who;
+      drawSprite("girl_sit_talk", talking ? frameOf("girl_sit_talk", now) : 0, x, f.y, 1);
+    }
+  }
+  // people who speak as David passes (talk() in main.js) and have art: standing there, facing him
+  const ART = { Eliab: ["eliab_arms_crossed", "eliab_arms_crossed"] };
+  for (const k of talks) {
+    const a = ART[k.who]; if (!a || !SPR[a[0]]) continue;
+    const x = k.x - camX + 2 * T; if (x < -200 || x > W + 200) continue;
+    const talking = dialog.t > 0 && dialog.who === k.who, nm = talking ? a[1] : a[0];
+    drawSprite(nm, frameOf(nm, now), x, GR * T, Math.sign(david.x - (k.x + 2 * T)) || -1);
   }
 }
 

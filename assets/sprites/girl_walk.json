@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 91,
+  "frame_h": 167,
+  "ms_per_frame": 140,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 46,
+  "anchor_y": 167,
+  "source": "girl_walk.png"
+}

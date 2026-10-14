@@ -33,6 +33,7 @@ ap.add_argument("--start", type=int, default=1); ap.add_argument("--end", type=i
 ap.add_argument("--align", choices=["feet", "center", "ground"], default="feet")
 ap.add_argument("--mirror", action="store_true", help="flip left-right so the character faces right (the game's convention)")
 ap.add_argument("--soft", action="store_true"); ap.add_argument("--green", action="store_true")
+ap.add_argument("--white", action="store_true", help="the clip is on a white background (not green): key out white and its soft grey shadows")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 args = ap.parse_args()
 
@@ -55,7 +56,13 @@ def key(path):
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     ex = g - np.maximum(r, b)
     raw = Image.fromarray(a.astype(np.uint8)).convert("RGBA")
-    if args.soft:   # only the screen itself goes: its green is far above red and blue (fur with green spill stays)
+    if args.white:   # white screen: near-white, colourless pixels go (and the pale grey shadow on the floor)
+        lo, sat = np.minimum(np.minimum(r, g), b), np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)
+        alpha = np.clip((215 - lo) / 45, 0, 1)
+        alpha[sat > 34] = 1
+        alpha[(lo > 228) & (sat < 22)] = 0
+        inside = ndimage.binary_fill_holes(alpha > 0.5); alpha[inside & (alpha < 1) & (sat > 18)] = 1
+    elif args.soft:   # only the screen itself goes: its green is far above red and blue (fur with green spill stays)
         alpha = np.clip(1 - (ex - 45) / 55, 0, 1)
         alpha[(ex > 85) & (g > 110)] = 0
         inside = ndimage.binary_fill_holes(alpha > 0.5)   # green eyes, gaps in the fur: back in
@@ -63,7 +70,7 @@ def key(path):
     else:
         alpha = np.clip(1 - (ex - 15) / 45, 0, 1)
         alpha[green_mask(a)] = 0
-    a[..., 1] = np.minimum(g, np.maximum(r, b) + 6)          # remove green spill on edges
+    if not args.white: a[..., 1] = np.minimum(g, np.maximum(r, b) + 6)          # remove green spill on edges
     al = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.6))
     alpha = np.asarray(al).copy()
     alpha[:4, :] = 0; alpha[-4:, :] = 0; alpha[:, :4] = 0; alpha[:, -4:] = 0
@@ -78,6 +85,7 @@ def key(path):
 
 # skip frames that aren't on the green screen (e.g. a reference screenshot at the start)
 def on_green(path):
+    if args.white: return True
     return green_mask(np.asarray(Image.open(path).convert("RGB")).astype(int)).mean() > 0.4
 files = [f for f in files if on_green(f)]
 

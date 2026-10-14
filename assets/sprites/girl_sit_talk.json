@@ -1,0 +1,12 @@
+{
+  "frames": 6,
+  "frame_w": 71,
+  "frame_h": 107,
+  "ms_per_frame": 280,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 31,
+  "anchor_y": 106,
+  "source": "girl_sit_talk.png",
+  "pingpong": true
+}

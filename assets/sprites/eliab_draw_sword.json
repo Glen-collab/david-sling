@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 224,
+  "frame_h": 304,
+  "ms_per_frame": 264,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 105,
+  "anchor_y": 301,
+  "source": "eliab_2.mp4",
+  "video_frames": [
+    70,
+    77,
+    84,
+    90,
+    97,
+    104,
+    111,
+    118,
+    125,
+    131,
+    138,
+    145
+  ]
+}

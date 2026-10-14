@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 117,
+  "frame_h": 161,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 71,
+  "anchor_y": 160,
+  "source": "girl_run.png"
+}

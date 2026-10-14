@@ -792,6 +792,42 @@ window.SPRITE_DATA = {
   "ay": 97,
   "align": "feet"
  },
+ "eliab_arms_crossed": {
+  "src": "../assets/sprites/eliab_arms_crossed.png",
+  "frames": 6,
+  "w": 112,
+  "h": 294,
+  "ms": 400,
+  "loop": true,
+  "pingpong": true,
+  "ax": 51,
+  "ay": 291,
+  "align": "feet"
+ },
+ "eliab_draw_sword": {
+  "src": "../assets/sprites/eliab_draw_sword.png",
+  "frames": 12,
+  "w": 224,
+  "h": 304,
+  "ms": 264,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 301,
+  "align": "feet"
+ },
+ "eliab_walk": {
+  "src": "../assets/sprites/eliab_walk.png",
+  "frames": 12,
+  "w": 172,
+  "h": 289,
+  "ms": 139,
+  "loop": true,
+  "pingpong": false,
+  "ax": 102,
+  "ay": 287,
+  "align": "feet"
+ },
  "father_give": {
   "src": "../assets/sprites/father_give.png",
   "frames": 14,
@@ -898,6 +934,54 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 164,
   "ay": 102,
+  "align": "feet"
+ },
+ "girl_run": {
+  "src": "../assets/sprites/girl_run.png",
+  "frames": 6,
+  "w": 117,
+  "h": 161,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 71,
+  "ay": 160,
+  "align": "feet"
+ },
+ "girl_sit_talk": {
+  "src": "../assets/sprites/girl_sit_talk.png",
+  "frames": 6,
+  "w": 71,
+  "h": 107,
+  "ms": 280,
+  "loop": true,
+  "pingpong": true,
+  "ax": 31,
+  "ay": 106,
+  "align": "feet"
+ },
+ "girl_talk": {
+  "src": "../assets/sprites/girl_talk.png",
+  "frames": 6,
+  "w": 95,
+  "h": 167,
+  "ms": 260,
+  "loop": true,
+  "pingpong": true,
+  "ax": 36,
+  "ay": 167,
+  "align": "feet"
+ },
+ "girl_walk": {
+  "src": "../assets/sprites/girl_walk.png",
+  "frames": 6,
+  "w": 91,
+  "h": 167,
+  "ms": 140,
+  "loop": true,
+  "pingpong": false,
+  "ax": 46,
+  "ay": 167,
   "align": "feet"
  },
  "hanan_counsel": {
