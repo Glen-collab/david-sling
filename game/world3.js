@@ -522,3 +522,112 @@ function drawGuide() {
   const name = G.moving ? "shammah_walk" : "shammah_idle";
   drawSprite(name, frameOf(name, G.t * (G.moving ? 1.6 : 1)), G.x, G.y, G.facing);
 }
+
+// ---------------------------------------------------------------------------
+// The Anointing (1 Samuel 16:12-13): plays when 3-3 is cleared, before the Journal. At the sacrifice outside the town
+// gate: Jesse's sons in a line (Glen's clip, David at the end), Samuel walks in with the horn of oil, the LORD says
+// "this is the one", David steps forward, and Samuel pours the oil over his head in front of his brothers. A warm light
+// and David's song for the Spirit: something changed in David, not in his sling (no new powers). A moves it on.
+// ---------------------------------------------------------------------------
+function drawStoryBox(who, text, hint = "A: next", top = false) {   // the caption box of a story scene (bottom, or top)
+  const bw = Math.min(900, W - 60), bx = W / 2 - bw / 2, by = top ? 76 : H - 150;
+  ctx.save();
+  ctx.fillStyle = "rgba(28,18,8,0.88)"; ctx.beginPath(); ctx.roundRect(bx, by, bw, 118, 16); ctx.fill();
+  ctx.strokeStyle = "rgba(255,214,120,0.5)"; ctx.lineWidth = 2; ctx.stroke();
+  ctx.textAlign = "left"; let ty = by + 34;
+  if (who) { ctx.fillStyle = "#ffd98a"; ctx.font = "bold 20px sans-serif"; ctx.fillText(who, bx + 24, ty); ty += 30; }
+  ctx.fillStyle = "#fff6e2"; ctx.font = (who ? "" : "italic ") + "20px sans-serif";
+  const words = text.split(" "); let cur = "";
+  for (const wd of words) { const t2 = cur ? cur + " " + wd : wd; if (ctx.measureText(t2).width > bw - 48) { ctx.fillText(cur, bx + 24, ty); ty += 26; cur = wd; } else cur = t2; }
+  ctx.fillText(cur, bx + 24, ty);
+  if (hint) { ctx.textAlign = "right"; ctx.fillStyle = "rgba(255,240,215,0.6)"; ctx.font = "14px sans-serif"; ctx.fillText(hint, bx + bw - 18, by + 108); }
+  ctx.restore();
+}
+const ANOINT = {
+  SIZE: 1.7,          // how big the people are (the stage's ground line stays where it is)
+  LINE_X: 0.16,       // where the brothers' line stands (its first man, as a share of the screen width)
+  DAVID_DX: 404,      // from the line's anchor to David after he steps out (sprite pixels, brothers_line)
+  DAVID_HEAD: 191,    // the top of David's head above the ground (sprite pixels)
+  HORN: [62, 225],    // Samuel's horn tip, raised: ahead of his anchor and above the ground (sprite pixels, samuel_anoint)
+  STEP_TIME: 2.4,     // seconds for David to step out of the line
+  POUR_TIME: 5,       // seconds for Samuel to raise the horn and pour
+};
+const anointing = {
+  active: false, t: 0, step: 0, stepT: 0, done: null, samX: 0, glow: 0,
+  lines: [
+    ["", "David came in from the fields, still dusty from the hills. Everyone turned to look."],
+    ["", "He was ruddy, with bright eyes and a fine appearance (1 Samuel 16:12)."],
+    ["The LORD", "Rise and anoint him. This is the one."],                                                              // 16:12
+    ["", "Then Samuel took the horn of oil and anointed him in front of his brothers."],                               // 16:13
+    ["", "And the Spirit of the LORD came powerfully upon David from that day on."],                                   // 16:13
+    ["Anointing", "In Israel, oil was poured on the head of someone God set apart for His work, like a king or a priest. The word Messiah means \"the anointed one.\""],
+  ],
+  start(done) { Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, samX: W + 140, glow: 0, chimed: false }); hushLoops(); dialog.t = 0; },
+  next() { this.step++; this.stepT = 0; },
+  camX() { return Math.max(0, MAIN_COLS * T - W); },   // the end of 3-3: the town gate behind them
+  lineX() { return W * ANOINT.LINE_X; },
+  davidX() { return this.lineX() + ANOINT.DAVID_DX * SCALE * ANOINT.SIZE; },
+  update(dt) {
+    this.t += dt; this.stepT += dt;
+    const A = this.stepT > 0.8 && (pressed("a") || pressed("b") || pressed("start"));
+    const samTo = this.davidX() + ANOINT.HORN[0] * SCALE * ANOINT.SIZE;   // the horn right over David's head
+    if (this.step >= 1) this.samX = Math.max(samTo, this.samX - 190 * dt);   // Samuel walks in from the right
+    if (this.step === 1 && this.samX > samTo) return;                         // (the line waits until he's there)
+    if (this.step === 2 && this.stepT < ANOINT.STEP_TIME) return;             // David steps out of the line
+    if (this.step === 3 && this.stepT < ANOINT.POUR_TIME) return;             // the oil
+    if (this.step === 4) this.glow = Math.min(1, this.glow + dt * 0.6);
+    if (this.step === 3 && this.stepT >= ANOINT.POUR_TIME && !this.chimed) { this.chimed = true; chime(5); setTimeout(() => chime(9), 200); setTimeout(() => chime(12), 420); }
+    if (!A) return;
+    if (this.step === 3) { harpMusic.currentTime = 0; harpMusic.volume = TUNE.HARP_VOLUME; harpMusic.play().catch(() => {}); }   // David's song, for the Spirit
+    if (this.step < this.lines.length - 1) { this.next(); return; }
+    this.active = false; harpMusic.pause(); harpMusic.volume = 0;
+    if (this.done) this.done();
+  },
+  draw() {
+    const cx = this.camX(), y = GR * T, s = ANOINT.SIZE, a = Math.min(1, this.t / 1.2);
+    drawBackground(cx); drawTiles(cx);
+    const dx = this.davidX(), k = SCALE * s;
+    // Jesse's sons (David at the end); he steps out at step 2
+    const B = SPR.brothers_line;
+    if (B) {
+      let i;
+      if (this.step < 2) i = Math.floor(this.t * 2) % 15;
+      else i = Math.min(B.frames - 1, 15 + Math.floor(Math.min(1, this.stepT / ANOINT.STEP_TIME) * (B.frames - 15) + (this.step > 2 ? 9 : 0)));
+      drawSprite("brothers_line", i, this.lineX(), y, 1, s);
+    }
+    // Samuel: walking in, standing, then the horn raised and poured (Glen's clip), facing the line
+    const S = SPR.samuel_anoint;
+    if (S && this.step >= 1) {
+      let i;
+      if (this.samX > this.davidX() + ANOINT.HORN[0] * SCALE * ANOINT.SIZE + 1) i = Math.floor(this.t * 6) % 3;
+      else if (this.step < 3) i = 3 + Math.floor(this.t * 2) % 6;
+      else if (this.step === 3) i = Math.min(20, 9 + Math.floor(this.stepT / ANOINT.POUR_TIME * 12));
+      else i = 23;
+      drawSprite("samuel_anoint", i, this.samX, y, -1, s);
+      if (this.step === 3 && i >= 15) {   // the oil running from the horn over David's head
+        const hx = this.samX - ANOINT.HORN[0] * k, hy = y - ANOINT.HORN[1] * k, head = y - ANOINT.DAVID_HEAD * k;
+        ctx.strokeStyle = "rgba(232,196,90,0.95)"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(dx, head + 4); ctx.stroke();
+        for (let n = 0; n < 4; n++) {
+          const ph = (this.t * 1.3 + n / 4) % 1;
+          ctx.fillStyle = `rgba(240,205,95,${1 - ph})`; ctx.beginPath(); ctx.arc(dx + (n - 1.5) * 9, head + 6 + ph * 40, 3.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+    if (this.glow > 0) {   // the warm light on David (the Spirit of the LORD)
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      const g = ctx.createRadialGradient(dx, y - 100 * k, 10, dx, y - 100 * k, 300);
+      g.addColorStop(0, `rgba(255,214,120,${0.55 * this.glow})`); g.addColorStop(0.5, `rgba(255,190,90,${0.22 * this.glow})`); g.addColorStop(1, "rgba(255,190,90,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      for (let n = 0; n < 14; n++) {   // motes of light rising round him
+        const ph = (this.t * 0.35 + n / 14) % 1;
+        ctx.fillStyle = `rgba(255,240,190,${0.8 * this.glow * Math.sin(ph * Math.PI)})`;
+        ctx.beginPath(); ctx.arc(dx + Math.sin(n * 2.3 + this.t) * 60, y - 20 - ph * 260, 2.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,248,230,0.9)"; ctx.font = "italic 22px Georgia, serif";
+    ctx.fillText("The Anointing", W / 2, 50);
+    if (this.t > 1.2) drawStoryBox(...this.lines[this.step], this.step === this.lines.length - 1 ? "A: continue" : "A: next", true);   // up top: the people stand on the ground below
+  },
+};

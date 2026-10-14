@@ -348,6 +348,18 @@ window.SPRITE_DATA = {
   "ay": 196,
   "align": "feet"
  },
+ "brothers_line": {
+  "src": "../assets/sprites/brothers_line.png",
+  "frames": 20,
+  "w": 665,
+  "h": 294,
+  "ms": 502,
+  "loop": false,
+  "pingpong": false,
+  "ax": 216,
+  "ay": 291,
+  "align": "feet"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,
@@ -2074,6 +2086,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 72,
   "ay": 72,
+  "align": "feet"
+ },
+ "samuel_anoint": {
+  "src": "../assets/sprites/samuel_anoint.png",
+  "frames": 24,
+  "w": 166,
+  "h": 286,
+  "ms": 418,
+  "loop": false,
+  "pingpong": false,
+  "ax": 71,
+  "ay": 284,
   "align": "feet"
  },
  "scorpion_walk": {

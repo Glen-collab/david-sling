@@ -2488,6 +2488,7 @@ function updateFinish(dt) {
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
     const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
+    else if (LEVEL_STAGE === "3-3" && typeof anointing !== "undefined") anointing.start(journal);   // the Anointing (world3.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -3186,6 +3187,9 @@ function frame(now) {
     else { Courtyard.update(real); Courtyard.draw(); }
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
+  }
+  if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
+    pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof ending !== "undefined" && ending.active) {   // the end-of-world scene (world2.js) has the screen
     pollInput(); ending.update(real); ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

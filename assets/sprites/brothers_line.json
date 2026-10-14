@@ -1,0 +1,33 @@
+{
+  "frames": 20,
+  "frame_w": 665,
+  "frame_h": 294,
+  "ms_per_frame": 502,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 216,
+  "anchor_y": 291,
+  "source": "anointing_of_brothers_white.mp4",
+  "video_frames": [
+    1,
+    14,
+    26,
+    39,
+    52,
+    64,
+    77,
+    89,
+    102,
+    115,
+    127,
+    140,
+    153,
+    165,
+    178,
+    190,
+    203,
+    216,
+    228,
+    241
+  ]
+}
