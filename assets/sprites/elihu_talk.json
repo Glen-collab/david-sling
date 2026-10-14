@@ -1,15 +1,27 @@
 {
-  "frames": 2,
-  "frame_w": 132,
-  "frame_h": 222,
-  "ms_per_frame": 260,
+  "frames": 13,
+  "frame_w": 119,
+  "frame_h": 230,
+  "ms_per_frame": 220,
   "loop": true,
   "align": "feet",
-  "anchor_x": 55,
-  "anchor_y": 221,
-  "source": "elihu_poses.png",
-  "poses": [
-    2,
-    6
-  ]
+  "anchor_x": 46,
+  "anchor_y": 228,
+  "source": "ozem_1.mp4",
+  "video_frames": [
+    1,
+    8,
+    16,
+    23,
+    31,
+    38,
+    45,
+    53,
+    60,
+    68,
+    75,
+    83,
+    90
+  ],
+  "pingpong": true
 }

@@ -1,16 +1,17 @@
 {
-  "frames": 2,
-  "frame_w": 101,
-  "frame_h": 230,
-  "ms_per_frame": 500,
+  "frames": 3,
+  "frame_w": 73,
+  "frame_h": 229,
+  "ms_per_frame": 600,
   "loop": true,
   "align": "feet",
-  "anchor_x": 32,
+  "anchor_x": 37,
   "anchor_y": 228,
-  "source": "ozem_1.mp4",
+  "source": "elihu_2.mp4",
   "video_frames": [
-    1,
-    6
+    60,
+    75,
+    90
   ],
   "pingpong": true
 }
