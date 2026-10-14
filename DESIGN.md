@@ -66,7 +66,7 @@ Jesse had eight sons. David was the youngest (1 Samuel 16:10–11, 17:12–14). 
 - **Abinadab** (second): steady, a bit of a joker. Gives practical tips.
 - **Shammah** (third): kind, encouraging. The brother who believes in David.
 
-The other four brothers aren't named in Samuel. They appear only as background family.
+The other four brothers aren't named in Samuel. They appear only as background family. **Decided 2026-10-14 (Glen):** the game names them from 1 Chronicles 2:14–15 (**Nethanel, Raddai, Ozem**) and 27:18 (**Elihu**, "one of David's brothers", standing in for the eighth son 1 Samuel counts; some read Elihu as Eliab, and the game doesn't settle it). They're at their chores in Jesse's courtyard (sheep, ox and yoke, hens, water jar) with small, everyday lines, since the Bible gives them no words.
 
 ---
 

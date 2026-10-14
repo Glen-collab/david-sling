@@ -50,6 +50,16 @@ const HOME_SPOTS = [
   { id: "stall", x: 0.705, label: "The market" },
   { id: "gate", x: 0.915, label: "Out to the fields" },
 ];
+// David's younger-older brothers at their chores (Glen's art: assets/items/brother_*.png, still pictures). Names from
+// 1 Chronicles 2:14-15 (Nethanel, Raddai, Ozem); Elihu from 1 Chronicles 27:18, standing in for the eighth son that
+// 1 Samuel 16:10-11 counts. The Bible gives them no words, so theirs are small, everyday and kind. Up next to one: a line.
+const BROTHERS = [
+  { id: "raddai", name: "Raddai", x: 0.205, size: 0.27, says: ["Father wants the far field ploughed before the rain. The ox and I disagree about when.", "Watch his horns, little brother. He swings his head when the flies bite."] },
+  { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["Six hens, eleven eggs this week. Don't tell Eliab, he'll want them all.", "They come running the moment they hear the basket. Like your sheep and that harp."] },
+  { id: "elihu", name: "Elihu", x: 0.815, size: 0.27, says: ["The well's low this summer. I carry twice as many jars as last year.", "This little one follows me to the well every morning. She thinks the jar is for her."] },
+  { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Taking the ewes out to the near pasture. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
+];
+for (const b of BROTHERS) HOME_SPOTS.push({ id: "brother:" + b.id, x: b.x, label: b.name });
 // the throw: one piece per world (§4c). Together it's the Konami code.
 const THROW_PIECES = [["up"], ["up"], ["down"], ["down"], ["left", "right"], ["left", "right"], ["b"], ["a"]];
 // What Jesse says after a practice throw, taking turns. Jesse in 1 Samuel is a busy farmer: when Samuel came he nearly
@@ -128,6 +138,10 @@ const Courtyard = {
     const spot = this.near();
     if (pressed("select")) { this.useShelf(); return; }
     if (!spot || !pressed("up")) return;
+    if (spot.id.startsWith("brother:")) {
+      const b = BROTHERS.find(b => "brother:" + b.id === spot.id); b.n = (b.n || 0) + 1;
+      this.say(b.name, b.says[(b.n - 1) % b.says.length]); return;
+    }
     if (spot.id === "gate") { this.leaving = () => WorldMap.open(this.world); return; }
     if (spot.id === "shelf") { this.useShelf(); return; }
     if (spot.id === "jesse") { this.useJesse(); return; }
@@ -244,6 +258,9 @@ const Courtyard = {
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);
+    for (const b of BROTHERS) {   // the brothers at their chores (behind everyone else)
+      const bx = b.x * SW - cam; if (bx > -200 && bx < W + 200) drawItem("brother_" + b.id, bx, floor + 6, b.size * HOME.SIZE, ctx.globalAlpha);
+    }
     // Jesse, just right of the target, facing David: idle, talking while his words are up, or pointing and laughing after a hit
     const jx = HOME_SPOTS.find(s => s.id === "jesse").x * SW - cam, ct = this.cheerAt === null ? 1e9 : this.t - this.cheerAt;
     if (!animDone("jesse_cheer", ct)) drawSprite("jesse_cheer", frameOf("jesse_cheer", ct), jx, floor, -1, HOME.SIZE * HOME.JESSE_SIZE, ctx.globalAlpha);
