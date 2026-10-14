@@ -23,12 +23,12 @@ for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c 
 // Glen's pieces (assets/items/town_*.png, cut from his side-view sheet): the houses are stone walls built up from his
 // low wall, row on row, with his mud roof slab on top
 const ok = n => ITEM[n] && ITEM[n].naturalWidth;
-const TOWN_STONE = "sepia(0.55) saturate(1.35) brightness(1.1)";   // Glen's grey stone, warmed to the tan town in his backgrounds
+const TOWN_STONE = "none";   // a filter on Glen's stone if it ever needs warming (his warm sheet matches the town as it is)
 function drawStoneHouse(h) {
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0, img = ITEM.town_low_wall;
   const rh = 34, rw = img.naturalWidth * rh / img.naturalHeight;
   ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, w, y1 - y0); ctx.clip();
-  ctx.fillStyle = "#9c8466"; ctx.fillRect(x0, y0, w, y1 - y0);
+  ctx.fillStyle = "#a8703f"; ctx.fillRect(x0, y0, w, y1 - y0);
   ctx.filter = TOWN_STONE;
   for (let y = y1 - rh, row = 0; y > y0 - rh; y -= rh * 0.82, row++) {
     for (let x = x0 - ((row * 0.37 + h.c * 0.13) % 1) * rw; x < x1; x += rw - 6) ctx.drawImage(img, x, y, rw, rh);
