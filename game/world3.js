@@ -54,8 +54,9 @@ const HOUSE_LOOKS = {
   corner:  { wx0: 37, wx1: 473, walk: 40, a: 180, b: 245 },
   parapet: { wx0: 20, wx1: 403, walk: 85, a: 230, b: 310 },
 };
+const HOUSE_SINK = 16;   // how far houses and stairs sink into the topsoil (pixels), like the dry-stone walls
 function drawHouseArt(h, img, L) {
-  const x0 = h.c * T, y0 = h.r * T, y1 = GR * T, w = (h.w) * T, s = w / (L.wx1 - L.wx0);
+  const x0 = h.c * T, y0 = h.r * T, y1 = GR * T + HOUSE_SINK, w = (h.w) * T, s = w / (L.wx1 - L.wx0);
   const W = img.naturalWidth, H = img.naturalHeight, dx = x0 - L.wx0 * s, dw = W * s;
   const topEnd = y0 + (L.a - L.walk) * s, botStart = y1 - (H - L.b) * s;
   ctx.save(); ctx.beginPath(); ctx.rect(dx - 2, y0 - 200, dw + 4, y1 - y0 + 200); ctx.clip();
@@ -147,7 +148,7 @@ function drawWorld3(camX) {
   }
   for (const s of stairs) if (on(s.c * T, (s.c + 2 * s.h) * T)) {   // Glen's stone stairs, stretched over the steps
     if (ok("town_stairs")) ctx.filter = TOWN_STONE;
-    if (ok("town_stairs")) ctx.drawImage(ITEM.town_stairs, s.c * T - 4, (GR - s.h) * T - 6, 2 * s.h * T + 8, s.h * T + 10);
+    if (ok("town_stairs")) ctx.drawImage(ITEM.town_stairs, s.c * T - 4, (GR - s.h) * T - 6, 2 * s.h * T + 8, s.h * T + 6 + HOUSE_SINK);
     else { ctx.fillStyle = "#a89a84"; for (let k = 0; k < s.h; k++) ctx.fillRect((s.c + 2 * k) * T, (GR - k - 1) * T, (2 * (s.h - k)) * T, T); }
     ctx.filter = "none";
   }
