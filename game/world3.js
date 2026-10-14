@@ -82,7 +82,30 @@ function drawSideHouse(h) {
   ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y0); ctx.lineTo(x1 + D, y0 - E); ctx.moveTo(x1, y0); ctx.lineTo(x1, y1); ctx.stroke();
   if (ok("town_side_beam")) ctx.drawImage(ITEM.town_side_beam, x0 - 6, y0 - 4, w + 12, 11);   // the roof beam along the front edge
 }
+// Glen's side-view houses (town_house_shed/tower/big.png, cut off the ground he came on). Per picture, in its own
+// pixels: the wall's left and right edge, the roof line David stands on, and two cuts. Above the first cut (the roof)
+// and below the second (door and windows) are drawn at true shape; the plain wall between repeats to make the house as
+// tall as its blocks. A house too short for both parts is squashed a little instead.
+const HOUSE_LOOKS = {
+  shed:  { wx0: 35, wx1: 393, walk: 31, a: 91,  b: 146 },
+  tower: { wx0: 30, wx1: 502, walk: 37, a: 155, b: 275 },
+  big:   { wx0: 52, wx1: 708, walk: 12, a: 187, b: 287 },
+};
+function drawHouseArt(h, img, L) {
+  const x0 = h.c * T, y0 = h.r * T, y1 = GR * T + HOUSE_SINK, w = h.w * T, s = w / (L.wx1 - L.wx0);
+  const W = img.naturalWidth, H = img.naturalHeight, dx = x0 - L.wx0 * s, dw = W * s;
+  const need = (L.a - L.walk + H - L.b) * s, sy = Math.min(1, (y1 - y0) / need) * s;
+  const topEnd = y0 + (L.a - L.walk) * sy, botStart = y1 - (H - L.b) * sy, band = (L.b - L.a) * s;
+  for (let y = topEnd; y < botStart; y += band - 1) {   // the plain wall between roof and door, as often as it takes
+    const hh = Math.min(band, botStart - y + 1);
+    ctx.drawImage(img, 0, L.a, W, hh / s, dx, y, dw, hh);
+  }
+  ctx.drawImage(img, 0, L.b, W, H - L.b, dx, botStart, dw, (H - L.b) * sy);
+  ctx.drawImage(img, 0, 0, W, L.a, dx, y0 - L.walk * sy, dw, L.a * sy);
+}
 function drawHouse(h) {
+  const rows = GR - h.r, look = rows <= 4 ? "shed" : rows / h.w > 1.2 ? "tower" : "big";
+  if (ok("town_house_" + look)) { drawHouseArt(h, ITEM["town_house_" + look], HOUSE_LOOKS[look]); return; }
   if (ok("town_side_low_wall")) { drawSideHouse(h); return; }
   if (ok("town_low_wall")) { drawStoneHouse(h); return; }
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0;
@@ -109,6 +132,11 @@ function drawHouse(h) {
   sg.addColorStop(0, "rgba(0,0,0,0)"); sg.addColorStop(1, "rgba(60,40,20,0.25)"); ctx.fillStyle = sg; ctx.fillRect(x0 - 22, y0 + 8, 22, y1 - y0 - 8);
 }
 function drawLadder(l) {
+  if (ok("town_ladder")) {   // Glen's ladder, cut from the top down to the ground (it runs on below the soil)
+    const img = ITEM.town_ladder, w = 2 * T - 4, sc = w / img.naturalWidth, top = l.r * T - 26, hh = GR * T + 10 - top;
+    ctx.drawImage(img, 0, 0, img.naturalWidth, Math.min(img.naturalHeight, hh / sc), l.c * T + 2, top, w, Math.min(hh, img.naturalHeight * sc));
+    return;
+  }
   const x0 = l.c * T + 8, x1 = (l.c + 2) * T - 8, top = l.r * T - 22, bot = GR * T;
   ctx.strokeStyle = "#6b4423"; ctx.lineWidth = 6; ctx.lineCap = "round";
   ctx.beginPath(); ctx.moveTo(x0, top); ctx.lineTo(x0 + 4, bot); ctx.moveTo(x1, top); ctx.lineTo(x1 - 4, bot); ctx.stroke();
