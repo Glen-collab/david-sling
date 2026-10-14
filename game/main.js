@@ -809,7 +809,12 @@ if (LEVEL_NAME === "test") {
 } else if (LEVEL_NAME === "2-4") {
   // ---- 2-4 The Bear's Ravine, at dusk: wolves hunting in pairs, claw marks, a tree crashing down off in the trees,
   //      Hanan's last campfire, then the Bear at the pen wall ----
-  const wolfPair = (c, gap = 3) => { critter("wolf", c); critter("wolf", c + gap); critters[critters.length - 1].delay = 0.7; };
+  const wolfPair = (c, gap = 3) => {   // a pack: two sitting in plain sight, a third that comes in from behind (world2.js updateWolf)
+    const pack = { on: false, t: 0 };
+    critter("wolf", c); critters[critters.length - 1].pack = pack;
+    critter("wolf", c + gap); Object.assign(critters[critters.length - 1], { pack, delay: 0.6 });
+    critter("wolf", c); Object.assign(critters[critters.length - 1], { pack, lurk: true }); pack.lurker = critters[critters.length - 1];
+  };
   ground(0, 40);
   oliveRow(6, 16, 5);
   lostSheep("sheep", 14, 16);
@@ -822,7 +827,7 @@ if (LEVEL_NAME === "test") {
   deadfall(60, 10, 2, 7);                                      // a torn-up log pile: a full charged stone breaks it
   setPiece("claws", 64, 15); deco("rubble_dirt", 57, 16, 0.3); deco("rock_pile_grey", 70, 16, 0.3);
   oliveArc(66, 16, 5);
-  wolfPair(74);
+  wolfPair(79);                                                // (room behind for the pack's third wolf)
   // The One: up the ravine wall, ledge by ledge
   plat(80, 13, 3); plat(85, 10, 3); plat(90, 7, 3); plat(95, 4, 3);
   lostSheep("lamb", 96, 3, "one");

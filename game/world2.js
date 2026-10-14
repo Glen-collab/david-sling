@@ -500,6 +500,7 @@ function updateSceneDavid(d, dt) { return updateStonesTalk(d, dt); }
 function resetWorld2(restart) {   // after a fall (restart: out of lives, back to the start of the stage)
   Object.assign(flood, { on: false, done: false, startT: 0, told: false, level: 1, lastX: undefined }); hushFlood();
   resetEagles();
+  for (const k of critters) if (k.pack) k.pack.on = false;   // the wolves wait to spring it again
   if (bear.on && bear.state !== "defeated") resetBear();
   if (restart) { resetBoy(); stonesTalk.step = -1; }
   else if (boy.state === "follow" || boy.state === "stone") { boy.x = david.x - 40; boy.y = david.y; boy.state = "follow"; }
@@ -687,6 +688,8 @@ function drawFalls(camX) {
 // ---------------------------------------------------------------------------
 Object.assign(W2, {
   WOLF_SEE: 9, WOLF_RUN: 400, WOLF_SIZE: 1.25,
+  WOLF_BEHIND: 12,       // tiles behind David where the pack's third wolf comes in
+  WOLF_CLOSE: 4,         // when it's this close to David, the two sitting wolves get up
   BEAR_HP: 8,            // a stagger (full charged stone while it roars) = 2; while dazed: tap 1, charged 2, Power 3
   BEAR_SIZE: 1.7,
   BEAR_WALK: 120, BEAR_CHARGE: 540, BEAR_CHARGE_RUN: 11,   // px/s, and the most tiles one charge runs
@@ -709,6 +712,27 @@ const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera
 // --- wolves
 function updateWolf(k, dx, sameLevel, dt) {
   const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); };
+  // a pack (wolfPack in main.js): two sit in plain sight while a third comes in from behind David. When it's close,
+  // the two get up and come too.
+  if (k.lurk) {
+    if (!k.pack.on) { k.alpha = 0; k.x = -9999; return; }   // not yet: nowhere to be seen
+    if (k.state === "idle") {
+      // from behind David, on open ground with nothing between them (not past a wall, a log pile or a gap)
+      const c = Math.floor(david.x / T), r = Math.floor((david.y - 1) / T); let n = 1;
+      while (n < W2.WOLF_BEHIND && !isSolid(c - n, r) && !isSolid(c - n, r - 1) && (isSolid(c - n, r + 1) || isOneway(c - n, r + 1))) n++;
+      k.alpha = 1; k.x = (c - n + 1.5) * T; k.y = (r + 1) * T; k.vy = 0; k.facing = 1; setCrit(k, "hunt");
+      toast("Wolves hunt in packs. One's coming up behind you!"); sfx("lion_roar", k.x, 0.35, 1.7);
+    }
+  } else if (k.pack && k.state === "idle") {   // sitting, watching: waiting for the one from behind
+    fall(); k.facing = Math.sign(dx) || k.facing;
+    if (!k.pack.on && sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { k.pack.on = true; k.pack.t = 0; }
+    if (k.pack.on) {
+      k.pack.t += dt / 2;   // (two sitters each add half)
+      const L = k.pack.lurker, close = L && !L.gone && Math.abs(L.x - david.x) < W2.WOLF_CLOSE * T;
+      if (close || k.pack.t > 2.4 || (L && L.gone)) { setCrit(k, "rise"); k.t = -(k.delay || 0); }
+    }
+    return;
+  }
   if (k.state === "idle") {
     fall(); k.facing = Math.sign(dx) || k.facing;
     if (sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { setCrit(k, "rise"); k.t = -(k.delay || 0); }
