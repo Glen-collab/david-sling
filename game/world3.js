@@ -23,7 +23,7 @@ for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c 
 // Glen's pieces (assets/items/town_*.png, cut from his side-view sheet): the houses are stone walls built up from his
 // low wall, row on row, with his mud roof slab on top
 const ok = n => ITEM[n] && ITEM[n].naturalWidth;
-const TOWN_STONE = "saturate(0.5) brightness(1.18)";   // the orange stairs (and stone-house fallback) paled to the tan of Glen's houses
+const TOWN_STONE = "none";   // a filter for Glen's stone pieces if they ever need matching to the houses (his pale sheet matches as it is)
 function drawStoneHouse(h) {
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0, img = ITEM.town_low_wall;
   const rh = 34, rw = img.naturalWidth * rh / img.naturalHeight;
