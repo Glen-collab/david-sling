@@ -552,6 +552,11 @@ const ANOINT = {
   STEP_TIME: 2.4,     // seconds for David to step out of the line
   POUR_TIME: 5,       // seconds for Samuel to raise the horn and pour
 };
+// Glen's close-up of the oil pouring over David's head (Grok clip). At the pour, the wide shot fades into it, full
+// screen, and fades back out when it ends. Missing file = the wide shot only.
+const ANOINT_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/anointing_closeup.mp4", muted: true, playsInline: true, preload: "auto" });
+ANOINT_CLIP.onerror = () => { ANOINT_CLIP.missing = true; };
+const clipOk = () => !ANOINT_CLIP.missing && ANOINT_CLIP.readyState >= 2;
 const anointing = {
   active: false, t: 0, step: 0, stepT: 0, done: null, samX: 0, glow: 0,
   lines: [
@@ -562,8 +567,13 @@ const anointing = {
     ["", "And the Spirit of the LORD came powerfully upon David from that day on."],                                   // 16:13
     ["Anointing", "In Israel, oil was poured on the head of someone God set apart for His work, like a king or a priest. The word Messiah means \"the anointed one.\""],
   ],
-  start(done) { Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, samX: W + 140, glow: 0, chimed: false }); hushLoops(); dialog.t = 0; },
-  next() { this.step++; this.stepT = 0; },
+  start(done) { Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, samX: W + 140, glow: 0, chimed: false, close: 0, closeEnd: -1, useClip: false }); hushLoops(); dialog.t = 0; },
+  next() {
+    this.step++; this.stepT = 0;
+    this.close = 0; this.closeEnd = -1;
+    if (this.step === 3 && clipOk()) { this.useClip = true; ANOINT_CLIP.currentTime = 0; ANOINT_CLIP.play().catch(() => {}); } else this.useClip = false;
+  },
+  CLOSE_FADE: 0.9,   // seconds to fade into and out of the close-up
   camX() { return Math.max(0, MAIN_COLS * T - W); },   // the end of 3-3: the town gate behind them
   lineX() { return W * ANOINT.LINE_X; },
   davidX() { return this.lineX() + ANOINT.DAVID_DX * SCALE * ANOINT.SIZE; },
@@ -574,7 +584,12 @@ const anointing = {
     if (this.step >= 1) this.samX = Math.max(samTo, this.samX - 190 * dt);   // Samuel walks in from the right
     if (this.step === 1 && this.samX > samTo) return;                         // (the line waits until he's there)
     if (this.step === 2 && this.stepT < ANOINT.STEP_TIME) return;             // David steps out of the line
-    if (this.step === 3 && this.stepT < ANOINT.POUR_TIME) return;             // the oil
+    if (this.step === 3 && this.useClip) {   // the close-up: fade in, play it through, fade back to the wide shot
+      if (this.closeEnd < 0 && (ANOINT_CLIP.ended || this.stepT > 30)) this.closeEnd = 0;
+      if (this.closeEnd < 0) this.close = Math.min(1, this.stepT / this.CLOSE_FADE);
+      else { this.closeEnd += dt; this.close = Math.max(0, 1 - this.closeEnd / this.CLOSE_FADE); }
+      if (this.close > 0 || this.closeEnd < 0) return;
+    } else if (this.step === 3 && this.stepT < ANOINT.POUR_TIME) return;      // the oil (wide shot only)
     if (this.step === 4) this.glow = Math.min(1, this.glow + dt * 0.6);
     if (this.step === 3 && this.stepT >= ANOINT.POUR_TIME && !this.chimed) { this.chimed = true; chime(5); setTimeout(() => chime(9), 200); setTimeout(() => chime(12), 420); }
     if (!A) return;
@@ -604,7 +619,7 @@ const anointing = {
       else if (this.step === 3) i = Math.min(20, 9 + Math.floor(this.stepT / ANOINT.POUR_TIME * 12));
       else i = 23;
       drawSprite("samuel_anoint", i, this.samX, y, -1, s);
-      if (this.step === 3 && i >= 15) {   // the oil running from the horn over David's head
+      if (this.step === 3 && !this.useClip && i >= 15) {   // the oil running from the horn over David's head
         const hx = this.samX - ANOINT.HORN[0] * k, hy = y - ANOINT.HORN[1] * k, head = y - ANOINT.DAVID_HEAD * k;
         ctx.strokeStyle = "rgba(232,196,90,0.95)"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(dx, head + 4); ctx.stroke();
         for (let n = 0; n < 4; n++) {
@@ -625,9 +640,13 @@ const anointing = {
       }
       ctx.restore();
     }
+    if (this.close > 0 && ANOINT_CLIP.videoWidth) {   // the close-up, filling the screen
+      const v = ANOINT_CLIP, sc = Math.max(W / v.videoWidth, H / v.videoHeight), vw = v.videoWidth * sc, vh = v.videoHeight * sc;
+      ctx.save(); ctx.globalAlpha = this.close; ctx.drawImage(v, (W - vw) / 2, (H - vh) / 2, vw, vh); ctx.restore();
+    }
     ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,248,230,0.9)"; ctx.font = "italic 22px Georgia, serif";
     ctx.fillText("The Anointing", W / 2, 50);
-    if (this.t > 1.2) drawStoryBox(...this.lines[this.step], this.step === this.lines.length - 1 ? "A: continue" : "A: next", true);   // up top: the people stand on the ground below
+    if (this.t > 1.2) drawStoryBox(...this.lines[this.step], this.step === this.lines.length - 1 ? "A: continue" : "A: next", this.close < 0.5);   // up top over the wide shot; at the bottom over the close-up (the oil is up top there)   // up top: the people stand on the ground below
   },
 };
