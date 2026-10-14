@@ -117,6 +117,8 @@ spear). Same height as each brother's everyday sprites. `abinadab_war_talk`, `sh
 `david-sling-art/video/anointing_of_brothers.mp4`: all eight sons lined up (Eliab in war gear first, David last) for
 1 Samuel 16:6-11, Jesse's sons passing before Samuel. Its background is a baked-in grey checkerboard (a fake
 "transparent" pattern), not a flat screen, so it needs its own key (checker colors) before it can be cut.
+USE `anointing_of_brothers_white.mp4` instead: the same lineup on clean white, tested with `vid2sprite.py --white`
+(keys cleanly, all eight in one sheet; the brothers chat and David steps forward near the end).
 
 ## Later: brothers turning to make way (Glen wants to see the current version play first)
 Courtyard brothers (home.js, `HOME.MAKE_WAY*`, `TURN_TIME`) step back up-screen behind David when he walks into them and
