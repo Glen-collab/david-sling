@@ -21,6 +21,10 @@ const HOME = {
   TRADER_X: 0.75,                 // where the trader stands, just in front of his stall
   TRADER_SIZE: 1.2,
   BROTHER_SIZE: 1.12,             // the brothers are older than David: a little taller
+  MAKE_WAY: 85,                   // David this close (px): the brother takes two steps back, out of his way...
+  MAKE_WAY_UP: 22,                // ...this far up the screen (behind David)...
+  MAKE_WAY_TIME: 0.5,             // ...in this many seconds (a walk clip plays while he steps)
+  TURN_TIME: 0.22,                // seconds to turn around to face David
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -274,23 +278,34 @@ const Courtyard = {
         else if (b.st === "talk") { b.st = "idle"; b.stT = 0; }
         else if (b.st === "idle" && !near && b.stT > 1.5) { b.st = "walk"; b.stT = 0; }
         if (!near) b.waved = b.waved && Math.abs(dpx - b.px * SW) < 400;   // wave again after David's been away
-        if (b.st !== "walk" && Math.abs(dpx - b.px * SW) < 95) b.px += (b.px * SW < dpx ? -1 : 1) * 120 * dt / SW;   // give David room to stand
         if (b.st === "walk") {
           b.px += b.dir * 70 * dt / SW;
           if (Math.abs(b.px - b.x) > 0.035) { b.px = b.x + Math.sign(b.px - b.x) * 0.035; b.dir = -b.dir; }
         }
       }
+      // making way: David walks into him, so he steps back out of the path (up the screen, behind David), turning to
+      // keep facing him, and steps back to his spot once David's gone by
+      const gap = Math.abs(dpx - b.px * SW), d0 = b.way || 0;
+      const wayTo = gap < HOME.MAKE_WAY ? 1 : gap > HOME.MAKE_WAY * 1.6 ? 0 : d0;
+      b.way = d0 + Math.sign(wayTo - d0) * Math.min(Math.abs(wayTo - d0), dt / HOME.MAKE_WAY_TIME);
+      const stepping = b.way !== d0 || (b.stepT || 0) > 0;
+      b.stepT = b.way !== d0 ? 0.15 : Math.max(0, (b.stepT || 0) - dt);   // finish the step that's under way
+      if (b.way !== d0 && walks && b.st === "walk") { b.st = "idle"; b.stT = 0; }
       const bx = b.px * SW - cam; if (bx < -200 || bx > W + 200) continue;
-      const face = b.st === "walk" && walks && !talking ? b.dir : Math.sign(dpx - b.px * SW) || -1, sz = HOME.SIZE * HOME.BROTHER_SIZE;
+      const faceTo = b.st === "walk" && walks && !talking ? b.dir : Math.sign(dpx - b.px * SW) || -1;
+      b.face = b.face === undefined ? faceTo : b.face + Math.sign(faceTo - b.face) * Math.min(Math.abs(faceTo - b.face), 2 * dt / HOME.TURN_TIME);
+      const face = (b.face < 0 ? -1 : 1) * Math.max(0.3, Math.abs(b.face));   // the turn: squeezes through side-on
+      const sz = HOME.SIZE * HOME.BROTHER_SIZE * (1 - 0.06 * b.way), by = floor - HOME.MAKE_WAY_UP * b.way;
       let nm, fi;
-      if (walks && b.st === "walk") { nm = b.id + "_walk"; fi = frameOf(nm, b.stT); }
+      if (walks && stepping && !talking) { nm = b.id + "_walk"; b.wT = (b.wT || 0) + dt; fi = frameOf(nm, b.wT); }
+      else if (walks && b.st === "walk") { nm = b.id + "_walk"; fi = frameOf(nm, b.stT); }
       else if (walks && b.st === "wave") { nm = b.id + "_wave"; fi = frameOf(nm, b.stT); }
       else if (talking) { nm = b.id + "_talk"; fi = walks ? frameOf(nm, this.t - this.msg.at) : Math.floor((this.t - this.msg.at) / 0.9) % 2; }
       else {
         const still = !walks && (b.id === "nethanel" || Math.floor(this.t / 5 + b.x * 7) % 3 === 2) ? "_crossed" : "_idle";   // (Nethanel's standing pose has his staff beside him)
         nm = b.id + still; fi = walks ? frameOf(nm, this.t) : 0;
       }
-      if (SPR[nm]) drawSprite(nm, fi, bx, floor, face, sz, ctx.globalAlpha);
+      if (SPR[nm]) drawSprite(nm, fi, bx, by, face, sz, ctx.globalAlpha);
       else drawItem("brother_" + b.id, bx, floor + 6, b.size * HOME.SIZE, ctx.globalAlpha);
     }
     // Jesse, just right of the target, facing David: idle, talking while his words are up, or pointing and laughing after a hit
