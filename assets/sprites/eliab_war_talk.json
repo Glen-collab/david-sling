@@ -1,0 +1,27 @@
+{
+  "frames": 14,
+  "frame_w": 201,
+  "frame_h": 334,
+  "ms_per_frame": 312,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 83,
+  "anchor_y": 332,
+  "source": "eliab_war.mp4",
+  "video_frames": [
+    81,
+    89,
+    97,
+    105,
+    113,
+    121,
+    129,
+    137,
+    145,
+    153,
+    161,
+    169,
+    177,
+    185
+  ]
+}

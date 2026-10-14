@@ -14,6 +14,9 @@ usage:
   --ref     start:end frames where the character is seen at full height, for consistent scale (default 4:end).
   --soft    a gentler key for furry, greenish characters (the ram): only clearly green screen is removed, and holes
             inside the body (green eyes, spill in the fur) are filled back in.
+  --thin W  measure the body without anything thinner than W video pixels (a spear or bow sticking up above the head),
+            so the size and the head line-up come from the man, not the spear tip.
+  --headroom H  add H pixels of empty space above the top of the sheet (room to paint in a spear tip cut off by the video).
   --green   also write <out_prefix>_green.png: the same frames, same layout, straight from the video (green screen
             and all), for borrowing parts in Photoshop.
 
@@ -35,6 +38,8 @@ ap.add_argument("--mirror", action="store_true", help="flip left-right so the ch
 ap.add_argument("--soft", action="store_true"); ap.add_argument("--green", action="store_true")
 ap.add_argument("--white", action="store_true", help="the clip is on a white background (not green): key out white and its soft grey shadows")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
+ap.add_argument("--min-loop", type=float, default=0.5, help="shortest loop in seconds (raise it if it finds half a stride)")
+ap.add_argument("--thin", type=int, default=0); ap.add_argument("--headroom", type=int, default=0)
 args = ap.parse_args()
 
 tmp = tempfile.mkdtemp()
@@ -89,9 +94,18 @@ def on_green(path):
     return green_mask(np.asarray(Image.open(path).convert("RGB")).astype(int)).mean() > 0.4
 files = [f for f in files if on_green(f)]
 
+def body(m):   # the mask without thin things (spear, bow) when --thin is set
+    if not args.thin: return m
+    o = ndimage.maximum_filter(ndimage.minimum_filter(m.astype(np.uint8), args.thin), args.thin) > 0   # square opening, fast
+    return o if o.any() else m
+
 def anchor(im):
     m = np.asarray(im)[..., 3] > 128; ys, xs = np.where(m)
-    foot = ys.max(); top = ys.min()
+    foot = ys.max(); top = ys.min(); xl, xr = xs.min(), xs.max()
+    if args.thin:   # head line-up and the height from the body; the box (xl, top, xr) still holds the spear
+        bys, bxs = np.where(body(m))
+        cx = int(np.median(bxs[bys < bys.min() + max(10, (foot - bys.min()) // 4)]))
+        return foot, cx, xl, top, xr, foot
     if args.align == "ground":   # on the floor but tumbling: lowest point on the ground line, centred by the whole body
         cx = int((xs.min() + xs.max()) / 2)
         return foot, cx, xs.min(), top, xs.max(), foot
@@ -119,7 +133,7 @@ else:
     sils = [sil(k, a) for k, a in zip(keyed, anchors)]
     best = None
     for s0 in range(0, max(1, min(n // 2, n - 15))):
-        for lag in range(max(10, int(fps * 0.5)), min(n - s0, int(fps * 2.5))):
+        for lag in range(max(10, int(fps * args.min_loop)), min(n - s0, int(fps * 2.5))):
             d = (sils[s0] ^ sils[s0 + lag]).mean()
             if best is None or d < best[0]:
                 best = (d, s0, lag)
@@ -142,7 +156,7 @@ crops = [im.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + B)) for im, a in sel]
 def height_of(path):
     k = key(path)
     if k is None: return 0
-    m = np.asarray(k)[..., 3] > 128; ys, xs = np.where(m)
+    m = body(np.asarray(k)[..., 3] > 128); ys, xs = np.where(m)
     return (ys.max() - ys.min()) if len(ys) else 0
 r0, r1 = (int(v) for v in args.ref.split(":"))
 char_h = max(height_of(f) for f in all_files[r0 - 1:(r1 or len(all_files))][::6] if on_green(f))
@@ -154,14 +168,15 @@ if args.mirror:
     frames = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in frames]
     anchor_x = cw - anchor_x
 
-sheet = Image.new("RGBA", (cw * N, ch))
-for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, 0))
+hr = args.headroom
+sheet = Image.new("RGBA", (cw * N, ch + hr))
+for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, hr))
 sheet.save(args.out + "_sheet.png")
 if args.green:   # the untouched video frames, cut and laid out exactly like the sheet
     gf = [im.raw.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + B)).resize((cw, ch), Image.LANCZOS) for im, a in sel]
     if args.mirror: gf = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in gf]
-    gs = Image.new("RGBA", (cw * N, ch), (53, 188, 54, 255))
-    for k, f in enumerate(gf): gs.alpha_composite(f, (k * cw, 0))
+    gs = Image.new("RGBA", (cw * N, ch + hr), (53, 188, 54, 255))
+    for k, f in enumerate(gf): gs.alpha_composite(f, (k * cw, hr))
     gs.save(args.out + "_green.png")
 
 ms = round(1000 * (length / fps) / N)
@@ -171,7 +186,7 @@ for f in frames:
     gif.append(bg.convert("RGB").resize((cw // 2 * 2 // 1, ch), Image.LANCZOS))
 gif[0].save(args.out + "_preview.gif", save_all=True, append_images=gif[1:], duration=ms, loop=0)
 
-json.dump({"frames": N, "frame_w": cw, "frame_h": ch, "ms_per_frame": ms, "loop": not args.once,
-           "align": args.align, "anchor_x": anchor_x, "anchor_y": round(-T * sc),
+json.dump({"frames": N, "frame_w": cw, "frame_h": ch + hr, "ms_per_frame": ms, "loop": not args.once,
+           "align": args.align, "anchor_x": anchor_x, "anchor_y": round(-T * sc) + hr,
            "source": os.path.basename(args.clip), "video_frames": [args.start + i for i in idx]}, open(args.out + ".json", "w"), indent=2)
 print(f"{N} frames of {cw}x{ch}, {ms} ms each -> {args.out}_sheet.png")

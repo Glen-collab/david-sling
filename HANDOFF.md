@@ -107,3 +107,10 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 | `SONG.md` | "The Shepherd Leads Me" (Glen's song; stays as is) |
 | `SPRITES.md`, `VIDEO_SPRITES.md`, `ART_PROMPTS.md` | Sprite lists, the Grok-to-sprite pipeline, art prompts |
 | `assets/sounds/SOURCES.md` | Where each sound came from |
+
+## War gear brothers (for the army camp / Valley of Elah)
+Sprites `abinadab_war_walk/idle/talk`, `shammah_war_walk/ready/draw`, `eliab_war_walk/idle/talk` (clips in
+david-sling-art/video/*_war.mp4, cut with `vid2sprite.py --white --thin 41`, which sizes on the body and ignores the
+spear). Same height as each brother's everyday sprites. `abinadab_war_talk`, `shammah_war_draw` and `eliab_war_talk` have
+40px of `--headroom` so Glen can paint in the spear/bow tips the video cut off. Not placed in any level yet.
+`david-sling-art/video/samuel_anointing.mp4`: Samuel anointing, for the anointing scene later.

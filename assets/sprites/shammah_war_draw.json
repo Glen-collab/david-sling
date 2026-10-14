@@ -1,0 +1,27 @@
+{
+  "frames": 14,
+  "frame_w": 250,
+  "frame_h": 316,
+  "ms_per_frame": 253,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 102,
+  "anchor_y": 314,
+  "source": "831c23f4-Warrior_brother_2.MP4",
+  "video_frames": [
+    121,
+    127,
+    134,
+    140,
+    147,
+    153,
+    160,
+    166,
+    173,
+    179,
+    186,
+    192,
+    199,
+    205
+  ]
+}

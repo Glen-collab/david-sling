@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 175,
+  "frame_h": 274,
+  "ms_per_frame": 76,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 104,
+  "anchor_y": 272,
+  "source": "shammah_war.mp4",
+  "video_frames": [
+    20,
+    22,
+    24,
+    26,
+    27,
+    29,
+    31,
+    33,
+    35,
+    36,
+    38,
+    40
+  ]
+}

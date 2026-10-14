@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 141,
+  "frame_h": 258,
+  "ms_per_frame": 73,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 71,
+  "anchor_y": 256,
+  "source": "abinadab_war.mp4",
+  "video_frames": [
+    12,
+    14,
+    16,
+    17,
+    19,
+    21,
+    22,
+    24,
+    26,
+    28,
+    30,
+    31
+  ]
+}
