@@ -1231,7 +1231,7 @@ const ending = {
         if (this.stepT > ending.GIVE && !this.pouch) { this.pouch = { t: 0 }; }
         if (this.pouch) this.pouch.t += dt;
         if (this.pouch && this.pouch.t > 1.2 && !this.gave) {
-          this.gave = true; sfx("extra_life", undefined, 0.7);
+          this.gave = true; sfx("extra_life", undefined, 0.7); dialog.t = 0;   // it lands in David's lap: the father's words give way to the gift
           try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); if (!p.slingPouch) { p.slingPouch = true; TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
         }
         if (this.pouch && this.pouch.t > 2.6 && A) { dialog.t = 0; this.next(); }
