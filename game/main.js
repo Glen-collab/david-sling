@@ -46,9 +46,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
-  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -327,6 +327,7 @@ const STAGE_INFO = {
   "2-2": { cols: 306, bg: "w2_2", ter: "w2s", name: "The Dry Riverbed" },
   "2-3": { cols: 196, bg: "w2_3", ter: "w2s", name: "The High Cliffs" },
   "2-4": { cols: 258, bg: "w2_4", ter: "w2f", name: "The Bear's Ravine" },   // ter: the stage's own ground set (assets/terrain/w2f)
+  "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -350,6 +351,10 @@ const codeWalls = [];
 const deadfalls = [];
 // World 2's set pieces, run by world2.js: the flood, the boy from Tekoa, the talk about the stones (see world2.js)
 const setPieces = [];
+// World 3: Bethlehem's flat-roofed houses (material 9, drawn in world3.js) and ladders up their walls (rungs you hop up)
+const houses = [], ladders = [], GRANARY_BEAM_ROW = 12;   // (the granary's beam, where its whip snake lies)
+const house = (c, w, r) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r }); };
+const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
@@ -863,6 +868,49 @@ if (LEVEL_NAME === "test") {
   setPiece("bear", 226, GR - 1, { arena: 198 });               // at the pen wall, a sheep pinned under its paw
   wallRow(228.5 * T, ["pen_wall_2"], 0.27);                       // the pen's wall, cracked where the bear's been at it
   sheepfold(238);
+} else if (LEVEL_NAME === "3-1") {
+  // ---- 3-1 The Day Before: all Bethlehem is getting ready for the prophet, and David gets the jobs nobody wants.
+  //      The chores are the level: crows out of the barley, rats out of the granary (or leave the whip snake on the
+  //      beam alone and it does the job), flat roofs to run across, ladders up the walls, The One on the highest roof.
+  //      At the end Jesse sends him out to the far pasture. Nobody thinks to invite him. ----
+  ground(0, 236);
+  talk(4, "Eliab", "Samuel the prophet is coming to Bethlehem. When he sees me, he'll know. Look at me.");
+  talk(10, "Shammah", "Don't mind him. Somebody has to keep the sheep alive while he's being admired.");
+  oliveRow(14, 16, 4);
+  setPiece("barley", 19, GR - 1, { w: 18 });                   // the crows are at the barley: sling them off
+  for (const c of [22, 26, 30, 34]) critter("crow", c, GR - 1);
+  lostSheep("sheep", 28, 16);                                  // nibbling the barley with the crows
+  // the first houses: up the ladder, then roof to roof
+  house(44, 6, 13); ladder(42, 13); oliveRow(44, 12, 6);
+  special(51, 9);                                              // over the gap between the roofs: jump for it
+  house(53, 5, 11); lostSheep("lambblack", 55, 10, "ledge");   // up on a roof (it followed the ladder): the harp brings it down
+  house(60, 6, 13); food("figs", 63, 12);                      // figs drying on the roof
+  house(68, 4, 15);                                            // a low shed: the way back down
+  campfire(76, GR - 1, "Hanan", "Every doorstep in Bethlehem swept for the prophet. The elders are trembling: when a prophet comes, it can mean trouble. Or it can mean the LORD is about to do something.");
+  // the granary: rats in the grain, and the harmless green whip snake on the beam
+  setPiece("granary", 86, GR - 1, { w: 11 });
+  snake("whip", 91, GRANARY_BEAM_ROW);
+  for (const c of [88, 91, 94, 96]) critter("rat", c, GR - 1, 2);
+  lostSheep("sheep", 102, 16, "cast");                         // on its back in the lane: roll it over (Down)
+  // the lanes: a tall house in the way, so it's over the roofs
+  house(108, 5, 12); ladder(106, 12); oliveRow(108, 11, 5);
+  house(115, 6, 10); oliveArc(115, 8, 6);
+  house(123, 5, 12); oliveRow(123, 11, 5);
+  // the threshing floor, where Ruth gleaned in Boaz's fields, long ago (a Journal fact)
+  setPiece("threshing", 132, GR - 1, { w: 7 }); food("bread", 135, 16);
+  special(141, 12);
+  lostSheep("sheepblack", 144, 16);
+  setPiece("barley", 149, GR - 1, { w: 16 });                  // the second field: more crows
+  for (const c of [151, 155, 159, 163]) critter("crow", c, GR - 1);
+  lostSheep("sheep", 157, 16);
+  // The One: on the highest roof in Bethlehem, a long chain of roof jumps
+  house(171, 4, 13); ladder(169, 13);
+  house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7);
+  house(195, 5, 5); lostSheep("lamb", 197, 4, "one");
+  oliveRow(171, 12, 4); oliveRow(177, 10, 4); oliveRow(183, 8, 4); oliveRow(189, 6, 4);
+  oliveRow(204, 16, 6);
+  talk(214, "Jesse", "David, the flock still needs you. Take them out to the far pasture tomorrow. Your brothers will stay for the prophet.");
+  sheepfold(222);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1412,7 +1460,7 @@ function drawTiles(camX) {
   const sed = terPattern("sediment", TUNE.TER_FILL_SCALE), lim = terPattern("limestone", TUNE.TER_FILL_SCALE);
   if (sed && sed.setTransform) sed.setTransform(new DOMMatrix().translate(0, getSedimentPhase()));
   for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
-    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6 || m === 7 || m === 8) continue;
+    const m = matAt(c, r); if (!m || m === 3 || m === 4 || m === 5 || m === 6 || m === 7 || m === 8 || m === 9) continue;
     const rockFill = c >= MAIN_COLS ? terPattern("cave_rock_tile", 0.45) || lim : lim;   // in a cave: damp cave rock
     ctx.fillStyle = (m === 2 ? rockFill : sed) || (m === 2 ? "#c9b48c" : "#8b6a3e");
     let fx = c * T, fw = T + 0.5;
@@ -2894,13 +2942,14 @@ function updateWorld(dt) {
   updatePickups(dt); updateGourds(); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
+  if (typeof updateWorld3 === "function") updateWorld3(dt);   // the crows in the barley, the rats in the granary (world3.js)
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
 const BG = {};
 // a set can borrow layers it doesn't have yet from another set (1-4 night: its own sky, World 1's hills until Glen's arrive)
 const BG_BORROW = {};   // e.g. { w1_2: { near: "w1" } } while a set is still missing a layer
-for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4"]) {
+for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
     if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }
@@ -3062,7 +3111,7 @@ function frame(now) {
   drawCaveDoors(camX);
   drawTiles(camX);
   drawCaveFeatures(camX);
-  drawPlatforms(camX);
+  drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
   drawPickups(camX);

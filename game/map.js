@@ -45,6 +45,17 @@ const MAP_WORLDS = {
       { id: "2-4", label: "The Bear's Ravine", x: 1500, y: 950, trail: [[1330, 680], [1380, 800], [1440, 900]] },
     ],
   },
+  // World 3: Bethlehem up close. Stand-in: the World 1 painting (it's Bethlehem's hills) until the World 3 map arrives.
+  3: {
+    name: "The Anointing", src: "../assets/maps/world1_map.png",
+    stops: [
+      { id: "home", label: "Jesse's house", x: 607, y: 331 },
+      { id: "3-1", label: "The Day Before", x: 580, y: 540, trail: [[533, 367], [440, 400], [400, 460], [440, 513]] },
+      { id: "3-2", label: "The Far Pasture", x: 1133, y: 620, trail: [[680, 567], [787, 607], [933, 627], [1027, 622]] },
+      { id: "3-3", label: "We Will Not Sit Down", x: 940, y: 400, trail: [[1107, 560], [1053, 493], [1000, 427]] },
+      { id: "3-4", label: "The Chosen Shepherd", x: 1507, y: 727, trail: [[1013, 440], [1133, 507], [1267, 587], [1387, 667]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -62,8 +73,8 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1, 2];   // worlds you can go into from the journey map so far
-const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_WORLDS = [1, 2, 3];   // worlds you can go into from the journey map so far
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }

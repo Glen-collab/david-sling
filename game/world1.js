@@ -6,6 +6,7 @@
 // World 2's file loads right after this one. It's added from here, not index.html, because a browser can keep an old
 // copy of index.html (the scripts themselves always load fresh).
 document.write('<script src="world2.js?v=' + (window.BUILD || 0) + '"><\/script>');
+document.write('<script src="world3.js?v=' + (window.BUILD || 0) + '"><\/script>');   // Bethlehem: houses, crows, rats
 document.write('<script src="harp_songs.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the harp-duel charts (tools/make_harp_chart.py)
 
 const W1 = {
@@ -278,7 +279,7 @@ function runCritter(k, speed, dt) {   // move along the ground; stop at a pit ed
 }
 function updateCritters(dt) {
   for (const k of critters) {
-    if (k.gone) { if (k.alpha > 0) { k.alpha -= dt * 1.2; k.x += k.vx * dt; } continue; }
+    if (k.gone) { if (k.alpha > 0) { k.alpha -= dt * 1.2; k.x += k.vx * dt; if (k.fly) k.y += k.vy * dt; } continue; }
     if (k.fell) { k.gone = true; k.alpha = 0; continue; }   // ran into a pit
     k.t += dt;
     const dx = david.x - k.x, sameLevel = Math.abs(david.y - k.y) < 90;
@@ -291,6 +292,8 @@ function updateCritters(dt) {
     else if (k.kind === "scorpion") updateScorpion(k, dx, sameLevel, dt);
     else if (k.kind === "hedgehog") updateHedgehog(k, dx, sameLevel, dt);
     else if (k.kind === "tortoise") updateTortoise(k, dx, sameLevel, dt);
+    else if (k.kind === "crow") updateCrow(k, dx, sameLevel, dt);   // world3.js
+    else if (k.kind === "rat") updateRat(k, dx, sameLevel, dt);
   }
 }
 function updateFox(k, dx, sameLevel, dt) {
@@ -384,6 +387,8 @@ function stoneHitsCritters(s) {
     if (k.kind === "scorpion") return stoneHitsScorpion(k, s);
     if (k.kind === "hedgehog") return stoneHitsHedgehog(k, s);
     if (k.kind === "tortoise") return stoneHitsTortoise(k, s);
+    if (k.kind === "crow") return stoneHitsCrow(k, s);   // world3.js
+    if (k.kind === "rat") return stoneHitsRat(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: {roll}."); }
@@ -409,6 +414,8 @@ function drawCritters(camX) {
     if (k.kind === "wolf") { drawWolf(k, x); continue; }
     if (k.kind === "scorpion" || k.kind === "hedgehog") { drawSmallCritter(k, x, k.kind + "_walk"); continue; }
     if (k.kind === "tortoise") { drawTortoise(k, x); continue; }
+    if (k.kind === "crow") { drawCrow(k, x); continue; }   // world3.js
+    if (k.kind === "rat") { drawRat(k, x); continue; }
     const a = CRITTER_ART[k.kind];
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

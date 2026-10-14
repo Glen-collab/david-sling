@@ -125,3 +125,14 @@ Courtyard brothers (home.js, `HOME.MAKE_WAY*`, `TURN_TIME`) step back up-screen 
 squeeze-turn to face him. Planned upgrade: a Grok clip per brother, "turns toward the camera, two small steps back,
 nods, turns to face the other way", cut as `<name>_makeway` and played instead of the walk steps. Use the same
 behavior for the war-gear brothers in the army camp.
+
+## World 3 (started 2026-10-14)
+3-1 The Day Before is built and playable from the journey map (World 3 map = the World 1 painting as a stand-in).
+Code: game/world3.js (loaded from world1.js after world2.js). Level helpers in main.js: house(c, w, roofRow) = solid
+material 9 drawn by world3.js; ladder(c, topRow) = 2-wide rungs every 3 rows; setPiece "barley" / "granary" / "threshing".
+Creatures: critter("crow") (raven art, pecks, hops off when David runs at it, a stone sends it away; a cleared field
+drops bread) and critter("rat") (drawn shapes until a rat clip; cleared granary drops cheese). The granary's whip snake
+on the beam slides down when David walks in under it and the rats bolt (sling the snake = Care miss).
+Backgrounds: w3_1 from Glen's "3-1 far/mid/near.png"; ground set ter "w2s" (dry, no grass).
+Still stand-ins: the houses, ladders, barley, granary and threshing floor (waiting on the World 3 pieces sheet), rats,
+the World 3 map. Not done from the design: the stray goat (no goat art), the Micah 5:2 scroll.

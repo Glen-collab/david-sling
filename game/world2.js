@@ -124,7 +124,7 @@ function drawCampfirePeople(camX) {
     }
   }
   // people who speak as David passes (talk() in main.js) and have art: standing there, facing him
-  const ART = { Eliab: ["eliab_arms_crossed", "eliab_arms_crossed"], Shammah: ["shammah_idle", "shammah_talk"], Abinadab: ["abinadab_idle", "abinadab_point"] };
+  const ART = { Eliab: ["eliab_arms_crossed", "eliab_arms_crossed"], Shammah: ["shammah_idle", "shammah_talk"], Abinadab: ["abinadab_idle", "abinadab_point"], Jesse: ["jesse_idle", "jesse_talk"] };
   // one of each person: he stands at his next line not yet said (or his last), and once he's said one he walks on
   // ahead to the next spot (2-1: Abinadab warns of the pigs, then goes on up the trail)
   const ppl = talks.ppl || (talks.ppl = {}), dt = Math.min(0.05, now - (talks.pplT ?? now)); talks.pplT = now;
