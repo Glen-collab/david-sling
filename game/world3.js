@@ -126,8 +126,8 @@ function drawGranary(p) {   // an open-fronted stone storehouse: sacks of grain 
 }
 function drawThreshing(p) {   // a round floor of beaten earth ringed with stones, barley piled on it
   const cx = (p.c + p.w / 2) * T, y = p.y, rx = p.w * T / 2;
-  if (ok("town_threshing_floor")) {
-    const img = ITEM.town_threshing_floor, w = rx * 2 + 20, h = img.naturalHeight * w / img.naturalWidth;
+  if (ok("town_side_threshing_floor")) {
+    const img = ITEM.town_side_threshing_floor, w = rx * 2 + 20, h = img.naturalHeight * w / img.naturalWidth;
     ctx.drawImage(img, cx - w / 2, y - h + 8, w, h);
     ctx.fillStyle = "#d9b55c"; ctx.beginPath(); ctx.moveTo(cx - rx * 0.45, y - h * 0.55); ctx.quadraticCurveTo(cx, y - h * 0.55 - 44, cx + rx * 0.45, y - h * 0.55); ctx.fill();   // barley heaped on it
     return;
@@ -147,8 +147,8 @@ function drawWorld3(camX) {
     else if (p.kind === "threshing") drawThreshing(p);
   }
   for (const s of stairs) if (on(s.c * T, (s.c + 2 * s.h) * T)) {   // Glen's stone stairs, stretched over the steps
-    if (ok("town_stairs")) ctx.filter = TOWN_STONE;
-    if (ok("town_stairs")) ctx.drawImage(ITEM.town_stairs, s.c * T - 4, (GR - s.h) * T - 6, 2 * s.h * T + 8, s.h * T + 6 + HOUSE_SINK);
+    if (ok("town_side_stairs")) ctx.filter = TOWN_STONE;
+    if (ok("town_side_stairs")) ctx.drawImage(ITEM.town_side_stairs, s.c * T - 4, (GR - s.h) * T - 6, 2 * s.h * T + 8, s.h * T + 6 + HOUSE_SINK);
     else { ctx.fillStyle = "#a89a84"; for (let k = 0; k < s.h; k++) ctx.fillRect((s.c + 2 * k) * T, (GR - k - 1) * T, (2 * (s.h - k)) * T, T); }
     ctx.filter = "none";
   }
