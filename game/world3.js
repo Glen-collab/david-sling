@@ -288,9 +288,10 @@ function stoneHitsRat(k, s) {
 }
 Object.assign(W3, { RAT_SIZE: 0.6 });   // Glen's rat run sheet, next to everything else
 function drawRat(k, x) {   // a little brown rat: Glen's running rat (standing still = its first frame), or a drawn one
-  if (SPR.rat_run) {
+  const nm = SPR.rat_run2 && Math.floor(k.home / (2 * T)) % 2 ? "rat_run2" : "rat_run";   // Glen's two rats, every other one
+  if (SPR[nm]) {
     const run = k.gone || k.state === "run";
-    drawSprite("rat_run", run ? frameOf("rat_run", k.t) : 0, x + k.facing * 14, k.y + 2, k.facing, W3.RAT_SIZE, k.alpha);
+    drawSprite(nm, run ? frameOf(nm, k.t) : 0, x + k.facing * 14, k.y + 2, k.facing, W3.RAT_SIZE, k.alpha);
     return;
   }
   const y = k.y, f = k.facing, run = k.gone || k.state === "run", leg = run ? Math.sin(performance.now() / 40) * 3 : 0;
