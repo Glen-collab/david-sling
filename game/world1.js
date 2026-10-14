@@ -35,7 +35,7 @@ function drawDialog() {
   ctx.save(); ctx.globalAlpha = a;
   ctx.font = "19px sans-serif";
   // wrap to two or three lines
-  const words = dialog.say.split(" "), lines = []; let cur = "";
+  const words = keyText(dialog.say).split(" "), lines = []; let cur = "";
   for (const w of words) { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > 760) { lines.push(cur); cur = w; } else cur = t; }
   lines.push(cur);
   const h = 44 + lines.length * 26, y = helpT > 0 ? 140 : 52;   // up in the sky, out of the way of the ground (below the help box while it shows)
@@ -386,7 +386,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "tortoise") return stoneHitsTortoise(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
-      if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: hold Down, then press A."); }
+      if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: {roll}."); }
       return true;
     }
     if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) { dropStolenLamb(k); toast("It dropped your lamb!"); }

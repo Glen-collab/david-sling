@@ -291,7 +291,20 @@ function checkCombo(dt) {
 }
 
 let toastText = "", toastTime = 0;
-function toast(t) { toastText = t; toastTime = 4; }
+function toast(t) { toastText = keyText(t); toastTime = 4; }
+// "{ROLL}" / "{roll}" in what people say: the roll on the controller in use. A SNES pad has its own roll button (X); an
+// NES pad only has Down + A. The controller picked in the settings, or the pad that's plugged in if it says keyboard.
+function controllerKind() {
+  const c = SETTINGS.controller;
+  if (c !== "keyboard") return c;
+  const p = readPad(); if (!p) return "keyboard";
+  const m = mapFor(p); return m && !m.x ? "nes" : "snes";
+}
+function keyText(s) {
+  if (!s || s.indexOf("{") < 0) return s;
+  const roll = { keyboard: "press Down + Z, or V", nes: "hold Down, then press A", snes: "press X" }[controllerKind()];
+  return s.replace(/\{ROLL\}/g, roll[0].toUpperCase() + roll.slice(1)).replace(/\{roll\}/g, roll);
+}
 
 // ============================================================================
 // Levels: World 1's four stages ("#1-1" ... "#1-4" in the address), and "#test", the old movement test.
@@ -395,7 +408,7 @@ const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, tea
 // Moves are taught by people, never found (DESIGN §3c). Learned skills are kept in the save ("davidProgress".skills).
 //   aimUp: Abinadab, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
 // The movement test (#test) and "?allskills" have everything.
-const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: hold Down, then press A", charge: "Charged sling: hold B" };
+const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: {roll}", charge: "Charged sling: hold B" };
 const skills = new Set();
 try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
@@ -568,7 +581,7 @@ if (LEVEL_NAME === "test") {
   crumble(24, 15, 3);                                          // it shakes when you land: keep moving
   ground(29, 60);
   raven(36, 7);
-  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. (Hold Down, then press A)", "roll");
+  talk(38, "Shammah", "Too low to walk through? Get low and tuck, like when we were kids rolling down the hill. ({ROLL})", "roll");
   rock(42, 11, 10, 4);                                         // a low passage: roll (or crawl) under
   oliveRow(42, 16, 10);
   lostSheep("sheep", 56, 16);                                  // on the far side of the passage
