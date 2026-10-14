@@ -536,7 +536,7 @@ if (LEVEL_NAME === "test") {
   snake("viper", 95);
   // a gully
   ground(103, 170);
-  campfire(106, GR - 1, "The neighbour", "That's my ram you've got with yours. Most boys would keep him. If you find your neighbour's sheep, you bring it home.");
+  campfire(106, GR - 1, "The neighbor", "That's my ram you've got with yours. Most boys would keep him. If you find your neighbor's sheep, you bring it home.");
   // a cave in the hillside: The One is somewhere at the back of it (press Up at the mouth)
   {
     const R = caveRoom(46), c = R.c0;

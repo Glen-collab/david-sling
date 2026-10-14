@@ -67,7 +67,7 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 > **Neighbour:** "That's my ram you've got with yours. Most boys would keep him. If you find your neighbour's sheep, you bring it home."
 
 **David writes:**
-> *If my neighbour's sheep wanders, I must not look away. I bring it home, even when it isn't mine.*
+> *If my neighbor's sheep wanders, I must not look away. I bring it home, even when it isn't mine.*
 > — Deuteronomy 22:1–3
 
 ### 1-3 · The Rocky Pastures

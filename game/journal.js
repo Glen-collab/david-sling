@@ -31,7 +31,7 @@ const JOURNAL_PAGES = {
     draft: {
       left: [
         ...E(1, "Not everything that moves in the grass is my enemy. But the serpent is crafty, so I will look before I throw.", "Genesis 3:1"),
-        ...E(2, "If my neighbour's sheep wanders, I must not look away. I bring it home, even when it isn't mine.", "Deuteronomy 22:1–3"),
+        ...E(2, "If my neighbor's sheep wanders, I must not look away. I bring it home, even when it isn't mine.", "Deuteronomy 22:1–3"),
         ...E(3, "The LORD is my Rock. Everything He does is right, and He does not move.", "Deuteronomy 32:4"),
         ...E(4, "I am of Judah, the lion's cub. The LORD goes ahead of me, so I will not be afraid.", "Genesis 49:9; Deuteronomy 31:8"),
       ],
