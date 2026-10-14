@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 137,
+  "frame_h": 272,
+  "ms_per_frame": 69,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 81,
+  "anchor_y": 271,
+  "source": "shammah_1.mp4",
+  "video_frames": [
+    206,
+    208,
+    209,
+    211,
+    213,
+    214,
+    216,
+    218,
+    219,
+    221,
+    223,
+    224
+  ]
+}

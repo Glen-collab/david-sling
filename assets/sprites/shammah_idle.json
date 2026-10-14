@@ -1,0 +1,17 @@
+{
+  "frames": 3,
+  "frame_w": 94,
+  "frame_h": 273,
+  "ms_per_frame": 600,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 47,
+  "anchor_y": 271,
+  "source": "shammah_1.mp4",
+  "video_frames": [
+    1,
+    7,
+    14
+  ],
+  "pingpong": true
+}

@@ -1944,6 +1944,42 @@ window.SPRITE_DATA = {
   "ay": 92,
   "align": "feet"
  },
+ "shammah_idle": {
+  "src": "../assets/sprites/shammah_idle.png",
+  "frames": 3,
+  "w": 94,
+  "h": 273,
+  "ms": 600,
+  "loop": true,
+  "pingpong": true,
+  "ax": 47,
+  "ay": 271,
+  "align": "feet"
+ },
+ "shammah_talk": {
+  "src": "../assets/sprites/shammah_talk.png",
+  "frames": 10,
+  "w": 109,
+  "h": 276,
+  "ms": 230,
+  "loop": true,
+  "pingpong": true,
+  "ax": 74,
+  "ay": 274,
+  "align": "feet"
+ },
+ "shammah_walk": {
+  "src": "../assets/sprites/shammah_walk.png",
+  "frames": 12,
+  "w": 137,
+  "h": 272,
+  "ms": 69,
+  "loop": true,
+  "pingpong": false,
+  "ax": 81,
+  "ay": 271,
+  "align": "feet"
+ },
  "sheep_cast": {
   "src": "../assets/sprites/sheep_cast.png",
   "frames": 12,
