@@ -103,6 +103,7 @@ const Courtyard = {
   open(world = 1) {
     if (!this.img) { this.img = new Image(); this.img.src = `../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`; }
     this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null; this.offerAt = null; this.greetAt = null;
+    for (const b of BROTHERS) { b.lastT = undefined; b.way = 0; b.stepT = 0; b.px = undefined; }   // back at their chores
     this.x = 0.82; this.facing = -1; this.walkT = 0; this.mode = null; this.msg = null;
     this.prog = loadProgress();
     // a world beaten since Jesse last spoke to you? he's waiting with its piece
@@ -266,7 +267,7 @@ const Courtyard = {
       // their load), talking while their words are up. One with a walk clip (Raddai) strolls up and down his patch,
       // stops and waves when David comes over, then stands and chats.
       const talking = this.msg && this.msg.who === b.name, dpx = this.x * SW;
-      const dt = Math.min(0.05, this.t - (b.lastT ?? this.t)); b.lastT = this.t;
+      const dt = Math.max(0, Math.min(0.05, this.t - (b.lastT ?? this.t))); b.lastT = this.t;   // (this.t starts over each visit)
       if (b.px === undefined) { b.px = b.x; b.dir = 1; b.st = "walk"; b.stT = 0; }
       b.stT += dt;
       const walks = !!SPR[b.id + "_walk"] && SPR[b.id + "_walk"].frames > 2, near = Math.abs(dpx - b.px * SW) < 170;
@@ -286,7 +287,7 @@ const Courtyard = {
       // keep facing him, and steps back to his spot once David's gone by
       const gap = Math.abs(dpx - b.px * SW), d0 = b.way || 0;
       const wayTo = gap < HOME.MAKE_WAY ? 1 : gap > HOME.MAKE_WAY * 1.6 ? 0 : d0;
-      b.way = d0 + Math.sign(wayTo - d0) * Math.min(Math.abs(wayTo - d0), dt / HOME.MAKE_WAY_TIME);
+      b.way = Math.max(0, Math.min(1, d0 + Math.sign(wayTo - d0) * Math.min(Math.abs(wayTo - d0), dt / HOME.MAKE_WAY_TIME)));
       const stepping = b.way !== d0 || (b.stepT || 0) > 0;
       b.stepT = b.way !== d0 ? 0.15 : Math.max(0, (b.stepT || 0) - dt);   // finish the step that's under way
       if (b.way !== d0 && walks && b.st === "walk") { b.st = "idle"; b.stT = 0; }
