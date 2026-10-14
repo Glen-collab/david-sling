@@ -63,13 +63,29 @@ path, and a campfire near the riverbed. Mood: wild, hot and dry, rugged.
 
 ### World 3 — The Anointing
 ```
-Bethlehem village up close: clay-brick houses with flat roofs, a central open square with a
-well, a stone altar on a small hill outside town where a thin line of smoke rises from a
-sacrifice, olive groves and Jesse's farmhouse with a sheepfold. The path loops from the
-fields into town and out again into the hills. At the far end the sky turns dark grey
-with rain clouds over open grassland, and a muddy trampled track leads away. Mood:
-warm and sacred in town, stormy at the end.
+Bethlehem on its hill on a festival day, seen from above. Pale limestone and clay-brick
+houses with flat roofs packed close together, narrow lanes, a stone watchtower with an
+outside stair, a few round thatched huts, rooftops with figs and grain drying on them.
+Golden barley fields and a round stone threshing floor on the slope below town.
+The path, in order:
+1. Bottom-left: Jesse's farmhouse with a stone sheepfold and an olive tree (the start).
+2. Up into the town lanes and across the rooftops (first level dot).
+3. Out of town, far away across open green-gold hills to a lonely pasture with a small
+   campfire, a stream with stepping stones, and tiny white sheep dots. From here you can
+   see the town far off on its hill (second level dot).
+4. A fast path back toward town through fields with low stone walls and wooden fences
+   (third level dot).
+5. Just outside the town gate, on a small rise: a stone altar with a thin line of white
+   smoke going straight up, and a glow of warm golden light around it. A special
+   story spot, not a level dot: a small golden star circle instead of a plain one.
+   Beside the gate, an old stone well (a small extra spot).
+6. The path leaves town again into wide open grassland under dark grey storm clouds,
+   with rain falling far off and a muddy trampled track (last level dot). At the very
+   end, a big boulder cracked down the middle, and huge hoof prints in the mud.
+Mood: warm, golden and sacred around the town and the altar; open and peaceful at the
+far pasture; stormy and wild at the end.
 ```
+Five plain level dots in all (Jesse's house, then the four stages), plus the golden star at the altar and the small well spot. When the picture comes in, the dots get placed on it in `map.js` (World 3 borrows World 1's map until then).
 
 ### World 4 — The King's Court
 ```
