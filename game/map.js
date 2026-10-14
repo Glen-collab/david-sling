@@ -45,15 +45,18 @@ const MAP_WORLDS = {
       { id: "2-4", label: "The Bear's Ravine", x: 1500, y: 950, trail: [[1330, 680], [1380, 800], [1440, 900]] },
     ],
   },
-  // World 3: Bethlehem up close. Stand-in: the World 1 painting (it's Bethlehem's hills) until the World 3 map arrives.
+  // World 3: Glen's painting of Bethlehem on its festival day (1920 x 1280): Jesse's farmhouse bottom-left, the town in
+  // the middle, the far pasture top-left, the fields and fences, the altar and the well by the gate, the storm on the right.
   3: {
-    name: "The Anointing", src: "../assets/maps/world1_map.png",
+    name: "The Anointing", src: "../assets/maps/world3_map.jpg",
+    david: { far: 0.6, near: 0.95, y0: 300, y1: 1100 },
     stops: [
-      { id: "home", label: "Jesse's house", x: 607, y: 331 },
-      { id: "3-1", label: "The Day Before", x: 580, y: 540, trail: [[533, 367], [440, 400], [400, 460], [440, 513]] },
-      { id: "3-2", label: "The Far Pasture", x: 1133, y: 620, trail: [[680, 567], [787, 607], [933, 627], [1027, 622]] },
-      { id: "3-3", label: "We Will Not Sit Down", x: 940, y: 400, trail: [[1107, 560], [1053, 493], [1000, 427]] },
-      { id: "3-4", label: "The Chosen Shepherd", x: 1507, y: 727, trail: [[1013, 440], [1133, 507], [1267, 587], [1387, 667]] },
+      { id: "home", label: "Jesse's house", x: 300, y: 1050 },
+      { id: "3-1", label: "The Day Before", x: 850, y: 560, trail: [[420, 1000], [560, 930], [640, 870], [760, 800], [800, 690]] },
+      { id: "3-2", label: "The Far Pasture", x: 270, y: 380, trail: [[680, 640], [480, 600], [330, 520]] },
+      { id: "3-3", label: "We Will Not Sit Down", x: 560, y: 820, trail: [[260, 500], [300, 600], [400, 700], [480, 760]] },
+      // the way to 3-4 goes past the altar (the anointing) and out of the gate, down the muddy track into the storm
+      { id: "3-4", label: "The Chosen Shepherd", x: 1640, y: 1040, trail: [[700, 720], [880, 620], [1060, 520], [1220, 400], [1310, 420], [1360, 560], [1430, 700], [1500, 840], [1570, 960]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
