@@ -1296,11 +1296,12 @@ const ending = {
       if (k < 1 || this.step === 4) drawPouch(px, py, this.step === 4 && k >= 1 ? 0.5 + 0.5 * Math.sin(now * 4) : 0);
       if (this.step === 4 && this.pouch && this.pouch.t > 1.2) {
         ctx.save(); ctx.globalAlpha = Math.min(1, (this.pouch.t - 1.2) * 2);
-        ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 400, 80, 800, 116, 16); ctx.fill();
-        drawPouch(W / 2 - 330, 138, 0, 104);
-        ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The leather sling pouch", W / 2 + 50, 126);
-        ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Made by the leatherworker of Tekoa.", W / 2 + 50, 158);
-        ctx.fillText("Your charged shot charges a little faster.", W / 2 + 50, 182);
+        const cy = dialog.t > 0 ? (helpT > 0 ? 250 : 172) : 80;   // under the words while someone's talking (drawDialog's box)
+        ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 400, cy, 800, 116, 16); ctx.fill();
+        drawPouch(W / 2 - 330, cy + 58, 0, 104);
+        ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The leather sling pouch", W / 2 + 50, cy + 46);
+        ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Made by the leatherworker of Tekoa.", W / 2 + 50, cy + 78);
+        ctx.fillText("Your charged shot charges a little faster.", W / 2 + 50, cy + 102);
         ctx.restore(); ctx.textAlign = "left";
       }
     }
