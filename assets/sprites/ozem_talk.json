@@ -1,0 +1,15 @@
+{
+  "frames": 2,
+  "frame_w": 146,
+  "frame_h": 228,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 70,
+  "anchor_y": 226,
+  "source": "ozem_poses.png",
+  "poses": [
+    2,
+    6
+  ]
+}

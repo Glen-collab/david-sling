@@ -1,0 +1,15 @@
+{
+  "frames": 2,
+  "frame_w": 163,
+  "frame_h": 226,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 87,
+  "anchor_y": 225,
+  "source": "nethanel_poses.png",
+  "poses": [
+    2,
+    6
+  ]
+}

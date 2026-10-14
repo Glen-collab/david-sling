@@ -1,0 +1,14 @@
+{
+  "frames": 1,
+  "frame_w": 124,
+  "frame_h": 231,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 73,
+  "anchor_y": 229,
+  "source": "raddai_poses.png",
+  "poses": [
+    5
+  ]
+}

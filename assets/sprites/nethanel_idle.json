@@ -1,0 +1,14 @@
+{
+  "frames": 1,
+  "frame_w": 113,
+  "frame_h": 229,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 32,
+  "anchor_y": 227,
+  "source": "nethanel_poses.png",
+  "poses": [
+    1
+  ]
+}

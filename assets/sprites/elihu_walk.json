@@ -1,0 +1,15 @@
+{
+  "frames": 2,
+  "frame_w": 139,
+  "frame_h": 220,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 67,
+  "anchor_y": 219,
+  "source": "elihu_poses.png",
+  "poses": [
+    3,
+    4
+  ]
+}
