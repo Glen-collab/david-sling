@@ -79,9 +79,9 @@ function stoneHitsDeadfall(s) {   // a stone hit a solid tile: was it a deadfall
   if (s.charged || s.power) {
     d.broken = true;
     for (let x = d.c; x < d.c + d.w; x++) for (let y = d.r; y < d.r + d.h; y++) solid[y][x] = 0;
-    for (let k = 0; k < 30; k++) bits.push({ x: (d.c + d.w / 2) * T, y: (d.r + Math.random() * d.h) * T, vx: (Math.random() - 0.5) * 700, vy: -Math.random() * 600, life: 1, color: k % 3 ? "#6b4a2a" : "#9a7a4a" });
+    for (let k = 0; k < 30; k++) bits.push({ x: (d.c + d.w / 2) * T, y: (d.r + Math.random() * d.h) * T, vx: (Math.random() - 0.5) * 700, vy: -Math.random() * 600, life: 1, color: d.thorns ? (k % 3 ? "#5f6b2e" : "#8a7a3e") : k % 3 ? "#6b4a2a" : "#9a7a4a" });
     sfx("stone_hit", undefined, 1); if (typeof chime === "function") chime(5);
-    toast("Crack! The dead branches gave way.");
+    toast(d.thorns ? "Swish! The thorns are cleared." : "Crack! The dead branches gave way.");
   } else {
     stoneHit(s, 0.6);
     if (!d.told) { d.told = true; toast(hasSkill("charge") ? "Too thick for a tap stone. Hold B until the ring turns gold, then let go." : "Too thick to break with a tap stone. Too tall to climb."); }
@@ -89,9 +89,15 @@ function stoneHitsDeadfall(s) {   // a stone hit a solid tile: was it a deadfall
   return true;
 }
 function drawDeadfalls(camX) {   // logs stacked up the pile, a little crooked, with dead branches poking out
-  if (!TER.wall_mid || !TER.wall_mid.naturalWidth) return;
   for (const d of deadfalls) {
     if (d.broken) continue;
+    if (d.thorns) {   // a thorny thicket (World 3): thorn bushes heaped up the whole height
+      const x0 = d.c * T - camX, w = d.w * T; if (x0 + w < -200 || x0 > W + 200) continue;
+      const bottom = (d.r + d.h) * T, n = Math.ceil(d.h * T / 70);
+      for (let k = 0; k < n; k++) for (let j = -1; j <= 1; j++) drawItem("thorn_bush", x0 + w / 2 + j * w * 0.42 + Math.sin(d.c + k * 2.3 + j) * 6, bottom + 10 - k * 66, 0.62 - Math.abs(j) * 0.08);
+      continue;
+    }
+    if (!TER.wall_mid || !TER.wall_mid.naturalWidth) continue;
     const x0 = d.c * T - camX, x1 = (d.c + d.w) * T - camX; if (x1 < -200 || x0 > W + 200) continue;
     const lh = W2.DEADFALL_LOG_H * T, n = Math.ceil(d.h * T / (lh * 0.8)), bottom = (d.r + d.h) * T;
     for (let k = 0; k < n; k++) {
@@ -1145,7 +1151,7 @@ function drawTortoise(k, x) {
 function updatePools() {
   const d = david;
   for (const p of setPieces) if (p.kind === "pool" && d.deadT <= 0 && !inCutscene() && d.x > p.c * T && d.x < (p.c + p.w) * T && d.y > GR * T + 34) {
-    pitFall(); toast("Splash! Into the pool. The tortoise will carry you, if you let it.");
+    pitFall(); toast(p.say || "Splash! Into the pool. The tortoise will carry you, if you let it.");
   }
 }
 function drawPools(camX) {   // shallow green-brown water, in front of the tortoise's legs

@@ -16,6 +16,7 @@ Object.assign(TUNE.SPRITE_SIZE, { raven_peck: TUNE.SPRITE_SIZE.raven_peck || 1, 
 
 // ladders: a rung to hop onto every three rows (drawn as a ladder, not as rock ledges)
 for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c = l.c; c < l.c + 2; c++) specialPlat.add(c + "," + y); }
+for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);   // stepping stones: drawn as rocks, not as ledges
 
 // ---------------------------------------------------------------------------
 // Drawing: houses, ladders, barley, the granary, the threshing floor
@@ -109,6 +110,11 @@ function drawStairTower(t) {
   const img = ITEM.town_stair_tower, s = (GR * T + HOUSE_SINK - 6 * T) / (1700 - 260), ox = 140, oy = 106;
   ctx.drawImage(img, t.c * T - (155 - ox) * s, 6 * T - (260 - oy) * s, img.naturalWidth * s, img.naturalHeight * s);
 }
+function drawStepStone(p) {   // a flat grey rock standing up out of the stream, its top level with the bank
+  const x = p.c * T + T / 2, y = GR * T;
+  if (ok("boulder_grey")) { const img = ITEM.boulder_grey; ctx.drawImage(img, x - T * 0.75, y - 8, T * 1.5, T * 1.5); return; }
+  ctx.fillStyle = "#8e8a80"; ctx.beginPath(); ctx.roundRect(x - T * 0.6, y - 6, T * 1.2, T * 1.3, 10); ctx.fill();
+}
 function drawHouse(h) {
   const rows = GR - h.r, look = h.w >= 6 ? "fort" : rows <= 4 ? "shed" : rows / h.w > 1.2 ? "tower" : "big";
   if (ok("town_house_" + look)) { drawHouseArt(h, ITEM["town_house_" + look], HOUSE_LOOKS[look]); return; }
@@ -183,7 +189,7 @@ function drawThreshing(p) {   // a round floor of beaten earth ringed with stone
   ctx.fillStyle = "#cfc2a6"; for (let a = 0; a < 14; a++) { const t = a / 14 * Math.PI; ctx.beginPath(); ctx.ellipse(cx - Math.cos(t) * rx, y - 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawWorld3(camX) {
-  if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing")) return;
+  if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing" || p.kind === "stepstone")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
   const on = (x0, x1) => x1 > camX - 60 && x0 < camX + W + 60;
@@ -202,6 +208,7 @@ function drawWorld3(camX) {
   for (const h of houses) if (on(h.c * T, (h.c + h.w) * T)) drawHouse(h);
   for (const l of ladders) if (on(l.c * T, (l.c + 2) * T)) drawLadder(l);
   for (const p of setPieces) if (p.kind === "barley" && on(p.c * T, (p.c + p.w) * T)) drawBarley(p, now);
+  for (const p of setPieces) if (p.kind === "stepstone" && on(p.c * T, (p.c + 1) * T)) drawStepStone(p);
   ctx.restore();
 }
 
@@ -293,4 +300,164 @@ function updateWorld3(dt) {
       g.huntT += dt; if (g.huntT > W3.SNAKE_HUNT) ratsFlee(g, "The whip snake went after the rats. Let it do its job: the granary's clear.");
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// 3-2 The Far Pasture. Flies: a sheep plagued by flies at its eyes won't settle until you rub olive oil on its head
+// (press Down beside it). The oil comes from your flask, the one the olives fill (Psalm 23:5: "you anoint my head with
+// oil"), the stage right before David himself is anointed.   lostSheep("sheep", c, 16, "flies")
+// ---------------------------------------------------------------------------
+Object.assign(W3, { OIL_COST: 5 });   // olives' worth of oil to anoint one sheep
+function fliesSheep(sh, dx, dy) {   // called from updateSheep (main.js) while it's still plagued
+  if (Math.abs(dx) > 80 || Math.abs(dy) > 80) return;
+  if (!sh.hinted) { sh.hinted = true; toast("Flies at its eyes: it won't settle. Press Down to rub olive oil on its head."); }
+  if (!pressed("down") || !david.onGround || inCutscene()) return;
+  if (david.olives < W3.OIL_COST) { toast(`Not enough oil in your flask. Gather olives (it takes ${W3.OIL_COST}).`); return; }
+  david.olives -= W3.OIL_COST; sh.freed = true;
+  chime(7);
+  for (let k = 0; k < 14; k++) bits.push({ x: sh.x, y: sh.y - 40, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 260, life: 0.8, color: "#e8d27a" });
+  toast("You anointed its head with oil, and the flies are gone. \"You anoint my head with oil\" (Psalm 23:5)");
+}
+function drawFlies(x, y, t) {   // a little cloud of flies buzzing round its head
+  ctx.save(); ctx.fillStyle = "#1d1a12";
+  for (let k = 0; k < 11; k++) {
+    const fx = x + Math.sin(t * 7.3 + k * 1.7) * 30, fy = y - 52 + Math.sin(t * 9.1 + k * 2.9) * 16;
+    ctx.beginPath(); ctx.arc(fx, fy, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(220,230,240,0.55)"; ctx.fillRect(fx - 3, fy - 3, 2, 2); ctx.fillRect(fx + 1, fy - 3, 2, 2); ctx.fillStyle = "#1d1a12";
+  }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Rustlers (3-2): with the whole town at the gathering, a sheep thief creeps up on the flock you left at a campfire.
+//   critter("rustler", c) beside campfire(c). Once you've gone on past that fire with sheep resting there, he sneaks in
+//   from behind, grabs one and makes off with it over his shoulders. A stone makes him drop it and run.
+// Stand-in art: a villager's walk clip darkened to a shadowy figure, until Glen's rustler clip (ART_PROMPTS).
+// ---------------------------------------------------------------------------
+Object.assign(W3, { RUSTLER_AFTER: 10, RUSTLER_SNEAK: 120, RUSTLER_RUN: 230, RUSTLER_ART: "abinadab_walk", RUSTLER_FILTER: "brightness(0.3) saturate(0.5)" });
+const rustlerH = () => { const s = SPR[W3.RUSTLER_ART]; return s ? s.ay * SCALE * (TUNE.SPRITE_SIZE[W3.RUSTLER_ART] || 1) : 190; };   // his height on screen
+CRITTER_ART.rustler = { box: k => ({ x0: k.x - 30, x1: k.x + 30, y0: k.y - rustlerH(), y1: k.y }) };
+function updateRustler(k, dx, sameLevel, dt) {
+  const fire = k.fire || (k.fire = nearestFire(k.home));
+  if (k.state === "idle") {   // out of sight (and after a fall, he's given back whatever he had)
+    k.alpha = 0;
+    if (k.sheep) { const sh = k.sheep; k.sheep = null; Object.assign(sh, { x: fire.x, y: fire.y, vy: 0 }); joinLine(sh, true); }
+    const flock = line.filter(sh => sh.fire === fire && sh.state === "atFire" && sh.how !== "rescued");
+    if (!k.done && flock.length && david.x > fire.x + W3.RUSTLER_AFTER * T) {
+      k.done = true; k.target = flock[flock.length - 1];
+      Object.assign(k, { x: Math.max(fire.x - 14 * T, Math.min(fire.x - 9 * T, camX - 80)), y: fire.y, vy: 0, facing: 1, alpha: 1 }); setCrit(k, "sneak");
+      baa(fire.x, 1); toast("Baa! Back at the campfire... a thief is creeping up on your flock!");
+    }
+    return;
+  }
+  if (k.state === "sneak") {
+    if (!line.includes(k.target) || k.target.state !== "atFire") {
+      k.target = line.find(sh => sh.fire === fire && sh.state === "atFire" && sh.how !== "rescued");
+      if (!k.target) { k.gone = true; k.vx = -W3.RUSTLER_RUN; return; }
+    }
+    k.facing = Math.sign(k.target.x - k.x) || 1;
+    runCritter(k, W3.RUSTLER_SNEAK, dt);
+    if (Math.abs(k.target.x - k.x) < 30) {
+      const sh = k.target; line.splice(line.indexOf(sh), 1); sh.state = "stolen"; k.sheep = sh;
+      baa(sh.x, 1); setCrit(k, "flee"); toast("He's grabbed one of your sheep! Hit him with a stone!");
+    }
+    return;
+  }
+  if (k.state === "flee") {   // off with it, away from David; stops to look back, runs again when he comes close
+    k.facing = -Math.sign(dx) || -1;
+    const moved = runCritter(k, W3.RUSTLER_RUN, dt);
+    if (k.t > 2.5 || !moved) setCrit(k, "wait");
+  } else if (k.state === "wait") {
+    k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 40, 150, dt);
+    k.facing = Math.sign(dx) || k.facing;
+    if (Math.abs(dx) < 260 && k.t > 0.6) setCrit(k, "flee");
+  }
+  if (k.sheep) Object.assign(k.sheep, { x: k.x - k.facing * 6, y: k.y - rustlerH() * 0.55, facing: k.facing });   // across his shoulders
+}
+function stoneHitsRustler(k, s) {
+  if (k.state === "idle") return false;   // not here yet
+  if (k.sheep) {
+    const sh = k.sheep; k.sheep = null; Object.assign(sh, { x: k.x, y: k.y, vy: 0 }); joinLine(sh, true);
+    toast("He dropped your sheep and ran! It's trotting back to the fire.");
+  } else toast("The thief ran off.");
+  k.gone = true; k.facing = Math.sign(k.x - david.x) || -1; k.vx = k.facing * W3.RUSTLER_RUN * 1.6; stoneHit(s);
+  return !s.power;
+}
+function drawRustler(k, x) {
+  const name = W3.RUSTLER_ART; if (!SPR[name]) return;
+  const i = k.state === "wait" ? 0 : frameOf(name, k.t * (k.state === "sneak" ? 0.7 : 1.3));
+  drawSprite(name, i, x, k.y, k.facing, k.state === "sneak" ? 0.94 : 1, k.alpha, W3.RUSTLER_FILTER);
+}
+
+// ---------------------------------------------------------------------------
+// 3-2: at each campfire, a scene back in town. Jesse's sons pass before Samuel one by one, and each time the word is
+// "not this one" (1 Samuel 16:6-10). Then you're back on the hill with the sheep, alone, on purpose. We see it through
+// Samuel's eyes, so there's no Samuel on screen. A or B moves it on.
+// ---------------------------------------------------------------------------
+const PASS_SCENES = [
+  { sons: ["eliab"], lines: [
+    ["Samuel", "Surely the LORD's anointed is standing here."],                                                   // 16:6
+    ["The LORD", "Don't look at his face, or how tall he is. People look at the outward appearance, but the LORD looks at the heart."] ] },   // 16:7
+  { sons: ["abinadab", "shammah"], lines: [
+    ["", "Jesse called Abinadab, and he passed before Samuel."],
+    ["Samuel", "The LORD has not chosen this one either."],                                                       // 16:8
+    ["", "Then Jesse had Shammah pass by."],
+    ["Samuel", "The LORD has not chosen this one either."] ] },                                                   // 16:9
+  { sons: ["nethanel", "raddai", "ozem", "elihu"], lines: [
+    ["", "Jesse had seven of his sons pass before Samuel."],
+    ["Samuel", "The LORD has not chosen these."],                                                                 // 16:10
+    ["", "And far out on the hills, the youngest was with the sheep."] ] },
+];
+const passScene = { active: false, t: 0, k: 0, line: 0, lineT: 0, seen: new Set() };
+function fireLit(f) {   // main.js: a campfire was just lit
+  if (LEVEL_NAME !== "3-2") return;
+  const n = fires.indexOf(f);
+  if (!PASS_SCENES[n] || passScene.seen.has(n)) return;
+  passScene.seen.add(n); Object.assign(passScene, { active: true, t: 0, k: n, line: 0, lineT: 0 });
+}
+const PASS_ENTER = 1.6, PASS_LINE = 4.5, PASS_SIZE = 1.8;   // seconds to walk in, seconds per line, how big the brothers are
+function updatePassScene(real) {
+  const P = passScene, S = PASS_SCENES[P.k];
+  P.t += real; if (P.t < PASS_ENTER) return;
+  P.lineT += real;
+  if ((P.lineT > 0.5 && (pressed("a") || pressed("b"))) || P.lineT > PASS_LINE) {
+    if (P.line < S.lines.length - 1) { P.line++; P.lineT = 0; } else P.active = false;
+  }
+}
+function drawPassScene() {
+  const P = passScene; if (!P.active) return;
+  const S = PASS_SCENES[P.k], a = Math.min(1, P.t * 2.5);
+  ctx.save(); ctx.globalAlpha = a;
+  const sky = ctx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#f2c98a"); sky.addColorStop(0.6, "#f7e2b8"); sky.addColorStop(1, "#d9b382");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  const base = H * 0.7;   // Bethlehem behind them: Glen's houses along the street
+  ["town_house_big", "town_house_fort", "town_house_shed", "town_house_big"].forEach((n, i) => {
+    const img = ITEM[n]; if (!img || !img.naturalWidth) return;
+    const h = H * (i % 2 ? 0.3 : 0.26), w = img.naturalWidth * h / img.naturalHeight;
+    ctx.globalAlpha = a * 0.85; ctx.drawImage(img, W * (0.04 + i * 0.24), base - h + 8, w, h);
+  });
+  ctx.globalAlpha = a; ctx.fillStyle = "#c9a172"; ctx.fillRect(0, base, W, H - base);
+  ctx.fillStyle = "rgba(60,36,12,0.18)"; ctx.fillRect(0, 0, W, H);
+  const n = S.sons.length, gap = Math.min(170, W * 0.6 / n);
+  S.sons.forEach((son, i) => {   // they walk in from the left and stand before Samuel (the camera, on the right)
+    const tx = W * 0.62 - (n - 1 - i) * gap, f = Math.min(1, P.t / PASS_ENTER), x = -120 + (tx + 120) * (1 - (1 - f) * (1 - f));
+    const walk = son + "_walk", idle = son === "eliab" ? "eliab_arms_crossed" : son + "_idle";
+    if (f < 1 && SPR[walk]) drawSprite(walk, frameOf(walk, P.t), x, base + 6, 1, PASS_SIZE, a);
+    else if (SPR[idle]) drawSprite(idle, frameOf(idle, P.t), x, base + 6, 1, PASS_SIZE, a);
+  });
+  ctx.textAlign = "center"; ctx.fillStyle = "rgba(50,30,10,0.85)"; ctx.font = "italic 22px Georgia, serif";
+  ctx.fillText("Meanwhile, in Bethlehem...", W / 2, 50);
+  if (P.t >= PASS_ENTER) {
+    const [who, text] = S.lines[P.line], bw = Math.min(900, W - 60), bx = W / 2 - bw / 2, by = H - 150;
+    ctx.fillStyle = "rgba(28,18,8,0.88)"; ctx.beginPath(); ctx.roundRect(bx, by, bw, 118, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(255,214,120,0.5)"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.textAlign = "left"; let ty = by + 34;
+    if (who) { ctx.fillStyle = "#ffd98a"; ctx.font = "bold 20px sans-serif"; ctx.fillText(who, bx + 24, ty); ty += 30; }
+    ctx.fillStyle = "#fff6e2"; ctx.font = (who ? "" : "italic ") + "20px sans-serif";
+    const words = text.split(" "); let cur = "";
+    for (const wd of words) { const t2 = cur ? cur + " " + wd : wd; if (ctx.measureText(t2).width > bw - 48) { ctx.fillText(cur, bx + 24, ty); ty += 26; cur = wd; } else cur = t2; }
+    ctx.fillText(cur, bx + 24, ty);
+    ctx.textAlign = "right"; ctx.fillStyle = "rgba(255,240,215,0.6)"; ctx.font = "14px sans-serif"; ctx.fillText("A: next", bx + bw - 18, by + 108);
+  }
+  ctx.restore();
 }

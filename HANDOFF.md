@@ -127,12 +127,22 @@ nods, turns to face the other way", cut as `<name>_makeway` and played instead o
 behavior for the war-gear brothers in the army camp.
 
 ## World 3 (started 2026-10-14)
-3-1 The Day Before is built and playable from the journey map (World 3 map = the World 1 painting as a stand-in).
+3-1 The Day Before and 3-2 The Far Pasture are built and playable. World 3 map: Glen's Bethlehem painting
+(assets/maps/world3_map.jpg); the trail to 3-4 passes the altar and the well (no stops there yet).
 Code: game/world3.js (loaded from world1.js after world2.js). Level helpers in main.js: house(c, w, roofRow) = solid
-material 9 drawn by world3.js; ladder(c, topRow) = 2-wide rungs every 3 rows; setPiece "barley" / "granary" / "threshing".
+material 9 drawn from Glen's side-view houses (town_house_shed/big/tower/fort, sliced so roof and door keep their shape,
+picked by size); ladder(c, topRow) = Glen's ladder, rungs every 3 rows; stair(c, h); stairTower(c) = Glen's tower with
+its own stair (climb the stair, jump onto the top at row 7); setPiece "barley" / "granary" / "threshing".
 Creatures: critter("crow") (raven art, pecks, hops off when David runs at it, a stone sends it away; a cleared field
 drops bread) and critter("rat") (drawn shapes until a rat clip; cleared granary drops cheese). The granary's whip snake
 on the beam slides down when David walks in under it and the rats bolt (sling the snake = Care miss).
 Backgrounds: w3_1 from Glen's "3-1 far/mid/near.png"; ground set ter "w2s" (dry, no grass).
-Still stand-ins: the houses, ladders, barley, granary and threshing floor (waiting on the World 3 pieces sheet), rats,
-the World 3 map. Not done from the design: the stray goat (no goat art), the Micah 5:2 scroll.
+3-2 (World 1's w1_2 background until Glen's 3-2 layers): lostSheep(..., "flies") = flies at its eyes, press Down to oil
+its head (costs W3.OIL_COST olives from the HUD flask, Psalm 23:5); critter("rustler", c) beside campfire(c) = once you
+go on past that fire with sheep resting there, a thief sneaks in from behind, grabs one and runs; a stone makes him drop
+it (stand-in art: abinadab_walk darkened, until a rustler clip); stepStone(c) = a rock in a stream (one-way ledge,
+drawn in world3.js) over setPiece("pool", c, GR, { w, say }); thicket(c, r, w, h) = a thorn thicket only a charged
+stone clears (The One is behind it). Each campfire plays a scene in town (PASS_SCENES: Eliab; Abinadab and Shammah;
+the other four; 1 Samuel 16:6-10), seen through Samuel's eyes, no Samuel on screen. Shammah runs in at the end.
+Not done from the design: the stray goat (no goat art), the Micah 5:2 and Psalm 139:1 scrolls (no scroll system yet),
+the harp phrase at 3-2's campfire, stray dogs (jackals stand in).

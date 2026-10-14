@@ -328,6 +328,7 @@ const STAGE_INFO = {
   "2-3": { cols: 196, bg: "w2_3", ter: "w2s", name: "The High Cliffs" },
   "2-4": { cols: 258, bg: "w2_4", ter: "w2f", name: "The Bear's Ravine" },   // ter: the stage's own ground set (assets/terrain/w2f)
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
+  "3-2": { cols: 236, bg: "w1_2", name: "The Far Pasture" },   // bg: World 1's hills until Glen's 3-2 layers come in (then "w3_2")
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -357,12 +358,14 @@ const stair = (c, h) => { for (let k = 0; k < h; k++) block(c + 2 * k, GR - k - 
 const house = (c, w, r) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r }); };
 const stairTowers = [];
 // Glen's tower with its own stone stair: you run past in front of the tower, climb the stair (steps up to the right), then
-// jump up onto the tower top (a ledge you can jump up through). The tower's left edge is column c; the top is row 6.
+// jump up onto the tower top (a ledge you can jump up through, row 7: you stand behind the battlements). The tower's left edge is column c; its drawn top is row 6.
 const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
-const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 6, 7); stairTowers.push({ c }); };
+const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
+const stepStone = c => { plat(c, GR, 1); setPiece("stepstone", c, GR); };   // a flat rock in a stream: a ledge level with the bank (drawn in world3.js)
+const thicket = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false, thorns: true }); };   // thorns: a charged stone clears them
 const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
 const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
@@ -919,6 +922,42 @@ if (LEVEL_NAME === "test") {
   oliveRow(171, 12, 4); oliveRow(177, 10, 4); oliveRow(183, 8, 4); oliveRow(189, 6, 4);
   oliveRow(204, 16, 6); deco("town_hut_round", 203, 16, 0.13);
   talk(214, "Jesse", "David, the flock still needs you. Take them out to the far pasture tomorrow. Your brothers will stay for the prophet.");
+  sheepfold(222);
+} else if (LEVEL_NAME === "3-2") {
+  // ---- 3-2 The Far Pasture: the one who wasn't invited. Far from town, alone with the sheep, while his brothers pass
+  // before Samuel (a scene at each campfire, world3.js). Flies to oil off the sheep, a stream, rustlers at the flock. ----
+  ground(0, 44);
+  campfire(8);                                                 // David's own fire: Hanan is in town for the gathering
+  oliveRow(12, 16, 8);                                         // olives: oil in the flask (the flies need it)
+  lostSheep("sheep", 24, 16, "flies");                         // flies at its eyes: oil its head (Down)
+  critter("fox", 34); oliveArc(30, 16, 6);
+  // the stream: stepping stones over the water
+  setPiece("pool", 45, GR, { w: 12, say: "Splash! Into the stream. Hop the stepping stones." });
+  stepStone(47); stepStone(50); stepStone(53);
+  ground(57, 124);
+  rock(63, 14, 6, 3); lostSheep("sheepblack", 66, 13, "ledge");   // up on the rocks: the harp brings it down
+  special(66, 9);
+  deco("olive_tree", 74, 16, 1.1, "back", "golden_olive");
+  campfire(82); critter("rustler", 82);                         // a thief comes for the sheep at this fire once you've gone on
+  oliveRow(86, 16, 6);
+  lostSheep("sheep", 96, 16, "thorns");                        // caught in the thorns: sling the bush
+  critter("jackal", 106);                                      // a stray after your lamb
+  rock(112, 15, 3, 2); rock(115, 13, 4, 4); oliveRow(115, 12, 4);
+  special(121, 8);
+  ground(125, 154);
+  lostSheep("sheep", 130, 16, "cast");                         // on its back: roll it over (Down)
+  critter("fox", 140); oliveArc(134, 16, 8);
+  campfire(146); critter("rustler", 146);
+  // the second stream, and The One across it, deep in a thorny thicket: charged stones clear the way
+  setPiece("pool", 155, GR, { w: 10, say: "Splash! Into the stream. Hop the stepping stones." });
+  stepStone(157); stepStone(160); stepStone(162);
+  ground(165, 235);
+  thicket(169, 13, 2, 4); lostSheep("lamb", 172, 16, "one"); deco("thorn_bush", 174, 16, 0.6);
+  lostSheep("sheep", 184, 16, "flies");
+  oliveRow(180, 16, 6); critter("jackal", 194);
+  rock(198, 14, 4, 3); rock(202, 12, 3, 5); special(203, 7);
+  deco("olive_tree", 208, 16, 1.0);
+  talk(214, "Shammah", "David! (gasp) Run... all the way here... The prophet sent for you! He won't sit down to eat until you come!");
   sheepfold(222);
 }
 
@@ -1892,6 +1931,7 @@ function updateFires(dt) {
     if (near && !f.lit) {
       f.lit = true; checkpoint = { x: f.x - 30, y: f.y };
       if (f.who) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
+      if (typeof fireLit === "function") fireLit(f);   // world3.js: 3-2's scenes back in town
       learnSkill(f.teach);
     }
     if (near && david.state === "harp" && david.hearts < david.maxHearts) {
@@ -2043,7 +2083,7 @@ const trail = [];         // David's footsteps, newest last
 let rescuedLamb = false;
 function newSheep(o) {
   return Object.assign(o, { x: o.hx, y: o.hy, vx: 0, vy: 0, onGround: true, state: "lost", t: Math.random() * 3, facing: -1,
-    freed: o.how !== "thorns" && o.how !== "cast", upright: false, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
+    freed: o.how !== "thorns" && o.how !== "cast" && o.how !== "flies", upright: false, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
 }
 function resetAllSheep() {
   for (let i = lost.length - 1; i >= 0; i--) if (lost[i].how === "rescued") lost.splice(i, 1);
@@ -2144,7 +2184,7 @@ function updateSheep(dt) {
     sh.t += dt; const b0 = sh.bleatT; sh.bleatT -= dt; if (sh.bleatT < -1) sh.bleatT = 3 + Math.random() * 2;
     if (b0 >= 0 && sh.bleatT < 0) baa(sh.x, sh.how === "thorns" || sh.how === "cast" ? 0.9 : 0.6);
     const dx = d.x - sh.x, dy = d.y - sh.y, near = Math.abs(dx) < 56 && Math.abs(dy) < 80;
-    if (sh.state === "helped") continue;   // David is lifting it up (updateLiftSheep)
+    if (sh.state === "helped" || sh.state === "stolen") continue;   // David is lifting it up (updateLiftSheep), or a thief has it (world3.js)
     if (!sh.freed) {
       if (sh.how === "cast" && Math.abs(dx) < 80 && Math.abs(dy) < 80) {
         if (!sh.hinted) { sh.hinted = true; toast("This sheep is cast, stuck on its back. Press Down to roll it back up."); }
@@ -2154,6 +2194,7 @@ function updateSheep(dt) {
           d.liftPhase = 0; d.harp = false; d.charging = false; d.throwT = -1; setState("liftSheep");
         }
       }
+      if (sh.how === "flies" && typeof fliesSheep === "function") fliesSheep(sh, dx, dy);   // world3.js: oil its head
       if (sh.how === "thorns" && Math.abs(dx) < 140 && Math.abs(dy) < 80 && !sh.hinted) {
         sh.hinted = true; toast("Its wool is caught in the thorns. Sling the bush to cut it free!");
       }
@@ -2270,6 +2311,7 @@ function drawSheepOne(sh, camX) {
     const [nm, i] = sheepFrame(sh);
     drawSprite(nm, i, x, y, sh.facing);
   }
+  if (sh.how === "flies" && !sh.freed && typeof drawFlies === "function") drawFlies(x, y, sh.t);
   if (sh.one || sh.how === "rescued") sparkle(x, y, sh.t);
   if (!line.includes(sh) && sh.state !== "helped" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
     ctx.save(); ctx.globalAlpha = Math.min(1, -sh.bleatT * 4, (1 + sh.bleatT) * 4);
@@ -3104,8 +3146,9 @@ function frame(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
-  if (pressed("start") && !setup.active && !oneMoment.active && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
+  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
+  else if (typeof passScene !== "undefined" && passScene.active) updatePassScene(real);   // world3.js: back in town, before Samuel
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
@@ -3151,7 +3194,7 @@ function frame(now) {
   }
   drawHUD();
   drawFinishBanner();
-  drawOneMoment();
+  drawOneMoment(); if (typeof drawPassScene === "function") drawPassScene();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
