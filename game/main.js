@@ -1960,7 +1960,7 @@ const SHEEP_ART = {
   sheepblack: { run: "sheepblack_run", walk: "sheepblack_walk", stand: "sheepblack_stand", graze: "sheepblack_graze" },
   lamb:       { run: "lamb_hop",       walk: "lamb_walk",       stand: "lamb_stand",       graze: "lamb_graze" },
   lambblack:  { run: "lambblack_leap", walk: "lambblack_walk",  stand: "lambblack_stand",  graze: "lambblack_stand" },
-  ram:        { run: "ram_run",        walk: "ram_walk",        stand: "ram_stand" },
+  ram:        { run: "flockram_walk",  walk: "flockram_walk",   stand: "flockram_stand",   graze: "flockram_graze" },   // the flock's own woolly ram (the wild ram and the ibex use ram_*)
   rescued:    { run: "lamb_run",       walk: "lamb_run",        stand: null,               graze: null },
 };
 

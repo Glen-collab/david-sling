@@ -114,7 +114,10 @@ function drawCampfirePeople(camX) {
   const now = performance.now() / 1000;
   for (const f of fires) {
     const x = f.x - camX - 62; if (x < -200 || x > W + 200) continue;
-    if (f.who === "Hanan" && SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), x, f.y, 1);
+    if (f.who === "Hanan" && SPR.hanan_sit) {   // on a grey rock (like the fire's ring stones), its top just under his seat
+      drawItem("boulder_grey", x - 30 * SCALE, f.y + 4, 92 * SCALE / 375);
+      drawSprite("hanan_sit", frameOf("hanan_sit", now), x, f.y, 1);
+    }
     if (f.who === "The shepherd girl" && SPR.girl_sit_talk) {   // sitting by her fire; she talks while her words are up
       const talking = dialog.t > 0 && dialog.who === f.who;
       drawSprite("girl_sit_talk", talking ? frameOf("girl_sit_talk", now) : 0, x, f.y, 1);

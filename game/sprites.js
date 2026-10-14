@@ -36,6 +36,42 @@ window.SPRITE_DATA = {
   "ay": 258,
   "align": "feet"
  },
+ "abinadab_war_idle": {
+  "src": "../assets/sprites/abinadab_war_idle.png",
+  "frames": 4,
+  "w": 140,
+  "h": 261,
+  "ms": 552,
+  "loop": false,
+  "pingpong": false,
+  "ax": 75,
+  "ay": 259,
+  "align": "feet"
+ },
+ "abinadab_war_talk": {
+  "src": "../assets/sprites/abinadab_war_talk.png",
+  "frames": 12,
+  "w": 175,
+  "h": 302,
+  "ms": 208,
+  "loop": false,
+  "pingpong": false,
+  "ax": 84,
+  "ay": 301,
+  "align": "feet"
+ },
+ "abinadab_war_walk": {
+  "src": "../assets/sprites/abinadab_war_walk.png",
+  "frames": 12,
+  "w": 141,
+  "h": 258,
+  "ms": 73,
+  "loop": true,
+  "pingpong": false,
+  "ax": 71,
+  "ay": 256,
+  "align": "feet"
+ },
  "bat_fly": {
   "src": "../assets/sprites/bat_fly.png",
   "frames": 8,
@@ -864,6 +900,42 @@ window.SPRITE_DATA = {
   "ay": 287,
   "align": "feet"
  },
+ "eliab_war_idle": {
+  "src": "../assets/sprites/eliab_war_idle.png",
+  "frames": 4,
+  "w": 167,
+  "h": 294,
+  "ms": 219,
+  "loop": false,
+  "pingpong": false,
+  "ax": 77,
+  "ay": 292,
+  "align": "feet"
+ },
+ "eliab_war_talk": {
+  "src": "../assets/sprites/eliab_war_talk.png",
+  "frames": 14,
+  "w": 201,
+  "h": 334,
+  "ms": 312,
+  "loop": false,
+  "pingpong": false,
+  "ax": 83,
+  "ay": 332,
+  "align": "feet"
+ },
+ "eliab_war_walk": {
+  "src": "../assets/sprites/eliab_war_walk.png",
+  "frames": 12,
+  "w": 185,
+  "h": 294,
+  "ms": 115,
+  "loop": true,
+  "pingpong": false,
+  "ax": 94,
+  "ay": 292,
+  "align": "feet"
+ },
  "elihu_idle": {
   "src": "../assets/sprites/elihu_idle.png",
   "frames": 2,
@@ -958,6 +1030,42 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 151,
   "ay": 97,
+  "align": "feet"
+ },
+ "flockram_graze": {
+  "src": "../assets/sprites/flockram_graze.png",
+  "frames": 10,
+  "w": 153,
+  "h": 94,
+  "ms": 142,
+  "loop": true,
+  "pingpong": true,
+  "ax": 72,
+  "ay": 92,
+  "align": "feet"
+ },
+ "flockram_stand": {
+  "src": "../assets/sprites/flockram_stand.png",
+  "frames": 10,
+  "w": 134,
+  "h": 125,
+  "ms": 140,
+  "loop": true,
+  "pingpong": true,
+  "ax": 101,
+  "ay": 123,
+  "align": "feet"
+ },
+ "flockram_walk": {
+  "src": "../assets/sprites/flockram_walk.png",
+  "frames": 12,
+  "w": 143,
+  "h": 121,
+  "ms": 42,
+  "loop": true,
+  "pingpong": false,
+  "ax": 111,
+  "ay": 119,
   "align": "feet"
  },
  "fox_sit": {
@@ -2014,6 +2122,42 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 81,
   "ay": 271,
+  "align": "feet"
+ },
+ "shammah_war_draw": {
+  "src": "../assets/sprites/shammah_war_draw.png",
+  "frames": 14,
+  "w": 250,
+  "h": 316,
+  "ms": 253,
+  "loop": false,
+  "pingpong": false,
+  "ax": 102,
+  "ay": 314,
+  "align": "feet"
+ },
+ "shammah_war_ready": {
+  "src": "../assets/sprites/shammah_war_ready.png",
+  "frames": 8,
+  "w": 179,
+  "h": 258,
+  "ms": 333,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 256,
+  "align": "feet"
+ },
+ "shammah_war_walk": {
+  "src": "../assets/sprites/shammah_war_walk.png",
+  "frames": 12,
+  "w": 175,
+  "h": 274,
+  "ms": 76,
+  "loop": true,
+  "pingpong": false,
+  "ax": 104,
+  "ay": 272,
   "align": "feet"
  },
  "sheep_cast": {
