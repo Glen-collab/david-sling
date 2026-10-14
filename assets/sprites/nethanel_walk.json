@@ -1,15 +1,25 @@
 {
-  "frames": 2,
-  "frame_w": 211,
-  "frame_h": 223,
-  "ms_per_frame": 260,
+  "frames": 12,
+  "frame_w": 143,
+  "frame_h": 231,
+  "ms_per_frame": 101,
   "loop": true,
   "align": "feet",
-  "anchor_x": 106,
-  "anchor_y": 221,
-  "source": "nethanel_poses.png",
-  "poses": [
-    3,
-    4
+  "anchor_x": 83,
+  "anchor_y": 228,
+  "source": "raddai_1.mp4",
+  "video_frames": [
+    15,
+    17,
+    20,
+    22,
+    25,
+    27,
+    29,
+    32,
+    34,
+    37,
+    39,
+    42
   ]
 }

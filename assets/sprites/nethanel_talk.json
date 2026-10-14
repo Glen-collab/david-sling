@@ -1,15 +1,26 @@
 {
-  "frames": 2,
-  "frame_w": 163,
-  "frame_h": 226,
-  "ms_per_frame": 260,
+  "frames": 12,
+  "frame_w": 147,
+  "frame_h": 235,
+  "ms_per_frame": 200,
   "loop": true,
   "align": "feet",
-  "anchor_x": 87,
-  "anchor_y": 225,
-  "source": "nethanel_poses.png",
-  "poses": [
-    2,
-    6
-  ]
+  "anchor_x": 54,
+  "anchor_y": 232,
+  "source": "raddai_2.mp4",
+  "video_frames": [
+    86,
+    91,
+    96,
+    101,
+    106,
+    111,
+    115,
+    120,
+    125,
+    130,
+    135,
+    140
+  ],
+  "pingpong": true
 }

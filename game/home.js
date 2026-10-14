@@ -58,7 +58,7 @@ const BROTHERS = [
   { id: "raddai", name: "Raddai", x: 0.225, size: 0.27, says: ["Father wants the far field plowed before the rain. I'm just catching my breath first.", "Father says I plow a straighter line than Eliab. Don't tell him I told you."] },
   { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["First of the barley. Father says the first sheaf goes to the LORD before we eat a grain of it.", "Eliab says I carry it like a baby. At least I carry it."] },
   { id: "elihu", name: "Elihu", x: 0.815, size: 0.27, says: ["The well's low this summer. I carry twice as many jars as last year.", "This little one follows me to the well every morning. She thinks the jar is for her."] },
-  { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Taking the ewes out to the near pasture. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
+  { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Father sent me for the ewes. I'll have them in before dark. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
 ];
 for (const b of BROTHERS) HOME_SPOTS.push({ id: "brother:" + b.id, x: b.x, label: b.name });
 // the throw: one piece per world (§4c). Together it's the Konami code.
@@ -269,7 +269,7 @@ const Courtyard = {
       const walks = !!SPR[b.id + "_walk"] && SPR[b.id + "_walk"].frames > 2, near = Math.abs(dpx - b.px * SW) < 170;
       if (walks) {
         if (talking) b.st = "talk";
-        else if (near && b.st === "walk") { b.st = b.waved ? "idle" : "wave"; b.stT = 0; b.waved = true; }
+        else if (near && b.st === "walk") { b.st = b.waved || !SPR[b.id + "_wave"] ? "idle" : "wave"; b.stT = 0; b.waved = true; }
         else if (b.st === "wave" && animDone(b.id + "_wave", b.stT)) { b.st = "idle"; b.stT = 0; }
         else if (b.st === "talk") { b.st = "idle"; b.stT = 0; }
         else if (b.st === "idle" && !near && b.stT > 1.5) { b.st = "walk"; b.stT = 0; }
