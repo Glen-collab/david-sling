@@ -316,6 +316,45 @@ edges must match so the image can repeat seamlessly. No characters, no animals, 
 
 **Save as** `david-sling-art\2-1 far.png`, `2-1 mid.png`, `2-1 near.png`, and the same for 2-2, 2-3, 2-4.
 
+## World 3 stage backgrounds (one set of three layers per stage)
+Same format as World 2 (paste the style block, then the format lines above, then the layer). **Green (#00FF00) is fine
+again** for 3-1 and 3-3 (town: tan brick, little green). Use **magenta (#FF00FF)** for 3-2 and 3-4 (grassy hills).
+
+### 3-1 The Day Before (Bethlehem, warm morning)
+- **Far:** `World 3, the hill country around Bethlehem on a warm clear morning. A soft blue sky with a few white clouds. Along the bottom half: terraced hills with olive groves and golden barley fields, very hazy.`
+- **Middle:** `World 3 middle distance: the village of Bethlehem seen from the side, a row of clay-brick and limestone houses with flat roofs, wooden ladders leaning on walls, laundry and drying figs on the roofs, a stone granary, a round stone threshing floor with barley piled on it, date palms. EVERYTHING above the rooftops is solid flat bright green (#00FF00), no sky.`
+- **Near:** `World 3 foreground strip, the bottom quarter only: a dusty village lane, clay water jars, baskets of barley, a low stone wall and a few chickens' feathers, full colour and sharp. EVERYTHING above it is solid flat bright green (#00FF00).`
+
+### 3-2 The Far Pasture (bright midday, lonely)
+- **Far:** `World 3, wide open hills far from town at bright midday. A big blue sky. Along the bottom half, small and far away on the right: Bethlehem on its hilltop, with a crowd of tiny people gathered on the hill outside the town and a thin line of smoke rising from an altar.`
+- **Middle:** `World 3 middle distance: long empty grassy hills with scattered boulders, a few lone oak trees and a stream winding between them. Peaceful and a little lonely. EVERYTHING above the hills is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 3 foreground strip, the bottom quarter only: long grass, wildflowers, thistles and flat stones, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+### 3-3 We Will Not Sit Down (afternoon, the run back to town)
+- **Far:** `World 3, golden afternoon. A warm sky. Along the bottom half: Bethlehem on its hill getting closer, festive, with banners of cloth and a crowd at the town gate.`
+- **Middle:** `World 3 middle distance: barley fields with wooden fences and dry-stone walls, an olive grove, the town wall of Bethlehem with its gate and the first flat-roofed houses rising behind it. EVERYTHING above it is solid flat bright green (#00FF00), no sky.`
+- **Near:** `World 3 foreground strip, the bottom quarter only: barley stalks, fence posts, stones and a dusty path, full colour and sharp. EVERYTHING above it is solid flat bright green (#00FF00).`
+
+### 3-4 The Chosen Shepherd (the storm)
+- **Far:** `World 3, open grassland as a storm rolls in. Heavy dark grey-blue clouds, rain falling in slanted streaks in the distance, a bright crack of light near the horizon. Along the bottom half: dark rolling hills.`
+- **Middle:** `World 3 middle distance in a storm: wind-bent grass, three huge old oak trees standing apart, a low stone wall, puddles and mud, everything dark and wet with a cold blue light. EVERYTHING above it is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 3 foreground strip in a storm, the bottom quarter only: muddy ground, flattened wet grass, puddles and broken branches, sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+
+**Save as** `david-sling-art-1 far.png`, `3-1 mid.png`, `3-1 near.png`, and the same for 3-2, 3-3, 3-4.
+
+### World 3 pieces (one sheet, side view, on solid magenta #FF00FF)
+`A set of separate side-view game pieces with space between them: three flat-roofed clay-brick house fronts of different widths (the flat roof is a walkable ledge), a short wooden ladder, a stone granary with a doorway, a wooden fence section low enough to roll under, a round stone threshing floor, a big old oak tree, the same oak split in half by lightning, and a cut log.`
+
+### World 3 Grok clips (start from a picture, side view facing right, plain green screen, camera still)
+- **Samuel:** an old prophet with a long white beard, plain dark robe and a ram's horn of oil. Clips: stand, talk, pour oil (arms raised, tipping the horn). (Glen's `samuel_anointing.mp4` may already cover the pour.)
+- **The old widow gleaning:** bent over, picking up barley stalks into her apron; standing and talking.
+- **Crow:** Grok's crows look like our raven, which is fine: we can reuse `raven_fly/peck`.
+- **Rat:** a brown rat running; sniffing.
+- **Stray dog:** a lean tan village dog: run, bark, slink away.
+- **Rustler:** a sheep thief in a dark head cloth: sneak (crouched walk), run away.
+- **Wild ox (aurochs, boss):** paw the ground, charge head down, stuck with horns in a tree trunk, skid, shake its head, run away.
+- **Messenger on horseback** (end of World 3): a rider galloping.
+
 ## Big scenes (full-screen art for the ending)
 Use the style block, plus: *"Format: one full-screen game scene, wide 16:9, no characters' faces in close-up."*
 
