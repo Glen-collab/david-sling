@@ -348,8 +348,9 @@ again** for 3-1 and 3-3 (town: tan brick, little green). Use **magenta (#FF00FF)
 
 ### 3-3 We Will Not Sit Down (afternoon, the run back to town)
 - **Far:** `World 3, golden afternoon. A warm sky. Along the bottom half: Bethlehem on its hill getting closer, festive, with banners of cloth and a crowd at the town gate.`
-- **Middle:** `World 3 middle distance: barley fields with wooden fences and dry-stone walls, an olive grove, the town wall of Bethlehem with its gate and the first flat-roofed houses rising behind it. EVERYTHING above it is solid flat bright green (#00FF00), no sky.`
-- **Near:** `World 3 foreground strip, the bottom quarter only: barley stalks, fence posts, stones and a dusty path, full colour and sharp. EVERYTHING above it is solid flat bright green (#00FF00).`
+- **Middle:** `World 3 middle distance: barley fields with wooden fences and dry-stone walls, an olive grove, the town wall of Bethlehem with its gate and the first flat-roofed houses rising behind it. EVERYTHING above it is solid flat bright magenta (#FF00FF), no sky.`
+- **Near:** `World 3 foreground strip, the bottom quarter only: barley stalks, fence posts, stones and a dusty path, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+  (3-3 switched to magenta: the fields and olive trees are green, and a green key would eat them.)
 
 ### 3-4 The Chosen Shepherd (the storm)
 - **Far:** `World 3, open grassland as a storm rolls in. Heavy dark grey-blue clouds, rain falling in slanted streaks in the distance, a bright crack of light near the horizon. Along the bottom half: dark rolling hills.`
