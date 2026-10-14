@@ -765,7 +765,7 @@ Four short screens, no more:
 ### World 1 — summary table
 | Stage | New thing | Sheep | People | Scroll |
 |---|---|---|---|---|
-| 1-1 | run, jump, sling, aim up | 5 + The One | Eliab, Shammah, **Hanan** | Psalm 23:1 |
+| 1-1 | run, jump, sling, aim up | 5 + The One | Eliab, Abinadab, **Hanan** | Psalm 23:1 |
 | 1-2 | Harp (Select), protecting the line, The One introduced | 5 + The One | **Hanan**, Abinadab | Luke 16:10 |
 | 1-3 | Roll, crumbling ledges, rope bridges, secrets | 5 + The One | Shammah, **Hanan** | Psalm 121:1–2 |
 | 1-4 | Darkness, jackal packs, the lion watching | 5 + The One | **Hanan** | Joshua 1:9 |
@@ -774,7 +774,7 @@ Four short screens, no more:
 ### World 1 — who gives what
 | Where | Person | Card | Gift / effect |
 |---|---|---|---|
-| 1-1 | Shammah | 🎓 Skill: aiming up | |
+| 1-1 | Abinadab | 🎓 Skill: aiming up | |
 | 1-1 campfire | Hanan | 📜 Judges 20:16 (the slingers of Benjamin) | |
 | Map: 🔥 Hanan | Hanan | 🗝️ Secret: "There's a lamb in a low cave in 1-2. You'll need to get low to reach it." | Rest + harp |
 | 1-2 | Hanan | 🎓 Skill: the harp gathers sheep · 📜 Proverbs 27:23 | |

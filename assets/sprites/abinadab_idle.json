@@ -1,0 +1,18 @@
+{
+  "frames": 4,
+  "frame_w": 84,
+  "frame_h": 262,
+  "ms_per_frame": 600,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 45,
+  "anchor_y": 260,
+  "source": "abinadab_1.mp4",
+  "video_frames": [
+    70,
+    82,
+    93,
+    105
+  ],
+  "pingpong": true
+}

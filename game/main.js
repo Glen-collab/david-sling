@@ -393,7 +393,7 @@ const campfire = (c, r = GR - 1, who = null, say = null, teach = null) => fires.
 const talks = [];
 const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, teach, done: false });
 // Moves are taught by people, never found (DESIGN §3c). Learned skills are kept in the save ("davidProgress".skills).
-//   aimUp: Shammah, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
+//   aimUp: Abinadab, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
 // The movement test (#test) and "?allskills" have everything.
 const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: hold Down, then press A", charge: "Charged sling: hold B" };
 const skills = new Set();
@@ -478,7 +478,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheepblack", 26, 16);                             // the first lost sheep: just walk up to it
   // a tiny gap you can't fail
   ground(33, 72);
-  talk(36, "Shammah", "Ignore him. Watch: hold Up and press B, and you can hit the high ones.", "aimUp");
+  talk(36, "Abinadab", "Ignore him. Watch: hold Up and press B, and you can hit the high ones.", "aimUp");   // (pointing up: Glen's clip)
   rock(40, 13, 3, 4); gourd(41, 12);                           // a gourd on the rock: sling it
   gourd(46, 7, true); gourd(50, 6, true);                      // hanging gourds: aim up
   special(41, 6);                                              // high over the rock: jump from the top, then flip
