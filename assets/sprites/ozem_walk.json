@@ -1,15 +1,25 @@
 {
-  "frames": 2,
-  "frame_w": 173,
-  "frame_h": 222,
-  "ms_per_frame": 260,
+  "frames": 12,
+  "frame_w": 127,
+  "frame_h": 227,
+  "ms_per_frame": 111,
   "loop": true,
   "align": "feet",
-  "anchor_x": 102,
-  "anchor_y": 220,
-  "source": "ozem_poses.png",
-  "poses": [
-    3,
-    4
+  "anchor_x": 70,
+  "anchor_y": 226,
+  "source": "ozem_1.mp4",
+  "video_frames": [
+    175,
+    178,
+    180,
+    183,
+    186,
+    188,
+    191,
+    194,
+    196,
+    199,
+    202,
+    204
   ]
 }

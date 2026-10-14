@@ -56,7 +56,7 @@ const HOME_SPOTS = [
 // 1 Samuel 16:10-11 counts. The Bible gives them no words, so theirs are small, everyday and kind. Up next to one: a line.
 const BROTHERS = [
   { id: "raddai", name: "Raddai", x: 0.225, size: 0.27, says: ["Father wants the far field plowed before the rain. I'm just catching my breath first.", "Father says I plow a straighter line than Eliab. Don't tell him I told you."] },
-  { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["First of the barley. Father says the first sheaf goes to the LORD before we eat a grain of it.", "Eliab says I carry it like a baby. At least I carry it."] },
+  { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["First of the barley. Father says the first sheaf goes to the LORD before we eat a grain of it.", "I counted the barley sacks twice. Father counted them three times. We're a careful family."] },
   { id: "elihu", name: "Elihu", x: 0.815, size: 0.27, says: ["The well's low this summer. I carry twice as many jars as last year.", "This little one follows me to the well every morning. She thinks the jar is for her."] },
   { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Father sent me for the ewes. I'll have them in before dark. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
 ];
