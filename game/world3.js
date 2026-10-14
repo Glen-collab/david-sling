@@ -166,6 +166,12 @@ function drawBarley(p, now) {
   }
 }
 function drawGranary(p) {   // an open-fronted stone storehouse: sacks of grain inside, a beam across under the roof
+  if (ok("town_barn")) {   // Glen's open barn: its tie beam is the snake's beam, its floor on the ground, stretched to the granary's width
+    const img = ITEM.town_barn, B = { beam: 421, floor: 965, wx0: 149, wx1: 1369 };   // in the picture's own pixels
+    const x0 = p.c * T, x1 = (p.c + p.w) * T, beamY = (GRANARY_BEAM_ROW + 1) * T, sy = (p.y - beamY) / (B.floor - B.beam), sx = (x1 - x0) / (B.wx1 - B.wx0);
+    ctx.drawImage(img, x0 - B.wx0 * sx, beamY - B.beam * sy, img.naturalWidth * sx, img.naturalHeight * sy);
+    return;
+  }
   const x0 = p.c * T, x1 = (p.c + p.w) * T, y1 = p.y, top = y1 - 6 * T, beam = (GRANARY_BEAM_ROW + 1) * T;
   ctx.fillStyle = "#5e4a33"; ctx.fillRect(x0, top, x1 - x0, y1 - top);   // the dark inside
   ctx.fillStyle = "#b9a17c"; ctx.fillRect(x0 - 10, top - 14, x1 - x0 + 20, 18); ctx.fillRect(x0 - 10, top, 22, y1 - top); ctx.fillRect(x1 - 12, top, 22, y1 - top);
