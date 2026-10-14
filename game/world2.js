@@ -125,11 +125,20 @@ function drawCampfirePeople(camX) {
   }
   // people who speak as David passes (talk() in main.js) and have art: standing there, facing him
   const ART = { Eliab: ["eliab_arms_crossed", "eliab_arms_crossed"], Shammah: ["shammah_idle", "shammah_talk"], Abinadab: ["abinadab_idle", "abinadab_point"] };
-  for (const k of talks) {
-    const a = ART[k.who]; if (!a || !SPR[a[0]]) continue;
-    const x = k.x - camX + 2 * T; if (x < -200 || x > W + 200) continue;
-    const talking = dialog.t > 0 && dialog.who === k.who, nm = talking ? a[1] : a[0];
-    drawSprite(nm, frameOf(nm, now), x, GR * T, Math.sign(david.x - (k.x + 2 * T)) || -1);
+  // one of each person: he stands at his next line not yet said (or his last), and once he's said one he walks on
+  // ahead to the next spot (2-1: Abinadab warns of the pigs, then goes on up the trail)
+  const ppl = talks.ppl || (talks.ppl = {}), dt = Math.min(0.05, now - (talks.pplT ?? now)); talks.pplT = now;
+  for (const who in ART) {
+    const mine = talks.filter(k => k.who === who); if (!mine.length || !SPR[ART[who][0]]) continue;
+    const spot = (mine.find(k => !k.done) || mine[mine.length - 1]).x + 2 * T;
+    const p = ppl[who] || (ppl[who] = { x: spot, t: 0 });
+    const talking = dialog.t > 0 && dialog.who === who, walkNm = who.toLowerCase() + "_walk";
+    const gap = spot - p.x, walking = !talking && Math.abs(gap) > 4 && SPR[walkNm];
+    if (walking) p.x += Math.sign(gap) * Math.min(Math.abs(gap), TUNE.WALK_SPEED * 0.8 * dt); else if (!talking) p.x = spot;
+    p.t += dt;
+    const x = p.x - camX; if (x < -200 || x > W + 200) continue;
+    const nm = walking ? walkNm : talking ? ART[who][1] : ART[who][0];
+    drawSprite(nm, frameOf(nm, walking ? p.t : now), x, GR * T, walking ? Math.sign(gap) : Math.sign(david.x - p.x) || -1);
   }
 }
 
