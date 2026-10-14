@@ -24,7 +24,6 @@ const HOME = {
   MAKE_WAY: 85,                   // David this close (px): the brother takes two steps back, out of his way...
   MAKE_WAY_UP: 22,                // ...this far up the screen (behind David)...
   MAKE_WAY_TIME: 0.5,             // ...in this many seconds (a walk clip plays while he steps)
-  TURN_TIME: 0.22,                // seconds to turn around to face David
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -292,9 +291,7 @@ const Courtyard = {
       b.stepT = b.way !== d0 ? 0.15 : Math.max(0, (b.stepT || 0) - dt);   // finish the step that's under way
       if (b.way !== d0 && walks && b.st === "walk") { b.st = "idle"; b.stT = 0; }
       const bx = b.px * SW - cam; if (bx < -200 || bx > W + 200) continue;
-      const faceTo = b.st === "walk" && walks && !talking ? b.dir : Math.sign(dpx - b.px * SW) || -1;
-      b.face = b.face === undefined ? faceTo : b.face + Math.sign(faceTo - b.face) * Math.min(Math.abs(faceTo - b.face), 2 * dt / HOME.TURN_TIME);
-      const face = (b.face < 0 ? -1 : 1) * Math.max(0.3, Math.abs(b.face));   // the turn: squeezes through side-on
+      const face = b.st === "walk" && walks && !talking ? b.dir : Math.sign(dpx - b.px * SW) || -1;
       const sz = HOME.SIZE * HOME.BROTHER_SIZE * (1 - 0.06 * b.way), by = floor - HOME.MAKE_WAY_UP * b.way;
       let nm, fi;
       if (walks && stepping && !talking) { nm = b.id + "_walk"; b.wT = (b.wT || 0) + dt; fi = frameOf(nm, b.wT); }
