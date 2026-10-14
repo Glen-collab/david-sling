@@ -286,7 +286,13 @@ function stoneHitsRat(k, s) {
   else toast(left ? `Rat chased off! ${left} still in the grain.` : "Rat chased off!");
   return !s.power;
 }
-function drawRat(k, x) {   // a little brown rat (drawn until there's a rat clip)
+Object.assign(W3, { RAT_SIZE: 0.6 });   // Glen's rat run sheet, next to everything else
+function drawRat(k, x) {   // a little brown rat: Glen's running rat (standing still = its first frame), or a drawn one
+  if (SPR.rat_run) {
+    const run = k.gone || k.state === "run";
+    drawSprite("rat_run", run ? frameOf("rat_run", k.t) : 0, x + k.facing * 14, k.y + 2, k.facing, W3.RAT_SIZE, k.alpha);
+    return;
+  }
   const y = k.y, f = k.facing, run = k.gone || k.state === "run", leg = run ? Math.sin(performance.now() / 40) * 3 : 0;
   ctx.save(); ctx.globalAlpha = k.alpha; ctx.translate(x, y); ctx.scale(f, 1);
   ctx.strokeStyle = "#c79a8a"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-12, -6); ctx.quadraticCurveTo(-26, -2, -32, -10); ctx.stroke();

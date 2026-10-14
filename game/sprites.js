@@ -2052,6 +2052,18 @@ window.SPRITE_DATA = {
   "ay": 302,
   "align": "feet"
  },
+ "rat_run": {
+  "src": "../assets/sprites/rat_run.png",
+  "frames": 6,
+  "w": 237,
+  "h": 106,
+  "ms": 70,
+  "loop": true,
+  "pingpong": false,
+  "ax": 217,
+  "ay": 105,
+  "align": "feet"
+ },
  "raven_fly": {
   "src": "../assets/sprites/raven_fly.png",
   "frames": 8,
