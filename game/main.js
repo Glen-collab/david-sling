@@ -805,7 +805,6 @@ if (LEVEL_NAME === "test") {
   pillar(118, 5, 8);                                           // the top of the cliffs
   campfire(120, 4);
   lostSheep("lambblack", 124, 4);
-  special(124, 0);
   // down into the hidden spring
   pillar(129, 7, 4);
   pillar(135, 9, 4); oliveArc(133, 8, 3);

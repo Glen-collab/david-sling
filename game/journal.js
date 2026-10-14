@@ -482,7 +482,7 @@ function sfxPageTurn() { penScratch(0.35, 2.5); }
 
 // special stones found in each stage are saved by stage ("1-1": 3, ...); the world's spread shows the total
 function stonesFound(world) {
-  try { const s = JSON.parse(localStorage.getItem("davidStones") || "{}"); return [1, 2, 3, 4].reduce((n, k) => n + (s[`${world}-${k}`] || 0), 0); } catch (e) { return 0; }
+  try { const s = JSON.parse(localStorage.getItem("davidStones") || "{}"); return [1, 2, 3, 4].reduce((n, k) => n + Math.min(3, s[`${world}-${k}`] || 0), 0); } catch (e) { return 0; }   // 3 a stage (2-3 once had 4)
 }
 function saveStones(stage, n) {
   try { const s = JSON.parse(localStorage.getItem("davidStones") || "{}"); s[stage] = Math.max(s[stage] || 0, n); localStorage.setItem("davidStones", JSON.stringify(s)); } catch (e) {}
