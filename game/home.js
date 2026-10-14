@@ -55,7 +55,7 @@ const HOME_SPOTS = [
 // 1 Chronicles 2:14-15 (Nethanel, Raddai, Ozem); Elihu from 1 Chronicles 27:18, standing in for the eighth son that
 // 1 Samuel 16:10-11 counts. The Bible gives them no words, so theirs are small, everyday and kind. Up next to one: a line.
 const BROTHERS = [
-  { id: "raddai", name: "Raddai", x: 0.205, size: 0.27, says: ["Father wants the far field plowed before the rain. This yoke gets heavier every trip.", "Father says I plow a straighter line than Eliab. Don't tell him I told you."] },
+  { id: "raddai", name: "Raddai", x: 0.225, size: 0.27, says: ["Father wants the far field plowed before the rain. I'm just catching my breath first.", "Father says I plow a straighter line than Eliab. Don't tell him I told you."] },
   { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["First of the barley. Father says the first sheaf goes to the LORD before we eat a grain of it.", "Eliab says I carry it like a baby. At least I carry it."] },
   { id: "elihu", name: "Elihu", x: 0.815, size: 0.27, says: ["The well's low this summer. I carry twice as many jars as last year.", "This little one follows me to the well every morning. She thinks the jar is for her."] },
   { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Taking the ewes out to the near pasture. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
@@ -259,12 +259,38 @@ const Courtyard = {
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);
-    for (const b of BROTHERS) {   // the brothers at their chores (Glen's Meta pose sheets), facing David: standing (now and then
-      const bx = b.x * SW - cam; if (bx < -200 || bx > W + 200) continue;   // arms crossed or holding his load), talking while his words are up
-      const talking = this.msg && this.msg.who === b.name, face = Math.sign(this.x * SW - b.x * SW) || -1;
-      const still = b.id === "nethanel" || Math.floor(this.t / 5 + b.x * 7) % 3 === 2 ? "_crossed" : "_idle";   // (Nethanel's standing pose has his staff beside him)
-      const nm = b.id + (talking ? "_talk" : still);
-      if (SPR[nm]) drawSprite(nm, talking ? Math.floor((this.t - this.msg.at) / 0.9) % 2 : 0, bx, floor, face, HOME.SIZE * HOME.BROTHER_SIZE, ctx.globalAlpha);
+    for (const b of BROTHERS) {   // the brothers at their chores, facing David: standing (now and then arms crossed or holding
+      // their load), talking while their words are up. One with a walk clip (Raddai) strolls up and down his patch,
+      // stops and waves when David comes over, then stands and chats.
+      const talking = this.msg && this.msg.who === b.name, dpx = this.x * SW;
+      const dt = Math.min(0.05, this.t - (b.lastT ?? this.t)); b.lastT = this.t;
+      if (b.px === undefined) { b.px = b.x; b.dir = 1; b.st = "walk"; b.stT = 0; }
+      b.stT += dt;
+      const walks = !!SPR[b.id + "_walk"] && SPR[b.id + "_walk"].frames > 2, near = Math.abs(dpx - b.px * SW) < 170;
+      if (walks) {
+        if (talking) b.st = "talk";
+        else if (near && b.st === "walk") { b.st = b.waved ? "idle" : "wave"; b.stT = 0; b.waved = true; }
+        else if (b.st === "wave" && animDone(b.id + "_wave", b.stT)) { b.st = "idle"; b.stT = 0; }
+        else if (b.st === "talk") { b.st = "idle"; b.stT = 0; }
+        else if (b.st === "idle" && !near && b.stT > 1.5) { b.st = "walk"; b.stT = 0; }
+        if (!near) b.waved = b.waved && Math.abs(dpx - b.px * SW) < 400;   // wave again after David's been away
+        if (b.st !== "walk" && Math.abs(dpx - b.px * SW) < 95) b.px += (b.px * SW < dpx ? -1 : 1) * 120 * dt / SW;   // give David room to stand
+        if (b.st === "walk") {
+          b.px += b.dir * 70 * dt / SW;
+          if (Math.abs(b.px - b.x) > 0.035) { b.px = b.x + Math.sign(b.px - b.x) * 0.035; b.dir = -b.dir; }
+        }
+      }
+      const bx = b.px * SW - cam; if (bx < -200 || bx > W + 200) continue;
+      const face = b.st === "walk" && walks && !talking ? b.dir : Math.sign(dpx - b.px * SW) || -1, sz = HOME.SIZE * HOME.BROTHER_SIZE;
+      let nm, fi;
+      if (walks && b.st === "walk") { nm = b.id + "_walk"; fi = frameOf(nm, b.stT); }
+      else if (walks && b.st === "wave") { nm = b.id + "_wave"; fi = frameOf(nm, b.stT); }
+      else if (talking) { nm = b.id + "_talk"; fi = walks ? frameOf(nm, this.t - this.msg.at) : Math.floor((this.t - this.msg.at) / 0.9) % 2; }
+      else {
+        const still = !walks && (b.id === "nethanel" || Math.floor(this.t / 5 + b.x * 7) % 3 === 2) ? "_crossed" : "_idle";   // (Nethanel's standing pose has his staff beside him)
+        nm = b.id + still; fi = walks ? frameOf(nm, this.t) : 0;
+      }
+      if (SPR[nm]) drawSprite(nm, fi, bx, floor, face, sz, ctx.globalAlpha);
       else drawItem("brother_" + b.id, bx, floor + 6, b.size * HOME.SIZE, ctx.globalAlpha);
     }
     // Jesse, just right of the target, facing David: idle, talking while his words are up, or pointing and laughing after a hit
