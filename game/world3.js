@@ -268,9 +268,38 @@ function drawCrow(k, x) {
 // ---------------------------------------------------------------------------
 function updateRat(k, dx, sameLevel, dt) {
   if (k.state === "idle") setCrit(k, "run");
-  if (k.state === "pause") { k.vx = 0; if (k.t > 0.4 + (k.home % 5) * 0.15) setCrit(k, "run"); return; }
+  if (k.state === "caught") { k.vx = 0; return; }   // in the whip snake's jaws
+  if (k.state === "pause") { if (touchesDavid(critterBox(k)) && david.inv <= 0) hurtDavid(k.x); k.vx = 0; if (k.t > 0.4 + (k.home % 5) * 0.15) setCrit(k, "run"); return; }
   k.x += k.facing * W3.RAT_RUN * dt;
+  if (touchesDavid(critterBox(k)) && david.inv <= 0) {   // run into one and it nips your ankle
+    hurtDavid(k.x);
+    if (!W3.nipTold) { W3.nipTold = true; toast("Ow! A rat nipped your ankle. Sling them out of the grain, or leave the snake to it."); }
+  }
   if (Math.abs(k.x - k.home) > (k.range || 2 * T) && Math.sign(k.x - k.home) === k.facing) { k.facing = -k.facing; setCrit(k, "pause"); }
+}
+// The whip snake goes after the rats: drops to the floor, glides up to the nearest one and lunges (Glen's strike
+// poses). It catches one or two (W3.SNAKE_CATCH), then the rest bolt and it slides off.
+Object.assign(W3, { SNAKE_CATCH: 2, SNAKE_GLIDE: 260, SNAKE_STRIKE: 0.4 });
+function huntRats(g, sn, dt) {
+  sn.ht += dt;
+  const floor = g.p.y, rats = critters.filter(k => k.kind === "rat" && !k.gone && k.home >= g.x0 - T && k.home <= g.x1 + T);
+  if (sn.phase === "drop") { sn.y = Math.min(floor, sn.y + 700 * dt); if (sn.y >= floor) { sn.phase = "go"; sn.ht = 0; } return; }
+  if (sn.phase === "go") {
+    const k = rats.sort((a, b) => Math.abs(a.x - sn.x) - Math.abs(b.x - sn.x))[0];
+    if (!k || (g.caught || 0) >= W3.SNAKE_CATCH) {
+      ratsFlee(g, (g.caught || 0) ? `The whip snake caught ${g.caught === 1 ? "a rat" : "two rats"} and the rest bolted. Let it do its job: the granary's clear.` : "The whip snake went after the rats. The granary's clear.");
+      Object.assign(sn, { state: "leave", t: 0 }); return;
+    }
+    sn.facing = Math.sign(k.x - sn.x) || 1; sn.x += sn.facing * W3.SNAKE_GLIDE * dt; sn.t += dt;
+    if (Math.abs(k.x - sn.x) < 46) { sn.phase = "strike"; sn.ht = 0; sn.prey = k; k.state = "caught"; k.vx = 0; }
+    return;
+  }
+  if (sn.phase === "strike" && sn.ht > W3.SNAKE_STRIKE) {
+    const k = sn.prey; k.gone = true; k.vx = 0; k.alpha = 0.6;
+    g.caught = (g.caught || 0) + 1; stoneHit({ x: k.x, y: k.y }, 0.25);
+    if (g.caught === 1) toast("Snap! The whip snake caught a rat.");
+    sn.phase = "go"; sn.ht = 0;
+  }
 }
 function ratsFlee(g, why) {
   for (const k of critters) if (k.kind === "rat" && !k.gone && k.home >= g.x0 - T && k.home <= g.x1 + T) {
@@ -317,8 +346,9 @@ function updateWorld3(dt) {
     const sn = g.snake, inside = david.x > g.x0 && david.x < g.x1 && david.deadT <= 0;
     if (sn.state === "idle" && !sn.gone && inside) { sn.state = "leave"; sn.t = 0; sn.facing = Math.sign((g.x0 + g.x1) / 2 - sn.x) || 1; }   // David came in under it
     if (sn.state === "leave" && !(sn.gone && sn.vy)) {   // (gone with a fling = it was slung)
-      g.huntT += dt; if (g.huntT > W3.SNAKE_HUNT) ratsFlee(g, "The whip snake went after the rats. Let it do its job: the granary's clear.");
+      g.huntT += dt; if (g.huntT > W3.SNAKE_HUNT) Object.assign(sn, { state: "hunt", phase: "drop", ht: 0, alpha: 1 });
     }
+    if (sn.state === "hunt" && !sn.gone) huntRats(g, sn, dt);
   }
 }
 

@@ -1958,7 +1958,8 @@ function drawSnakes(camX) {
     if (s.kind === "whip") {   // slim, green, gliding: the harmless one
       if (SPR.whip_slither) {   // Glen's whip snake: coiled up, head raised when David is close, slithering off
         const near = Math.abs(david.x - s.x) < 300 && Math.abs(david.y - s.y) < 160;
-        if (s.state === "leave" || s.gone) drawSprite("whip_slither", frameOf("whip_slither", s.t), x, s.y + 2, s.facing, 1, s.alpha);
+        if (s.state === "hunt" && s.phase === "strike") drawSprite("whip_strike", Math.min(1, Math.floor(s.ht / (W3.SNAKE_STRIKE / 2))), x, s.y + 2, s.facing, 1, s.alpha);   // the lunge (world3.js)
+        else if (s.state === "leave" || s.state === "hunt" || s.gone) drawSprite("whip_slither", frameOf("whip_slither", s.t), x, s.y + 2, s.facing, 1, s.alpha);
         else drawSprite("whip_coil", near ? 1 : 0, x, s.y + 2, s.facing, 1, s.alpha);
       } else drawSprite("snake_strike", s.state === "leave" ? [7, 6, 7, 0][Math.floor(s.t / 0.15) % 4] : 7, x, s.y, s.facing, 0.85, s.alpha, WHIP_FILTER);
       continue;
