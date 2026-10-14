@@ -23,7 +23,7 @@ for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c 
 // Glen's pieces (assets/items/town_*.png, cut from his side-view sheet): the houses are stone walls built up from his
 // low wall, row on row, with his mud roof slab on top
 const ok = n => ITEM[n] && ITEM[n].naturalWidth;
-const TOWN_STONE = "none";   // a filter on Glen's stone if it ever needs warming (his warm sheet matches the town as it is)
+const TOWN_STONE = "saturate(0.5) brightness(1.18)";   // the orange stairs (and stone-house fallback) paled to the tan of Glen's houses
 function drawStoneHouse(h) {
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0, img = ITEM.town_low_wall;
   const rh = 34, rw = img.naturalWidth * rh / img.naturalHeight;
@@ -45,7 +45,32 @@ function drawStoneHouse(h) {
   const slab = ITEM.town_roof_slab;   // the flat roof: beams and packed mud, overhanging a little
   if (ok("town_roof_slab")) ctx.drawImage(slab, x0 - 10, y0 - 12, w + 20, 26);
 }
+// Glen's whole houses (town_house_*.png). Per picture, in its own pixels: the wall's left and right edge, the roof
+// David stands on, and two cuts. Above the first cut (roof, window) and below the second (the door) are drawn at true
+// shape; the plain bricks between the cuts repeat to make the house as tall as its blocks.
+const HOUSE_LOOKS = {
+  small:   { wx0: 25, wx1: 400, walk: 25, a: 145, b: 220 },
+  tall:    { wx0: 26, wx1: 396, walk: 30, a: 200, b: 430 },
+  corner:  { wx0: 37, wx1: 473, walk: 40, a: 180, b: 245 },
+  parapet: { wx0: 20, wx1: 403, walk: 85, a: 230, b: 310 },
+};
+function drawHouseArt(h, img, L) {
+  const x0 = h.c * T, y0 = h.r * T, y1 = GR * T, w = (h.w) * T, s = w / (L.wx1 - L.wx0);
+  const W = img.naturalWidth, H = img.naturalHeight, dx = x0 - L.wx0 * s, dw = W * s;
+  const topEnd = y0 + (L.a - L.walk) * s, botStart = y1 - (H - L.b) * s;
+  ctx.save(); ctx.beginPath(); ctx.rect(dx - 2, y0 - 200, dw + 4, y1 - y0 + 200); ctx.clip();
+  const band = (L.b - L.a) * s;
+  for (let y = topEnd; y < botStart; y += band - 1) {   // the plain brick between roof and door, as often as it takes
+    const hh = Math.min(band, botStart - y + 1);
+    ctx.drawImage(img, 0, L.a, W, hh / s, dx, y, dw, hh);
+  }
+  ctx.drawImage(img, 0, 0, W, L.a, dx, y0 - L.walk * s, dw, L.a * s);
+  ctx.drawImage(img, 0, L.b, W, H - L.b, dx, botStart, dw, (H - L.b) * s);   // the door last, so a short house keeps it
+  ctx.restore();
+}
 function drawHouse(h) {
+  let look = h.look || ((GR - h.r) / h.w > 1.5 ? "tall" : h.c % 2 ? "corner" : "small");
+  if (ok("town_house_" + look)) { drawHouseArt(h, ITEM["town_house_" + look], HOUSE_LOOKS[look]); return; }
   if (ok("town_low_wall")) { drawStoneHouse(h); return; }
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0;
   const g = ctx.createLinearGradient(x0, 0, x1, 0);

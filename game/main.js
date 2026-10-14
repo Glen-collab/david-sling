@@ -354,7 +354,7 @@ const setPieces = [];
 // World 3: Bethlehem's flat-roofed houses (material 9, drawn in world3.js) and ladders up their walls (rungs you hop up)
 const houses = [], ladders = [], stairs = [], GRANARY_BEAM_ROW = 12;
 const stair = (c, h) => { for (let k = 0; k < h; k++) block(c + 2 * k, GR - k - 1, 2 * (h - k), 1, 9); stairs.push({ c, h }); };   // steps up to the right, 2 columns each   // (the granary's beam, where its whip snake lies)
-const house = (c, w, r) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r }); };
+const house = (c, w, r, look) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r, look }); };   // look: small/tall/corner/parapet (picked by shape if left out)
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
@@ -910,7 +910,7 @@ if (LEVEL_NAME === "test") {
   // The One: on the highest roof in Bethlehem, a long chain of roof jumps
   house(171, 4, 13); ladder(169, 13);
   house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7); deco("town_fig_rack", 179, 10, 0.18);
-  house(195, 5, 5); lostSheep("lamb", 197, 4, "one");
+  house(195, 5, 5, "parapet"); lostSheep("lamb", 197, 4, "one");
   oliveRow(171, 12, 4); oliveRow(177, 10, 4); oliveRow(183, 8, 4); oliveRow(189, 6, 4);
   oliveRow(204, 16, 6);
   talk(214, "Jesse", "David, the flock still needs you. Take them out to the far pasture tomorrow. Your brothers will stay for the prophet.");
