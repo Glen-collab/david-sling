@@ -90,6 +90,7 @@ const HOUSE_LOOKS = {
   shed:  { wx0: 35, wx1: 393, walk: 31, a: 91,  b: 146 },
   tower: { wx0: 30, wx1: 502, walk: 37, a: 155, b: 275 },
   big:   { wx0: 52, wx1: 708, walk: 12, a: 187, b: 287 },
+  fort:  { wx0: 102, wx1: 1607, walk: 136, a: 506, b: 546 },
 };
 function drawHouseArt(h, img, L) {
   const x0 = h.c * T, y0 = h.r * T, y1 = GR * T + HOUSE_SINK, w = h.w * T, s = w / (L.wx1 - L.wx0);
@@ -103,8 +104,13 @@ function drawHouseArt(h, img, L) {
   ctx.drawImage(img, 0, L.b, W, H - L.b, dx, botStart, dw, (H - L.b) * sy);
   ctx.drawImage(img, 0, 0, W, L.a, dx, y0 - L.walk * sy, dw, L.a * sy);
 }
+// Glen's stair tower: drawn so its top ledge (picture row 260) is at row 6 and its ground (1700) sinks into the soil
+function drawStairTower(t) {
+  const img = ITEM.town_stair_tower, s = (GR * T + HOUSE_SINK - 6 * T) / (1700 - 260), ox = 140, oy = 106;
+  ctx.drawImage(img, t.c * T - (155 - ox) * s, 6 * T - (260 - oy) * s, img.naturalWidth * s, img.naturalHeight * s);
+}
 function drawHouse(h) {
-  const rows = GR - h.r, look = rows <= 4 ? "shed" : rows / h.w > 1.2 ? "tower" : "big";
+  const rows = GR - h.r, look = h.w >= 6 ? "fort" : rows <= 4 ? "shed" : rows / h.w > 1.2 ? "tower" : "big";
   if (ok("town_house_" + look)) { drawHouseArt(h, ITEM["town_house_" + look], HOUSE_LOOKS[look]); return; }
   if (ok("town_side_low_wall")) { drawSideHouse(h); return; }
   if (ok("town_low_wall")) { drawStoneHouse(h); return; }
@@ -177,7 +183,7 @@ function drawThreshing(p) {   // a round floor of beaten earth ringed with stone
   ctx.fillStyle = "#cfc2a6"; for (let a = 0; a < 14; a++) { const t = a / 14 * Math.PI; ctx.beginPath(); ctx.ellipse(cx - Math.cos(t) * rx, y - 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawWorld3(camX) {
-  if (!houses.length && !ladders.length && !stairs.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing")) return;
+  if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
   const on = (x0, x1) => x1 > camX - 60 && x0 < camX + W + 60;
@@ -192,6 +198,7 @@ function drawWorld3(camX) {
     else { ctx.fillStyle = "#a89a84"; for (let k = 0; k < s.h; k++) ctx.fillRect((s.c + 2 * k) * T, (GR - k - 1) * T, (2 * (s.h - k)) * T, T); }
     ctx.filter = "none";
   }
+  for (const t of stairTowers) if (on(t.c * T, (t.c + 9) * T) && ok("town_stair_tower")) drawStairTower(t);
   for (const h of houses) if (on(h.c * T, (h.c + h.w) * T)) drawHouse(h);
   for (const l of ladders) if (on(l.c * T, (l.c + 2) * T)) drawLadder(l);
   for (const p of setPieces) if (p.kind === "barley" && on(p.c * T, (p.c + p.w) * T)) drawBarley(p, now);

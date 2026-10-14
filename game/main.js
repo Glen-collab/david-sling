@@ -355,6 +355,11 @@ const setPieces = [];
 const houses = [], ladders = [], stairs = [], GRANARY_BEAM_ROW = 12;
 const stair = (c, h) => { for (let k = 0; k < h; k++) block(c + 2 * k, GR - k - 1, 2 * (h - k), 1, 9); stairs.push({ c, h }); };   // steps up to the right, 2 columns each   // (the granary's beam, where its whip snake lies)
 const house = (c, w, r) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r }); };
+const stairTowers = [];
+// Glen's tower with its own stone stair: you run past in front of the tower, climb the stair (steps up to the right), then
+// jump up onto the tower top (a ledge you can jump up through). The tower's left edge is column c; the top is row 6.
+const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
+const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 6, 7); stairTowers.push({ c }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
@@ -902,7 +907,7 @@ if (LEVEL_NAME === "test") {
   house(123, 5, 12); oliveRow(123, 11, 5);
   // the threshing floor, where Ruth gleaned in Boaz's fields, long ago (a Journal fact)
   setPiece("threshing", 132, GR - 1, { w: 7 }); food("bread", 135, 16);
-  special(141, 12);
+  stairTower(139); special(141, 4);                            // up the tower's stair, then a flip onto its top
   lostSheep("sheepblack", 144, 16);
   setPiece("barley", 149, GR - 1, { w: 16 });                  // the second field: more crows
   for (const c of [151, 155, 159, 163]) critter("crow", c, GR - 1);
@@ -912,7 +917,7 @@ if (LEVEL_NAME === "test") {
   house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7); deco("town_side_fig_rack", 179, 10, 0.18);
   house(195, 5, 5); lostSheep("lamb", 197, 4, "one");
   oliveRow(171, 12, 4); oliveRow(177, 10, 4); oliveRow(183, 8, 4); oliveRow(189, 6, 4);
-  oliveRow(204, 16, 6);
+  oliveRow(204, 16, 6); deco("town_hut_round", 203, 16, 0.13);
   talk(214, "Jesse", "David, the flock still needs you. Take them out to the far pasture tomorrow. Your brothers will stay for the prophet.");
   sheepfold(222);
 }
