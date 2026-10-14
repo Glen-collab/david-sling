@@ -20,6 +20,7 @@ const HOME = {
   JESSE_SIZE: 1.2,                // Jesse next to David (a grown man stands a head taller)
   TRADER_X: 0.75,                 // where the trader stands, just in front of his stall
   TRADER_SIZE: 1.2,
+  BROTHER_SIZE: 1.12,             // the brothers are older than David: a little taller
 };
 // The tithe (decided 2026-10-12): the first thing when David comes home after a world, before the market or anything
 // else, DAVID offers to set aside the first tenth of the olives he gathered in that world (counted as they were picked
@@ -54,8 +55,8 @@ const HOME_SPOTS = [
 // 1 Chronicles 2:14-15 (Nethanel, Raddai, Ozem); Elihu from 1 Chronicles 27:18, standing in for the eighth son that
 // 1 Samuel 16:10-11 counts. The Bible gives them no words, so theirs are small, everyday and kind. Up next to one: a line.
 const BROTHERS = [
-  { id: "raddai", name: "Raddai", x: 0.205, size: 0.27, says: ["Father wants the far field ploughed before the rain. The ox and I disagree about when.", "Watch his horns, little brother. He swings his head when the flies bite."] },
-  { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["Six hens, eleven eggs this week. Don't tell Eliab, he'll want them all.", "They come running the moment they hear the basket. Like your sheep and that harp."] },
+  { id: "raddai", name: "Raddai", x: 0.205, size: 0.27, says: ["Father wants the far field ploughed before the rain. This yoke gets heavier every trip.", "Watch his horns, little brother. He swings his head when the flies bite."] },
+  { id: "ozem", name: "Ozem", x: 0.625, size: 0.27, says: ["First of the barley. Father says the first sheaf goes to the LORD before we eat a grain of it.", "Eliab says I carry it like a baby. At least I carry it."] },
   { id: "elihu", name: "Elihu", x: 0.815, size: 0.27, says: ["The well's low this summer. I carry twice as many jars as last year.", "This little one follows me to the well every morning. She thinks the jar is for her."] },
   { id: "nethanel", name: "Nethanel", x: 0.885, size: 0.27, says: ["Taking the ewes out to the near pasture. You take the far hills, as always.", "You came back. Good. Father pretends he doesn't watch the gate for you."] },
 ];
@@ -258,8 +259,13 @@ const Courtyard = {
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);
-    for (const b of BROTHERS) {   // the brothers at their chores (behind everyone else)
-      const bx = b.x * SW - cam; if (bx > -200 && bx < W + 200) drawItem("brother_" + b.id, bx, floor + 6, b.size * HOME.SIZE, ctx.globalAlpha);
+    for (const b of BROTHERS) {   // the brothers at their chores (Glen's Meta pose sheets), facing David: standing (now and then
+      const bx = b.x * SW - cam; if (bx < -200 || bx > W + 200) continue;   // arms crossed or holding his load), talking while his words are up
+      const talking = this.msg && this.msg.who === b.name, face = Math.sign(this.x * SW - b.x * SW) || -1;
+      const still = b.id === "nethanel" || Math.floor(this.t / 5 + b.x * 7) % 3 === 2 ? "_crossed" : "_idle";   // (Nethanel's standing pose has his staff beside him)
+      const nm = b.id + (talking ? "_talk" : still);
+      if (SPR[nm]) drawSprite(nm, talking ? Math.floor((this.t - this.msg.at) / 0.9) % 2 : 0, bx, floor, face, HOME.SIZE * HOME.BROTHER_SIZE, ctx.globalAlpha);
+      else drawItem("brother_" + b.id, bx, floor + 6, b.size * HOME.SIZE, ctx.globalAlpha);
     }
     // Jesse, just right of the target, facing David: idle, talking while his words are up, or pointing and laughing after a hit
     const jx = HOME_SPOTS.find(s => s.id === "jesse").x * SW - cam, ct = this.cheerAt === null ? 1e9 : this.t - this.cheerAt;
