@@ -518,11 +518,11 @@ if (LEVEL_NAME === "test") {
   oliveRow(186, 16, 6);
   sheepfold(206);
 } else if (LEVEL_NAME === "1-2") {
-  // ---- 1-2 The Wandering Flock: the harp gathers them, foxes go for your lamb, a cast sheep, a neighbour's ram ----
+  // ---- 1-2 The Wandering Flock: the harp gathers them, foxes go for your lamb, a cast sheep, a neighbor's ram ----
   ground(0, 40);
   campfire(6, GR - 1, "Hanan", "Count them every morning and every night. Sheep know their shepherd's voice, and they know your song. Play the harp (Select): the lost ones will come to it.", "harpCall");
   oliveRow(10, 16, 5);
-  lostSheep("ram", 30, 16);                                    // a ram that isn't yours: the neighbour's (bring it home too)
+  lostSheep("ram", 30, 16);                                    // a ram that isn't yours: the neighbor's (bring it home too)
   critter("fox", 37);
   ground(44, 98);
   rock(50, 14, 6, 3); rock(56, 12, 5, 5);

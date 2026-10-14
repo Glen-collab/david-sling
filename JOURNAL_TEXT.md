@@ -62,9 +62,9 @@ Draft text for every checkpoint saying, every journal entry and every psalm line
 | **Learn** | Gather lost sheep with the harp. Protect the line from foxes. Right a cast sheep. |
 | **Earn** | The harp gathers the flock. |
 | **Find** | 5 lost sheep, The One (in a low cave, comes back after 1-3), 3 special stones. |
-| **Checkpoint** | **A neighbour shepherd** (an old man whose ram has wandered into your flock) |
+| **Checkpoint** | **A neighbor shepherd** (an old man whose ram has wandered into your flock) |
 
-> **Neighbour:** "That's my ram you've got with yours. Most boys would keep him. If you find your neighbour's sheep, you bring it home."
+> **Neighbor:** "That's my ram you've got with yours. Most boys would keep him. If you find your neighbor's sheep, you bring it home."
 
 **David writes:**
 > *If my neighbor's sheep wanders, I must not look away. I bring it home, even when it isn't mine.*
@@ -226,7 +226,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 ### World 7: The Giant's Shadow *(one scratch-out)*
 | Stage | Lesson | David writes |
 |---|---|---|
-| 7-1 Saul's armour | Not by our own strength | *Gideon's army was cut to three hundred, so no one could say their own strength won.* — Judges 7:2 |
+| 7-1 Saul's armor | Not by our own strength | *Gideon's army was cut to three hundred, so no one could say their own strength won.* — Judges 7:2 |
 | 7-2 The walk down, memories | Remember the way | *Remember how the LORD led you all the way. I remember the lion, the bear, the flood.* — Deuteronomy 8:2 |
 | 7-3 Five smooth stones | Be still | *The LORD will fight for you. You only need to be still.* — Exodus 14:14 |
 | 7-4 The shield-bearer | One with God is enough | *One of you can chase a thousand, because the LORD fights for you.* — Joshua 23:10 |
@@ -235,10 +235,10 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 |---|---|
 | 7-1 | *You set a table before me,* |
 | 7-2 | *…even while my enemies stand near…* |
-| 7-3 | *…and You give me armour.* |
-| 7-4 | *…and You ~~give me armour~~ replace my fear.* (he took Saul's armour off) |
+| 7-3 | *…and You give me armor.* |
+| 7-4 | *…and You ~~give me armor~~ replace my fear.* (he took Saul's armor off) |
 
-**What happened:** *The king put his armour on me. I couldn't even walk in it. I took it off, and chose five smooth stones from the stream.* <sub>1 Samuel 17:38–40</sub>
+**What happened:** *The king put his armor on me. I couldn't even walk in it. I took it off, and chose five smooth stones from the stream.* <sub>1 Samuel 17:38–40</sub>
 
 ### World 8: David and Goliath *(no scratch-outs)*
 | Stage | Lesson | David writes |
