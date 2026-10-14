@@ -1956,7 +1956,11 @@ function drawSnakes(camX) {
     if (s.alpha <= 0) continue;
     const x = s.x - camX;
     if (s.kind === "whip") {   // slim, green, gliding: the harmless one
-      drawSprite("snake_strike", s.state === "leave" ? [7, 6, 7, 0][Math.floor(s.t / 0.15) % 4] : 7, x, s.y, s.facing, 0.85, s.alpha, WHIP_FILTER);
+      if (SPR.whip_slither) {   // Glen's whip snake: coiled up, head raised when David is close, slithering off
+        const near = Math.abs(david.x - s.x) < 300 && Math.abs(david.y - s.y) < 160;
+        if (s.state === "leave" || s.gone) drawSprite("whip_slither", frameOf("whip_slither", s.t), x, s.y + 2, s.facing, 1, s.alpha);
+        else drawSprite("whip_coil", near ? 1 : 0, x, s.y + 2, s.facing, 1, s.alpha);
+      } else drawSprite("snake_strike", s.state === "leave" ? [7, 6, 7, 0][Math.floor(s.t / 0.15) % 4] : 7, x, s.y, s.facing, 0.85, s.alpha, WHIP_FILTER);
       continue;
     }
     if (snakeArt(s)) {

@@ -2436,6 +2436,42 @@ window.SPRITE_DATA = {
   "ay": 0,
   "align": "feet"
  },
+ "whip_coil": {
+  "src": "../assets/sprites/whip_coil.png",
+  "frames": 2,
+  "w": 108,
+  "h": 103,
+  "ms": 700,
+  "loop": true,
+  "pingpong": false,
+  "ax": 102,
+  "ay": 102,
+  "align": "feet"
+ },
+ "whip_slither": {
+  "src": "../assets/sprites/whip_slither.png",
+  "frames": 6,
+  "w": 225,
+  "h": 100,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 211,
+  "ay": 99,
+  "align": "feet"
+ },
+ "whip_strike": {
+  "src": "../assets/sprites/whip_strike.png",
+  "frames": 2,
+  "w": 260,
+  "h": 69,
+  "ms": 120,
+  "loop": false,
+  "pingpong": false,
+  "ax": 254,
+  "ay": 68,
+  "align": "feet"
+ },
  "wolf_run": {
   "src": "../assets/sprites/wolf_run.png",
   "frames": 12,

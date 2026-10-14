@@ -1,0 +1,11 @@
+{
+  "frames": 2,
+  "frame_w": 108,
+  "frame_h": 103,
+  "ms_per_frame": 700,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 102,
+  "anchor_y": 102,
+  "source": "whip sheets"
+}
