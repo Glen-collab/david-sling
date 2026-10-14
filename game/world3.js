@@ -20,7 +20,33 @@ for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c 
 // ---------------------------------------------------------------------------
 // Drawing: houses, ladders, barley, the granary, the threshing floor
 // ---------------------------------------------------------------------------
+// Glen's pieces (assets/items/town_*.png, cut from his side-view sheet): the houses are stone walls built up from his
+// low wall, row on row, with his mud roof slab on top
+const ok = n => ITEM[n] && ITEM[n].naturalWidth;
+const TOWN_STONE = "sepia(0.55) saturate(1.35) brightness(1.1)";   // Glen's grey stone, warmed to the tan town in his backgrounds
+function drawStoneHouse(h) {
+  const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0, img = ITEM.town_low_wall;
+  const rh = 34, rw = img.naturalWidth * rh / img.naturalHeight;
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, w, y1 - y0); ctx.clip();
+  ctx.fillStyle = "#9c8466"; ctx.fillRect(x0, y0, w, y1 - y0);
+  ctx.filter = TOWN_STONE;
+  for (let y = y1 - rh, row = 0; y > y0 - rh; y -= rh * 0.82, row++) {
+    for (let x = x0 - ((row * 0.37 + h.c * 0.13) % 1) * rw; x < x1; x += rw - 6) ctx.drawImage(img, x, y, rw, rh);
+  }
+  ctx.filter = "none";
+  const dw = Math.min(30, w * 0.3), dx = x0 + w * 0.5 - dw / 2;   // the doorway: a wooden door in the dark
+  ctx.fillStyle = "#2e2014"; ctx.beginPath(); ctx.roundRect(dx - 4, y1 - 56, dw + 8, 56, [6, 6, 0, 0]); ctx.fill();
+  ctx.fillStyle = "#7a5432"; ctx.fillRect(dx, y1 - 50, dw, 50); ctx.fillStyle = "#5e3f24"; for (let k = 1; k < 3; k++) ctx.fillRect(dx + dw * k / 3 - 1, y1 - 50, 2, 50);
+  ctx.fillStyle = "#2e2014";
+  for (let wy = y1 - 4 * T + 30; wy > y0 + 24; wy -= 4 * T) for (const fx of w > 4 * T ? [0.22, 0.78] : [0.5]) if (wy < y1 - 70 || fx !== 0.5) ctx.fillRect(x0 + w * fx - 8, wy, 16, 16);
+  const sg = ctx.createLinearGradient(x0, 0, x0 + 22, 0); sg.addColorStop(0, "rgba(40,28,14,0.35)"); sg.addColorStop(1, "rgba(40,28,14,0)");
+  ctx.fillStyle = sg; ctx.fillRect(x0, y0, 22, y1 - y0);
+  ctx.restore();
+  const slab = ITEM.town_roof_slab;   // the flat roof: beams and packed mud, overhanging a little
+  if (ok("town_roof_slab")) ctx.drawImage(slab, x0 - 10, y0 - 12, w + 20, 26);
+}
 function drawHouse(h) {
+  if (ok("town_low_wall")) { drawStoneHouse(h); return; }
   const x0 = h.c * T, x1 = (h.c + h.w) * T, y0 = h.r * T, y1 = GR * T, w = x1 - x0;
   const g = ctx.createLinearGradient(x0, 0, x1, 0);
   g.addColorStop(0, "#c9a878"); g.addColorStop(0.5, "#ddbf8f"); g.addColorStop(1, "#b8956a");
@@ -74,12 +100,18 @@ function drawGranary(p) {   // an open-fronted stone storehouse: sacks of grain 
 }
 function drawThreshing(p) {   // a round floor of beaten earth ringed with stones, barley piled on it
   const cx = (p.c + p.w / 2) * T, y = p.y, rx = p.w * T / 2;
+  if (ok("town_threshing_floor")) {
+    const img = ITEM.town_threshing_floor, w = rx * 2 + 20, h = img.naturalHeight * w / img.naturalWidth;
+    ctx.drawImage(img, cx - w / 2, y - h + 8, w, h);
+    ctx.fillStyle = "#d9b55c"; ctx.beginPath(); ctx.moveTo(cx - rx * 0.45, y - h * 0.55); ctx.quadraticCurveTo(cx, y - h * 0.55 - 44, cx + rx * 0.45, y - h * 0.55); ctx.fill();   // barley heaped on it
+    return;
+  }
   ctx.fillStyle = "#b8976a"; ctx.beginPath(); ctx.ellipse(cx, y - 4, rx, 10, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#d9b55c"; ctx.beginPath(); ctx.moveTo(cx - rx * 0.5, y - 6); ctx.quadraticCurveTo(cx, y - 46, cx + rx * 0.5, y - 6); ctx.fill();
   ctx.fillStyle = "#cfc2a6"; for (let a = 0; a < 14; a++) { const t = a / 14 * Math.PI; ctx.beginPath(); ctx.ellipse(cx - Math.cos(t) * rx, y - 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawWorld3(camX) {
-  if (!houses.length && !ladders.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing")) return;
+  if (!houses.length && !ladders.length && !stairs.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
   const on = (x0, x1) => x1 > camX - 60 && x0 < camX + W + 60;
@@ -87,6 +119,12 @@ function drawWorld3(camX) {
     if (!on(p.c * T, (p.c + (p.w || 4)) * T)) continue;
     if (p.kind === "granary") drawGranary(p);
     else if (p.kind === "threshing") drawThreshing(p);
+  }
+  for (const s of stairs) if (on(s.c * T, (s.c + 2 * s.h) * T)) {   // Glen's stone stairs, stretched over the steps
+    if (ok("town_stairs")) ctx.filter = TOWN_STONE;
+    if (ok("town_stairs")) ctx.drawImage(ITEM.town_stairs, s.c * T - 4, (GR - s.h) * T - 6, 2 * s.h * T + 8, s.h * T + 10);
+    else { ctx.fillStyle = "#a89a84"; for (let k = 0; k < s.h; k++) ctx.fillRect((s.c + 2 * k) * T, (GR - k - 1) * T, (2 * (s.h - k)) * T, T); }
+    ctx.filter = "none";
   }
   for (const h of houses) if (on(h.c * T, (h.c + h.w) * T)) drawHouse(h);
   for (const l of ladders) if (on(l.c * T, (l.c + 2) * T)) drawLadder(l);

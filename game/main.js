@@ -352,7 +352,8 @@ const deadfalls = [];
 // World 2's set pieces, run by world2.js: the flood, the boy from Tekoa, the talk about the stones (see world2.js)
 const setPieces = [];
 // World 3: Bethlehem's flat-roofed houses (material 9, drawn in world3.js) and ladders up their walls (rungs you hop up)
-const houses = [], ladders = [], GRANARY_BEAM_ROW = 12;   // (the granary's beam, where its whip snake lies)
+const houses = [], ladders = [], stairs = [], GRANARY_BEAM_ROW = 12;
+const stair = (c, h) => { for (let k = 0; k < h; k++) block(c + 2 * k, GR - k - 1, 2 * (h - k), 1, 9); stairs.push({ c, h }); };   // steps up to the right, 2 columns each   // (the granary's beam, where its whip snake lies)
 const house = (c, w, r) => { block(c, r, w, GR - r, 9); houses.push({ c, w, r }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
@@ -877,20 +878,23 @@ if (LEVEL_NAME === "test") {
   talk(4, "Eliab", "Samuel the prophet is coming to Bethlehem. When he sees me, he'll know. Look at me.");
   talk(10, "Shammah", "Don't mind him. Somebody has to keep the sheep alive while he's being admired.");
   oliveRow(14, 16, 4);
-  setPiece("barley", 19, GR - 1, { w: 18 });                   // the crows are at the barley: sling them off
-  for (const c of [22, 26, 30, 34]) critter("crow", c, GR - 1);
-  lostSheep("sheep", 28, 16);                                  // nibbling the barley with the crows
-  // the first houses: up the ladder, then roof to roof
-  house(44, 6, 13); ladder(42, 13); oliveRow(44, 12, 6);
+  setPiece("barley", 19, GR - 1, { w: 15 });                   // the crows are at the barley: sling them off
+  for (const c of [21, 25, 28, 32]) critter("crow", c, GR - 1);
+  lostSheep("sheep", 27, 16);                                  // nibbling the barley with the crows
+  deco("town_grain_baskets", 16, 16, 0.22); deco("town_clay_pots", 38, 16, 0.2);
+  // the first houses: up the stone stairs, then roof to roof
+  stair(36, 4); house(44, 6, 13); oliveRow(44, 12, 6);
   special(51, 9);                                              // over the gap between the roofs: jump for it
   house(53, 5, 11); lostSheep("lambblack", 55, 10, "ledge");   // up on a roof (it followed the ladder): the harp brings it down
-  house(60, 6, 13); food("figs", 63, 12);                      // figs drying on the roof
+  house(60, 6, 13); deco("town_fig_rack", 62, 12, 0.22); food("figs", 64, 12);   // figs drying on the roof
   house(68, 4, 15);                                            // a low shed: the way back down
+  deco("town_log_stack", 80, 16, 0.2);
   campfire(76, GR - 1, "Hanan", "Every doorstep in Bethlehem swept for the prophet. The elders are trembling: when a prophet comes, it can mean trouble. Or it can mean the LORD is about to do something.");
   // the granary: rats in the grain, and the harmless green whip snake on the beam
   setPiece("granary", 86, GR - 1, { w: 11 });
   snake("whip", 91, GRANARY_BEAM_ROW);
   for (const c of [88, 91, 94, 96]) critter("rat", c, GR - 1, 2);
+  deco("town_rock_heap", 101, 16, 0.18); deco("town_clay_pots", 130, 16, 0.18); deco("town_grain_baskets", 146, 16, 0.2);
   lostSheep("sheep", 102, 16, "cast");                         // on its back in the lane: roll it over (Down)
   // the lanes: a tall house in the way, so it's over the roofs
   house(108, 5, 12); ladder(106, 12); oliveRow(108, 11, 5);
@@ -905,7 +909,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheep", 157, 16);
   // The One: on the highest roof in Bethlehem, a long chain of roof jumps
   house(171, 4, 13); ladder(169, 13);
-  house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7);
+  house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7); deco("town_fig_rack", 179, 10, 0.18);
   house(195, 5, 5); lostSheep("lamb", 197, 4, "one");
   oliveRow(171, 12, 4); oliveRow(177, 10, 4); oliveRow(183, 8, 4); oliveRow(189, 6, 4);
   oliveRow(204, 16, 6);
