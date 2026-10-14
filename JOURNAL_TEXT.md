@@ -138,6 +138,7 @@ The first draft of World 1 had a hidden scroll per stage with verses like Psalm 
 Each world: the four stage lessons (left page), the psalm page stage by stage (right page), and the "What happened" entry. Scripture under David's entries is only from Genesis to Ruth. Checkpoint sayings come later, once the people at each fire are settled.
 
 ### World 2: The Wilderness *(the bear)*
+*(In the game as of 2026-10-14, as this draft, so World 2's stages have Journal pages: `JOURNAL_PAGES[2]` in game/journal.js. Change the words here and there together until Glen locks them.)*
 | Stage | Lesson | David writes |
 |---|---|---|
 | 2-1 Woods (charged sling) | Wait for the right moment | *Israel moved when the cloud moved, and waited when it stayed. I am learning to wait.* — Numbers 9:22–23 |

@@ -57,6 +57,38 @@ const JOURNAL_PAGES = {
       ],
     },
   },
+  // World 2: the FIRST DRAFT from JOURNAL_TEXT.md (Glen hasn't locked it yet: change the words there, then here)
+  2: {
+    name: "The Wilderness",
+    stages: ["The Forest Trail", "The Dry Riverbed", "The High Cliffs", "The Bear's Ravine"],
+    draft: {
+      left: [
+        ...E(1, "Israel moved when the cloud moved, and waited when it stayed. I am learning to wait.", "Numbers 9:22–23"),
+        ...E(2, "The LORD made a dry path through the sea for our people. Today He brought us through the flood.", "Exodus 14:29"),
+        ...E(3, "In the dry land He brought water out of the hard rock.", "Deuteronomy 8:15"),
+        ...E(4, "He watched over our journey through the wilderness, and we have not lacked anything.", "Deuteronomy 2:7"),
+      ],
+      right: [
+        { at: 1, size: "psalm", segs: [
+          { text: "He leads me", at: 1 }, { text: "through the wilderness,", at: 1, strike: 2 }, { text: "beside the waters,", at: 2 }, { text: "\n" },
+          { text: "where the", at: 3 }, { text: "springs run clear.", at: 3, strike: 4 }, { text: "troubled waves grow still.", at: 4 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "David told King Saul about this years later: 1 Samuel 17:34–37",
+          segs: [{ text: "A bear came for the flock tonight. The LORD who helped me with the lion helped me again.", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the finished lines so far: World 1's, then World 2's under it
+        { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
+          { text: "He leads me beside the waters,", at: 5 }, { text: "\n" }, { text: "where the troubled waves grow still.", at: 5 }] },
+      ],
+    },
+  },
 };
 
 // ----------------------------------------------------------------------------
