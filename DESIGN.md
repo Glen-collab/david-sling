@@ -430,7 +430,7 @@ David writes only from **books that existed before him**: the Law of Moses (**Ge
 
 | Advice at a checkpoint | What David writes, from scripture before him |
 |---|---|
-| "Bring back every stray sheep, even your neighbour's" | Return a neighbour's lost sheep (Deuteronomy 22:1) |
+| "Bring back every stray sheep, even your neighbor's" | Return a neighbor's lost sheep (Deuteronomy 22:1) |
 | "Leave the bees be; there's honey for the patient" | Samson found honey in the lion he had killed (Judges 14:8) |
 | "The lion is Judah's own sign" | Judah, David's tribe, is "a lion's cub" (Genesis 49:9) |
 | "Snakes are crafty; look before you step" | The serpent was the craftiest creature (Genesis 3:1) |
@@ -645,7 +645,7 @@ Goliath falls to one stone (§5h, phase 3). To throw it perfectly, the player en
 | 4 | ↓ | Bow: serving the king |
 | 5 | ← → | The road: steady steps through the dark |
 | 6 | ← → | The valley: don't run either way |
-| 7 | B | The sling, without Saul's armour |
+| 7 | B | The sling, without Saul's armor |
 | 8 | A | Faith: "the battle is the LORD's". The throw itself. |
 
 **In the fight:** when Goliath's forehead opens and time slows, enter the code from memory. Each correct input lights up and winds the sling tighter; a wrong one restarts the code while the opening lasts. The full code = the perfect stone. Run out of time = a miss, and he opens up again later (rule 2). Saved stones of remembrance already lengthen the opening (§3f), so they buy time to enter the code. The Journal always shows the pieces you've earned.
