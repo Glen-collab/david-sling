@@ -329,6 +329,7 @@ const STAGE_INFO = {
   "2-4": { cols: 258, bg: "w2_4", ter: "w2f", name: "The Bear's Ravine" },   // ter: the stage's own ground set (assets/terrain/w2f)
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
+  "3-3": { cols: 214, bg: "w3_1", name: "We Will Not Sit Down" },   // bg: 3-1's Bethlehem until Glen's 3-3 layers come in (then "w3_3")
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -365,6 +366,10 @@ const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const stepStone = c => { plat(c, GR, 1); setPiece("stepstone", c, GR); };   // a flat rock in a stream: a ledge level with the bank (drawn in world3.js)
+// 3-3: a wooden fence, rails up top and open underneath: jump it, or keep your speed and roll under (drawn in world3.js)
+const fence = c => { block(c, 13, 1, 2, 9); setPiece("fence", c, GR - 1); };
+// 3-3: where Shammah waits (in order) and what he calls out when David catches up (world3.js runs him along)
+const guide = (c, r, line) => setPiece("guide", c, r, { line });
 const thicket = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false, thorns: true }); };   // thorns: a charged stone clears them
 const codeWall = (c, r, w, h, need) => { block(c, r, w, h, 7); codeWalls.push({ c, r, w, h, need, open: false }); };
 const darkZones = [];   // the dark inside of a cave (drawn behind everything in front)
@@ -959,6 +964,48 @@ if (LEVEL_NAME === "test") {
   deco("olive_tree", 208, 16, 1.0);
   talk(214, "Shammah", "David! (gasp) Run... all the way here... The prophet sent for you! He won't sit down to eat until you come!");
   sheepfold(222);
+} else if (LEVEL_NAME === "3-3") {
+  // ---- 3-3 We Will Not Sit Down: "Send for him; we will not sit down until he arrives" (1 Samuel 16:11). Shammah has
+  // run all the way out to fetch him, and now he runs ahead the quick way they took as boys: under the fences, over
+  // the walls, through the barley and up over the rooftops into town. Everything is one jump or the roll. No timer. ----
+  ground(0, 213);
+  guide(5, GR - 1, "Remember rolling down the hills when we were little? Under the fences, not over them. Come on!");
+  guide(22, GR - 1, "Fence! Get low and roll: {ROLL}.");
+  setPiece("barley", 10, GR - 1, { w: 9 });
+  fence(25); oliveRow(26, 16, 3);
+  lostSheep("sheep", 33, 16);                                  // a straggler: the flock comes too
+  wall(38, 15, 2, 2);
+  guide(44, GR - 1, "Two more! Don't slow down!");
+  fence(47); fence(53); oliveRow(48, 16, 4);
+  special(51, 12);                                             // between the fences: a jump from the ground
+  campfire(60);
+  wall(66, 14, 3, 3); lostSheep("sheepblack", 67, 13);         // up on the wall: jump up to it
+  guide(72, GR - 1, "Through the barley! Father's field: we cut through here every harvest.");
+  setPiece("barley", 75, GR - 1, { w: 14 }); oliveArc(77, 16, 8);
+  lostSheep("sheep", 85, 16, "cast");                          // on its back in the barley: roll it over (Down)
+  fence(92); fence(96);
+  guide(99, GR - 1, "Rock garden! Up and over.");
+  rock(103, 15, 3, 2); rock(107, 13, 3, 4); rock(111, 15, 3, 2); oliveRow(107, 12, 3);
+  special(108, 8);
+  lostSheep("sheep", 116, 16, "thorns");
+  campfire(122);
+  setPiece("barley", 126, GR - 1, { w: 6 });
+  // into town: up the stairs and over the roofs, the way they ran as boys
+  guide(130, GR - 1, "Up the stairs! The roofs are faster than the lanes today, the whole town's in them.");
+  stair(133, 4);
+  house(141, 5, 12); house(147, 5, 10); house(153, 5, 9); house(159, 4, 9);
+  oliveRow(141, 11, 5); lostSheep("sheep", 149, 9); oliveRow(153, 8, 5);
+  special(156, 4);
+  ladder(163, 9);                                              // the gap by the wall: a ladder back up
+  // the town wall, thick enough to walk along the top, with a low drain under it: The One went in there
+  rock(165, 8, 9, 7); rock(174, 8, 2, 9); setPiece("drain", 165, GR - 1, { w: 9 });
+  lostSheep("lamb", 171, 16, "one");
+  guide(166, 7, "Nearly there! I can see Father at the gate!");
+  oliveRow(166, 7, 9);
+  house(176, 5, 10); house(182, 4, 13);
+  oliveArc(188, 16, 6);
+  guide(196, GR - 1, "There he is! Go on, David. They're all waiting for you.");
+  sheepfold(204);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)

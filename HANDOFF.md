@@ -144,5 +144,9 @@ it (stand-in art: abinadab_walk darkened, until a rustler clip); stepStone(c) = 
 drawn in world3.js) over setPiece("pool", c, GR, { w, say }); thicket(c, r, w, h) = a thorn thicket only a charged
 stone clears (The One is behind it). Each campfire plays a scene in town (PASS_SCENES: Eliab; Abinadab and Shammah;
 the other four; 1 Samuel 16:6-10), seen through Samuel's eyes, no Samuel on screen. Shammah runs in at the end.
-Not done from the design: the stray goat (no goat art), the Micah 5:2 and Psalm 139:1 scrolls (no scroll system yet),
+3-3 (3-1's w3_1 background until Glen's 3-3 layers): fence(c) = rails at rows 13-14, open underneath (jump it or roll
+under, drawn in world3.js); guide(c, r, line) = Shammah's stops: he waits, calls the line when David catches up, runs
+to the next (resets to the checkpoint's spot after a fall); the town wall rock(165, 8, 9, 7) with setPiece("drain") under
+it and The One inside. The stages have no music track, so "the music speeds up near town" isn't done.
+Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire, stray dogs (jackals stand in).

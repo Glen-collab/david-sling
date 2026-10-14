@@ -189,7 +189,7 @@ function drawThreshing(p) {   // a round floor of beaten earth ringed with stone
   ctx.fillStyle = "#cfc2a6"; for (let a = 0; a < 14; a++) { const t = a / 14 * Math.PI; ctx.beginPath(); ctx.ellipse(cx - Math.cos(t) * rx, y - 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawWorld3(camX) {
-  if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing" || p.kind === "stepstone")) return;
+  if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing" || p.kind === "stepstone" || p.kind === "fence" || p.kind === "guide")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
   const on = (x0, x1) => x1 > camX - 60 && x0 < camX + W + 60;
@@ -209,6 +209,9 @@ function drawWorld3(camX) {
   for (const l of ladders) if (on(l.c * T, (l.c + 2) * T)) drawLadder(l);
   for (const p of setPieces) if (p.kind === "barley" && on(p.c * T, (p.c + p.w) * T)) drawBarley(p, now);
   for (const p of setPieces) if (p.kind === "stepstone" && on(p.c * T, (p.c + 1) * T)) drawStepStone(p);
+  for (const p of setPieces) if (p.kind === "drain" && on(p.c * T, (p.c + p.w) * T)) drawDrain(p);
+  for (const p of setPieces) if (p.kind === "fence" && on(p.c * T - T, (p.c + 2) * T)) drawFence(p);
+  drawGuide();
   ctx.restore();
 }
 
@@ -292,6 +295,10 @@ function drawRat(k, x) {   // a little brown rat (drawn until there's a rat clip
 }
 
 function updateWorld3(dt) {
+  if (guides.length) {   // 3-3: Shammah runs ahead (after a fall he's back at the last spot David reached)
+    if (david.deadT > 0) shammahRun.dead = true;
+    else { if (shammahRun.dead) { shammahRun.dead = false; resetGuide(); } updateGuide(dt); }
+  }
   for (const g of granaries) {   // the whip snake slid off its beam (David came in and left it be): the rats bolt
     if (g.saved || !g.snake) continue;
     const sn = g.snake, inside = david.x > g.x0 && david.x < g.x1 && david.deadT <= 0;
@@ -460,4 +467,58 @@ function drawPassScene() {
     ctx.textAlign = "right"; ctx.fillStyle = "rgba(255,240,215,0.6)"; ctx.font = "14px sans-serif"; ctx.fillText("A: next", bx + bw - 18, by + 108);
   }
   ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// 3-3 We Will Not Sit Down. Fences (fence(c): rails up top, open underneath: jump it, or roll under and keep your speed), the drain under
+// the town wall (The One is in there), and Shammah running ahead: he waits at each guide() spot and calls out the way
+// when David catches up, then runs on to the next (straight through the fences: he knows the gaps).
+// ---------------------------------------------------------------------------
+Object.assign(W3, { GUIDE_RUN: 400, GUIDE_NEAR: 4 });   // Shammah's speed (px/s); how close (tiles) David gets before he runs on
+function drawFence(p) {   // two posts in the ground, rails across rows 13-14, open underneath (rows 15-16)
+  const x = p.c * T + T / 2, top = 13 * T - 8, low = 15 * T;
+  ctx.fillStyle = "#6b4a2a";
+  for (const dx of [-T * 0.62, T * 0.62]) { ctx.beginPath(); ctx.roundRect(x + dx - 6, top - 6, 12, GR * T + 8 - top, 4); ctx.fill(); }
+  for (let k = 0; k < 3; k++) {
+    const y = top + 4 + k * (low - top - 14) / 2;
+    ctx.fillStyle = "#8a6238"; ctx.beginPath(); ctx.roundRect(x - T * 0.85, y, T * 1.7, 11, 4); ctx.fill();
+    ctx.fillStyle = "rgba(255,230,190,0.25)"; ctx.fillRect(x - T * 0.81, y + 1, T * 1.62, 3);
+  }
+}
+function drawDrain(p) {   // the low drain under the town wall: a dark arched opening with stones round it
+  const x0 = p.c * T, x1 = (p.c + p.w) * T, top = 15 * T, bot = GR * T;
+  ctx.fillStyle = "rgba(20,14,8,0.82)"; ctx.fillRect(x0, top, x1 - x0, bot - top);
+  ctx.fillStyle = "#b9ab90";
+  for (let x = x0 - 6; x < x0 + 30; x += 15) { ctx.beginPath(); ctx.roundRect(x, top - 10, 14, 12, 3); ctx.fill(); }
+  ctx.fillStyle = "#8f8270"; ctx.fillRect(x0 - 4, top - 2, 6, bot - top + 2);
+}
+const guides = setPieces.filter(p => p.kind === "guide");
+const shammahRun = { i: 0, x: guides.length ? guides[0].x : 0, y: guides.length ? guides[0].y : 0, moving: false, said: false, t: 0, facing: 1 };
+function resetGuide() {   // after a fall: he's waiting at the last spot David reached (never further back than the checkpoint)
+  const G = shammahRun; let i = 0;
+  for (let k = 0; k < guides.length; k++) if (guides[k].x <= checkpoint.x + 2 * T) i = k;
+  Object.assign(G, { i, x: guides[i].x, y: guides[i].y, moving: false, said: false });
+}
+function updateGuide(dt) {
+  const G = shammahRun; if (!guides.length) return;
+  G.t += dt;
+  if (G.moving) {
+    const g = guides[G.i], dx = g.x - G.x, step = W3.GUIDE_RUN * dt;
+    G.facing = Math.sign(dx) || 1;
+    if (Math.abs(dx) <= step) { G.x = g.x; G.y = g.y; G.moving = false; G.said = false; }
+    else { const f = step / Math.abs(dx); G.x += Math.sign(dx) * step; G.y += (g.y - G.y) * f; }
+    return;
+  }
+  G.facing = Math.sign(david.x - G.x) || 1;   // waiting: watching for David
+  const near = Math.abs(david.x - G.x) < W3.GUIDE_NEAR * T || david.x > G.x;
+  if (near && david.deadT <= 0 && !G.said) { G.said = true; sayLine("Shammah", guides[G.i].line); G.waitT = 0; }
+  if (G.said && G.i < guides.length - 1) {
+    G.waitT = (G.waitT || 0) + dt;
+    if (G.waitT > 0.9) { G.i++; G.moving = true; }
+  }
+}
+function drawGuide() {
+  const G = shammahRun; if (!guides.length) return;
+  const name = G.moving ? "shammah_walk" : "shammah_idle";
+  drawSprite(name, frameOf(name, G.t * (G.moving ? 1.6 : 1)), G.x, G.y, G.facing);
 }
