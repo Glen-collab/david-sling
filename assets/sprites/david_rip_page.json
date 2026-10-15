@@ -1,0 +1,11 @@
+{
+ "frames": 6,
+ "frame_w": 247,
+ "frame_h": 306,
+ "ms_per_frame": 450,
+ "loop": false,
+ "align": "feet",
+ "anchor_x": 92,
+ "anchor_y": 303,
+ "source": "david_rip_page_sheet.png"
+}

@@ -501,7 +501,11 @@ const Journal = {
     if (pressed("a") || pressed("start")) { r.phase = "done"; this.ripDone(); return; }
     if (r.phase === "write") {
       while (r.next < r.tl.acts.length && r.tl.acts[r.next].t0 <= r.t) { const a = r.tl.acts[r.next++]; if (a.type === "write") penScratch(a.dur * 0.85); }
-      if (r.t >= r.tl.total + 1.3) { r.phase = "tear"; r.t = 0; penScratch(0.55, 5); }   // he stops... then rips it out
+      if (r.t >= r.tl.total + 1.3) { r.phase = SPR.david_rip_page ? "fire" : "tear"; r.t = 0; this.viewWant = this.view = 1; }   // he stops...
+    } else if (r.phase === "fire") {   // the cutaway: by the campfire at night, he tears it out and throws it in (Glen's sheet)
+      if (r.t >= 0.9 && !r.ripSnd) { r.ripSnd = true; penScratch(0.55, 5); }
+      if (r.t >= 3.0 && !r.whoosh) { r.whoosh = true; if (typeof sfx === "function") sfx("jump", undefined, 0.3, 0.6); }
+      if (r.t >= 6.2) { r.phase = "done"; this.ripDone(); }
     } else if (r.phase === "tear") {
       if (r.t >= TEAR_N * TEAR_MS / 1000 + 0.4) { r.phase = "burn"; r.t = 0; }
     } else if (r.phase === "burn") {
@@ -512,8 +516,36 @@ const Journal = {
     try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.ripped = p.ripped || {}; p.ripped[this.world] = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
     this.page().t = 0; this.page().nextAct = 0; this.phase = "write";
   },
+  drawRipFire() {   // David by the fire at night (3-2's far pasture, dark), tearing the page out and throwing it in
+    const r = this.rip, t = r.t, gy = H * 0.88, dx = W * 0.36, fx = W * 0.62, now = performance.now(), SZ = 2.3;
+    const L = typeof BG !== "undefined" && BG.w3_2;
+    ctx.fillStyle = "#0b1020"; ctx.fillRect(0, 0, W, H);
+    if (L && L.far && L.far.naturalWidth) { ctx.save(); ctx.filter = "brightness(0.32) saturate(0.7)"; ctx.drawImage(L.far, 0, -H * 0.12, W, H); ctx.restore();
+      ctx.save(); ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = "#3a4a8a"; ctx.fillRect(0, 0, W, H); ctx.restore(); }   // moonlit blue
+    const gg = ctx.createLinearGradient(0, gy - 30, 0, H); gg.addColorStop(0, "#1c2418"); gg.addColorStop(1, "#0a0d08");
+    ctx.fillStyle = gg; ctx.fillRect(0, gy - 30, W, H - gy + 30);
+    const fl = 0.85 + Math.sin(now / 70) * 0.08 + Math.sin(now / 23) * 0.05, burst = t > 3.3 && t < 4.6 ? 1.6 : 1;
+    const gr = ctx.createRadialGradient(fx, gy - 40, 10, fx, gy - 40, 300 * burst);
+    gr.addColorStop(0, `rgba(255,150,50,${0.42 * fl})`); gr.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H); ctx.restore();
+    if (ITEM.campfire && ITEM.campfire.naturalWidth) drawItem("campfire", fx, gy + 6, 1.5);
+    // David: reading (0), the tear (1-3), holding it out (4), the toss (5)
+    const i = t < 0.9 ? 0 : t < 1.4 ? 1 : t < 1.9 ? 2 : t < 2.5 ? 3 : t < 3.0 ? 4 : 5;
+    drawSprite("david_rip_page", i, dx, gy, 1, SZ);
+    const h = 300 * SCALE * SZ;
+    if (t >= 3.0 && t < 3.5) {   // the crumpled page arcing into the fire
+      const f = (t - 3.0) / 0.5, x0 = dx + h * 0.62, y0 = gy - h * 0.62, x = x0 + (fx - x0) * f, y = y0 + (gy - 40 - y0) * f - Math.sin(f * Math.PI) * 60;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(f * 5); ctx.fillStyle = "#e9dcc0"; ctx.beginPath(); ctx.moveTo(-14, -10); ctx.lineTo(12, -14); ctx.lineTo(16, 8); ctx.lineTo(-10, 14); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    if (t >= 3.5 && BURN.naturalWidth) {   // it burns in the flames (Glen's burn sheet, small)
+      const k = Math.min(BURN_N - 1, Math.floor((t - 3.5) * 1000 / BURN_MS)), fw = BURN.naturalWidth / BURN_N, fh = BURN.naturalHeight, bh = 130, bw = bh * fw / fh;
+      ctx.drawImage(BURN, k * fw, 0, fw, fh, fx - bw / 2, gy - 75 - bh / 2, bw, bh);
+    }
+    const a = Math.min(1, t / 0.5, (6.2 - t) / 0.5); ctx.fillStyle = `rgba(0,0,0,${1 - Math.max(0, a)})`; ctx.fillRect(0, 0, W, H);   // fade in and out
+  },
   drawRip(bx, by, s) {
     const r = this.rip, dw = 1536 * s, dh = 1024 * s;
+    if (r.phase === "fire") { this.drawRipFire(); return; }
     if (r.phase === "write") { renderSpread(spreadCanvas[0], r.lay, r.step, r.t); ctx.drawImage(spreadCanvas[0], bx, by, dw, dh); return; }
     if (r.phase === "tear" && TEAR.naturalWidth) {   // Glen's tear sheet, scaled over the book
       const i = Math.min(TEAR_N - 1, Math.floor(r.t * 1000 / TEAR_MS)), fw = TEAR.naturalWidth / TEAR_N, fh = TEAR.naturalHeight;

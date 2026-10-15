@@ -660,6 +660,18 @@ window.SPRITE_DATA = {
   "ay": 248,
   "align": "feet"
  },
+ "david_rip_page": {
+  "src": "../assets/sprites/david_rip_page.png",
+  "frames": 6,
+  "w": 247,
+  "h": 306,
+  "ms": 450,
+  "loop": false,
+  "pingpong": false,
+  "ax": 92,
+  "ay": 303,
+  "align": "feet"
+ },
  "david_roll": {
   "src": "../assets/sprites/david_roll.png",
   "frames": 12,
