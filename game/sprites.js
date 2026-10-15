@@ -912,6 +912,18 @@ window.SPRITE_DATA = {
   "ay": 102,
   "align": "feet"
  },
+ "donkey_bare_walk": {
+  "src": "../assets/sprites/donkey_bare_walk.png",
+  "frames": 5,
+  "w": 191,
+  "h": 204,
+  "ms": 150,
+  "loop": true,
+  "pingpong": false,
+  "ax": 146,
+  "ay": 202,
+  "align": "feet"
+ },
  "donkey_bolt": {
   "src": "../assets/sprites/donkey_bolt.png",
   "frames": 12,

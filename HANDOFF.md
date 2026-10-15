@@ -252,6 +252,6 @@ the harp phrase at 3-2's campfire.
   doves (harmless), crows (fair game), 3 boars, the vineyard keeper (talk + Glen's sheet; thanks you with grapes when the
   two vineyard boars are gone). 5 lost sheep + The One on a terrace; 3 special stones; the finish gate is blocked until
   both gifts are on the donkey and it isn't balking (giftsBlocking). Ends at a village sheepfold (sheepfold(246)).
-  Not yet: the donkey's art still shows both gifts when one is stolen; DESIGN's "5 dropped gifts as the lost things"
+  donkey_bare_walk (Glen): once a gift is stolen the donkey switches to it and the gifts left ride on his back (DONKEY_BACK). Not yet: DESIGN's "5 dropped gifts as the lost things"
   (it uses 5 lost sheep from the villages for now); World 4 Journal pages; the Psalm 121:8 scroll.
 

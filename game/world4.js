@@ -18,7 +18,8 @@ const W4 = {
   DOVE_SIZE: 0.55, DOVE_SPOOK: 2.5,
   KEEPER_SIZE: 1.05,
 };
-Object.assign(TUNE.SPRITE_SIZE, { donkey_packs_walk: W4.DONKEY_SIZE, donkey_packs_scared: W4.DONKEY_SIZE });
+Object.assign(TUNE.SPRITE_SIZE, { donkey_packs_walk: W4.DONKEY_SIZE, donkey_packs_scared: W4.DONKEY_SIZE, donkey_bare_walk: W4.DONKEY_SIZE });
+const DONKEY_BACK = [-74, -105];   // the middle of his back on donkey_bare_walk (sheet px from the anchor): where a gift that's left rides
 const giftDonkey = () => critters.find(k => k.kind === "giftdonkey");
 const GIFT_NAMES = { bread: "the bread", wine: "the skin of wine" };
 const giftDrops = [];   // gifts lying on the road (a bandit dropped them): walk over one to load it back on
@@ -67,11 +68,16 @@ function stoneHitsGiftDonkey(k, s) {
   return true;
 }
 function drawGiftDonkey(k, x) {
-  let nm = "donkey_packs_walk", i = 0;
+  const bare = k.gifts.length < 2 && SPR.donkey_bare_walk;   // a gift stolen: Glen's bare donkey, with what's left drawn on
+  let nm = bare ? "donkey_bare_walk" : "donkey_packs_walk", i = 0;
   if (k.state === "walk") i = frameOf(nm, k.t);
   else if (k.state === "spooked" && SPR.donkey_packs_scared) { nm = "donkey_packs_scared"; i = Math.min(SPR[nm].frames - 1, Math.floor(k.t / 0.9 * SPR[nm].frames)); }
   else if (k.state === "balk" && SPR.donkey_packs_scared) { nm = "donkey_packs_scared"; i = 3; x += Math.sin(performance.now() / 40) * 1.5; }   // trembling
   drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
+  if (bare && nm === "donkey_bare_walk") {
+    const sc = SCALE * W4.DONKEY_SIZE, bob = k.state === "walk" ? Math.abs(Math.sin(k.t * 6)) * 2 : 0;
+    for (const g of k.gifts) drawGift(g, x + k.facing * DONKEY_BACK[0] * sc, k.y + DONKEY_BACK[1] * sc + 10 - bob, g === "wine" ? 0.9 : 0.85);
+  }
   if (k.state === "balk") {   // calming: a little ring of notes fills while David plays
     const f = Math.min(1, (k.calmT || 0) / W4.CALM_TIME);
     if (f > 0) { ctx.save(); ctx.strokeStyle = "rgba(255,230,140,0.9)"; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, k.y - 120, 16, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2); ctx.stroke(); ctx.restore(); }
@@ -96,7 +102,7 @@ function updateGiftDrops() {
 }
 function drawGift(name, x, y, s = 1) {   // the wineskin (Glen's), or a sack of bread
   if (name === "wine" && ITEM.wineskin && ITEM.wineskin.naturalWidth) drawItem("wineskin", x, y, 0.28 * s);
-  else if (ITEM.bread && ITEM.bread.naturalWidth) drawItem("bread", x, y, 0.5 * s);
+  else if (ITEM.bread && ITEM.bread.naturalWidth) drawItem("bread", x, y, 0.2 * s);
   else { ctx.fillStyle = "#d8c08a"; ctx.beginPath(); ctx.ellipse(x, y - 14 * s, 22 * s, 14 * s, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawGiftDrops(camX) {
