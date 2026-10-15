@@ -520,10 +520,15 @@ const Journal = {
     const r = this.rip, t = r.t, gy = H * 0.88, dx = W * 0.36, fx = W * 0.62, now = performance.now(), SZ = 2.3;
     const L = typeof BG !== "undefined" && BG.w3_2;
     ctx.fillStyle = "#0b1020"; ctx.fillRect(0, 0, W, H);
-    if (L && L.far && L.far.naturalWidth) { ctx.save(); ctx.filter = "brightness(0.32) saturate(0.7)"; ctx.drawImage(L.far, 0, -H * 0.12, W, H); ctx.restore();
-      ctx.save(); ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = "#3a4a8a"; ctx.fillRect(0, 0, W, H); ctx.restore(); }   // moonlit blue
-    const gg = ctx.createLinearGradient(0, gy - 30, 0, H); gg.addColorStop(0, "#1c2418"); gg.addColorStop(1, "#0a0d08");
-    ctx.fillStyle = gg; ctx.fillRect(0, gy - 30, W, H - gy + 30);
+    if (L && L.far && L.far.naturalWidth) { ctx.save(); ctx.filter = "brightness(0.6) saturate(0.7)"; ctx.drawImage(L.far, 0, -H * 0.12, W, H); ctx.restore();
+    }
+    // the pasture's own hills and ground (3-2's layers and the stage's topsoil and earth), then all of it moonlit
+    if (L && L.mid && L.mid.naturalWidth) drawLayerRepeating(L.mid, 0, 1, gy + 10, 360, true);
+    if (L && L.near && L.near.naturalWidth) drawLayerRepeating(L.near, 0, 1, gy + 26, 150, true);
+    ctx.fillStyle = (typeof terPattern === "function" && terPattern("sediment", TUNE.TER_FILL_SCALE)) || "#2a2418"; ctx.fillRect(0, gy - 2, W, H - gy + 2);
+    if (typeof terStrip === "function") terStrip("topsoil", -4, W + 4, gy - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+    ctx.save(); ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = "#33406e"; ctx.fillRect(0, 0, W, H); ctx.restore();   // moonlit blue
+    ctx.fillStyle = "rgba(4,6,14,0.35)"; ctx.fillRect(0, 0, W, H);
     const fl = 0.85 + Math.sin(now / 70) * 0.08 + Math.sin(now / 23) * 0.05, burst = t > 3.3 && t < 4.6 ? 1.6 : 1;
     const gr = ctx.createRadialGradient(fx, gy - 40, 10, fx, gy - 40, 300 * burst);
     gr.addColorStop(0, `rgba(255,150,50,${0.42 * fl})`); gr.addColorStop(1, "rgba(0,0,0,0)");
