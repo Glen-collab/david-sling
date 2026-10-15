@@ -54,3 +54,4 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | wolf_growl, wolf_bark, wolf_howl | wolf-growl.mp3, 8-wolf-growl-bark.mp3, wolf-howl.mp3 | wolves (World 2): the pack howls, they growl as they rise; 3-2's stray dog barks | ? |
 | hyena_1, hyena_2, hyena_3 | hyena.mp3, hyena (1).mp3, hyena (2).mp3 | not used yet (later) | ? |
 | fox_1, fox_2, fox_3 | fox.mp3, fox2.mp3, fox3_two_barks.mp3 (Glen's shorter re-saves, 2026-10-15) | a fox coming for the lamb, one at random | ? |
+| paper_rip | paper-rip.mp3 (Glen), slowed to 0.82x (lower, heavier) | the rip-out cutaway: David tearing the page | ? |

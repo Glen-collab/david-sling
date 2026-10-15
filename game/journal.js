@@ -503,7 +503,7 @@ const Journal = {
       while (r.next < r.tl.acts.length && r.tl.acts[r.next].t0 <= r.t) { const a = r.tl.acts[r.next++]; if (a.type === "write") penScratch(a.dur * 0.85); }
       if (r.t >= r.tl.total + 1.3) { r.phase = SPR.david_rip_page ? "fire" : "tear"; r.t = 0; this.viewWant = this.view = 1; }   // he stops...
     } else if (r.phase === "fire") {   // the cutaway: by the campfire at night, he tears it out and throws it in (Glen's sheet)
-      if (r.t >= 0.9 && !r.ripSnd) { r.ripSnd = true; penScratch(0.55, 5); }
+      if (r.t >= 0.9 && !r.ripSnd) { r.ripSnd = true; if (typeof sfx === "function" && !(SFX.paper_rip || {}).missing) sfx("paper_rip", undefined, 1); else penScratch(0.55, 5); }   // Glen's paper rip, slowed for drama
       if (r.t >= 3.0 && !r.whoosh) { r.whoosh = true; if (typeof sfx === "function") sfx("jump", undefined, 0.3, 0.6); }
       if (r.t >= 6.2) { r.phase = "done"; this.ripDone(); }
     } else if (r.phase === "tear") {

@@ -3299,7 +3299,7 @@ const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
   "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated",
   "thunder", "thunder_2", "thunder_3",   // 3-4's storm (Glen's lightning sounds)
-  "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3"];   // Glen's animal sounds (2026-10-15); hyena_1-3 are saved for later
+  "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip"];   // Glen's animal sounds (2026-10-15); hyena_1-3 are saved for later
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
