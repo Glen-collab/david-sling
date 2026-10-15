@@ -1029,7 +1029,7 @@ if (LEVEL_NAME === "test") {
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
   ground(0, 239);
   campfire(6, GR - 1, "Hanan", "So. The prophet poured oil on your head. And tomorrow the sheep still need water. Kings are made in the small things, David.");
-  talk(16, "Hanan", "Storm coming. In a storm the wild oxen panic and charge at anything that moves. If one charges, put a tree between you, and roll ({roll}) under its horns.");
+  talk(16, "Hanan", "Storm coming. In a storm the wild oxen panic and charge at anything that moves. If one charges you, roll ({roll}) under its horns. Sooner or later it'll run itself into a tree.");
   oliveRow(20, 16, 6);
   lostSheep("sheep", 30, 16);
   rock(38, 15, 3, 2); rock(41, 13, 3, 4); oliveRow(41, 12, 3); special(42, 7);
@@ -1050,9 +1050,10 @@ if (LEVEL_NAME === "test") {
   rock(163, 15, 2, 2); rock(166, 13, 3, 4); special(167, 8);
   campfire(172);                                                // the checkpoint before the ox
   // the arena: a muddy slope, three big trees, the flock huddled at the left, and the ox out of the rain
-  setPiece("flockHuddle", 179);
-  setPiece("oxtree", 188); setPiece("oxtree", 199); setPiece("oxtree", 210);
-  setPiece("ox", 222, GR - 1, { arena: 177, end: 224 });
+  setPiece("flockHuddle", 177);                                  // the flock, huddled behind the arena's first tree
+  rock(180, 15, 2, 2); setPiece("oxtree", 183);                  // the arena: hop the rock in; an oak at each end, the ox in between
+  setPiece("oxtree", 214); rock(216, 15, 2, 2);
+  setPiece("ox", 198, GR - 1);
   sheepfold(229);
 }
 
