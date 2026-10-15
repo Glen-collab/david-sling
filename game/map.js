@@ -241,9 +241,13 @@ const WorldMap = {
     }
   },
   readJournal() {   // Select: page through what David has written so far
-    const world = this.M.journey ? Math.max(1, ...BUILT_WORLDS.filter(w => this.prog[`${w}-1`])) : this.world;
-    const p = this.prog, last = [4, 3, 2, 1].find(k => p[`${world}-${k}`] && p[`${world}-${k}`].cleared);
-    if (!last) { toast("Nothing in the Journal yet. Clear 1-1 first."); return; }
+    // this world's pages, or (none written yet, or nothing cleared here) the newest world before it that has some
+    const p = this.prog, lastOf = w => [4, 3, 2, 1].find(k => p[`${w}-${k}`] && p[`${w}-${k}`].cleared);
+    const from = this.M.journey ? Math.max(...BUILT_WORLDS) : this.world;
+    let world = null;
+    for (let w = from; w >= 1; w--) if (JOURNAL_PAGES[w] && lastOf(w)) { world = w; break; }
+    if (!world) { toast("Nothing in the Journal yet. Clear 1-1 first."); return; }
+    const last = lastOf(world);
     this.active = false;
     Journal.open({ world, stage: last, read: true, onClose: () => { this.active = true; this.fade = 0; } });
   },
