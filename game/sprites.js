@@ -458,13 +458,13 @@ window.SPRITE_DATA = {
  },
  "david_climb": {
   "src": "../assets/sprites/david_climb.png",
-  "frames": 6,
-  "w": 122,
+  "frames": 4,
+  "w": 132,
   "h": 274,
   "ms": 140,
   "loop": true,
   "pingpong": false,
-  "ax": 60,
+  "ax": 66,
   "ay": 273,
   "align": "feet"
  },

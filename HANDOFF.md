@@ -193,7 +193,7 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
   Up/Down climb at TUNE.CLIMB_SPEED, no gravity; A jumps off; top = steps onto the roof, bottom = back on the ground.
   Getting hit knocks him off. The rungs are still one-way ledges (you can jump onto them; carrying the lamb, Down still
   drops a rung). Art: david_climb (Glen's back-view strip, david-sling-art/world3/david_climb_sheet.png, green keyed to
-  magenta, sheet2sprite --blobs, height 270); all its reaching poses use the right hand (a left-hand version is optional).
+  magenta, sheet2sprite --blobs, height 270), 4 frames: right hand up, level, LEFT hand up (pose 4 of Glen's david_climb_left_sheet.png), level.
   Top of a ladder with a roof beside it (ladderRoof): state "topout" plays david_topout (tools/cut_topout.py: Glen's
   back strip poses 0-1 + side strip poses 1-3, david-sling-art/world3/david_topout_*_sheet.png): hands at the edge,
   pulling up, climbing over, hands and knees, stepping off onto the roof (TOPOUT_POS per-frame feet offsets). Down on the

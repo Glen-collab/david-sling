@@ -1,11 +1,11 @@
 {
-  "frames": 6,
-  "frame_w": 122,
+  "frames": 4,
+  "frame_w": 132,
   "frame_h": 274,
   "ms_per_frame": 140,
   "loop": true,
   "align": "feet",
-  "anchor_x": 60,
+  "anchor_x": 66,
   "anchor_y": 273,
-  "source": "climb_mag.png"
+  "source": "david_climb_sheet.png + david_climb_left_sheet.png (R, level, L, level)"
 }
