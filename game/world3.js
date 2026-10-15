@@ -1130,7 +1130,7 @@ const w3ending = {
       g.addColorStop(0, "rgba(255,170,60,0.4)"); g.addColorStop(1, "rgba(255,120,30,0)"); ctx.fillStyle = g; ctx.fillRect(fx - r, gy - 34 - r, r * 2, r * 2); ctx.restore();
       if (SPR.hanan_idle_nostaff) drawSprite("hanan_idle_nostaff", frameOf("hanan_idle_nostaff", now), fx - 100, gy, 1);   // standing by the fire, his hands empty
       else { drawItem("boulder_grey", fx - 92 - 30 * SCALE, gy + 4, 92 * SCALE / 375); if (SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), fx - 92, gy, 1); }
-      drawStaff(fx + 165, gy, 0.6);   // standing beside him
+      drawStaff(fx + 165, gy + 4, 0.95);   // standing beside him (a little taller than David)
       const k = Math.floor(now * 1000 / TUNE.HARP_LOOP_MS) % 6, i = 8 + (k < 4 ? k : 6 - k);
       drawSprite("david_play_harp", i, fx + 120, gy, -1);   // sitting on the ground by the fire, as in the stages
     } else {
@@ -1157,7 +1157,7 @@ const w3ending = {
       ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - this.HANDOVER - this.RAISE * 0.5) * 2);
       const cy = 80;
       ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 420, cy, 840, 150, 16); ctx.fill();
-      drawStaff(W / 2 - 350, cy + 140, 0.55);
+      drawStaff(W / 2 - 350, cy + 140, 0.85);
       ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("Hanan's shepherd's staff", W / 2 + 40, cy + 44);
       ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("One more heart, for good.", W / 2 + 40, cy + 74);
       ctx.font = "italic 18px Georgia, serif"; ctx.fillText("\"Your rod and your staff, they comfort me.\"  Psalm 23:4", W / 2 + 40, cy + 108);
