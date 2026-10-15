@@ -2739,12 +2739,12 @@ window.SPRITE_DATA = {
  "thief_run": {
   "src": "../assets/sprites/thief_run.png",
   "frames": 6,
-  "w": 176,
+  "w": 205,
   "h": 355,
   "ms": 90,
   "loop": true,
   "pingpong": false,
-  "ax": 94,
+  "ax": 124,
   "ay": 353,
   "align": "feet"
  },

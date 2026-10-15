@@ -299,16 +299,20 @@ function updateCritters(dt) {
     else if (k.kind === "goat") updateGoat(k, dx, sameLevel, dt);
   }
 }
+function foxBark(k) {   // Glen's fox sound, at most every 3 seconds per fox
+  const now = performance.now(); if (now - (k.barkAt || 0) < 3000) return;
+  k.barkAt = now; sfx("fox", k.x, 0.75, 0.95 + Math.random() * 0.1);
+}
 function updateFox(k, dx, sameLevel, dt) {
   if (k.state === "idle") {
     k.facing = Math.sign(dx) || k.facing;
-    if (Math.abs(dx) < W1.FOX_SEE && sameLevel) { setCrit(k, "hunt"); sfx("fox", k.x, 0.7); }   // a bark as it comes for the lamb
+    if (Math.abs(dx) < W1.FOX_SEE && sameLevel) { setCrit(k, "hunt"); foxBark(k); }   // a bark as it comes for the lamb
     k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); k.vx = 0; collideBody(k, 50, 44, dt);
     return;
   }
   if (k.state === "back") {   // ran off after nipping at the lamb; comes round again
     runCritter(k, W1.FOX_SPEED * 0.8, dt);
-    if (k.t > 1.3) { setCrit(k, "hunt"); }
+    if (k.t > 1.3) { setCrit(k, "hunt"); foxBark(k); }   // and again each time it comes back round
     return;
   }
   // hunting: straight for the lamb (or David, if he's carrying it)
