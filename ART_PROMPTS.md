@@ -713,3 +713,19 @@ seams, the neck tied shut with a leather cord and a little loop to carry it. Pix
 filling most of the picture. Background solid flat bright green (#00FF00). No shadow, no text.
 ```
 
+## 4-3 The Broken String (Gibeah's market): art
+**The Steward** (sprite sheet, green): one row of 6 poses, facing left, Pixar-style: the old head servant of Saul's
+palace, tall and thin, very old but upright, neat short white beard, kind tired eyes, plain dark-blue wool robe with a
+rope belt, a ring of iron keys at his belt, sandals. Poses: standing; talking, one hand open; pointing ahead; hands
+folded, listening; shaking his head slowly; a small warm smile. Background #00FF00.
+
+**Backgrounds** (style + format lines as for 4-1; save as 4-3 far/mid/near.png):
+- Far: Gibeah in late-afternoon gold: the fortress and towers on the hilltop, flat-roofed houses down the slopes, date
+  palms, the hazy hills of Benjamin, a sky turning gold and peach.
+- Middle: the market street: stalls with striped red/cream/blue awnings, grain and fig baskets, clay jars, a stone well,
+  flat roofs with ladders and laundry, a carpenter's yard with stacked beams. Everything above the rooftops #FF00FF.
+- Near: a packed-earth market lane, straw, a dropped fig, stones, a crate, rope, wood shavings. Everything above #FF00FF.
+
+**The three harp things** (one sheet, magenta): a coil of pale gut string; a carved wooden lyre tuning peg; a round lump
+of golden beeswax with a honeycomb pattern. They replace the drawn icons as assets/items/quest_string, quest_peg, quest_wax.
+
