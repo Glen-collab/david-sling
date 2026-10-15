@@ -203,3 +203,13 @@ the harp phrase at 3-2's campfire.
 - Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.
   Cut for World 4 (1 Samuel 16:19, at Jesse's door), not placed yet: messenger_stop (slows to a stand),
   messenger_dismount (hops down), messenger_talk (talking with his hands, loop).
+
+## World 4 (started 2026-10-15)
+- Map: Glen's painting (assets/maps/world4_map.jpg, 2048 x 1152; source david-sling-art/world 4 map.png), stops in
+  map.js MAP_WORLDS[4]: home = Bethlehem gate, 4-1 on the vineyard road, 4-2 the training yard, 4-3 the market town
+  (through the kitchen-fire gate), 4-4 the king's hall. BUILT_WORLDS includes 4 so the map opens; its stages say "not
+  built yet" until they're in BUILT_STAGES. Landmarks painted but not stops yet: the vineyard keeper's watchtower
+  (~660,690), the servants' kitchen fire (~790,350), the rooftop garden (~350,330), Jebus (right, off the path).
+- The map card still says "Sheep found": World 4's lost things are gifts/goats/harp parts/lamps (DESIGN 5d).
+- Next art: 4-1 far/mid/near (prompts in ART_PROMPTS.md), donkey with packs, doves, vineyard keeper, wineskin.
+

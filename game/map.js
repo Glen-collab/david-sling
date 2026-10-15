@@ -62,6 +62,20 @@ const MAP_WORLDS = {
       { id: "3-4", label: "The Chosen Shepherd", x: 1640, y: 1040, trail: [[1360, 560], [1430, 700], [1500, 840], [1570, 960]] },
     ],
   },
+  // World 4: Glen's painting of the road north to Gibeah (2048 x 1152): Bethlehem's gate bottom-left, the road up through
+  // the vineyards (the keeper's watchtower beside it), the training yard below the fortress, the kitchen fire in its
+  // wall, the market town inside, the king's hall at the top; Jebus on its own hill to the right, off the path.
+  4: {
+    name: "The King's Court", src: "../assets/maps/world4_map.jpg",
+    david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
+    stops: [
+      { id: "home", label: "Bethlehem gate", x: 470, y: 1045 },
+      { id: "4-1", label: "The Road to Gibeah", x: 1010, y: 690, trail: [[560, 990], [640, 910], [760, 830], [900, 760]] },
+      { id: "4-2", label: "The Training Yard", x: 620, y: 440, trail: [[1040, 620], [960, 550], [880, 490], [790, 450]] },
+      { id: "4-3", label: "The Broken String", x: 760, y: 235, trail: [[720, 400], [790, 370], [795, 315], [780, 270]] },
+      { id: "4-4", label: "The King's Hall", x: 820, y: 150, trail: [[800, 200]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -79,7 +93,7 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1, 2, 3];   // worlds you can go into from the journey map so far
+const BUILT_WORLDS = [1, 2, 3, 4];   // worlds you can go into from the journey map so far
 const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
