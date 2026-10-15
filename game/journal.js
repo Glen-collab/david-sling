@@ -315,6 +315,13 @@ function drawFlatPage(side, page, step, t) {
   });
   return pen;
 }
+function tornStub(c) {   // a ragged brown strip along the binding edge of the right page (drawn flat, then bent onto the scene)
+  const g = c.getContext("2d"); g.save(); g.setTransform(RES, 0, 0, RES, 0, 0);
+  g.fillStyle = "rgb(150,110,70)"; g.beginPath(); g.moveTo(0, 0);
+  for (let y = 0; y <= FH; y += 18) g.lineTo(26 + Math.abs(Math.sin(y * 0.37) * 14 + Math.sin(y * 0.11) * 9), y);
+  g.lineTo(0, FH); g.closePath(); g.fill();
+  g.strokeStyle = "rgb(110,75,45)"; g.lineWidth = 3; g.stroke(); g.restore();
+}
 function renderSpread(target, spread, step, t) {
   const g = target.getContext("2d");
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, target.width, target.height);
@@ -561,7 +568,11 @@ const Journal = {
     const g = sceneCanvas.getContext("2d");
     g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(img, 0, 0, 1536, 1024);
     const words = (pg, alpha) => {
-      for (const side of ["left", "right"]) { drawFlatPage(side, pg.lay[side], pg.step, pg.t); drawBent(g, flatCanvas[side], sc[side], alpha); }
+      for (const side of ["left", "right"]) {
+        drawFlatPage(side, pg.lay[side], pg.step, pg.t);
+        if (side === "right" && pg.lay.book === BOOK_RIPPED) tornStub(flatCanvas.right);   // the stub of the page he tore out
+        drawBent(g, flatCanvas[side], sc[side], alpha);
+      }
     };
     if (this.turn) {   // the words fade over to the next page
       const f = Math.min(1, this.turn.t / JTUNE.FLIP_TIME);
