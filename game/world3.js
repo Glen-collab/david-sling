@@ -22,7 +22,22 @@ function onLadder(d) {   // main.js: standing on a rung? (Down steps down it)
   if (on && !W3.ladderTold) { W3.ladderTold = true; toast("A ladder: hold Up to climb it, Down to climb down, A to jump off."); }
   return on;
 }
-for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);   // stepping stones: drawn as rocks, not as ledges
+for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);
+
+// a narrow lane between two tall houses, walls too high to jump out of on either side: falling in counts as a pit
+// (Glen: it looks the same, but it's a fall). Found from the map: ground-level gaps with walls 5+ rows high both sides.
+const trapCols = new Set();
+{
+  const wallH = c => { let r = GR - 1; while (r >= 0 && isSolid(c, r)) r--; return GR - 1 - r; };   // rows of solid above the ground
+  for (let c = 1; c < COLS - 1; c++) {
+    if (isSolid(c, GR - 1) || !isSolid(c - 1, GR - 1)) continue;   // the left edge of a ground-level gap
+    let e = c; while (e < COLS && !isSolid(e, GR - 1)) e++;
+    if (e >= COLS || e - c > 4) continue;
+    let ladderIn = false; for (let x = c; x < e; x++) for (let r = 0; r < GR; r++) if (isOneway(x, r)) ladderIn = true;
+    if (!ladderIn && Math.min(wallH(c - 1), wallH(e)) >= 5) for (let x = c; x < e; x++) trapCols.add(x);
+  }
+}
+const inTrap = (x, y) => trapCols.has(Math.floor(x / T)) && y >= GR * T - 2;   // stepping stones: drawn as rocks, not as ledges
 
 // ---------------------------------------------------------------------------
 // Drawing: houses, ladders, barley, the granary, the threshing floor
@@ -345,6 +360,7 @@ function drawRat(k, x) {   // a little brown rat: Glen's running rat (standing s
 }
 
 function updateWorld3(dt) {
+  if (trapCols.size && david.onGround && david.deadT <= 0 && inTrap(david.x, david.y)) { pitFall(); toast("Too high to climb out of there! Back up you go."); }
   if (typeof updateOx === "function") { updateStorm(dt); updateOx(dt); }   // 3-4 (below)
   if (ladders.length && !W3.ladderTold && david.onGround && ladderRungs.has(Math.floor(david.x / T) + "," + Math.floor(david.y / T))) onLadder(david);
   if (guides.length) {   // 3-3: Shammah runs ahead (after a fall he's back at the last spot David reached)

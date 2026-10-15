@@ -1369,7 +1369,7 @@ function updateDavid(dt) {
   // remember the last solid ground he stood on (not a ledge that might crumble), for climbing back out of a pit
   if (d.onGround) {
     const r = Math.floor(d.y / T), cL = Math.floor((d.x - BODY_W) / T), cR = Math.floor((d.x + BODY_W) / T);
-    if (isSolid(cL, r) && isSolid(cR, r)) d.safe = { x: d.x, y: d.y };
+    if (isSolid(cL, r) && isSolid(cR, r) && !(typeof inTrap === "function" && inTrap(d.x, d.y))) d.safe = { x: d.x, y: d.y };   // (not down a lane between tall houses, world3.js)
   }
 
   // --- choose the animation
