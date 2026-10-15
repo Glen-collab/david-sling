@@ -2389,7 +2389,9 @@ function sheepFrame(sh) {   // which sheet and frame to draw for a sheep right n
 }
 // the thorn bush round the tangled sheep: one behind it, and a low one over its legs, so its head and back peek out
 let THORN_BUSH_X = 8, THORN_BUSH_SIZE = 0.42, THORN_FRONT = true, THORN_FRONT_X = 2, THORN_FRONT_SIZE = 0.22;
-function drawSheepOne(sh, camX) {
+const oilingSheep = () => david.state === "liftSheep" && david.helpSheep && david.helpSheep.how === "flies";
+function drawSheepOne(sh, camX, front) {
+  if (!front && oilingSheep() && sh === david.helpSheep) return;   // drawn after David instead
   const x = sh.x - camX, y = sh.y;
   if (x < -150 || x > W + 150) return;
   if (sh.one || sh.how === "rescued") goldGlow(x, y, sh.t);
@@ -3289,6 +3291,7 @@ function frame(now) {
   drawFlock(camX);
   drawLamb(camX); if (typeof drawBoy === "function") { drawClaws(camX); drawBoy(camX); drawIbexes(camX); drawBear(camX); }   // world2.js
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
+  if (oilingSheep()) drawSheepOne(david.helpSheep, camX, true);   // the sheep he's oiling stands in front of him, kneeling
   drawFoldFront(camX);
   drawStones(camX); if (typeof drawFlood === "function") { drawPools(camX); drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js
   drawDecor(camX, "front");
