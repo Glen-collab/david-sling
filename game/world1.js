@@ -302,6 +302,7 @@ function updateCritters(dt) {
     else if (k.kind === "villagedog") updateVillageDog(k, dx, sameLevel, dt);
     else if (k.kind === "bandit") updateBandit(k, dx, sameLevel, dt);
     else if (k.kind === "dove") updateDove(k, dx, sameLevel, dt);
+    else if (k.kind === "guarddog") updateGuardDog(k, dx, sameLevel, dt);
   }
 }
 function foxBark(k) {   // Glen's fox sound, at most every 3 seconds per fox
@@ -422,6 +423,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "villagedog") return stoneHitsVillageDog(k, s);
     if (k.kind === "bandit") return stoneHitsBandit(k, s);
     if (k.kind === "dove") { stoneHitsDove(k, s); continue; }
+    if (k.kind === "guarddog") return stoneHitsGuardDog(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: {roll}."); }
@@ -462,6 +464,7 @@ function drawCritters(camX) {
     if (k.kind === "villagedog") { drawVillageDog(k, x); continue; }
     if (k.kind === "bandit") { drawBandit(k, x); continue; }
     if (k.kind === "dove") { drawDove(k, x); continue; }
+    if (k.kind === "guarddog") { drawVillageDog(k, x); continue; }
     const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

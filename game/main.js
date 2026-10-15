@@ -341,6 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
+  "4-2": { cols: 232, bg: "w4_1", name: "The Training Yard" },   // (borrowing 4-1's layers until Glen's yard set)
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
@@ -459,7 +460,8 @@ const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, tea
 // Moves are taught by people, never found (DESIGN §3c). Learned skills are kept in the save ("davidProgress".skills).
 //   aimUp: Abinadab, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
 // The movement test (#test) and "?allskills" have everything.
-const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: {roll}", charge: "Charged sling: hold B" };
+const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: {roll}", charge: "Charged sling: hold B",
+  quick: "Quick release: tap B twice, quick, for two stones" };   // quick: Gera, 4-2
 const skills = new Set();
 try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
@@ -1091,6 +1093,46 @@ if (LEVEL_NAME === "test") {
   critter("villagedog", 276); critter("dove", 280);
   oliveRow(284, 16, 6);
   sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+} else if (LEVEL_NAME === "4-2") {
+  // ---- 4-2 The Training Yard: David arrives at Gibeah and the captain of the yard wants to see what the shepherd can do
+  //      (he's one of Saul's armor-bearers now, 1 Samuel 16:21). Gera, an old left-handed slinger of Benjamin (Judges
+  //      20:16), teaches quick release. A sling course of targets (standing, on ropes, swinging) and clay jars on the
+  //      walls; guard dogs; five of the king's goats have strayed; The One is the lamb meant for the king's table, in a feed
+  //      shed up on the wall. The letter He is scratched on the wall behind a target. ----
+  ground(0, 231);
+  campfire(5);
+  talk(9, "Gera", "So you're the shepherd with the sling. Benjamin's slingers are famous, you know. Seven hundred of us, left-handed, and \"every one of them could sling a stone at a hair and not miss\" (Judges 20:16).");
+  talk(15, "Gera", "You throw well. But slow. Watch me: release, reload, release. Tap B twice, quick, and a second stone follows the first.", "quick");
+  setPiece("target", 21, 14); setPiece("target", 25, 12); setPiece("target", 29, 15);   // the first targets: try two at once
+  special(27, 8);
+  critter("goat", 34);                                          // a stray from the king's flock
+  setPiece("target", 40, 11, { move: "rope" }); setPiece("target", 45, 10, { move: "rope" });
+  // the battlements: up the steps, clay jars along the top
+  rock(50, 15, 2, 2); wall(52, 12, 10, 5); setPiece("jar", 54, 11); setPiece("jar", 57, 11); setPiece("jar", 60, 11);
+  rock(62, 15, 2, 2);
+  wall(68, 13, 2, 4); inscription(67, 14, "he"); setPiece("target", 67, 14);   // the target hides a letter scratched on the wall
+  critter("guarddog", 74);
+  campfire(80);
+  rock(85, 14, 3, 3); critter("goat", 86, 13);                 // up on the woodpile
+  setPiece("target", 93, 12, { move: "swing" }); setPiece("target", 99, 12, { move: "swing" });
+  special(97, 6);
+  wall(104, 9, 2, 8); setPiece("target", 110, 10);             // over the wall: a target you can only see from up there
+  critter("goat", 114);
+  // The One: the lamb meant for the king's table, in a feed shed up on the fortress wall
+  ladder(117, 10); wall(119, 10, 9, 7); deco("town_house_shed", 124, 9, 0.16); lostSheep("lamb", 125, 9, "one");
+  oliveRow(119, 9, 4);
+  critter("guarddog", 133);
+  setPiece("target", 138, 13); setPiece("target", 141, 10, { move: "rope" }); special(140, 5);
+  campfire(146);
+  critter("goat", 151);
+  setPiece("target", 157, 12, { move: "swing" }); setPiece("target", 162, 9, { move: "rope" }); setPiece("target", 166, 14);
+  rock(172, 15, 2, 2); wall(174, 12, 9, 5); setPiece("jar", 176, 11); setPiece("jar", 179, 11); setPiece("jar", 181, 11);
+  rock(183, 15, 2, 2);
+  critter("goat", 189, GR - 1);
+  critter("guarddog", 195);
+  oliveRow(198, 16, 5);
+  talk(204, "Gera", "Not bad, shepherd. Not bad at all. \"Do you see a man skilled in his work? He will serve kings\" (Proverbs 22:29). Go on, the steward is waiting for you.");
+  sheepfold(215);                                                // the palace fold: the king's goats in
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
@@ -1331,7 +1373,7 @@ function updateDavid(dt) {
     toast(`Power Sling! (${d.specialStones} stone${d.specialStones === 1 ? "" : "s"} of remembrance left)`);
   }
   if (!d.carrying && !d.harp && !busy) {
-    if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; }
+    if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; d.quickUsed = false; d.quickQueued = false; }
     if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
@@ -1352,7 +1394,13 @@ function updateDavid(dt) {
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
       sfx("sling_throw", undefined, full >= 1 ? 0.95 : 0.8, 0.95 + Math.random() * 0.1);   // always the whip of the throw
     }
-    if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; }
+    if (hasSkill("quick") && !d.charging && pressed("b") && !d.carrying && !d.harp && d.throwT > 0.04) d.quickQueued = true;   // tapped again during the throw
+    if (d.thrown && d.quickQueued && !d.quickUsed && d.throwT >= relAt + 0.07) {   // quick release (Gera, 4-2): the second stone, right behind the first
+      d.quickUsed = true; const st = stones[stones.length - 1];
+      if (st) { stones.push({ ...st, x: d.x + d.facing * 30, y: st.charged ? st.y : d.y - (d.h === LOW_H ? 40 : 78), vx: st.vx, vy: st.vy, charged: false, power: false, life: 2.5, trail: undefined });
+        sfx("sling_throw_quick", undefined, 0.9, 1.05); }
+    }
+    if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; d.quickUsed = false; d.quickQueued = false; }
   }
 
   // --- ladders: hold Up in front of one to climb it (Down from the top to climb down), A to jump off
@@ -1647,7 +1695,8 @@ function updateStones(dt) {
     if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
-    if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -2686,7 +2735,8 @@ function updateFinish(dt) {
       t: Math.random(), delay: 1.0 + i * 0.55, slot: px + 3.8 * T + ((i * 5) % n) * (10 * T / n), state: "wait", counted: false,
       depth: (i % 3) * 5, idleName: [SHEEP_ART[sh.kind].graze, SHEEP_ART[sh.kind].stand][i % 2] }));
     finish.found = foundCount(); finish.total = lostCount(); finish.one = line.some(sh => sh.one);
-    if (typeof lostGifts !== "undefined" && lostGifts.length) { finish.found = lostGifts.filter(g => g.taken).length; finish.total = lostGifts.length; finish.things = "gifts"; }
+    const LT = typeof lostThingsTally === "function" ? lostThingsTally() : null;   // World 4: gifts, goats... (world4.js)
+    if (LT) { finish.found = LT.found; finish.total = LT.total; finish.things = LT.things; finish.icon = LT.icon; }
     if (finish.total && finish.found === finish.total) { d.lives++; sfx("extra_life"); toast(`All ${finish.total} lost ${finish.things || "sheep"} found: +1 life!`); }
     return;
   }
@@ -2884,7 +2934,7 @@ function drawFinishBanner() {
   ctx.fillText("Stage " + LEVEL_STAGE + " clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
   ctx.fillText(`Lost ${finish.things || "sheep"} found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
-  if (finish.things) drawItem("gift_honey", W / 2 - 200, 270, 0.26); else hudIcon("sheep", W / 2 - 200, 234, 38);
+  if (finish.icon === "goat") drawSprite("goat_stand", 0, W / 2 - 200, 272, 1, 0.45); else if (finish.things) drawItem("gift_honey", W / 2 - 200, 270, 0.26); else hudIcon("sheep", W / 2 - 200, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
   ctx.fillText(olive, W / 2, 330);
   if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(next, W / 2, 352); }

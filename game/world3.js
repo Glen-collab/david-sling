@@ -1182,7 +1182,10 @@ function updateGoat(k, dx, sameLevel, dt) {
   if (!k.follow) {   // nibbling by the woodpile until he comes up to it
     if (k.state !== "idle") setCrit(k, "idle");
     if (sameLevel && Math.abs(dx) < 1.4 * T && david.deadT <= 0) {
-      k.follow = true; toast("Father's goat got out again! It'll follow you. Lead it home to Father, at the far end of the lanes.");
+      k.follow = true;
+      if (k.stray) { const n = critters.filter(q => q.stray && q.follow).length, all = critters.filter(q => q.stray).length;
+        toast(n === all ? `All ${all} of the king's goats found! Bring them to the fold.` : `A stray goat from the king's flock! It'll follow you. (${n} of ${all})`); }
+      else toast("Father's goat got out again! It'll follow you. Lead it home to Father, at the far end of the lanes.");
     }
     return;
   }
@@ -1223,7 +1226,7 @@ function updateGoat(k, dx, sameLevel, dt) {
   }
 }
 function stoneHitsGoat(k, s) {
-  if (!W3.goatStoned) { W3.goatStoned = true; toast("Not Father's goat! Save your stones for the crows."); }
+  if (!W3.goatStoned) { W3.goatStoned = true; toast(k.stray ? "Not the king's goats! Save your stones for the targets." : "Not Father's goat! Save your stones for the crows."); }
   return false;   // the stone flies on
 }
 function drawGoat(k, x) {

@@ -24,10 +24,8 @@ const giftDonkey = () => critters.find(k => k.kind === "giftdonkey");
 const GIFT_NAMES = { bread: "the bread", wine: "the skin of wine" };
 const giftDrops = [];   // gifts lying on the road (a bandit dropped them): walk over one to load it back on
 for (const k of critters) if (k.kind === "giftdonkey") Object.assign(k, { gifts: ["bread", "wine"], facing: 1 });
-if (LEVEL_STAGE === "4-1") {   // Father's young goat, for the king: it follows from the start, and is never "home"
-  W3.GOAT_HOME = 1e6;
-  for (const k of critters) if (k.kind === "goat") k.follow = true;
-}
+if (WORLD === 4) W3.GOAT_HOME = 1e6;   // goats in World 4 are never "home" (that's 3-1's Jesse)
+if (LEVEL_STAGE === "4-1") for (const k of critters) if (k.kind === "goat") k.follow = true;   // Father's young goat, for the king
 
 // ---------------------------------------------------------------------------
 // The gift donkey
@@ -279,9 +277,9 @@ function drawLostGifts(camX) {
   }
 }
 function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true = drawn instead of the sheep)
-  if (!lostGifts.length) return false;
-  drawItem("gift_honey", HUD_X + 14, 224, 0.24);
-  hudText(`${lostGifts.filter(g => g.taken).length}/${lostGifts.length}`, HUD_X + 40, 220);
+  const L = lostThingsTally(); if (!L) return false;
+  if (L.icon === "goat") drawSprite("goat_stand", 0, HUD_X + 14, 224, 1, 0.42); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
+  hudText(`${L.found}/${L.total}`, HUD_X + 40, 220);
   if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
   return true;
 }
@@ -319,6 +317,82 @@ function drawInscriptions(camX) {
   }
   ctx.restore();
 }
+// ---------------------------------------------------------------------------
+// 4-2 The Training Yard: Gera's sling course. Targets (setPiece "target", { move: "rope" | "swing" }), clay jars on the
+// battlements (setPiece "jar"), a guard dog that chases David (critter "guarddog"), and five stray palace goats
+// (critter "goat" with .stray: they follow once found, and count as the stage's lost things).
+// ---------------------------------------------------------------------------
+Object.assign(W4, { TARGET_R: 24, ROPE_AMP: 2.2, SWING_AMP: 0.9, GUARD_RUN: 330, GUARD_GIVEUP: 4.5 });
+const targets = setPieces.filter(p => p.kind === "target" || p.kind === "jar").map(p => ({ ...p, hit: false, fallT: 0, ph: (p.c % 7) * 0.9 }));
+function targetPos(t, now) {   // where a target is right now (rope targets bob up and down, swinging ones swing)
+  if (t.kind === "jar") return { x: t.x, y: t.y - 30 };
+  const cy = t.r * T + T / 2;
+  if (t.move === "rope") return { x: t.x, y: cy + Math.sin(now * 1.4 + t.ph) * W4.ROPE_AMP * T };
+  if (t.move === "swing") { const a = Math.sin(now * 1.7 + t.ph) * W4.SWING_AMP, L = 3 * T; return { x: t.x + Math.sin(a) * L, y: cy - 3 * T + Math.cos(a) * L, a }; }
+  return { x: t.x, y: cy };
+}
+function stoneHitsWorld4(s) {   // main.js stone loop
+  if (!targets.length) return false;
+  const now = performance.now() / 1000;
+  for (const t of targets) {
+    if (t.hit) continue;
+    const p = targetPos(t, now), r = t.kind === "jar" ? 26 : W4.TARGET_R;
+    if (Math.hypot(s.x - p.x, s.y - p.y) > r + 6) continue;
+    t.hit = true; t.hx = p.x; t.hy = p.y; stoneHit(s, 0.5);
+    for (let k = 0; k < (t.kind === "jar" ? 16 : 10); k++) bits.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 420, life: 0.8, color: t.kind === "jar" ? (k % 2 ? "#b8693a" : "#8a4a26") : (k % 2 ? "#c0392b" : "#e8d3a8") });
+    david.olives++; david.gathered++;
+    const left = targets.filter(q => !q.hit).length, n = targets.length - left;
+    if (!left) { toast(`Every target and jar in the yard! "Do you see a man skilled in his work? He will serve kings." (Proverbs 22:29)`); david.lives++; sfx("extra_life"); }
+    else if (n === 1 || n % 4 === 0) toast(`${t.kind === "jar" ? "Smash!" : "Thwack!"} ${n} of ${targets.length} in the yard. (An olive for each.)`);
+    return !s.power;
+  }
+  return false;
+}
+function drawTargets(camX) {
+  const now = performance.now() / 1000;
+  for (const t of targets) {
+    const p = t.hit ? { x: t.hx, y: t.hy + Math.min(400, t.fallT * t.fallT * 900) } : targetPos(t, now);
+    if (t.hit) { t.fallT += 1 / 60; if (t.fallT > 1.2) continue; }
+    const x = p.x - camX; if (x < -150 || x > W + 150) continue;
+    ctx.save();
+    if (!t.hit && t.move === "rope") { ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, p.y - 8 * T); ctx.lineTo(x, p.y - W4.TARGET_R); ctx.stroke(); }
+    if (!t.hit && t.move === "swing") { const top = t.r * T + T / 2 - 3 * T; ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(t.x - camX, top); ctx.lineTo(x, p.y - W4.TARGET_R); ctx.stroke(); ctx.fillStyle = "#5a3e22"; ctx.fillRect(t.x - camX - 30, top - 6, 60, 8); }
+    if (t.kind === "jar") { ctx.globalAlpha = t.hit ? Math.max(0, 1 - t.fallT) : 1; drawItem("gift_oil", x, p.y + 30, 0.36); ctx.restore(); continue; }
+    if (!t.hit && !t.move) { ctx.fillStyle = "#6b4a2a"; ctx.fillRect(x - 4, p.y, 8, t.y - p.y); }   // its post
+    ctx.translate(x, p.y); if (t.hit) { ctx.rotate(t.fallT * 6); ctx.globalAlpha = Math.max(0, 1 - t.fallT); }
+    const R = W4.TARGET_R;   // a straw-and-wood target, painted rings
+    ctx.fillStyle = "#c9a56a"; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#6b4a2a"; ctx.lineWidth = 3; ctx.stroke();
+    for (const [rr, col] of [[R * 0.72, "#a8322a"], [R * 0.48, "#efe3c4"], [R * 0.24, "#a8322a"]]) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+}
+// the guard dog: runs at David barking, snaps once, then loses interest and trots off. A stone sends it off.
+CRITTER_ART.guarddog = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 60, y1: k.y }) };
+function updateGuardDog(k, dx, sameLevel, dt) {
+  const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); };
+  if (k.state === "idle") {
+    fall(); k.facing = Math.sign(dx) || k.facing;
+    if (sameLevel && Math.abs(dx) < W4.DOG_SEE * T && david.deadT <= 0) { setCrit(k, "run"); sfx("wolf_bark", k.x, 0.9); if (!W4.guardTold) { W4.guardTold = true; toast("A guard dog! It'll chase you for a while. Outrun it, or a stone sends it off."); } }
+    return;
+  }
+  if (k.state === "run") {
+    k.facing = Math.sign(dx) || k.facing;
+    if (!runCritter(k, W4.GUARD_RUN, dt) && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
+    if (Math.floor(k.t * 1.6) !== Math.floor((k.t - dt) * 1.6)) sfx("wolf_bark", k.x, 0.6, 1.1);
+    if (touchesDavid(critterBox(k)) && !k.bit) { k.bit = true; hurtDavid(k.x); }
+    if (k.t > W4.GUARD_GIVEUP) { k.gone = true; k.facing = -k.facing; k.vx = k.facing * 200; toast("The guard dog lost interest and trotted off."); }
+  }
+}
+function stoneHitsGuardDog(k, s) { k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 420; stoneHit(s, 0.6); toast("The guard dog ran off, yelping."); return !s.power; }
+// stray palace goats (4-2's lost things): world3.js's goat, with other words
+if (LEVEL_STAGE === "4-2") for (const k of critters) if (k.kind === "goat") k.stray = true;
+function lostThingsTally() {   // World 4's lost things for the HUD and the clear card (null = it's sheep, as usual)
+  if (lostGifts.length) return { found: lostGifts.filter(g => g.taken).length, total: lostGifts.length, things: "gifts", icon: "gift" };
+  const goats = critters.filter(k => k.stray);
+  if (goats.length) return { found: goats.filter(k => k.follow).length, total: goats.length, things: "goats", icon: "goat" };
+  return null;
+}
 function updateWorld4(dt) {
   updateInscriptions(dt);
   if (WORLD !== 4) return;
@@ -327,7 +401,7 @@ function updateWorld4(dt) {
 function drawWorld4(camX) {
   drawInscriptions(camX);
   if (WORLD !== 4) return;
-  drawKeeper(camX); drawGiftDrops(camX); drawLostGifts(camX);
+  drawKeeper(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
 }
 
 // ---------------------------------------------------------------------------

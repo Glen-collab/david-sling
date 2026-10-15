@@ -260,4 +260,11 @@ the harp phrase at 3-2's campfire.
   what to look for), bread in a hollow under a rock shelf behind a deadfall (charged stone), oil inside an outcrop whose
   left end is fakeRock (walk in), cheese on a high ledge above The One's terrace, honey inside an outcrop whose loose
   stone is at the far right (look back). A dead tree (deadfall) blocks the road at 240. 4-1 is now 316 cols, fold at 300.
+- **4-2 The Training Yard is built** (2026-10-15; layout in main.js, pieces in world4.js; borrows w4_1 layers). Gera
+  (made up, left-handed Benjamite, Judges 20:16 WEB) teaches skill "quick" (quick release: a second tap during a throw
+  sends a second stone just after the first; main.js d.quickQueued/quickUsed). 20 targets and jars (setPiece "target"
+  static / { move: "rope" } / { move: "swing" }, setPiece "jar" drawn with gift_oil): an olive each, all of them = +1 life
+  and Proverbs 22:29 (WEB). Guard dogs (critter "guarddog": chase, snap once, give up after 4.5 s). Lost things = 5 stray
+  king's goats (world3 goat with .stray; lostThingsTally in world4.js feeds the HUD and the clear card). The One in a feed
+  shed on the wall (ladder up). Letter He behind a target at 67. Gera has no art yet (talks only). Ends at a palace fold.
 
