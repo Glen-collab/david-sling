@@ -1,0 +1,11 @@
+{
+ "frames": 6,
+ "frame_w": 202,
+ "frame_h": 274,
+ "ms_per_frame": 400,
+ "loop": false,
+ "align": "feet",
+ "anchor_x": 103,
+ "anchor_y": 271,
+ "source": "gera_sheet.png"
+}

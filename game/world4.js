@@ -388,6 +388,19 @@ function updateGuardDog(k, dx, sameLevel, dt) {
 function stoneHitsGuardDog(k, s) { k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 420; stoneHit(s, 0.6); toast("The guard dog ran off, yelping."); return !s.power; }
 // stray palace goats (4-2's lost things): world3.js's goat, with other words
 if (LEVEL_STAGE === "4-2") for (const k of critters) if (k.kind === "goat") k.stray = true;
+// Gera (Glen's sheet, facing left): 0 standing, 1 talking, 2 whirling the sling, 3 letting fly, 4 laughing, 5 arms crossed.
+// He waits at his next line not yet said; teaching quick release he shows it (2-3), and at the end he laughs.
+TUNE.SPRITE_SIZE.gera = 1.12;   // a grown man, a head taller than David
+function drawGera(camX) {
+  const mine = talks.filter(t => t.who === "Gera"); if (!mine.length || !SPR.gera) return;
+  const k = mine.findIndex(t => !t.done), cur = k < 0 ? mine.length - 1 : Math.max(0, k - (dialog.t > 0 && dialog.who === "Gera" ? 1 : 0));
+  const gx = mine[cur].x + 2 * T, x = gx - camX; if (x < -200 || x > W + 200) return;
+  const talking = dialog.t > 0 && dialog.who === "Gera", now = performance.now() / 1000;
+  let i = 0;
+  if (talking) i = cur === 1 ? (Math.floor(now * 2.2) % 2 ? 3 : 2) : cur === mine.length - 1 ? (Math.floor(now * 1.4) % 2 ? 4 : 1) : 1;
+  else if (k < 0) i = 5;
+  drawSprite("gera", i, x, GR * T, -(Math.sign(david.x - gx) || -1));
+}
 function lostThingsTally() {   // World 4's lost things for the HUD and the clear card (null = it's sheep, as usual)
   if (lostGifts.length) return { found: lostGifts.filter(g => g.taken).length, total: lostGifts.length, things: "gifts", icon: "gift" };
   const goats = critters.filter(k => k.stray);
@@ -402,7 +415,7 @@ function updateWorld4(dt) {
 function drawWorld4(camX) {
   drawInscriptions(camX);
   if (WORLD !== 4) return;
-  drawKeeper(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
+  drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
 }
 
 // ---------------------------------------------------------------------------

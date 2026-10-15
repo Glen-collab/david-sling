@@ -1308,6 +1308,18 @@ window.SPRITE_DATA = {
   "ay": 102,
   "align": "feet"
  },
+ "gera": {
+  "src": "../assets/sprites/gera.png",
+  "frames": 6,
+  "w": 202,
+  "h": 274,
+  "ms": 400,
+  "loop": false,
+  "pingpong": false,
+  "ax": 103,
+  "ay": 271,
+  "align": "feet"
+ },
  "girl_run": {
   "src": "../assets/sprites/girl_run.png",
   "frames": 6,

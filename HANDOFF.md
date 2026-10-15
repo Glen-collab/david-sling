@@ -266,5 +266,5 @@ the harp phrase at 3-2's campfire.
   static / { move: "rope" } / { move: "swing" }, setPiece "jar" drawn with gift_oil): an olive each, all of them = +1 life
   and Proverbs 22:29 (WEB). Guard dogs (critter "guarddog": chase, snap once, give up after 4.5 s). Lost things = 5 stray
   king's goats (world3 goat with .stray; lostThingsTally in world4.js feeds the HUD and the clear card). The One in a feed
-  shed on the wall (ladder up). Letter He behind a target at 67. Gera has no art yet (talks only). Ends at a palace fold.
+  shed on the wall (ladder up). Letter He behind a target at 67. Gera: Glen's 6-pose sheet (gera.png, cut keeping the loose sling loop), drawn by drawGera at his next line. Ends at a palace fold.
 
