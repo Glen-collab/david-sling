@@ -3138,7 +3138,8 @@ function updateSound(dt) {
   rainVol = fadeLoop(rainLoop, rainVol, STAGE_INFO.storm && !cave.room ? TUNE.RAIN_VOLUME : 0, dt, 0.4);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
-  const spd = d.onGround && d.deadT <= 0 && !d.harp ? Math.abs(d.vx) : 0;
+  const scene = (typeof passScene !== "undefined" && passScene.active) || oneMoment.active || finish.active;   // a scene over the stage: no footsteps
+  const spd = d.onGround && d.deadT <= 0 && !d.harp && !scene ? Math.abs(d.vx) : 0;
   const running = spd > (TUNE.WALK_SPEED + TUNE.RUN_SPEED) / 2;
   runVol = fadeLoop(stepsRun, runVol, running ? TUNE.STEPS_VOLUME : 0, dt, 6);
   if (running) { stepsRun.playbackRate = Math.max(0.85, Math.min(1.2, spd / TUNE.RUN_SPEED)); }
@@ -3345,7 +3346,7 @@ function frame(now) {
   // Start in a stage: pause (resume, settings, back to the map)
   if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
-  else if (typeof passScene !== "undefined" && passScene.active) updatePassScene(real);   // world3.js: back in town, before Samuel
+  else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
