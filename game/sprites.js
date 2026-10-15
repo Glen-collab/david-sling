@@ -2556,6 +2556,18 @@ window.SPRITE_DATA = {
   "ay": 74,
   "align": "feet"
  },
+ "thief_crawl": {
+  "src": "../assets/sprites/thief_crawl.png",
+  "frames": 6,
+  "w": 245,
+  "h": 121,
+  "ms": 160,
+  "loop": true,
+  "pingpong": false,
+  "ax": 175,
+  "ay": 119,
+  "align": "feet"
+ },
  "thief_pickup": {
   "src": "../assets/sprites/thief_pickup.png",
   "frames": 6,
@@ -2578,6 +2590,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 94,
   "ay": 353,
+  "align": "feet"
+ },
+ "thief_sneak": {
+  "src": "../assets/sprites/thief_sneak.png",
+  "frames": 6,
+  "w": 181,
+  "h": 174,
+  "ms": 140,
+  "loop": true,
+  "pingpong": false,
+  "ax": 135,
+  "ay": 173,
   "align": "feet"
  },
  "thief_stand": {

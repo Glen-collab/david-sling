@@ -399,11 +399,13 @@ function drawFlies(x, y, t) {   // a little cloud of flies buzzing round its hea
 // Rustlers (3-2): with the whole town at the gathering, a sheep thief creeps up on the flock you left at a campfire.
 //   critter("rustler", c) beside campfire(c). Once you've gone on past that fire with sheep resting there, he sneaks in
 //   from behind, crouches and grabs one, and makes off with it held up over his head. A stone makes him drop it and run.
-// Art: Glen's thief sheets (thief_stand / thief_pickup / thief_run, hand raised for the sheep). There's no creeping
-// sheet yet, so he sneaks up bent over (pickup frames 1-2). Without them: a villager's walk clip, darkened.
+// Art: Glen's thief sheets: thief_sneak (crouched creep), thief_crawl (belly-crawl the last few steps), thief_pickup,
+// thief_run (hand raised for the sheep), thief_stand. Without them: a villager's walk clip, darkened.
 // ---------------------------------------------------------------------------
 Object.assign(W3, { RUSTLER_AFTER: 10, RUSTLER_SNEAK: 120, RUSTLER_RUN: 230, RUSTLER_ART: "abinadab_walk", RUSTLER_FILTER: "brightness(0.3) saturate(0.5)",
   THIEF_GRAB: 0.55,     // seconds crouching to grab the sheep (pickup frames 0-4)
+  THIEF_CRAWL: 3,       // tiles from the sheep where he drops to his belly and crawls
+  THIEF_CRAWL_SPEED: 0.45,   // x his sneaking speed while crawling
   THIEF_HAND: 322 });   // how high his raised hand holds the sheep, in thief_run sheet pixels above his feet
 const thiefArt = () => !!SPR.thief_run;
 const rustlerH = () => { const nm = thiefArt() ? "thief_stand" : W3.RUSTLER_ART, s = SPR[nm]; return s ? s.ay * SCALE * (TUNE.SPRITE_SIZE[nm] || 1) : 190; };   // his height on screen
@@ -427,7 +429,8 @@ function updateRustler(k, dx, sameLevel, dt) {
       if (!k.target) { k.gone = true; k.vx = -W3.RUSTLER_RUN; return; }
     }
     k.facing = Math.sign(k.target.x - k.x) || 1;
-    runCritter(k, W3.RUSTLER_SNEAK, dt);
+    k.crawl = thiefArt() && SPR.thief_crawl && Math.abs(k.target.x - k.x) < W3.THIEF_CRAWL * T;
+    runCritter(k, W3.RUSTLER_SNEAK * (k.crawl ? W3.THIEF_CRAWL_SPEED : 1), dt);
     if (Math.abs(k.target.x - k.x) < 30) {
       const sh = k.target; line.splice(line.indexOf(sh), 1); sh.state = "stolen"; k.sheep = sh; k.vx = 0;
       baa(sh.x, 1); setCrit(k, thiefArt() ? "grab" : "flee"); toast("He's grabbed one of your sheep! Hit him with a stone!");
@@ -465,7 +468,9 @@ function stoneHitsRustler(k, s) {
 function drawRustler(k, x) {
   if (thiefArt()) {
     let nm = "thief_run", i = frameOf(nm, k.t);
-    if (k.state === "sneak") { nm = "thief_pickup"; i = 1 + (Math.floor(k.t * 3) % 2); }               // creeping, bent over
+    if (k.state === "sneak" && k.crawl) { nm = "thief_crawl"; i = frameOf(nm, k.t); }               // on his belly, the last few steps
+    else if (k.state === "sneak" && SPR.thief_sneak) { nm = "thief_sneak"; i = frameOf(nm, k.t); }    // creeping, crouched low
+    else if (k.state === "sneak") { nm = "thief_pickup"; i = 1 + (Math.floor(k.t * 3) % 2); }
     else if (k.state === "grab") { nm = "thief_pickup"; i = Math.min(4, Math.floor(k.t / W3.THIEF_GRAB * 5)); }
     else if (k.state === "wait") { nm = "thief_stand"; i = frameOf(nm, k.t); }                       // looking back at David
     drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);

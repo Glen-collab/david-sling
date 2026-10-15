@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 181,
+  "frame_h": 174,
+  "ms_per_frame": 140,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 135,
+  "anchor_y": 173,
+  "source": "thief_sneak.png"
+}

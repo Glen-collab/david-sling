@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 245,
+  "frame_h": 121,
+  "ms_per_frame": 160,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 175,
+  "anchor_y": 119,
+  "source": "thief_crawl.png"
+}
