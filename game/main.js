@@ -1843,6 +1843,8 @@ function getSedimentPhase() {
 }
 const matAt = (c, r) => (r >= 0 && r < ROWS && c >= 0 && c < COLS) ? solid[r][c] : 0;
 
+// the empty margin at the top of each set's wall pictures (left, mid, right), as a share of the picture's height (measured)
+const WALL_TOP = { w2s: [0.21, 0.15, 0.13], w2f: [0.15, 0.15, 0.14], w4p: [0.01, 0.05, 0.02] };
 function drawTiles(camX) {
   const c0 = Math.max(0, Math.floor(camX / T) - 2), c1 = Math.min(COLS - 1, Math.ceil((camX + W) / T) + 2);
   ctx.save(); ctx.translate(-Math.round(camX), 0);
@@ -1919,10 +1921,19 @@ function drawTiles(camX) {
     // colour-match the stones to the limestone and the background walls
     ctx.save(); ctx.filter = STAGE_INFO.ter ? "none" : TUNE.WALL_FILTER;   // World 1's stones are colour-matched to its limestone; other sets come as drawn
     ctx.beginPath(); ctx.rect(x0 - 200, -1000, x1 - x0 + 400, groundY + 1000); ctx.clip();
+    const m = WALL_TOP[STAGE_INFO.ter];   // a stage's own set: lift each piece by the empty space at the top of its picture
+    if (m) {
+      const top = r * T + sink - 4, H2 = hh + 6;
+      const lw = terPiece("wall_left", x0 - 4, top - m[0] * H2, H2);
+      const rw = TER.wall_right.naturalWidth * H2 / (TER.wall_right.naturalHeight || 1);
+      terStrip("wall_mid", x0 - 4 + lw * 0.7, x1 + 4 - rw * 0.7, top - m[1] * H2, H2);
+      terPiece("wall_right", x1 + 4 - rw, top - m[2] * H2, H2);
+    } else {
     const lw = terPiece("wall_left", x0 - 4, y, hh);
     const rw = TER.wall_right.naturalWidth * hh / (TER.wall_right.naturalHeight || 1);
     terStrip("wall_mid", x0 - 4 + lw * 0.7, x1 + 4 - rw * 0.7, y + hh * 0.13, hh * 0.87);
     terPiece("wall_right", x1 + 4 - rw, y, hh);
+    }
     ctx.restore();
   }
   // 3) top edges: grass on earth, weathered rock on limestone (one strip per run of exposed tops)
