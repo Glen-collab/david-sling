@@ -301,7 +301,7 @@ function updateCritters(dt) {
 }
 function foxBark(k) {   // Glen's fox sound, at most every 3 seconds per fox
   const now = performance.now(); if (now - (k.barkAt || 0) < 3000) return;
-  k.barkAt = now; sfx("fox", k.x, 0.75, 0.95 + Math.random() * 0.1);
+  k.barkAt = now; sfxOne(["fox_1", "fox_2", "fox_3"], k.x, 0.75);
 }
 function updateFox(k, dx, sameLevel, dt) {
   if (k.state === "idle") {
