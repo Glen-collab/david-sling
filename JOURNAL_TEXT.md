@@ -175,7 +175,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 ### World 4: The King's Court
 | Stage | Lesson | David writes |
 |---|---|---|
-| 4-1 Escort the donkey | Honour your father | *Father sent me with gifts for the king. I will honour him by bringing them safely.* — Exodus 20:12 |
+| 4-1 Escort the donkey | Honor your father | *Father sent me with gifts for the king. I will honour him by bringing them safely.* — Exodus 20:12 |
 | 4-2 Quick release | Skill is a gift | *The LORD filled Bezalel with skill to make beautiful things. My sling hand is His gift too.* — Exodus 31:3 |
 | 4-3 Gibeah, the harp parts | Music is old and good | *Jubal was the father of all who play the harp. I am one of his children.* — Genesis 4:21 |
 | 4-4 Saul's torment | Bless the one who is hurting | *I asked the LORD to bless the king, keep him, and give him peace.* — Numbers 6:24–26 |

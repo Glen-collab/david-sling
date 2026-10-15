@@ -123,6 +123,42 @@ const JOURNAL_PAGES = {
       ],
     },
   },
+  // World 4: JOURNAL_TEXT.md's first draft (2026-10-15), until Glen locks the words. The right page builds the song's
+  // second verse ("You lead me down the right road ... Even when the shadows gather, You remain the same").
+  4: {
+    name: "The King's Court",
+    stages: ["The Road to Gibeah", "The Training Yard", "The Broken String", "The King's Hall"],
+    draft: {
+      left: [
+        ...E(1, "Father sent me with gifts for the king. I will honor him by bringing them safely.", "Exodus 20:12"),
+        ...E(2, "The LORD filled Bezalel with skill to make beautiful things. My sling hand is His gift too.", "Exodus 31:3"),
+        ...E(3, "Jubal was the father of all who play the harp. I am one of his children.", "Genesis 4:21"),
+        ...E(4, "I asked the LORD to bless the king, keep him, and give him peace.", "Numbers 6:24–26"),
+      ],
+      right: [
+        { at: 1, size: "psalm", segs: [
+          { text: "You lead me down the", at: 1 }, { text: "king's", at: 1, strike: 2 }, { text: "right", at: 2 }, { text: "road...", at: 1 }, { text: "\n" },
+          { text: "Even when the", at: 3 }, { text: "king rages,", at: 3, strike: 4 }, { text: "shadows gather,", at: 4 }, { text: "\n" },
+          { text: "You remain the same.", at: 3 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 16:23",
+          segs: [{ text: "The king was troubled tonight. I played for him, and the shadows left him for a while.", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the song so far: verse 1 (Worlds 1-3), and the start of verse 2
+        { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
+          { text: "He leads me beside the waters,", at: 5 }, { text: "\n" }, { text: "where the troubled waves grow still.", at: 5 }, { text: "\n" },
+          { text: "He restores my soul again,", at: 5 }, { text: "\n" }, { text: "and guides me where He will.", at: 5 }, { text: "\n" },
+          { text: "You lead me down the right road;", at: 5 }, { text: "\n" }, { text: "when the shadows gather, You remain the same.", at: 5 }] },
+      ],
+    },
+  },
 };
 
 // ----------------------------------------------------------------------------
