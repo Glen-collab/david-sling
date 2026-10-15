@@ -279,7 +279,8 @@ function drawLostGifts(camX) {
 function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true = drawn instead of the sheep)
   const L = lostThingsTally(); if (!L) return false;
   if (L.icon === "goat") drawSprite("goat_stand", 0, HUD_X + 14, 224, 1, 0.42);
-  else if (L.icon === "hen") drawSprite("chicken_peck", 0, HUD_X + 14, 224, 1, 1.2); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
+  else if (L.icon === "hen") drawSprite("chicken_peck", 0, HUD_X + 14, 224, 1, 1.2);
+  else if (L.icon === "lamp") drawItem("hall_lamp_lit", HUD_X + 14, 228, 0.16); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
   hudText(`${L.found}/${L.total}`, HUD_X + 40, 220);
   questItems.forEach((q, i) => { ctx.save(); ctx.globalAlpha = q.taken ? 1 : 0.35; drawQuestIcon(q.name, HUD_X + 6 + i * 44, 290, 0.8); ctx.restore(); });   // 4-3: the harp's three things
   if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
@@ -516,8 +517,129 @@ function drawSteward(camX) {
   const i = talking ? P[Math.floor(now * 1.1) % 2] : k < 0 && harpMended() ? 5 : 3;
   drawSprite("steward", i, x, GR * T, -(Math.sign(david.x - sx) || -1));
 }
+// ---------------------------------------------------------------------------
+// 4-4 The King's Hall (DESIGN): the palace at night, a storm outside. Shadows drift through the halls (setPiece "wisp"):
+// they don't hurt, but touching one makes David shiver to a stop. The hall lamps (setPiece "hall_lamp") are the lost
+// things: walk up to one and it's lit, and the shadows near it melt away. The One hides under the great staircase.
+// At the end, BOSS Saul's Torment (setPiece "throne"): won with music, not the sling. Sit by the king and play (the harp
+// duel, world2.js, kind "saul"): David's notes from Glen's Morning Meditation 1 over the dark Harp of the Deep. Steady
+// tunes push the shadows back; misses let them creep in; rushing (pressing early) makes them surge (the Steward's
+// warning). If the shadows reach the king, he sends David out: back to the servants' fire, where the Steward's tier-2
+// counsel makes it gentler. The tunes go in three parts: the quiet part, the storm, the new part. Then he sleeps (16:23).
+// ---------------------------------------------------------------------------
+Object.assign(W4, { WISP_DRIFT: 55, WISP_SHIVER: 0.8, LAMP_REACH: 1.4, LAMP_CLEAR: 7,
+  SAUL_SIZE: 1.25, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9 });
+TUNE.SPRITE_SIZE.saul = W4.SAUL_SIZE;
+const wisps = setPieces.filter(p => p.kind === "wisp").map(p => ({ hx: p.x, hy: p.r * T, x: p.x, y: p.r * T, ph: (p.c % 9) * 0.7, alpha: 1, gone: false }));
+const hallLamps = setPieces.filter(p => p.kind === "hall_lamp").map(p => ({ x: p.x, y: GR * T, lit: false, t: 0 }));
+const throne = setPieces.find(p => p.kind === "throne");
+const saul = { calm: false, darkVol: 0 };
+const darkSong = Object.assign(new Audio(`../assets/audio/saul_dark.mp3?v=${window.BUILD || 0}`), { loop: true, volume: 0, _music: true });
+function updateHall(dt) {
+  const d = david;
+  if (d.shiverT > 0) d.shiverT -= dt;
+  for (const L of hallLamps) {
+    L.t += dt; if (L.lit) continue;
+    if (Math.abs(d.x - L.x) < W4.LAMP_REACH * T && Math.abs(d.y - L.y) < 90 && d.deadT <= 0) {
+      L.lit = true; sfx("heal", L.x, 0.5, 1.2); if (typeof chime === "function") chime(7);
+      const n = hallLamps.filter(q => q.lit).length;
+      toast(n === hallLamps.length ? `All ${n} hall lamps are lit. "The LORD is near to those who have a broken heart" (Psalm 34:18).` : `You lit a hall lamp, and the shadows near it melt away. (${n} of ${hallLamps.length})`);
+    }
+  }
+  for (const w of wisps) {
+    if (w.gone) { w.alpha = Math.max(0, w.alpha - dt * 1.2); continue; }
+    if (hallLamps.some(L => L.lit && Math.abs(L.x - w.x) < W4.LAMP_CLEAR * T)) { w.gone = true; continue; }   // the light drives it off
+    const dx = d.x - w.x, dy = d.y - 60 - w.y, dist = Math.hypot(dx, dy);
+    if (dist < 7 * T) { w.x += dx / dist * W4.WISP_DRIFT * dt; w.y += dy / dist * W4.WISP_DRIFT * 0.5 * dt; }   // slowly after him
+    else { w.x += (w.hx - w.x) * dt * 0.3; w.y += (w.hy - w.y) * dt * 0.3; }
+    if (dist < 52 && !(d.shiverT > 0) && d.deadT <= 0) {
+      d.shiverT = W4.WISP_SHIVER; d.vx = 0;
+      if (!W4.shiverTold) { W4.shiverTold = true; toast("Brr... a cold shadow. It doesn't hurt, but it stops you in your tracks. Light the lamps: the dark keeps back from the light."); }
+    }
+  }
+  updateSaul(dt);
+}
+// --- Saul's Torment
+const saulPhase = () => { const g = harpDuel; if (!g.active || g.kind !== "saul") return saul.calm ? 3 : 0; return g.phrase < 2 ? 0 : g.phrase < 4 ? 1 : 2; };
+function saulDuelTarget(d) {   // world2.js harpDuelTarget: sitting by the troubled king
+  if (!throne || saul.calm || Math.abs(d.x - throne.x) > 6 * T) return null;
+  return { duelKind: "saul" };
+}
+function inThroneRoom() { return throne && !saul.calm && david.x > throne.x - W4.SAUL_ARENA * T && david.deadT <= 0; }
+function updateSaul(dt) {
+  if (!throne) return;
+  const d = david, g = harpDuel, duel = g.active && g.kind === "saul";
+  if (inThroneRoom() && !W4.throneTold) { W4.throneTold = true; toast("King Saul, troubled on his throne. Sit beside him and play (Select)."); }
+  if (duel) {
+    g.dark = g.dark || 0;
+    if (dialog.t > 0 && dialog.who !== "King Saul") dialog.t = 0;   // nobody talks over the song
+    const ph = saulPhase();
+    if (ph !== g.lastPh) {   // a new part of the song
+      if (ph === 1) { toast("Thunder outside... the king cries out. Steady, David. Don't rush."); sfx("thunder", undefined, 0.9); saul.flash = 1; }
+      if (ph === 2) toast("The new part of the song. The shadows begin to thin.");
+      g.lastPh = ph;
+    }
+    if (g.dark >= 1) saulSendsOut();
+  }
+  saul.flash = Math.max(0, (saul.flash || 0) - dt * 2);
+  // the dark song: under everything in the throne room, louder as the shadows grow, fading as he's calmed
+  const want = saul.calm || !inThroneRoom() ? 0 : duel ? Math.max(0.05, 0.22 + 0.5 * g.dark - 0.18 * g.calm + (saulPhase() === 1 ? 0.15 : 0)) : 0.32;
+  saul.darkVol += (want - saul.darkVol) * Math.min(1, dt * 1.5);
+  darkSong.volume = Math.max(0, Math.min(1, saul.darkVol * TUNE.SFX_VOLUME * 1.6));
+  if (saul.darkVol > 0.01 && darkSong.paused && audioUnlocked) darkSong.play().catch(() => {});
+  if (saul.darkVol <= 0.01 && !darkSong.paused) darkSong.pause();
+}
+function saulMiss(rushed) {   // world2.js: a missed or rushed note
+  const g = harpDuel; g.dark = (g.dark || 0) + (rushed ? W4.SAUL_RUSH : W4.SAUL_MISS) * (W4.counsel2 ? 0.6 : 1);
+  if (rushed && !W4.rushTold) { W4.rushTold = true; toast("Too soon! Rushing makes it worse. Play steady: wait for each note to reach the harp."); }
+}
+function saulTune() { const g = harpDuel; g.dark = Math.max(0, (g.dark || 0) - W4.SAUL_TUNE); }   // a whole tune: the shadows draw back
+function saulCalmed() {
+  saul.calm = true; sfx("heal", undefined, 0.7);
+  toast("The hall goes quiet. King Saul leans back... and sleeps. \"Saul was refreshed and was well\" (1 Samuel 16:23).");
+}
+function saulSendsOut() {
+  endHarpDuel(); const d = david; d.harp = false; harpDuel.dark = 0;
+  sayLine("King Saul", "Leave me! Get out, all of you!");
+  setTimeout(() => {
+    Object.assign(d, { x: checkpoint.x, y: checkpoint.y, vx: 0, vy: 0 }); setState("idle"); camX = Math.max(0, d.x - W / 2);
+    if (!W4.counsel2) { W4.counsel2 = true; HARP_DUEL.saul.window = 0.32;
+      sayLine("The Steward", "Sit down. Tell me what happened. ... It's not your fault, boy. Go back. Slower this time: let each note come to you."); }
+    else toast("Back by the servants' fire. Go back to him when you're ready.");
+  }, 1600);
+}
+function saulBlocking() { return throne && !saul.calm ? "The king is still troubled. Sit by him and play first." : null; }
+function drawHall(camX) {
+  const now = performance.now() / 1000;
+  for (const L of hallLamps) {
+    const x = L.x - camX; if (x < -100 || x > W + 100) continue;
+    if (L.lit) { ctx.save(); ctx.globalCompositeOperation = "lighter"; const r = 130 + Math.sin(now * 7 + L.x) * 6, g = ctx.createRadialGradient(x + 20, L.y - 140, 6, x + 20, L.y - 140, r);
+      g.addColorStop(0, "rgba(255,190,90,0.45)"); g.addColorStop(1, "rgba(255,150,60,0)"); ctx.fillStyle = g; ctx.fillRect(x + 20 - r, L.y - 140 - r, r * 2, r * 2); ctx.restore(); }
+    else goldGlow(x, L.y, L.t);
+    drawItem(L.lit ? "hall_lamp_lit" : "hall_lamp_unlit", x, L.y + 4, 0.55);
+  }
+  for (const w of wisps) {
+    if (w.alpha <= 0) continue; const x = w.x - camX + Math.sin(now * 0.9 + w.ph) * 14, y = w.y + Math.sin(now * 1.3 + w.ph) * 10;
+    if (x < -200 || x > W + 200) continue;
+    drawSprite("shadow_wisp", frameOf("shadow_wisp", now + w.ph), x, y, Math.sin(now * 0.4 + w.ph) > 0 ? 1 : -1, 0.9, 0.85 * w.alpha);
+  }
+  if (!throne) return;
+  const x = throne.x - camX; if (x < -400 || x > W + 400) return;
+  const g = harpDuel, duel = g.active && g.kind === "saul", dark = duel ? g.dark || 0 : saul.calm ? 0 : 0.7, ph = saulPhase();
+  const pose = saul.calm ? 3 : duel ? [0, 1, 2][ph] : 0;
+  drawSprite("saul", pose, x, GR * T, 1);
+  if (!saul.calm || dark > 0) {   // the shadows round his chair: closer and thicker as the dark grows; thinning in the new part
+    const n = 7, fade = saul.calm ? 0 : Math.min(1, 0.35 + dark * 0.8 - (duel ? g.calm * 0.35 : 0));
+    for (let k = 0; k < n; k++) {
+      const a = now * 0.35 + k * Math.PI * 2 / n, rad = 230 - 120 * dark;
+      drawSprite("shadow_wisp", (k + Math.floor(now * 2)) % 4, x + Math.cos(a) * rad, GR * T - 150 + Math.sin(a) * rad * 0.45, k % 2 ? 1 : -1, 0.75, fade * 0.8);
+    }
+  }
+  if (saul.flash > 0) { ctx.fillStyle = `rgba(220,230,255,${saul.flash * 0.35})`; ctx.fillRect(0, 0, W, H); }   // lightning in the windows
+}
 function lostThingsTally() {   // World 4's lost things for the HUD and the clear card (null = it's sheep, as usual)
   if (lostGifts.length) return { found: lostGifts.filter(g => g.taken).length, total: lostGifts.length, things: "gifts", icon: "gift" };
+  if (hallLamps.length) return { found: hallLamps.filter(L => L.lit).length, total: hallLamps.length, things: "lamps", icon: "lamp" };
   const hens = critters.filter(k => k.lostHen);
   if (hens.length) return { found: hens.filter(k => k.caught).length, total: hens.length, things: "hens", icon: "hen" };
   const goats = critters.filter(k => k.stray);
@@ -527,12 +649,12 @@ function lostThingsTally() {   // World 4's lost things for the HUD and the clea
 function updateWorld4(dt) {
   updateInscriptions(dt);
   if (WORLD !== 4) return;
-  updateGiftDrops(); updateKeeper(); updateLostGifts(dt); updateTown(dt);
+  updateGiftDrops(); updateKeeper(); updateLostGifts(dt); updateTown(dt); updateHall(dt);
 }
 function drawWorld4(camX) {
   drawInscriptions(camX);
   if (WORLD !== 4) return;
-  drawTown(camX); drawSteward(camX); drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
+  drawTown(camX); drawHall(camX); drawSteward(camX); drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
 }
 
 // ---------------------------------------------------------------------------

@@ -341,6 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
+  "4-4": { cols: 226, bg: "w4_4", ter: "w2s", name: "The King's Hall" },   // Glen's palace-at-night set
   "4-3": { cols: 214, bg: "w4_3", ter: "w2s", name: "The Broken String" },   // Glen's Gibeah market set
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
@@ -1177,6 +1178,31 @@ if (LEVEL_NAME === "test") {
   house(174, 5, 13); special(176, 9);
   talk(184, "The Steward", "You found them all? Good. Now listen. When the dark comes on him, don't rush. Play steady. Rushing makes it worse.");
   sheepfold(196);                                               // back to the palace
+} else if (LEVEL_NAME === "4-4") {
+  // ---- 4-4 The King's Hall: night, a storm outside. The king is troubled again. Shadows drift through the halls (a cold
+  //      touch stops David in his tracks); light the five hall lamps (the lost things) and the shadows near them melt.
+  //      Palace dogs bark. The One wandered in out of the storm, under the great staircase. Then Saul's Torment. ----
+  ground(0, 225);
+  campfire(5, GR - 1, "The Steward", "The king is troubled again. Hear the storm? Light the hall lamps as you go: the dark keeps back from the light. Now, David.");
+  setPiece("hall_lamp", 14); setPiece("wisp", 20, 13); setPiece("wisp", 27, 12);
+  critter("guarddog", 32);
+  plat(36, 13, 6); plat(43, 10, 5); special(45, 6); setPiece("wisp", 40, 9);   // up along the balconies
+  setPiece("hall_lamp", 52);
+  inscription(58, 12, "he");                                     // on a column: the second He
+  setPiece("wisp", 62, 13); setPiece("wisp", 68, 11); setPiece("wisp", 74, 13);
+  campfire(80, GR - 1, "The Steward", "Those old marks on the columns? Our fathers wrote from right to left, boy. Most people here have forgotten.");
+  // the great staircase: The One is hiding underneath (a low gap: crawl in)
+  stair(86, 5); wall(96, 11, 8, 4); lostSheep("lamb", 100, 16, "one");
+  setPiece("hall_lamp", 106); setPiece("wisp", 110, 12);
+  critter("guarddog", 116);
+  plat(120, 12, 5); plat(127, 9, 5); plat(134, 12, 5); special(129, 5);
+  setPiece("wisp", 125, 8); setPiece("wisp", 138, 11); setPiece("hall_lamp", 142);
+  setPiece("wisp", 150, 13); setPiece("wisp", 156, 10); setPiece("wisp", 162, 13);
+  campfire(166);                                                // the servants' fire: back here if the king sends you out
+  setPiece("hall_lamp", 172); plat(174, 13, 5);
+  talk(182, "The Steward", "There he is. Sit beside him and play. Steady, David. Steady.");
+  setPiece("throne", 196);                                      // BOSS: Saul's Torment (world4.js)
+  sheepfold(208);                                               // the palace door: out into the morning
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
@@ -1504,6 +1530,8 @@ function updateDavid(dt) {
   } else if (d.state === "standup") {
     d.vx = 0;
     if (d.t > TUNE.HARP_STANDUP) setState("idle");
+  } else if (d.shiverT > 0) {   // 4-4: a cold shadow touched him (world4.js)
+    d.vx = 0;
   } else if (d.harp) {
     d.vx = 0;
   } else {
@@ -2731,7 +2759,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);

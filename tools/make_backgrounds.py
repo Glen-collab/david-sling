@@ -58,7 +58,9 @@ def key_magenta(img, strict=False):
     return out
 
 NO_PINK = {"w2_3", "w2s"}   # sets with nothing pink in them, so any pink tinge is cleaned off (2-2's oleanders are pink: not in here)
+MAGENTA_SETS = {"w4_4"}   # magenta, though the picture's corners aren't (4-4's mid layer has stone in its top corners)
 def key_backdrop(img, name=""):   # green or magenta, whichever the corners are
+    if name in MAGENTA_SETS: return key_magenta(img)
     c = np.asarray(img.convert("RGB"))[2:12, 2:12].reshape(-1, 3).mean(0)
     return key_magenta(img, name in NO_PINK) if c[0] > 150 and c[2] > 150 and c[1] < 120 else key_green(img)
 

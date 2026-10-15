@@ -212,7 +212,7 @@ function drawDonkey(k, x) {
 // ---------------------------------------------------------------------------
 const HARP_DUEL = {
   donkey: { song: "donkey", window: 0.24, speed: 230, title: "Play for the frightened donkey" },   // window: how far off a note can be (s)
-  // saul: { song: "saul", window: 0.13, speed: 340, ... }   (World 4: the calm/rage tug of war)
+  saul: { song: "saul", window: 0.26, speed: 240, title: "Play for King Saul", lo: "Troubled", hi: "At peace", done: "He sleeps." },   // world4.js: the shadows
 };
 const HARP_STRINGS = ["up", "right", "a", "b", "left", "down"];   // top (high notes) to bottom (low)
 const HARP_COLORS = { up: "#f2c84b", right: "#e06a4a", a: "#e48ac0", b: "#8fc8e8", left: "#7cc46a", down: "#5a86d8" };
@@ -249,12 +249,13 @@ function duelPlayFrom(t) {
 }
 function endHarpDuel() { harpDuel.active = false; if (duelAudio) duelAudio.pause(); }
 function harpDuelTarget(d) {
+  if (typeof saulDuelTarget === "function") { const s = saulDuelTarget(d); if (s) return s; }   // 4-4 (world4.js)
   return critters.find(k => k.kind === "donkey" && !k.gone && !k.calmed && Math.abs(k.x - d.x) < W2.DONKEY_HEAR * T && Math.abs(k.y - d.y) < 120);
 }
 function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = the duel has the controls
   const g = harpDuel;
   if (!g.active) {
-    if (d.harp && d.state === "harp" && d.deadT <= 0) { const k = harpDuelTarget(d); if (k) { startHarpDuel("donkey", k); return true; } }
+    if (d.harp && d.state === "harp" && d.deadT <= 0) { const k = harpDuelTarget(d); if (k) { startHarpDuel(k.duelKind || "donkey", k.duelKind ? null : k); return true; } }
     return false;
   }
   d.vx = 0;
@@ -277,18 +278,21 @@ function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = 
   const p = g.song.phrases[g.phrase], n = g.song.notes[g.next], w = g.opt.window;
   const miss = why => {
     g.state = "missed"; g.t = 1.3; g.misses++; g.missNote = { b: n.b, why }; duelAudio.pause(); harpTwang();
+    if (g.kind === "saul") saulMiss(false);
     if (g.target) g.target.t = 0;
   };
   const btn = ["up", "down", "left", "right", "a", "b"].find(b => pressed(b));
+  if (btn && g.kind === "saul" && g.songT < n.t - w && n.t - g.songT < 0.8) saulMiss(true);   // Saul: rushing makes it worse (no rewind)
   if (btn && Math.abs(g.songT - n.t) <= w) {   // presses well before a note don't count (no penalty for being eager)
     if (btn !== n.b) { miss("wrong"); return true; }
     g.hits.push({ b: n.b, t: 0 }); g.next++;
     if (g.next >= p.to) {   // a whole tune
-      g.phrase++; g.calm = g.phrase / g.song.phrases.length;
+      g.phrase++; g.calm = g.phrase / g.song.phrases.length; if (g.kind === "saul") saulTune();
       if (g.phrase >= g.song.phrases.length) {
         g.state = "done"; g.t = 3.2;
-        if (g.target) { g.target.calmed = true; g.target.vx = 0; setCrit(g.target, "calm"); }
-        sfx("heal", undefined, 0.6); toast("The donkey is calm. He lowers his head and lets you by.");
+        if (g.kind === "saul") saulCalmed();
+        else { if (g.target) { g.target.calmed = true; g.target.vx = 0; setCrit(g.target, "calm"); }
+          sfx("heal", undefined, 0.6); toast("The donkey is calm. He lowers his head and lets you by."); }
       }
     }
   } else if (g.songT > n.t + w) miss("late");
@@ -304,8 +308,8 @@ function drawHarpDuel() {
   ctx.fillText(`${g.opt.title}  ·  tune ${Math.min(g.phrase + 1, g.song.phrases.length)} of ${g.song.phrases.length}`, x0 + 22, y0 + 32);
   // the calm meter
   const mx = x0 + pw - 290, mw = 200;
-  ctx.font = "13px sans-serif"; ctx.fillStyle = "#e9dcc4"; ctx.textAlign = "right"; ctx.fillText("Frightened", mx - 8, y0 + 31);
-  ctx.textAlign = "left"; ctx.fillText("Calm", mx + mw + 8, y0 + 31);
+  ctx.font = "13px sans-serif"; ctx.fillStyle = "#e9dcc4"; ctx.textAlign = "right"; ctx.fillText(g.opt.lo || "Frightened", mx - 8, y0 + 31);
+  ctx.textAlign = "left"; ctx.fillText(g.opt.hi || "Calm", mx + mw + 8, y0 + 31);
   ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.beginPath(); ctx.roundRect(mx, y0 + 20, mw, 14, 7); ctx.fill();
   ctx.fillStyle = "#9fd27a"; ctx.beginPath(); ctx.roundRect(mx, y0 + 20, Math.max(14, mw * g.calm), 14, 7); ctx.fill();
   // the six strings (high notes on top) and the harp at the left, where notes are played
@@ -342,7 +346,7 @@ function drawHarpDuel() {
   }
   ctx.textAlign = "center"; ctx.font = "15px sans-serif"; ctx.fillStyle = "#e9dcc4";
   const msg = g.state === "missed" ? (g.missNote.why === "late" ? "Too late! The harp falls silent. Start the tune again." : "Wrong string! Start the tune again.")
-            : g.state === "done" ? "He's calm." : "Press each note as it reaches the harp  ·  Select: stop";
+            : g.state === "done" ? (g.opt.done || "He's calm.") : g.kind === "saul" ? "Play steady: each note as it reaches the harp, never early" : "Press each note as it reaches the harp  ·  Select: stop";
   ctx.fillText(msg, W / 2, y0 + ph - 16);
   ctx.restore(); ctx.textAlign = "left";
 }

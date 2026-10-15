@@ -275,4 +275,17 @@ the harp phrase at 3-2's campfire.
   and they bolt). The One appears from under the cloth stall (setPiece "clothstall") when the mended harp is played
   beside it. The Steward (Glen's sheet, drawSteward: talks, points, shakes his head, smiles once the harp is mended) gives the tier-1 warning at the end ("Play steady"). Letter Waw on a
   doorpost at 38. HUD: hen counter + the three harp things (Glen's quest_string/peg/wax items).
+- **4-4 The King's Hall + BOSS Saul's Torment are built** (2026-10-15; Glen's w4_4 palace-at-night set, forced magenta key
+  in make_backgrounds MAGENTA_SETS). Shadows (setPiece "wisp", world4.js updateHall): drift after David, a touch =
+  d.shiverT (main.js: stops him, no damage). Lost things = 5 hall lamps (setPiece "hall_lamp": walk up to light; a lit
+  lamp melts wisps within 7 tiles; Psalm 34:18 WEB with "the LORD" when all are lit). The One under the staircase (crawl
+  gap under wall 96-103). He on a column at 58; the Steward's right-to-left hint at the fire at 80. The servants' fire 166.
+  BOSS (setPiece "throne" 196): sit by Saul and play = the World 2 harp duel with kind "saul" (HARP_DUEL.saul; world2.js
+  calls saulMiss/saulTune/saulCalmed). Song: harp_saul.mp3 charted from Morning Meditation 1 (4-100s, gap 1.05, tunes
+  4,5,5,6,6,7 = 33 notes); saul_dark.mp3 = Harp of the Deep underneath, louder as g.dark grows. Parts: tunes 1-2 quiet,
+  3-4 the storm (thunder, Saul frightened), 5-6 the new part (calm). Miss = dark +0.3; rushing (a press up to 0.8 s before
+  a note) = +0.12, no rewind; a whole tune = -0.15. dark >= 1: "Leave me!" -> back to the fire; first time the Steward's
+  tier-2 counsel (window 0.26 -> 0.32, dark gains x0.6). Calmed: Saul asleep, 1 Sam 16:23 (WEB). Fold blocked till then.
+  Not yet: End of World 4 scene (Saul's thanks 16:22, the King's Favour = fast travel, the Steward, Hanan at the gate),
+  World 4 Journal pages, the Psalm 121:8 / 22:29 / 33:3 / 34:18 scrolls, a follow-the-beat easy assist.
 
