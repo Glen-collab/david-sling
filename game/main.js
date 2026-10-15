@@ -373,7 +373,15 @@ const stairTowers = [];
 const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
 const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
-const ladderRoof = l => isSolid(l.c + 2, l.r) ? 1 : isSolid(l.c - 1, l.r) ? -1 : 0;   // which side its roof is on (0 = none)
+// the roof beside the top of a ladder: which side (0 = none) and the row of its top, which can be a row or two above the
+// top rung (3-3's town wall). A side counts if its top is at the rung or up to 2 rows higher.
+function ladderTop(l) {
+  if (l.top !== undefined) return l.top;
+  const topRow = c => { if (!isSolid(c, l.r)) return null; let r = l.r; while (r > l.r - 3 && isSolid(c, r - 1)) r--; return isSolid(c, r - 1) ? null : r; };
+  const right = topRow(l.c + 2), left = topRow(l.c - 1);
+  return (l.top = right !== null ? { dir: 1, y: right * T } : left !== null ? { dir: -1, y: left * T } : { dir: 0, y: l.r * T });
+}
+const ladderRoof = l => ladderTop(l).dir;   // which side its roof is on (0 = none)
 // the top of a ladder (david_topout, Glen's two strips): hands up at the roof edge, pulling up, climbing over, on hands
 // and knees, up and stepping off. Per frame: [px from the roof edge (toward the roof), px below the roof top] for his feet.
 const TOPOUT_POS = () => [[-T, 238 * SCALE - 12], [-T, 192 * SCALE - 8], [-12, 42 * SCALE], [26, 0], [44, 0]];
@@ -1284,7 +1292,7 @@ function updateDavid(dt) {
   if (!busy && !d.harp && !d.carrying && d.throwT < 0) {
     const l = ladderAt(d), atTop = l && d.onGround && d.y <= l.r * T + 2;
     const lt = !l && d.onGround && pressed("down") &&   // on the roof right by the top of one: back over the edge and down it
-      ladders.find(q => ladderRoof(q) && Math.abs(d.y - q.r * T) < 3 && Math.abs(d.x - ((q.c + 1) * T + ladderRoof(q) * T)) < 60);
+      ladders.find(q => ladderRoof(q) && Math.abs(d.y - ladderTop(q).y) < 3 && Math.abs(d.x - ((q.c + 1) * T + ladderRoof(q) * T)) < 60);
     if (lt) { setState("topout"); Object.assign(d, { ladder: lt, topDir: ladderRoof(lt), topRev: true, vx: 0, vy: 0, onGround: false }); }
     else if (l && ((held("up") && !atTop && (d.onGround || d.vy > -200)) || (pressed("down") && atTop))) {
       setState("climb"); d.ladder = l; d.climbDist = 0; d.vx = 0; d.vy = 0; d.onGround = false; d.jumpBuf = 0;
@@ -1313,7 +1321,7 @@ function updateDavid(dt) {
     const l = d.ladder, v = (held("down") ? 1 : 0) - (held("up") ? 1 : 0);
     d.vx = 0; d.vy = 0; d.onGround = false; d.x += ((l.c + 1) * T - d.x) * Math.min(1, dt * 14);
     d.y += v * TUNE.CLIMB_SPEED * dt; d.climbDist += Math.abs(v) * TUNE.CLIMB_SPEED * dt;
-    if (v < 0 && ladderRoof(l) && d.y <= l.r * T + TOPOUT_POS()[0][1]) {   // hands at the roof edge: over the top
+    if (v < 0 && ladderRoof(l) && d.y <= ladderTop(l).y + TOPOUT_POS()[0][1]) {   // hands at the roof edge: over the top
       setState("topout"); d.topDir = ladderRoof(l); d.topRev = false;
     }
     else if (d.y <= l.r * T) { d.y = l.r * T; d.onGround = true; d.ladder = null; setState("idle"); }   // up at the top: standing on the top rung
@@ -1326,7 +1334,7 @@ function updateDavid(dt) {
     const l = d.ladder, P = TOPOUT_POS(), n = P.length, ft = d.topRev ? TOPDOWN_FRAME : TOPOUT_FRAME;
     const k = Math.min(n - 1, Math.floor(d.t / ft)), i = d.topRev ? n - 1 - k : k, edge = (l.c + 1) * T + d.topDir * T;
     d.topK = i; d.vx = 0; d.vy = 0; d.onGround = false;
-    d.x = edge + d.topDir * P[i][0]; d.y = l.r * T + P[i][1];
+    d.x = edge + d.topDir * P[i][0]; d.y = ladderTop(l).y + P[i][1];
     if (d.t >= n * ft) {
       if (d.topRev) { setState("climb"); d.climbDist = 0; d.x = (l.c + 1) * T; }
       else { d.onGround = true; d.ladder = null; d.facing = d.topDir; setState("idle"); }
