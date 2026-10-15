@@ -1153,7 +1153,7 @@ if (LEVEL_NAME === "test") {
   setPiece("awning", 26, 12, { w: 3 }); deco("town_grain_baskets", 27, 16, 0.18);
   setPiece("awning", 32, 10, { w: 3 }); questItem("string", 33, 5);   // bounce high off the third awning for it
   critter("hen", 30);
-  house(38, 5, 12); inscription(38, 15, "waw");                 // a doorpost with an old letter cut into it
+  rock(36, 14, 2, 3); house(38, 5, 12); inscription(38, 15, "waw");                 // a doorpost with an old letter cut into it
   house(44, 5, 10); house(50, 4, 12); special(51, 7);
   critter("dove", 56); critter("hen", 58);
   campfire(62);
@@ -1167,9 +1167,9 @@ if (LEVEL_NAME === "test") {
   // the beekeeper: his bees are calm if you leave them; the hornets in the old wall past them are not
   talk(103, "The beekeeper", "Beeswax for a harp? Take what's by the hive. My bees won't hurt you if you leave them be. But watch the old wall past them: hornets.");
   deco("beehive_tree", 108, 16, 1.2); for (let k = 0; k < 4; k++) bee(108, k); questItem("wax", 111, 16);
-  rock(118, 12, 3, 5); for (const r of [11, 9]) hornet(120, r);   // the old wall, and its hornets
+  rock(116, 15, 2, 2); rock(118, 13, 3, 4); for (const r of [12, 10]) hornet(120, r);   // a step, the old wall, and its hornets
   oliveRow(124, 16, 5); critter("hen", 128);
-  house(132, 5, 12); house(138, 4, 9); ladder(136, 12); special(139, 4);
+  rock(130, 14, 2, 3); house(132, 5, 12); house(138, 4, 9); ladder(136, 12); special(139, 4);
   critter("dove", 146);
   campfire(150);
   setPiece("clothstall", 158);                                  // The One is under it: play the mended harp beside it
