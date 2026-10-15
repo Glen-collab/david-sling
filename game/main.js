@@ -1120,7 +1120,7 @@ if (LEVEL_NAME === "test") {
   rock(85, 14, 3, 3); critter("goat", 86, 13);                 // up on the woodpile
   setPiece("target", 93, 12, { move: "swing" }); setPiece("target", 99, 12, { move: "swing" });
   special(97, 6);
-  wall(104, 9, 2, 8); setPiece("target", 110, 10);             // over the wall: a target you can only see from up there
+  rock(101, 14, 3, 3); rock(104, 11, 4, 6); setPiece("target", 111, 9);   // up the step and onto the rock: a target you can only reach from up there
   critter("goat", 114);
   // The One: the lamb meant for the king's table, in a feed shed up on the fortress wall
   ladder(117, 10); wall(119, 10, 9, 7); deco("town_house_shed", 124, 9, 0.16); lostSheep("lamb", 125, 9, "one");
