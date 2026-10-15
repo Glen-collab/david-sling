@@ -1114,7 +1114,7 @@ if (LEVEL_NAME === "test") {
   // the battlements: up the steps, clay jars along the top
   rock(50, 15, 2, 2); wall(52, 12, 10, 5); setPiece("jar", 54, 11); setPiece("jar", 57, 11); setPiece("jar", 60, 11);
   rock(62, 15, 2, 2);
-  wall(68, 13, 2, 4); inscription(67, 14, "he"); setPiece("target", 67, 14);   // the target hides a letter scratched on the wall
+  rock(68, 13, 3, 4); inscription(67, 14, "he"); setPiece("target", 67, 14);   // the target hides a letter scratched on the wall
   critter("guarddog", 74);
   campfire(80);
   rock(85, 14, 3, 3); critter("goat", 86, 13);                 // up on the woodpile
