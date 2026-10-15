@@ -355,6 +355,16 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
   1: { src: "../assets/journal/w1_reading.jpg", y: -40, lamp: [1384, 712],
        left:  { top: [[645, 388], [790, 412], [903, 468]], bot: [[500, 690], [640, 752], [775, 800]] },
        right: { top: [[915, 470], [1060, 478], [1210, 515]], bot: [[787, 800], [950, 840], [1100, 870]] } },
+  // Glen's scenes for Worlds 2-4 (2026-10-15): the same over-the-shoulder framing; page edges marked by hand
+  2: { src: "../assets/journal/w2_reading.jpg", y: -40, lamp: [1368, 800],   // the wilderness camp, the fire and the pen
+       left:  { top: [[650, 470], [760, 496], [876, 538]], bot: [[524, 752], [640, 780], [756, 804]] },
+       right: { top: [[884, 536], [1012, 538], [1144, 560]], bot: [[764, 808], [896, 848], [1032, 872]] } },
+  3: { src: "../assets/journal/w3_reading.jpg", y: -40, lamp: [1332, 800],   // the far pasture after the storm, Bethlehem's lights
+       left:  { top: [[624, 452], [744, 480], [868, 532]], bot: [[504, 732], [624, 772], [748, 804]] },
+       right: { top: [[872, 532], [1000, 544], [1136, 572]], bot: [[756, 808], [888, 848], [1028, 876]] } },
+  4: { src: "../assets/journal/w4_reading.jpg", y: -40, lamp: [1392, 712],   // a servant's room in Saul's palace, the storm outside
+       left:  { top: [[616, 444], [752, 472], [892, 520]], bot: [[520, 768], [640, 800], [772, 828]] },
+       right: { top: [[900, 520], [1032, 532], [1168, 564]], bot: [[780, 832], [928, 868], [1080, 892]] } },
 };
 for (const sc of Object.values(SCENES)) { sc.img = new Image(); sc.img.src = sc.src + "?v=" + (window.BUILD || 0); }
 const newCanvas = () => Object.assign(document.createElement("canvas"), { width: 1536, height: 1024 });
