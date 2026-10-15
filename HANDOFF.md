@@ -185,6 +185,10 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
   david-sling-art/world3/goat_*_sheet.png): goat_walk, goat_run (--blobs), goat_stand (cut by a scratch script lined up on
   the tail, since pose 5 grazes head-down and touches pose 6). Also meant for World 4 (Jesse's young goat for Saul, market
   and palace goats).
+- Anointing stop (#3-A) revisited after it's cleared: `afterAnoint` (world3.js) instead of the scene. Samuel has gone
+  home (16:13); one of the family sends David back to the sheep, a different one each visit (progress.afterAnoint):
+  Jesse, Shammah (proud of him), Eliab (sour, sets up 17:28), Abinadab (well done; points to the pastures). A: back to
+  the map, B: watch the anointing again. Lines in AFTER_ANOINT.
 Not done from the design: the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire.
 - Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.

@@ -784,8 +784,63 @@ const anointing = {
   },
 };
 
-// from the map's Anointing stop ("#3-A"): play the scene straight away, then back to the map
-if (STORY_HASH === "3-A") anointing.start(() => { stageCleared("3-A", {}); backToMap(); });
+// Back at the Anointing stop after it's happened: Samuel has gone home to Ramah (16:13), and one of the family is
+// there to send David back to the sheep (he's still "with the sheep" in 16:19). A different one each visit.
+// A: back to the map. B: see the anointing again.
+const AFTER_ANOINT = [
+  { who: "Jesse", idle: "jesse_idle", talk: "jesse_talk", lines: [
+    "Samuel has gone home to Ramah. What the LORD has planned for you, I can't say. But I know where a shepherd belongs.",
+    "The flock is waiting, son. Back to the pastures with you, and the LORD go with you."] },
+  { who: "Shammah", idle: "shammah_idle", talk: "shammah_talk", walk: "shammah_walk", lines: [
+    "There he is! The prophet's choice. Out of all of us, it was you. I'm proud of you, little brother.",
+    "Still, somebody has to keep the sheep alive. Looks like it's still you. Go on, they're waiting."] },
+  { who: "Eliab", idle: "eliab_arms_crossed", walk: "eliab_walk", lines: [
+    "Oh, it's you. A little oil in your hair doesn't make you better than the rest of us.",
+    "And who's minding the sheep? Go on, back to the pastures."] },   // the Eliab of 1 Samuel 17:28
+  { who: "Abinadab", idle: "abinadab_idle", point: "abinadab_point", walk: "abinadab_walk", lines: [
+    "Seven of us stood in that line, and the prophet chose you. I still can't believe it. Well done, David.",
+    "Now go on. The sheep won't feed themselves."] },
+];
+const savedProgress = () => { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } };   // (map.js loads after this file)
+const afterAnoint = {
+  active: false, t: 0, line: 0, lineT: 0, who: null, SIZE: 1.7, ENTER: 1.4,
+  start() {
+    const p = savedProgress(), n = p.afterAnoint || 0; p.afterAnoint = n + 1;
+    try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    Object.assign(this, { active: true, t: 0, line: 0, lineT: 0, who: AFTER_ANOINT[n % AFTER_ANOINT.length] }); dialog.t = 0;
+  },
+  update(dt) {
+    this.t += dt; if (this.t < this.ENTER) return;
+    this.lineT += dt; if (this.lineT < 0.5) return;
+    const last = this.line >= this.who.lines.length - 1;
+    if (last && pressed("b")) { this.active = false; anointing.start(() => backToMap()); return; }
+    if (pressed("a") || pressed("start") || (!last && pressed("b"))) { if (!last) { this.line++; this.lineT = 0; } else { this.active = false; backToMap(); } }
+  },
+  draw() {
+    const P = this.who, cx = anointing.camX(), y = GR * T, a = Math.min(1, this.t / 0.8), s = this.SIZE;
+    drawBackground(cx); drawFlatGround(cx);
+    drawSprite("david_idle", frameOf("david_idle", this.t), W * 0.34, y, 1, s);   // David, home from the hills
+    const tx = W * 0.6, f = Math.min(1, this.t / this.ENTER), x = W + 120 + (tx - W - 120) * (1 - (1 - f) * (1 - f));
+    let nm = P.idle;
+    if (f < 1 && P.walk && SPR[P.walk]) nm = P.walk;
+    else if (f >= 1 && this.line === 1 && P.point && SPR[P.point]) nm = P.point;   // pointing off to the pastures
+    else if (f >= 1 && P.talk && SPR[P.talk] && this.lineT < 2.5) nm = P.talk;
+    drawSprite(nm, frameOf(nm, this.t), f < 1 && !(P.walk && SPR[P.walk]) ? tx : x, y, -1, s, f < 1 && !(P.walk && SPR[P.walk]) ? f : 1);
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,248,230,0.9)"; ctx.font = "italic 22px Georgia, serif";
+    ctx.fillText("After the Anointing", W / 2, 50);
+    if (this.t >= this.ENTER) {
+      const last = this.line >= P.lines.length - 1;
+      drawStoryBox(P.who, P.lines[this.line], last ? "A: back to the map    B: see the anointing again" : "A: next", true);
+    }
+  },
+};
+
+// from the map's Anointing stop ("#3-A"): the scene the first time, then back to the map; after that, a word from family
+if (STORY_HASH === "3-A") {
+  if ((savedProgress()["3-A"] || {}).cleared) afterAnoint.start();
+  else anointing.start(() => { stageCleared("3-A", {}); backToMap(); });
+}
 
 // ---------------------------------------------------------------------------
 // 3-4 The Chosen Shepherd: the storm (rain, the dark, lightning), the fallen oak over The One, and the Wild Ox.

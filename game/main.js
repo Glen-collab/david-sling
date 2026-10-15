@@ -3265,6 +3265,9 @@ function frame(now) {
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
   }
+  if (typeof afterAnoint !== "undefined" && afterAnoint.active) {   // back at the Anointing stop afterward (world3.js)
+    pollInput(); afterAnoint.update(real); afterAnoint.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
