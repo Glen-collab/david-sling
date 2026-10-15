@@ -158,7 +158,26 @@ overlay, rain, lightning every W3.LIGHTNING s), the fallen oak over The One (set
 (world2's setPiece "wind"). The Wild Ox (setPiece "ox", { arena, end }; setPiece "oxtree" x3; "flockHuddle"): phase 1
 charges the flock, a charged stone turns it; phase 2 roll under its charge by a tree, horns stick (W3.OX_STUCK), any hit
 splits that tree; lightning can drop a branch near David; phase 3 hit it while it skids (W3.OX_HITS3), then it runs off
-(driven off, not killed). Art: Glen's four ox sheets cut with `sheet2sprite.py --blobs` (each figure by its own outline; sources in david-sling-art/world3/ox_*_sheet.png): ox_windup (the tell), ox_charge (charge/skid), ox_dazed (hits the tree, sits dizzy; shake = getting up), ox_gallop (flee). W3.OX_SIZE 1.6; anchors set at the nose (the hit box runs back from ox.x). Not done: slippery landing, counsel tiers, the
-End of World 3 reflection scene (Hanan's staff, the messenger).
+(driven off, not killed). Art: Glen's four ox sheets cut with `sheet2sprite.py --blobs` (each figure by its own outline; sources in david-sling-art/world3/ox_*_sheet.png): ox_windup (the tell), ox_charge (charge/skid), ox_dazed (hits the tree, sits dizzy; shake = getting up), ox_gallop (flee). W3.OX_SIZE 1.6; anchors set at the nose (the hit box runs back from ox.x). Not done: slippery landing, counsel tiers.
+
+**2026-10-15 (after the PC restart):**
+- 3-4 backgrounds = Glen's storm set `w3_4`. Ox-fight trees = Glen's oak sheet (assets/items/oak, oak_gashed while the ox
+  is stuck in it, oak_split after; W3.OAK_H). The One's hollow = `oak_fallen` (W3.OAK_FALLEN_*).
+- **End of World 3 scene** (`w3ending` in world3.js; main.js runs it after the 3-4 clear, before the Journal; `?w3end=N#3-4`
+  jumps to step N): Glen's sunset set `w3_end` (the storm layers fade off it), Hanan walks in, 3 lines, holds out the staff
+  (hanan_give_staff), the two of them (hanan_staff_to_david, then hanan_david_raise_staff: two-person clips cut on one
+  fixed frame, anchor 105 px left of David's feet so they line up), gift card = davidProgress.staff = +1 max heart for good
+  (main.js), David walks back to the flock (david_walk_staff), 1 Samuel 16:7 (WEB), a rider far off (stand-in: a dark
+  donkey + rider until a messenger clip), David plays by the fire with Hanan standing (hanan_idle_nostaff: he gave his
+  staff away; his other sprites all hold one). drawStaff() uses assets/items/staff.png once Glen paints it.
+- End of World 2: Hanan now walks in (hanan_walk); `?w2end=5#2-4` jumps there.
+- 3-2: Glen's thief sheets (thief_stand/pickup/run): sneaks bent over (pickup frames 1-2: no sneak sheet yet), grabs,
+  runs with the sheep held up in his raised hand (W3.THIEF_HAND), looks back. Glen's stray dog (dog_sit/walk/run) plays the
+  jackal in World 3 (k.art = "dog"; the lamb drawn in its jaws, CRITTER_ART.dog.mouth).
+- 3-1: hens (critter "hen": chicken_peck/run, W3.HEN_*), scatter when David runs at them; a stone is wasted on them.
+- Cut but not placed: sheep2_walk (Glen's cuter sheep: ask where). Sheepfold-with-shelter art from Meta saved as
+  david-sling-art/sheepfold_gate_meta.png (not wired; Glen to decide).
+- Headless testing: the game's update doesn't run under --virtual-time-budget, so set state by hand in a temporary
+  appended script (and camX = david.x - W/2) and screenshot; restore the file after.
 Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
-the harp phrase at 3-2's campfire, stray dogs (jackals stand in).
+the harp phrase at 3-2's campfire, a messenger clip.
