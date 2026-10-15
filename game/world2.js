@@ -1242,7 +1242,7 @@ const ending = {
         }
         if (this.pouch && this.pouch.t > 2.6 && A) { dialog.t = 0; this.next(); }
         break;
-      case 5: this.hananX = Math.max(1010, this.hananX - 120 * dt); if (this.hananX <= 1010) { say(3); this.next(); } break;   // Hanan, watching
+      case 5: this.hananX = Math.max(1010, Math.min(this.hananX, W + 30) - (SPR.hanan_walk ? 70 : 120) * dt); if (this.hananX <= 1010) { say(3); this.next(); } break;   // Hanan walks in (70 = his stride at this size, so his feet don't skate), watching
       case 6: if (A) { dialog.t = 0; this.next(); } break;
       case 7: if (this.stepT > 1.5 && A) this.next(); break;                                        // Psalm 18:1-2
       case 8:   // David plays
@@ -1294,7 +1294,7 @@ const ending = {
       if (SPR[nm]) drawSprite(nm, fi, fx, gy, -1);
     }
     if (this.step >= 5) {   // Hanan
-      const nm = this.step === 5 ? "hanan_idle" : dialog.t > 0 && dialog.who === "Hanan" ? "hanan_talk" : "hanan_idle";
+      const nm = this.step === 5 ? (SPR.hanan_walk ? "hanan_walk" : "hanan_idle") : dialog.t > 0 && dialog.who === "Hanan" ? "hanan_talk" : "hanan_idle";   // walks in (Glen's clip)
       drawSprite(nm, frameOf(nm, now), this.hananX, gy, -1);
     }
     if (this.pouch) {   // the leather sling pouch, from the father's hands to David's
@@ -1349,3 +1349,10 @@ function drawPouch(x, y, glow, size = 56) {   // Glen's leather sling pouch (ass
   ctx.strokeStyle = "#5a3818"; ctx.beginPath(); ctx.moveTo(-14, -6); ctx.quadraticCurveTo(0, -28, 14, -6); ctx.stroke();
   ctx.restore();
 }
+
+// "?w2end" in the address plays the End of World 2 scene straight away (testing); "?w2end=5" jumps to Hanan walking in
+if (new URLSearchParams(location.search).has("w2end")) setTimeout(() => {
+  const at = Number(new URLSearchParams(location.search).get("w2end")) || 0;
+  ending.start(() => location.reload());
+  if (at) Object.assign(ending, { step: at, boyX: 680, pouch: at > 4 ? { t: 9 } : null, gave: at > 4, fade: 1, t: 2 });
+}, 300);

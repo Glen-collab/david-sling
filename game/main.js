@@ -46,9 +46,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
-  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100, w3_4: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 }, w3_4: { mid: 440, near: 200 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true, w3_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -331,7 +331,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
-  "3-4": { cols: 240, bg: "w3_2", name: "The Chosen Shepherd", storm: true },   // bg: 3-2's hills under the storm (world3.js) until Glen's 3-4 layers
+  "3-4": { cols: 240, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -897,6 +897,7 @@ if (LEVEL_NAME === "test") {
   for (const c of [21, 25, 28, 32]) critter("crow", c, GR - 1);
   lostSheep("sheep", 27, 16);                                  // nibbling the barley with the crows
   deco("town_grain_baskets", 16, 16, 0.22); deco("town_clay_pots", 38, 16, 0.2);
+  for (const c of [12, 15]) critter("hen", c, GR - 1);          // hens pecking by the baskets: they scatter as he runs through
   // the first houses: up the stone stairs, then roof to roof
   stair(36, 4); house(44, 6, 13); oliveRow(44, 12, 6);
   special(51, 9);                                              // over the gap between the roofs: jump for it
@@ -917,6 +918,7 @@ if (LEVEL_NAME === "test") {
   house(123, 5, 12); oliveRow(123, 11, 5);
   // the threshing floor, where Ruth gleaned in Boaz's fields, long ago (a Journal fact)
   setPiece("threshing", 132, GR - 1, { w: 7 }); food("bread", 135, 16);
+  for (const c of [126, 129, 140]) critter("hen", c, GR - 1);   // and scratching for spilled grain round the threshing floor
   stairTower(139); special(141, 4);                            // up the tower's stair, then a flip onto its top
   lostSheep("sheepblack", 144, 16);
   setPiece("barley", 149, GR - 1, { w: 16 });                  // the second field: more crows
@@ -3094,7 +3096,7 @@ function updateWorld(dt) {
 const BG = {};
 // a set can borrow layers it doesn't have yet from another set (1-4 night: its own sky, World 1's hills until Glen's arrive)
 const BG_BORROW = {};   // e.g. { w1_2: { near: "w1" } } while a set is still missing a layer
-for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3"]) {
+for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
     if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }

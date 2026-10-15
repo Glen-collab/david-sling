@@ -360,6 +360,30 @@ window.SPRITE_DATA = {
   "ay": 291,
   "align": "feet"
  },
+ "chicken_peck": {
+  "src": "../assets/sprites/chicken_peck.png",
+  "frames": 6,
+  "w": 87,
+  "h": 73,
+  "ms": 260,
+  "loop": true,
+  "pingpong": false,
+  "ax": 40,
+  "ay": 73,
+  "align": "feet"
+ },
+ "chicken_run": {
+  "src": "../assets/sprites/chicken_run.png",
+  "frames": 6,
+  "w": 83,
+  "h": 74,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 56,
+  "ay": 73,
+  "align": "feet"
+ },
  "cobra_hood": {
   "src": "../assets/sprites/cobra_hood.png",
   "frames": 8,
@@ -1188,6 +1212,18 @@ window.SPRITE_DATA = {
   "ay": 255,
   "align": "feet"
  },
+ "hanan_give_staff": {
+  "src": "../assets/sprites/hanan_give_staff.png",
+  "frames": 16,
+  "w": 304,
+  "h": 315,
+  "ms": 284,
+  "loop": false,
+  "pingpong": false,
+  "ax": 102,
+  "ay": 312,
+  "align": "feet"
+ },
  "hanan_idle": {
   "src": "../assets/sprites/hanan_idle.png",
   "frames": 8,
@@ -1222,6 +1258,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 109,
   "ay": 299,
+  "align": "feet"
+ },
+ "hanan_walk": {
+  "src": "../assets/sprites/hanan_walk.png",
+  "frames": 12,
+  "w": 205,
+  "h": 314,
+  "ms": 135,
+  "loop": true,
+  "pingpong": false,
+  "ax": 98,
+  "ay": 311,
   "align": "feet"
  },
  "hedgehog_ball": {
@@ -2256,6 +2304,18 @@ window.SPRITE_DATA = {
   "ay": 272,
   "align": "feet"
  },
+ "sheep2_walk": {
+  "src": "../assets/sprites/sheep2_walk.png",
+  "frames": 6,
+  "w": 97,
+  "h": 106,
+  "ms": 130,
+  "loop": true,
+  "pingpong": false,
+  "ax": 68,
+  "ay": 106,
+  "align": "feet"
+ },
  "sheep_cast": {
   "src": "../assets/sprites/sheep_cast.png",
   "frames": 12,
@@ -2386,6 +2446,42 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 105,
   "ay": 74,
+  "align": "feet"
+ },
+ "thief_pickup": {
+  "src": "../assets/sprites/thief_pickup.png",
+  "frames": 6,
+  "w": 161,
+  "h": 269,
+  "ms": 110,
+  "loop": false,
+  "pingpong": false,
+  "ax": 117,
+  "ay": 267,
+  "align": "feet"
+ },
+ "thief_run": {
+  "src": "../assets/sprites/thief_run.png",
+  "frames": 6,
+  "w": 176,
+  "h": 355,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 94,
+  "ay": 353,
+  "align": "feet"
+ },
+ "thief_stand": {
+  "src": "../assets/sprites/thief_stand.png",
+  "frames": 6,
+  "w": 90,
+  "h": 269,
+  "ms": 220,
+  "loop": true,
+  "pingpong": true,
+  "ax": 52,
+  "ay": 267,
   "align": "feet"
  },
  "tortoise_hide": {

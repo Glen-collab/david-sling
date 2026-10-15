@@ -1,0 +1,12 @@
+{
+  "frames": 6,
+  "frame_w": 90,
+  "frame_h": 269,
+  "ms_per_frame": 220,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 52,
+  "anchor_y": 267,
+  "source": "thief_stand.png",
+  "pingpong": true
+}

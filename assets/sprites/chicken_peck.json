@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 87,
+  "frame_h": 73,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 40,
+  "anchor_y": 73,
+  "source": "chicken_peck.png"
+}

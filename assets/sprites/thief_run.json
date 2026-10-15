@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 176,
+  "frame_h": 355,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 94,
+  "anchor_y": 353,
+  "source": "thief_run.png"
+}

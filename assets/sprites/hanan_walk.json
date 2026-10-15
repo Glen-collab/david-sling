@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 205,
+  "frame_h": 314,
+  "ms_per_frame": 135,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 98,
+  "anchor_y": 311,
+  "source": "hanan_walk.mp4",
+  "video_frames": [
+    90,
+    93,
+    96,
+    100,
+    103,
+    106,
+    110,
+    113,
+    116,
+    119,
+    122,
+    126
+  ]
+}

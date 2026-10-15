@@ -397,11 +397,15 @@ function drawFlies(x, y, t) {   // a little cloud of flies buzzing round its hea
 // ---------------------------------------------------------------------------
 // Rustlers (3-2): with the whole town at the gathering, a sheep thief creeps up on the flock you left at a campfire.
 //   critter("rustler", c) beside campfire(c). Once you've gone on past that fire with sheep resting there, he sneaks in
-//   from behind, grabs one and makes off with it over his shoulders. A stone makes him drop it and run.
-// Stand-in art: a villager's walk clip darkened to a shadowy figure, until Glen's rustler clip (ART_PROMPTS).
+//   from behind, crouches and grabs one, and makes off with it held up over his head. A stone makes him drop it and run.
+// Art: Glen's thief sheets (thief_stand / thief_pickup / thief_run, hand raised for the sheep). There's no creeping
+// sheet yet, so he sneaks up bent over (pickup frames 1-2). Without them: a villager's walk clip, darkened.
 // ---------------------------------------------------------------------------
-Object.assign(W3, { RUSTLER_AFTER: 10, RUSTLER_SNEAK: 120, RUSTLER_RUN: 230, RUSTLER_ART: "abinadab_walk", RUSTLER_FILTER: "brightness(0.3) saturate(0.5)" });
-const rustlerH = () => { const s = SPR[W3.RUSTLER_ART]; return s ? s.ay * SCALE * (TUNE.SPRITE_SIZE[W3.RUSTLER_ART] || 1) : 190; };   // his height on screen
+Object.assign(W3, { RUSTLER_AFTER: 10, RUSTLER_SNEAK: 120, RUSTLER_RUN: 230, RUSTLER_ART: "abinadab_walk", RUSTLER_FILTER: "brightness(0.3) saturate(0.5)",
+  THIEF_GRAB: 0.55,     // seconds crouching to grab the sheep (pickup frames 0-4)
+  THIEF_HAND: 322 });   // how high his raised hand holds the sheep, in thief_run sheet pixels above his feet
+const thiefArt = () => !!SPR.thief_run;
+const rustlerH = () => { const nm = thiefArt() ? "thief_stand" : W3.RUSTLER_ART, s = SPR[nm]; return s ? s.ay * SCALE * (TUNE.SPRITE_SIZE[nm] || 1) : 190; };   // his height on screen
 CRITTER_ART.rustler = { box: k => ({ x0: k.x - 30, x1: k.x + 30, y0: k.y - rustlerH(), y1: k.y }) };
 function updateRustler(k, dx, sameLevel, dt) {
   const fire = k.fire || (k.fire = nearestFire(k.home));
@@ -424,9 +428,14 @@ function updateRustler(k, dx, sameLevel, dt) {
     k.facing = Math.sign(k.target.x - k.x) || 1;
     runCritter(k, W3.RUSTLER_SNEAK, dt);
     if (Math.abs(k.target.x - k.x) < 30) {
-      const sh = k.target; line.splice(line.indexOf(sh), 1); sh.state = "stolen"; k.sheep = sh;
-      baa(sh.x, 1); setCrit(k, "flee"); toast("He's grabbed one of your sheep! Hit him with a stone!");
+      const sh = k.target; line.splice(line.indexOf(sh), 1); sh.state = "stolen"; k.sheep = sh; k.vx = 0;
+      baa(sh.x, 1); setCrit(k, thiefArt() ? "grab" : "flee"); toast("He's grabbed one of your sheep! Hit him with a stone!");
     }
+    return;
+  }
+  if (k.state === "grab") {   // crouched over it (the sheep stays on the ground until he's up and off)
+    k.vx = 0; if (k.sheep) Object.assign(k.sheep, { y: k.y, facing: k.facing });
+    if (k.t > W3.THIEF_GRAB) setCrit(k, "flee");
     return;
   }
   if (k.state === "flee") {   // off with it, away from David; stops to look back, runs again when he comes close
@@ -438,7 +447,10 @@ function updateRustler(k, dx, sameLevel, dt) {
     k.facing = Math.sign(dx) || k.facing;
     if (Math.abs(dx) < 260 && k.t > 0.6) setCrit(k, "flee");
   }
-  if (k.sheep) Object.assign(k.sheep, { x: k.x - k.facing * 6, y: k.y - rustlerH() * 0.55, facing: k.facing });   // across his shoulders
+  if (k.sheep && thiefArt()) {   // up in his raised hand while he runs; tucked at his side while he looks back
+    const sc = SCALE * (TUNE.SPRITE_SIZE.thief_run || 1), up = k.state === "flee";
+    Object.assign(k.sheep, { x: k.x - k.facing * (up ? 4 * sc : 10), y: k.y - (up ? W3.THIEF_HAND * sc : rustlerH() * 0.45), facing: k.facing });
+  } else if (k.sheep) Object.assign(k.sheep, { x: k.x - k.facing * 6, y: k.y - rustlerH() * 0.55, facing: k.facing });   // across his shoulders
 }
 function stoneHitsRustler(k, s) {
   if (k.state === "idle") return false;   // not here yet
@@ -450,6 +462,14 @@ function stoneHitsRustler(k, s) {
   return !s.power;
 }
 function drawRustler(k, x) {
+  if (thiefArt()) {
+    let nm = "thief_run", i = frameOf(nm, k.t);
+    if (k.state === "sneak") { nm = "thief_pickup"; i = 1 + (Math.floor(k.t * 3) % 2); }               // creeping, bent over
+    else if (k.state === "grab") { nm = "thief_pickup"; i = Math.min(4, Math.floor(k.t / W3.THIEF_GRAB * 5)); }
+    else if (k.state === "wait") { nm = "thief_stand"; i = frameOf(nm, k.t); }                       // looking back at David
+    drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
+    return;
+  }
   const name = W3.RUSTLER_ART; if (!SPR[name]) return;
   const i = k.state === "wait" ? 0 : frameOf(name, k.t * (k.state === "sneak" ? 0.7 : 1.3));
   drawSprite(name, i, x, k.y, k.facing, k.state === "sneak" ? 0.94 : 1, k.alpha, W3.RUSTLER_FILTER);
@@ -958,4 +978,36 @@ function drawStorm(camX) {
   ctx.stroke();
   if (storm.flash > 0) { ctx.fillStyle = `rgba(235,240,255,${0.55 * storm.flash})`; ctx.fillRect(0, 0, W, H); }
   ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Hens in the village lanes (3-1): pecking about, they scatter, flapping, when David runs at them. Harmless, and
+// they're the neighbors' hens: a stone just sends one off squawking (Glen's peck and run sheets).
+//   critter("hen", c)
+// ---------------------------------------------------------------------------
+Object.assign(W3, { HEN_SIZE: 1.4, HEN_WANDER: 18, HEN_RUN: 250, HEN_SPOOK: 2.5, HEN_RANGE: 4 });   // RANGE: tiles from home
+CRITTER_ART.hen = { idle: "chicken_peck", move: "chicken_run", len: 24, h: 40, box: k => ({ x0: k.x - 20, x1: k.x + 20, y0: k.y - 40, y1: k.y }) };
+for (const k of critters) if (k.kind === "hen") { k.facing = k.home % 2 ? 1 : -1; k.t = (k.home % 5) * 0.7; }
+function updateHen(k, dx, sameLevel, dt) {
+  if (k.state === "run") {   // a flapping dash away from him, then back to pecking where she lands
+    if (!runCritter(k, W3.HEN_RUN, dt) || k.t > 0.9 || Math.abs(k.x - k.home) > W3.HEN_RANGE * T * 1.5) setCrit(k, "peck");
+    return;
+  }
+  if (k.state !== "peck") setCrit(k, "peck");
+  if (Math.abs(k.x - k.home) > W3.HEN_RANGE * T) k.facing = Math.sign(k.home - k.x);
+  else if (k.t > 3 + (k.home % 4) * 0.5) { k.facing = -k.facing; k.t = 0; }   // turns about now and then
+  runCritter(k, W3.HEN_WANDER, dt);
+  const fast = Math.abs(david.vx) > TUNE.WALK_SPEED * 0.6;
+  if (sameLevel && david.deadT <= 0 && Math.abs(dx) < W3.HEN_SPOOK * T * (fast ? 1.6 : 1)) {
+    k.facing = -Math.sign(dx) || 1; setCrit(k, "run");
+  }
+}
+function stoneHitsHen(k, s) {
+  k.facing = Math.sign(k.x - david.x) || 1; setCrit(k, "run");
+  if (!W3.henStoned) { W3.henStoned = true; toast("Squawk! That's a neighbor's hen. Save your stones for the crows."); }
+  return false;   // the stone flies on
+}
+function drawHen(k, x) {
+  const nm = k.state === "run" ? "chicken_run" : "chicken_peck"; if (!SPR[nm]) return;
+  drawSprite(nm, frameOf(nm, k.t + k.home), x, k.y, k.facing, W3.HEN_SIZE, k.alpha);
 }

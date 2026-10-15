@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 97,
+  "frame_h": 106,
+  "ms_per_frame": 130,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 68,
+  "anchor_y": 106,
+  "source": "sheep2_walk.png"
+}

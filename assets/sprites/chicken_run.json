@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 83,
+  "frame_h": 74,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 56,
+  "anchor_y": 73,
+  "source": "chicken_run.png"
+}
