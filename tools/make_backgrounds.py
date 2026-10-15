@@ -21,8 +21,9 @@ SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w3_3": ("3-3 far.png", "3-3 mid.png", "3-3 near.png"),   # 3-3 We Will Not Sit Down (golden afternoon, the town gate)
         "w3_4": ("3-4 far.png", "3-4 mid.png", "3-4 near.png"),   # 3-4 The Chosen Shepherd (the storm)
         "w3_end": ("3-4 end far.png", "3-4 end mid.png", "3-4 end near.png"),   # End of World 3: the storm clears at sunset
-        "w4_1": ("4-1 far.png", "4-1 mid.png", "4-1 near.png")}   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
-MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1"}
+        "w4_1": ("4-1 far.png", "4-1 mid.png", "4-1 near.png"),   # 4-1 The Road to Gibeah
+        "w4_2": ("4-2 far.png", "4-2 mid.png", "4-2 near.png")}   # 4-2 The Training Yard (Gibeah's fortress)   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
+MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):

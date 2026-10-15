@@ -363,6 +363,7 @@ function drawTargets(camX) {
     const R = W4.TARGET_R;   // a straw-and-wood target, painted rings
     ctx.fillStyle = "#c9a56a"; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "#6b4a2a"; ctx.lineWidth = 3; ctx.stroke();
+    if (!t.hit) { ctx.strokeStyle = `rgba(255,216,74,${0.55 + 0.3 * Math.sin(performance.now() / 300 + t.ph)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R + 4, 0, Math.PI * 2); ctx.stroke(); }   // a gold rim: these are the ones to hit (the painted yard has targets too)
     for (const [rr, col] of [[R * 0.72, "#a8322a"], [R * 0.48, "#efe3c4"], [R * 0.24, "#a8322a"]]) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill(); }
     ctx.restore();
   }
