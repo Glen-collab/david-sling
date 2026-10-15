@@ -136,7 +136,7 @@ function updateVillageDog(k, dx, sameLevel, dt) {
     return;
   }
   if (k.state === "run") {   // for the donkey
-    k.facing = Math.sign(don.x - k.x) || k.facing;
+    if (Math.abs(don.x - k.x) > 30) k.facing = Math.sign(don.x - k.x);
     if (!runCritter(k, W4.DOG_RUN, dt) && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);   // over a rock
     if (Math.abs(don.x - k.x) < 2 * T) { setCrit(k, "bark"); spookDonkey(don, "A dog's barking at the donkey! He's spooked. Sit and play the harp to calm him (Select)."); }
     if (k.t > 6) setCrit(k, "bark");
@@ -397,8 +397,12 @@ function updateGuardDog(k, dx, sameLevel, dt) {
     return;
   }
   if (k.state === "run") {
-    k.facing = Math.sign(dx) || k.facing;
-    if (!runCritter(k, W4.GUARD_RUN, dt) && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
+    if (!sameLevel || Math.abs(dx) < 36) {   // David's up out of reach (or right on top of it): it stands its ground, barking
+      fall(); if (Math.abs(dx) > 50) k.facing = Math.sign(dx);
+    } else {
+      k.facing = Math.sign(dx);
+      if (!runCritter(k, W4.GUARD_RUN, dt) && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
+    }
     if (Math.floor(k.t * 1.6) !== Math.floor((k.t - dt) * 1.6)) sfx("wolf_bark", k.x, 0.6, 1.1);
     if (touchesDavid(critterBox(k)) && !k.bit) { k.bit = true; hurtDavid(k.x); }
     if (k.t > W4.GUARD_GIVEUP) { k.gone = true; k.facing = -k.facing; k.vx = k.facing * 200; toast("The guard dog lost interest and trotted off."); }
