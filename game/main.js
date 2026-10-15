@@ -331,6 +331,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
+  "3-4": { cols: 240, bg: "w3_2", name: "The Chosen Shepherd", storm: true },   // bg: 3-2's hills under the storm (world3.js) until Glen's 3-4 layers
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -1007,6 +1008,36 @@ if (LEVEL_NAME === "test") {
   oliveArc(188, 16, 6);
   guide(196, GR - 1, "There he is! Go on, David. They're all waiting for you.");
   sheepfold(204);
+} else if (LEVEL_NAME === "3-4") {
+  // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
+  // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
+  ground(0, 239);
+  campfire(6, GR - 1, "Hanan", "So. The prophet poured oil on your head. And tomorrow the sheep still need water. Kings are made in the small things, David.");
+  talk(16, "Hanan", "Storm coming. In a storm the wild oxen panic and charge at anything that moves. If one charges, put a tree between you, and roll ({roll}) under its horns.");
+  oliveRow(20, 16, 6);
+  lostSheep("sheep", 30, 16);
+  rock(38, 15, 3, 2); rock(41, 13, 3, 4); oliveRow(41, 12, 3); special(42, 7);
+  critter("fox", 50); oliveArc(52, 16, 6);
+  lostSheep("sheep", 62, 16, "cast");                          // on its back in the wet grass: roll it over (Down)
+  campfire(72);
+  setPiece("wind", 78, GR - 1, { end: 118 });                  // the gusts: wait them out, or lean into them
+  rock(84, 15, 2, 2); rock(92, 14, 3, 3); lostSheep("sheepblack", 93, 13, "ledge");
+  oliveRow(98, 16, 6); critter("jackal", 104);
+  lostSheep("sheep", 112, 16, "thorns");
+  special(116, 11);
+  campfire(124);
+  // The One: in a hollow under a fallen oak, lying on its root ball. Roll in under the trunk.
+  rock(134, 14, 2, 3); block(136, 14, 8, 1, 9); setPiece("oak", 134, 14, { w: 10 }); lostSheep("lamb", 141, 16, "one");
+  oliveRow(136, 13, 8);
+  critter("fox", 150); oliveArc(148, 16, 8);
+  lostSheep("sheep", 158, 16);
+  rock(163, 15, 2, 2); rock(166, 13, 3, 4); special(167, 8);
+  campfire(172);                                                // the checkpoint before the ox
+  // the arena: a muddy slope, three big trees, the flock huddled at the left, and the ox out of the rain
+  setPiece("flockHuddle", 179);
+  setPiece("oxtree", 188); setPiece("oxtree", 199); setPiece("oxtree", 210);
+  setPiece("ox", 222, GR - 1, { arena: 177, end: 224 });
+  sheepfold(229);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1470,6 +1501,7 @@ function updateStones(dt) {
     if (s.life > 0 && stoneHitsThorns(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
+    if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -1860,6 +1892,7 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   resetCritters(); resetCrumbles(); resetCaves(); resetCodeWalls();
   resetAllSheep();
   if (typeof resetWorld2 === "function") resetWorld2(true);
+  if (typeof resetOx === "function") resetOx();
 }
 function respawn() {
   const d = david;
@@ -1872,6 +1905,7 @@ function respawn() {
   if (lion && !rescuedLamb) resetLion();
   sheepToCheckpoint();
   if (typeof resetWorld2 === "function") resetWorld2(false);
+  if (typeof resetOx === "function") resetOx();
 }
 
 // food
@@ -2438,6 +2472,11 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The bear is between you and the pen!");
       finish.blocked = 3; return;
     }
+    if (typeof oxBlocking === "function" && oxBlocking()) {   // 3-4: the ox first (world3.js)
+      d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
+      if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
+      finish.blocked = 3; return;
+    }
     if (typeof boyMissing === "function" && boyMissing()) {   // 2-2: not without the boy from Tekoa (world2.js)
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast("Not without the boy! He's still on the rock in the riverbed.");
@@ -2997,7 +3036,7 @@ function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
   const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
-  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight());
+  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight());
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   if (!fight && typeof bear !== "undefined" && bear.on && bear.state === "pen") bossIntroPlayed = false;
@@ -3243,6 +3282,7 @@ function frame(now) {
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
   ctx.restore();
   drawNight(camX);
+  if (typeof drawStorm === "function") drawStorm(camX);   // 3-4: rain, the dark, lightning (world3.js)
   drawCaveDarkness(camX);
   drawFinalBlow();
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }

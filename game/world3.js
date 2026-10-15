@@ -201,6 +201,7 @@ function drawThreshing(p) {   // a round floor of beaten earth ringed with stone
   ctx.fillStyle = "#cfc2a6"; for (let a = 0; a < 14; a++) { const t = a / 14 * Math.PI; ctx.beginPath(); ctx.ellipse(cx - Math.cos(t) * rx, y - 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill(); }
 }
 function drawWorld3(camX) {
+  if (typeof drawOx === "function") { drawFallenOak(camX); drawOx(camX); }   // 3-4 (below)
   if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing" || p.kind === "stepstone" || p.kind === "fence" || p.kind === "guide")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
@@ -343,6 +344,7 @@ function drawRat(k, x) {   // a little brown rat: Glen's running rat (standing s
 }
 
 function updateWorld3(dt) {
+  if (typeof updateOx === "function") { updateStorm(dt); updateOx(dt); }   // 3-4 (below)
   if (ladders.length && !W3.ladderTold && david.onGround && ladderRungs.has(Math.floor(david.x / T) + "," + Math.floor(david.y / T))) onLadder(david);
   if (guides.length) {   // 3-3: Shammah runs ahead (after a fall he's back at the last spot David reached)
     if (david.deadT > 0) shammahRun.dead = true;
@@ -758,3 +760,197 @@ const anointing = {
 
 // from the map's Anointing stop ("#3-A"): play the scene straight away, then back to the map
 if (STORY_HASH === "3-A") anointing.start(() => { stageCleared("3-A", {}); backToMap(); });
+
+// ---------------------------------------------------------------------------
+// 3-4 The Chosen Shepherd: the storm (rain, the dark, lightning), the fallen oak over The One, and the Wild Ox.
+// The ox is NOT killed: it's driven off (DESIGN, World 3 boss). Phase 1: it charges the huddled flock; a charged stone
+// turns it on David. Phase 2: it paws the ground and charges; stand by a tree and roll under its horns at the last
+// moment, and its horns stick in the trunk: hit it, and the tree splits and falls. Phase 3, no trees left: it charges
+// back and forth, faster; hit it while it skids to turn. Then it shakes its head and runs off into the rain.
+// Stand-in art: Glen's boar clips, bigger and darker, until there are wild ox clips (ART_PROMPTS, World 3 Grok clips).
+// ---------------------------------------------------------------------------
+Object.assign(W3, {
+  OX_SIZE: 1.9, OX_FILTER: "brightness(0.5) saturate(0.55) sepia(0.25)",
+  OX_TELL: 1.3,        // seconds pawing the ground before a charge (the warning)
+  OX_CHARGE: 640,      // px/s; phase 3 is faster still
+  OX_FAST: 1.25,
+  OX_STUCK: 2.6,       // seconds its horns are stuck in a trunk
+  OX_SKID: 0.8,        // seconds skidding to a stop in the mud (phase 3: the moment to hit it)
+  OX_HITS3: 3,         // hits in phase 3
+  LIGHTNING: [6, 10],  // seconds between flashes
+});
+const oxPiece = setPieces.find(p => p.kind === "ox");
+const oxTrees = setPieces.filter(p => p.kind === "oxtree").map(p => ({ x: p.x, down: false, fallT: 0 }));
+const ox = { on: !!oxPiece };
+const branches = [];
+function resetOx() {
+  if (!ox.on) return;
+  Object.assign(ox, { x: oxPiece.x, y: GR * T, facing: -1, state: "wait", t: 0, phase: 1, hits: 0, vx: 0, flash: 0, alpha: 1, hitThisStuck: false, told: {} });
+  for (const tr of oxTrees) Object.assign(tr, { down: false, fallT: 0 });
+  branches.length = 0;
+}
+resetOx();
+const oxFight = () => ox.on && ox.state !== "wait" && ox.state !== "gone" && david.deadT <= 0;
+const oxBlocking = () => ox.on && ox.state !== "gone" && ox.state !== "flee";
+const oxArena = () => [oxPiece.arena * T + T, oxPiece.end * T];
+function setOx(s) { if (ox.state !== s) { ox.state = s; ox.t = 0; } }
+function oxBox() {
+  const len = 230 * SCALE * W3.OX_SIZE, h = (ox.state === "stuck" ? 120 : 150) * SCALE * W3.OX_SIZE;
+  const front = ox.x + ox.facing * 20, back = ox.x - ox.facing * len;
+  return { x0: Math.min(front, back), x1: Math.max(front, back), y0: ox.y - h, y1: ox.y };
+}
+function oxSay(key, text) { if (!ox.told[key]) { ox.told[key] = true; toast(text); } }
+function updateOx(dt) {
+  if (!ox.on) return;
+  const O = ox, d = david, [ax0, ax1] = oxArena();
+  O.t += dt; O.flash = Math.max(0, O.flash - dt);
+  for (const tr of oxTrees) if (tr.down) tr.fallT += dt;
+  for (const b of branches) { b.vy += 1600 * dt; b.y += b.vy * dt; if (!b.hit && b.y > d.y - d.h && Math.abs(b.x - d.x) < 40 && b.y < d.y + 20) { b.hit = true; hurtDavid(b.x); } }
+  for (let i = branches.length - 1; i >= 0; i--) if (branches[i].y > GR * T + 40) branches.splice(i, 1);
+  if (O.state === "gone") return;
+  if (O.state === "flee") { O.x += 520 * dt; O.facing = 1; O.alpha = Math.max(0, O.alpha - dt * 0.5); if (O.alpha <= 0) setOx("gone"); return; }
+  if (O.state === "wait") {   // out in the rain, until David comes into the arena
+    if (d.x > ax0 + T && d.deadT <= 0) { setOx("tell"); O.facing = -1; toast("A wild ox! It burst out of the rain and it's going for the flock! Turn it with a charged stone (hold B)."); }
+    return;
+  }
+  const fast = O.phase === 3 ? W3.OX_FAST : 1, dx = d.x - O.x;
+  const target = O.phase === 1 ? ax0 - T : d.x;   // phase 1: the flock, at the left of the arena
+  switch (O.state) {
+    case "tell":   // pawing the ground, head down: the warning
+      O.facing = Math.sign(target - O.x) || O.facing;
+      if (O.t > W3.OX_TELL / fast) { setOx("charge"); O.startX = O.x; }
+      break;
+    case "charge": {
+      O.x += O.facing * W3.OX_CHARGE * fast * dt;
+      const front = O.x + O.facing * 20;
+      if (O.phase === 2) {   // horns into a tree trunk: stuck
+        const tr = oxTrees.find(t => !t.down && Math.abs(t.x - front) < 14);
+        if (tr && Math.sign(tr.x - O.startX) === O.facing && Math.abs(tr.x - O.startX) > 2 * T) {
+          O.x = tr.x - O.facing * 20; O.tree = tr; O.hitThisStuck = false; setOx("stuck"); w2Shake.v = Math.max(w2Shake.v, 0.6);
+          sfx("stone_hit", O.x, 1, 0.3); oxSay("stuck", "Its horns are stuck in the tree! Hit it now!");
+          break;
+        }
+      }
+      if (O.phase === 1 && O.x <= ax0 + 1.5 * T) {   // it reaches the flock and scatters them, then wheels round for another go
+        O.x = ax0 + 1.5 * T; w2Shake.v = Math.max(w2Shake.v, 0.4); baa(O.x, 1); setOx("skid");
+        oxSay("flock", "It's crashing into the flock! Hit it with a full charged stone to turn it on you.");
+        break;
+      }
+      const past = O.phase > 1 && (O.facing > 0 ? O.x > d.x + 5 * T : O.x < d.x - 5 * T);
+      if (past || O.x <= ax0 || O.x >= ax1) { O.x = Math.max(ax0, Math.min(ax1, O.x)); setOx("skid"); O.skidV = W3.OX_CHARGE * fast * 0.6; }
+      break;
+    }
+    case "skid":   // sliding to a stop in the mud
+      O.skidV = Math.max(0, (O.skidV || 0) - 900 * dt); O.x = Math.max(ax0, Math.min(ax1, O.x + O.facing * O.skidV * dt));
+      if (O.t > W3.OX_SKID) { setOx("turn"); }
+      break;
+    case "turn": if (O.t > 0.5) { O.facing = Math.sign((O.phase === 1 ? ax1 - 4 * T : d.x) - O.x) || -O.facing; setOx(O.phase === 1 ? "back" : "tell"); } break;
+    case "back":   // phase 1: trotting back out to the right for another run at the flock
+      O.facing = 1; O.x += 260 * dt; if (O.x >= ax1 - 4 * T) { O.facing = -1; setOx("tell"); }
+      break;
+    case "stuck":
+      if (O.t > W3.OX_STUCK) { O.tree = null; setOx("turn"); oxSay("free", "It pulled free! Get by another tree, and roll under the next charge."); }
+      break;
+  }
+  // its horns: touching David hurts, unless he's rolling (or crawling) under them
+  const low = d.state === "roll" || d.state === "crawl";
+  if ((O.state === "charge" || O.state === "tell") && d.deadT <= 0 && !low) {
+    const b = oxBox(); if (d.x + BODY_W / 2 > b.x0 && d.x - BODY_W / 2 < b.x1 && d.y > b.y0 && d.y - d.h < b.y1) hurtDavid(O.x);
+  }
+  if (O.state === "charge" && low && Math.abs(d.x - O.x) < 60) oxSay("roll", "Under its horns! Now make it hit a tree.");
+}
+function stoneHitsOx(s) {
+  const O = ox; if (!O.on || O.state === "wait" || O.state === "flee" || O.state === "gone") return false;
+  const b = oxBox(); if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
+  for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
+  if (O.phase === 1) {
+    if (s.charged || s.power) { O.phase = 2; O.flash = 0.3; stoneHit(s); O.facing = Math.sign(david.x - O.x) || 1; setOx("tell");
+      toast("It turned on you! Stand by a tree and roll under its horns at the last moment."); }
+    else { stoneHit(s, 0.6); oxSay("tap", "A tap stone doesn't turn it. Hold B until the ring turns gold."); }
+    return true;
+  }
+  if (O.phase === 2 && O.state === "stuck" && !O.hitThisStuck) {
+    O.hitThisStuck = true; O.flash = 0.3; stoneHit(s); sfx("lion_hit", O.x, 0.8, 0.6);
+    O.tree.down = true; O.tree = null; w2Shake.v = 0.8; setOx("turn");
+    const left = oxTrees.filter(t => !t.down).length;
+    if (left) toast(`Crack! The tree split and fell. ${left} ${left === 1 ? "tree" : "trees"} left.`);
+    else { O.phase = 3; O.hits = 0; toast("No trees left! It'll charge back and forth, faster. Roll under it, and hit it while it skids in the mud."); }
+    return true;
+  }
+  if (O.phase === 3 && (O.state === "skid" || O.state === "turn")) {
+    O.hits++; O.flash = 0.3; stoneHit(s); sfx("lion_hit", O.x, 0.8, 0.6);
+    if (O.hits >= W3.OX_HITS3) {
+      setOx("shake"); O.state = "shake";
+      setTimeout(() => { if (ox.state === "shake") { setOx("flee"); toast("It shook its head, snorted... and ran off into the rain. \"The voice of the LORD is powerful\" (Psalm 29:4)"); } }, 1600);
+      toast("It stopped.");
+    } else toast(`Hit! ${W3.OX_HITS3 - O.hits} more.`);
+    return true;
+  }
+  stoneHit(s, 0.6); oxSay("bounce", O.phase === 2 ? "Stones just bounce off it. Get its horns stuck in a tree first." : "Wait until it skids in the mud.");
+  return true;
+}
+function drawOx(camX) {
+  if (!ox.on) return;
+  for (const tr of oxTrees) {   // three big old trees (Glen's olive tree, bigger); a split one falls over and fades
+    const x = tr.x - camX; if (x < -400 || x > W + 400) continue;
+    const img = ITEM.olive_tree; if (!img || !img.naturalWidth) continue;
+    const h = 9 * T, w = img.naturalWidth * h / img.naturalHeight;
+    ctx.save(); ctx.translate(x, GR * T + 6);
+    if (tr.down) { const f = Math.min(1, tr.fallT / 0.9); ctx.rotate(f * f * 1.45 * (tr.x > ox.x ? 1 : -1)); ctx.globalAlpha = Math.max(0, 1 - Math.max(0, tr.fallT - 2) / 1.5); }
+    ctx.filter = "brightness(0.7) saturate(0.8)"; ctx.drawImage(img, -w / 2, -h, w, h); ctx.restore();
+  }
+  for (const b of branches) { ctx.save(); ctx.translate(b.x - camX, b.y); ctx.rotate(b.y * 0.01); if (ITEM.log_short) ctx.drawImage(ITEM.log_short, -50, -14, 100, 28); ctx.restore(); }
+  for (const p of setPieces) if (p.kind === "flockHuddle") {   // the flock, huddled together at the left of the arena
+    const x = p.x - camX; if (x < -300 || x > W + 300) continue;
+    [[-60, "sheep_stand"], [10, "sheepblack_stand"], [70, "sheep_stand"], [-20, "lamb_stand"], [40, "sheep_graze"]].forEach(([o, n], i) => {
+      if (SPR[n]) drawSprite(n, 0, x + o + Math.sin(performance.now() / 90 + i) * (ox.phase === 1 && ox.state !== "wait" ? 2 : 0), GR * T, i % 2 ? -1 : 1);
+    });
+  }
+  if (ox.state === "gone") return;
+  const x = ox.x - camX; if (x < -500 || x > W + 500) return;
+  let name = "boar_stand", i = frameOf("boar_stand", ox.t), filter = W3.OX_FILTER;
+  if (ox.state === "tell") { name = "boar_scrape"; i = frameOf(name, ox.t * 1.6); filter += " drop-shadow(0 0 10px rgba(255,200,60,0.9))"; }
+  else if (ox.state === "charge" || ox.state === "back" || ox.state === "flee") { name = "boar_charge"; i = frameOf(name, ox.t); }
+  else if (ox.state === "stuck" || ox.state === "shake") { name = "boar_stunned"; i = frameOf(name, ox.t); }
+  else if (ox.state === "skid") { name = "boar_charge"; i = 3; }
+  if (ox.flash > 0) filter += " brightness(2)";
+  drawSprite(name, i, x, ox.y, ox.facing, W3.OX_SIZE, ox.alpha, filter);
+}
+function drawFallenOak(camX) {   // The One's hollow: a fallen oak lying on its root ball, the trunk across the top
+  for (const p of setPieces) if (p.kind === "oak") {
+    const x0 = p.c * T - camX; if (x0 > W + 200 || x0 + p.w * T < -200) continue;
+    if (ITEM.log_long && ITEM.log_long.naturalWidth) ctx.drawImage(ITEM.log_long, x0 + 1.4 * T, p.r * T - 10, (p.w - 1.6) * T, T + 18);
+    if (ITEM.stump_roots && ITEM.stump_roots.naturalWidth) { const img = ITEM.stump_roots, h = 3.4 * T, w = img.naturalWidth * h / img.naturalHeight; ctx.drawImage(img, x0 - w * 0.25, GR * T + 8 - h, w, h); }
+  }
+}
+// the storm: darker, rain slanting down, and now and then lightning (in the arena it can bring a branch down)
+const storm = { on: !!(STAGE_INFO && STAGE_INFO.storm), next: 4, flash: 0 };
+function updateStorm(dt) {
+  if (!storm.on) return;
+  storm.flash = Math.max(0, storm.flash - dt * 2.2);
+  storm.next -= dt;
+  if (storm.next <= 0) {
+    storm.next = W3.LIGHTNING[0] + Math.random() * (W3.LIGHTNING[1] - W3.LIGHTNING[0]); storm.flash = 1;
+    setTimeout(() => { sfx("fall_pit", undefined, 0.5, 0.4); w2Shake.v = Math.max(w2Shake.v, 0.25); }, 350);   // the thunder
+    if (oxFight() && ox.phase === 2) {   // a strike on the tree nearest David: a branch comes down
+      const tr = oxTrees.filter(t => !t.down).sort((a, b) => Math.abs(a.x - david.x) - Math.abs(b.x - david.x))[0];
+      if (tr && Math.abs(tr.x - david.x) < 4 * T) { branches.push({ x: tr.x + (david.x - tr.x) * 0.6, y: GR * T - 6 * T, vy: 0 }); toast("Lightning hit the tree! Look out above!"); }
+    }
+  }
+}
+function drawStorm(camX) {
+  if (!storm.on) return;
+  ctx.save();
+  const g = ctx.createLinearGradient(0, 0, 0, H);   // heavy cloud: darkest up top
+  g.addColorStop(0, "rgba(22,28,40,0.72)"); g.addColorStop(0.55, "rgba(30,38,52,0.5)"); g.addColorStop(1, "rgba(20,26,36,0.35)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "rgba(200,215,235,0.35)"; ctx.lineWidth = 1.5; ctx.beginPath();
+  const t = performance.now() / 1000;
+  for (let k = 0; k < 140; k++) {   // rain: the same drops falling over and over, slanting with the wind
+    const sx = (k * 97.3 + t * 260 - camX * 0.3) % (W + 200) - 100, sy = (k * 53.7 + t * 900) % (H + 60) - 30;
+    ctx.moveTo(sx, sy); ctx.lineTo(sx - 9, sy + 26);
+  }
+  ctx.stroke();
+  if (storm.flash > 0) { ctx.fillStyle = `rgba(235,240,255,${0.55 * storm.flash})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}

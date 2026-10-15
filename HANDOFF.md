@@ -153,5 +153,12 @@ altar by the well). After 3-3, the map walks David there by himself and plays it
 the scene, then marks 3-A cleared and opens the trail to 3-4). A at the star replays it. Sprites from Glen's clips: brothers_line (all eight sons, David at the
 end steps out) and samuel_anoint (walk in, raise the horn, pour). Positions in ANOINT (horn tip / David's head measured
 from the sprites). Harp music plays for the Spirit (16:13); the last card explains "anointing" and "Messiah".
+3-4 The Chosen Shepherd (STAGE_INFO storm: true; bg w3_2 until Glen's 3-4 storm layers): world3.js storm (dark
+overlay, rain, lightning every W3.LIGHTNING s), the fallen oak over The One (setPiece "oak": roll in), wind gusts
+(world2's setPiece "wind"). The Wild Ox (setPiece "ox", { arena, end }; setPiece "oxtree" x3; "flockHuddle"): phase 1
+charges the flock, a charged stone turns it; phase 2 roll under its charge by a tree, horns stick (W3.OX_STUCK), any hit
+splits that tree; lightning can drop a branch near David; phase 3 hit it while it skids (W3.OX_HITS3), then it runs off
+(driven off, not killed). Stand-in art: boar clips, darker, W3.OX_SIZE. Not done: slippery landing, counsel tiers, the
+End of World 3 reflection scene (Hanan's staff, the messenger).
 Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire, stray dogs (jackals stand in).
