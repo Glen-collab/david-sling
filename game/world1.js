@@ -302,7 +302,7 @@ function updateCritters(dt) {
 function updateFox(k, dx, sameLevel, dt) {
   if (k.state === "idle") {
     k.facing = Math.sign(dx) || k.facing;
-    if (Math.abs(dx) < W1.FOX_SEE && sameLevel) setCrit(k, "hunt");
+    if (Math.abs(dx) < W1.FOX_SEE && sameLevel) { setCrit(k, "hunt"); sfx("fox", k.x, 0.7); }   // a bark as it comes for the lamb
     k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); k.vx = 0; collideBody(k, 50, 44, dt);
     return;
   }

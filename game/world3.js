@@ -1208,7 +1208,9 @@ const w3ending = {
     ["Hanan", "I won't always be on these hills with you. Take this. When the path is hard, lean on it, and remember who leads you."],
   ],
   MID_H: 430, NEAR_H: 190, RIDER_Y: 250,  // layer heights on screen; how far above the ground the rider goes by
-  RIDER_SIZE: 0.35, RIDE: 7,              // the far-off messenger's size, and seconds to cross
+  RIDER_SIZE: 0.35,                       // the messenger's size where he pulls up (Glen: far off on the hills, nearer, stops, then off to town)
+  RIDER_PATH: [[0.10, 350, 0.08], [0.33, 300, 0.33], [0.90, 335, 0.07]],   // [x as a share of the width, px above the ground, size]: far hilltop, where he stops, Bethlehem
+  RIDE_IN: 3.6, RIDE_STOP: 2.8, RIDE_OUT: 4.2,   // seconds: coming nearer, standing, riding off to the town
   DAVID_X: 520, FIRE_X: 900, WALK: 70,    // where David stands, the fire, Hanan's walking speed (his stride at this size)
   OFFER: 2.2, HANDOVER: 5.6, RAISE: 2.5,  // seconds: Hanan holding the staff out, the two of them, David lifting it up (Glen's clips)
   FLOCK_X: 330,                           // where David walks back to, with his staff
@@ -1241,7 +1243,7 @@ const w3ending = {
       case 7:                                                                                   // back to his sheep, with the staff
         this.davidX = Math.max(this.FLOCK_X, this.davidX - TUNE.WALK_SPEED * 0.8 * dt); if (this.davidX <= this.FLOCK_X && this.stepT > 1) this.next(); break;
       case 8: if (this.stepT > 1.5 && A) this.next(); break;                                    // 1 Samuel 16:7
-      case 9: if (this.stepT > 4 && A) this.next(); break;                                      // the rider on the road
+      case 9: if ((this.stepT > 4 && A) || this.stepT > this.RIDE_IN + this.RIDE_STOP + this.RIDE_OUT + 0.5) this.next(); break;   // the rider on the road
       case 10:                                                                                  // by the fire, David plays
         if (this.stepT < 0.1 && audioUnlocked && harpMusic.paused) { harpMusic.currentTime = 0; harpMusic.volume = 0; harpMusic.play().catch(() => {}); }
         harpMusic.volume = Math.min(TUNE.HARP_VOLUME, harpMusic.volume + dt * 0.4);
@@ -1257,6 +1259,7 @@ const w3ending = {
       ctx.save(); ctx.globalAlpha = a;
       if (L.far && L.far.naturalWidth) ctx.drawImage(L.far, 0, 0, W, H);
       if (L.mid && L.mid.naturalWidth) drawLayerRepeating(L.mid, 0, 1, gy + 10, this.MID_H, true);
+      if (L === BG.w3_end && this.step === 9) this.drawRider(gy, now);   // out on the hillside, above the stone wall (RIDER_PATH keeps him over it)
       if (L.near && L.near.naturalWidth) drawLayerRepeating(L.near, 0, 1, gy + 22, this.NEAR_H, true);
       ctx.restore();
     };
@@ -1271,21 +1274,26 @@ const w3ending = {
       ctx.stroke(); ctx.restore();
     }
   },
-  drawRider(gy, now) {   // the king's messenger far off on the hills, galloping toward Bethlehem (on the right): Glen's clip
-    const k = Math.min(1, this.stepT / this.RIDE), x = W * 0.08 + k * W * 0.62, y = gy - this.RIDER_Y + Math.sin(k * 3) * 4;
-    ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 2);
-    if (SPR.messenger_gallop) drawSprite("messenger_gallop", frameOf("messenger_gallop", now), x, y, 1, this.RIDER_SIZE, 1, "saturate(0.7) brightness(0.85)");   // a little hazy, far away
-    else {
-      if (SPR.donkey_walk) drawSprite("donkey_walk", frameOf("donkey_walk", now * 1.8), x, y, 1, 0.32, 1, "brightness(0.15)");
-      ctx.fillStyle = "#1c1612"; ctx.beginPath(); ctx.ellipse(x - 4, y - 30, 5, 10, 0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x - 2, y - 44, 4, 0, Math.PI * 2); ctx.fill();
+  drawRider(gy, now) {   // the king's messenger (Glen's clips): small on a far hilltop, riding nearer, pulling up to stand, then off to Bethlehem
+    const [A, B, C] = this.RIDER_PATH, t = this.stepT, ease = f => f * f * (3 - 2 * f);
+    let p, nm = "messenger_gallop", i = frameOf(nm, now), a = Math.min(1, t * 1.5);
+    if (t < this.RIDE_IN) { const f = ease(t / this.RIDE_IN); p = A.map((v, k) => v + (B[k] - v) * f); }
+    else if (t < this.RIDE_IN + this.RIDE_STOP) {   // pulling up, then standing
+      p = B; nm = "messenger_stop";
+      if (SPR[nm]) i = Math.min(SPR[nm].frames - 1, Math.floor((t - this.RIDE_IN) / (this.RIDE_STOP * 0.6) * SPR[nm].frames)); else { nm = "messenger_gallop"; i = 0; }
+    } else {
+      const f = Math.min(1, (t - this.RIDE_IN - this.RIDE_STOP) / this.RIDE_OUT); p = B.map((v, k) => v + (C[k] - v) * ease(f));
+      a = Math.min(a, 1 - Math.max(0, f - 0.8) / 0.2);   // gone into the town
     }
+    if (a <= 0) return;
+    const x = W * p[0], y = gy - p[1], haze = p[2] < 0.2 ? "saturate(0.6) brightness(0.8)" : "saturate(0.8) brightness(0.9)";
+    ctx.save(); ctx.globalAlpha *= a;
+    if (SPR[nm]) drawSprite(nm, i, x, y, 1, p[2], 1, haze);
     ctx.restore();
   },
   draw() {
     const now = performance.now() / 1000, gy = 560;
     this.drawLand(gy, now);
-    if (this.step === 9) this.drawRider(gy, now);
     const flock = [["sheep_graze", 90, 1], ["sheepblack_graze", 300, -1], ["sheep_stand", 380, 1], ["lamb_graze", 210, 1], ["sheep_graze", 40, -1], ["sheep_stand", 160, -1]];
     for (const [nm, x, f] of flock) if (SPR[nm]) drawSprite(nm, frameOf(nm, now + x), x, gy, f);
     if (this.step >= 10) {   // by the fire: Hanan on his rock, David on the other side with the harp
