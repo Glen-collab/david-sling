@@ -646,7 +646,7 @@ function drawHall(camX) {
     if (L.lit) { ctx.save(); ctx.globalCompositeOperation = "lighter"; const r = 130 + Math.sin(now * 7 + L.x) * 6, g = ctx.createRadialGradient(x + 20, L.y - 140, 6, x + 20, L.y - 140, r);
       g.addColorStop(0, "rgba(255,190,90,0.45)"); g.addColorStop(1, "rgba(255,150,60,0)"); ctx.fillStyle = g; ctx.fillRect(x + 20 - r, L.y - 140 - r, r * 2, r * 2); ctx.restore(); }
     else goldGlow(x, L.y, L.t);
-    drawItem(L.lit ? "hall_lamp_lit" : "hall_lamp_unlit", x, L.y + 4, 0.55);
+    drawItem(L.lit ? "hall_lamp_lit" : "hall_lamp_unlit", x, L.y + 4, 0.48);   // (both cut at the same scale: lighting it doesn't change its size)
   }
   for (const w of wisps) {
     if (w.alpha <= 0) continue; const x = w.x - camX + Math.sin(now * 0.9 + w.ph) * 14, y = w.y + Math.sin(now * 1.3 + w.ph) * 10;
