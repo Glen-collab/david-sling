@@ -1296,6 +1296,25 @@ It's the only extra jump in the game and it arrives late, so the last four world
 - **Worlds 5–8 are built around it:** 5-3's ridge has high routes past the lookouts; the chariot (5-4) is jumped over; the watchtower (6-4) is climbed; the shield-bearer (7-4) is double-jumped over; Goliath's spear sweeps (8-2, phase 1) are dodged forward through the air, which is how you "run to meet him".
 - **The gateposts grow** from World 5 on, so the top olive needs the double jump.
 
+#### The Cave of the Name *(Glen's idea, 2026-10-15: a puzzle like Indiana Jones' "Word of God")*
+A side cave off the mountain trail in 5-2: an underground stream crossed on **stepping stones carved with old Hebrew
+letters** (the Paleo-Hebrew script of David's day). Only the right letters hold; a wrong stone crumbles into the water
+(a fall: one heart, back to the bank). A carving on the wall gives the clue for each crossing.
+- **Crossing 1, the warm-up: David's own name.** In Hebrew it's three letters, **Dalet-Waw-Dalet** (DWD). It reads the
+  same either way, so the first crossing teaches how the puzzle works.
+- **Crossing 2: the Name.** The name God told Moses at the burning bush (Exodus 3:15): four letters, **Yod-He-Waw-He**
+  (YHWH), the name behind every "the LORD" in small capitals. The twist: **Hebrew is read right to left**, so walking
+  left to right you must step on them last letter first: He, Waw, He, Yod. The clue says so:
+  > "Four letters, Yod, He, Waw, He. And remember: our fathers read from the right."
+- Decoy letters on the other stones (Aleph, Bet, Gimel, Kaf, Lamed, Mem, Shin...), looking just as real.
+- **Reward:** at the far side, a stone of remembrance and a Journal fact: why English Bibles print "the LORD" in small
+  capitals (it stands for the four-letter name), and that Hebrew is written right to left. Psalm 20:7 later in this
+  world ("we trust in the name of the LORD our God") echoes it.
+- **Reverence:** the tiles show only the old Hebrew letters, never the name spelled out in English; the game's own text
+  keeps "the LORD" (WEB style), and the Journal explains it.
+- **Art:** blank carved stepping stones (Glen) with the letters drawn on them in code, so every letter shape is exact
+  (an image model would get the old letters wrong).
+
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
 - **Lookouts (light stealth):** each one watches a stretch of ridge with a torchlight cone. If he sees you, he shouts and lights a **signal fire**, and a few extra raiders come. **Being seen is never a fail state**, just a harder few seconds. Sneaking past (or knocking the torch out of his hand with a quick shot) earns a "Not seen" bonus.
