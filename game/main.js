@@ -2836,6 +2836,7 @@ function updateFinish(dt) {
     const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
     else if (LEVEL_STAGE === "3-4" && typeof w3ending !== "undefined") w3ending.start(journal);   // the end of World 3 (world3.js)
+    else if (LEVEL_STAGE === "4-4" && typeof w4ending !== "undefined") w4ending.start(journal);   // the end of World 4 (world4.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -3555,6 +3556,9 @@ function frame(now) {
   }
   if (typeof w4intro !== "undefined" && w4intro.active) {   // the opening of World 4, at Jesse's door (world4.js)
     pollInput(); w4intro.update(real); w4intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w4ending !== "undefined" && w4ending.active) {   // the end of World 4 (world4.js) has the screen
+    pollInput(); w4ending.update(real); w4ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w3ending !== "undefined" && w3ending.active) {   // the end of World 3 (world3.js) has the screen
     pollInput(); w3ending.update(real); w3ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

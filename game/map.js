@@ -185,7 +185,7 @@ const WorldMap = {
     this.fade = Math.min(1, this.fade + dt * 2);
     if (this.reveal < 1) { this.reveal = Math.min(1, this.reveal + dt / MTUNE.REVEAL_TIME); return; }
     // walking: toward the target stop along the trail
-    const want = this.stopD(this.target), step = MTUNE.WALK_SPEED * dt;
+    const want = this.stopD(this.target), step = MTUNE.WALK_SPEED * dt * (this.M.journey && this.prog.favor ? 3.5 : 1);   // the King's Favor (End of World 4): quick on the Journey map
     const moving = Math.abs(want - this.d) > 0.5;
     if (moving) {
       const dir = Math.sign(want - this.d);

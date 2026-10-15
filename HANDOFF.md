@@ -295,4 +295,9 @@ the harp phrase at 3-2's campfire.
   rewritten without the words struck at that step (they were on the torn page). From then on the draft spread draws
   davids_journal_page_ripped-out.png (the torn stub). A skips. 6-1's rip-out: add rip: { at: 1, text: "Eliab thinks he's so..." }
   to World 6's pages when they exist. World 4 Journal pages are in too (draft text).
+- **End of World 4 scene is built** (w4ending in world4.js; main.js starts it after the 4-4 clear, before the Journal;
+  ?w4end=N jumps to beat N). Beats: morning in the hall (w4_4 lifted with a screen fill), Saul (saul_joy, then saul 4/5):
+  thanks, 1 Sam 16:22 (WEB); the King's Favor card (US spelling; progress.favor = 3.5x walking on the Journey map; 1 Sam
+  17:15 WEB); the Steward's line (DESIGN); 1 Sam 16:23; then the Bethlehem gate (w3_1, a drawn dusty road) and Hanan
+  (no staff: he gave it to David) "I told you I'd be here" / "Did you find the one who tells you the truth?". A advances.
 

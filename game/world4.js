@@ -763,3 +763,93 @@ if (LEVEL_STAGE === "4-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w4intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w4intro")) w4intro.start();
 }
+
+// ---------------------------------------------------------------------------
+// The end of World 4 (DESIGN "End of World 4 — reflection scene"): morning at Gibeah after the storm. Saul, rested,
+// thanks David and sends word to Jesse (1 Samuel 16:22). The gift: the King's Favor (David may come and go between the
+// king's house and his father's, 17:15) = faster travel on the Journey map (progress.favor). The Steward's words,
+// 16:23, and then home to the sheep: Hanan at the Bethlehem gate, as he promised. Then the Journal.
+// Glen's art: saul (5 standing talking, 6 smiling), saul_joy (arms raised), steward, hanan_idle_nostaff, david_walk.
+// ---------------------------------------------------------------------------
+const w4ending = {
+  active: false,
+  beats: [
+    { at: "hall", who: "", text: "Morning in Gibeah. The storm had passed in the night, and the palace was quiet." },
+    { at: "hall", who: "King Saul", text: "David. I slept the whole night through. I can't remember the last time I slept like that.", saul: "joy" },
+    { at: "hall", who: "King Saul", text: "Stay with me. I'll send word to your father today.", saul: "talk" },
+    { at: "hall", who: "", text: "Saul sent to Jesse, saying, \"Please let David stand before me, for he has found favor in my sight.\" (1 Samuel 16:22)", saul: "smile" },
+    { at: "hall", card: true, saul: "smile" },
+    { at: "hall", who: "The Steward", text: "You didn't fix him, boy. Only God can. But you gave him rest tonight. That's a gift too.", steward: "talk" },
+    { at: "hall", who: "", text: "When the spirit from God was on Saul, David took the harp and played with his hand; so Saul was refreshed and was well. (1 Samuel 16:23)", steward: "smile" },
+    { at: "gate", who: "", text: "And David went home to the sheep, as he would again and again.", walk: true },
+    { at: "gate", who: "Hanan", text: "There you are. I told you I'd be here when you came home." },
+    { at: "gate", who: "Hanan", text: "So. Did you find the one who tells you the truth?" },
+  ],
+  start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, fade: 0, out: 0, davidX: -80 }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt; this.fade = Math.min(1, this.t / 1.2);
+    const B = this.beats[this.i];
+    if (B && B.walk) this.davidX = Math.min(W * 0.4, this.davidX + TUNE.WALK_SPEED * 0.7 * dt);
+    if (B && B.card && this.bt < 0.05 && !this.gave) {
+      this.gave = true; sfx("extra_life", undefined, 0.7);
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.favor = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    }
+    if (this.out > 0) {
+      this.out += dt;
+      if (this.out > 1.2) { this.active = false; const cb = this.done; this.done = null; cb && cb(); }
+      return;
+    }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < this.beats.length - 1) {
+        const was = this.beats[this.i].at; this.i++; this.bt = 0;
+        if (this.beats[this.i].at !== was) { this.t = 0; this.fade = 0; }   // a new place: fade in
+      } else this.out = 0.001;
+    }
+  },
+  draw() {
+    const B = this.beats[this.i], y = GR * T, now = performance.now() / 1000, keep = bgWorld;
+    if (B.at === "hall") {   // the king's hall in the morning: Glen's night hall, warmed and brightened
+      bgWorld = "w4_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+      ctx.save(); ctx.globalCompositeOperation = "screen"; ctx.fillStyle = "rgba(150,110,60,0.55)"; ctx.fillRect(0, 0, W, H); ctx.restore();   // morning: lift the night
+      ctx.save(); ctx.globalCompositeOperation = "lighter";   // sunlight through the high windows
+      const g = ctx.createLinearGradient(W * 0.7, 0, W * 0.4, H); g.addColorStop(0, "rgba(255,210,140,0.22)"); g.addColorStop(1, "rgba(255,210,140,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
+      const sx = W * 0.64;
+      if (B.saul === "joy" && SPR.saul_joy) drawSprite("saul_joy", 2 + (Math.floor(now * 1.5) % 2), sx, y, -1);
+      else if (SPR.saul) drawSprite("saul", B.saul === "talk" ? 4 : 5, sx, y, -1);
+      if (SPR.steward && this.i >= 5) drawSprite("steward", B.steward === "talk" ? [1, 4][Math.floor(now * 0.9) % 2] : 5, W * 0.18, y, 1);
+      drawSprite("david_idle", frameOf("david_idle", now), W * 0.36, y, 1);
+    } else {   // the Bethlehem gate: Hanan waiting
+      bgWorld = "w3_1"; drawBackground(0); bgWorld = keep;
+      const gg = ctx.createLinearGradient(0, y - 8, 0, H); gg.addColorStop(0, "#c9a571"); gg.addColorStop(0.12, "#a9824f"); gg.addColorStop(1, "#6e5333");   // the dusty road at the gate
+      ctx.fillStyle = gg; ctx.fillRect(0, y - 8, W, H - y + 8);
+      ctx.fillStyle = "rgba(90,66,40,0.5)"; for (let k = 0; k < 60; k++) { ctx.beginPath(); ctx.ellipse((k * 97.7) % W, y + 14 + (k * 37) % (H - y - 20), 6 + k % 5, 3, 0, 0, Math.PI * 2); ctx.fill(); }
+      if (SPR.hanan_idle_nostaff) drawSprite("hanan_idle_nostaff", frameOf("hanan_idle_nostaff", now), W * 0.62, y, -1);   // (his staff is David's now)
+      const walking = B.walk && this.davidX < W * 0.4;
+      const dx = B.walk ? this.davidX : W * 0.4, nm = typeof SPR.david_walk_staff !== "undefined" && (JSON.parse(localStorage.getItem("davidProgress") || "{}").staff) ? "david_walk_staff" : "david_walk";
+      drawSprite(walking ? nm : "david_idle", frameOf(walking ? nm : "david_idle", now), dx, y, 1);
+    }
+    if (B.card) {   // the gift
+      const cy = 90, a = Math.min(1, this.bt * 2);
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = "rgba(25,14,6,0.88)"; ctx.beginPath(); ctx.roundRect(W / 2 - 440, cy, 880, 170, 16); ctx.fill();
+      ctx.strokeStyle = "rgba(255,214,120,0.6)"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#c9a227"; ctx.beginPath(); ctx.arc(W / 2 - 360, cy + 85, 46, 0, Math.PI * 2); ctx.fill();   // the king's seal
+      ctx.fillStyle = "#7a1f2b"; ctx.beginPath(); ctx.arc(W / 2 - 360, cy + 85, 34, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#f3d27a"; ctx.font = "bold 30px Georgia, serif"; ctx.textAlign = "center"; ctx.fillText("♛", W / 2 - 360, cy + 96);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("The King's Favor", W / 2 + 40, cy + 44);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Come and go between the king's house and your father's:", W / 2 + 40, cy + 76);
+      ctx.fillText("you travel much faster on the Journey map now.", W / 2 + 40, cy + 100);
+      ctx.font = "italic 17px Georgia, serif"; ctx.fillText("\"David went back and forth from Saul to feed his father's sheep at Bethlehem.\"  1 Samuel 17:15", W / 2 + 40, cy + 140);
+      ctx.restore(); ctx.textAlign = "left";
+    } else if (B.text) drawStoryBox(B.who, B.text, this.i === this.beats.length - 1 ? (JOURNAL_PAGES[4] ? "A: write in the Journal" : "A: continue") : "A: next", true);
+    if (B.card) caption("A: next", 0.8, true);
+    const a = Math.min(this.fade, 1 - Math.min(1, this.out / 1.2));
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};
+// "?w4end" plays the End of World 4 straight away (testing); "?w4end=7" starts at the beat that number
+if (new URLSearchParams(location.search).has("w4end")) setTimeout(() => {
+  w4ending.start(() => location.reload());
+  const at = Number(new URLSearchParams(location.search).get("w4end")) || 0; if (at) Object.assign(w4ending, { i: at, fade: 1, t: 2, davidX: W * 0.4 });
+}, 300);
