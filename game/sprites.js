@@ -816,6 +816,18 @@ window.SPRITE_DATA = {
   "ay": 259,
   "align": "feet"
  },
+ "david_walk_staff": {
+  "src": "../assets/sprites/david_walk_staff.png",
+  "frames": 12,
+  "w": 147,
+  "h": 265,
+  "ms": 87,
+  "loop": true,
+  "pingpong": false,
+  "ax": 65,
+  "ay": 262,
+  "align": "feet"
+ },
  "dog_run": {
   "src": "../assets/sprites/dog_run.png",
   "frames": 6,
@@ -1248,6 +1260,18 @@ window.SPRITE_DATA = {
   "ay": 255,
   "align": "feet"
  },
+ "hanan_david_raise_staff": {
+  "src": "../assets/sprites/hanan_david_raise_staff.png",
+  "frames": 18,
+  "w": 361,
+  "h": 312,
+  "ms": 140,
+  "loop": false,
+  "pingpong": false,
+  "ax": 154,
+  "ay": 310,
+  "align": "feet"
+ },
  "hanan_give_staff": {
   "src": "../assets/sprites/hanan_give_staff.png",
   "frames": 16,
@@ -1270,6 +1294,18 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 96,
   "ay": 298,
+  "align": "feet"
+ },
+ "hanan_idle_nostaff": {
+  "src": "../assets/sprites/hanan_idle_nostaff.png",
+  "frames": 12,
+  "w": 106,
+  "h": 289,
+  "ms": 200,
+  "loop": true,
+  "pingpong": true,
+  "ax": 69,
+  "ay": 286,
   "align": "feet"
  },
  "hanan_sit": {

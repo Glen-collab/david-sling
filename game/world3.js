@@ -1043,7 +1043,8 @@ const w3ending = {
   ],
   MID_H: 430, NEAR_H: 190, RIDER_Y: 250,  // layer heights on screen; how far above the ground the rider goes by
   DAVID_X: 520, FIRE_X: 900, WALK: 70,    // where David stands, the fire, Hanan's walking speed (his stride at this size)
-  OFFER: 2.2, HANDOVER: 5.6,              // seconds: Hanan holding the staff out, then the two of them (Glen's clips)
+  OFFER: 2.2, HANDOVER: 5.6, RAISE: 2.5,  // seconds: Hanan holding the staff out, the two of them, David lifting it up (Glen's clips)
+  FLOCK_X: 330,                           // where David walks back to, with his staff
   start(done) {
     Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, hananX: W + 30, gave: false, fade: 0 });
     hushLoops(); dialog.t = 0;
@@ -1062,21 +1063,23 @@ const w3ending = {
       case 3: if (A) { dialog.t = 0; this.next(); } break;
       case 4: if (this.stepT > this.OFFER) { say(2); this.next(); } break;                       // he holds it out
       case 5: if (A) { dialog.t = 0; this.next(); } break;
-      case 6:                                                                                   // David takes it
-        if (this.stepT > this.HANDOVER && !this.gave) {
+      case 6:                                                                                   // David takes it, and lifts it up
+        if (this.stepT > this.HANDOVER + this.RAISE * 0.5 && !this.gave) {
           this.gave = true; sfx("extra_life", undefined, 0.7);
           try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.staff = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
         }
-        if (this.gave && this.stepT > this.HANDOVER + 1.5 && A) this.next();
+        if (this.gave && this.stepT > this.HANDOVER + this.RAISE && A) { this.davidX = this.DAVID_X; this.next(); }
         break;
-      case 7: if (this.stepT > 1.5 && A) this.next(); break;                                    // 1 Samuel 16:7
-      case 8: if (this.stepT > 4 && A) this.next(); break;                                      // the rider on the road
-      case 9:                                                                                   // by the fire, David plays
+      case 7:                                                                                   // back to his sheep, with the staff
+        this.davidX = Math.max(this.FLOCK_X, this.davidX - TUNE.WALK_SPEED * 0.8 * dt); if (this.davidX <= this.FLOCK_X && this.stepT > 1) this.next(); break;
+      case 8: if (this.stepT > 1.5 && A) this.next(); break;                                    // 1 Samuel 16:7
+      case 9: if (this.stepT > 4 && A) this.next(); break;                                      // the rider on the road
+      case 10:                                                                                  // by the fire, David plays
         if (this.stepT < 0.1 && audioUnlocked && harpMusic.paused) { harpMusic.currentTime = 0; harpMusic.volume = 0; harpMusic.play().catch(() => {}); }
         harpMusic.volume = Math.min(TUNE.HARP_VOLUME, harpMusic.volume + dt * 0.4);
         if (this.stepT > 3.5 && A) this.next();
         break;
-      case 10: harpMusic.volume = Math.max(0, harpMusic.volume - dt * 0.8); if (this.stepT > 1.2) { harpMusic.pause(); this.active = false; const cb = this.done; this.done = null; cb && cb(); } break;
+      case 11: harpMusic.volume = Math.max(0, harpMusic.volume - dt * 0.8); if (this.stepT > 1.2) { harpMusic.pause(); this.active = false; const cb = this.done; this.done = null; cb && cb(); } break;
     }
   },
   drawLand(gy, now) {
@@ -1111,16 +1114,16 @@ const w3ending = {
   draw() {
     const now = performance.now() / 1000, gy = 560;
     this.drawLand(gy, now);
-    if (this.step === 8) this.drawRider(gy, now);
+    if (this.step === 9) this.drawRider(gy, now);
     const flock = [["sheep_graze", 90, 1], ["sheepblack_graze", 300, -1], ["sheep_stand", 380, 1], ["lamb_graze", 210, 1], ["sheep_graze", 40, -1], ["sheep_stand", 160, -1]];
     for (const [nm, x, f] of flock) if (SPR[nm]) drawSprite(nm, frameOf(nm, now + x), x, gy, f);
-    if (this.step >= 9) {   // by the fire: Hanan on his rock, David on the other side with the harp
+    if (this.step >= 10) {   // by the fire: Hanan on his rock, David on the other side with the harp
       const fx = this.FIRE_X - 220;
       drawItem("campfire", fx, gy + 4, 0.55);
       ctx.save(); ctx.globalCompositeOperation = "lighter"; const r = 70 + Math.sin(now * 11) * 6, g = ctx.createRadialGradient(fx, gy - 34, 4, fx, gy - 34, r);
       g.addColorStop(0, "rgba(255,170,60,0.4)"); g.addColorStop(1, "rgba(255,120,30,0)"); ctx.fillStyle = g; ctx.fillRect(fx - r, gy - 34 - r, r * 2, r * 2); ctx.restore();
-      drawItem("boulder_grey", fx - 92 - 30 * SCALE, gy + 4, 92 * SCALE / 375);
-      if (SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), fx - 92, gy, 1);
+      if (SPR.hanan_idle_nostaff) drawSprite("hanan_idle_nostaff", frameOf("hanan_idle_nostaff", now), fx - 100, gy, 1);   // standing by the fire, his hands empty
+      else { drawItem("boulder_grey", fx - 92 - 30 * SCALE, gy + 4, 92 * SCALE / 375); if (SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), fx - 92, gy, 1); }
       drawStaff(fx + 165, gy, 0.6);   // standing beside him
       const k = Math.floor(now * 1000 / TUNE.HARP_LOOP_MS) % 6, i = 8 + (k < 4 ? k : 6 - k);
       drawSprite("david_play_harp", i, fx + 120, gy, -1);   // sitting on the ground by the fire, as in the stages
@@ -1132,13 +1135,20 @@ const w3ending = {
         if (this.step >= 4 && SPR.hanan_give_staff) { nm = "hanan_give_staff"; i = this.step === 4 ? Math.min(SPR[nm].frames - 1, Math.floor(this.stepT / this.OFFER * SPR[nm].frames)) : SPR[nm].frames - 1; }
         if (SPR[nm]) drawSprite(nm, i, this.hananX, gy, -1);
       }
-      if (this.step >= 6 && SPR.hanan_staff_to_david) {   // the two of them (Glen's clip, mirrored: Hanan on the right)
-        const nm = "hanan_staff_to_david", s = SPR[nm], i = Math.min(s.frames - 1, Math.floor((this.step === 6 ? this.stepT : 99) / this.HANDOVER * s.frames));
+      if (this.step === 6 && SPR.hanan_staff_to_david) {   // the two of them (Glen's clips, mirrored: Hanan on the right)
+        const raising = this.stepT > this.HANDOVER && SPR.hanan_david_raise_staff, nm = raising ? "hanan_david_raise_staff" : "hanan_staff_to_david", s = SPR[nm];
+        const i = Math.min(s.frames - 1, Math.floor((raising ? this.stepT - this.HANDOVER : this.stepT) / (raising ? this.RAISE : this.HANDOVER) * s.frames));
         drawSprite(nm, i, this.DAVID_X + 105 * this.sc(nm), gy, -1);
+      }
+      if (this.step >= 7) {   // Hanan stays by the fire; David with his staff, walking back to the flock, then standing with them
+        const hn = SPR.hanan_idle_nostaff ? "hanan_idle_nostaff" : "hanan_idle";   // he's given it away (Glen's clip)
+        drawSprite(hn, frameOf(hn, now), this.hananStop(), gy, -1);
+        const nm = SPR.david_walk_staff ? "david_walk_staff" : "david_walk", walking = this.step === 7 && this.davidX > this.FLOCK_X;
+        drawSprite(nm, walking ? frameOf(nm, now) : 0, this.davidX, gy, -1);
       }
     }
     if (this.step === 6 && this.gave) {   // the gift card
-      ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - this.HANDOVER) * 2);
+      ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - this.HANDOVER - this.RAISE * 0.5) * 2);
       const cy = 80;
       ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 420, cy, 840, 150, 16); ctx.fill();
       drawStaff(W / 2 - 350, cy + 140, 0.55);
@@ -1148,7 +1158,7 @@ const w3ending = {
       ctx.restore(); ctx.textAlign = "left";
     }
     if (this.step === 0) caption("The storm passed. The flock was safe.", Math.min(1, this.stepT * 1.5) * Math.min(1, (3.5 - this.stepT) * 2));
-    if (this.step === 7) {   // 1 Samuel 16:7 (WEB, "the LORD" for Yahweh)
+    if (this.step === 8) {   // 1 Samuel 16:7 (WEB, "the LORD" for Yahweh)
       ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 1.5);
       ctx.fillStyle = "rgba(8,10,24,0.72)"; ctx.fillRect(0, 0, W, H);
       ctx.textAlign = "center"; ctx.fillStyle = "#fff6dc"; ctx.font = "italic 30px Georgia, serif";
@@ -1158,13 +1168,13 @@ const w3ending = {
       ctx.fillStyle = "#ffe08a"; ctx.font = "20px Georgia, serif"; ctx.fillText("1 Samuel 16:7", W / 2, 400);
       ctx.restore(); ctx.textAlign = "left";
     }
-    if (this.step === 8) caption("Far off, a rider on the road to Bethlehem. A messenger from the king.", Math.min(1, this.stepT * 1.5));
-    if (this.step === 9 && this.stepT > 3.5) caption(typeof JOURNAL_PAGES !== "undefined" && JOURNAL_PAGES[WORLD] ? "Press A to write in the Journal" : "Press A to continue", 1, true);
-    else if (this.step === 2 || this.step === 3 || this.step === 5 || (this.step === 6 && this.gave && this.stepT > this.HANDOVER + 1.5) || (this.step === 7 && this.stepT > 1.5) || (this.step === 8 && this.stepT > 4)) caption("A: next", 0.8, true);
+    if (this.step === 9) caption("Far off, a rider on the road to Bethlehem. A messenger from the king.", Math.min(1, this.stepT * 1.5));
+    if (this.step === 10 && this.stepT > 3.5) caption(typeof JOURNAL_PAGES !== "undefined" && JOURNAL_PAGES[WORLD] ? "Press A to write in the Journal" : "Press A to continue", 1, true);
+    else if (this.step === 2 || this.step === 3 || this.step === 5 || (this.step === 6 && this.gave && this.stepT > this.HANDOVER + this.RAISE) || (this.step === 8 && this.stepT > 1.5) || (this.step === 9 && this.stepT > 4)) caption("A: next", 0.8, true);
     if (dialog.t > 0) drawDialog();
     if (this.fade < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - this.fade})`; ctx.fillRect(0, 0, W, H); }
-    if (this.step === 9 && this.stepT < 0.8) { ctx.fillStyle = `rgba(0,0,0,${1 - this.stepT / 0.8})`; ctx.fillRect(0, 0, W, H); }   // a fade to the fire
-    if (this.step === 10) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, this.stepT / 1.2)})`; ctx.fillRect(0, 0, W, H); }
+    if (this.step === 10 && this.stepT < 0.8) { ctx.fillStyle = `rgba(0,0,0,${1 - this.stepT / 0.8})`; ctx.fillRect(0, 0, W, H); }   // a fade to the fire
+    if (this.step === 11) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, this.stepT / 1.2)})`; ctx.fillRect(0, 0, W, H); }
   },
 };
 function drawStaff(x, y, s) {   // Hanan's staff standing up, foot at x, y: Glen's art (assets/items/staff.png), or a drawn crook
@@ -1180,7 +1190,7 @@ function drawStaff(x, y, s) {   // Hanan's staff standing up, foot at x, y: Glen
 if (new URLSearchParams(location.search).has("w3end")) setTimeout(() => {
   const at = Number(new URLSearchParams(location.search).get("w3end")) || 0;
   w3ending.start(() => location.reload());
-  if (at) Object.assign(w3ending, { step: at, hananX: w3ending.hananStop(), fade: 1, t: 2 });
+  if (at) Object.assign(w3ending, { step: at, hananX: w3ending.hananStop(), davidX: at > 7 ? w3ending.FLOCK_X : w3ending.DAVID_X, gave: at > 6, fade: 1, t: 2 });
 }, 300);
 
 // ---------------------------------------------------------------------------

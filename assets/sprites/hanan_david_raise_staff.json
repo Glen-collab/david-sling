@@ -1,0 +1,12 @@
+{
+  "frames": 18,
+  "frame_w": 361,
+  "frame_h": 312,
+  "ms_per_frame": 140,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 154,
+  "anchor_y": 310,
+  "source": "david_staff.mov",
+  "note": "Hanan (left) and David (right): David lifts the staff up high. Anchor sits DX px left of David's feet, like hanan_staff_to_david"
+}

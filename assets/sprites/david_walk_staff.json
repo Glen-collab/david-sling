@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 147,
+  "frame_h": 265,
+  "ms_per_frame": 87,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 65,
+  "anchor_y": 262,
+  "source": "david_walk_staff_crop.mp4",
+  "video_frames": [
+    22,
+    24,
+    26,
+    28,
+    30,
+    32,
+    34,
+    37,
+    39,
+    41,
+    43,
+    45
+  ]
+}
