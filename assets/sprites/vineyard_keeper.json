@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 152,
+  "frame_h": 272,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 78,
+  "anchor_y": 271,
+  "source": "keeper_mag.png"
+}

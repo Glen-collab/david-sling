@@ -2892,6 +2892,18 @@ window.SPRITE_DATA = {
   "ay": 279,
   "align": "feet"
  },
+ "vineyard_keeper": {
+  "src": "../assets/sprites/vineyard_keeper.png",
+  "frames": 6,
+  "w": 152,
+  "h": 272,
+  "ms": 400,
+  "loop": true,
+  "pingpong": false,
+  "ax": 78,
+  "ay": 271,
+  "align": "feet"
+ },
  "waterfall": {
   "src": "../assets/sprites/waterfall.png",
   "frames": 32,
