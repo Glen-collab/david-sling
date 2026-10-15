@@ -724,7 +724,7 @@ const w4intro = {
   },
   draw() {
     const y = GR * T, s = this.SIZE, now = performance.now() / 1000, keep = bgWorld;
-    bgWorld = "w3_1"; drawBackground(0); bgWorld = keep; drawFlatGround(0);   // Bethlehem: Jesse's house in the morning
+    bgWorld = "w3_1"; drawBackground(0); bgWorld = keep; drawTownGround(y);   // Bethlehem: Jesse's house in the morning, on the town's dusty ground
     const dx = W * 0.28, jx = W * 0.39, ex = W * 0.49, mx = W * 0.8;
     // the family at the door
     if (SPR.jesse_idle) drawSprite(this.step === 3 && SPR.jesse_talk ? "jesse_talk" : "jesse_idle", frameOf("jesse_idle", now), jx, y, 1, s);
