@@ -221,7 +221,8 @@ the harp phrase at 3-2's campfire.
   ready for STAGE_INFO "4-1" bg w4_1 when the stage is built. make_backgrounds.py now skips a missing layer (borrow it).
 - donkey_packs_walk (Glen's 5-pose sheet, david-sling-art/world4/donkey_packs_walk_sheet.png, green keyed, --blobs,
   height 200 like the World 2 donkey): the gift donkey for 4-1. Not placed yet.
-- Next art: donkey scared, doves, vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
+- donkey_packs_scared (Glen's 4 poses: startled, half-rear, full rear, backing away; --once, scaled to match the walk).
+- Next art: doves, vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
 
 ## 2026-10-15 late: sounds, Journal, jackals
 - Glen's animal/storm sounds are wired (assets/sounds/SOURCES.md has the map): thunder x3 (3-4), rain loop (TUNE.RAIN_VOLUME,

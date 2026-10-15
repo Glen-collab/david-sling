@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 207,
+  "frame_h": 224,
+  "ms_per_frame": 200,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 142,
+  "anchor_y": 223,
+  "source": "dps_mag.png"
+}
