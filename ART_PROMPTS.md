@@ -672,3 +672,44 @@ above it is solid flat bright magenta (#FF00FF).
 ```
 
 **Save as** `david-sling-art\4-1 far.png`, `4-1 mid.png`, `4-1 near.png`.
+
+## 4-1 sprites (one message each; paste the style block first)
+Sheets are one row of poses on solid green, like the goat and the climbing strips. **Save in** `david-sling-art\world4\`.
+
+**Donkey with packs, walking** (upload a frame of the World 2 donkey with it, so it's the same animal)
+```
+A sprite sheet: one row of 6 poses of the same small grey-brown donkey walking to the right, a full walk cycle, seen
+straight from the side. Pixar-style 3D, soft lighting. Pale muzzle and belly, long ears, dark stripe down the back, a
+short brushy tail. It carries a simple woven saddle blanket with two bulging cloth sacks of bread tied on either side, a
+plump leather wineskin strapped on top, and a short rope lead hanging from its halter. Every pose the same size, hooves
+on the same line, clear gaps between poses. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Donkey with packs, scared**
+```
+The same donkey with the same packs, same size and style: one row of 4 poses facing right. Spooked: ears pinned back,
+eyes wide, head jerking up, then rearing back on its hind legs with its front hooves up, then landing and backing away.
+Clear gaps between poses. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Doves**
+```
+A sprite sheet of the same small grey rock dove, Pixar-style 3D, soft lighting: soft blue-grey feathers, two dark bars
+on each wing, a shimmer of green and purple on the neck, pink feet. Top row: 4 poses walking to the right, head bobbing
+forward and back. Bottom row: 4 poses flying to the right, a full wingbeat (wings up, level, down, level). All poses the
+same size, clear gaps between them. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Vineyard keeper** (made up: an old farmer whose vines the wild boars are wrecking)
+```
+A sprite sheet: one row of 6 poses of the same old vineyard keeper, full body, seen from the side, FACING LEFT.
+Pixar-style 3D, soft lighting. A sturdy, kind, sunburned old farmer with a short grey beard, a faded striped headcloth,
+a rough brown wool tunic with the sleeves rolled up, a leather belt with a small curved pruning knife in it, sandals.
+Poses: standing; talking with one hand open; talking and pointing back over his shoulder; shaking his head sadly
+(the boars ruined his vines); laughing with relief; waving goodbye. Same size, feet on the same line, clear gaps between
+poses. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Wineskin** (one item: the gift that falls off the donkey)
+```
+A single game item: a plump goatskin wineskin, seen from the side, lying on its side: soft brown leather, stitched
+seams, the neck tied shut with a leather cord and a little loop to carry it. Pixar-style 3D, soft lighting. Centered,
+filling most of the picture. Background solid flat bright green (#00FF00). No shadow, no text.
+```
+
