@@ -528,7 +528,7 @@ function drawSteward(camX) {
 // counsel makes it gentler. The tunes go in three parts: the quiet part, the storm, the new part. Then he sleeps (16:23).
 // ---------------------------------------------------------------------------
 Object.assign(W4, { WISP_DRIFT: 55, WISP_SHIVER: 0.8, LAMP_REACH: 1.4, LAMP_CLEAR: 7,
-  SAUL_SIZE: 1.25, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9 });
+  SAUL_SIZE: 1.25, THRONE_SIZE: 0.44, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9 });
 Object.assign(TUNE.SPRITE_SIZE, { saul: W4.SAUL_SIZE, saul_torment: W4.SAUL_SIZE, saul_joy: W4.SAUL_SIZE, saul_sad: W4.SAUL_SIZE });
 // Glen's other Saul sheets: saul_torment (0 lurching, 1 head in hands, 2 fists, 3 shouting, 4 arms flung out, 5 clutching
 // his robe), saul_joy (arms raised, for the End of World 4), saul_sad (head bowed).
@@ -613,7 +613,7 @@ function saulSendsOut() {
   }, 1600);
 }
 function drawThrone(x) {   // the empty throne while he's up: Glen's item (assets/items/throne.png), when there is one
-  if (ITEM.throne && ITEM.throne.naturalWidth) drawItem("throne", x + 0.6 * T, GR * T + 4, W4.THRONE_SIZE || 0.5);
+  if (ITEM.throne && ITEM.throne.naturalWidth) drawItem("throne", x + 60 * SCALE * W4.SAUL_SIZE, GR * T + 2, W4.THRONE_SIZE);   // where the chair is in his seated frames
 }
 function saulBlocking() { return throne && !saul.calm ? "The king is still troubled. Sit by him and play first." : null; }
 function drawHall(camX) {
