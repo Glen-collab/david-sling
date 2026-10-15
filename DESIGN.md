@@ -1330,6 +1330,11 @@ drawn and run in world4.js (OLD_LETTERS).
 - 4-4: the second **He**, on a column in the king's hall, and the **Steward**, the one who tells the truth, gives the
   how-to-read hint: *"Our fathers wrote from right to left, boy. Most people here have forgotten."*
 - 5-1: **Dalet** (a door), on a rock by the supply road, with the clue toward David's own name (DWD) for the warm-up.
+- **Missed some? Come back later (Glen).** The cave is always open, but the wall carving that gives the clue only shows
+  the letters David has found; the rest are worn away (blank). You can still guess your way across (a wrong stone is just
+  a fall), or leave and go back for the letters you missed: the Journal keeps a page of the letters found so far, with
+  an empty space for each one still out there and a hint of which world it's in. World 4's gift (the King's Favour:
+  fast travel between world maps) makes the trip back quick. The cave's reward waits until you cross.
 
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
