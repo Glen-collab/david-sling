@@ -226,7 +226,7 @@ the harp phrase at 3-2's campfire.
   flight loop, lined up on the beak; drawn at the same body size as the walk). For 4-1's road (harmless: Shepherd's Judgment).
 - vineyard_keeper (Glen's 6 poses, facing left; one sheet, pick the frame: 0 standing, 1 talking, 2 pointing back over
   his shoulder, 3 shaking his head, 4 laughing, 5 waving goodbye). Keyed like the bush (his grape leaves are kept).
-- Next art: wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
+- wineskin (assets/items, 240 px): the gift that falls off the donkey in 4-1. All 4-1 art is in; next is building the stage.
 
 ## 2026-10-15 late: sounds, Journal, jackals
 - Glen's animal/storm sounds are wired (assets/sounds/SOURCES.md has the map): thunder x3 (3-4), rain loop (TUNE.RAIN_VOLUME,
