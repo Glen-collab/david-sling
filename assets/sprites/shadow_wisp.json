@@ -1,0 +1,12 @@
+{
+ "frames": 4,
+ "frame_w": 293,
+ "frame_h": 305,
+ "ms_per_frame": 260,
+ "loop": true,
+ "pingpong": true,
+ "align": "center",
+ "anchor_x": 146,
+ "anchor_y": 152,
+ "source": "shadow_sheet.png"
+}

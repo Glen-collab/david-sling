@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 230,
+  "frame_h": 304,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 130,
+  "anchor_y": 303,
+  "source": "saul_mag.png"
+}
