@@ -16,6 +16,12 @@ Object.assign(TUNE.SPRITE_SIZE, { raven_peck: TUNE.SPRITE_SIZE.raven_peck || 1, 
 
 // ladders: a rung to hop onto every three rows (drawn as a ladder, not as rock ledges)
 for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c = l.c; c < l.c + 2; c++) specialPlat.add(c + "," + y); }
+const ladderRungs = new Set(); for (const l of ladders) for (const y of l.rungs) for (let c = l.c; c < l.c + 2; c++) ladderRungs.add(c + "," + y);
+function onLadder(d) {   // main.js: standing on a rung? (Down steps down it)
+  const on = ladderRungs.has(Math.floor(d.x / T) + "," + Math.floor(d.y / T));
+  if (on && !W3.ladderTold) { W3.ladderTold = true; toast("On a ladder: press Down to climb down a rung, A to climb up."); }
+  return on;
+}
 for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);   // stepping stones: drawn as rocks, not as ledges
 
 // ---------------------------------------------------------------------------
@@ -337,6 +343,7 @@ function drawRat(k, x) {   // a little brown rat: Glen's running rat (standing s
 }
 
 function updateWorld3(dt) {
+  if (ladders.length && !W3.ladderTold && david.onGround && ladderRungs.has(Math.floor(david.x / T) + "," + Math.floor(david.y / T))) onLadder(david);
   if (guides.length) {   // 3-3: Shammah runs ahead (after a fall he's back at the last spot David reached)
     if (david.deadT > 0) shammahRun.dead = true;
     else { if (shammahRun.dead) { shammahRun.dead = false; resetGuide(); } updateGuide(dt); }
@@ -363,10 +370,17 @@ function fliesSheep(sh, dx, dy) {   // called from updateSheep (main.js) while i
   if (!sh.hinted) { sh.hinted = true; toast("Flies at its eyes: it won't settle. Press Down to rub olive oil on its head."); }
   if (!pressed("down") || !david.onGround || inCutscene()) return;
   if (david.olives < W3.OIL_COST) { toast(`Not enough oil in your flask. Gather olives (it takes ${W3.OIL_COST}).`); return; }
-  david.olives -= W3.OIL_COST; sh.freed = true;
-  chime(7);
-  for (let k = 0; k < 14; k++) bits.push({ x: sh.x, y: sh.y - 40, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 260, life: 0.8, color: "#e8d27a" });
-  toast("You anointed its head with oil, and the flies are gone. \"You anoint my head with oil\" (Psalm 23:5)");
+  // he kneels over it like over a cast sheep (main.js updateLiftSheep), and rubs the oil in: oilSheep() below
+  david.olives -= W3.OIL_COST;
+  if (david.carrying || lamb.carried) { david.carrying = false; lamb.carried = false; lamb.x = david.x - david.facing * 50; lamb.y = david.y; }
+  sh.state = "helped"; sh.upright = true; david.helpSheep = sh; david.helpSide = Math.sign(sh.x - david.x) || david.facing;
+  david.liftPhase = 0; david.harp = false; david.charging = false; david.throwT = -1; setState("liftSheep");
+}
+function oilSheep(sh) {   // main.js: halfway through the kneel, the oil goes on and the flies scatter
+  sh.oiled = true; chime(7);
+  for (let k = 0; k < 16; k++) bits.push({ x: sh.x + sh.facing * 18, y: sh.y - 46, vx: (Math.random() - 0.5) * 200, vy: -Math.random() * 240, life: 0.9, color: k % 2 ? "#e8d27a" : "#fff2b0" });
+  for (let k = 0; k < 8; k++) bits.push({ x: sh.x, y: sh.y - 52, vx: (Math.random() - 0.5) * 600, vy: -200 - Math.random() * 300, life: 0.6, color: "#1d1a12" });   // the flies scatter
+  toast("You rubbed olive oil on its head, and the flies are gone. \"You anoint my head with oil\" (Psalm 23:5)");
 }
 function drawFlies(x, y, t) {   // a little cloud of flies buzzing round its head
   ctx.save(); ctx.fillStyle = "#1d1a12";
@@ -453,7 +467,7 @@ const PASS_SCENES = [
     ["Samuel", "The LORD has not chosen this one either."],                                                       // 16:8
     ["", "Then Jesse had Shammah pass by."],
     ["Samuel", "The LORD has not chosen this one either."] ] },                                                   // 16:9
-  { sons: ["nethanel", "raddai", "ozem", "elihu"], lines: [
+  { sons: [], line: true, lines: [
     ["", "Jesse had seven of his sons pass before Samuel."],
     ["Samuel", "The LORD has not chosen these."],                                                                 // 16:10
     ["", "And far out on the hills, the youngest was with the sheep."] ] },
@@ -478,22 +492,21 @@ function drawPassScene() {
   const P = passScene; if (!P.active) return;
   const S = PASS_SCENES[P.k], a = Math.min(1, P.t * 2.5);
   ctx.save(); ctx.globalAlpha = a;
-  const sky = ctx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#f2c98a"); sky.addColorStop(0.6, "#f7e2b8"); sky.addColorStop(1, "#d9b382");
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-  const base = H * 0.7;   // Bethlehem behind them: Glen's houses along the street
-  ["town_house_big", "town_house_fort", "town_house_shed", "town_house_big"].forEach((n, i) => {
-    const img = ITEM[n]; if (!img || !img.naturalWidth) return;
-    const h = H * (i % 2 ? 0.3 : 0.26), w = img.naturalWidth * h / img.naturalHeight;
-    ctx.globalAlpha = a * 0.85; ctx.drawImage(img, W * (0.04 + i * 0.24), base - h + 8, w, h);
-  });
-  ctx.globalAlpha = a; ctx.fillStyle = "#c9a172"; ctx.fillRect(0, base, W, H - base);
-  ctx.fillStyle = "rgba(60,36,12,0.18)"; ctx.fillRect(0, 0, W, H);
+  const keep = bgWorld; bgWorld = "w3_1";   // Bethlehem: 3-1's town layers, and the stage's own topsoil (a stretch with no rocks)
+  drawBackground(0); bgWorld = keep; drawFlatGround(0);
+  const base = GR * T;
+  if (S.line) {   // the seven: Glen's brothers-line clip, cut off just before David (he's out with the sheep)
+    const B = SPR.brothers_line, ax = W * 0.2, cut = ax + (584 - B.ax) * SCALE * 1.9;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, cut, H); ctx.clip();
+    drawSprite("brothers_line", Math.floor(P.t * 2) % 15, ax, base, 1, 1.9, a);
+    ctx.restore();
+  }
   const n = S.sons.length, gap = Math.min(170, W * 0.6 / n);
   S.sons.forEach((son, i) => {   // they walk in from the left and stand before Samuel (the camera, on the right)
     const tx = W * 0.62 - (n - 1 - i) * gap, f = Math.min(1, P.t / PASS_ENTER), x = -120 + (tx + 120) * (1 - (1 - f) * (1 - f));
     const walk = son + "_walk", idle = son === "eliab" ? "eliab_arms_crossed" : son + "_idle";
-    if (f < 1 && SPR[walk]) drawSprite(walk, frameOf(walk, P.t), x, base + 6, 1, PASS_SIZE, a);
-    else if (SPR[idle]) drawSprite(idle, frameOf(idle, P.t), x, base + 6, 1, PASS_SIZE, a);
+    if (f < 1 && SPR[walk]) drawSprite(walk, frameOf(walk, P.t), x, base, 1, PASS_SIZE, a);
+    else if (SPR[idle]) drawSprite(idle, frameOf(idle, P.t), x, base, 1, PASS_SIZE, a);
   });
   ctx.textAlign = "center"; ctx.fillStyle = "rgba(50,30,10,0.85)"; ctx.font = "italic 22px Georgia, serif";
   ctx.fillText("Meanwhile, in Bethlehem...", W / 2, 50);
@@ -513,19 +526,25 @@ function drawPassScene() {
 }
 
 // ---------------------------------------------------------------------------
-// 3-3 We Will Not Sit Down. Fences (fence(c): rails up top, open underneath: jump it, or roll under and keep your speed), the drain under
+// 3-3 We Will Not Sit Down. Fences (fence(c): too tall to jump, open underneath: roll under), the drain under
 // the town wall (The One is in there), and Shammah running ahead: he waits at each guide() spot and calls out the way
 // when David catches up, then runs on to the next (straight through the fences: he knows the gaps).
 // ---------------------------------------------------------------------------
 Object.assign(W3, { GUIDE_RUN: 400, GUIDE_NEAR: 4 });   // Shammah's speed (px/s); how close (tiles) David gets before he runs on
-function drawFence(p) {   // two posts in the ground, rails across rows 13-14, open underneath (rows 15-16)
-  const x = p.c * T + T / 2, top = 13 * T - 8, low = 15 * T;
-  ctx.fillStyle = "#6b4a2a";
-  for (const dx of [-T * 0.62, T * 0.62]) { ctx.beginPath(); ctx.roundRect(x + dx - 6, top - 6, 12, GR * T + 8 - top, 4); ctx.fill(); }
-  for (let k = 0; k < 3; k++) {
-    const y = top + 4 + k * (low - top - 14) / 2;
-    ctx.fillStyle = "#8a6238"; ctx.beginPath(); ctx.roundRect(x - T * 0.85, y, T * 1.7, 11, 4); ctx.fill();
-    ctx.fillStyle = "rgba(255,230,190,0.25)"; ctx.fillRect(x - T * 0.81, y + 1, T * 1.62, 3);
+function drawFence(p) {   // a tall plank fence (rows 7-14), open at the bottom (rows 15-16): roll under
+  const x = p.c * T + T / 2, top = 7 * T, low = 15 * T;
+  ctx.fillStyle = "#7a5634";   // upright planks, pointed tops
+  for (let k = -2; k <= 2; k++) {
+    const px = x + k * 13 - 6, pt = top + Math.abs(k) * 4;
+    ctx.beginPath(); ctx.moveTo(px, low); ctx.lineTo(px, pt + 8); ctx.lineTo(px + 6, pt); ctx.lineTo(px + 12, pt + 8); ctx.lineTo(px + 12, low); ctx.fill();
+    ctx.fillStyle = "rgba(40,24,10,0.35)"; ctx.fillRect(px + 10, pt + 8, 2, low - pt - 8); ctx.fillStyle = "#7a5634";
+  }
+  ctx.fillStyle = "#5e3f24";
+  for (const dx of [-T * 0.95, T * 0.95]) { ctx.beginPath(); ctx.roundRect(x + dx - 7, top - 10, 14, GR * T + 8 - top + 10, 4); ctx.fill(); }   // posts down into the ground
+  for (let k = 0; k < 2; k++) {
+    const y = top + 30 + k * (low - top - 60);
+    ctx.fillStyle = "#8a6238"; ctx.beginPath(); ctx.roundRect(x - T * 1.05, y, T * 2.1, 12, 4); ctx.fill();
+    ctx.fillStyle = "rgba(255,230,190,0.25)"; ctx.fillRect(x - T * 1.0, y + 1, T * 2.0, 3);
   }
 }
 function drawDrain(p) {   // the low drain under the town wall: a dark arched opening with stones round it
@@ -540,16 +559,44 @@ const shammahRun = { i: 0, x: guides.length ? guides[0].x : 0, y: guides.length 
 function resetGuide() {   // after a fall: he's waiting at the last spot David reached (never further back than the checkpoint)
   const G = shammahRun; let i = 0;
   for (let k = 0; k < guides.length; k++) if (guides[k].x <= checkpoint.x + 2 * T) i = k;
-  Object.assign(G, { i, x: guides[i].x, y: guides[i].y, moving: false, said: false });
+  Object.assign(G, { i, x: guides[i].x, y: guides[i].y, moving: false, said: false, air: false, vy: 0 });
 }
+// Shammah runs the ground like David: up steps and roofs with a jump, over gaps with a jump, down off ledges with a
+// drop. He knows the gaps under the fences (he ducks through them).
+const fenceCols = new Set(setPieces.filter(p => p.kind === "fence").map(p => p.c));
+function guideFloor(c, feet) {   // the top of what he can stand on in column c, from a little above his feet down
+  if (c < 0 || c >= COLS) return null;
+  for (let r = Math.max(1, Math.floor(feet / T) - 7); r < ROWS; r++) {
+    const solidHere = (isSolid(c, r) && !fenceCols.has(c)) || isOneway(c, r);
+    if (solidHere && !(isSolid(c, r - 1) && !fenceCols.has(c))) return r * T;
+  }
+  return null;
+}
+function guideJump(G, rise) { G.vy = -Math.sqrt(2 * TUNE.GRAVITY * Math.max(T, rise + 34)); G.air = true; }
 function updateGuide(dt) {
   const G = shammahRun; if (!guides.length) return;
   G.t += dt;
   if (G.moving) {
-    const g = guides[G.i], dx = g.x - G.x, step = W3.GUIDE_RUN * dt;
-    G.facing = Math.sign(dx) || 1;
-    if (Math.abs(dx) <= step) { G.x = g.x; G.y = g.y; G.moving = false; G.said = false; }
-    else { const f = step / Math.abs(dx); G.x += Math.sign(dx) * step; G.y += (g.y - G.y) * f; }
+    const g = guides[G.i], dx = g.x - G.x, dir = Math.sign(dx) || 1;
+    G.facing = dir;
+    const col = Math.floor(G.x / T), ahead = Math.floor((G.x + dir * 26) / T);
+    if (!G.air) {
+      const here = guideFloor(col, G.y), next = guideFloor(ahead, G.y);
+      if (next !== null && next < G.y - 4) guideJump(G, G.y - next);                     // a step up: jump onto it
+      else if (next === null || next > G.y + 2 * T) {                                    // a drop or a gap: is there a landing ahead at about this height?
+        for (let k = 2; k <= 5; k++) { const f = guideFloor(col + dir * k, G.y); if (f !== null && f <= G.y + T) { guideJump(G, Math.max(0, G.y - f) + T); break; } }
+      }
+      if (!G.air && next !== null && next > G.y + 4) G.air = true;                        // walk off a ledge: fall
+    }
+    const step = W3.GUIDE_RUN * dt, wall = guideFloor(ahead, G.y);
+    const blocked = G.air && wall !== null && wall < G.y - 8 && (wall > G.y - 6 * T);      // in the air, a wall in his face: no further until he's above it
+    if (!blocked) G.x += Math.abs(dx) <= step ? dx : dir * step;
+    if (G.air) {
+      G.vy = Math.min(TUNE.MAX_FALL, G.vy + TUNE.GRAVITY * dt); G.y += G.vy * dt;
+      const f = guideFloor(Math.floor(G.x / T), G.y - Math.max(0, G.vy * dt) - 2);
+      if (G.vy > 0 && f !== null && G.y >= f) { G.y = f; G.vy = 0; G.air = false; }
+    }
+    if (Math.abs(g.x - G.x) < 1 && !G.air) { G.x = g.x; G.moving = false; G.said = false; }
     return;
   }
   G.facing = Math.sign(david.x - G.x) || 1;   // waiting: watching for David
@@ -562,8 +609,8 @@ function updateGuide(dt) {
 }
 function drawGuide() {
   const G = shammahRun; if (!guides.length) return;
-  const name = G.moving ? "shammah_walk" : "shammah_idle";
-  drawSprite(name, frameOf(name, G.t * (G.moving ? 1.6 : 1)), G.x, G.y, G.facing);
+  const name = G.moving ? "shammah_walk" : "shammah_idle", duck = fenceCols.has(Math.floor(G.x / T)) || fenceCols.has(Math.floor((G.x + G.facing * 30) / T));
+  drawSprite(name, frameOf(name, G.t * (G.moving ? 1.6 : 1)), G.x, G.y, G.facing, duck ? 0.6 : 1);   // ducking under a fence
 }
 
 // ---------------------------------------------------------------------------
@@ -572,6 +619,14 @@ function drawGuide() {
 // "this is the one", David steps forward, and Samuel pours the oil over his head in front of his brothers. A warm light
 // and David's song for the Spirit: something changed in David, not in his sling (no new powers). A moves it on.
 // ---------------------------------------------------------------------------
+function drawFlatGround(cx) {   // the stage's own topsoil and earth, flat all the way across (a story scene: no houses or rocks)
+  const c0 = Math.floor(cx / T) - 3, c1 = c0 + Math.ceil(W / T) + 6, saved = [];
+  for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) if (c >= 0 && c < COLS) {
+    saved.push([r, c, solid[r][c], oneway[r][c]]); solid[r][c] = r >= GR ? 1 : 0; oneway[r][c] = false;
+  }
+  drawTiles(cx);
+  for (const [r, c, v, o] of saved) { solid[r][c] = v; oneway[r][c] = o; }
+}
 function drawStoryBox(who, text, hint = "A: next", top = false) {   // the caption box of a story scene (bottom, or top)
   const bw = Math.min(900, W - 60), bx = W / 2 - bw / 2, by = top ? 76 : H - 150;
   ctx.save();
@@ -643,7 +698,7 @@ const anointing = {
   },
   draw() {
     const cx = this.camX(), y = GR * T, s = ANOINT.SIZE, a = Math.min(1, this.t / 1.2);
-    drawBackground(cx); drawTiles(cx);
+    drawBackground(cx); drawFlatGround(cx);
     const dx = this.davidX(), k = SCALE * s;
     // Jesse's sons (David at the end); he steps out at step 2
     const B = SPR.brothers_line;
@@ -670,6 +725,13 @@ const anointing = {
           ctx.fillStyle = `rgba(240,205,95,${1 - ph})`; ctx.beginPath(); ctx.arc(dx + (n - 1.5) * 9, head + 6 + ph * 40, 3.2, 0, Math.PI * 2); ctx.fill();
         }
       }
+    }
+    if (B && SPR.samuel_anoint && this.step >= 1) {   // David again, in front of Samuel (below Samuel's raised arm and horn)
+      const cut = this.lineX() + (582 - B.ax) * k, head = y - (ANOINT.DAVID_HEAD + 12) * k;
+      let i; if (this.step < 2) i = Math.floor(this.t * 2) % 15;
+      else i = Math.min(B.frames - 1, 15 + Math.floor(Math.min(1, this.stepT / ANOINT.STEP_TIME) * (B.frames - 15) + (this.step > 2 ? 9 : 0)));
+      ctx.save(); ctx.beginPath(); ctx.rect(cut, head, W - cut, H - head); ctx.clip();
+      drawSprite("brothers_line", i, this.lineX(), y, 1, s); ctx.restore();
     }
     if (this.glow > 0) {   // the warm light on David (the Spirit of the LORD)
       ctx.save(); ctx.globalCompositeOperation = "lighter";

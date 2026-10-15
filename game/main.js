@@ -366,8 +366,8 @@ const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const stepStone = c => { plat(c, GR, 1); setPiece("stepstone", c, GR); };   // a flat rock in a stream: a ledge level with the bank (drawn in world3.js)
-// 3-3: a wooden fence, rails up top and open underneath: jump it, or keep your speed and roll under (drawn in world3.js)
-const fence = c => { block(c, 13, 1, 2, 9); setPiece("fence", c, GR - 1); };
+// 3-3: a tall wooden fence, too high to jump, with a gap underneath to roll through (drawn in world3.js)
+const fence = c => { block(c, 7, 1, 8, 9); setPiece("fence", c, GR - 1); };
 // 3-3: where Shammah waits (in order) and what he calls out when David catches up (world3.js runs him along)
 const guide = (c, r, line) => setPiece("guide", c, r, { line });
 const thicket = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false, thorns: true }); };   // thorns: a charged stone clears them
@@ -993,7 +993,7 @@ if (LEVEL_NAME === "test") {
   // into town: up the stairs and over the roofs, the way they ran as boys
   guide(130, GR - 1, "Up the stairs! The roofs are faster than the lanes today, the whole town's in them.");
   stair(133, 4);
-  house(141, 5, 12); house(147, 5, 10); house(153, 5, 9); house(159, 4, 9);
+  house(141, 6, 12); house(147, 6, 10); house(153, 6, 9); house(159, 4, 9);   // shoulder to shoulder: no gaps to fall into
   oliveRow(141, 11, 5); lostSheep("sheep", 149, 9); oliveRow(153, 8, 5);
   special(156, 4);
   ladder(163, 9);                                              // the gap by the wall: a ladder back up
@@ -1271,6 +1271,7 @@ function updateDavid(dt) {
     const r = Math.floor(d.y / T), c = Math.floor(d.x / T);
     if (isOneway(c, r) && Math.abs(d.vx) <= 60) { d.dropThrough = true; d.y += 2; }
   }
+  if (d.onGround && pressed("down") && typeof onLadder === "function" && onLadder(d)) { d.dropThrough = true; d.y += 2; }   // a ladder: Down steps down a rung (world3.js)
 
   // --- gravity + collisions
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
@@ -2135,7 +2136,7 @@ const trail = [];         // David's footsteps, newest last
 let rescuedLamb = false;
 function newSheep(o) {
   return Object.assign(o, { x: o.hx, y: o.hy, vx: 0, vy: 0, onGround: true, state: "lost", t: Math.random() * 3, facing: -1,
-    freed: o.how !== "thorns" && o.how !== "cast" && o.how !== "flies", upright: false, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
+    freed: o.how !== "thorns" && o.how !== "cast" && o.how !== "flies", upright: false, oiled: false, stillT: 9, bleatT: Math.random() * 4, hinted: false, moved: 0 });
 }
 function resetAllSheep() {
   for (let i = lost.length - 1; i >= 0; i--) if (lost[i].how === "rescued") lost.splice(i, 1);
@@ -2363,7 +2364,7 @@ function drawSheepOne(sh, camX) {
     const [nm, i] = sheepFrame(sh);
     drawSprite(nm, i, x, y, sh.facing);
   }
-  if (sh.how === "flies" && !sh.freed && typeof drawFlies === "function") drawFlies(x, y, sh.t);
+  if (sh.how === "flies" && !sh.freed && !sh.oiled && typeof drawFlies === "function") drawFlies(x, y, sh.t);
   if (sh.one || sh.how === "rescued") sparkle(x, y, sh.t);
   if (!line.includes(sh) && sh.state !== "helped" && sh.bleatT < 0 && sh.bleatT > -1) {   // "baa!" now and then, so you can find them
     ctx.save(); ctx.globalAlpha = Math.min(1, -sh.bleatT * 4, (1 + sh.bleatT) * 4);
@@ -2520,6 +2521,7 @@ function updateLiftSheep(d, dt) {
     sh.upright = true; sh.facing = d.helpSide; sh.stillT = 0;
     for (let k = 0; k < 10; k++) bits.push({ x: sh.x, y: sh.y - 6, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 220, life: 0.5, color: "#d8c9a4" });
   }
+  if (sh.how === "flies" && !sh.oiled && d.t > LIFT_DOWN) oilSheep(sh);   // world3.js
   if (d.t > LIFT_DOWN + LIFT_HOLD + LIFT_UP) { d.liftPhase = 0; sh.freed = true; joinLine(sh); setState("idle"); }
 }
 function updateFinishDavid(d, dt) {   // drop down, step back beside the post, turn to watch them come
