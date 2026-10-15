@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 276,
+  "frame_h": 250,
+  "ms_per_frame": 160,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 157,
+  "anchor_y": 248,
+  "source": "slip_mag.png"
+}

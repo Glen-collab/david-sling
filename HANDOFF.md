@@ -158,7 +158,7 @@ overlay, rain, lightning every W3.LIGHTNING s), the fallen oak over The One (set
 (world2's setPiece "wind"). The Wild Ox (setPiece "ox", { arena, end }; setPiece "oxtree" x3; "flockHuddle"): phase 1
 charges the flock, a charged stone turns it; phase 2 roll under its charge by a tree, horns stick (W3.OX_STUCK), any hit
 splits that tree; lightning can drop a branch near David; phase 3 hit it while it skids (W3.OX_HITS3), then it runs off
-(driven off, not killed). Art: Glen's four ox sheets cut with `sheet2sprite.py --blobs` (each figure by its own outline; sources in david-sling-art/world3/ox_*_sheet.png): ox_windup (the tell), ox_charge (charge/skid), ox_dazed (hits the tree, sits dizzy; shake = getting up), ox_gallop (flee). W3.OX_SIZE 1.6; anchors set at the nose (the hit box runs back from ox.x). Not done: slippery landing, counsel tiers.
+(driven off, not killed). Art: Glen's four ox sheets cut with `sheet2sprite.py --blobs` (each figure by its own outline; sources in david-sling-art/world3/ox_*_sheet.png): ox_windup (the tell), ox_charge (charge/skid), ox_dazed (hits the tree, sits dizzy; shake = getting up), ox_gallop (flee). W3.OX_SIZE 1.6; anchors set at the nose (the hit box runs back from ox.x). Slippery landing: in 3-4 a hard landing (fall > 600) plays `david_slip` (Glen's 6-pose sheet on green, david-sling-art/world3/david_slip_sheet.png, keyed to magenta then sheet2sprite --blobs); he slides forward and can't move or jump for TUNE.SLIP_LOCK 0.5s (TUNE.SLIP_MS/SLIP_SLIDE/SLIP_MUD). Not done: counsel tiers.
 
 **2026-10-15 (after the PC restart):**
 - 3-4 backgrounds = Glen's storm set `w3_4`. Ox-fight trees = Glen's oak sheet (assets/items/oak, oak_gashed while the ox

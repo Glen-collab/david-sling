@@ -756,6 +756,18 @@ window.SPRITE_DATA = {
   "ay": 244,
   "align": "feet"
  },
+ "david_slip": {
+  "src": "../assets/sprites/david_slip.png",
+  "frames": 6,
+  "w": 276,
+  "h": 250,
+  "ms": 160,
+  "loop": false,
+  "pingpong": false,
+  "ax": 157,
+  "ay": 248,
+  "align": "feet"
+ },
  "david_slow_to_stop": {
   "src": "../assets/sprites/david_slow_to_stop.png",
   "frames": 8,

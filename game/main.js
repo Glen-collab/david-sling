@@ -19,6 +19,10 @@ const TUNE = {
   MAX_FALL: 1300,
   COYOTE: 0.09,           // seconds you can still jump after running off a ledge
   JUMP_BUFFER: 0.12,      // seconds a jump press is remembered before landing
+  SLIP_MS: 130,           // 3-4's muddy slope: a hard landing slips (david_slip, ms per frame)
+  SLIP_LOCK: 0.5,         // seconds he can't move or jump while he slides and catches his balance
+  SLIP_SLIDE: 160,        // the least he slides forward on landing (px/s)
+  SLIP_MUD: 420,          // how fast the slide slows (px/s per second; lower = slicker)
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
@@ -1185,7 +1189,8 @@ function updateDavid(dt) {
   }
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
-  const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup";
+  const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK);
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
@@ -1280,6 +1285,9 @@ function updateDavid(dt) {
       else { d.carrying = false; lamb.carried = false; lamb.x = d.x + d.facing * 40; lamb.y = d.y; lamb.vy = 0; }
       setState("idle");
     }
+  } else if (d.state === "slip") {   // 3-4: slid on landing in the mud; arms out, then he stands
+    d.vx = Math.sign(d.vx) * Math.max(0, Math.abs(d.vx) - TUNE.SLIP_MUD * dt);
+    if (animDone("david_slip", d.t, TUNE.SLIP_MS) || (d.t > TUNE.SLIP_LOCK && dir !== 0)) setState("idle");
   } else if (d.state === "standup") {
     d.vx = 0;
     if (d.t > TUNE.HARP_STANDUP) setState("idle");
@@ -1318,7 +1326,8 @@ function updateDavid(dt) {
   }
 
   // --- choose the animation
-  if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp" || d.state === "standup") {
+  if (d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "kneel" || d.state === "harp" || d.state === "standup" ||
+      (d.state === "slip" && d.onGround)) {
     if (d.state === "kneel" && animDone("david_sit_harp", d.t, 95)) setState("harp");
     return;
   }
@@ -1327,7 +1336,13 @@ function updateDavid(dt) {
     else if (d.state !== "flip" || animDone("david_flip", d.t, 60)) setState("jump");
     return;
   }
-  if (wasAir && d.onGround) { d.flipUsed = false; if (fallSpeed > 600 && !d.carrying) { setState("land"); return; } }
+  if (wasAir && d.onGround) {
+    d.flipUsed = false;
+    if (fallSpeed > 600 && !d.carrying && LEVEL_STAGE === "3-4") {   // the muddy slope: his feet go out from under him
+      setState("slip"); d.vx = d.facing * Math.max(TUNE.SLIP_SLIDE, Math.abs(d.vx) * 0.8); d.jumpBuf = 0; return;
+    }
+    if (fallSpeed > 600 && !d.carrying) { setState("land"); return; }
+  }
   if (d.state === "land" && d.t < 0.2 && dir === 0) return;
   if (d.carrying) { setState("carry"); return; }
   if (d.h === LOW_H) { setState(Math.abs(d.vx) > 20 ? "crawl" : "crouch"); return; }
@@ -1422,6 +1437,7 @@ function drawDavid(camX) {
     }
     case "flip": drawSprite("david_flip", frameOf("david_flip", t, 60), x, y - d.h / 2 - 6, d.facing); break;
     case "land": drawSprite("david_jump_land", frameOf("david_jump_land", t, 45), x, y, d.facing); break;
+    case "slip": drawSprite("david_slip", frameOf("david_slip", t, TUNE.SLIP_MS), x, y, d.facing); break;
     case "roll": drawSprite("david_roll", Math.min(11, Math.floor(d.rollT / TUNE.ROLL_TIME * 12)), x, y, d.facing); break;
     case "getup": drawSprite("david_roll_getup", Math.min(6, 3 + Math.floor(d.t / 0.07)), x, y, d.facing); break;
     case "crouch": drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing); break;
