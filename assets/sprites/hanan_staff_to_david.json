@@ -1,0 +1,12 @@
+{
+  "frames": 24,
+  "frame_w": 302,
+  "frame_h": 285,
+  "ms_per_frame": 250,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 151,
+  "anchor_y": 283,
+  "source": "hanan_staff_give_david.mp4",
+  "note": "two people: Hanan (left, facing right) gives David (right) his staff; anchor = middle of the pair"
+}

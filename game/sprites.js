@@ -1248,6 +1248,18 @@ window.SPRITE_DATA = {
   "ay": 227,
   "align": "feet"
  },
+ "hanan_staff_to_david": {
+  "src": "../assets/sprites/hanan_staff_to_david.png",
+  "frames": 24,
+  "w": 302,
+  "h": 285,
+  "ms": 250,
+  "loop": false,
+  "pingpong": false,
+  "ax": 151,
+  "ay": 283,
+  "align": "feet"
+ },
  "hanan_talk": {
   "src": "../assets/sprites/hanan_talk.png",
   "frames": 30,
