@@ -729,3 +729,13 @@ folded, listening; shaking his head slowly; a small warm smile. Background #00FF
 **The three harp things** (one sheet, magenta): a coil of pale gut string; a carved wooden lyre tuning peg; a round lump
 of golden beeswax with a honeycomb pattern. They replace the drawn icons as assets/items/quest_string, quest_peg, quest_wax.
 
+
+## 4-4 The King's Hall + Saul's Torment: art
+- **King Saul** (sheet, green, facing left): very tall, dark beard with grey, bronze circlet, deep red robe, purple
+  mantle. Poses: seated head in hands (troubled); seated gripping the throne, frightened; seated leaning back, calm;
+  asleep in the throne; standing talking kindly; standing, tired warm smile. Throne in the seated poses. Never a villain.
+- **Shadow wisps** (4, green): dark indigo storm-smoke with a faint purple glow. NO faces, eyes or claws.
+- **Hall lamp** (2, magenta): a clay oil lamp on a tall bronze stand, unlit and lit (4-4's five lost things).
+- **Backgrounds** (save 4-4 far/mid/near.png): far = Saul's great hall at night (stone walls, beams, red/purple banners,
+  stormy windows with lightning, lamplight, deep shadow); mid = columns, a great staircase, balconies, tapestries, #FF00FF
+  above; near = polished stone floor, rug edge, cushion, bronze bowl, reed mats, #FF00FF above.
