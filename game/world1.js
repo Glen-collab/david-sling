@@ -7,6 +7,7 @@
 // copy of index.html (the scripts themselves always load fresh).
 document.write('<script src="world2.js?v=' + (window.BUILD || 0) + '"><\/script>');
 document.write('<script src="world3.js?v=' + (window.BUILD || 0) + '"><\/script>');   // Bethlehem: houses, crows, rats
+document.write('<script src="world4.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the road to Gibeah: the gift donkey, dogs, bandits, doves
 document.write('<script src="harp_songs.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the harp-duel charts (tools/make_harp_chart.py)
 
 const W1 = {
@@ -297,6 +298,10 @@ function updateCritters(dt) {
     else if (k.kind === "rustler") updateRustler(k, dx, sameLevel, dt);
     else if (k.kind === "hen") updateHen(k, dx, sameLevel, dt);
     else if (k.kind === "goat") updateGoat(k, dx, sameLevel, dt);
+    else if (k.kind === "giftdonkey") updateGiftDonkey(k, dx, sameLevel, dt);   // world4.js
+    else if (k.kind === "villagedog") updateVillageDog(k, dx, sameLevel, dt);
+    else if (k.kind === "bandit") updateBandit(k, dx, sameLevel, dt);
+    else if (k.kind === "dove") updateDove(k, dx, sameLevel, dt);
   }
 }
 function foxBark(k) {   // Glen's fox sound, at most every 3 seconds per fox
@@ -413,6 +418,10 @@ function stoneHitsCritters(s) {
     if (k.kind === "rustler") return stoneHitsRustler(k, s);
     if (k.kind === "hen") { stoneHitsHen(k, s); continue; }
     if (k.kind === "goat") { stoneHitsGoat(k, s); continue; }
+    if (k.kind === "giftdonkey") return stoneHitsGiftDonkey(k, s);   // world4.js
+    if (k.kind === "villagedog") return stoneHitsVillageDog(k, s);
+    if (k.kind === "bandit") return stoneHitsBandit(k, s);
+    if (k.kind === "dove") { stoneHitsDove(k, s); continue; }
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: {roll}."); }
@@ -449,6 +458,10 @@ function drawCritters(camX) {
     if (k.kind === "rustler") { drawRustler(k, x); continue; }
     if (k.kind === "hen") { drawHen(k, x); continue; }
     if (k.kind === "goat") { drawGoat(k, x); continue; }
+    if (k.kind === "giftdonkey") { drawGiftDonkey(k, x); continue; }   // world4.js
+    if (k.kind === "villagedog") { drawVillageDog(k, x); continue; }
+    if (k.kind === "bandit") { drawBandit(k, x); continue; }
+    if (k.kind === "dove") { drawDove(k, x); continue; }
     const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

@@ -341,6 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
+  "4-1": { cols: 262, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
@@ -1036,6 +1037,44 @@ if (LEVEL_NAME === "test") {
   oliveArc(188, 16, 6);
   guide(196, GR - 1, "There he is! Go on, David. They're all waiting for you.");
   sheepfold(204);
+} else if (LEVEL_NAME === "4-1") {
+  // ---- 4-1 The Road to Gibeah: north with the king's gifts (1 Samuel 16:20). The donkey with the bread and the wine
+  //      follows David, and Father's young goat. Village dogs spook the donkey (the harp calms him), bandits creep up
+  //      behind for the gifts, boars in the vineyards (Psalm 80:13), doves on the road (leave them), crows in the vines.
+  //      The walls of Jebus far off. Five lost sheep from the village flocks; The One on a vineyard terrace. ----
+  ground(0, 261);
+  campfire(6);
+  critter("giftdonkey", 1); critter("goat", 0);                  // the king's gifts (world4.js; the goat is world3.js's)
+  oliveRow(11, 16, 5); critter("dove", 14); critter("dove", 17);
+  lostSheep("sheep", 22, 16);
+  deco("town_hut_round", 29, 16, 0.14); deco("town_clay_pots", 33, 16, 0.2); critter("villagedog", 38);   // the first village: a dog by the huts
+  rock(42, 15, 3, 2); rock(45, 13, 3, 4); oliveRow(45, 12, 3); special(46, 7);
+  critter("bandit", 50);                                          // behind you, once you're past
+  oliveArc(54, 16, 6);
+  campfire(60);
+  talk(63, "The vineyard keeper", "Shalom, young man. Watch yourself in my vines. Wild boars came out of the woods and tore them up. \"The boar out of the wood ravages it\" (Psalm 80:13).");
+  for (const c of [69, 73]) critter("crow", c, GR - 1);          // crows at the grapes: fair game
+  critter("boar", 80, GR - 1, 8);
+  rock(86, 15, 3, 2); rock(89, 13, 4, 4); lostSheep("sheepblack", 90, 12, "ledge");   // up on a terrace wall: the harp brings it down
+  critter("boar", 97, GR - 1, 8); oliveRow(100, 16, 5);
+  lostSheep("sheep2", 106, 16);
+  deco("town_hut_round", 113, 16, 0.14); deco("town_grain_baskets", 116, 16, 0.2); critter("villagedog", 118); critter("dove", 121);
+  campfire(124);
+  critter("bandit", 128);
+  // The One: a lamb that strayed from a village flock, up on the highest vineyard terrace
+  rock(134, 15, 3, 2); rock(137, 13, 3, 4); rock(140, 11, 5, 6); lostSheep("lamb", 143, 10, "one"); special(141, 7);
+  oliveRow(146, 16, 4); critter("dove", 150); critter("dove", 152);
+  for (const c of [157, 161]) critter("crow", c, GR - 1);
+  lostSheep("sheep", 166, 16, "thorns");
+  critter("boar", 175, GR - 1, 10);
+  oliveArc(182, 16, 6);
+  campfire(188);
+  deco("town_hut_round", 194, 16, 0.14); deco("town_clay_pots", 197, 16, 0.18); critter("villagedog", 199);
+  critter("bandit", 203);
+  lostSheep("sheepblack", 212, 16);
+  rock(217, 15, 2, 2); rock(220, 13, 3, 4); special(221, 8);
+  oliveRow(226, 16, 6);
+  sheepfold(246);                                                // a village fold below Gibeah: the strays in, then up to the fortress
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
@@ -2582,6 +2621,12 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
+    const gb = typeof giftsBlocking === "function" ? giftsBlocking() : null;   // 4-1: not without the king's gifts (world4.js)
+    if (gb) {
+      d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
+      if (finish.blocked <= 0) toast(gb);
+      finish.blocked = 3; return;
+    }
     if (typeof boyMissing === "function" && boyMissing()) {   // 2-2: not without the boy from Tekoa (world2.js)
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast("Not without the boy! He's still on the rock in the riverbed.");
@@ -3203,7 +3248,8 @@ function updateWorld(dt) {
   updatePickups(dt); updateGourds(); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
-  if (typeof updateWorld3 === "function") updateWorld3(dt);   // the crows in the barley, the rats in the granary (world3.js)
+  if (typeof updateWorld3 === "function") updateWorld3(dt);
+  if (typeof updateWorld4 === "function") updateWorld4(dt);   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -3356,6 +3402,9 @@ function frame(now) {
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
+  if (typeof w4intro !== "undefined" && w4intro.active) {   // the opening of World 4, at Jesse's door (world4.js)
+    pollInput(); w4intro.update(real); w4intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
   if (typeof w3ending !== "undefined" && w3ending.active) {   // the end of World 3 (world3.js) has the screen
     pollInput(); w3ending.update(real); w3ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
@@ -3382,7 +3431,8 @@ function frame(now) {
   drawCaveDoors(camX);
   drawTiles(camX);
   drawCaveFeatures(camX);
-  drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);   // world3.js: houses, ladders, barley, granary
+  drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);
+  if (typeof drawWorld4 === "function") drawWorld4(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
   drawPickups(camX);

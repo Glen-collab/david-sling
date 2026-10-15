@@ -242,4 +242,16 @@ the harp phrase at 3-2's campfire.
   ox campfire at 244, the arena 255-286, the fold at 299. Still three special stones.
 - Ox arena trees take three rams each (tr.rams; OX_TREE_RAMS): whole, then gashed (oak_gashed from 2 rams), then split ->
   "breakout": the ox gallops out, the flock scatters, and after OX_BREAKOUT the fight resets with David at the checkpoint.
+- **4-1 The Road to Gibeah is built** (2026-10-15; game/world4.js, loaded by world1.js after world3.js; layout in main.js;
+  STAGE_INFO "4-1" cols 262 bg w4_1; in BUILT_STAGES). Opening scene w4intro (first time only, progress.w4intro; ?w4intro
+  replays): Bethlehem (w3_1 layers), messenger rides up/stops/dismounts, 1 Sam 16:19 and 16:20 (WEB, checked on ebible),
+  Eliab "Him? For the king?", donkey and goat led in, Hanan's farewell (DESIGN), title card. The stage: gift donkey
+  (critter "giftdonkey": follows, hops rocks, catches up if far; gifts ["bread","wine"]), Father's young goat follows
+  (world3 goat, follow preset, W3.GOAT_HOME = 1e6), village dogs (bark, spook the donkey -> it balks until David plays the
+  harp within 6 tiles for 1.6 s), bandits (thief art; steal the wine/bread; a stone drops it; walk over it to reload),
+  doves (harmless), crows (fair game), 3 boars, the vineyard keeper (talk + Glen's sheet; thanks you with grapes when the
+  two vineyard boars are gone). 5 lost sheep + The One on a terrace; 3 special stones; the finish gate is blocked until
+  both gifts are on the donkey and it isn't balking (giftsBlocking). Ends at a village sheepfold (sheepfold(246)).
+  Not yet: the donkey's art still shows both gifts when one is stolen; DESIGN's "5 dropped gifts as the lost things"
+  (it uses 5 lost sheep from the villages for now); World 4 Journal pages; the Psalm 121:8 scroll.
 
