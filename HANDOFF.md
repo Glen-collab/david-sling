@@ -158,7 +158,7 @@ overlay, rain, lightning every W3.LIGHTNING s), the fallen oak over The One (set
 (world2's setPiece "wind"). The Wild Ox (setPiece "ox", { arena, end }; setPiece "oxtree" x3; "flockHuddle"): phase 1
 charges the flock, a charged stone turns it; phase 2 roll under its charge by a tree, horns stick (W3.OX_STUCK), any hit
 splits that tree; lightning can drop a branch near David; phase 3 hit it while it skids (W3.OX_HITS3), then it runs off
-(driven off, not killed). Stand-in art: boar clips, darker, W3.OX_SIZE. Not done: slippery landing, counsel tiers, the
+(driven off, not killed). Art: Glen's four ox sheets cut with `sheet2sprite.py --blobs` (each figure by its own outline; sources in david-sling-art/world3/ox_*_sheet.png): ox_windup (the tell), ox_charge (charge/skid), ox_dazed (hits the tree, sits dizzy; shake = getting up), ox_gallop (flee). W3.OX_SIZE 1.6; anchors set at the nose (the hit box runs back from ox.x). Not done: slippery landing, counsel tiers, the
 End of World 3 reflection scene (Hanan's staff, the messenger).
 Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire, stray dogs (jackals stand in).

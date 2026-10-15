@@ -1908,6 +1908,54 @@ window.SPRITE_DATA = {
   "ay": 237,
   "align": "feet"
  },
+ "ox_charge": {
+  "src": "../assets/sprites/ox_charge.png",
+  "frames": 5,
+  "w": 404,
+  "h": 228,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 375,
+  "ay": 225,
+  "align": "feet"
+ },
+ "ox_dazed": {
+  "src": "../assets/sprites/ox_dazed.png",
+  "frames": 6,
+  "w": 405,
+  "h": 438,
+  "ms": 200,
+  "loop": true,
+  "pingpong": false,
+  "ax": 340,
+  "ay": 435,
+  "align": "feet"
+ },
+ "ox_gallop": {
+  "src": "../assets/sprites/ox_gallop.png",
+  "frames": 6,
+  "w": 457,
+  "h": 309,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 355,
+  "ay": 306,
+  "align": "feet"
+ },
+ "ox_windup": {
+  "src": "../assets/sprites/ox_windup.png",
+  "frames": 6,
+  "w": 394,
+  "h": 322,
+  "ms": 140,
+  "loop": true,
+  "pingpong": false,
+  "ax": 335,
+  "ay": 319,
+  "align": "feet"
+ },
  "ozem_idle": {
   "src": "../assets/sprites/ozem_idle.png",
   "frames": 3,

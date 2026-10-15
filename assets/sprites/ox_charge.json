@@ -1,0 +1,11 @@
+{
+  "frames": 5,
+  "frame_w": 404,
+  "frame_h": 228,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 375,
+  "anchor_y": 225,
+  "source": "ox_charge_sheet_mag.png"
+}

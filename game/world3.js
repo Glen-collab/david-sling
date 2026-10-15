@@ -767,10 +767,10 @@ if (STORY_HASH === "3-A") anointing.start(() => { stageCleared("3-A", {}); backT
 // turns it on David. Phase 2: it paws the ground and charges; stand by a tree and roll under its horns at the last
 // moment, and its horns stick in the trunk: hit it, and the tree splits and falls. Phase 3, no trees left: it charges
 // back and forth, faster; hit it while it skids to turn. Then it shakes its head and runs off into the rain.
-// Stand-in art: Glen's boar clips, bigger and darker, until there are wild ox clips (ART_PROMPTS, World 3 Grok clips).
+// Art: Glen's four ox sheets (windup, charge, dazed, gallop); see drawOx below.
 // ---------------------------------------------------------------------------
 Object.assign(W3, {
-  OX_SIZE: 1.9, OX_FILTER: "brightness(0.5) saturate(0.55) sepia(0.25)",
+  OX_SIZE: 1.6, OX_FILTER: "brightness(0.85)",   // a touch darker for the storm
   OX_TELL: 1.3,        // seconds pawing the ground before a charge (the warning)
   OX_CHARGE: 640,      // px/s; phase 3 is faster still
   OX_FAST: 1.25,
@@ -827,7 +827,7 @@ function updateOx(dt) {
         const tr = oxTrees.find(t => !t.down && Math.abs(t.x - front) < 14);
         if (tr && Math.sign(tr.x - O.startX) === O.facing && Math.abs(tr.x - O.startX) > 2 * T) {
           O.x = tr.x - O.facing * 20; O.tree = tr; O.hitThisStuck = false; setOx("stuck"); w2Shake.v = Math.max(w2Shake.v, 0.6);
-          sfx("stone_hit", O.x, 1, 0.3); oxSay("stuck", "Its horns are stuck in the tree! Hit it now!");
+          sfx("stone_hit", O.x, 1, 0.3); oxSay("stuck", "It ran head-first into the tree! It's dazed. Hit it now!");
           break;
         }
       }
@@ -849,7 +849,7 @@ function updateOx(dt) {
       O.facing = 1; O.x += 260 * dt; if (O.x >= ax1 - 4 * T) { O.facing = -1; setOx("tell"); }
       break;
     case "stuck":
-      if (O.t > W3.OX_STUCK) { O.tree = null; setOx("turn"); oxSay("free", "It pulled free! Get by another tree, and roll under the next charge."); }
+      if (O.t > W3.OX_STUCK) { O.tree = null; setOx("turn"); oxSay("free", "It shook it off! Get by another tree, and roll under the next charge."); }
       break;
   }
   // its horns: touching David hurts, unless he's rolling (or crawling) under them
@@ -908,11 +908,16 @@ function drawOx(camX) {
   }
   if (ox.state === "gone") return;
   const x = ox.x - camX; if (x < -500 || x > W + 500) return;
-  let name = "boar_stand", i = frameOf("boar_stand", ox.t), filter = W3.OX_FILTER;
-  if (ox.state === "tell") { name = "boar_scrape"; i = frameOf(name, ox.t * 1.6); filter += " drop-shadow(0 0 10px rgba(255,200,60,0.9))"; }
-  else if (ox.state === "charge" || ox.state === "back" || ox.state === "flee") { name = "boar_charge"; i = frameOf(name, ox.t); }
-  else if (ox.state === "stuck" || ox.state === "shake") { name = "boar_stunned"; i = frameOf(name, ox.t); }
-  else if (ox.state === "skid") { name = "boar_charge"; i = 3; }
+  // Glen's ox sheets: ox_windup (stands, gets angry, digs in), ox_charge, ox_dazed (hits the tree, sits down dizzy,
+  // shakes it off) and ox_gallop (running away, tail up)
+  const once = (name, t, dur) => Math.min(SPR[name] ? SPR[name].frames - 1 : 0, Math.floor(t / dur * (SPR[name] ? SPR[name].frames : 1)));
+  let name = "ox_windup", i = 0, filter = W3.OX_FILTER;
+  if (ox.state === "tell") { i = 1 + Math.min(4, Math.floor(ox.t / W3.OX_TELL * 5)); filter += " drop-shadow(0 0 10px rgba(255,200,60,0.9))"; }
+  else if (ox.state === "charge" || ox.state === "back") { name = "ox_charge"; i = frameOf(name, ox.t); }
+  else if (ox.state === "flee") { name = "ox_gallop"; i = frameOf(name, ox.t); }
+  else if (ox.state === "stuck") { name = "ox_dazed"; i = ox.t < 1.2 ? once(name, ox.t, 1.2) : 3 + Math.floor(ox.t * 2.5) % 3; }
+  else if (ox.state === "shake") { name = "ox_dazed"; i = [3, 4, 5, 4, 1, 0][Math.min(5, Math.floor(ox.t / 0.27))]; }
+  else if (ox.state === "skid") { name = "ox_charge"; i = 0; }
   if (ox.flash > 0) filter += " brightness(2)";
   drawSprite(name, i, x, ox.y, ox.facing, W3.OX_SIZE, ox.alpha, filter);
 }

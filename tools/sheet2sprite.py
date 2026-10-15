@@ -1,7 +1,7 @@
 """Turn a picture sheet of poses (a row of N frames on magenta, from GPT) into a sprite sheet like vid2sprite's.
 
 usage:
-  python tools/sheet2sprite.py <sheet.png> <out_prefix> --frames N [--height H] [--ms 120] [--once] [--pingpong] [--mirror]
+  python tools/sheet2sprite.py <sheet.png> <out_prefix> --frames N [--height H] [--ms 120] [--once] [--pingpong] [--mirror] [--blobs]
 
 Splits the row into N pieces at the gaps between the figures, keys the magenta out (and the pink fringe), lines the
 frames up on the feet and the head, and scales so the tallest frame is --height. Writes <out_prefix>.png + .json.
@@ -16,6 +16,7 @@ ap.add_argument("sheet"); ap.add_argument("out")
 ap.add_argument("--frames", type=int, required=True); ap.add_argument("--height", type=int, default=200)
 ap.add_argument("--ms", type=int, default=120); ap.add_argument("--once", action="store_true")
 ap.add_argument("--pingpong", action="store_true"); ap.add_argument("--mirror", action="store_true")
+ap.add_argument("--blobs", action="store_true", help="cut each figure out by its own outline (for figures whose tails overlap)")
 args = ap.parse_args()
 
 a = np.asarray(Image.open(args.sheet).convert("RGB")).astype(float)
@@ -36,9 +37,16 @@ cuts = [int(X0 + step * k - step * 0.3 + np.argmin(prof[int(X0 + step * k - step
 bounds = [X0] + cuts + [X1]
 
 frames = []
+if args.blobs:   # the N biggest figures, left to right, each with its own outline
+    blab, bn = ndimage.label(solid); bsz = ndimage.sum(solid, blab, range(1, bn + 1))
+    big = sorted((1 + int(i) for i in np.argsort(-bsz)[:args.frames]), key=lambda i: ndimage.find_objects(blab)[i - 1][1].start)
 for k in range(args.frames):
-    x0, x1 = bounds[k], bounds[k + 1]
-    al = alpha[:, x0:x1] * (ndimage.label(solid[:, x0:x1])[0] > 0)
+    if args.blobs:
+        sl = ndimage.find_objects(blab)[big[k] - 1][1]; x0, x1 = max(0, sl.start - 4), sl.stop + 4
+        al = alpha[:, x0:x1] * ndimage.binary_dilation(blab[:, x0:x1] == big[k], iterations=2)
+    else:
+        x0, x1 = bounds[k], bounds[k + 1]
+        al = alpha[:, x0:x1] * (ndimage.label(solid[:, x0:x1])[0] > 0)
     lab, n = ndimage.label(al > 0.5)
     if n > 1:   # keep the biggest figure (drop stray bits of the neighbours)
         sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1)); keep = 1 + int(np.argmax(sizes))

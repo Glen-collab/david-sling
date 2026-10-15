@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 405,
+  "frame_h": 438,
+  "ms_per_frame": 200,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 340,
+  "anchor_y": 435,
+  "source": "ox_dazed_sheet_mag.png"
+}

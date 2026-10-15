@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 394,
+  "frame_h": 322,
+  "ms_per_frame": 140,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 335,
+  "anchor_y": 319,
+  "source": "ox_windup_sheet_mag.png"
+}

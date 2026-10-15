@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 457,
+  "frame_h": 309,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 355,
+  "anchor_y": 306,
+  "source": "ox_gallop_sheet_mag.png"
+}
