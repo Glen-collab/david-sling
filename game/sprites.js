@@ -2388,9 +2388,21 @@ window.SPRITE_DATA = {
   "ay": 272,
   "align": "feet"
  },
+ "sheep2_stand": {
+  "src": "../assets/sprites/sheep2_stand.png",
+  "frames": 2,
+  "w": 97,
+  "h": 106,
+  "ms": 900,
+  "loop": true,
+  "pingpong": true,
+  "ax": 68,
+  "ay": 106,
+  "align": "feet"
+ },
  "sheep2_walk": {
   "src": "../assets/sprites/sheep2_walk.png",
-  "frames": 6,
+  "frames": 4,
   "w": 97,
   "h": 106,
   "ms": 130,

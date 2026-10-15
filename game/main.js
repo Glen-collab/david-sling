@@ -541,7 +541,7 @@ if (LEVEL_NAME === "test") {
   ground(146, 200);
   deco("fig_tree", 150, 16, 1.0, "back", "special");           // jump into it: figs, and a stone of remembrance
   boulder(153, 14, 6, 3);
-  rock(162, 13, 3, 4); lostSheep("sheep", 167, 16);            // a sheep grazing behind the rock
+  rock(162, 13, 3, 4); lostSheep("sheep2", 167, 16);            // a sheep grazing behind the rock
   snake("viper", 170);
   deco("olive_tree", 173, 16, 1.15, "back", "golden_olive");
   rock(178, 13, 2, 4); food("fig_cake", 179, 12);              // step up onto the rock
@@ -656,7 +656,7 @@ if (LEVEL_NAME === "test") {
   critter("jackal", 30);
   snake("viper", 40);
   ground(48, 100);
-  lostSheep("sheep", 56, 16);
+  lostSheep("sheep2", 56, 16);
   critter("jackal", 64); raven(70, 7);
   plat(75, 13, 4); lostSheep("sheepblack", 76, 12, "ledge"); special(78, 7);
   oliveArc(82, 16, 6); food("bread", 92, 16);
@@ -850,7 +850,7 @@ if (LEVEL_NAME === "test") {
   };
   ground(0, 40);
   oliveRow(6, 16, 5);
-  lostSheep("sheep", 14, 16);
+  lostSheep("sheep2", 14, 16);
   rock(20, 13, 3, 4); setPiece("claws", 21, 13);               // claw marks on the rock: something big passed this way
   deco("stump_roots", 10, 16, 0.32); deco("log_broken", 27, 16, 0.4); deco("rubble_sticks", 38, 16, 0.3);   // torn-up logs, overturned rocks
   special(21, 9);
@@ -923,7 +923,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheepblack", 144, 16);
   setPiece("barley", 149, GR - 1, { w: 16 });                  // the second field: more crows
   for (const c of [151, 155, 159, 163]) critter("crow", c, GR - 1);
-  lostSheep("sheep", 157, 16);
+  lostSheep("sheep2", 157, 16);
   // The One: on the highest roof in Bethlehem, a long chain of roof jumps
   house(171, 4, 13); ladder(169, 13);
   house(177, 4, 11); house(183, 4, 9); special(184, 6); house(189, 4, 7); deco("town_side_fig_rack", 179, 10, 0.18);
@@ -1032,7 +1032,7 @@ if (LEVEL_NAME === "test") {
   rock(134, 14, 2, 3); block(136, 14, 8, 1, 9); setPiece("oak", 134, 14, { w: 10 }); lostSheep("lamb", 141, 16, "one");
   oliveRow(136, 13, 8);
   critter("fox", 150); oliveArc(148, 16, 8);
-  lostSheep("sheep", 158, 16);
+  lostSheep("sheep2", 158, 16);
   rock(163, 15, 2, 2); rock(166, 13, 3, 4); special(167, 8);
   campfire(172);                                                // the checkpoint before the ox
   // the arena: a muddy slope, three big trees, the flock huddled at the left, and the ox out of the rain
@@ -2158,6 +2158,7 @@ function drawTakenLamb(camX) {
 const SHEEP_ART = {
   sheep:      { run: "sheep_trot",     walk: "sheep_walk",      stand: "sheep_stand",      graze: "sheep_graze" },
   sheepblack: { run: "sheepblack_run", walk: "sheepblack_walk", stand: "sheepblack_stand", graze: "sheepblack_graze" },
+  sheep2:     { run: "sheep2_walk",    walk: "sheep2_walk",     stand: "sheep2_stand",     graze: "sheep2_stand" },   // Glen's curly, big-eyed sheep (one walk sheet: no trot or graze yet)
   lamb:       { run: "lamb_hop",       walk: "lamb_walk",       stand: "lamb_stand",       graze: "lamb_graze" },
   lambblack:  { run: "lambblack_leap", walk: "lambblack_walk",  stand: "lambblack_stand",  graze: "lambblack_stand" },
   ram:        { run: "flockram_walk",  walk: "flockram_walk",   stand: "flockram_stand",   graze: "flockram_graze" },   // the flock's own woolly ram (the wild ram and the ibex use ram_*)

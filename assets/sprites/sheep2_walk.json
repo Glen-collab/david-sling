@@ -1,5 +1,5 @@
 {
-  "frames": 6,
+  "frames": 4,
   "frame_w": 97,
   "frame_h": 106,
   "ms_per_frame": 130,
@@ -7,5 +7,5 @@
   "align": "feet",
   "anchor_x": 68,
   "anchor_y": 106,
-  "source": "sheep2_walk.png"
+  "source": "sheep2_walk_sheet.png (Glen)"
 }
