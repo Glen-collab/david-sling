@@ -213,5 +213,7 @@ the harp phrase at 3-2's campfire.
 - The map card still says "Sheep found": World 4's lost things are gifts/goats/harp parts/lamps (DESIGN 5d).
 - 4-1 backgrounds: set `w4_1` (Glen's 4-1 far/mid/near, magenta keyed; mirrored; mid 400 / near 190) is in the loader,
   ready for STAGE_INFO "4-1" bg w4_1 when the stage is built. make_backgrounds.py now skips a missing layer (borrow it).
-- Next art: donkey with packs, doves, vineyard keeper, wineskin.
+- donkey_packs_walk (Glen's 5-pose sheet, david-sling-art/world4/donkey_packs_walk_sheet.png, green keyed, --blobs,
+  height 200 like the World 2 donkey): the gift donkey for 4-1. Not placed yet.
+- Next art: donkey scared, doves, vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
 
