@@ -510,7 +510,10 @@ function drawTown(camX) {
   }
   if (clothStall) {   // a low table draped with cloth to the ground (The One under it)
     const x = clothStall.x - camX, y = GR * T;
-    if (x > -150 && x < W + 150) {
+    if (x > -150 && x < W + 150 && ITEM.cloth_stall && ITEM.cloth_stall.naturalWidth) {   // Glen's draped stall
+      const w = !clothStall.out && Math.sin(now * 0.7) > 0.6 ? Math.sin(now * 9) * 1.5 : 0;   // a little shiver now and then
+      drawItem("cloth_stall", x + w, y + 4, 0.42);
+    } else if (x > -150 && x < W + 150) {
       ctx.save(); ctx.fillStyle = "#7d4a8a"; ctx.beginPath(); ctx.moveTo(x - 60, y); ctx.lineTo(x - 52, y - 54); ctx.lineTo(x + 52, y - 54); ctx.lineTo(x + 60, y); ctx.fill();
       ctx.fillStyle = "#e6c96a"; ctx.fillRect(x - 52, y - 58, 104, 8);
       if (!clothStall.out) { const w = Math.sin(now * 9) * (Math.sin(now * 0.7) > 0.6 ? 2 : 0); ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(x - 40 + w, y - 14, 80, 14); }   // a little shiver
