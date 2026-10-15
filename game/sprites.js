@@ -456,6 +456,18 @@ window.SPRITE_DATA = {
   "ay": 245,
   "align": "feet"
  },
+ "david_climb": {
+  "src": "../assets/sprites/david_climb.png",
+  "frames": 6,
+  "w": 122,
+  "h": 274,
+  "ms": 140,
+  "loop": true,
+  "pingpong": false,
+  "ax": 60,
+  "ay": 273,
+  "align": "feet"
+ },
  "david_crawl": {
   "src": "../assets/sprites/david_crawl.png",
   "frames": 10,

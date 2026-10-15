@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 122,
+  "frame_h": 274,
+  "ms_per_frame": 140,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 60,
+  "anchor_y": 273,
+  "source": "climb_mag.png"
+}

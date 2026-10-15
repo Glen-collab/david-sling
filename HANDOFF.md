@@ -189,6 +189,11 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
   home (16:13); one of the family sends David back to the sheep, a different one each visit (progress.afterAnoint):
   Jesse, Shammah (proud of him), Eliab (sour, sets up 17:28), Abinadab (well done; points to the pastures). A: back to
   the map, B: watch the anointing again. Lines in AFTER_ANOINT.
+- Ladders are climbed now (main.js state "climb", ladderAt()): hold Up in front of one (or Down at its top) to grab on;
+  Up/Down climb at TUNE.CLIMB_SPEED, no gravity; A jumps off; top = steps onto the roof, bottom = back on the ground.
+  Getting hit knocks him off. The rungs are still one-way ledges (you can jump onto them; carrying the lamb, Down still
+  drops a rung). Art: david_climb (Glen's back-view strip, david-sling-art/world3/david_climb_sheet.png, green keyed to
+  magenta, sheet2sprite --blobs, height 270); all its reaching poses use the right hand (a left-hand version is optional).
 Not done from the design: the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire.
 - Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.

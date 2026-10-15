@@ -23,6 +23,8 @@ const TUNE = {
   SLIP_LOCK: 0.5,         // seconds he can't move or jump while he slides and catches his balance
   SLIP_SLIDE: 160,        // the least he slides forward on landing (px/s)
   SLIP_MUD: 420,          // how fast the slide slows (px/s per second; lower = slicker)
+  CLIMB_SPEED: 230,       // ladders: px/s up or down (hold Up / Down)
+  CLIMB_STRIDE: 26,       // px climbed per frame of david_climb
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
@@ -369,6 +371,7 @@ const stairTowers = [];
 const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
 const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
+const ladderAt = d => ladders.find(l => d.x > l.c * T - 4 && d.x < (l.c + 2) * T + 4 && d.y > l.r * T - 4 && d.y <= GR * T + 2);   // the ladder he's in front of
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
 const stepStone = c => { plat(c, GR, 1); setPiece("stepstone", c, GR); };   // a flat rock in a stream: a ledge level with the bank (drawn in world3.js)
@@ -1191,7 +1194,7 @@ function updateDavid(dt) {
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
-               (d.state === "slip" && d.t < TUNE.SLIP_LOCK);
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb";
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
@@ -1269,6 +1272,15 @@ function updateDavid(dt) {
     if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; }
   }
 
+  // --- ladders: hold Up in front of one to climb it (Down from the top to climb down), A to jump off
+  if (!busy && !d.harp && !d.carrying && d.throwT < 0) {
+    const l = ladderAt(d), atTop = l && d.onGround && d.y <= l.r * T + 2;
+    if (l && ((held("up") && !atTop && (d.onGround || d.vy > -200)) || (pressed("down") && atTop))) {
+      setState("climb"); d.ladder = l; d.climbDist = 0; d.vx = 0; d.vy = 0; d.onGround = false; d.jumpBuf = 0;
+      if (!d.ladderTold) { d.ladderTold = true; toast("Climbing! Hold Up or Down on the ladder. A jumps off."); }
+    }
+  }
+
   // --- horizontal movement
   let lowPose = false;
   if (d.state === "roll") {
@@ -1285,6 +1297,16 @@ function updateDavid(dt) {
       if (d.state === "pickup") { d.carrying = true; lamb.carried = true; }
       else { d.carrying = false; lamb.carried = false; lamb.x = d.x + d.facing * 40; lamb.y = d.y; lamb.vy = 0; }
       setState("idle");
+    }
+  } else if (d.state === "climb") {   // on a ladder: no gravity, Up/Down to climb, A to jump off
+    const l = d.ladder, v = (held("down") ? 1 : 0) - (held("up") ? 1 : 0);
+    d.vx = 0; d.vy = 0; d.onGround = false; d.x += ((l.c + 1) * T - d.x) * Math.min(1, dt * 14);
+    d.y += v * TUNE.CLIMB_SPEED * dt; d.climbDist += Math.abs(v) * TUNE.CLIMB_SPEED * dt;
+    if (d.y <= l.r * T) { d.y = l.r * T; d.onGround = true; d.ladder = null; setState("idle"); }   // up at the top: standing on the roof
+    else if (v > 0 && isSolid(Math.floor(d.x / T), Math.floor(d.y / T))) { d.y = Math.floor(d.y / T) * T; d.onGround = true; d.ladder = null; setState("idle"); }   // down at the bottom
+    else if (pressed("a")) {   // jump off, the way he's pushing (or straight back down)
+      if (dir) d.facing = dir;
+      d.ladder = null; d.vy = -TUNE.JUMP_SPEED * 0.7; d.vx = dir * TUNE.WALK_SPEED; setState("jump"); sfx("jump", undefined, 0.5);
     }
   } else if (d.state === "slip") {   // 3-4: slid on landing in the mud; arms out, then he stands
     d.vx = Math.sign(d.vx) * Math.max(0, Math.abs(d.vx) - TUNE.SLIP_MUD * dt);
@@ -1307,6 +1329,7 @@ function updateDavid(dt) {
     else if (d.vx > target) d.vx = Math.max(target, d.vx - acc * dt);
   }
   d.h = lowPose ? LOW_H : STAND_H;
+  if (d.state === "climb") return;   // on a ladder: no gravity, no collisions (the ladder's in open air)
 
   // drop through a one-way platform: Down + A while standing on one
   d.dropThrough = false;
@@ -1314,7 +1337,7 @@ function updateDavid(dt) {
     const r = Math.floor(d.y / T), c = Math.floor(d.x / T);
     if (isOneway(c, r) && Math.abs(d.vx) <= 60) { d.dropThrough = true; d.y += 2; }
   }
-  if (d.onGround && pressed("down") && typeof onLadder === "function" && onLadder(d)) { d.dropThrough = true; d.y += 2; }   // a ladder: Down steps down a rung (world3.js)
+  if (d.onGround && pressed("down") && typeof onLadder === "function" && onLadder(d) && d.state !== "climb" && d.carrying) { d.dropThrough = true; d.y += 2; }   // carrying the lamb: Down steps down a rung (world3.js)
 
   // --- gravity + collisions
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);
@@ -1439,6 +1462,7 @@ function drawDavid(camX) {
     case "flip": drawSprite("david_flip", frameOf("david_flip", t, 60), x, y - d.h / 2 - 6, d.facing); break;
     case "land": drawSprite("david_jump_land", frameOf("david_jump_land", t, 45), x, y, d.facing); break;
     case "slip": drawSprite("david_slip", frameOf("david_slip", t, TUNE.SLIP_MS), x, y, d.facing); break;
+    case "climb": drawSprite("david_climb", Math.floor((d.climbDist || 0) / TUNE.CLIMB_STRIDE) % 6, x, y, 1); break;   // his back to us
     case "roll": drawSprite("david_roll", Math.min(11, Math.floor(d.rollT / TUNE.ROLL_TIME * 12)), x, y, d.facing); break;
     case "getup": drawSprite("david_roll_getup", Math.min(6, 3 + Math.floor(d.t / 0.07)), x, y, d.facing); break;
     case "crouch": drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing); break;

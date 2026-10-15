@@ -19,7 +19,7 @@ for (const l of ladders) for (const y of l.rungs) { plat(l.c, y, 2); for (let c 
 const ladderRungs = new Set(); for (const l of ladders) for (const y of l.rungs) for (let c = l.c; c < l.c + 2; c++) ladderRungs.add(c + "," + y);
 function onLadder(d) {   // main.js: standing on a rung? (Down steps down it)
   const on = ladderRungs.has(Math.floor(d.x / T) + "," + Math.floor(d.y / T));
-  if (on && !W3.ladderTold) { W3.ladderTold = true; toast("On a ladder: press Down to climb down a rung, A to climb up."); }
+  if (on && !W3.ladderTold) { W3.ladderTold = true; toast("A ladder: hold Up to climb it, Down to climb down, A to jump off."); }
   return on;
 }
 for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);   // stepping stones: drawn as rocks, not as ledges
