@@ -44,8 +44,18 @@ function updateGiftDonkey(k, dx, sameLevel, dt) {
     } else if (k.state === "balk" && !near && !k.toldFar && Math.abs(dx) > 10 * T) { k.toldFar = true; toast("The donkey won't move! Go back and play the harp for him (Select)."); }
     return;
   }
+  if (k.state === "leap") {   // up (or down) after David in one bound, like the goat (world3.js goatLeap)
+    const f = Math.min(1, k.t / 0.75), base = k.ly0 + (k.ly1 - k.ly0) * f;
+    k.x = k.lx0 + (k.lx1 - k.lx0) * f; k.y = base - Math.sin(f * Math.PI) * (Math.max(k.ly0, k.ly1) - k.ltop);
+    if (f >= 1) { k.y = k.ly1; k.vy = 0; k.onGround = true; setCrit(k, "walk"); k.stuckT = 0; }
+    return;
+  }
   // following: walks after David when he's more than a few tiles off, stands when he stops
   if (david.deadT > 0) { fall(); return; }
+  if (david.onGround && k.onGround && Math.abs(david.y - k.y) > 30 && Math.abs(dx) < 9 * T) {   // David's up on a rock (or down off one)
+    let tx = david.x - (Math.sign(dx) || 1) * 70; if (!standable(tx, david.y)) tx = david.x;
+    goatLeap(k, tx, david.y); return;
+  }
   const far = Math.abs(dx) > W4.DONKEY_LOST * T || (!sameLevel && Math.abs(dx) > 6 * T && david.onGround);
   if (far) { k.lostT = (k.lostT || 0) + dt; if (k.lostT > 1.2 && david.onGround) { k.lostT = 0; k.x = david.x - (david.facing || 1) * 3 * T; k.y = david.y; k.vy = 0; if (!standable(k.x, k.y)) k.x = david.x; } }
   else k.lostT = 0;
@@ -53,6 +63,11 @@ function updateGiftDonkey(k, dx, sameLevel, dt) {
     k.facing = Math.sign(dx); setCrit(k, "walk");
     const moved = runCritter(k, W4.DONKEY_WALK + Math.min(240, Math.abs(dx) - W4.DONKEY_FOLLOW * T), dt);
     if (!moved && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);   // a rock in the way: up he goes
+    k.stuckT = moved ? 0 : (k.stuckT || 0) + dt;
+    if (k.stuckT > 1.5 && david.onGround) {   // still stuck (under a shelf, in the rocks): he finds his own way round to David
+      k.stuckT = 0; let tx = david.x - (Math.sign(dx) || 1) * 2 * T; if (!standable(tx, david.y)) tx = david.x;
+      Object.assign(k, { x: tx, y: david.y, vy: 0, onGround: true });
+    }
   } else { setCrit(k, "stand"); fall(); }
 }
 function spookDonkey(k, why) {
@@ -70,6 +85,7 @@ function drawGiftDonkey(k, x) {
   let nm = bare ? "donkey_bare_walk" : "donkey_packs_walk", i = 0;
   if (k.state === "walk") i = frameOf(nm, k.t);
   else if (k.state === "spooked" && SPR.donkey_packs_scared) { nm = "donkey_packs_scared"; i = Math.min(SPR[nm].frames - 1, Math.floor(k.t / 0.9 * SPR[nm].frames)); }
+  else if (k.state === "leap") i = 2;
   else if (k.state === "balk" && SPR.donkey_packs_scared) { nm = "donkey_packs_scared"; i = 3; x += Math.sin(performance.now() / 40) * 1.5; }   // trembling
   drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
   if (bare && nm === "donkey_bare_walk") {
