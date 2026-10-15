@@ -179,7 +179,13 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
   (2026-10-15); the stage end stays the two-post gate.
 - Headless testing: the game's update doesn't run under --virtual-time-budget, so set state by hand in a temporary
   appended script (and camX = david.x - W/2) and screenshot; restore the file after.
-Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
+- 3-1: Father's stray goat (critter "goat" at col 82, by the woodpile; world3.js updateGoat). Walk up to it and it
+  follows; it leaps after David onto roofs and ladders, jumps the gaps between roofs, and catches up if left far behind
+  (W3.GOAT_LOST). Home = near Jesse (W3.GOAT_HOME 214), where it stays grazing. Glen's sheets (transparent PNGs in
+  david-sling-art/world3/goat_*_sheet.png): goat_walk, goat_run (--blobs), goat_stand (cut by a scratch script lined up on
+  the tail, since pose 5 grazes head-down and touches pose 6). Also meant for World 4 (Jesse's young goat for Saul, market
+  and palace goats).
+Not done from the design: the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire.
 - Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.
   Cut for World 4 (1 Samuel 16:19, at Jesse's door), not placed yet: messenger_stop (slows to a stand),

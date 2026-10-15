@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 176,
+  "frame_h": 164,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 88,
+  "anchor_y": 162,
+  "source": "goat_run_mag.png"
+}

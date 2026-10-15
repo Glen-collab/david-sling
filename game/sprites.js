@@ -1272,6 +1272,42 @@ window.SPRITE_DATA = {
   "ay": 167,
   "align": "feet"
  },
+ "goat_run": {
+  "src": "../assets/sprites/goat_run.png",
+  "frames": 6,
+  "w": 176,
+  "h": 164,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 88,
+  "ay": 162,
+  "align": "feet"
+ },
+ "goat_stand": {
+  "src": "../assets/sprites/goat_stand.png",
+  "frames": 6,
+  "w": 127,
+  "h": 164,
+  "ms": 300,
+  "loop": true,
+  "pingpong": false,
+  "ax": 63,
+  "ay": 162,
+  "align": "feet"
+ },
+ "goat_walk": {
+  "src": "../assets/sprites/goat_walk.png",
+  "frames": 6,
+  "w": 126,
+  "h": 163,
+  "ms": 140,
+  "loop": true,
+  "pingpong": false,
+  "ax": 63,
+  "ay": 162,
+  "align": "feet"
+ },
  "hanan_counsel": {
   "src": "../assets/sprites/hanan_counsel.png",
   "frames": 30,

@@ -909,6 +909,7 @@ if (LEVEL_NAME === "test") {
   house(60, 6, 13); deco("town_side_fig_rack", 62, 12, 0.22); food("figs", 64, 12);   // figs drying on the roof
   house(68, 4, 15);                                            // a low shed: the way back down
   deco("town_side_log_stack", 80, 16, 0.2);
+  critter("goat", 82);                                         // Father's goat, got out again: lead it home to Jesse (world3.js)
   campfire(76, GR - 1, "Hanan", "Every doorstep in Bethlehem swept for the prophet. The elders are trembling: when a prophet comes, it can mean trouble. Or it can mean the LORD is about to do something.");
   // the granary: rats in the grain, and the harmless green whip snake on the beam
   setPiece("granary", 86, GR - 1, { w: 11 });

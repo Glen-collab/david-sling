@@ -1033,6 +1033,89 @@ function drawHen(k, x) {
 }
 
 // ---------------------------------------------------------------------------
+// Father's stray goat (3-1, DESIGN "bring a stray goat home through the lanes"): it's out nibbling by the woodpile.
+// Walk up to it and it follows you; up a ladder or over the roofs it just leaps up after you (goats climb anything).
+// Get it to Jesse at the end of the lanes. Glen's goat sheets: goat_stand (chew, look round, nibble), goat_walk, goat_run.
+//   critter("goat", c)      W3.GOAT_HOME: the column it's going home to (Jesse)
+// ---------------------------------------------------------------------------
+Object.assign(W3, { GOAT_SIZE: 1.0,  GOAT_WALK: 150, GOAT_RUN: 380, GOAT_NEAR: 1.6, GOAT_FAR: 3.5, GOAT_LEAP: 9, GOAT_LOST: 22,
+                    GOAT_LEAP_T: 0.65, GOAT_HOME: 214 });   // NEAR/FAR/LEAP/LOST in tiles; LEAP_T seconds in the air
+CRITTER_ART.goat = { idle: "goat_stand", move: "goat_walk", len: 60, h: 70, box: k => ({ x0: k.x - 40, x1: k.x + 40, y0: k.y - 70, y1: k.y }) };
+const standable = (x, y) => { const c = Math.floor(x / T), r = Math.floor(y / T); return isSolid(c, r) || isOneway(c, r); };
+function goatLeap(k, tx, ty) {   // an arc from where it stands to (tx, ty), clearing whatever is between
+  const top = Math.min(k.y, ty) - 70;
+  Object.assign(k, { lx0: k.x, ly0: k.y, lx1: tx, ly1: ty, ltop: top, facing: Math.sign(tx - k.x) || k.facing });
+  setCrit(k, "leap");
+}
+function updateGoat(k, dx, sameLevel, dt) {
+  if (k.home2) {   // home with Jesse (and stays there, even if David falls and the critters reset)
+    if (k.state !== "graze") { setCrit(k, "graze"); k.x = k.homeX; k.y = k.homeY; k.facing = 1; }
+    return;
+  }
+  if (k.state === "leap") {
+    const f = Math.min(1, k.t / W3.GOAT_LEAP_T), a = k.ly0 + (k.ly1 - k.ly0) * f;
+    k.x = k.lx0 + (k.lx1 - k.lx0) * f; k.y = a - Math.sin(f * Math.PI) * (Math.max(k.ly0, k.ly1) - k.ltop);
+    if (f >= 1) { k.y = k.ly1; k.vy = 0; k.onGround = true; setCrit(k, "walk"); }
+    return;
+  }
+  if (!k.follow) {   // nibbling by the woodpile until he comes up to it
+    if (k.state !== "idle") setCrit(k, "idle");
+    if (sameLevel && Math.abs(dx) < 1.4 * T && david.deadT <= 0) {
+      k.follow = true; toast("Father's goat got out again! It'll follow you. Lead it home to Father, at the far end of the lanes.");
+    }
+    return;
+  }
+  if (david.deadT > 0) { if (k.state !== "idle") setCrit(k, "idle"); return; }
+  const adx = Math.abs(dx), ady = david.y - k.y;
+  if (k.x > W3.GOAT_HOME * T - 3 * T && Math.abs(ady) < 40) {   // home
+    k.home2 = true; k.homeX = k.x; k.homeY = k.y; k.facing = 1;
+    toast("Father's goat is home. \"Good. One less thing to chase before the prophet comes.\"");
+    return;
+  }
+  if (adx > W3.GOAT_LOST * T && david.onGround) {   // left far behind (or David fell): it comes trotting up the lane after him
+    k.x = david.x - (david.facing || 1) * 2 * T; k.y = david.y;
+    if (!standable(k.x, k.y)) k.x = david.x;
+    setCrit(k, "idle"); return;
+  }
+  // he's up on a roof or a ledge (or down off one), standing still enough: leap to him
+  if (david.onGround && Math.abs(ady) > 30 && adx < W3.GOAT_LEAP * T && k.onGround) {
+    let tx = david.x - (Math.sign(dx) || 1) * 45;
+    if (!standable(tx, david.y)) tx = david.x;
+    goatLeap(k, tx, david.y); return;
+  }
+  if (adx < W3.GOAT_NEAR * T) { k.facing = Math.sign(dx) || k.facing; if (k.state !== "idle") setCrit(k, "idle"); k.vx = 0;
+    k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); return; }
+  k.facing = Math.sign(dx) || 1;
+  if (k.onGround && Math.abs(ady) < 30 && !standable(k.x + k.facing * 0.6 * T, k.y)) {   // a gap between the roofs: jump it
+    for (let n = 2; n <= 5; n++) {
+      const tx = k.x + k.facing * n * T;
+      if (standable(tx, k.y) && !isSolid(Math.floor(tx / T), Math.floor(k.y / T) - 1)) { goatLeap(k, tx, k.y); return; }
+    }
+  }
+  const fast = adx > W3.GOAT_FAR * T;
+  setCrit(k, fast ? "run" : "walk");
+  if (!runCritter(k, fast ? W3.GOAT_RUN : W3.GOAT_WALK, dt) && k.onGround && adx > 2 * T) {   // a wall or a gap in the way: hop it
+    const tx = k.x + k.facing * 2.5 * T;
+    let ty = null;
+    for (let r = Math.floor(k.y / T) - 8; r <= Math.floor(k.y / T) + 4; r++) if (standable(tx, r * T) && !isSolid(Math.floor(tx / T), r - 1)) { ty = r * T; break; }
+    if (ty !== null) goatLeap(k, tx, ty);
+  }
+}
+function stoneHitsGoat(k, s) {
+  if (!W3.goatStoned) { W3.goatStoned = true; toast("Not Father's goat! Save your stones for the crows."); }
+  return false;   // the stone flies on
+}
+function drawGoat(k, x) {
+  let nm = "goat_stand", i;
+  if (k.state === "leap") { nm = "goat_run"; i = 4; }   // all four feet off the ground
+  else if (k.state === "run") nm = "goat_run";
+  else if (k.state === "walk") nm = "goat_walk";
+  if (!SPR[nm]) return;
+  if (i === undefined) i = frameOf(nm, k.t + (nm === "goat_stand" ? k.home : 0));
+  drawSprite(nm, i, x, k.y, k.facing, W3.GOAT_SIZE, k.alpha);
+}
+
+// ---------------------------------------------------------------------------
 // The end of World 3 (DESIGN "End of World 3 — reflection scene"): the storm passes at sunset, the flock is safe.
 // Hanan walks up and gives David his own old shepherd's staff (Glen's clips: hanan_walk, hanan_give_staff, then the
 // two of them, hanan_staff_to_david); Psalm 23:4. Then 1 Samuel 16:7, a rider far off on the road to Bethlehem (the

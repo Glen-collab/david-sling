@@ -296,6 +296,7 @@ function updateCritters(dt) {
     else if (k.kind === "rat") updateRat(k, dx, sameLevel, dt);
     else if (k.kind === "rustler") updateRustler(k, dx, sameLevel, dt);
     else if (k.kind === "hen") updateHen(k, dx, sameLevel, dt);
+    else if (k.kind === "goat") updateGoat(k, dx, sameLevel, dt);
   }
 }
 function updateFox(k, dx, sameLevel, dt) {
@@ -393,6 +394,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "rat") return stoneHitsRat(k, s);
     if (k.kind === "rustler") return stoneHitsRustler(k, s);
     if (k.kind === "hen") { stoneHitsHen(k, s); continue; }
+    if (k.kind === "goat") { stoneHitsGoat(k, s); continue; }
     if (k.kind === "ram") {   // stones just bounce off those horns
       stoneHit(s, 0.6);
       if (!k.told) { k.told = true; toast("Stones bounce off the ram's horns! Roll under its charge: {roll}."); }
@@ -422,6 +424,7 @@ function drawCritters(camX) {
     if (k.kind === "rat") { drawRat(k, x); continue; }
     if (k.kind === "rustler") { drawRustler(k, x); continue; }
     if (k.kind === "hen") { drawHen(k, x); continue; }
+    if (k.kind === "goat") { drawGoat(k, x); continue; }
     const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);

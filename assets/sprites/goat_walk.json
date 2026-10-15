@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 126,
+  "frame_h": 163,
+  "ms_per_frame": 140,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 63,
+  "anchor_y": 162,
+  "source": "goat_walk_mag.png"
+}

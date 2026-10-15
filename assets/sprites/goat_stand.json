@@ -1,0 +1,11 @@
+{
+ "frames": 6,
+ "frame_w": 127,
+ "frame_h": 164,
+ "ms_per_frame": 300,
+ "loop": true,
+ "align": "feet",
+ "anchor_x": 63,
+ "anchor_y": 162,
+ "source": "goat_stand_sheet.png"
+}
