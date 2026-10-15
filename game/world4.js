@@ -474,7 +474,7 @@ function updateTown(dt) {
     const o = newSheep({ kind: "lamb", how: "one", one: true, hx: clothStall.x + T, hy: GR * T }); lost.push(o);
     toast("Something moved under the cloth stall... a lamb! It came out to the sound of the harp.");
   }
-  if (clothStall && !clothStall.hinted && Math.abs(d.x - clothStall.x) < 2 * T && !clothStall.out) { clothStall.hinted = true; sayLine("", "A faint bleat from under the cloth stall. Something's hiding there, too frightened to come out."); }
+  if (clothStall && !clothStall.hinted && Math.abs(d.x - clothStall.x) < 2 * T && !clothStall.out) { clothStall.hinted = true; sayLine("", harpMended() ? "A faint bleat from under the cloth stall. Something's hiding there, too frightened to come out. Maybe a song would coax it out (Select)." : "A faint bleat from under the cloth stall. Something's too frightened to come out. Once your harp is mended, a song might coax it out."); }
 }
 function updateLostHen(k, dt) {   // world3.js updateHen: a runaway hen lets you scoop her up if you walk, not run
   if (!k.lostHen || k.gone) return false;
