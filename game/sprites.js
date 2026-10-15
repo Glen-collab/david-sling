@@ -2520,6 +2520,42 @@ window.SPRITE_DATA = {
   "ay": 303,
   "align": "feet"
  },
+ "saul_joy": {
+  "src": "../assets/sprites/saul_joy.png",
+  "frames": 6,
+  "w": 251,
+  "h": 335,
+  "ms": 400,
+  "loop": true,
+  "pingpong": false,
+  "ax": 121,
+  "ay": 333,
+  "align": "feet"
+ },
+ "saul_sad": {
+  "src": "../assets/sprites/saul_sad.png",
+  "frames": 6,
+  "w": 166,
+  "h": 304,
+  "ms": 500,
+  "loop": true,
+  "pingpong": false,
+  "ax": 65,
+  "ay": 303,
+  "align": "feet"
+ },
+ "saul_torment": {
+  "src": "../assets/sprites/saul_torment.png",
+  "frames": 6,
+  "w": 267,
+  "h": 335,
+  "ms": 260,
+  "loop": true,
+  "pingpong": false,
+  "ax": 121,
+  "ay": 333,
+  "align": "feet"
+ },
  "scorpion_walk": {
   "src": "../assets/sprites/scorpion_walk.png",
   "frames": 12,

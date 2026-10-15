@@ -529,7 +529,9 @@ function drawSteward(camX) {
 // ---------------------------------------------------------------------------
 Object.assign(W4, { WISP_DRIFT: 55, WISP_SHIVER: 0.8, LAMP_REACH: 1.4, LAMP_CLEAR: 7,
   SAUL_SIZE: 1.25, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9 });
-TUNE.SPRITE_SIZE.saul = W4.SAUL_SIZE;
+Object.assign(TUNE.SPRITE_SIZE, { saul: W4.SAUL_SIZE, saul_torment: W4.SAUL_SIZE, saul_joy: W4.SAUL_SIZE, saul_sad: W4.SAUL_SIZE });
+// Glen's other Saul sheets: saul_torment (0 lurching, 1 head in hands, 2 fists, 3 shouting, 4 arms flung out, 5 clutching
+// his robe), saul_joy (arms raised, for the End of World 4), saul_sad (head bowed).
 const wisps = setPieces.filter(p => p.kind === "wisp").map(p => ({ hx: p.x, hy: p.r * T, x: p.x, y: p.r * T, ph: (p.c % 9) * 0.7, alpha: 1, gone: false }));
 const hallLamps = setPieces.filter(p => p.kind === "hall_lamp").map(p => ({ x: p.x, y: GR * T, lit: false, t: 0 }));
 const throne = setPieces.find(p => p.kind === "throne");
@@ -582,6 +584,8 @@ function updateSaul(dt) {
     if (g.dark >= 1) saulSendsOut();
   }
   saul.flash = Math.max(0, (saul.flash || 0) - dt * 2);
+  saul.t = (saul.t || 0) + dt;
+  if (saul.outT > 0) saul.outT -= dt;
   // the dark song: under everything in the throne room, louder as the shadows grow, fading as he's calmed
   const want = saul.calm || !inThroneRoom() ? 0 : duel ? Math.max(0.05, 0.22 + 0.5 * g.dark - 0.18 * g.calm + (saulPhase() === 1 ? 0.15 : 0)) : 0.32;
   saul.darkVol += (want - saul.darkVol) * Math.min(1, dt * 1.5);
@@ -600,13 +604,16 @@ function saulCalmed() {
 }
 function saulSendsOut() {
   endHarpDuel(); const d = david; d.harp = false; harpDuel.dark = 0;
-  sayLine("King Saul", "Leave me! Get out, all of you!");
+  sayLine("King Saul", "Leave me! Get out, all of you!"); saul.outT = 2.5;
   setTimeout(() => {
     Object.assign(d, { x: checkpoint.x, y: checkpoint.y, vx: 0, vy: 0 }); setState("idle"); camX = Math.max(0, d.x - W / 2);
     if (!W4.counsel2) { W4.counsel2 = true; HARP_DUEL.saul.window = 0.32;
       sayLine("The Steward", "Sit down. Tell me what happened. ... It's not your fault, boy. Go back. Slower this time: let each note come to you."); }
     else toast("Back by the servants' fire. Go back to him when you're ready.");
   }, 1600);
+}
+function drawThrone(x) {   // the empty throne while he's up: Glen's item (assets/items/throne.png), when there is one
+  if (ITEM.throne && ITEM.throne.naturalWidth) drawItem("throne", x + 0.6 * T, GR * T + 4, W4.THRONE_SIZE || 0.5);
 }
 function saulBlocking() { return throne && !saul.calm ? "The king is still troubled. Sit by him and play first." : null; }
 function drawHall(camX) {
@@ -627,7 +634,13 @@ function drawHall(camX) {
   const x = throne.x - camX; if (x < -400 || x > W + 400) return;
   const g = harpDuel, duel = g.active && g.kind === "saul", dark = duel ? g.dark || 0 : saul.calm ? 0 : 0.7, ph = saulPhase();
   const pose = saul.calm ? 3 : duel ? [0, 1, 2][ph] : 0;
-  drawSprite("saul", pose, x, GR * T, 1);
+  const up = !saul.calm && SPR.saul_torment && (saul.outT > 0 || !duel || ph === 1);   // on his feet: pacing before you play, in the storm, sending you out
+  if (up) {
+    const seq = saul.outT > 0 ? [4] : ph === 1 && duel ? [1, 5, 2, 5] : [1, 2, 5, 3, 1, 0];
+    const i = seq[Math.floor(saul.t / (duel ? 0.45 : 0.6)) % seq.length], pace = duel || saul.outT > 0 ? 0 : Math.sin(saul.t * 0.5) * 2.5 * T;
+    drawThrone(x);
+    drawSprite("saul_torment", i, x - 1.5 * T + pace, GR * T, pace && Math.cos(saul.t * 0.5) < 0 ? -1 : 1);
+  } else drawSprite("saul", pose, x, GR * T, 1);
   if (!saul.calm || dark > 0) {   // the shadows round his chair: closer and thicker as the dark grows; thinning in the new part
     const n = 7, fade = saul.calm ? 0 : Math.min(1, 0.35 + dark * 0.8 - (duel ? g.calm * 0.35 : 0));
     for (let k = 0; k < n; k++) {

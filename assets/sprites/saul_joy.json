@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 251,
+  "frame_h": 335,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 121,
+  "anchor_y": 333,
+  "source": "saul_joy_mag.png"
+}
