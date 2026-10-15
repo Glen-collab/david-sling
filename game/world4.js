@@ -771,6 +771,14 @@ if (LEVEL_STAGE === "4-1" && !STORY_HASH) {
 // 16:23, and then home to the sheep: Hanan at the Bethlehem gate, as he promised. Then the Journal.
 // Glen's art: saul (5 standing talking, 6 smiling), saul_joy (arms raised), steward, hanan_idle_nostaff, david_walk.
 // ---------------------------------------------------------------------------
+const TOWN_GROUND = {};   // the dusty ground pieces, loaded for the gate scene
+for (const n of ["topsoil", "sediment"]) TOWN_GROUND[n] = Object.assign(new Image(), { src: `../assets/terrain/w2s/${n}.png?v=${window.BUILD || 0}` });
+function drawTownGround(y) {
+  const sed = TOWN_GROUND.sediment, top = TOWN_GROUND.topsoil, k = TUNE.TER_FILL_SCALE;
+  if (sed.naturalWidth) { const w = sed.naturalWidth * k, h = sed.naturalHeight * k; for (let gy = y - 2; gy < H; gy += h - 1) for (let x = 0; x < W; x += w - 1) ctx.drawImage(sed, x, gy, w, h); }
+  else { ctx.fillStyle = "#8a6a44"; ctx.fillRect(0, y - 2, W, H - y + 2); }
+  if (top.naturalWidth) { const h = TUNE.TER_TOPSOIL_H, w = top.naturalWidth * h / top.naturalHeight; for (let x = -4; x < W; x += w - 1) ctx.drawImage(top, x, y - TUNE.TER_GRASS_RISE, w, h); }
+}
 const w4ending = {
   active: false,
   beats: [
@@ -821,9 +829,7 @@ const w4ending = {
       drawSprite("david_idle", frameOf("david_idle", now), W * 0.36, y, 1);
     } else {   // the Bethlehem gate: Hanan waiting
       bgWorld = "w3_1"; drawBackground(0); bgWorld = keep;
-      const gg = ctx.createLinearGradient(0, y - 8, 0, H); gg.addColorStop(0, "#c9a571"); gg.addColorStop(0.12, "#a9824f"); gg.addColorStop(1, "#6e5333");   // the dusty road at the gate
-      ctx.fillStyle = gg; ctx.fillRect(0, y - 8, W, H - y + 8);
-      ctx.fillStyle = "rgba(90,66,40,0.5)"; for (let k = 0; k < 60; k++) { ctx.beginPath(); ctx.ellipse((k * 97.7) % W, y + 14 + (k * 37) % (H - y - 20), 6 + k % 5, 3, 0, 0, Math.PI * 2); ctx.fill(); }
+      drawTownGround(y);   // Bethlehem's own dusty ground (the w2s set 3-1 uses), not the palace stone this stage loaded
       if (SPR.hanan_idle_nostaff) drawSprite("hanan_idle_nostaff", frameOf("hanan_idle_nostaff", now), W * 0.62, y, -1);   // (his staff is David's now)
       const walking = B.walk && this.davidX < W * 0.4;
       const dx = B.walk ? this.davidX : W * 0.4, nm = typeof SPR.david_walk_staff !== "undefined" && (JSON.parse(localStorage.getItem("davidProgress") || "{}").staff) ? "david_walk_staff" : "david_walk";
