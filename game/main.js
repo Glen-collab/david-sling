@@ -110,6 +110,7 @@ const TUNE = {
     david_sling_throw: 1.15,
     david_sling_throw_up: 1.15,
     david_crawl: 0.92,
+    david_slip: 0.8,      // Glen's slip strip draws him chunkier: matched to his head size on the other sprites
     lion_prowl_carry_lamb: 1.3, lion_sit_carry_lamb: 1.3, lion_set_lamb_down: 1.24,
     lion_run: 1.3, lion_pounce: 1.3, lion_prowl: 1.3, lion_roar: 1.3, lion_sit_roar: 1.3, lion_dazed: 1.3,
     cobra_hood: 1.5, snake_strike: 1.5,
@@ -2407,6 +2408,15 @@ function updateFireSheep(sh, dt) {
     Object.assign(sh, { x: tx, y: sh.fire.y, vx: 0, vy: 0, state: "atFire", stillT: 9, t: Math.random() * 3, facing: Math.sign(sh.fire.x - tx) || 1 });
     return;
   }
+  // no closer for a while (boxed in, like The One under 3-4's fallen oak, whose root rock blocks the way left): head for the
+  // campfire the other way instead; still stuck after that, it just turns up at its fire
+  const gap = Math.abs(tx - sh.x);
+  if (sh.bestD === undefined || gap < sh.bestD - 4) { sh.bestD = gap; sh.stuckT = 0; } else sh.stuckT += dt;
+  if (sh.stuckT > 1.5) {
+    const other = fires.filter(f => f !== sh.fire && Math.sign(f.x - sh.x) === -dir).sort((a, b) => Math.abs(a.x - sh.x) - Math.abs(b.x - sh.x))[0];
+    if (other && !sh.turned) { sh.turned = true; sh.fire = other; sh.spot = restSpot(other, line.filter(o => o !== sh && o.fire === other).length); sh.bestD = undefined; sh.stuckT = 0; return; }
+    sh.walkT = 99; return;   // (next frame: at its fire)
+  }
   sh.facing = dir;
   sh.vx = dir * TUNE.RUN_SPEED * 0.85;                        // sprint
   if (sh.onGround && !groundAhead(sh, dir)) sh.vy = -980;      // leap the pit
@@ -3079,15 +3089,16 @@ unlockAudio();   // when the browser already allows sound (the "Play David" laun
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
-  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated"];
+  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated",
+  "thunder", "thunder_2", "thunder_3"];   // (thunder: 3-4's storm; any that aren't there yet are just skipped)
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
-for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; SFX[n] = a; }
+for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
 function loadSfx() {}
 // play a sound; x (optional) is where it happens in the level, so off-screen things are quieter
 function sfx(name, x, vol = 1, rate = 1) {
   if (!audioUnlocked) return null;
-  const base = SFX[name]; if (!base) return null;
+  const base = SFX[name]; if (!base || base.missing) return null;
   let v = vol * TUNE.SFX_VOLUME;
   if (x !== undefined) { const off = Math.abs(x - (camX + W / 2)); v *= Math.max(0, Math.min(1, 1.25 - off / (W * 0.9))); }
   if (v <= 0.01) return null;

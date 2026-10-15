@@ -1031,7 +1031,11 @@ function updateStorm(dt) {
   storm.next -= dt;
   if (storm.next <= 0) {
     storm.next = W3.LIGHTNING[0] + Math.random() * (W3.LIGHTNING[1] - W3.LIGHTNING[0]); storm.flash = 1;
-    setTimeout(() => { sfx("fall_pit", undefined, 0.5, 0.4); w2Shake.v = Math.max(w2Shake.v, 0.25); }, 350);   // the thunder
+    setTimeout(() => {   // the thunder: Glen's thunder sounds (assets/sounds/thunder.mp3, thunder_2, thunder_3), one at random
+      const th = ["thunder", "thunder_2", "thunder_3"].filter(n => SFX[n] && !SFX[n].missing);
+      if (th.length) sfx(th[Math.floor(Math.random() * th.length)], undefined, 0.9, 0.9 + Math.random() * 0.2);
+      w2Shake.v = Math.max(w2Shake.v, 0.25);
+    }, 350);
     if (oxFight() && ox.phase === 2) {   // a strike on the tree nearest David: a branch comes down
       const tr = oxTrees.filter(t => !t.down).sort((a, b) => Math.abs(a.x - david.x) - Math.abs(b.x - david.x))[0];
       if (tr && Math.abs(tr.x - david.x) < 4 * T) { branches.push({ x: tr.x + (david.x - tr.x) * 0.6, y: GR * T - 6 * T, vy: 0 }); toast("Lightning hit the tree! Look out above!"); }
