@@ -1025,3 +1025,160 @@ function drawHen(k, x) {
   const nm = k.state === "run" ? "chicken_run" : "chicken_peck"; if (!SPR[nm]) return;
   drawSprite(nm, frameOf(nm, k.t + k.home), x, k.y, k.facing, W3.HEN_SIZE, k.alpha);
 }
+
+// ---------------------------------------------------------------------------
+// The end of World 3 (DESIGN "End of World 3 — reflection scene"): the storm passes at sunset, the flock is safe.
+// Hanan walks up and gives David his own old shepherd's staff (Glen's clips: hanan_walk, hanan_give_staff, then the
+// two of them, hanan_staff_to_david); Psalm 23:4. Then 1 Samuel 16:7, a rider far off on the road to Bethlehem (the
+// king's messenger, setting up World 4), and David plays by the fire. Then the Journal.
+// The gift: davidProgress.staff = one more heart, for good (main.js). It comes back at Goliath (1 Samuel 17:40).
+// Background: Glen's sunset-after-the-rain set (w3_end), with 3-4's storm layers fading off it as the scene opens.
+// ---------------------------------------------------------------------------
+const w3ending = {
+  active: false,
+  lines: [
+    ["Hanan", "That ox would have scattered the whole flock. You stood between them and it."],
+    ["Hanan", "They say the prophet poured oil on your head. And here you are, back with the sheep the next day. Good."],
+    ["Hanan", "I won't always be on these hills with you. Take this. When the path is hard, lean on it, and remember who leads you."],
+  ],
+  MID_H: 430, NEAR_H: 190, RIDER_Y: 250,  // layer heights on screen; how far above the ground the rider goes by
+  DAVID_X: 520, FIRE_X: 900, WALK: 70,    // where David stands, the fire, Hanan's walking speed (his stride at this size)
+  OFFER: 2.2, HANDOVER: 5.6,              // seconds: Hanan holding the staff out, then the two of them (Glen's clips)
+  start(done) {
+    Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, hananX: W + 30, gave: false, fade: 0 });
+    hushLoops(); dialog.t = 0;
+  },
+  next() { this.step++; this.stepT = 0; },
+  sc(name) { return SCALE * (TUNE.SPRITE_SIZE[name] || 1); },
+  hananStop() { return this.DAVID_X + 192 * this.sc("hanan_staff_to_david"); },   // so the two-person clip lines up with them
+  update(dt) {
+    this.t += dt; this.stepT += dt; this.fade = Math.min(1, this.t / 1.5);
+    const A = pressed("a") || pressed("b") || pressed("start");
+    const say = i => { dialog.who = this.lines[i][0]; dialog.say = this.lines[i][1]; dialog.t = 90; };
+    switch (this.step) {
+      case 0: if (this.stepT > 3.5) this.next(); break;                                        // the rain stops, the sun comes out
+      case 1: this.hananX = Math.max(this.hananStop(), this.hananX - this.WALK * dt); if (this.hananX <= this.hananStop()) { say(0); this.next(); } break;
+      case 2: if (A) { say(1); this.next(); } break;
+      case 3: if (A) { dialog.t = 0; this.next(); } break;
+      case 4: if (this.stepT > this.OFFER) { say(2); this.next(); } break;                       // he holds it out
+      case 5: if (A) { dialog.t = 0; this.next(); } break;
+      case 6:                                                                                   // David takes it
+        if (this.stepT > this.HANDOVER && !this.gave) {
+          this.gave = true; sfx("extra_life", undefined, 0.7);
+          try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.staff = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+        }
+        if (this.gave && this.stepT > this.HANDOVER + 1.5 && A) this.next();
+        break;
+      case 7: if (this.stepT > 1.5 && A) this.next(); break;                                    // 1 Samuel 16:7
+      case 8: if (this.stepT > 4 && A) this.next(); break;                                      // the rider on the road
+      case 9:                                                                                   // by the fire, David plays
+        if (this.stepT < 0.1 && audioUnlocked && harpMusic.paused) { harpMusic.currentTime = 0; harpMusic.volume = 0; harpMusic.play().catch(() => {}); }
+        harpMusic.volume = Math.min(TUNE.HARP_VOLUME, harpMusic.volume + dt * 0.4);
+        if (this.stepT > 3.5 && A) this.next();
+        break;
+      case 10: harpMusic.volume = Math.max(0, harpMusic.volume - dt * 0.8); if (this.stepT > 1.2) { harpMusic.pause(); this.active = false; const cb = this.done; this.done = null; cb && cb(); } break;
+    }
+  },
+  drawLand(gy, now) {
+    const clear = this.step === 0 ? Math.min(1, this.stepT / 3) : 1;
+    const layers = (L, a) => {
+      if (!L || a <= 0) return;
+      ctx.save(); ctx.globalAlpha = a;
+      if (L.far && L.far.naturalWidth) ctx.drawImage(L.far, 0, 0, W, H);
+      if (L.mid && L.mid.naturalWidth) drawLayerRepeating(L.mid, 0, 1, gy + 10, this.MID_H, true);
+      if (L.near && L.near.naturalWidth) drawLayerRepeating(L.near, 0, 1, gy + 22, this.NEAR_H, true);
+      ctx.restore();
+    };
+    ctx.fillStyle = "#2a2f3c"; ctx.fillRect(0, 0, W, H);
+    layers(BG.w3_end, 1);
+    layers(BG.w3_4, 1 - clear);   // the storm, fading off
+    ctx.fillStyle = terPattern("sediment", TUNE.TER_FILL_SCALE) || "#3a3326"; ctx.fillRect(0, gy - 2, W, H - gy + 2);
+    terStrip("topsoil", -4, W + 4, gy - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
+    if (clear < 1) {   // the last of the rain
+      ctx.save(); ctx.strokeStyle = `rgba(200,215,235,${0.35 * (1 - clear)})`; ctx.lineWidth = 1.5; ctx.beginPath();
+      for (let k = 0; k < 140; k++) { const sx = (k * 97.3 + now * 260) % (W + 200) - 100, sy = (k * 53.7 + now * 900) % (H + 60) - 30; ctx.moveTo(sx, sy); ctx.lineTo(sx - 8, sy + 22); }
+      ctx.stroke(); ctx.restore();
+    }
+  },
+  drawRider(gy, now) {   // stand-in until a messenger clip: a dark little rider far off on the hills, riding for Bethlehem
+    const k = Math.min(1, this.stepT / 6), x = W * 0.92 - k * W * 0.55, y = gy - this.RIDER_Y + Math.sin(k * 3) * 4;
+    ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 2) * 0.85;
+    if (SPR.donkey_walk) drawSprite("donkey_walk", frameOf("donkey_walk", now * 1.8), x, y, -1, 0.32, 1, "brightness(0.15)");
+    ctx.fillStyle = "#1c1612"; ctx.beginPath(); ctx.ellipse(x + 4, y - 30, 5, 10, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 2, y - 44, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  },
+  draw() {
+    const now = performance.now() / 1000, gy = 560;
+    this.drawLand(gy, now);
+    if (this.step === 8) this.drawRider(gy, now);
+    const flock = [["sheep_graze", 90, 1], ["sheepblack_graze", 300, -1], ["sheep_stand", 380, 1], ["lamb_graze", 210, 1], ["sheep_graze", 40, -1], ["sheep_stand", 160, -1]];
+    for (const [nm, x, f] of flock) if (SPR[nm]) drawSprite(nm, frameOf(nm, now + x), x, gy, f);
+    if (this.step >= 9) {   // by the fire: Hanan on his rock, David on the other side with the harp
+      const fx = this.FIRE_X - 220;
+      drawItem("campfire", fx, gy + 4, 0.55);
+      ctx.save(); ctx.globalCompositeOperation = "lighter"; const r = 70 + Math.sin(now * 11) * 6, g = ctx.createRadialGradient(fx, gy - 34, 4, fx, gy - 34, r);
+      g.addColorStop(0, "rgba(255,170,60,0.4)"); g.addColorStop(1, "rgba(255,120,30,0)"); ctx.fillStyle = g; ctx.fillRect(fx - r, gy - 34 - r, r * 2, r * 2); ctx.restore();
+      drawItem("boulder_grey", fx - 92 - 30 * SCALE, gy + 4, 92 * SCALE / 375);
+      if (SPR.hanan_sit) drawSprite("hanan_sit", frameOf("hanan_sit", now), fx - 92, gy, 1);
+      drawStaff(fx + 165, gy, 0.6);   // standing beside him
+      const k = Math.floor(now * 1000 / TUNE.HARP_LOOP_MS) % 6, i = 8 + (k < 4 ? k : 6 - k);
+      drawSprite("david_play_harp", i, fx + 120, gy, -1);   // sitting on the ground by the fire, as in the stages
+    } else {
+      drawItem("campfire", this.FIRE_X, gy + 4, 0.55);
+      if (this.step <= 5 || !SPR.hanan_staff_to_david) drawSprite("david_idle", frameOf("david_idle", now), this.DAVID_X, gy, 1);
+      if (this.step >= 1 && this.step <= 5) {   // Hanan: walking up, talking, holding the staff out
+        let nm = this.step === 1 ? "hanan_walk" : dialog.t > 0 && dialog.who === "Hanan" && this.step < 4 ? "hanan_talk" : "hanan_idle", i = frameOf(nm, now);
+        if (this.step >= 4 && SPR.hanan_give_staff) { nm = "hanan_give_staff"; i = this.step === 4 ? Math.min(SPR[nm].frames - 1, Math.floor(this.stepT / this.OFFER * SPR[nm].frames)) : SPR[nm].frames - 1; }
+        if (SPR[nm]) drawSprite(nm, i, this.hananX, gy, -1);
+      }
+      if (this.step >= 6 && SPR.hanan_staff_to_david) {   // the two of them (Glen's clip, mirrored: Hanan on the right)
+        const nm = "hanan_staff_to_david", s = SPR[nm], i = Math.min(s.frames - 1, Math.floor((this.step === 6 ? this.stepT : 99) / this.HANDOVER * s.frames));
+        drawSprite(nm, i, this.DAVID_X + 105 * this.sc(nm), gy, -1);
+      }
+    }
+    if (this.step === 6 && this.gave) {   // the gift card
+      ctx.save(); ctx.globalAlpha = Math.min(1, (this.stepT - this.HANDOVER) * 2);
+      const cy = 80;
+      ctx.fillStyle = "rgba(25,14,6,0.85)"; ctx.beginPath(); ctx.roundRect(W / 2 - 420, cy, 840, 150, 16); ctx.fill();
+      drawStaff(W / 2 - 350, cy + 140, 0.55);
+      ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("Hanan's shepherd's staff", W / 2 + 40, cy + 44);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("One more heart, for good.", W / 2 + 40, cy + 74);
+      ctx.font = "italic 18px Georgia, serif"; ctx.fillText("\"Your rod and your staff, they comfort me.\"  Psalm 23:4", W / 2 + 40, cy + 108);
+      ctx.restore(); ctx.textAlign = "left";
+    }
+    if (this.step === 0) caption("The storm passed. The flock was safe.", Math.min(1, this.stepT * 1.5) * Math.min(1, (3.5 - this.stepT) * 2));
+    if (this.step === 7) {   // 1 Samuel 16:7 (WEB, "the LORD" for Yahweh)
+      ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 1.5);
+      ctx.fillStyle = "rgba(8,10,24,0.72)"; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = "center"; ctx.fillStyle = "#fff6dc"; ctx.font = "italic 30px Georgia, serif";
+      ctx.fillText("\"Don't look on his face, or on the height of his stature...", W / 2, 250);
+      ctx.fillText("for I don't see as man sees. For man looks at the", W / 2, 298);
+      ctx.fillText("outward appearance, but the LORD looks at the heart.\"", W / 2, 346);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "20px Georgia, serif"; ctx.fillText("1 Samuel 16:7", W / 2, 400);
+      ctx.restore(); ctx.textAlign = "left";
+    }
+    if (this.step === 8) caption("Far off, a rider on the road to Bethlehem. A messenger from the king.", Math.min(1, this.stepT * 1.5));
+    if (this.step === 9 && this.stepT > 3.5) caption(typeof JOURNAL_PAGES !== "undefined" && JOURNAL_PAGES[WORLD] ? "Press A to write in the Journal" : "Press A to continue", 1, true);
+    else if (this.step === 2 || this.step === 3 || this.step === 5 || (this.step === 6 && this.gave && this.stepT > this.HANDOVER + 1.5) || (this.step === 7 && this.stepT > 1.5) || (this.step === 8 && this.stepT > 4)) caption("A: next", 0.8, true);
+    if (dialog.t > 0) drawDialog();
+    if (this.fade < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - this.fade})`; ctx.fillRect(0, 0, W, H); }
+    if (this.step === 9 && this.stepT < 0.8) { ctx.fillStyle = `rgba(0,0,0,${1 - this.stepT / 0.8})`; ctx.fillRect(0, 0, W, H); }   // a fade to the fire
+    if (this.step === 10) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, this.stepT / 1.2)})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+function drawStaff(x, y, s) {   // Hanan's staff standing up, foot at x, y: Glen's art (assets/items/staff.png), or a drawn crook
+  const img = ITEM.staff;
+  if (img && img.naturalWidth) { const h = 330 * SCALE * s, w = img.naturalWidth * h / img.naturalHeight; ctx.drawImage(img, x - w / 2, y - h, w, h); return; }
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = "round";
+  for (const [w, c] of [[11, "#3a2410"], [7, "#7a5130"]]) {
+    ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -200); ctx.arc(-18, -200, 18, 0, Math.PI + 0.5, true); ctx.stroke();
+  }
+  ctx.restore();
+}
+// "?w3end" in the address plays the End of World 3 scene straight away (testing); "?w3end=6" jumps to the hand-over
+if (new URLSearchParams(location.search).has("w3end")) setTimeout(() => {
+  const at = Number(new URLSearchParams(location.search).get("w3end")) || 0;
+  w3ending.start(() => location.reload());
+  if (at) Object.assign(w3ending, { step: at, hananX: w3ending.hananStop(), fade: 1, t: 2 });
+}, 300);
