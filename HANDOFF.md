@@ -254,4 +254,10 @@ the harp phrase at 3-2's campfire.
   both gifts are on the donkey and it isn't balking (giftsBlocking). Ends at a village sheepfold (sheepfold(246)).
   donkey_bare_walk (Glen): once a gift is stolen the donkey switches to it and the gifts left ride on his back (DONKEY_BACK). Not yet: DESIGN's "5 dropped gifts as the lost things"
   (it uses 5 lost sheep from the villages for now); World 4 Journal pages; the Psalm 121:8 scroll.
+- 4-1's lost things are Father's five extra gifts (Glen's sheet -> assets/items/gift_bread, gift_oil, gift_figs,
+  gift_cheese, gift_honey): lostGift(name, c, r) in main.js, world4.js updateLostGifts/drawLostGifts/drawLostThings
+  (the HUD counter and the clear card say "gifts"). Hidden NES/Castlevania style (Glen): figs on the road (so you know
+  what to look for), bread in a hollow under a rock shelf behind a deadfall (charged stone), oil inside an outcrop whose
+  left end is fakeRock (walk in), cheese on a high ledge above The One's terrace, honey inside an outcrop whose loose
+  stone is at the far right (look back). A dead tree (deadfall) blocks the road at 240. 4-1 is now 316 cols, fold at 300.
 

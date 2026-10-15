@@ -341,7 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
-  "4-1": { cols: 262, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
+  "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
@@ -438,6 +438,8 @@ const bees = [], hornets = [];
 const bee = (c, k) => bees.push({ hx: c * T + T / 2, k, t: k * 1.6, x: 0, y: 0, facing: 1, gone: false, alpha: 1, vx: 0, vy: 0 });
 const hornet = (c, r, kind = "hornet") => hornets.push({ kind, hx: c * T + T / 2, hy: (r + 1) * T, x: c * T + T / 2, y: (r + 1) * T, state: "hover", t: Math.random() * 3, facing: -1, gone: false, alpha: 1, vx: 0, vy: 0 });
 const raven = (c, r) => hornet(c, r, "raven");
+const lostGifts = [];   // World 4's lost things (4-1: the extra gifts Father packed, shaken loose on the road; world4.js)
+const lostGift = (name, c, r) => lostGifts.push({ name, x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
 const ambushFox = c => { critter("fox", c); critters[critters.length - 1].ambush = true; };   // hiding in a bush until David's close (world1.js)   // ravens dive at you on open ground, like the hornets but bigger
 let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
@@ -1041,40 +1043,51 @@ if (LEVEL_NAME === "test") {
   // ---- 4-1 The Road to Gibeah: north with the king's gifts (1 Samuel 16:20). The donkey with the bread and the wine
   //      follows David, and Father's young goat. Village dogs spook the donkey (the harp calms him), bandits creep up
   //      behind for the gifts, boars in the vineyards (Psalm 80:13), doves on the road (leave them), crows in the vines.
-  //      The walls of Jebus far off. Five lost sheep from the village flocks; The One on a vineyard terrace. ----
-  ground(0, 261);
+  //      The lost things: five more gifts Father packed, shaken loose on the rough road, most of them hidden (Glen: NES
+  //      false walls and Castlevania breakable walls): behind dead branches a charged stone breaks, inside rocks you can
+  //      walk into, up on ledges. The One: a lamb from a village flock, on the highest vineyard terrace. ----
+  ground(0, 315);
   campfire(6);
   critter("giftdonkey", 1); critter("goat", 0);                  // the king's gifts (world4.js; the goat is world3.js's)
   oliveRow(11, 16, 5); critter("dove", 14); critter("dove", 17);
-  lostSheep("sheep", 22, 16);
-  deco("town_hut_round", 29, 16, 0.14); deco("town_clay_pots", 33, 16, 0.2); critter("villagedog", 38);   // the first village: a dog by the huts
+  lostGift("figs", 23, 16);                                       // the first one, right on the road: so you know what to look for
+  deco("town_hut_round", 29, 16, 0.14); deco("town_clay_pots", 33, 16, 0.2); critter("villagedog", 38);   // the first village
   rock(42, 15, 3, 2); rock(45, 13, 3, 4); oliveRow(45, 12, 3); special(46, 7);
   critter("bandit", 50);                                          // behind you, once you're past
-  oliveArc(54, 16, 6);
-  campfire(60);
-  talk(63, "The vineyard keeper", "Shalom, young man. Watch yourself in my vines. Wild boars came out of the woods and tore them up. \"The boar out of the wood ravages it\" (Psalm 80:13).");
-  for (const c of [69, 73]) critter("crow", c, GR - 1);          // crows at the grapes: fair game
-  critter("boar", 80, GR - 1, 8);
-  rock(86, 15, 3, 2); rock(89, 13, 4, 4); lostSheep("sheepblack", 90, 12, "ledge");   // up on a terrace wall: the harp brings it down
-  critter("boar", 97, GR - 1, 8); oliveRow(100, 16, 5);
-  lostSheep("sheep2", 106, 16);
-  deco("town_hut_round", 113, 16, 0.14); deco("town_grain_baskets", 116, 16, 0.2); critter("villagedog", 118); critter("dove", 121);
-  campfire(124);
-  critter("bandit", 128);
-  // The One: a lamb that strayed from a village flock, up on the highest vineyard terrace
-  rock(134, 15, 3, 2); rock(137, 13, 3, 4); rock(140, 11, 5, 6); lostSheep("lamb", 143, 10, "one"); special(141, 7);
-  oliveRow(146, 16, 4); critter("dove", 150); critter("dove", 152);
-  for (const c of [157, 161]) critter("crow", c, GR - 1);
-  lostSheep("sheep", 166, 16, "thorns");
-  critter("boar", 175, GR - 1, 10);
-  oliveArc(182, 16, 6);
-  campfire(188);
-  deco("town_hut_round", 194, 16, 0.14); deco("town_clay_pots", 197, 16, 0.18); critter("villagedog", 199);
-  critter("bandit", 203);
-  lostSheep("sheepblack", 212, 16);
-  rock(217, 15, 2, 2); rock(220, 13, 3, 4); special(221, 8);
-  oliveRow(226, 16, 6);
-  sheepfold(246);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+  // gift: the bread, in a hollow under a rock shelf, dead branches across its mouth (a charged stone breaks them)
+  rock(52, 15, 2, 2); rock(56, 12, 8, 2); deadfall(56, 14, 1, 3); rock(63, 14, 1, 3); lostGift("bread", 60, 16);
+  rock(64, 15, 2, 2);
+  campfire(70);
+  talk(72, "The vineyard keeper", "Shalom, young man. Watch yourself in my vines. Wild boars came out of the woods and tore them up. \"The boar out of the wood ravages it\" (Psalm 80:13).");
+  for (const c of [78, 82]) critter("crow", c, GR - 1);          // crows at the grapes: fair game
+  critter("boar", 87, GR - 1, 8);
+  // gift: the oil, inside an outcrop: its lower left end is only loose stone you can walk into
+  rock(93, 13, 10, 4); fakeRock(93, 14, 2, 3); block(95, 14, 2, 3, 0); lostGift("oil", 95, 16);
+  critter("boar", 108, GR - 1, 8); oliveRow(110, 16, 5);
+  deco("town_hut_round", 116, 16, 0.14); deco("town_grain_baskets", 119, 16, 0.2); critter("villagedog", 121); critter("dove", 124);
+  campfire(127);
+  critter("bandit", 131);
+  // The One, on the highest vineyard terrace; and higher still, a ledge with the cheese (a long jump up)
+  rock(136, 15, 3, 2); rock(139, 13, 3, 4); rock(142, 11, 5, 6); lostSheep("lamb", 145, 10, "one"); special(143, 7);
+  rock(149, 7, 2, 1); lostGift("cheese", 149, 6);
+  oliveRow(152, 16, 4); critter("dove", 156); critter("dove", 158);
+  for (const c of [163, 167]) critter("crow", c, GR - 1);
+  // gift: the honey, inside an outcrop whose loose stone is at the far (right) end: look back after you climb over
+  rock(171, 15, 2, 2); rock(173, 12, 9, 5); fakeRock(180, 13, 2, 4); block(178, 13, 2, 4, 0); lostGift("honey", 178, 16);
+  critter("boar", 188, GR - 1, 10);
+  oliveArc(194, 16, 6);
+  campfire(200);
+  deco("town_hut_round", 205, 16, 0.14); deco("town_clay_pots", 208, 16, 0.18); critter("villagedog", 211);
+  critter("bandit", 214);
+  rock(222, 15, 2, 2); rock(225, 13, 3, 4); special(226, 8);
+  oliveRow(231, 16, 6);
+  deadfall(240, 10, 2, 7);                                       // a dead tree across the road: a charged stone, or no way on
+  critter("boar", 250, GR - 1, 8); for (const c of [256, 259]) critter("crow", c, GR - 1);
+  campfire(264);
+  critter("bandit", 268);
+  critter("villagedog", 276); critter("dove", 280);
+  oliveRow(284, 16, 6);
+  sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
@@ -2573,6 +2586,7 @@ function drawSheep(camX) {
   for (const sh of lost) drawSheepOne(sh, camX);
 }
 function drawSheepCount() {
+  if (typeof drawLostThings === "function" && drawLostThings()) return;   // World 4: the lost gifts (world4.js)
   if (!lostCount()) return;
   hudIcon("sheep", HUD_X - 4, 194, 36);
   hudText(`${foundCount()}/${lostCount()}`, HUD_X + 40, 220);
@@ -2669,7 +2683,8 @@ function updateFinish(dt) {
       t: Math.random(), delay: 1.0 + i * 0.55, slot: px + 3.8 * T + ((i * 5) % n) * (10 * T / n), state: "wait", counted: false,
       depth: (i % 3) * 5, idleName: [SHEEP_ART[sh.kind].graze, SHEEP_ART[sh.kind].stand][i % 2] }));
     finish.found = foundCount(); finish.total = lostCount(); finish.one = line.some(sh => sh.one);
-    if (finish.total && finish.found === finish.total) { d.lives++; sfx("extra_life"); toast(`All ${finish.total} lost sheep found: +1 life!`); }
+    if (typeof lostGifts !== "undefined" && lostGifts.length) { finish.found = lostGifts.filter(g => g.taken).length; finish.total = lostGifts.length; finish.things = "gifts"; }
+    if (finish.total && finish.found === finish.total) { d.lives++; sfx("extra_life"); toast(`All ${finish.total} lost ${finish.things || "sheep"} found: +1 life!`); }
     return;
   }
   finish.blocked = Math.max(0, finish.blocked - dt);
@@ -2865,8 +2880,8 @@ function drawFinishBanner() {
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
   ctx.fillText("Stage " + LEVEL_STAGE + " clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
-  ctx.fillText(`Lost sheep found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
-  hudIcon("sheep", W / 2 - 200, 234, 38);
+  ctx.fillText(`Lost ${finish.things || "sheep"} found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
+  if (finish.things) drawItem("gift_honey", W / 2 - 200, 270, 0.26); else hudIcon("sheep", W / 2 - 200, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
   ctx.fillText(olive, W / 2, 330);
   if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(next, W / 2, 352); }

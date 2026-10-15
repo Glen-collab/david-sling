@@ -256,13 +256,42 @@ function drawKeeper(camX) {
 // ---------------------------------------------------------------------------
 // Hooks: called from world1.js (critters), main.js (each frame and drawing)
 // ---------------------------------------------------------------------------
+// The lost things of 4-1: five more gifts Father packed (lostGift(name, c, r) in main.js), shaken loose on the road
+const LOST_GIFT_NAMES = { bread: "a bundle of loaves", oil: "the jar of olive oil", figs: "the string of dried figs", cheese: "the cheese wrapped in leaves", honey: "the jar of honey" };
+function updateLostGifts(dt) {
+  if (!lostGifts.length) return;
+  if (!W4.giftsTold && david.x > 12 * T) { W4.giftsTold = true; toast("Father packed more gifts for the king, and five shook loose on the rough road. Some are well hidden."); }
+  for (const g of lostGifts) {
+    g.t += dt; if (g.taken) continue;
+    if (Math.abs(david.x - g.x) < 42 && Math.abs(david.y - g.y) < 80 && david.deadT <= 0) {
+      g.taken = true; sfx("olive_pickup", g.x, 1, 0.9); if (typeof chime === "function") chime(6);
+      const n = lostGifts.filter(q => q.taken).length;
+      toast(n === lostGifts.length ? `You found ${LOST_GIFT_NAMES[g.name]}! All ${n} of Father's gifts.` : `You found ${LOST_GIFT_NAMES[g.name]}! (${n} of ${lostGifts.length})`);
+      for (let k = 0; k < 12; k++) bits.push({ x: g.x, y: g.y - 30, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 400, life: 0.8, color: k % 2 ? "#ffd84a" : "#fff2b0" });
+    }
+  }
+}
+function drawLostGifts(camX) {
+  for (const g of lostGifts) {
+    if (g.taken) continue; const x = g.x - camX; if (x < -80 || x > W + 80) continue;
+    goldGlow(x, g.y, g.t);
+    drawItem("gift_" + g.name, x, g.y + 2 + Math.sin(g.t * 2) * 2, 0.36);
+  }
+}
+function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true = drawn instead of the sheep)
+  if (!lostGifts.length) return false;
+  drawItem("gift_honey", HUD_X + 14, 224, 0.24);
+  hudText(`${lostGifts.filter(g => g.taken).length}/${lostGifts.length}`, HUD_X + 40, 220);
+  if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
+  return true;
+}
 function updateWorld4(dt) {
   if (WORLD !== 4) return;
-  updateGiftDrops(); updateKeeper();
+  updateGiftDrops(); updateKeeper(); updateLostGifts(dt);
 }
 function drawWorld4(camX) {
   if (WORLD !== 4) return;
-  drawKeeper(camX); drawGiftDrops(camX);
+  drawKeeper(camX); drawGiftDrops(camX); drawLostGifts(camX);
 }
 
 // ---------------------------------------------------------------------------
