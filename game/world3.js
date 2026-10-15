@@ -755,3 +755,6 @@ const anointing = {
     if (this.t > 1.2) drawStoryBox(...this.lines[this.step], this.step === this.lines.length - 1 ? "A: continue" : "A: next", this.close < 0.5);   // up top over the wide shot; at the bottom over the close-up (the oil is up top there)   // up top: the people stand on the ground below
   },
 };
+
+// from the map's Anointing stop ("#3-A"): play the scene straight away, then back to the map
+if (STORY_HASH === "3-A") anointing.start(() => { stageCleared("3-A", {}); backToMap(); });

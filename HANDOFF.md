@@ -148,8 +148,9 @@ the other four; 1 Samuel 16:6-10), seen through Samuel's eyes, no Samuel on scre
 under, drawn in world3.js); guide(c, r, line) = Shammah's stops: he waits, calls the line when David catches up, runs
 to the next (resets to the checkpoint's spot after a fall); the town wall rock(165, 8, 9, 7) with setPiece("drain") under
 it and The One inside. The stages have no music track, so "the music speeds up near town" isn't done.
-The Anointing (world3.js `anointing`, same shape as World 2's `ending`): plays when 3-3 is cleared, before the Journal,
-in front of the town gate (3-3's own background). Sprites from Glen's clips: brothers_line (all eight sons, David at the
+The Anointing (world3.js `anointing`): a story stop on the World 3 map (id "3-A", `story: true`, a gold star at the
+altar by the well). After 3-3, the map walks David there by himself and plays it ("#3-A" loads 3-3's ground and runs
+the scene, then marks 3-A cleared and opens the trail to 3-4). A at the star replays it. Sprites from Glen's clips: brothers_line (all eight sons, David at the
 end steps out) and samuel_anoint (walk in, raise the horn, pour). Positions in ANOINT (horn tip / David's head measured
 from the sprites). Harp music plays for the Spirit (16:13); the last card explains "anointing" and "Messiah".
 Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),

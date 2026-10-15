@@ -55,8 +55,11 @@ const MAP_WORLDS = {
       { id: "3-1", label: "The Day Before", x: 850, y: 560, trail: [[420, 1000], [560, 930], [640, 870], [760, 800], [800, 690]] },
       { id: "3-2", label: "The Far Pasture", x: 270, y: 380, trail: [[680, 640], [480, 600], [330, 520]] },
       { id: "3-3", label: "We Will Not Sit Down", x: 560, y: 820, trail: [[260, 500], [300, 600], [400, 700], [480, 760]] },
-      // the way to 3-4 goes past the altar (the anointing) and out of the gate, down the muddy track into the storm
-      { id: "3-4", label: "The Chosen Shepherd", x: 1640, y: 1040, trail: [[700, 720], [880, 620], [1060, 520], [1220, 400], [1310, 420], [1360, 560], [1430, 700], [1500, 840], [1570, 960]] },
+      // a story stop, not a stage: the sacrifice at the altar by the well, inside the gate (1 Samuel 16:5). After 3-3,
+      // David walks here by himself and the Anointing plays.
+      { id: "3-A", label: "The Anointing", story: true, x: 1300, y: 415, trail: [[700, 720], [880, 620], [1060, 520], [1220, 410]] },
+      // then out of the gate, down the muddy track into the storm
+      { id: "3-4", label: "The Chosen Shepherd", x: 1640, y: 1040, trail: [[1360, 560], [1430, 700], [1500, 840], [1570, 960]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
@@ -137,6 +140,9 @@ const WorldMap = {
     const atI = Math.max(0, M.stops.findIndex(s => s.id === (M.journey ? this.prog.jat || "w1" : this.prog.at || "home")));
     this.cur = Math.min(atI, this.openTo);
     this.d = this.dist[this.stopAt[this.cur]]; this.target = this.cur; this.facing = 1; this.walkT = 0;
+    this.autoStory = false;   // the next stop is a story (the Anointing) and David's right before it: he walks there by himself
+    const nx = M.stops[this.openTo];
+    if (nx && nx.story && !this.isCleared(nx) && this.cur === this.openTo - 1) { this.target = this.openTo; this.autoStory = true; }
     this.lambD = this.d; this.lambFacing = 1;
     this.stones = M.journey ? 0 : stonesFound(world);
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) mapAmbience.play().catch(() => {});
@@ -173,7 +179,11 @@ const WorldMap = {
       const p = this.at(this.d); this.dirX = p.dx * dir; this.dirY = p.dy * dir;
       if (Math.abs(this.dirX) > 4) this.facing = Math.sign(this.dirX);
       this.walkT += dt;
-      if (Math.abs(want - this.d) <= 0.5) { this.d = want; this.cur = this.target; this.walkT = 0; chime(this.cur); this.prog[this.M.journey ? "jat" : "at"] = this.M.stops[this.cur].id; saveProgress(this.prog); }
+      if (Math.abs(want - this.d) <= 0.5) {
+        this.d = want; this.cur = this.target; this.walkT = 0; chime(this.cur); this.prog[this.M.journey ? "jat" : "at"] = this.M.stops[this.cur].id; saveProgress(this.prog);
+        const st = this.M.stops[this.cur];
+        if (st.story && this.autoStory) { this.autoStory = false; this.leaving = () => startStage(st.id); }   // arrived: the scene plays
+      }
     }
     // the lamb trots along behind him on the trail
     if (moving) this.lastDir = Math.sign(want - this.d) || this.lastDir;
@@ -212,7 +222,7 @@ const WorldMap = {
     if (!MAP_CHEAT && pressed("b")) { this.leaving = () => this.open("journey"); return; }   // B: back out to the journey map
     if ((pressed("a") || pressed("start")) && stop.id === "home") { this.leaving = () => Courtyard.open(this.world); return; }   // home: Jesse's courtyard
     if ((pressed("a") || pressed("start")) && stop.id !== "home") {
-      if (BUILT_STAGES.includes(stop.id)) this.leaving = () => startStage(stop.id);
+      if (BUILT_STAGES.includes(stop.id) || stop.story) this.leaving = () => startStage(stop.id);
       else toast(`${stop.id} ${stop.label} isn't built yet. It's next!`);
     }
   },
@@ -257,6 +267,11 @@ const WorldMap = {
       const [x, y] = P(st.x, st.y), depth = 0.7 + 0.5 * (st.y / img.naturalHeight), done = this.isCleared(st), num = st.world ? String(st.world) : st.id.split("-")[1];
       const r = 17 * depth;
       if (st.id === "home") { if (!this.stoneMarker("map_stop", x, y, r * 0.85, "")) this.marker(x, y, r * 0.85, "#c9a46a", "#5a3a1c", "⌂"); return; }
+      if (st.story) {   // a story stop: a small golden star
+        ctx.save(); ctx.translate(x, y); ctx.fillStyle = done ? "#e8d9b8" : "#ffd84a"; ctx.strokeStyle = "#6b3a10"; ctx.lineWidth = 2; ctx.beginPath();
+        for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.45 : r; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+        ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); return;
+      }
       const flash = !done && Math.floor(this.t * 2.5) % 2 === 0;
       if (!done) {   // a soft pulsing glow on the next stage
         const g = ctx.createRadialGradient(x, y, 2, x, y, r * 2.6);
@@ -321,6 +336,11 @@ const WorldMap = {
     if (st.id === "home") {
       ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText("Home: Jesse's house", W / 2, y + 32);
       ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText("A: go into the courtyard    Right: walk out to the hills", W / 2, y + 60);
+      return;
+    }
+    if (st.story) {
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(st.label, W / 2, y + 32);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText(p.cleared ? "A: watch it again" : "A: watch", W / 2, y + 58);
       return;
     }
     ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`${st.id}  ${st.label}`, W / 2, y + 32);

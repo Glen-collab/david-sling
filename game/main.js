@@ -310,7 +310,8 @@ function keyText(s) {
 // Levels: World 1's four stages ("#1-1" ... "#1-4" in the address), and "#test", the old movement test.
 // Built from simple commands (columns/rows are tiles). Screen is 20 tiles tall; ground surface is row 17.
 // ============================================================================
-const STAGE_HASH = (location.hash.match(/^#(\d-\d)$/) || [])[1];
+const STORY_HASH = location.hash === "#3-A" ? "3-A" : null;   // a story stop from the map (the Anointing): 3-3's ground, then the scene
+const STAGE_HASH = (location.hash.match(/^#(\d-\d)$/) || [])[1] || (STORY_HASH && "3-3");
 const LEVEL_NAME = location.hash === "#test" ? "test" : STAGE_HASH || "1-1";
 // the game opens on the World 1 map; a stage in the address ("#1-2") goes straight into it (key 1 = 1-1)
 function backToMap() { history.replaceState(null, "", location.pathname + location.search); location.reload(); }
@@ -2494,7 +2495,6 @@ function updateFinish(dt) {
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
     const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
-    else if (LEVEL_STAGE === "3-3" && typeof anointing !== "undefined") anointing.start(journal);   // the Anointing (world3.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
