@@ -466,7 +466,8 @@ function updateLostHen(k, dt) {   // world3.js updateHen: a runaway hen lets you
   }
   return false;
 }
-function drawQuestIcon(name, x, y, s = 1) {   // drawn, until there's art: a coil of gut string, a wooden peg, a lump of wax
+function drawQuestIcon(name, x, y, s = 1) {   // Glen's items (quest_string/peg/wax), or drawn ones
+  const art = ITEM["quest_" + name]; if (art && art.naturalWidth) { drawItem("quest_" + name, x, y, 0.26 * s); return; }
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
   if (name === "string") { ctx.strokeStyle = "#e9dcc0"; ctx.lineWidth = 3; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.ellipse(0, -16, 14 - k * 3, 9 - k * 2, 0, 0, Math.PI * 2); ctx.stroke(); } }
   else if (name === "peg") { ctx.fillStyle = "#8a5a2e"; ctx.fillRect(-4, -34, 8, 30); ctx.fillStyle = "#a8743e"; ctx.beginPath(); ctx.ellipse(0, -36, 12, 7, 0, 0, Math.PI * 2); ctx.fill(); }
@@ -502,7 +503,19 @@ function drawTown(camX) {
     if (art && art.naturalWidth) drawItem("quest_" + q.name, x, q.y + Math.sin(q.t * 2) * 2, 0.36); else drawQuestIcon(q.name, x, q.y + Math.sin(q.t * 2) * 2);
   }
 }
-// the Steward (made up): the palace's old head servant, "the one who tells you the truth" (Hanan, World 4's opening)
+// the Steward (made up): the palace's old head servant, "the one who tells you the truth" (Hanan, World 4's opening).
+// Glen's sheet, facing left: 0 standing, 1 talking, 2 pointing, 3 hands folded, 4 shaking his head, 5 a small smile.
+TUNE.SPRITE_SIZE.steward = 1.15;
+const STEWARD_POSE = [[1, 4], [2, 1], [1, 3]];   // per line: the two poses he moves between while he says it
+function drawSteward(camX) {
+  const mine = talks.filter(t => t.who === "The Steward"); if (!mine.length || !SPR.steward) return;
+  const talking = dialog.t > 0 && dialog.who === "The Steward", k = mine.findIndex(t => !t.done);
+  const cur = k < 0 ? mine.length - 1 : Math.max(0, k - (talking ? 1 : 0));
+  const sx = mine[cur].x + 2 * T, x = sx - camX; if (x < -200 || x > W + 200) return;
+  const P = STEWARD_POSE[Math.min(cur, STEWARD_POSE.length - 1)], now = performance.now() / 1000;
+  const i = talking ? P[Math.floor(now * 1.1) % 2] : k < 0 && harpMended() ? 5 : 3;
+  drawSprite("steward", i, x, GR * T, -(Math.sign(david.x - sx) || -1));
+}
 function lostThingsTally() {   // World 4's lost things for the HUD and the clear card (null = it's sheep, as usual)
   if (lostGifts.length) return { found: lostGifts.filter(g => g.taken).length, total: lostGifts.length, things: "gifts", icon: "gift" };
   const hens = critters.filter(k => k.lostHen);
@@ -519,7 +532,7 @@ function updateWorld4(dt) {
 function drawWorld4(camX) {
   drawInscriptions(camX);
   if (WORLD !== 4) return;
-  drawTown(camX); drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
+  drawTown(camX); drawSteward(camX); drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
 }
 
 // ---------------------------------------------------------------------------

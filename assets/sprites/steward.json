@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 193,
+  "frame_h": 294,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 127,
+  "anchor_y": 293,
+  "source": "stew_mag.png"
+}

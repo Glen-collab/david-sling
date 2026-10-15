@@ -273,6 +273,6 @@ the harp phrase at 3-2's campfire.
   tallest beam stack, the wax by the beekeeper's hive (bees harmless; hornets on the old wall). The finish is blocked
   until all three (questBlocking). Lost things = 5 runaway hens (critter "hen" in 4-3 = lostHen: walk up to catch, run
   and they bolt). The One appears from under the cloth stall (setPiece "clothstall") when the mended harp is played
-  beside it. The Steward talks (no art yet) and gives the tier-1 warning at the end ("Play steady"). Letter Waw on a
-  doorpost at 38. HUD: hen counter + the three harp things (drawn icons until there's art: quest_string/peg/wax items).
+  beside it. The Steward (Glen's sheet, drawSteward: talks, points, shakes his head, smiles once the harp is mended) gives the tier-1 warning at the end ("Play steady"). Letter Waw on a
+  doorpost at 38. HUD: hen counter + the three harp things (Glen's quest_string/peg/wax items).
 
