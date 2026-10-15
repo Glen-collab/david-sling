@@ -352,12 +352,98 @@ again** for 3-1 and 3-3 (town: tan brick, little green). Use **magenta (#FF00FF)
 - **Near:** `World 3 foreground strip, the bottom quarter only: barley stalks, fence posts, stones and a dusty path, full colour and sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
   (3-3 switched to magenta: the fields and olive trees are green, and a green key would eat them.)
 
-### 3-4 The Chosen Shepherd (the storm)
-- **Far:** `World 3, open grassland as a storm rolls in. Heavy dark grey-blue clouds, rain falling in slanted streaks in the distance, a bright crack of light near the horizon. Along the bottom half: dark rolling hills.`
-- **Middle:** `World 3 middle distance in a storm: wind-bent grass, three huge old oak trees standing apart, a low stone wall, puddles and mud, everything dark and wet with a cold blue light. EVERYTHING above it is solid flat bright magenta (#FF00FF), no sky.`
-- **Near:** `World 3 foreground strip in a storm, the bottom quarter only: muddy ground, flattened wet grass, puddles and broken branches, sharp. EVERYTHING above it is solid flat bright magenta (#FF00FF).`
+### 3-4 The Chosen Shepherd (the storm): one message per layer, ready to paste
+The game adds its own darkness, rain and lightning flashes on top, so these layers stay **readable, not black**, and the
+middle and near layers have **no painted rain streaks** (they'd double up with the game's rain). The big oaks you fight
+around are game pieces (below), so the oaks in the middle layer stay small and far back.
 
-**Save as** `david-sling-art-1 far.png`, `3-1 mid.png`, `3-1 near.png`, and the same for 3-2, 3-3, 3-4.
+**Far:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country of Judah near Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 3, a storm rolling over open grassy hills in the late afternoon. Heavy towering storm
+clouds in dark slate blue and grey fill the sky, lit from inside in places, with one thin
+band of pale gold light breaking through low near the horizon. Far away, grey curtains of rain
+hang from the clouds onto the distant hills. Along the bottom half: dark rolling hills of
+wind-flattened grass, layer behind layer, cooler and hazier the farther they are. Moody and
+dramatic but still clear and readable, not black.
+```
+
+**Middle:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country of Judah near Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 3 middle distance in a storm: long grassy slopes with the grass bent hard to one side by
+the wind, a few small far-off oak trees leaning in the wind, scattered grey boulders, a low
+dry-stone wall running along a hillside, and silver puddles reflecting the stormy light. Cool
+blue-grey storm light with dark wet greens. No rain streaks. Softer and a little hazy compared
+with the foreground. EVERYTHING above the hills is solid flat bright magenta (#FF00FF), no sky,
+no clouds.
+```
+
+**Near:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country of Judah near Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 3 foreground strip in a storm, the bottom quarter only: wet flattened grass, dark mud,
+small puddles, torn leaves and a few broken oak branches, round wet stones, all glistening in
+cool blue storm light, full colour and sharp. No rain streaks. EVERYTHING above it is solid
+flat bright magenta (#FF00FF).
+```
+
+**Save as** `david-sling-art\3-4 far.png`, `3-4 mid.png`, `3-4 near.png`.
+
+### 3-4 oaks (game pieces that replace the big olive tree stand-in): one message
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country of Judah near Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+
+A set of separate side-view game pieces, all the same scale, with plenty of space between them,
+on solid flat bright magenta (#FF00FF). Lit by cool blue-grey storm light, bark and leaves wet.
+No rain streaks, no ground, no shadows on the background.
+1. A huge old Palestine oak tree standing alone: a thick gnarled trunk, a wide spreading crown
+   of dark green leaves, a few roots showing at the base.
+2. The same oak with a deep gash in its trunk where something big rammed it, bark torn away.
+3. The same oak split in half down the middle, one half leaning away, broken branches.
+4. A big fallen oak lying on its side, its trunk resting on its own branches and roots so
+   there is a low dark hollow underneath it, just big enough for a boy to roll into.
+```
+**Save as** `david-sling-art\world3\oaks_sheet.png`.
+
+### End of World 3: the storm clears (far layer for the Hanan scene): one message
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country of Judah near Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 3, just after a storm, at sunset. The last dark storm clouds are breaking up and drifting
+away at the top, their edges lit gold and pink; below them a clear, washed sky glowing orange
+and gold, a faint rainbow on one side. Along the bottom half: wet green hills shining in the
+low sun, and on a hill to the right, small and far away, the village of Bethlehem with
+flat-roofed houses glowing warm in the sunset. Peaceful, calm and hopeful.
+```
+**Save as** `david-sling-art\3-4 end far.png` (the 3-4 middle and near layers are reused under it).
+
+**Save as** `david-sling-art\3-1 far.png`, `3-1 mid.png`, `3-1 near.png`, and the same for 3-2, 3-3.
 
 ### World 3 pieces (one sheet, side view, on solid magenta #FF00FF)
 `A set of separate side-view game pieces with space between them: three flat-roofed clay-brick house fronts of different widths (the flat roof is a walkable ledge), a short wooden ladder, a stone granary with a doorway, a wooden fence section low enough to roll under, a round stone threshing floor, a big old oak tree, the same oak split in half by lightning, and a cut log.`
