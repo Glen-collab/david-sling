@@ -1130,6 +1130,7 @@ Object.assign(W3, { HEN_SIZE: 1.4, HEN_WANDER: 18, HEN_RUN: 250, HEN_SPOOK: 2.5,
 CRITTER_ART.hen = { idle: "chicken_peck", move: "chicken_run", len: 24, h: 40, box: k => ({ x0: k.x - 20, x1: k.x + 20, y0: k.y - 40, y1: k.y }) };
 for (const k of critters) if (k.kind === "hen") { k.facing = k.home % 2 ? 1 : -1; k.t = (k.home % 5) * 0.7; }
 function updateHen(k, dx, sameLevel, dt) {
+  if (typeof updateLostHen === "function" && updateLostHen(k, dt)) return;   // 4-3: a runaway hen, caught (world4.js)
   if (k.state === "run") {   // a flapping dash away from him, then back to pecking where she lands
     if (!runCritter(k, W3.HEN_RUN, dt) || k.t > 0.9 || Math.abs(k.x - k.home) > W3.HEN_RANGE * T * 1.5) setCrit(k, "peck");
     return;
@@ -1139,7 +1140,7 @@ function updateHen(k, dx, sameLevel, dt) {
   else if (k.t > 3 + (k.home % 4) * 0.5) { k.facing = -k.facing; k.t = 0; }   // turns about now and then
   runCritter(k, W3.HEN_WANDER, dt);
   const fast = Math.abs(david.vx) > TUNE.WALK_SPEED * 0.6;
-  if (sameLevel && david.deadT <= 0 && Math.abs(dx) < W3.HEN_SPOOK * T * (fast ? 1.6 : 1)) {
+  if (sameLevel && david.deadT <= 0 && Math.abs(dx) < W3.HEN_SPOOK * T * (fast ? 1.6 : 1) && (!k.lostHen || Math.abs(david.vx) > TUNE.WALK_SPEED * 1.15)) {   // (a runaway hen only bolts if you run at her)
     k.facing = -Math.sign(dx) || 1; setCrit(k, "run");
   }
 }

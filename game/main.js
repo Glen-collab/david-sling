@@ -341,6 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
+  "4-3": { cols: 214, bg: "w3_1", ter: "w2s", name: "The Broken String" },   // (borrowing Bethlehem's town layers until Glen's Gibeah set)
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
@@ -443,6 +444,8 @@ const lostGifts = [];   // World 4's lost things (4-1: the extra gifts Father pa
 const lostGift = (name, c, r) => lostGifts.push({ name, x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
 const inscriptions = [];   // old letters carved here and there, a trail to the Cave of the Name (World 5): world4.js draws them
 const inscription = (c, r, letter) => inscriptions.push({ letter, x: c * T + T / 2, y: (r + 0.5) * T, still: 0, read: false });
+const questItem = (name, c, r) => { if (typeof questItems !== "undefined") questItems.push({ name, x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 }); else pendingQuest.push([name, c, r]); };
+const pendingQuest = [];   // (world4.js loads after the layout: it picks these up)
 const ambushFox = c => { critter("fox", c); critters[critters.length - 1].ambush = true; };   // hiding in a bush until David's close (world1.js)   // ravens dive at you on open ground, like the hornets but bigger
 let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
@@ -1133,6 +1136,47 @@ if (LEVEL_NAME === "test") {
   oliveRow(198, 16, 5);
   talk(204, "Gera", "Not bad, shepherd. Not bad at all. \"Do you see a man skilled in his work? He will serve kings\" (Proverbs 22:29). Go on, the steward is waiting for you.");
   sheepfold(215);                                                // the palace fold: the king's goats in
+} else if (LEVEL_NAME === "4-3") {
+  // ---- 4-3 The Broken String: David is called to play for the king for the first time, and a string on his harp snaps.
+  //      The Steward (the one who tells the truth) sends him into Gibeah before nightfall: a gut string from the market,
+  //      a tuning peg from the carpenter, beeswax from the beekeeper. Springy stall awnings, rooftops, a seller's runaway
+  //      hens (the lost things: walk up slowly), the beekeeper's bees (leave them) and hornets in the old wall (not so
+  //      harmless). The One hides under a cloth stall and only comes out to the harp, once it's mended. Waw on a doorpost. ----
+  ground(0, 213);
+  campfire(5);                                                  // the palace kitchen hearth
+  talk(8, "The Steward", "So you're the shepherd boy with the harp. The king is not well. Everyone here pretends he is. I won't.");
+  talk(13, "The Steward", "A string snapped? Then into town with you, before nightfall. A gut string from the market, a new tuning peg from the carpenter, and beeswax for the wood. Go.");
+  // the market: stall awnings to bounce up on, the string seller's goods on the highest one
+  oliveRow(16, 16, 4);
+  setPiece("awning", 20, 14, { w: 3 }); deco("town_clay_pots", 21, 16, 0.18); critter("hen", 24);
+  setPiece("awning", 26, 12, { w: 3 }); deco("town_grain_baskets", 27, 16, 0.18);
+  setPiece("awning", 32, 10, { w: 3 }); questItem("string", 33, 5);   // bounce high off the third awning for it
+  critter("hen", 30);
+  house(38, 5, 12); inscription(38, 15, "waw");                 // a doorpost with an old letter cut into it
+  house(44, 5, 10); house(50, 4, 12); special(51, 7);
+  critter("dove", 56); critter("hen", 58);
+  campfire(62);
+  // the carpenter's yard: stacks of beams to climb, the peg on the tallest
+  talk(64, "The carpenter", "A tuning peg? I made one this morning, and the boy put it up on the beams to dry. Up you go, if you can.");
+  rock(68, 15, 3, 2); rock(72, 13, 3, 4); rock(76, 10, 3, 7); rock(80, 12, 2, 5); questItem("peg", 77, 9);
+  deco("town_side_log_stack", 70, 16, 0.2); deco("town_log_stack", 84, 16, 0.2);
+  critter("guarddog", 90);
+  critter("hen", 94);
+  campfire(100);
+  // the beekeeper: his bees are calm if you leave them; the hornets in the old wall past them are not
+  talk(103, "The beekeeper", "Beeswax for a harp? Take what's by the hive. My bees won't hurt you if you leave them be. But watch the old wall past them: hornets.");
+  deco("beehive_tree", 108, 16, 1.2); for (let k = 0; k < 4; k++) bee(108, k); questItem("wax", 111, 16);
+  rock(118, 12, 3, 5); for (const r of [11, 9]) hornet(120, r);   // the old wall, and its hornets
+  oliveRow(124, 16, 5); critter("hen", 128);
+  house(132, 5, 12); house(138, 4, 9); ladder(136, 12); special(139, 4);
+  critter("dove", 146);
+  campfire(150);
+  setPiece("clothstall", 158);                                  // The One is under it: play the mended harp beside it
+  deco("town_clay_pots", 162, 16, 0.18);
+  critter("guarddog", 168);
+  house(174, 5, 13); special(176, 9);
+  talk(184, "The Steward", "You found them all? Good. Now listen. When the dark comes on him, don't rush. Play steady. Rushing makes it worse.");
+  sheepfold(196);                                               // back to the palace
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
@@ -1323,7 +1367,7 @@ function updateDavid(dt) {
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
-    if (d.harp) { d.harp = false; setState("standup"); } else { d.harp = true; setState("kneel"); }
+    if (d.harp) { d.harp = false; setState("standup"); } else if (!(typeof harpBroken === "function" && harpBroken())) { d.harp = true; setState("kneel"); }   // (4-3: a broken string)
   }
   // Up, any direction, A or B: put the harp away and stand up
   if (d.harp && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }
@@ -2687,7 +2731,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = typeof giftsBlocking === "function" ? giftsBlocking() : null;   // 4-1: not without the king's gifts (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);

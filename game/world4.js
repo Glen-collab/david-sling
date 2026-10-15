@@ -278,8 +278,10 @@ function drawLostGifts(camX) {
 }
 function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true = drawn instead of the sheep)
   const L = lostThingsTally(); if (!L) return false;
-  if (L.icon === "goat") drawSprite("goat_stand", 0, HUD_X + 14, 224, 1, 0.42); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
+  if (L.icon === "goat") drawSprite("goat_stand", 0, HUD_X + 14, 224, 1, 0.42);
+  else if (L.icon === "hen") drawSprite("chicken_peck", 0, HUD_X + 14, 224, 1, 1.2); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
   hudText(`${L.found}/${L.total}`, HUD_X + 40, 220);
+  questItems.forEach((q, i) => { ctx.save(); ctx.globalAlpha = q.taken ? 1 : 0.35; drawQuestIcon(q.name, HUD_X + 6 + i * 44, 290, 0.8); ctx.restore(); });   // 4-3: the harp's three things
   if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
   return true;
 }
@@ -401,8 +403,110 @@ function drawGera(camX) {
   else if (k < 0) i = 5;
   drawSprite("gera", i, x, GR * T, -(Math.sign(david.x - gx) || -1));
 }
+// ---------------------------------------------------------------------------
+// 4-3 The Broken String (DESIGN): a string on David's harp snaps; the Steward sends him into Gibeah before nightfall for a
+// gut string (the market, up on the stall awnings), a tuning peg (the carpenter's beam stacks) and beeswax (past the
+// beekeeper's hives; the hornets in the old wall are another matter). Until all three are found the harp can't be played.
+//   questItem(name, c, r)           "string" | "peg" | "wax"
+//   setPiece("awning", c, r, { w })  a market stall's cloth awning: springy, it bounces David up (hold Down to land)
+//   setPiece("clothstall", c)        The One hides under it; it comes out when David plays the mended harp beside it
+//   critter("hen", c) in 4-3 = a seller's runaway hens (the lost things): walk up to one slowly to catch it
+// ---------------------------------------------------------------------------
+const QUEST_NAMES = { string: "a gut string for the harp", peg: "a new tuning peg", wax: "a lump of beeswax" };
+const questItems = pendingQuest.map(([name, c, r]) => ({ name, x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 }));   // main.js questItem()
+const awnings = setPieces.filter(p => p.kind === "awning");
+for (const a of awnings) plat(a.c, a.r, a.w);   // you land on the cloth (and bounce: updateTown)
+const clothStall = setPieces.find(p => p.kind === "clothstall");
+if (LEVEL_STAGE === "4-3") for (const k of critters) if (k.kind === "hen") k.lostHen = true;
+const harpMended = () => !questItems.length || questItems.every(q => q.taken);
+function harpBroken() {   // main.js: the harp can't be played until the string, the peg and the wax are found
+  if (harpMended()) return false;
+  if (!W4.harpTold || W4.harpTold < performance.now() - 6000) { W4.harpTold = performance.now(); toast(`The broken string! Still to find: ${questItems.filter(q => !q.taken).map(q => QUEST_NAMES[q.name]).join(", ")}.`); }
+  return true;
+}
+function questBlocking() {   // main.js: back to the Steward only with all three
+  if (!questItems.length || harpMended()) return null;
+  return `The Steward needs you to bring ${questItems.filter(q => !q.taken).map(q => QUEST_NAMES[q.name]).join(" and ")} first.`;
+}
+function updateTown(dt) {
+  for (const q of questItems) {
+    q.t += dt; if (q.taken) continue;
+    if (Math.abs(david.x - q.x) < 40 && Math.abs(david.y - q.y) < 80 && david.deadT <= 0) {
+      q.taken = true; sfx("olive_pickup", q.x, 1, 1.1); if (typeof chime === "function") { chime(5); setTimeout(() => chime(8), 150); }
+      const left = questItems.filter(o => !o.taken).length;
+      toast(left ? `You found ${QUEST_NAMES[q.name]}! ${left} more for the harp.` : `${QUEST_NAMES[q.name][0].toUpperCase() + QUEST_NAMES[q.name].slice(1)}! That's everything. David restrings his harp: it can be played again.`);
+    }
+  }
+  // the awnings: land on one and it springs you up
+  const d = david;
+  if (d.onGround && d.vy >= 0 && !held("down") && d.deadT <= 0) for (const a of awnings) {
+    if (d.x > a.c * T && d.x < (a.c + a.w) * T && Math.abs(d.y - a.r * T) < 3) {
+      d.vy = -TUNE.JUMP_SPEED * (held("a") ? 1.3 : 1.1); d.onGround = false; a.boing = 1; sfx("jump", d.x, 0.5, 0.75);
+      if (!W4.awningTold) { W4.awningTold = true; toast("Boing! The awnings are springy. Hold A on the bounce to go higher; hold Down to land on one."); }
+      break;
+    }
+  }
+  for (const a of awnings) a.boing = Math.max(0, (a.boing || 0) - dt * 3);
+  // The One: under the cloth stall; out it comes when the mended harp is played beside it
+  if (clothStall && !clothStall.out && harpMended() && d.state === "harp" && Math.abs(d.x - clothStall.x) < 4 * T) {
+    clothStall.out = true;
+    const o = newSheep({ kind: "lamb", how: "one", one: true, hx: clothStall.x + T, hy: GR * T }); lost.push(o);
+    toast("Something moved under the cloth stall... a lamb! It came out to the sound of the harp.");
+  }
+  if (clothStall && !clothStall.hinted && Math.abs(d.x - clothStall.x) < 2 * T && !clothStall.out) { clothStall.hinted = true; sayLine("", "A faint bleat from under the cloth stall. Something's hiding there, too frightened to come out."); }
+}
+function updateLostHen(k, dt) {   // world3.js updateHen: a runaway hen lets you scoop her up if you walk, not run
+  if (!k.lostHen || k.gone) return false;
+  const near = Math.abs(david.x - k.x) < 1.3 * T && Math.abs(david.y - k.y) < 60 && david.deadT <= 0;
+  if (near && Math.abs(david.vx) <= TUNE.WALK_SPEED * 1.1) {   // walking (or standing), not running
+    k.gone = true; k.caught = true; k.alpha = 0; sfx("olive_pickup", k.x, 0.7, 1.3);
+    const n = critters.filter(h => h.lostHen && h.caught).length, all = critters.filter(h => h.lostHen).length;
+    toast(n === all ? `All ${all} of the poultry seller's hens caught!` : `Caught one of the seller's runaway hens! (${n} of ${all}) Walk up slowly: running scares them.`);
+    return true;
+  }
+  return false;
+}
+function drawQuestIcon(name, x, y, s = 1) {   // drawn, until there's art: a coil of gut string, a wooden peg, a lump of wax
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  if (name === "string") { ctx.strokeStyle = "#e9dcc0"; ctx.lineWidth = 3; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.ellipse(0, -16, 14 - k * 3, 9 - k * 2, 0, 0, Math.PI * 2); ctx.stroke(); } }
+  else if (name === "peg") { ctx.fillStyle = "#8a5a2e"; ctx.fillRect(-4, -34, 8, 30); ctx.fillStyle = "#a8743e"; ctx.beginPath(); ctx.ellipse(0, -36, 12, 7, 0, 0, Math.PI * 2); ctx.fill(); }
+  else { ctx.fillStyle = "#e8b83a"; ctx.beginPath(); ctx.ellipse(0, -12, 16, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "rgba(255,240,170,0.8)"; ctx.beginPath(); ctx.ellipse(-5, -16, 5, 3, -0.4, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+}
+function drawTown(camX) {
+  const now = performance.now() / 1000;
+  for (const a of awnings) {   // striped cloth over a stall: poles, a sagging striped top that dips when bounced on
+    const x0 = a.c * T - camX, x1 = (a.c + a.w) * T - camX, y = a.r * T; if (x1 < -40 || x0 > W + 40) continue;
+    const sag = 6 + (a.boing || 0) * 14, cols = ["#b5352d", "#efe0c0", "#2f6f8a", "#efe0c0"], ci = a.c % 2 ? 2 : 0;
+    ctx.save(); ctx.fillStyle = "#6b4a2a"; ctx.fillRect(x0 + 2, y, 6, GR * T - y); ctx.fillRect(x1 - 8, y, 6, GR * T - y);
+    const n = Math.max(4, a.w * 2);
+    for (let k = 0; k < n; k++) {
+      const xa = x0 + (x1 - x0) * k / n, xb = x0 + (x1 - x0) * (k + 1) / n, sa = Math.sin(Math.PI * k / n) * sag, sb = Math.sin(Math.PI * (k + 1) / n) * sag;
+      ctx.fillStyle = cols[(ci + k % 2) % 4]; ctx.beginPath(); ctx.moveTo(xa, y - 4 + sa); ctx.lineTo(xb, y - 4 + sb); ctx.lineTo(xb, y + 12 + sb); ctx.lineTo(xa, y + 12 + sa); ctx.fill();
+    }
+    ctx.restore();
+  }
+  if (clothStall) {   // a low table draped with cloth to the ground (The One under it)
+    const x = clothStall.x - camX, y = GR * T;
+    if (x > -150 && x < W + 150) {
+      ctx.save(); ctx.fillStyle = "#7d4a8a"; ctx.beginPath(); ctx.moveTo(x - 60, y); ctx.lineTo(x - 52, y - 54); ctx.lineTo(x + 52, y - 54); ctx.lineTo(x + 60, y); ctx.fill();
+      ctx.fillStyle = "#e6c96a"; ctx.fillRect(x - 52, y - 58, 104, 8);
+      if (!clothStall.out) { const w = Math.sin(now * 9) * (Math.sin(now * 0.7) > 0.6 ? 2 : 0); ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(x - 40 + w, y - 14, 80, 14); }   // a little shiver
+      ctx.restore();
+    }
+  }
+  for (const q of questItems) {
+    if (q.taken) continue; const x = q.x - camX; if (x < -60 || x > W + 60) continue;
+    goldGlow(x, q.y, q.t);
+    const art = ITEM["quest_" + q.name];
+    if (art && art.naturalWidth) drawItem("quest_" + q.name, x, q.y + Math.sin(q.t * 2) * 2, 0.36); else drawQuestIcon(q.name, x, q.y + Math.sin(q.t * 2) * 2);
+  }
+}
+// the Steward (made up): the palace's old head servant, "the one who tells you the truth" (Hanan, World 4's opening)
 function lostThingsTally() {   // World 4's lost things for the HUD and the clear card (null = it's sheep, as usual)
   if (lostGifts.length) return { found: lostGifts.filter(g => g.taken).length, total: lostGifts.length, things: "gifts", icon: "gift" };
+  const hens = critters.filter(k => k.lostHen);
+  if (hens.length) return { found: hens.filter(k => k.caught).length, total: hens.length, things: "hens", icon: "hen" };
   const goats = critters.filter(k => k.stray);
   if (goats.length) return { found: goats.filter(k => k.follow).length, total: goats.length, things: "goats", icon: "goat" };
   return null;
@@ -410,12 +514,12 @@ function lostThingsTally() {   // World 4's lost things for the HUD and the clea
 function updateWorld4(dt) {
   updateInscriptions(dt);
   if (WORLD !== 4) return;
-  updateGiftDrops(); updateKeeper(); updateLostGifts(dt);
+  updateGiftDrops(); updateKeeper(); updateLostGifts(dt); updateTown(dt);
 }
 function drawWorld4(camX) {
   drawInscriptions(camX);
   if (WORLD !== 4) return;
-  drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
+  drawTown(camX); drawKeeper(camX); drawGera(camX); drawGiftDrops(camX); drawLostGifts(camX); drawTargets(camX);
 }
 
 // ---------------------------------------------------------------------------

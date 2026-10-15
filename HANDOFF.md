@@ -267,4 +267,12 @@ the harp phrase at 3-2's campfire.
   and Proverbs 22:29 (WEB). Guard dogs (critter "guarddog": chase, snap once, give up after 4.5 s). Lost things = 5 stray
   king's goats (world3 goat with .stray; lostThingsTally in world4.js feeds the HUD and the clear card). The One in a feed
   shed on the wall (ladder up). Letter He behind a target at 67. Gera: Glen's 6-pose sheet (gera.png, cut keeping the loose sling loop), drawn by drawGera at his next line. Ends at a palace fold.
+- **4-3 The Broken String is built** (2026-10-15; borrows Bethlehem's w3_1 layers). The harp can't be played until the
+  three questItem()s are found (harpBroken in world4.js; main.js harp start): the gut string up on the third springy stall
+  awning (setPiece "awning": a one-way ledge that bounces David, A = higher, Down = land), the peg on the carpenter's
+  tallest beam stack, the wax by the beekeeper's hive (bees harmless; hornets on the old wall). The finish is blocked
+  until all three (questBlocking). Lost things = 5 runaway hens (critter "hen" in 4-3 = lostHen: walk up to catch, run
+  and they bolt). The One appears from under the cloth stall (setPiece "clothstall") when the mended harp is played
+  beside it. The Steward talks (no art yet) and gives the tier-1 warning at the end ("Play steady"). Letter Waw on a
+  doorpost at 38. HUD: hen counter + the three harp things (drawn icons until there's art: quest_string/peg/wax items).
 
