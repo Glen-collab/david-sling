@@ -217,6 +217,7 @@ function drawThreshing(p) {   // a round floor of beaten earth ringed with stone
 }
 function drawWorld3(camX) {
   if (typeof drawOx === "function") { drawFallenOak(camX); drawOx(camX); }   // 3-4 (below)
+  drawMud(camX);   // 3-4's mud slicks (below)
   if (!houses.length && !ladders.length && !stairs.length && !stairTowers.length && !setPieces.some(p => p.kind === "barley" || p.kind === "granary" || p.kind === "threshing" || p.kind === "stepstone" || p.kind === "fence" || p.kind === "guide")) return;
   const now = performance.now() / 1000;
   ctx.save(); ctx.translate(-Math.round(camX), 0);
@@ -870,6 +871,8 @@ if (STORY_HASH === "3-A") {
 // charges the length of the arena (roll under its horns). At the far end it either rams the tree and sits down dazed, or
 // skids to a stop short of it and turns: you can't tell which until it happens. Only while it's dazed does a charged
 // stone count. Three hits and it shakes its head and runs off into the rain.
+// Each oak takes three rams (Glen): the first it shrugs off, the second gashes it, the third splits it, and the ox breaks
+// out through the gap and scatters the flock: the fight starts over from the campfire. So it's a race: about four dazes.
 // Art: Glen's four ox sheets (windup, charge, dazed, gallop); see drawOx below.
 // ---------------------------------------------------------------------------
 Object.assign(W3, {
@@ -882,19 +885,22 @@ Object.assign(W3, {
   OX_HIT_CHANCE: 0.5,  // how often a charge ends in the tree...
   OX_MISS_MAX: 2,      // ...but never more than this many misses in a row
   OX_HITS: 3,          // dazed hits to drive it off
+  OX_TREE_RAMS: 3,     // rams a tree takes before it splits (and the ox breaks out)
+  OX_BREAKOUT: 3.2,    // seconds of the ox breaking out and the flock scattering, before the fight starts over
   LIGHTNING: [6, 10],  // seconds between flashes
   OAK_H: 9,            // the fight's oaks, tiles tall (Glen's oak sheet)
   OAK_FILTER: "brightness(0.85)",
   OAK_FALLEN_WIDEN: 3, OAK_FALLEN_X: 1, OAK_FALLEN_DROP: 10,   // The One's fallen oak: tiles wider than the hollow, tiles left of it, px down
 });
 const oxPiece = setPieces.find(p => p.kind === "ox");
-const oxTrees = setPieces.filter(p => p.kind === "oxtree").map(p => ({ x: p.x, down: false, fallT: 0 })).sort((a, b) => a.x - b.x);
+const oxTrees = setPieces.filter(p => p.kind === "oxtree").map(p => ({ x: p.x, down: false, fallT: 0, rams: 0 })).sort((a, b) => a.x - b.x);
 const ox = { on: !!oxPiece && oxTrees.length >= 2 };
 const branches = [];
 const oxLen = () => 230 * SCALE * W3.OX_SIZE;   // nose to tail on screen
 function resetOx() {
   if (!ox.on) return;
-  Object.assign(ox, { x: (oxTrees[0].x + oxTrees[1].x) / 2, y: GR * T, facing: -1, state: "wait", t: 0, hits: 0, misses: 0, vx: 0, flash: 0, alpha: 1, tree: null, told: {} });
+  Object.assign(ox, { x: (oxTrees[0].x + oxTrees[1].x) / 2, y: GR * T, facing: -1, state: "wait", t: 0, hits: 0, misses: 0, vx: 0, flash: 0, alpha: 1, tree: null, told: ox.told || {} });
+  for (const tr of oxTrees) Object.assign(tr, { down: false, fallT: 0, rams: 0 });
   branches.length = 0;
 }
 resetOx();
@@ -916,6 +922,14 @@ function updateOx(dt) {
   for (const b of branches) { b.vy += 1600 * dt; b.y += b.vy * dt; if (!b.hit && b.y > d.y - d.h && Math.abs(b.x - d.x) < 40 && b.y < d.y + 20) { b.hit = true; hurtDavid(b.x); } }
   for (let i = branches.length - 1; i >= 0; i--) if (branches[i].y > GR * T + 40) branches.splice(i, 1);
   if (O.state === "gone") return;
+  if (O.state === "breakout") {   // through the gap where the tree was, out into the rain, the flock scattering; then start over
+    O.x += O.facing * 560 * dt; O.alpha = Math.max(0, 1 - Math.max(0, O.t - 1.6) / 1);
+    if (O.t > W3.OX_BREAKOUT) {
+      resetOx(); Object.assign(d, { x: checkpoint.x, y: checkpoint.y, vx: 0, vy: 0 }); setState("idle"); camX = Math.max(0, d.x - W / 2);
+      toast("Back to the fire. The flock's gathered again. This time, drive it off before it splits a tree.");
+    }
+    return;
+  }
   if (O.state === "flee") { O.x += 520 * dt; O.facing = 1; O.alpha = Math.max(0, O.alpha - dt * 0.5); if (O.alpha <= 0) setOx("gone"); return; }
   if (O.state === "shake") {
     if (O.t > 1.6) { setOx("flee"); toast("It shook its head, snorted... and ran off into the rain. \"The voice of the LORD is powerful\" (Psalm 29:4)"); }
@@ -949,9 +963,17 @@ function updateOx(dt) {
     case "charge": {
       O.x += O.facing * W3.OX_CHARGE * fast * dt;
       const wall = O.facing > 0 ? noseMax : noseMin, toWall = (wall - O.x) * O.facing;
-      if (O.willHit && toWall <= 0) {   // horns into the trunk: down it goes, dazed
-        O.x = wall; O.misses = 0; O.tree = O.facing > 0 ? oxTrees[1] : oxTrees[0]; setOx("stuck"); w2Shake.v = Math.max(w2Shake.v, 0.6);
-        sfx("stone_hit", O.x, 1, 0.3); oxSay("stuck", "It rammed the tree! It's dazed. A charged stone, now!");
+      if (O.willHit && toWall <= 0) {   // horns into the trunk
+        O.x = wall; O.misses = 0; const tr = O.facing > 0 ? oxTrees[1] : oxTrees[0]; tr.rams++;
+        w2Shake.v = Math.max(w2Shake.v, tr.rams >= W3.OX_TREE_RAMS ? 1 : 0.6); sfx("stone_hit", O.x, 1, 0.3);
+        if (tr.rams >= W3.OX_TREE_RAMS) {   // the third: the tree splits, and out it goes
+          tr.down = true; tr.fallT = 0; O.tree = null; setOx("breakout"); sfx("thunder", O.x, 0.7, 1.3); baa(O.x, 1);
+          toast("Crack! The tree split, and the ox broke out through the gap. It's scattering the flock!");
+        } else {   // down it goes, dazed
+          O.tree = tr; setOx("stuck");
+          if (tr.rams === 1) oxSay("stuck", "It rammed the tree! It's dazed. A charged stone, now!");
+          else toast("The tree's gashed! One more ram and it'll split. Hit the ox now!");
+        }
       } else if (!O.willHit && toWall <= 3 * T) {   // pulls up short
         O.misses++; O.skidV = W3.OX_CHARGE * fast * 0.7; setOx("skid");
         if (O.told.stuck) oxSay("short", "It stopped short of the tree: not dazed, so stones won't hurt it. Wait for the next one.");
@@ -976,7 +998,7 @@ function updateOx(dt) {
   if (O.state === "charge" && low && Math.abs(d.x - O.x) < 60) oxSay("roll", "Under its horns! Now watch where it ends up.");
 }
 function stoneHitsOx(s) {
-  const O = ox; if (!O.on || O.state === "wait" || O.state === "flee" || O.state === "gone" || O.state === "shake") return false;
+  const O = ox; if (!O.on || O.state === "wait" || O.state === "flee" || O.state === "gone" || O.state === "shake" || O.state === "breakout") return false;
   const b = oxBox(); if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
   for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
   if (O.state === "stuck" && (s.charged || s.power)) {
@@ -995,7 +1017,7 @@ function drawOx(camX) {
   for (const tr of oxTrees) {   // three big old oaks (Glen's sheet): gashed while the horns are in it, split once it's broken
     const x = tr.x - camX; if (x < -400 || x > W + 400) continue;
     if (ITEM.oak && ITEM.oak.naturalWidth) {
-      const img = ITEM[tr.down ? "oak_split" : ox.tree === tr && ox.state === "stuck" ? "oak_gashed" : "oak"], h = W3.OAK_H * T * img.naturalHeight / ITEM.oak.naturalHeight, w = img.naturalWidth * h / img.naturalHeight;
+      const img = ITEM[tr.down ? "oak_split" : tr.rams >= 2 ? "oak_gashed" : "oak"], h = W3.OAK_H * T * img.naturalHeight / ITEM.oak.naturalHeight, w = img.naturalWidth * h / img.naturalHeight;
       ctx.save(); ctx.filter = W3.OAK_FILTER; ctx.drawImage(img, x - w / 2, GR * T + 10 - h, w, h); ctx.restore();
       continue;
     }
@@ -1009,7 +1031,8 @@ function drawOx(camX) {
   for (const p of setPieces) if (p.kind === "flockHuddle") {   // the flock, huddled together at the left of the arena
     const x = p.x - camX; if (x < -300 || x > W + 300) continue;
     [[-60, "sheep_stand"], [10, "sheepblack_stand"], [70, "sheep_stand"], [-20, "lamb_stand"], [40, "sheep_graze"]].forEach(([o, n], i) => {
-      if (SPR[n]) drawSprite(n, 0, x + o + Math.sin(performance.now() / 90 + i) * (oxFight() ? 1.5 : 0), GR * T, i % 2 ? -1 : 1);
+      const sc = ox.state === "breakout" ? Math.max(0, ox.t - 0.6) : 0, dir = i % 2 ? -1 : 1;   // scattering when the ox breaks out
+      if (SPR[n]) drawSprite(n, 0, x + o + dir * sc * 260 + Math.sin(performance.now() / 90 + i) * (oxFight() ? 1.5 : 0), GR * T, sc ? dir : i % 2 ? -1 : 1, 1, Math.max(0, 1 - sc / 2));
     });
   }
   if (ox.state === "gone") return;
@@ -1021,7 +1044,7 @@ function drawOx(camX) {
   if (ox.state === "tell") { i = 1 + Math.min(4, Math.floor(ox.t / W3.OX_TELL * 5)); filter += " drop-shadow(0 0 10px rgba(255,200,60,0.9))"; }
   else if (ox.state === "charge") { name = "ox_charge"; i = frameOf(name, ox.t); }
   else if (ox.state === "idle" && ox.walking) { name = "ox_charge"; i = frameOf(name, ox.t * 0.5); }   // trotting back to the middle
-  else if (ox.state === "flee") { name = "ox_gallop"; i = frameOf(name, ox.t); }
+  else if (ox.state === "flee" || ox.state === "breakout") { name = "ox_gallop"; i = frameOf(name, ox.t); }
   else if (ox.state === "stuck") { name = "ox_dazed"; i = ox.t < 1.2 ? once(name, ox.t, 1.2) : 3 + Math.floor(ox.t * 2.5) % 3; }
   else if (ox.state === "shake") { name = "ox_dazed"; i = [3, 4, 5, 4, 1, 0][Math.min(5, Math.floor(ox.t / 0.27))]; }
   else if (ox.state === "skid") { name = "ox_charge"; i = 0; }
@@ -1042,6 +1065,27 @@ function drawFallenOak(camX) {   // The One's hollow: Glen's fallen oak, roots o
   }
 }
 // the storm: darker, rain slanting down, and now and then lightning (in the arena it can bring a branch down)
+// mud slicks (3-4): setPiece("mud", c, GR - 1, { w }). Wet, shiny ground with little grip (TUNE.MUD_GRIP): run in and stop,
+// and you keep sliding. (Landing a jump here still slips him, like anywhere on this slope.)
+const muds = setPieces.filter(p => p.kind === "mud").map(p => ({ x0: p.c * T, x1: (p.c + p.w) * T, y: GR * T }));
+function onMud(x, y) {
+  for (const m of muds) if (x > m.x0 && x < m.x1 && Math.abs(y - m.y) < 4) {
+    if (!W3.mudTold) { W3.mudTold = true; toast("Slick mud! If you stop short, you'll keep sliding."); }
+    return true;
+  }
+  return false;
+}
+function drawMud(camX) {
+  for (const m of muds) {
+    const x0 = m.x0 - camX, x1 = m.x1 - camX; if (x1 < -40 || x0 > W + 40) continue;
+    ctx.save();
+    ctx.fillStyle = "rgba(58,40,26,0.92)"; ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, m.y + 2, (x1 - x0) / 2 + 10, 13, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(92,66,44,0.9)"; ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, m.y - 1, (x1 - x0) / 2, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(200,215,235,0.35)"; ctx.lineWidth = 2;   // wet shine
+    for (let k = 0; k < (x1 - x0) / 60; k++) { const sx = x0 + 20 + k * 60 + (k % 2) * 17; ctx.beginPath(); ctx.moveTo(sx, m.y - 3); ctx.lineTo(sx + 22, m.y - 4); ctx.stroke(); }
+    ctx.restore();
+  }
+}
 const storm = { on: !!(STAGE_INFO && STAGE_INFO.storm), next: 4, flash: 0 };
 function updateStorm(dt) {
   if (!storm.on) return;

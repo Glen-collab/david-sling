@@ -25,7 +25,8 @@ const TUNE = {
   SLIP_MUD: 420,          // how fast the slide slows (px/s per second; lower = slicker)
   CLIMB_SPEED: 230,       // ladders: px/s up or down (hold Up / Down)
   CLIMB_STRIDE: 26,       // px climbed per frame of david_climb
-  RAIN_VOLUME: 0.35,      // the storm's rain loop (3-4)
+  RAIN_VOLUME: 0.35,
+  MUD_GRIP: 0.25,         // how much grip he has on 3-4's mud (1 = normal ground; lower = slides further)      // the storm's rain loop (3-4)
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
@@ -339,7 +340,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
-  "3-4": { cols: 240, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
+  "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
@@ -434,7 +435,8 @@ const deco = (name, c, r, size = 1, layer = "back", surprise = null) => decor.pu
 const bees = [], hornets = [];
 const bee = (c, k) => bees.push({ hx: c * T + T / 2, k, t: k * 1.6, x: 0, y: 0, facing: 1, gone: false, alpha: 1, vx: 0, vy: 0 });
 const hornet = (c, r, kind = "hornet") => hornets.push({ kind, hx: c * T + T / 2, hy: (r + 1) * T, x: c * T + T / 2, y: (r + 1) * T, state: "hover", t: Math.random() * 3, facing: -1, gone: false, alpha: 1, vx: 0, vy: 0 });
-const raven = (c, r) => hornet(c, r, "raven");   // ravens dive at you on open ground, like the hornets but bigger
+const raven = (c, r) => hornet(c, r, "raven");
+const ambushFox = c => { critter("fox", c); critters[critters.length - 1].ambush = true; };   // hiding in a bush until David's close (world1.js)   // ravens dive at you on open ground, like the hornets but bigger
 let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
 const olive = (x, y, kind) => olives.push({ x, y, kind: kind || (Math.random() < 0.5 ? "green" : "purple"), taken: false, t: Math.random() * 6, vy: 0, falling: false, placed: true });
@@ -1036,7 +1038,7 @@ if (LEVEL_NAME === "test") {
 } else if (LEVEL_NAME === "3-4") {
   // ---- 3-4 The Chosen Shepherd: the morning after the anointing, the new king goes back to the sheep (16:19). Open
   // grassland as a storm rolls in: wind, rain, lightning. At the end a wild ox charges out of the rain at the flock. ----
-  ground(0, 239);
+  ground(0, 309);
   campfire(6, GR - 1, "Hanan", "So. The prophet poured oil on your head. And tomorrow the sheep still need water. Kings are made in the small things, David.");
   talk(16, "Hanan", "Storm coming. In a storm the wild oxen panic and charge at anything that moves. If one charges you, roll ({roll}) under its horns. Sooner or later it'll run itself into a tree.");
   oliveRow(20, 16, 6);
@@ -1054,16 +1056,25 @@ if (LEVEL_NAME === "test") {
   // The One: in a hollow under a fallen oak, lying on its root ball. Roll in under the trunk.
   rock(134, 14, 2, 3); block(136, 14, 8, 1, 9); setPiece("oak", 134, 14, { w: 10 }); lostSheep("lamb", 141, 16, "one");
   oliveRow(136, 13, 8);
-  critter("fox", 150); oliveArc(148, 16, 8);
-  lostSheep("sheep2", 158, 16);
-  rock(163, 15, 2, 2); rock(166, 13, 3, 4); special(167, 8);
-  campfire(172);                                                // the checkpoint before the ox
-  // the arena: a muddy slope, three big trees, the flock huddled at the left, and the ox out of the rain
-  setPiece("flockHuddle", 177);                                  // the flock, huddled behind the arena's first tree
-  rock(180, 15, 2, 2); setPiece("oxtree", 183);                  // the arena: hop the rock in; an oak at each end, the ox in between
-  setPiece("oxtree", 214); rock(216, 15, 2, 2);
-  setPiece("ox", 198, GR - 1);
-  sheepfold(229);
+  // the long wet stretch (Glen, 2026-10-15): mud slicks, drops that make you slip, foxes hiding in the bushes
+  oliveArc(148, 16, 8);
+  ambushFox(153);                                               // in a bush: out it comes as you pass
+  setPiece("mud", 157, GR - 1, { w: 10 }); lostSheep("sheep2", 162, 16);   // a slick of mud: stop short and you slide
+  rock(169, 15, 3, 2); rock(172, 13, 3, 4); rock(175, 11, 4, 6); oliveRow(175, 10, 4); special(177, 6);   // up onto the high ledge...
+  setPiece("mud", 180, GR - 1, { w: 12 });                      // ...and off it, down into the mud
+  oliveArc(184, 16, 6); ambushFox(189);
+  campfire(196);                                                // halfway: rest and play
+  setPiece("wind", 202, GR - 1, { end: 232 });                  // the wind again, harder out here
+  rock(206, 15, 2, 2); rock(214, 14, 3, 3); oliveRow(214, 13, 3); oliveRow(220, 16, 5);
+  ambushFox(224);
+  rock(234, 15, 2, 2); rock(237, 13, 3, 4); oliveRow(237, 12, 3);
+  campfire(244);                                                // the checkpoint before the ox
+  // the arena: two big oaks, the flock huddled at the left, and the ox out of the rain
+  setPiece("flockHuddle", 249);                                  // the flock, huddled behind the arena's first tree
+  rock(252, 15, 2, 2); setPiece("oxtree", 255);                  // the arena: hop the rock in; an oak at each end, the ox in between
+  setPiece("oxtree", 286); rock(288, 15, 2, 2);
+  setPiece("ox", 270, GR - 1);
+  sheepfold(299);
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -1355,7 +1366,8 @@ function updateDavid(dt) {
     let target = dir * (d.holdDirT > TUNE.RUN_DELAY ? TUNE.RUN_SPEED : TUNE.WALK_SPEED);
     if (lowPose) target = dir * TUNE.CRAWL_SPEED;
     if (d.carrying) target *= 0.8;
-    const acc = d.onGround ? (dir !== 0 ? TUNE.ACCEL_GROUND : TUNE.FRICTION) : TUNE.ACCEL_AIR;
+    const mud = d.onGround && typeof onMud === "function" && onMud(d.x, d.y) ? TUNE.MUD_GRIP : 1;   // 3-4's mud slicks (world3.js)
+    const acc = (d.onGround ? (dir !== 0 ? TUNE.ACCEL_GROUND : TUNE.FRICTION) : TUNE.ACCEL_AIR) * mud;
     if (d.vx < target) d.vx = Math.min(target, d.vx + acc * dt);
     else if (d.vx > target) d.vx = Math.max(target, d.vx - acc * dt);
   }

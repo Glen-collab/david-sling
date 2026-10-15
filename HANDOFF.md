@@ -231,4 +231,10 @@ the harp phrase at 3-2's campfire.
 - Stray-dog art plays the jackal ONLY in 3-2 (Glen: 3-4's jackal is a jackal).
 - Testing: never append test code to game/*.js (Glen plays it live). Use the untracked copy david-sling/simgame/
   (cp game/*.js simgame/, excluded in .git/info/exclude) and wrap headless Chrome in `timeout 60`.
+- 3-4 is longer (cols 310, 2026-10-15): after The One, mud slicks (setPiece "mud": TUNE.MUD_GRIP 0.25, world3.js onMud/
+  drawMud), a rock climb to a high ledge and a drop into mud, three foxes hiding in bushes (ambushFox(c): hidden until
+  David's 3.5 tiles off, then they leap out; thorn_bush art for now), a halfway campfire (196), a second wind stretch, the
+  ox campfire at 244, the arena 255-286, the fold at 299. Still three special stones.
+- Ox arena trees take three rams each (tr.rams; OX_TREE_RAMS): whole, then gashed (oak_gashed from 2 rams), then split ->
+  "breakout": the ox gallops out, the flock scatters, and after OX_BREAKOUT the fight resets with David at the checkpoint.
 

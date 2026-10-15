@@ -304,6 +304,20 @@ function foxBark(k) {   // Glen's fox sound, at most every 3 seconds per fox
   k.barkAt = now; sfxOne(["fox_1", "fox_2", "fox_3"], k.x, 0.75);
 }
 function updateFox(k, dx, sameLevel, dt) {
+  if (k.ambush && k.state === "idle") {   // hiding in its bush (3-4)
+    k.alpha = 0; k.vx = 0;
+    if (sameLevel && Math.abs(dx) < 3.5 * T && david.deadT <= 0) {
+      k.alpha = 1; k.facing = Math.sign(dx) || -1; k.vx = k.facing * W1.FOX_SPEED * 1.3; k.vy = -720; k.onGround = false;
+      setCrit(k, "leap"); foxBark(k);
+      if (!W1.ambushTold) { W1.ambushTold = true; toast("A fox, hiding in the bush! Sling it before it gets your lamb."); }
+    }
+    return;
+  }
+  if (k.state === "leap") {   // out of the bush in one bound
+    k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt);
+    if (k.onGround && k.t > 0.15) setCrit(k, "hunt");
+    return;
+  }
   if (k.state === "idle") {
     k.facing = Math.sign(dx) || k.facing;
     if (Math.abs(dx) < W1.FOX_SEE && sameLevel) { setCrit(k, "hunt"); foxBark(k); }   // a bark as it comes for the lamb
@@ -416,6 +430,11 @@ function resetCritters() {
   lamb.stolen = false;
 }
 function drawCritters(camX) {
+  for (const k of critters) if (k.ambush) {   // the bushes the foxes hide in: a shiver when David gets close
+    const x = k.home - camX; if (x < -200 || x > W + 200) continue;
+    const near = k.state === "idle" && Math.abs(david.x - k.home) < 7 * T, sh = near ? Math.sin(performance.now() / 45) * 3 : 0;
+    drawItem("thorn_bush", x + sh, k.y0 + 10, 0.55);
+  }
   for (const k of critters) {
     if (k.alpha <= 0) continue;
     const x = k.x - camX; if (x < -300 || x > W + 300) continue;
