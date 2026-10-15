@@ -1314,6 +1314,11 @@ letters** (the Paleo-Hebrew script of David's day). Only the right letters hold;
   keeps "the LORD" (WEB style), and the Journal explains it.
 - **Art:** blank carved stepping stones (Glen) with the letters drawn on them in code, so every letter shape is exact
   (an image model would get the old letters wrong).
+  Done (2026-10-15): Glen's stones are assets/items/name_stone_1-4 (blank) and name_stone_broken. The letters come from
+  the Phoenician block of Unicode (the same script as Paleo-Hebrew) in the font "Segoe UI Historic" (Windows): Aleph
+  U+10900, Bet 10901, Gimel 10902, Dalet 10903, He 10904, Waw 10905, Yod 10909, Kaf 1090A, Lamed 1090B, Mem 1090C, Shin
+  10914. Draw them carved: a dark groove with a pale lip 2 px below. (Preview: david-sling-art/claude-checks/
+  name_stones_preview.png.) If a machine lacks the font, fall back to baked letter images.
 
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
