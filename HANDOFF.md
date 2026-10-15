@@ -288,4 +288,11 @@ the harp phrase at 3-2's campfire.
   tier-2 counsel (window 0.26 -> 0.32, dark gains x0.6). Calmed: Saul asleep, 1 Sam 16:23 (WEB). Fold blocked till then.
   Not yet: End of World 4 scene (Saul's thanks 16:22, the King's Favour = fast travel, the Steward, Hanan at the gate),
   World 4 Journal pages, the Psalm 121:8 / 22:29 / 33:3 / 34:18 scrolls, a follow-the-beat easy assist.
+- **The Journal rip-out is built** (2026-10-15, journal.js): JOURNAL_PAGES[w].rip = { at, text } (World 3: at 2, "Nobody even
+  remembered me. My brothers always..."). The first time he writes after that stage (progress.ripped[w]), the Journal
+  leans in, he writes the bitter words on the right page under what was there, stops, Glen's tear sheet plays (frames
+  pinned to the book by TEAR_BOOK), then the burn sheet in firelight, then the real lesson; the fresh right page is
+  rewritten without the words struck at that step (they were on the torn page). From then on the draft spread draws
+  davids_journal_page_ripped-out.png (the torn stub). A skips. 6-1's rip-out: add rip: { at: 1, text: "Eliab thinks he's so..." }
+  to World 6's pages when they exist. World 4 Journal pages are in too (draft text).
 

@@ -94,6 +94,9 @@ const JOURNAL_PAGES = {
   3: {
     name: "The Anointing",
     stages: ["The Day Before", "The Far Pasture", "We Will Not Sit Down", "The Chosen Shepherd"],
+    // a rip-out (JOURNAL_TEXT.md, rare on purpose): after 3-2 he starts this on the right page, stops, tears it out and
+    // burns it, then writes the real lesson. The words struck at that step were on the torn page, so they're gone after.
+    rip: { at: 2, text: "Nobody even remembered me. My brothers always..." },
     draft: {
       left: [
         ...E(1, "God put the first man in the garden to work it and take care of it. My work is the sheep.", "Genesis 2:15"),
@@ -165,6 +168,10 @@ const JOURNAL_PAGES = {
 // The book and its pages. Points are on the 1536 x 1024 book image: three along the top edge, three along the bottom.
 // ----------------------------------------------------------------------------
 const BOOK = new Image(); BOOK.src = "../assets/items/davids_journal.png?v=" + (window.BUILD || 0);
+const BOOK_RIPPED = new Image(); BOOK_RIPPED.src = "../assets/journal/davids_journal_page_ripped-out.png?v=" + (window.BUILD || 0);   // the stub of a torn-out page
+const TEAR = Object.assign(new Image(), { src: "../assets/journal/journal_tear.png?v=" + (window.BUILD || 0) }), TEAR_N = 8, TEAR_MS = 110;
+const TEAR_BOOK = [[16, 31, 251], [11, 27, 249], [11, 28, 249], [4, 27, 252], [13, 43, 250], [0, 45, 254], [6, 44, 258], [0, 43, 254]];   // the book's left half in each tear frame: left x, top, bottom (measured)
+const BURN = Object.assign(new Image(), { src: "../assets/journal/journal_burn.png?v=" + (window.BUILD || 0) }), BURN_N = 7, BURN_MS = 160;
 const BOOK_BOX = { x: 17, y: 58, w: 1493, h: 900 };   // the visible part of the image
 const SPINE_X = 784;
 const PAGE_EDGES = {
@@ -311,7 +318,8 @@ function drawFlatPage(side, page, step, t) {
 function renderSpread(target, spread, step, t) {
   const g = target.getContext("2d");
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, target.width, target.height);
-  if (BOOK.naturalWidth) g.drawImage(BOOK, 0, 0);
+  const book = spread.book && spread.book.naturalWidth ? spread.book : BOOK;
+  if (book.naturalWidth) g.drawImage(book, 0, 0);
   for (const side of ["left", "right"]) { drawFlatPage(side, spread[side], step, t); drawBent(g, flatCanvas[side], PAGE_EDGES[side]); }
 }
 
@@ -370,6 +378,11 @@ const Journal = {
     journalFlags = onesFlags(opts.world);
     // the spreads, in order. After stage 4 there are two to write: the last lesson, then the world's spread.
     this.pages = [{ spread: "draft", step: Math.min(4, opts.stage) }];
+    this.rip = null;
+    if (P.rip && !opts.read && opts.stage === P.rip.at && !opts.preview) {
+      let seen = false; try { seen = !!(JSON.parse(localStorage.getItem("davidProgress") || "{}").ripped || {})[opts.world]; } catch (e) {}
+      if (!seen) this.pages[0].ripNow = true;
+    }
     if (opts.stage >= 4 && !opts.noEnd) this.pages.push({ spread: "end", step: 5 });
     if (opts.read && opts.stage < 4) this.pages[0].step = opts.stage;
     // reading the Journal later: a page with the pieces of the throw Father has given you (DESIGN §4c)
@@ -379,6 +392,7 @@ const Journal = {
     this.layoutAll();
     this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
     this.view = 0; this.viewWant = 0; this.turn = null;
+    if (this.rip) this.view = this.viewWant = 1;   // leaned in close, to see it
     this.active = true;
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
   },
@@ -387,9 +401,19 @@ const Journal = {
     this.open({ world: 1, stage: step === 5 ? 4 : step, preview: true, stones, noEnd: step === 4 });
   },
   layoutAll() {
+    const R = this.P.rip;
     for (const pg of this.pages) {
-      const S = this.P[pg.spread];
-      pg.lay = { left: layoutPage(S.left, "left", pg.step, this.stones), right: layoutPage(S.right, "right", pg.step, this.stones) };
+      const S = this.P[pg.spread], torn = R && pg.spread === "draft" && pg.step >= R.at;
+      const right = torn ? S.right.map(b => ({ ...b, segs: b.segs.filter(sg => !(sg.strike && sg.strike <= R.at)) })) : S.right;
+      pg.lay = { left: layoutPage(S.left, "left", pg.step, this.stones), right: layoutPage(right, "right", pg.step, this.stones) };
+      if (torn) pg.lay.book = BOOK_RIPPED;
+      if (torn && pg.ripNow) for (const w of pg.lay.right.words) if (w.at < pg.step) w.at = pg.step;   // the fresh page: he writes it all again
+      if (pg.ripNow) {   // first, the page he tears out: what was there before, and the bitter words he starts
+        const before = S.right.map(b => ({ ...b, segs: b.segs.filter(sg => sg.at < R.at).map(sg => ({ ...sg, strike: 0 })) }));
+        const lay = { left: layoutPage(S.left, "left", R.at - 1, this.stones),
+                      right: layoutPage(before.concat([{ at: R.at, size: "entry", segs: [{ text: R.text, at: R.at }] }]), "right", R.at, this.stones) };
+        this.rip = { phase: "write", t: 0, step: R.at, lay, tl: buildTimeline(lay, R.at), next: 0 };
+      }
       pg.tl = buildTimeline(pg.lay, pg.step); pg.t = this.read ? pg.tl.total : 0; pg.nextAct = this.read ? pg.tl.acts.length : 0;
     }
     this.fontOk = caveatReady;   // laid out before the font arrived? do it again once it has
@@ -431,6 +455,7 @@ const Journal = {
       if (this.turn.t >= JTUNE.FLIP_TIME) { this.turn = null; this.phase = this.page().t < this.page().tl.total ? "write" : "done"; this.doneT = 0; }
       return;
     }
+    if (this.rip && this.rip.phase !== "done") { this.updateRip(dt); return; }
     const pg = this.page(), next = this.pages[this.cur + 1];
     const go = pressed("a") || pressed("start") || (JOURNAL_AUTO && this.phase === "done" && this.doneT > 0.8 && next && next.t === 0);   // ?jauto=1 (testing)
     if (this.phase === "write") {
@@ -454,6 +479,39 @@ const Journal = {
       else this.close();
     }
   },
+  updateRip(dt) {   // write the bitter words, stop, tear the page out, burn it; then the real lesson
+    const r = this.rip; r.t += dt;
+    if (pressed("a") || pressed("start")) { r.phase = "done"; this.ripDone(); return; }
+    if (r.phase === "write") {
+      while (r.next < r.tl.acts.length && r.tl.acts[r.next].t0 <= r.t) { const a = r.tl.acts[r.next++]; if (a.type === "write") penScratch(a.dur * 0.85); }
+      if (r.t >= r.tl.total + 1.3) { r.phase = "tear"; r.t = 0; penScratch(0.55, 5); }   // he stops... then rips it out
+    } else if (r.phase === "tear") {
+      if (r.t >= TEAR_N * TEAR_MS / 1000 + 0.4) { r.phase = "burn"; r.t = 0; }
+    } else if (r.phase === "burn") {
+      if (r.t >= BURN_N * BURN_MS / 1000 + 0.7) { r.phase = "done"; this.ripDone(); }
+    }
+  },
+  ripDone() {
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.ripped = p.ripped || {}; p.ripped[this.world] = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    this.page().t = 0; this.page().nextAct = 0; this.phase = "write";
+  },
+  drawRip(bx, by, s) {
+    const r = this.rip, dw = 1536 * s, dh = 1024 * s;
+    if (r.phase === "write") { renderSpread(spreadCanvas[0], r.lay, r.step, r.t); ctx.drawImage(spreadCanvas[0], bx, by, dw, dh); return; }
+    if (r.phase === "tear" && TEAR.naturalWidth) {   // Glen's tear sheet, scaled over the book
+      const i = Math.min(TEAR_N - 1, Math.floor(r.t * 1000 / TEAR_MS)), fw = TEAR.naturalWidth / TEAR_N, fh = TEAR.naturalHeight;
+      const [lx, ty, by2] = TEAR_BOOK[i], k = BOOK_BOX.h * s / (by2 - ty);   // each frame's book pinned to the real one (left edge, top, bottom)
+      ctx.drawImage(TEAR, i * fw, 0, fw, fh, bx + BOOK_BOX.x * s - lx * k, by + BOOK_BOX.y * s - ty * k, fw * k, fh * k); return;
+    }
+    if (r.phase === "burn") {   // the torn book dim behind; the page burning to ash in the firelight
+      if (BOOK_RIPPED.naturalWidth) { ctx.save(); ctx.globalAlpha *= 0.45; ctx.drawImage(BOOK_RIPPED, bx, by, dw, dh); ctx.restore(); }
+      const cx = W / 2, cy = H / 2, fl = 0.8 + Math.sin(performance.now() / 60) * 0.1;
+      const gl = ctx.createRadialGradient(cx, cy, 20, cx, cy, 380); gl.addColorStop(0, `rgba(255,140,40,${0.45 * fl})`); gl.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+      if (BURN.naturalWidth) { const i = Math.min(BURN_N - 1, Math.floor(r.t * 1000 / BURN_MS)), fw = BURN.naturalWidth / BURN_N, fh = BURN.naturalHeight, h = H * 0.62, w = h * fw / fh;
+        ctx.drawImage(BURN, i * fw, 0, fw, fh, cx - w / 2, cy - h / 2, w, h); }
+    }
+  },
   // ---- drawing ----
   draw() {
     const a = Math.max(0, this.fade), v = ease(this.view);
@@ -474,7 +532,7 @@ const Journal = {
     // what to press
     ctx.font = "15px sans-serif"; ctx.textAlign = "right";
     const keys = [];
-    if (this.phase === "write" && !this.turn) keys.push("A: skip");
+    if ((this.phase === "write" || (this.rip && this.rip.phase !== "done")) && !this.turn) keys.push("A: skip");
     if (this.phase === "done" && !this.turn) keys.push(this.pages.some(p => p.t === 0) ? "A: turn the page" : "A: continue");
     if (this.cur > 0 || this.pages[this.cur + 1]?.t > 0) keys.push("Left / Right: pages");
     keys.push(this.viewWant ? "Down: sit back" : "Up: lean in");
@@ -520,7 +578,8 @@ const Journal = {
     ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
     const s = Math.min((W - 40) / BOOK_BOX.w, (H - 60) / BOOK_BOX.h) * zoom;
     const bx = W / 2 - (BOOK_BOX.x + BOOK_BOX.w / 2) * s, by = (H - 52) / 2 + 4 - (BOOK_BOX.y + BOOK_BOX.h / 2) * s;
-    if (this.turn) this.drawFlip(bx, by, s);
+    if (this.rip && this.rip.phase !== "done") this.drawRip(bx, by, s);
+    else if (this.turn) this.drawFlip(bx, by, s);
     else {
       const pg = this.page();
       renderSpread(spreadCanvas[0], pg.lay, pg.step, pg.t);
