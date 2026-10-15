@@ -10,7 +10,7 @@ from scipy import ndimage
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from make_backgrounds import key_backdrop   # green or magenta, with the fringe clean-up
 
-SETS = {"w2f": "2-forest", "w2s": "2-sand"}
+SETS = {"w2f": "2-forest", "w2s": "2-sand", "w4p": "4-palace"}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:/Users/big_g/Desktop/david-sling-art"
 

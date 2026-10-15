@@ -341,7 +341,7 @@ const STAGE_INFO = {
   "3-1": { cols: 236, bg: "w3_1", ter: "w2s", name: "The Day Before" },   // dry, dusty ground: no grass in the village lanes
   "3-2": { cols: 236, bg: "w3_2", name: "The Far Pasture" },
   "3-3": { cols: 214, bg: "w3_3", name: "We Will Not Sit Down" },
-  "4-4": { cols: 226, bg: "w4_4", ter: "w2s", name: "The King's Hall" },   // Glen's palace-at-night set
+  "4-4": { cols: 226, bg: "w4_4", ter: "w4p", name: "The King's Hall" },   // Glen's palace-at-night set
   "4-3": { cols: 214, bg: "w4_3", ter: "w2s", name: "The Broken String" },   // Glen's Gibeah market set
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
