@@ -223,3 +223,12 @@ the harp phrase at 3-2's campfire.
   height 200 like the World 2 donkey): the gift donkey for 4-1. Not placed yet.
 - Next art: donkey scared, doves, vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
 
+## 2026-10-15 late: sounds, Journal, jackals
+- Glen's animal/storm sounds are wired (assets/sounds/SOURCES.md has the map): thunder x3 (3-4), rain loop (TUNE.RAIN_VOLUME,
+  STAGE_INFO.storm; fades in w3ending), eagles' dive, ravens/crows, jackals, wolves (howl/growl/bark). hyena_1-3 unused.
+  sfx() now skips files that failed to load (SFX[n].missing); sfxOne(names, x, vol) picks one at random.
+- World 3 Journal pages are in (JOURNAL_PAGES[3], from JOURNAL_TEXT.md's draft, like World 2's). 3-2's rip-out isn't.
+- Stray-dog art plays the jackal ONLY in 3-2 (Glen: 3-4's jackal is a jackal).
+- Testing: never append test code to game/*.js (Glen plays it live). Use the untracked copy david-sling/simgame/
+  (cp game/*.js simgame/, excluded in .git/info/exclude) and wrap headless Chrome in `timeout 60`.
+

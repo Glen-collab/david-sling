@@ -588,6 +588,7 @@ function updateEagles(dt) {
       if (e.t > W2.EAGLE_REST && Math.abs(tgt.x - e.x) < W2.EAGLE_SEE * T && tgt.y > e.y + 40) {
         const dx = tgt.x - e.x, dy = tgt.y - e.y, n = Math.hypot(dx, dy);
         e.state = "dive"; e.t = 0; e.vx = dx / n * W2.EAGLE_DIVE; e.vy = dy / n * W2.EAGLE_DIVE; e.facing = Math.sign(dx) || 1;
+        sfxOne(["eagle_1", "eagle_2"], e.x, 0.8);
         if (!e.screeched) { e.screeched = true; toast("An eagle! It's after your lamb. Hold Up and throw to hit it in the air."); }
       }
     } else if (e.state === "dive") {
@@ -754,11 +755,11 @@ function updateWolf(k, dx, sameLevel, dt) {
       const c = Math.floor(david.x / T), r = Math.floor((david.y - 1) / T); let n = 1;
       while (n < W2.WOLF_BEHIND && !isSolid(c - n, r) && !isSolid(c - n, r - 1) && (isSolid(c - n, r + 1) || isOneway(c - n, r + 1))) n++;
       k.alpha = 1; k.x = (c - n + 1.5) * T; k.y = (r + 1) * T; k.vy = 0; k.facing = 1; setCrit(k, "hunt");
-      toast("Wolves hunt in packs. One's coming up behind you!"); sfx("lion_roar", k.x, 0.35, 1.7);
+      toast("Wolves hunt in packs. One's coming up behind you!"); sfx("wolf_growl", k.x, 0.8);
     }
   } else if (k.pack && k.state === "idle") {   // sitting, watching: waiting for the one from behind
     fall(); k.facing = Math.sign(dx) || k.facing;
-    if (!k.pack.on && sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { k.pack.on = true; k.pack.t = 0; }
+    if (!k.pack.on && sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { k.pack.on = true; k.pack.t = 0; sfx("wolf_howl", k.x, 0.8); }
     if (k.pack.on) {
       k.pack.t += dt / 2;   // (two sitters each add half)
       const L = k.pack.lurker, close = L && !L.gone && Math.abs(L.x - david.x) < W2.WOLF_CLOSE * T;
@@ -768,7 +769,7 @@ function updateWolf(k, dx, sameLevel, dt) {
   }
   if (k.state === "idle") {
     fall(); k.facing = Math.sign(dx) || k.facing;
-    if (sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { setCrit(k, "rise"); k.t = -(k.delay || 0); }
+    if (sameLevel && Math.abs(dx) < W2.WOLF_SEE * T && david.deadT <= 0) { setCrit(k, "rise"); k.t = -(k.delay || 0); sfxOne(["wolf_growl", "wolf_bark"], k.x, 0.7); }
     return;
   }
   if (k.state === "rise") { fall(); if (k.t > 0.8) setCrit(k, "hunt"); return; }

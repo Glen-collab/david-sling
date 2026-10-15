@@ -46,3 +46,10 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | later/bear_growl | bear_monster_growl.wav | the bear (later) | ? |
 | lion_hit | lion_hit-with-stone.wav | every stone that hurts the lion | ? |
 | lion_defeated | lion_sound-finishing-stone.wav | the lion's cry at the final stone | ? |
+| thunder, thunder_2, thunder_3 | lightning.mp3, lightning (1).mp3, lightning (2).mp3 (Glen, 2026-10-15) | 3-4's thunder, one at random after each flash | ? |
+| rain | heavy-rain.mp3 | the storm stages' rain loop (fades out in the End of World 3 scene) | ? |
+| eagle_1, eagle_2 | eagle.mp3, eagle-sound.mp3 | an eagle starting its dive (2-3) | ? |
+| crow_1, crow_2 | crow.mp3, crow (1).mp3 | ravens diving (World 1), crows flapping up / slung (3-1) | ? |
+| jackal | jackal.mp3 | a jackal darting in for the lamb | ? |
+| wolf_growl, wolf_bark, wolf_howl | wolf-growl.mp3, 8-wolf-growl-bark.mp3, wolf-howl.mp3 | wolves (World 2): the pack howls, they growl as they rise; 3-2's stray dog barks | ? |
+| hyena_1, hyena_2, hyena_3 | hyena.mp3, hyena (1).mp3, hyena (2).mp3 | not used yet (later) | ? |

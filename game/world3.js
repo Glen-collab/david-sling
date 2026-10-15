@@ -250,10 +250,11 @@ function updateCrow(k, dx, sameLevel, dt) {
   if (sameLevel && Math.abs(dx) < W3.CROW_SPOOK * T && david.deadT <= 0) {
     const away = Math.sign(k.x - david.x) || 1, to = Math.max(k.home - 3 * T, Math.min(k.home + 3 * T, k.x + away * 2.5 * T));
     k.fx0 = k.x; k.fx1 = Math.abs(to - k.x) < T ? k.x - away * 3 * T : to; k.facing = Math.sign(k.fx1 - k.x) || 1;
-    setCrit(k, "flap");
+    setCrit(k, "flap"); sfxOne(["crow_1", "crow_2"], k.x, 0.45);
   }
 }
 function stoneHitsCrow(k, s) {
+  sfx("crow_2", k.x, 0.8);
   k.gone = true; k.fly = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 260; k.vy = -220; stoneHit(s, 0.4);
   const f = fields.find(f => k.home >= f.x0 - T && k.home <= f.x1 + T);
   const left = f ? critters.filter(c => c.kind === "crow" && !c.gone && c.home >= f.x0 - T && c.home <= f.x1 + T).length : 0;
@@ -1193,13 +1194,14 @@ const w3ending = {
   FLOCK_X: 330,                           // where David walks back to, with his staff
   start(done) {
     Object.assign(this, { active: true, t: 0, step: 0, stepT: 0, done, hananX: W + 30, gave: false, fade: 0 });
-    hushLoops(); dialog.t = 0;
+    hushLoops(true); dialog.t = 0;
   },
   next() { this.step++; this.stepT = 0; },
   sc(name) { return SCALE * (TUNE.SPRITE_SIZE[name] || 1); },
   hananStop() { return this.DAVID_X + 192 * this.sc("hanan_staff_to_david"); },   // so the two-person clip lines up with them
   update(dt) {
     this.t += dt; this.stepT += dt; this.fade = Math.min(1, this.t / 1.5);
+    if (!rainLoop.paused) { rainLoop.volume = Math.max(0, rainLoop.volume - dt * TUNE.RAIN_VOLUME / 4); if (rainLoop.volume <= 0) rainLoop.pause(); }   // the rain dies away as the storm clears
     const A = pressed("a") || pressed("b") || pressed("start");
     const say = i => { dialog.who = this.lines[i][0]; dialog.say = this.lines[i][1]; dialog.t = 90; };
     switch (this.step) {
@@ -1347,4 +1349,4 @@ if (new URLSearchParams(location.search).has("w3end")) setTimeout(() => {
 // it in its jaws; a stone makes it drop it). mouth: [px ahead of its head, px up, lamb size] for the lamb it carries.
 // ---------------------------------------------------------------------------
 CRITTER_ART.dog = { idle: "dog_sit", move: "dog_run", walk: "dog_walk", len: 110, h: 60, mouth: [14, 22, 0.7] };
-if (WORLD === 3 && SPR.dog_run) for (const k of critters) if (k.kind === "jackal") k.art = "dog";   // World 1's jackals stay jackals
+if (LEVEL_STAGE === "3-2" && SPR.dog_run) for (const k of critters) if (k.kind === "jackal") k.art = "dog";   // 3-2's stray dog (Glen); everywhere else a jackal is a jackal

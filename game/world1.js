@@ -325,7 +325,7 @@ function updateFox(k, dx, sameLevel, dt) {
 function updateJackal(k, dx, sameLevel, dt) {
   if (k.state === "idle") {
     k.facing = Math.sign(dx) || k.facing;
-    if (Math.abs(dx) < W1.JACKAL_SEE && sameLevel) setCrit(k, "run");
+    if (Math.abs(dx) < W1.JACKAL_SEE && sameLevel) { setCrit(k, "run"); sfx(k.art === "dog" ? "wolf_bark" : "jackal", k.x, 0.7); }
     k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); k.vx = 0; collideBody(k, 50, 44, dt);
     return;
   }
@@ -335,7 +335,7 @@ function updateJackal(k, dx, sameLevel, dt) {
     runCritter(k, W1.JACKAL_SPEED, dt);
     if (lambFree() && Math.abs(lamb.x - k.x) < 44 && Math.abs(lamb.y - k.y) < 50) {
       lamb.stolen = true; baa(lamb.x, 1); setCrit(k, "flee");
-      toast("A jackal grabbed your lamb! Chase it and hit it with a stone!");
+      toast(`A ${k.art === "dog" ? "stray dog" : "jackal"} grabbed your lamb! Chase it and hit it with a stone!`);
     } else if (touchesDavid(critterBox(k))) { hurtDavid(k.x); k.facing = -k.facing; setCrit(k, "bounce"); }
     return;
   }
@@ -401,7 +401,7 @@ function stoneHitsCritters(s) {
       return true;
     }
     if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) { dropStolenLamb(k); toast("It dropped your lamb!"); }
-    else toast(k.kind === "fox" ? "Fox driven off!" : "Jackal driven off!");
+    else toast(k.kind === "fox" ? "Fox driven off!" : k.art === "dog" ? "Stray dog driven off!" : "Jackal driven off!");
     k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 420; stoneHit(s);
     return !s.power;
   }

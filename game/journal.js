@@ -89,6 +89,40 @@ const JOURNAL_PAGES = {
       ],
     },
   },
+  // World 3: JOURNAL_TEXT.md's first draft (2026-10-15), like World 2's, until Glen locks the words. (3-2's rip-out
+  // isn't in yet: the page is just written.)
+  3: {
+    name: "The Anointing",
+    stages: ["The Day Before", "The Far Pasture", "We Will Not Sit Down", "The Chosen Shepherd"],
+    draft: {
+      left: [
+        ...E(1, "God put the first man in the garden to work it and take care of it. My work is the sheep.", "Genesis 2:15"),
+        ...E(2, "Hagar was alone in the desert, and she called Him \"the God who sees me.\" He sees me out here too.", "Genesis 16:13"),
+        ...E(3, "The LORD did not choose our people because we were many. We were the fewest of all.", "Deuteronomy 7:7"),
+        ...E(4, "Gideon said he was the least in his family. The LORD said, \"I will be with you.\"", "Judges 6:15–16"),
+      ],
+      right: [
+        { at: 1, size: "psalm", segs: [
+          { text: "He", at: 1 }, { text: "gives me work to do,", at: 1, strike: 2 }, { text: "restores my soul again,", at: 2 }, { text: "\n" },
+          { text: "and guides me where", at: 3 }, { text: "I want.", at: 3, strike: 4 }, { text: "He will.", at: 4 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 16:6–13",
+          segs: [{ text: "The prophet Samuel came to Bethlehem. All my brothers stood before him, and the LORD said no to each one. Then they sent for me.", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the finished lines so far: Worlds 1, 2 and 3
+        { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
+          { text: "He leads me beside the waters,", at: 5 }, { text: "\n" }, { text: "where the troubled waves grow still.", at: 5 }, { text: "\n" },
+          { text: "He restores my soul again,", at: 5 }, { text: "\n" }, { text: "and guides me where He will.", at: 5 }] },
+      ],
+    },
+  },
 };
 
 // ----------------------------------------------------------------------------

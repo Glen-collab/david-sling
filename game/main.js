@@ -25,6 +25,7 @@ const TUNE = {
   SLIP_MUD: 420,          // how fast the slide slows (px/s per second; lower = slicker)
   CLIMB_SPEED: 230,       // ladders: px/s up or down (hold Up / Down)
   CLIMB_STRIDE: 26,       // px climbed per frame of david_climb
+  RAIN_VOLUME: 0.35,      // the storm's rain loop (3-4)
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
@@ -3032,7 +3033,7 @@ function updateHornets(dt) {
       h.x += ((h.hx + Math.sin(h.t * 1.3) * 50) - h.x) * Math.min(1, dt * 2);
       h.y += ((h.hy + Math.sin(h.t * 2.1) * 18) - h.y) * Math.min(1, dt * 2);
       h.facing = dx > 0 ? 1 : -1;
-      if (dist < TUNE.HORNET_RANGE && h.t > 1.2) { h.state = "dive"; h.t = 0; h.vx = dx / dist * TUNE.HORNET_DIVE; h.vy = dy / dist * TUNE.HORNET_DIVE; }
+      if (dist < TUNE.HORNET_RANGE && h.t > 1.2) { h.state = "dive"; h.t = 0; h.vx = dx / dist * TUNE.HORNET_DIVE; h.vy = dy / dist * TUNE.HORNET_DIVE; if (h.kind === "raven") sfxOne(["crow_1", "crow_2"], h.x, 0.6); }
     } else if (h.state === "dive") {
       h.x += h.vx * dt; h.y += h.vy * dt; h.facing = h.vx > 0 ? 1 : -1;
       if (h.t > 0.9) { h.state = "back"; h.t = 0; }
@@ -3091,7 +3092,8 @@ unlockAudio();   // when the browser already allows sound (the "Play David" laun
 const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
   "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated",
-  "thunder", "thunder_2", "thunder_3"];   // (thunder: 3-4's storm; any that aren't there yet are just skipped)
+  "thunder", "thunder_2", "thunder_3",   // 3-4's storm (Glen's lightning sounds)
+  "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl"];   // Glen's animal sounds (2026-10-15); hyena_1-3 are saved for later
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
@@ -3107,12 +3109,14 @@ function sfx(name, x, vol = 1, rate = 1) {
   a.play().catch(() => {});
   return a;
 }
+const sfxOne = (names, x, vol = 1) => sfx(names[Math.floor(Math.random() * names.length)], x, vol, 0.94 + Math.random() * 0.12);   // one of a few, at random
 const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() * 7)), x, vol, 0.92 + Math.random() * 0.16);
 // looping beds
 function loopAudio(name, music = true) { const a = new Audio(`../assets/sounds/${name}.mp3?v=${window.BUILD || 0}`); a.loop = true; a._music = music; a.volume = 0; return a; }
 const ambience = loopAudio("ambience_hills"), bossMusic = loopAudio("boss_loop");
 const stepsRun = loopAudio("steps_run", false);
-let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0;
+const rainLoop = loopAudio("rain", false);   // the storm stages (STAGE_INFO.storm: 3-4)
+let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
 function fadeLoop(a, cur, want, dt, speed) {
   const v = want > cur ? Math.min(want, cur + dt * speed) : Math.max(want, cur - dt * speed);
   a.volume = Math.max(0, Math.min(1, v));
@@ -3131,6 +3135,7 @@ function updateSound(dt) {
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night || cave.room ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
+  rainVol = fadeLoop(rainLoop, rainVol, STAGE_INFO.storm && !cave.room ? TUNE.RAIN_VOLUME : 0, dt, 0.4);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
   const spd = d.onGround && d.deadT <= 0 && !d.harp ? Math.abs(d.vx) : 0;
@@ -3145,8 +3150,9 @@ function updateSound(dt) {
 }
 // everything quiet: The One's card and the pause menu stop the footsteps, the hills, the lion music and the harp.
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
-function hushLoops() {
+function hushLoops(keepRain = false) {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();
+  if (!keepRain && !rainLoop.paused) { rainLoop.pause(); rainVol = 0; }
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
   if (typeof hushFlood === "function") hushFlood();
   if (david.chargeSnd) { david.chargeSnd.pause(); david.chargeSnd = null; }
