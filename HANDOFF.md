@@ -211,5 +211,7 @@ the harp phrase at 3-2's campfire.
   built yet" until they're in BUILT_STAGES. Landmarks painted but not stops yet: the vineyard keeper's watchtower
   (~660,690), the servants' kitchen fire (~790,350), the rooftop garden (~350,330), Jebus (right, off the path).
 - The map card still says "Sheep found": World 4's lost things are gifts/goats/harp parts/lamps (DESIGN 5d).
-- Next art: 4-1 far/mid/near (prompts in ART_PROMPTS.md), donkey with packs, doves, vineyard keeper, wineskin.
+- 4-1 backgrounds: set `w4_1` (Glen's 4-1 far/mid/near, magenta keyed; mirrored; mid 400 / near 190) is in the loader,
+  ready for STAGE_INFO "4-1" bg w4_1 when the stage is built. make_backgrounds.py now skips a missing layer (borrow it).
+- Next art: donkey with packs, doves, vineyard keeper, wineskin.
 

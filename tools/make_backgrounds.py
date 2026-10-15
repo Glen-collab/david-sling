@@ -20,8 +20,9 @@ SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w3_2": ("3-2 far.png", "3-2 mid.png", "3-2 near.png"),   # 3-2 The Far Pasture (midday, Bethlehem far off)
         "w3_3": ("3-3 far.png", "3-3 mid.png", "3-3 near.png"),   # 3-3 We Will Not Sit Down (golden afternoon, the town gate)
         "w3_4": ("3-4 far.png", "3-4 mid.png", "3-4 near.png"),   # 3-4 The Chosen Shepherd (the storm)
-        "w3_end": ("3-4 end far.png", "3-4 end mid.png", "3-4 end near.png")}   # End of World 3: the storm clears at sunset
-MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end"}
+        "w3_end": ("3-4 end far.png", "3-4 end mid.png", "3-4 end near.png"),   # End of World 3: the storm clears at sunset
+        "w4_1": ("4-1 far.png", "4-1 mid.png", "4-1 near.png")}   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
+MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):
@@ -73,6 +74,7 @@ if __name__ == "__main__":   # (make_terrain_set.py imports the keying from here
         if sys.argv[1:] and name not in sys.argv[1:]: continue
         fimg = Image.open(os.path.join(SRC, far)).convert("RGB"); fimg.save(os.path.join(OUT, f"{name}_far.jpg"), quality=92)
         for layer, f in (("mid", mid), ("near", near)):
+            if not os.path.exists(os.path.join(SRC, f)): print(f"{name}: no {f} yet (borrow it: BG_BORROW in main.js)"); continue
             k = key_backdrop(Image.open(os.path.join(SRC, f)), name)
             if name not in MIRRORED: k = seamless(k)   # mirrored sets join by flipping every other copy (TUNE.BG_MIRROR), so no blend
             al = np.asarray(k)[..., 3] > 40; rows = np.where(al.any(1))[0]
