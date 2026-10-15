@@ -25,8 +25,9 @@ const TUNE = {
   SLIP_MUD: 420,          // how fast the slide slows (px/s per second; lower = slicker)
   CLIMB_SPEED: 230,       // ladders: px/s up or down (hold Up / Down)
   CLIMB_STRIDE: 26,       // px climbed per frame of david_climb
-  RAIN_VOLUME: 0.35,
-  MUD_GRIP: 0.25,         // how much grip he has on 3-4's mud (1 = normal ground; lower = slides further)      // the storm's rain loop (3-4)
+  RAIN_VOLUME: 0.35,      // the storm's rain loop (3-4)
+  MUD_GRIP: 0.25,         // how much grip he has on 3-4's mud (1 = normal ground; lower = slides further)
+  BUSH_SIZE: 0.32,        // the bushes the 3-4 foxes hide in (Glen's bush.png, 360 px wide)
   ROLL_SPEED: 520,
   ROLL_TIME: 0.55,        // seconds the roll lasts
   CRAWL_SPEED: 120,
