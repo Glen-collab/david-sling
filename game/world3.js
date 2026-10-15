@@ -426,7 +426,8 @@ Object.assign(W3, { RUSTLER_AFTER: 10, RUSTLER_SNEAK: 120, RUSTLER_RUN: 230, RUS
   THIEF_HAND: 322 });   // how high his raised hand holds the sheep, in thief_run sheet pixels above his feet
 const thiefArt = () => !!SPR.thief_run;
 const rustlerH = () => { const nm = thiefArt() ? "thief_stand" : W3.RUSTLER_ART, s = SPR[nm]; return s ? s.ay * SCALE * (TUNE.SPRITE_SIZE[nm] || 1) : 190; };   // his height on screen
-CRITTER_ART.rustler = { box: k => ({ x0: k.x - 30, x1: k.x + 30, y0: k.y - rustlerH(), y1: k.y }) };
+// (tall: up over the sheep held over his head, so a stone from up on a rock still finds him)
+CRITTER_ART.rustler = { box: k => ({ x0: k.x - 34, x1: k.x + 34, y0: k.y - Math.max(rustlerH(), k.sheep ? W3.THIEF_HAND * SCALE + 70 : 0) - 30, y1: k.y }) };
 function updateRustler(k, dx, sameLevel, dt) {
   const fire = k.fire || (k.fire = nearestFire(k.home));
   if (k.state === "idle") {   // out of sight (and after a fall, he's given back whatever he had)
@@ -459,10 +460,13 @@ function updateRustler(k, dx, sameLevel, dt) {
     if (k.t > W3.THIEF_GRAB) setCrit(k, "flee");
     return;
   }
-  if (k.state === "flee") {   // off with it, away from David; stops to look back, runs again when he comes close
+  if (k.state === "flee") {   // off with it, away from David (back toward the start); stops to look back, runs again when he comes close
     k.facing = -Math.sign(dx) || -1;
     const moved = runCritter(k, W3.RUSTLER_RUN, dt);
-    if (k.t > 2.5 || !moved) setCrit(k, "wait");
+    const wall = !moved && k.onGround && groundAhead(k, k.facing);   // (blocked by a wall, not stopped at the edge of water or a drop)
+    if (wall && k.x > 2 * T) k.vy = -hopFor(k, k.facing);   // a rock or a wall in the way: over it he goes
+    else if (!moved && k.onGround) setCrit(k, "wait");       // the stream or the end of the land: he's cornered
+    if (k.t > 2.5) setCrit(k, "wait");
   } else if (k.state === "wait") {
     k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 40, 150, dt);
     k.facing = Math.sign(dx) || k.facing;
