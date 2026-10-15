@@ -2161,7 +2161,7 @@ function drawTakenLamb(camX) {
 const SHEEP_ART = {
   sheep:      { run: "sheep_trot",     walk: "sheep_walk",      stand: "sheep_stand",      graze: "sheep_graze" },
   sheepblack: { run: "sheepblack_run", walk: "sheepblack_walk", stand: "sheepblack_stand", graze: "sheepblack_graze" },
-  sheep2:     { run: "sheep2_walk",    walk: "sheep2_walk",     stand: "sheep2_stand",     graze: "sheep2_stand" },   // Glen's curly, big-eyed sheep (one walk sheet: no trot or graze yet)
+  sheep2:     { run: "sheep2_trot",    walk: "sheep2_walk",     stand: "sheep2_stand",     graze: "sheep2_graze" },   // Glen's curly, big-eyed sheep
   lamb:       { run: "lamb_hop",       walk: "lamb_walk",       stand: "lamb_stand",       graze: "lamb_graze" },
   lambblack:  { run: "lambblack_leap", walk: "lambblack_walk",  stand: "lambblack_stand",  graze: "lambblack_stand" },
   ram:        { run: "flockram_walk",  walk: "flockram_walk",   stand: "flockram_stand",   graze: "flockram_graze" },   // the flock's own woolly ram (the wild ram and the ibex use ram_*)
@@ -2368,7 +2368,8 @@ function stoneHitsThorns(st) {
   return false;
 }
 // grazing: these first frames of each graze sheet are head-down eating; the rest raise the head
-const GRAZE_EAT = { lamb_graze: 3, sheep_graze: 3, sheepblack_graze: 2 };
+const GRAZE_EAT = { lamb_graze: 3, sheep_graze: 3, sheepblack_graze: 2, sheep2_graze: 5 };
+Object.assign(TUNE.SPRITE_SIZE, { sheep2_walk: 1.2, sheep2_stand: 1.2, sheep2_graze: 0.92 });   // the curly sheep's sheets, matched to its trot
 function updateLook(sh, dt) {   // a grazing sheep looks up while David is close ("hey, how you doing?")
   const near = Math.abs(david.x - sh.x) < 170 && Math.abs(david.y - sh.y) < 120;
   sh.look = Math.max(0, Math.min(1, (sh.look || 0) + (near ? 2.5 : -2) * dt));

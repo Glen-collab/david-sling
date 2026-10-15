@@ -2400,6 +2400,18 @@ window.SPRITE_DATA = {
   "ay": 272,
   "align": "feet"
  },
+ "sheep2_graze": {
+  "src": "../assets/sprites/sheep2_graze.png",
+  "frames": 7,
+  "w": 175,
+  "h": 108,
+  "ms": 260,
+  "loop": true,
+  "pingpong": false,
+  "ax": 94,
+  "ay": 107,
+  "align": "feet"
+ },
  "sheep2_stand": {
   "src": "../assets/sprites/sheep2_stand.png",
   "frames": 2,
@@ -2409,6 +2421,18 @@ window.SPRITE_DATA = {
   "loop": true,
   "pingpong": true,
   "ax": 68,
+  "ay": 106,
+  "align": "feet"
+ },
+ "sheep2_trot": {
+  "src": "../assets/sprites/sheep2_trot.png",
+  "frames": 6,
+  "w": 129,
+  "h": 108,
+  "ms": 70,
+  "loop": true,
+  "pingpong": false,
+  "ax": 97,
   "ay": 106,
   "align": "feet"
  },

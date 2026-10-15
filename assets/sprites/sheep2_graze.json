@@ -1,0 +1,11 @@
+{
+  "frames": 7,
+  "frame_w": 175,
+  "frame_h": 108,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 94,
+  "anchor_y": 107,
+  "source": "sheep2_graze_sheet.jpg (Glen), reordered"
+}

@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 129,
+  "frame_h": 108,
+  "ms_per_frame": 70,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 97,
+  "anchor_y": 106,
+  "source": "sheep2_trot_sheet.jpg"
+}
