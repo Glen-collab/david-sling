@@ -433,7 +433,8 @@ function drawCritters(camX) {
   for (const k of critters) if (k.ambush) {   // the bushes the foxes hide in: a shiver when David gets close
     const x = k.home - camX; if (x < -200 || x > W + 200) continue;
     const near = k.state === "idle" && Math.abs(david.x - k.home) < 7 * T, sh = near ? Math.sin(performance.now() / 45) * 3 : 0;
-    drawItem("thorn_bush", x + sh, k.y0 + 10, 0.55);
+    const bush = ITEM.bush && ITEM.bush.naturalWidth ? "bush" : "thorn_bush";   // Glen's leafy bush once it's in assets/items (TUNE.BUSH_SIZE)
+    drawItem(bush, x + sh, k.y0 + 10, bush === "bush" ? (TUNE.BUSH_SIZE || 0.5) : 0.55);
   }
   for (const k of critters) {
     if (k.alpha <= 0) continue;
