@@ -1123,7 +1123,7 @@ if (LEVEL_NAME === "test") {
   rock(101, 14, 3, 3); rock(104, 11, 4, 6); setPiece("target", 111, 9);   // up the step and onto the rock: a target you can only reach from up there
   critter("goat", 114);
   // The One: the lamb meant for the king's table, in a feed shed up on the fortress wall
-  ladder(117, 10); wall(119, 10, 9, 7); deco("town_house_shed", 124, 9, 0.16); lostSheep("lamb", 125, 9, "one");
+  ladder(117, 10); wall(119, 10, 9, 7); deco("town_grain_baskets", 122, 9, 0.2); lostSheep("lamb", 125, 9, "one");   // feed for the king's animals, and the lamb meant for his table
   oliveRow(119, 9, 4);
   critter("guarddog", 133);
   setPiece("target", 138, 13); setPiece("target", 141, 10, { move: "rope" }); special(140, 5);
