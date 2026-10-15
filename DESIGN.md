@@ -1320,6 +1320,17 @@ letters** (the Paleo-Hebrew script of David's day). Only the right letters hold;
   10914. Draw them carved: a dark groove with a pale lip 2 px below. (Preview: david-sling-art/claude-checks/
   name_stones_preview.png.) If a machine lacks the font, fall back to baked letter images.
 
+**The trail of old letters (Glen, 2026-10-15):** before the cave, the letters turn up faintly carved here and there in
+Worlds 4 and 5, never pointed out. Stand still beside one and a clue comes up (what the letter pictured, and a nudge);
+found letters are saved (progress.letters) for the Journal and the cave. `inscription(c, r, letter)` in main.js,
+drawn and run in world4.js (OLD_LETTERS).
+- 4-1: **Yod** (a hand), on the wall inside the secret hollow with the jar of oil. *(In.)*
+- 4-2: **He** (a man with arms raised), scratched on the training-yard wall behind a target.
+- 4-3: **Waw** (a tent peg, "and"), cut into a doorpost in the Gibeah market.
+- 4-4: the second **He**, on a column in the king's hall, and the **Steward**, the one who tells the truth, gives the
+  how-to-read hint: *"Our fathers wrote from right to left, boy. Most people here have forgotten."*
+- 5-1: **Dalet** (a door), on a rock by the supply road, with the clue toward David's own name (DWD) for the warm-up.
+
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
 - **Lookouts (light stealth):** each one watches a stretch of ridge with a torchlight cone. If he sees you, he shouts and lights a **signal fire**, and a few extra raiders come. **Being seen is never a fail state**, just a harder few seconds. Sneaking past (or knocking the torch out of his hand with a quick shot) earns a "Not seen" bonus.

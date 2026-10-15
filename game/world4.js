@@ -285,11 +285,47 @@ function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true
   if (lost.some(sh => sh.one)) hudIcon("sheep_one", HUD_X + 92, 190, 42, line.some(sh => sh.one) ? 1 : 0.3);
   return true;
 }
+// ---------------------------------------------------------------------------
+// Old letters (Glen): Paleo-Hebrew letters carved faintly on rocks and walls in World 4 and 5, a trail to the Cave of
+// the Name (DESIGN 5-2). Stand still beside one and a clue comes up; found letters are kept (progress.letters).
+// The letter shapes are the Phoenician block of Unicode (the same script), in the font "Segoe UI Historic".
+// ---------------------------------------------------------------------------
+const OLD_LETTERS = {
+  yod:   { ch: "\u{10909}", clue: "Old letters carved in the rock, worn almost smooth. This one is Yod: it was drawn as a hand. The first letter of a name worth remembering." },
+  he:    { ch: "\u{10904}", clue: "A letter carved here long ago: He. It was drawn as a man with his arms raised, as if shouting for joy." },
+  waw:   { ch: "\u{10905}", clue: "A letter cut into the post: Waw, a tent peg. A peg joins things together, and the word waw means \"and\"." },
+  dalet: { ch: "\u{10903}", clue: "A letter scratched here: Dalet, a door. Two Dalets with a Waw between them spell a shepherd boy's name." },
+};
+const letterFont = () => { try { return document.fonts.check('40px "Segoe UI Historic"'); } catch (e) { return true; } };
+function updateInscriptions(dt) {
+  for (const n of inscriptions) {
+    const near = Math.abs(david.x - n.x) < 1.6 * T && Math.abs(david.y - n.y) < 3 * T && Math.abs(david.vx) < 20 && david.onGround && david.deadT <= 0;
+    n.still = near ? n.still + dt : 0;
+    if (n.still > 0.7 && !n.read) {
+      n.read = true; sayLine("", OLD_LETTERS[n.letter].clue); if (typeof chime === "function") chime(3);
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.letters = p.letters || [];
+        if (!p.letters.includes(n.letter)) { p.letters.push(n.letter); localStorage.setItem("davidProgress", JSON.stringify(p)); } } catch (e) {}
+    }
+  }
+}
+function drawInscriptions(camX) {
+  if (!inscriptions.length || !letterFont()) return;
+  ctx.save(); ctx.font = '34px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (const n of inscriptions) {
+    const x = n.x - camX; if (x < -60 || x > W + 60) continue;
+    const a = n.read ? 0.55 : 0.32 + 0.2 * Math.min(1, n.still / 0.7);   // faint until you stop and look
+    ctx.fillStyle = `rgba(255,250,235,${a * 0.6})`; ctx.fillText(OLD_LETTERS[n.letter].ch, x, n.y + 2);   // the lit lower lip
+    ctx.fillStyle = `rgba(40,34,30,${a})`; ctx.fillText(OLD_LETTERS[n.letter].ch, x, n.y);                // the groove
+  }
+  ctx.restore();
+}
 function updateWorld4(dt) {
+  updateInscriptions(dt);
   if (WORLD !== 4) return;
   updateGiftDrops(); updateKeeper(); updateLostGifts(dt);
 }
 function drawWorld4(camX) {
+  drawInscriptions(camX);
   if (WORLD !== 4) return;
   drawKeeper(camX); drawGiftDrops(camX); drawLostGifts(camX);
 }

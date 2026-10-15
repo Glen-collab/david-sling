@@ -440,6 +440,8 @@ const hornet = (c, r, kind = "hornet") => hornets.push({ kind, hx: c * T + T / 2
 const raven = (c, r) => hornet(c, r, "raven");
 const lostGifts = [];   // World 4's lost things (4-1: the extra gifts Father packed, shaken loose on the road; world4.js)
 const lostGift = (name, c, r) => lostGifts.push({ name, x: c * T + T / 2, y: (r + 1) * T, taken: false, t: Math.random() * 6 });
+const inscriptions = [];   // old letters carved here and there, a trail to the Cave of the Name (World 5): world4.js draws them
+const inscription = (c, r, letter) => inscriptions.push({ letter, x: c * T + T / 2, y: (r + 0.5) * T, still: 0, read: false });
 const ambushFox = c => { critter("fox", c); critters[critters.length - 1].ambush = true; };   // hiding in a bush until David's close (world1.js)   // ravens dive at you on open ground, like the hornets but bigger
 let beesAngry = false;   // sling a honeybee and the honey is gone (Shepherd's Judgment)
 const olives = [];   // the "coins"
@@ -1063,6 +1065,7 @@ if (LEVEL_NAME === "test") {
   critter("boar", 87, GR - 1, 8);
   // gift: the oil, inside an outcrop: its lower left end is only loose stone you can walk into
   rock(93, 13, 10, 4); fakeRock(93, 14, 2, 3); block(95, 14, 2, 3, 0); lostGift("oil", 95, 16);
+  inscription(97, 15, "yod");                                     // carved on the wall inside: the first old letter
   critter("boar", 108, GR - 1, 8); oliveRow(110, 16, 5);
   deco("town_hut_round", 116, 16, 0.14); deco("town_grain_baskets", 119, 16, 0.2); critter("villagedog", 121); critter("dove", 124);
   campfire(127);
