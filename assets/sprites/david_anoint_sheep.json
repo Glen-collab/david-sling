@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 134,
+  "frame_h": 183,
+  "ms_per_frame": 142,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 95,
+  "anchor_y": 181,
+  "source": "david_anoint_sheep.mp4",
+  "video_frames": [
+    71,
+    74,
+    78,
+    81,
+    85,
+    88,
+    91,
+    95,
+    98,
+    102,
+    105,
+    109
+  ]
+}

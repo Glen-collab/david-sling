@@ -396,6 +396,18 @@ window.SPRITE_DATA = {
   "ay": 84,
   "align": "feet"
  },
+ "david_anoint_sheep": {
+  "src": "../assets/sprites/david_anoint_sheep.png",
+  "frames": 12,
+  "w": 134,
+  "h": 183,
+  "ms": 142,
+  "loop": true,
+  "pingpong": false,
+  "ax": 95,
+  "ay": 181,
+  "align": "feet"
+ },
  "david_arm_raised": {
   "src": "../assets/sprites/david_arm_raised.png",
   "frames": 8,

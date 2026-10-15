@@ -1388,10 +1388,13 @@ function drawDavid(camX) {
     drawSprite(name, i, x, y, d.facing); return;
   }
   if (d.state === "liftSheep" && d.liftPhase) {     // crouch frames 2..7 down, hold, and back up
-    const n0 = 2, n1 = 7, span = n1 - n0;
+    const n0 = 2, n1 = 7, span = n1 - n0, HOLD = liftHold(d);
+    if (t >= LIFT_DOWN && t < LIFT_DOWN + HOLD && d.helpSheep.how === "flies" && SPR.david_anoint_sheep) {   // kneeling, pouring oil on its head
+      drawSprite("david_anoint_sheep", frameOf("david_anoint_sheep", t - LIFT_DOWN), x, y, d.facing); return;
+    }
     const i = t < LIFT_DOWN ? n0 + Math.min(span, Math.floor(t / LIFT_DOWN * (span + 1)))
-            : t < LIFT_DOWN + LIFT_HOLD ? n1
-            : Math.max(n0, n1 - Math.floor((t - LIFT_DOWN - LIFT_HOLD) / LIFT_UP * (span + 1)));
+            : t < LIFT_DOWN + HOLD ? n1
+            : Math.max(n0, n1 - Math.floor((t - LIFT_DOWN - HOLD) / LIFT_UP * (span + 1)));
     drawSprite("david_crouch", i, x, y, d.facing); return;
   }
   if (d.state === "toLamb" || d.state === "finish" || d.state === "liftSheep") {
@@ -2554,8 +2557,11 @@ function updateFinish(dt) {
 // cast sheep: David steps up, bends down to it, and as he straightens up it's back on its feet
 const CAST_REACH = 58;                              // how far in front of him his hands are at the bottom of the crouch (sheet px)
 const LIFT_DOWN = 0.45, LIFT_HOLD = 0.3, LIFT_UP = 0.45;
+// oiling a sheep plagued by flies (world3.js): he kneels a little closer and pours from his flask (Glen's clip) for longer
+const ANOINT_REACH = 30, ANOINT_HOLD = 2.0, ANOINT_OIL_AT = 0.8;   // sheet px; seconds pouring; when the oil goes on
+const liftHold = d => d.helpSheep && d.helpSheep.how === "flies" ? ANOINT_HOLD : LIFT_HOLD;
 function updateLiftSheep(d, dt) {
-  const sh = d.helpSheep, tx = sh.x - d.helpSide * CAST_REACH * SCALE;
+  const sh = d.helpSheep, tx = sh.x - d.helpSide * (sh.how === "flies" ? ANOINT_REACH : CAST_REACH) * SCALE, HOLD = liftHold(d);
   if (!d.liftPhase) {                                // walk into place
     if (autoWalk(d, tx, dt) || d.t > 3) { d.x = tx; d.facing = d.helpSide; d.vx = 0; d.liftPhase = 1; d.t = 0; }
     return;
@@ -2565,8 +2571,8 @@ function updateLiftSheep(d, dt) {
     sh.upright = true; sh.facing = d.helpSide; sh.stillT = 0;
     for (let k = 0; k < 10; k++) bits.push({ x: sh.x, y: sh.y - 6, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 220, life: 0.5, color: "#d8c9a4" });
   }
-  if (sh.how === "flies" && !sh.oiled && d.t > LIFT_DOWN) oilSheep(sh);   // world3.js
-  if (d.t > LIFT_DOWN + LIFT_HOLD + LIFT_UP) { d.liftPhase = 0; sh.freed = true; joinLine(sh); setState("idle"); }
+  if (sh.how === "flies" && !sh.oiled && d.t > LIFT_DOWN + ANOINT_OIL_AT) oilSheep(sh);   // world3.js
+  if (d.t > LIFT_DOWN + HOLD + LIFT_UP) { d.liftPhase = 0; sh.freed = true; joinLine(sh); setState("idle"); }
 }
 function updateFinishDavid(d, dt) {   // drop down, step back beside the post, turn to watch them come
   d.vy = Math.min(TUNE.MAX_FALL, d.vy + TUNE.GRAVITY * dt);

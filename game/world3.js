@@ -376,6 +376,7 @@ function fliesSheep(sh, dx, dy) {   // called from updateSheep (main.js) while i
   david.olives -= W3.OIL_COST;
   if (david.carrying || lamb.carried) { david.carrying = false; lamb.carried = false; lamb.x = david.x - david.facing * 50; lamb.y = david.y; }
   sh.state = "helped"; sh.upright = true; david.helpSheep = sh; david.helpSide = Math.sign(sh.x - david.x) || david.facing;
+  sh.facing = -david.helpSide;   // it turns to him, head under the flask
   david.liftPhase = 0; david.harp = false; david.charging = false; david.throwT = -1; setState("liftSheep");
 }
 function oilSheep(sh) {   // main.js: halfway through the kneel, the oil goes on and the flies scatter
