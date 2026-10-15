@@ -798,6 +798,9 @@ Object.assign(W3, {
   OX_SKID: 0.8,        // seconds skidding to a stop in the mud (phase 3: the moment to hit it)
   OX_HITS3: 3,         // hits in phase 3
   LIGHTNING: [6, 10],  // seconds between flashes
+  OAK_H: 9,            // the fight's oaks, tiles tall (Glen's oak sheet)
+  OAK_FILTER: "brightness(0.85)",
+  OAK_FALLEN_WIDEN: 3, OAK_FALLEN_X: 1, OAK_FALLEN_DROP: 10,   // The One's fallen oak: tiles wider than the hollow, tiles left of it, px down
 });
 const oxPiece = setPieces.find(p => p.kind === "ox");
 const oxTrees = setPieces.filter(p => p.kind === "oxtree").map(p => ({ x: p.x, down: false, fallT: 0 }));
@@ -911,8 +914,13 @@ function stoneHitsOx(s) {
 }
 function drawOx(camX) {
   if (!ox.on) return;
-  for (const tr of oxTrees) {   // three big old trees (Glen's olive tree, bigger); a split one falls over and fades
+  for (const tr of oxTrees) {   // three big old oaks (Glen's sheet): gashed while the horns are in it, split once it's broken
     const x = tr.x - camX; if (x < -400 || x > W + 400) continue;
+    if (ITEM.oak && ITEM.oak.naturalWidth) {
+      const img = ITEM[tr.down ? "oak_split" : ox.tree === tr && ox.state === "stuck" ? "oak_gashed" : "oak"], h = W3.OAK_H * T * img.naturalHeight / ITEM.oak.naturalHeight, w = img.naturalWidth * h / img.naturalHeight;
+      ctx.save(); ctx.filter = W3.OAK_FILTER; ctx.drawImage(img, x - w / 2, GR * T + 10 - h, w, h); ctx.restore();
+      continue;
+    }
     const img = ITEM.olive_tree; if (!img || !img.naturalWidth) continue;
     const h = 9 * T, w = img.naturalWidth * h / img.naturalHeight;
     ctx.save(); ctx.translate(x, GR * T + 6);
@@ -941,9 +949,15 @@ function drawOx(camX) {
   if (ox.flash > 0) filter += " brightness(2)";
   drawSprite(name, i, x, ox.y, ox.facing, W3.OX_SIZE, ox.alpha, filter);
 }
-function drawFallenOak(camX) {   // The One's hollow: a fallen oak lying on its root ball, the trunk across the top
+function drawFallenOak(camX) {   // The One's hollow: Glen's fallen oak, roots over the rock at the left, the trunk across the top
   for (const p of setPieces) if (p.kind === "oak") {
-    const x0 = p.c * T - camX; if (x0 > W + 200 || x0 + p.w * T < -200) continue;
+    const x0 = p.c * T - camX; if (x0 > W + 300 || x0 + p.w * T < -300) continue;
+    const img = ITEM.oak_fallen;
+    if (img && img.naturalWidth) {
+      const w = (p.w + W3.OAK_FALLEN_WIDEN) * T, h = img.naturalHeight * w / img.naturalWidth;
+      ctx.save(); ctx.filter = W3.OAK_FILTER; ctx.drawImage(img, x0 - W3.OAK_FALLEN_X * T, GR * T + W3.OAK_FALLEN_DROP - h, w, h); ctx.restore();
+      continue;
+    }
     if (ITEM.log_long && ITEM.log_long.naturalWidth) ctx.drawImage(ITEM.log_long, x0 + 1.4 * T, p.r * T - 10, (p.w - 1.6) * T, T + 18);
     if (ITEM.stump_roots && ITEM.stump_roots.naturalWidth) { const img = ITEM.stump_roots, h = 3.4 * T, w = img.naturalWidth * h / img.naturalHeight; ctx.drawImage(img, x0 - w * 0.25, GR * T + 8 - h, w, h); }
   }
