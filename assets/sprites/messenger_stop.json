@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 388,
+  "frame_h": 341,
+  "ms_per_frame": 281,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 243,
+  "anchor_y": 339,
+  "source": "messenger_gallop.mp4",
+  "video_frames": [
+    100,
+    107,
+    115,
+    122,
+    129,
+    136,
+    144,
+    151,
+    158,
+    165,
+    173,
+    180
+  ]
+}

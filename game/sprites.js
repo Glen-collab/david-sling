@@ -2004,6 +2004,54 @@ window.SPRITE_DATA = {
   "ay": 185,
   "align": "feet"
  },
+ "messenger_dismount": {
+  "src": "../assets/sprites/messenger_dismount.png",
+  "frames": 14,
+  "w": 486,
+  "h": 350,
+  "ms": 185,
+  "loop": false,
+  "pingpong": false,
+  "ax": 307,
+  "ay": 347,
+  "align": "feet"
+ },
+ "messenger_gallop": {
+  "src": "../assets/sprites/messenger_gallop.png",
+  "frames": 12,
+  "w": 426,
+  "h": 347,
+  "ms": 62,
+  "loop": true,
+  "pingpong": false,
+  "ax": 236,
+  "ay": 344,
+  "align": "feet"
+ },
+ "messenger_stop": {
+  "src": "../assets/sprites/messenger_stop.png",
+  "frames": 12,
+  "w": 388,
+  "h": 341,
+  "ms": 281,
+  "loop": false,
+  "pingpong": false,
+  "ax": 243,
+  "ay": 339,
+  "align": "feet"
+ },
+ "messenger_talk": {
+  "src": "../assets/sprites/messenger_talk.png",
+  "frames": 14,
+  "w": 432,
+  "h": 329,
+  "ms": 143,
+  "loop": true,
+  "pingpong": false,
+  "ax": 293,
+  "ay": 326,
+  "align": "feet"
+ },
  "nethanel_idle": {
   "src": "../assets/sprites/nethanel_idle.png",
   "frames": 6,

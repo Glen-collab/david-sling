@@ -180,4 +180,7 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
 - Headless testing: the game's update doesn't run under --virtual-time-budget, so set state by hand in a temporary
   appended script (and camX = david.x - W/2) and screenshot; restore the file after.
 Not done from the design: the stray goat (no goat art), the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
-the harp phrase at 3-2's campfire, a messenger clip.
+the harp phrase at 3-2's campfire.
+- Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.
+  Cut for World 4 (1 Samuel 16:19, at Jesse's door), not placed yet: messenger_stop (slows to a stand),
+  messenger_dismount (hops down), messenger_talk (talking with his hands, loop).

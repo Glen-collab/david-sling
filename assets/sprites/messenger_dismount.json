@@ -1,0 +1,27 @@
+{
+  "frames": 14,
+  "frame_w": 486,
+  "frame_h": 350,
+  "ms_per_frame": 185,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 307,
+  "anchor_y": 347,
+  "source": "messenger_dismount.mp4",
+  "video_frames": [
+    1,
+    6,
+    10,
+    15,
+    20,
+    24,
+    29,
+    34,
+    39,
+    43,
+    48,
+    53,
+    57,
+    62
+  ]
+}

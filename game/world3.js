@@ -1048,6 +1048,7 @@ const w3ending = {
     ["Hanan", "I won't always be on these hills with you. Take this. When the path is hard, lean on it, and remember who leads you."],
   ],
   MID_H: 430, NEAR_H: 190, RIDER_Y: 250,  // layer heights on screen; how far above the ground the rider goes by
+  RIDER_SIZE: 0.35, RIDE: 7,              // the far-off messenger's size, and seconds to cross
   DAVID_X: 520, FIRE_X: 900, WALK: 70,    // where David stands, the fire, Hanan's walking speed (his stride at this size)
   OFFER: 2.2, HANDOVER: 5.6, RAISE: 2.5,  // seconds: Hanan holding the staff out, the two of them, David lifting it up (Glen's clips)
   FLOCK_X: 330,                           // where David walks back to, with his staff
@@ -1109,12 +1110,15 @@ const w3ending = {
       ctx.stroke(); ctx.restore();
     }
   },
-  drawRider(gy, now) {   // stand-in until a messenger clip: a dark little rider far off on the hills, riding for Bethlehem
-    const k = Math.min(1, this.stepT / 6), x = W * 0.92 - k * W * 0.55, y = gy - this.RIDER_Y + Math.sin(k * 3) * 4;
-    ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 2) * 0.85;
-    if (SPR.donkey_walk) drawSprite("donkey_walk", frameOf("donkey_walk", now * 1.8), x, y, -1, 0.32, 1, "brightness(0.15)");
-    ctx.fillStyle = "#1c1612"; ctx.beginPath(); ctx.ellipse(x + 4, y - 30, 5, 10, -0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 2, y - 44, 4, 0, Math.PI * 2); ctx.fill();
+  drawRider(gy, now) {   // the king's messenger far off on the hills, galloping toward Bethlehem (on the right): Glen's clip
+    const k = Math.min(1, this.stepT / this.RIDE), x = W * 0.08 + k * W * 0.62, y = gy - this.RIDER_Y + Math.sin(k * 3) * 4;
+    ctx.save(); ctx.globalAlpha = Math.min(1, this.stepT * 2);
+    if (SPR.messenger_gallop) drawSprite("messenger_gallop", frameOf("messenger_gallop", now), x, y, 1, this.RIDER_SIZE, 1, "saturate(0.7) brightness(0.85)");   // a little hazy, far away
+    else {
+      if (SPR.donkey_walk) drawSprite("donkey_walk", frameOf("donkey_walk", now * 1.8), x, y, 1, 0.32, 1, "brightness(0.15)");
+      ctx.fillStyle = "#1c1612"; ctx.beginPath(); ctx.ellipse(x - 4, y - 30, 5, 10, 0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x - 2, y - 44, 4, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.restore();
   },
   draw() {
