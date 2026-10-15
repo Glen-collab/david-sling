@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 198,
+  "frame_h": 169,
+  "ms_per_frame": 90,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 124,
+  "anchor_y": 167,
+  "source": "dove_fly_mag.png"
+}

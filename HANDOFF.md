@@ -222,7 +222,9 @@ the harp phrase at 3-2's campfire.
 - donkey_packs_walk (Glen's 5-pose sheet, david-sling-art/world4/donkey_packs_walk_sheet.png, green keyed, --blobs,
   height 200 like the World 2 donkey): the gift donkey for 4-1. Not placed yet.
 - donkey_packs_scared (Glen's 4 poses: startled, half-rear, full rear, backing away; --once, scaled to match the walk).
-- Next art: doves, vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
+- Doves (Glen's, white): dove_walk (6, loop, 110 px tall) and dove_fly (6: frames 0-2 = take-off from the ground, 3-5 = the
+  flight loop, lined up on the beak; drawn at the same body size as the walk). For 4-1's road (harmless: Shepherd's Judgment).
+- Next art: vineyard keeper, wineskin (prompts in ART_PROMPTS.md "4-1 sprites").
 
 ## 2026-10-15 late: sounds, Journal, jackals
 - Glen's animal/storm sounds are wired (assets/sounds/SOURCES.md has the map): thunder x3 (3-4), rain loop (TUNE.RAIN_VOLUME,

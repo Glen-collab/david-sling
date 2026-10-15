@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 101,
+  "frame_h": 112,
+  "ms_per_frame": 110,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 74,
+  "anchor_y": 112,
+  "source": "dove_walk_mag.png"
+}

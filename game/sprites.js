@@ -984,6 +984,30 @@ window.SPRITE_DATA = {
   "ay": 208,
   "align": "feet"
  },
+ "dove_fly": {
+  "src": "../assets/sprites/dove_fly.png",
+  "frames": 6,
+  "w": 198,
+  "h": 169,
+  "ms": 90,
+  "loop": false,
+  "pingpong": false,
+  "ax": 124,
+  "ay": 167,
+  "align": "feet"
+ },
+ "dove_walk": {
+  "src": "../assets/sprites/dove_walk.png",
+  "frames": 6,
+  "w": 101,
+  "h": 112,
+  "ms": 110,
+  "loop": true,
+  "pingpong": false,
+  "ax": 74,
+  "ay": 112,
+  "align": "feet"
+ },
  "eagle_fly": {
   "src": "../assets/sprites/eagle_fly.png",
   "frames": 12,
