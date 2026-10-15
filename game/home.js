@@ -170,6 +170,7 @@ const Courtyard = {
     if (!this.earned) { this.say("Jesse", "Throw all you like, son. But I haven't shown you the throw yet. Come and find me once you've faced the lion."); return; }
     if ((this.prog.throwGiven || 0) < this.earned) { this.say("Jesse", "Come here first, David. I have something for you."); return; }
     this.x = HOME.THROW_FROM; this.facing = 1; this.walkT = 0;
+    this.msg = null;   // (nobody talks over the practice: the throw needs the screen)
     this.mode = "practice"; this.code = THROW_PIECES.slice(0, this.earned).flat(); this.got = 0; this.pt = HOME.PRACTICE_TIME;
     this.result = null; this.sling = null; this.bits = []; this.wrong = false;
   },
@@ -345,7 +346,7 @@ const Courtyard = {
     if (this.mode === "market") this.drawMarket();
     if (this.mode === "practice") this.drawPractice();
     if (this.mode === "tithe") this.drawTithe();
-    if (this.msg) this.drawMsg();
+    if (this.msg && this.mode !== "practice") this.drawMsg();
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,245,225,0.9)";
     ctx.fillText(this.mode === "market" ? "Up / Down: choose    A: trade    B: leave" : this.mode === "practice" ? "Enter the throw    Select: stop" : this.mode === "tithe" ? "Up / Down: choose    A: answer" : "Left / Right: walk    Up: use    Select: Journal", W - 14, H - 10);
     ctx.restore();
