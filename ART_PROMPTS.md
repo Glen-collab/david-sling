@@ -87,14 +87,40 @@ far pasture; stormy and wild at the end.
 ```
 Five plain level dots in all (Jesse's house, then the four stages), plus the golden star at the altar and the small well spot. When the picture comes in, the dots get placed on it in `map.js` (World 3 borrows World 1's map until then).
 
-### World 4 — The King's Court
+### World 4 — The King's Court (one message, ready to paste)
 ```
-Gibeah, King Saul's hilltop fortress town. A path winds up a hill from small villages
-through vineyards to a rough-stone fortress with thick walls, wooden gates, and tents of
-soldiers outside. Inside the walls: a training yard with wooden targets and a large hall.
-Use deep reds and royal purples on banners (no symbols or text on them). Mood: grand,
-a little heavy and shadowed, the king's hall darker than everything else.
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft warm lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC (Judah and Benjamin, Iron Age): limestone hills, olive trees,
+vineyards, clay-brick villages.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: one complete overworld map screen laid out like the Super Mario Bros. 3 world maps. Seen from
+above at a slight tilt. Wide landscape, 16:9. A winding dotted path connects round "level dots" (plain
+empty circles) and a few small landmark buildings. No characters on the map.
+
+World 4: the road north from Bethlehem to King Saul's hilltop fortress at Gibeah, on a bright clear
+morning that grows heavier and more shadowed toward the end. The path, in order:
+1. Bottom-left: the stone gate of Bethlehem, small, pale limestone (the start).
+2. A long road winding north through green vineyards on terraced hillsides, with low stone terrace
+   walls and small villages (first level dot). Far off to one side, NOT on the path: a walled city on
+   its own hill with tall pale walls and towers (Jebus, the city that will one day be Jerusalem).
+3. Beside the road in the vineyards: a small round stone watchtower with a little hut (a landmark spot).
+4. Up the big hill to Gibeah: outside the fortress walls, a dusty training yard with wooden targets,
+   straw dummies and a low practice wall (second level dot).
+5. Against the fortress wall: a low stone kitchen building with a warm glowing fire in its doorway
+   and smoke rising (a landmark spot).
+6. Inside the walls: the town of Gibeah, crowded flat roofs, a well, and a market with colorful cloth
+   awnings (third level dot).
+7. Tucked slightly off the path: a small hidden rooftop garden with potted plants and vines (a small
+   extra spot).
+8. At the very top: King Saul's great hall, a big rough-stone building with heavy wooden doors and
+   deep red and royal purple banners (no symbols on them). It is darker than everything else, with
+   storm clouds gathering over it and one warm lamp-lit doorway (the last level dot).
+Rough-stone fortress walls with wooden gates and a few soldiers' tents outside them.
+Mood: bright and hopeful on the road and in the vineyards; grand, a little heavy and shadowed up at
+the fortress; the king's hall the darkest place on the map.
 ```
+Four plain level dots (4-1 to 4-4), plus the Bethlehem gate, the vineyard watchtower, the kitchen fire and the hidden
+garden. **Save as** `david-sling-art\world 4 map.png`.
 
 ### World 5 — The Road to the Valley
 ```
@@ -592,3 +618,57 @@ Three whole walls look less repetitive than a stretched middle piece.
 - If a pose comes out a different size, ask GPT: *"same character, same size and same proportions as before, new pose: …"*
 - If it adds text or a checkerboard, say *"no text, no numbers, solid #00FF00 green background only."*
 - Keep the first good image of each boss as the "reference" and upload it with every later pose request.
+
+## World 4 stage backgrounds (one set of three layers per stage)
+Same format as World 3. **Magenta (#FF00FF)** for 4-1's middle and near layers (vineyards: green leaves).
+
+### 4-1 The Road to Gibeah (bright morning, the road north): one message per layer, ready to paste
+**Far:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country north of Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 4, a bright fresh morning on the road north. A clear soft blue sky with a few small white
+clouds, warm gold near the horizon. Along the bottom half: rolling hills covered in terraced
+vineyards and olive groves, layer behind layer, hazy and pale blue-green in the distance. Small
+and far away, a little left of center, ONE walled city on its own hill: tall pale stone walls and
+square towers catching the morning sun (Jebus). Calm, open and hopeful.
+```
+
+**Middle:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country north of Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 4 middle distance: terraced hillsides of grapevines, the vines low and bushy with broad
+green leaves and purple grape clusters, held up by low dry-stone terrace walls in rows. A small
+round stone watchtower standing in one vineyard, a few clay-brick village houses with flat roofs,
+fig and olive trees, and a dusty road curving between the terraces. Morning sunlight. Softer and a
+little hazy compared with the foreground. EVERYTHING above the hills is solid flat bright magenta
+(#FF00FF), no sky, no clouds.
+```
+
+**Near:**
+```
+Style: a Pixar-style 3D animated movie look: smooth, rounded, appealing, soft lighting. NOT pixel art.
+Setting: ancient Israel around 1000 BC, the hill country north of Bethlehem.
+No text, no letters, no numbers, no logos, no UI anywhere in the image.
+Format: a very wide side-scrolling game background, about 3 times wider than tall (for example
+3072 x 1024). Seen straight from the side, no perspective tilt. The left and right edges must
+match so the image can repeat seamlessly. No characters, no animals.
+
+World 4 foreground strip, the bottom quarter only: the dusty edge of a country road, a low
+dry-stone wall with grapevines spilling over it, broad vine leaves, a few fallen purple grapes,
+small stones and tufts of dry grass, full colour and sharp in bright morning light. EVERYTHING
+above it is solid flat bright magenta (#FF00FF).
+```
+
+**Save as** `david-sling-art-1 far.png`, `4-1 mid.png`, `4-1 near.png`.
