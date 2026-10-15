@@ -816,6 +816,42 @@ window.SPRITE_DATA = {
   "ay": 259,
   "align": "feet"
  },
+ "dog_run": {
+  "src": "../assets/sprites/dog_run.png",
+  "frames": 6,
+  "w": 144,
+  "h": 83,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 109,
+  "ay": 82,
+  "align": "feet"
+ },
+ "dog_sit": {
+  "src": "../assets/sprites/dog_sit.png",
+  "frames": 6,
+  "w": 93,
+  "h": 122,
+  "ms": 260,
+  "loop": true,
+  "pingpong": true,
+  "ax": 56,
+  "ay": 121,
+  "align": "feet"
+ },
+ "dog_walk": {
+  "src": "../assets/sprites/dog_walk.png",
+  "frames": 6,
+  "w": 112,
+  "h": 103,
+  "ms": 120,
+  "loop": true,
+  "pingpong": false,
+  "ax": 85,
+  "ay": 102,
+  "align": "feet"
+ },
  "donkey_bolt": {
   "src": "../assets/sprites/donkey_bolt.png",
   "frames": 12,

@@ -422,10 +422,16 @@ function drawCritters(camX) {
     if (k.kind === "rat") { drawRat(k, x); continue; }
     if (k.kind === "rustler") { drawRustler(k, x); continue; }
     if (k.kind === "hen") { drawHen(k, x); continue; }
-    const a = CRITTER_ART[k.kind];
+    const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)
     let name = a.move, i;
     if (k.gone) i = frameOf(name, k.t * 1.5);
     else if (k.state === "idle") { name = a.idle; i = frameOf(name, k.t); }
+    else if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait") && !a.carry) {   // no carrying sheet: the lamb in its jaws
+      name = k.state === "wait" ? a.walk : a.move; i = k.state === "wait" ? 0 : frameOf(name, k.t);
+      drawSprite(name, i, x, k.y, k.facing, 1, k.alpha);
+      drawSprite("lamb_stand", 0, x + k.facing * a.mouth[0] * SCALE, k.y - a.mouth[1] * SCALE, k.facing, a.mouth[2], k.alpha);
+      continue;
+    }
     else if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) { name = a.carry; i = k.state === "wait" ? 0 : frameOf(name, k.t); }
     else if (k.kind === "ram" && k.state === "tell") { name = a.tell; i = Math.min(SPR[name].frames - 2, Math.floor(k.t * 1000 / SPR[name].ms)); }   // head down, horns first
     else if (k.kind === "ram" && k.state === "rest") { name = a.idle; i = 0; }

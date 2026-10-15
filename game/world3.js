@@ -1182,3 +1182,10 @@ if (new URLSearchParams(location.search).has("w3end")) setTimeout(() => {
   w3ending.start(() => location.reload());
   if (at) Object.assign(w3ending, { step: at, hananX: w3ending.hananStop(), fade: 1, t: 2 });
 }, 300);
+
+// ---------------------------------------------------------------------------
+// Stray dogs (3-2): Glen's scruffy village dog plays the jackal's part (sits watching, runs in for the lamb, off with
+// it in its jaws; a stone makes it drop it). mouth: [px ahead of its head, px up, lamb size] for the lamb it carries.
+// ---------------------------------------------------------------------------
+CRITTER_ART.dog = { idle: "dog_sit", move: "dog_run", walk: "dog_walk", len: 110, h: 60, mouth: [14, 22, 0.7] };
+if (WORLD === 3 && SPR.dog_run) for (const k of critters) if (k.kind === "jackal") k.art = "dog";   // World 1's jackals stay jackals

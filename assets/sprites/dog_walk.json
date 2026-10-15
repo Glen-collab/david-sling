@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 112,
+  "frame_h": 103,
+  "ms_per_frame": 120,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 85,
+  "anchor_y": 102,
+  "source": "dog_walk.png"
+}

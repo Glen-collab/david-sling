@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 144,
+  "frame_h": 83,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 109,
+  "anchor_y": 82,
+  "source": "dog_run.png"
+}

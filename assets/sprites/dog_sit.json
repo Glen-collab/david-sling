@@ -1,0 +1,12 @@
+{
+  "frames": 6,
+  "frame_w": 93,
+  "frame_h": 122,
+  "ms_per_frame": 260,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 56,
+  "anchor_y": 121,
+  "source": "dog_sit.png",
+  "pingpong": true
+}
