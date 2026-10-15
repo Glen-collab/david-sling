@@ -1209,7 +1209,7 @@ const w3ending = {
   ],
   MID_H: 430, NEAR_H: 190, RIDER_Y: 250,  // layer heights on screen; how far above the ground the rider goes by
   RIDER_SIZE: 0.35,                       // the messenger's size where he pulls up (Glen: far off on the hills, nearer, stops, then off to town)
-  RIDER_PATH: [[0.10, 350, 0.08], [0.33, 300, 0.33], [0.90, 335, 0.07]],   // [x as a share of the width, px above the ground, size]: far hilltop, where he stops, Bethlehem
+  RIDER_PATH: [[0.10, 350, 0.08], [0.33, 300, 0.33], [0.595, 262, 0.24], [0.925, 312, 0.06]],   // [x as a share of the width, px above the ground, size]: far hilltop, where he stops, down the slope (above the wall), up into Bethlehem
   RIDE_IN: 3.6, RIDE_STOP: 2.8, RIDE_OUT: 4.2,   // seconds: coming nearer, standing, riding off to the town
   DAVID_X: 520, FIRE_X: 900, WALK: 70,    // where David stands, the fire, Hanan's walking speed (his stride at this size)
   OFFER: 2.2, HANDOVER: 5.6, RAISE: 2.5,  // seconds: Hanan holding the staff out, the two of them, David lifting it up (Glen's clips)
@@ -1275,14 +1275,15 @@ const w3ending = {
     }
   },
   drawRider(gy, now) {   // the king's messenger (Glen's clips): small on a far hilltop, riding nearer, pulling up to stand, then off to Bethlehem
-    const [A, B, C] = this.RIDER_PATH, t = this.stepT, ease = f => f * f * (3 - 2 * f);
+    const [A, B, D, C] = this.RIDER_PATH, t = this.stepT, ease = f => f * f * (3 - 2 * f), lerp = (P, Q, f) => P.map((v, k) => v + (Q[k] - v) * f);
     let p, nm = "messenger_gallop", i = frameOf(nm, now), a = Math.min(1, t * 1.5);
     if (t < this.RIDE_IN) { const f = ease(t / this.RIDE_IN); p = A.map((v, k) => v + (B[k] - v) * f); }
     else if (t < this.RIDE_IN + this.RIDE_STOP) {   // pulling up, then standing
       p = B; nm = "messenger_stop";
       if (SPR[nm]) i = Math.min(SPR[nm].frames - 1, Math.floor((t - this.RIDE_IN) / (this.RIDE_STOP * 0.6) * SPR[nm].frames)); else { nm = "messenger_gallop"; i = 0; }
     } else {
-      const f = Math.min(1, (t - this.RIDE_IN - this.RIDE_STOP) / this.RIDE_OUT); p = B.map((v, k) => v + (C[k] - v) * ease(f));
+      const f = Math.min(1, (t - this.RIDE_IN - this.RIDE_STOP) / this.RIDE_OUT), SPLIT = 0.42;   // down the slope, then up at an angle to the town
+      p = f < SPLIT ? lerp(B, D, f / SPLIT) : lerp(D, C, ease((f - SPLIT) / (1 - SPLIT)));
       a = Math.min(a, 1 - Math.max(0, f - 0.8) / 0.2);   // gone into the town
     }
     if (a <= 0) return;
