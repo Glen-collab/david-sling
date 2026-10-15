@@ -194,6 +194,10 @@ splits that tree; lightning can drop a branch near David; phase 3 hit it while i
   Getting hit knocks him off. The rungs are still one-way ledges (you can jump onto them; carrying the lamb, Down still
   drops a rung). Art: david_climb (Glen's back-view strip, david-sling-art/world3/david_climb_sheet.png, green keyed to
   magenta, sheet2sprite --blobs, height 270); all its reaching poses use the right hand (a left-hand version is optional).
+  Top of a ladder with a roof beside it (ladderRoof): state "topout" plays david_topout (tools/cut_topout.py: Glen's
+  back strip poses 0-1 + side strip poses 1-3, david-sling-art/world3/david_topout_*_sheet.png): hands at the edge,
+  pulling up, climbing over, hands and knees, stepping off onto the roof (TOPOUT_POS per-frame feet offsets). Down on the
+  roof beside the ladder top plays it in reverse and puts him on the ladder.
 Not done from the design: the Micah 5:2, Psalm 139:1 and Psalm 78:70 scrolls (no scroll system yet),
 the harp phrase at 3-2's campfire.
 - Messenger (Glen's clips, 2026-10-15): messenger_gallop rides across the far hills in the End of World 3 scene.

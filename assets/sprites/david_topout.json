@@ -1,0 +1,11 @@
+{
+ "frames": 5,
+ "frame_w": 183,
+ "frame_h": 253,
+ "ms_per_frame": 200,
+ "loop": false,
+ "align": "feet",
+ "anchor_x": 91,
+ "anchor_y": 251,
+ "source": "david_topout_back_sheet.png + david_topout_side_sheet.png"
+}

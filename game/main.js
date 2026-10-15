@@ -371,6 +371,11 @@ const stairTowers = [];
 const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
 const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c }); };
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
+const ladderRoof = l => isSolid(l.c + 2, l.r) ? 1 : isSolid(l.c - 1, l.r) ? -1 : 0;   // which side its roof is on (0 = none)
+// the top of a ladder (david_topout, Glen's two strips): hands up at the roof edge, pulling up, climbing over, on hands
+// and knees, up and stepping off. Per frame: [px from the roof edge (toward the roof), px below the roof top] for his feet.
+const TOPOUT_POS = () => [[-T, 238 * SCALE - 12], [-T, 192 * SCALE - 8], [-12, 42 * SCALE], [26, 0], [44, 0]];
+const TOPOUT_FRAME = 0.2, TOPDOWN_FRAME = 0.15;   // seconds per frame going up, and going back down onto the ladder
 const ladderAt = d => ladders.find(l => d.x > l.c * T - 4 && d.x < (l.c + 2) * T + 4 && d.y > l.r * T - 4 && d.y <= GR * T + 2);   // the ladder he's in front of
 const setPiece = (kind, c, r = GR - 1, o = {}) => setPieces.push({ kind, c, r, x: c * T + T / 2, y: (r + 1) * T, ...o });
 const deadfall = (c, r, w, h) => { block(c, r, w, h, 8); deadfalls.push({ c, r, w, h, broken: false, told: false }); };
@@ -1194,7 +1199,7 @@ function updateDavid(dt) {
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
-               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb";
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout";
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
@@ -1275,7 +1280,10 @@ function updateDavid(dt) {
   // --- ladders: hold Up in front of one to climb it (Down from the top to climb down), A to jump off
   if (!busy && !d.harp && !d.carrying && d.throwT < 0) {
     const l = ladderAt(d), atTop = l && d.onGround && d.y <= l.r * T + 2;
-    if (l && ((held("up") && !atTop && (d.onGround || d.vy > -200)) || (pressed("down") && atTop))) {
+    const lt = !l && d.onGround && pressed("down") &&   // on the roof right by the top of one: back over the edge and down it
+      ladders.find(q => ladderRoof(q) && Math.abs(d.y - q.r * T) < 3 && Math.abs(d.x - ((q.c + 1) * T + ladderRoof(q) * T)) < 60);
+    if (lt) { setState("topout"); Object.assign(d, { ladder: lt, topDir: ladderRoof(lt), topRev: true, vx: 0, vy: 0, onGround: false }); }
+    else if (l && ((held("up") && !atTop && (d.onGround || d.vy > -200)) || (pressed("down") && atTop))) {
       setState("climb"); d.ladder = l; d.climbDist = 0; d.vx = 0; d.vy = 0; d.onGround = false; d.jumpBuf = 0;
       if (!d.ladderTold) { d.ladderTold = true; toast("Climbing! Hold Up or Down on the ladder. A jumps off."); }
     }
@@ -1302,11 +1310,23 @@ function updateDavid(dt) {
     const l = d.ladder, v = (held("down") ? 1 : 0) - (held("up") ? 1 : 0);
     d.vx = 0; d.vy = 0; d.onGround = false; d.x += ((l.c + 1) * T - d.x) * Math.min(1, dt * 14);
     d.y += v * TUNE.CLIMB_SPEED * dt; d.climbDist += Math.abs(v) * TUNE.CLIMB_SPEED * dt;
-    if (d.y <= l.r * T) { d.y = l.r * T; d.onGround = true; d.ladder = null; setState("idle"); }   // up at the top: standing on the roof
+    if (v < 0 && ladderRoof(l) && d.y <= l.r * T + TOPOUT_POS()[0][1]) {   // hands at the roof edge: over the top
+      setState("topout"); d.topDir = ladderRoof(l); d.topRev = false;
+    }
+    else if (d.y <= l.r * T) { d.y = l.r * T; d.onGround = true; d.ladder = null; setState("idle"); }   // up at the top: standing on the top rung
     else if (v > 0 && isSolid(Math.floor(d.x / T), Math.floor(d.y / T))) { d.y = Math.floor(d.y / T) * T; d.onGround = true; d.ladder = null; setState("idle"); }   // down at the bottom
     else if (pressed("a")) {   // jump off, the way he's pushing (or straight back down)
       if (dir) d.facing = dir;
       d.ladder = null; d.vy = -TUNE.JUMP_SPEED * 0.7; d.vx = dir * TUNE.WALK_SPEED; setState("jump"); sfx("jump", undefined, 0.5);
+    }
+  } else if (d.state === "topout") {   // over the top of a ladder onto the roof (or, topRev, back over the edge onto it)
+    const l = d.ladder, P = TOPOUT_POS(), n = P.length, ft = d.topRev ? TOPDOWN_FRAME : TOPOUT_FRAME;
+    const k = Math.min(n - 1, Math.floor(d.t / ft)), i = d.topRev ? n - 1 - k : k, edge = (l.c + 1) * T + d.topDir * T;
+    d.topK = i; d.vx = 0; d.vy = 0; d.onGround = false;
+    d.x = edge + d.topDir * P[i][0]; d.y = l.r * T + P[i][1];
+    if (d.t >= n * ft) {
+      if (d.topRev) { setState("climb"); d.climbDist = 0; d.x = (l.c + 1) * T; }
+      else { d.onGround = true; d.ladder = null; d.facing = d.topDir; setState("idle"); }
     }
   } else if (d.state === "slip") {   // 3-4: slid on landing in the mud; arms out, then he stands
     d.vx = Math.sign(d.vx) * Math.max(0, Math.abs(d.vx) - TUNE.SLIP_MUD * dt);
@@ -1329,7 +1349,7 @@ function updateDavid(dt) {
     else if (d.vx > target) d.vx = Math.max(target, d.vx - acc * dt);
   }
   d.h = lowPose ? LOW_H : STAND_H;
-  if (d.state === "climb") return;   // on a ladder: no gravity, no collisions (the ladder's in open air)
+  if (d.state === "climb" || d.state === "topout") return;   // on a ladder: no gravity, no collisions (the ladder's in open air)
 
   // drop through a one-way platform: Down + A while standing on one
   d.dropThrough = false;
@@ -1462,6 +1482,7 @@ function drawDavid(camX) {
     case "flip": drawSprite("david_flip", frameOf("david_flip", t, 60), x, y - d.h / 2 - 6, d.facing); break;
     case "land": drawSprite("david_jump_land", frameOf("david_jump_land", t, 45), x, y, d.facing); break;
     case "slip": drawSprite("david_slip", frameOf("david_slip", t, TUNE.SLIP_MS), x, y, d.facing); break;
+    case "topout": drawSprite("david_topout", d.topK || 0, x, y, (d.topK || 0) < 2 ? 1 : d.topDir); break;   // back view, then from the side
     case "climb": drawSprite("david_climb", Math.floor((d.climbDist || 0) / TUNE.CLIMB_STRIDE) % 6, x, y, 1); break;   // his back to us
     case "roll": drawSprite("david_roll", Math.min(11, Math.floor(d.rollT / TUNE.ROLL_TIME * 12)), x, y, d.facing); break;
     case "getup": drawSprite("david_roll_getup", Math.min(6, 3 + Math.floor(d.t / 0.07)), x, y, d.facing); break;

@@ -804,6 +804,18 @@ window.SPRITE_DATA = {
   "ay": 253,
   "align": "feet"
  },
+ "david_topout": {
+  "src": "../assets/sprites/david_topout.png",
+  "frames": 5,
+  "w": 183,
+  "h": 253,
+  "ms": 200,
+  "loop": false,
+  "pingpong": false,
+  "ax": 91,
+  "ay": 251,
+  "align": "feet"
+ },
  "david_turn_away": {
   "src": "../assets/sprites/david_turn_away.png",
   "frames": 8,
