@@ -1039,3 +1039,124 @@ if (LEVEL_STAGE === "5-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w5intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w5intro")) w5intro.start();
 }
+
+// ---------------------------------------------------------------------------
+// The end of World 5 (DESIGN "End of World 5 — the camp, and the giant"): the Israelite camp at Elah. Tobi's commander,
+// the provisions left with the keeper of the baggage (17:22, however many made it), the brothers, and then the voice:
+// the Philistine of Gath comes out of the ranks (17:23), shown only as a dark shape far off. The whole army runs
+// (17:24); David doesn't. Tobi's gift: his scout's cloak (+1 heart, progress.cloak). Psalm 56:3. Then the Journal.
+// Stand-ins until Glen's art: soldiers = the villagers' runs, darkened; the giant = a lookout's shape, blacked out.
+// ---------------------------------------------------------------------------
+const w5ending = {
+  active: false,
+  beats: [
+    { at: "camp", who: "", text: "Down in the Valley of Elah: the camp of Israel. Tobi ran the last stretch, shouting.", walk: true },
+    { at: "camp", who: "Tobi's commander", text: "Tobi?! We thought the Philistines had you! Two days, boy! Where have you been?", cmd: true },
+    { at: "camp", who: "Tobi", text: "Hiding in a cave, sir. I'm ashamed of it. This shepherd boy found me, and brought me back.", cmd: true },
+    { at: "camp", who: "", prov: true, cmd: true },
+    { at: "line", who: "", text: "Israel and the Philistines put the battle in array, army against army. David... ran to the army, and came and greeted his brothers. (1 Samuel 17:21-22)" },
+    { at: "line", who: "Shammah", text: "David?! What are you doing down here? ... Father sent bread? Ha! Bless him.", sham: "talk" },
+    { at: "line", who: "Eliab", text: "You shouldn't be here.", eli: "talk" },
+    { at: "line", who: "", text: "As he talked with them, behold, the champion, the Philistine of Gath, Goliath by name, came up out of the ranks of the Philistines, and said the same words; and David heard them. (1 Samuel 17:23)", giant: true },
+    { at: "line", who: "", text: "All the men of Israel, when they saw the man, fled from him and were terrified. (1 Samuel 17:24)", giant: true, flee: true },
+    { at: "line", who: "", text: "But David didn't move.", giant: true, flee: true, still: true },
+    { at: "line", card: true, giant: true, still: true },
+    { at: "line", who: "Tobi", text: "Everyone ran. Even me, again. You didn't. You walked toward it, David. I'll never forget that.", giant: true, still: true, tobi: true },
+    { at: "line", who: "", text: "Years later, David would write: \"When I am afraid, I will put my trust in you.\" (Psalm 56:3)", giant: true, still: true, tobi: true },
+    { at: "line", who: "", text: "To be continued in World 6: The Valley of Elah.", giant: true, still: true, tobi: true },
+  ],
+  start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, fade: 0, out: 0, davidX: -80, gave: false }); hushLoops(); dialog.t = 0; },
+  provText() {
+    let p = { bread: W5.LOAVES, cheese: W5.CHEESES }; try { p = JSON.parse(localStorage.getItem("davidProgress") || "{}").prov || p; } catch (e) {}
+    const all = p.bread >= W5.LOAVES && p.cheese >= W5.CHEESES;
+    return `David left his baggage in the hand of the keeper of the baggage (1 Samuel 17:22): the parched grain, ${all ? "and every one of the ten loaves and ten cheeses" : `${p.bread} of the ten loaves and ${p.cheese} of the ten cheeses`}. The cheeses were for the captain of their thousand.`;
+  },
+  update(dt) {
+    this.t += dt; this.bt += dt; this.fade = Math.min(1, this.t / 1.2);
+    const B = this.beats[this.i];
+    if (B && B.walk) this.davidX = Math.min(W * 0.3, this.davidX + TUNE.WALK_SPEED * 0.7 * dt);
+    if (B && B.giant && !this.roared) { this.roared = true; sfx("lion_roar", undefined, 0.6, 0.5); this.shake = 1.2; }
+    this.shake = Math.max(0, (this.shake || 0) - dt);
+    if (B && B.card && this.bt < 0.05 && !this.gave) {
+      this.gave = true; sfx("extra_life", undefined, 0.7);
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.cloak = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    }
+    if (this.out > 0) {
+      this.out += dt;
+      if (this.out > 1.2) { this.active = false; const cb = this.done; this.done = null; cb && cb(); }
+      return;
+    }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < this.beats.length - 1) {
+        const was = this.beats[this.i].at; this.i++; this.bt = 0;
+        if (this.beats[this.i].at !== was) { this.t = 0; this.fade = 0; }
+      } else this.out = 0.001;
+    }
+  },
+  draw() {
+    const B = this.beats[this.i], y = GR * T, now = performance.now() / 1000, keep = bgWorld;
+    ctx.save(); if (this.shake > 0) ctx.translate(Math.sin(now * 60) * 6 * this.shake, Math.cos(now * 47) * 3 * this.shake);
+    bgWorld = "w5_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+    if (B.at === "camp") {   // the camp: tents, the keeper's stacks, Tobi and his commander
+      for (let k = 0; k < 4; k++) drawItem("town_grain_baskets", W * 0.62 + k * 70, y + 4, 0.16);
+      const walking = B.walk && this.davidX < W * 0.3;
+      drawSprite(walking ? "david_walk" : "david_idle", frameOf(walking ? "david_walk" : "david_idle", now), B.walk ? this.davidX : W * 0.3, y, 1);
+      if (SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? [0, 1][Math.floor(now * 1.4) % 2] : 5, W * 0.42, y, 1);
+      if (B.cmd) drawCommander(W * 0.56, y, B.who === "Tobi's commander", now);
+      if (B.prov) { drawItem("grain_sack", W * 0.68, y + 2, 0.3); drawProvision("bread", W * 0.73, y, 1.2); drawProvision("cheese", W * 0.77, y, 1.2); }
+    } else {   // the battle line
+      if (B.giant) drawGiant(now, this.bt);
+      const fleeing = B.flee, ft = fleeing ? this.bt : 0;
+      if (!fleeing && !B.still) {   // the brothers in their war gear
+        drawSprite(B.eli ? "eliab_war_talk" : "eliab_war_idle", frameOf(B.eli ? "eliab_war_talk" : "eliab_war_idle", now), W * 0.62, y, -1);
+        drawSprite("abinadab_war_idle", frameOf("abinadab_war_idle", now), W * 0.72, y, -1);
+        drawSprite("shammah_war_ready", frameOf("shammah_war_ready", now), W * 0.52, y, -1);
+      }
+      if (fleeing) drawFleeingArmy(now, ft);
+      drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);   // David, still
+      if (B.tobi && SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? [0, 4][Math.floor(now * 1.2) % 2] : 5, W * 0.22, y, 1);
+    }
+    ctx.restore();
+    if (B.card) {   // the gift
+      const cy = 90, a = Math.min(1, this.bt * 2);
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = "rgba(25,14,6,0.88)"; ctx.beginPath(); ctx.roundRect(W / 2 - 440, cy, 880, 170, 16); ctx.fill();
+      ctx.strokeStyle = "rgba(255,214,120,0.6)"; ctx.lineWidth = 2; ctx.stroke();
+      if (SPR.tobi_cave) { ctx.save(); ctx.beginPath(); ctx.arc(W / 2 - 360, cy + 85, 56, 0, Math.PI * 2); ctx.clip(); ctx.fillStyle = "#3a4a66"; ctx.fill(); drawSprite("tobi_cave", 5, W / 2 - 360, cy + 190, 1, 1.15); ctx.restore(); }
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center"; ctx.fillText("Tobi's Scout Cloak", W / 2 + 40, cy + 44);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Tobi wraps his blue-grey cloak around your shoulders.", W / 2 + 40, cy + 76);
+      ctx.fillText("One more heart, for good.", W / 2 + 40, cy + 100);
+      ctx.font = "italic 17px Georgia, serif"; ctx.fillText("\"Keep it. A scout's cloak is for the bravest one on the road.\"", W / 2 + 40, cy + 140);
+      ctx.restore(); ctx.textAlign = "left";
+    } else if (B.prov) drawStoryBox("", this.provText(), "A: next", true);
+    else if (B.text) drawStoryBox(B.who, B.text, this.i === this.beats.length - 1 ? (JOURNAL_PAGES[5] ? "A: write in the Journal" : "A: continue") : "A: next", true);
+    if (B.card) caption("A: next", 0.8, true);
+    const a = Math.min(this.fade, 1 - Math.min(1, this.out / 1.2));
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};
+function drawCommander(x, y, talking, now) {   // Glen's commander when he comes; until then a soldier's shape (Eliab's war gear, aged)
+  if (SPR.commander_talk) { drawSprite(talking ? "commander_talk" : "commander_idle", frameOf(talking ? "commander_talk" : "commander_idle", now), x, y, -1); return; }
+  drawSprite(talking ? "eliab_war_talk" : "eliab_war_idle", frameOf("eliab_war_idle", now), x, y, -1, 1.05, 1, "saturate(0.5) brightness(0.85)");
+}
+function drawGiant(now, bt) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now
+  const a = Math.min(1, bt * 0.8 + 0.3), x = W * 0.84, y = GR * T - 215, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
+  ctx.save(); ctx.globalAlpha = a * 0.88;   // across the valley: twice the height of the men around him, even from here
+  drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), x, y, -1, nm === "lookout_spot" ? 0.95 : 1, 1, "brightness(0) blur(0.8px)");
+  ctx.fillStyle = "rgba(10,8,8,0.8)";   // the Philistine ranks at his feet, small
+  for (let k = -6; k <= 6; k++) if (k) { const mx = x + k * 18, h = 26 + (k % 3) * 3; ctx.beginPath(); ctx.ellipse(mx, y - h, 5, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(mx - 5, y - h + 4, 10, h - 4); }
+  ctx.restore();
+}
+function drawFleeingArmy(now, t) {   // soldiers running past David on both sides, away from the giant
+  const who = SPR.soldier_run ? ["soldier_run"] : ["villager_man_run", "villager_staffman_run"], f = SPR.soldier_run ? "" : "sepia(0.4) brightness(0.8)";
+  for (let k = 0; k < 9; k++) {
+    const nm = who[k % who.length], x = W + 100 + k * 130 - t * (420 + (k % 3) * 60), y = GR * T + (k % 2 ? 6 : -4);
+    if (x < -150 || x > W + 150) continue;
+    drawSprite(nm, frameOf(nm, now + k * 0.13), x, y, -1, SPR.soldier_run ? 1 : 1.15, 1, f);
+  }
+}
+// "?w5end" plays the End of World 5 straight away (testing); "?w5end=8" starts at that beat
+if (new URLSearchParams(location.search).has("w5end")) setTimeout(() => {
+  w5ending.start(() => location.reload());
+  const at = Number(new URLSearchParams(location.search).get("w5end")) || 0; if (at) Object.assign(w5ending, { i: at, fade: 1, t: 2, davidX: W * 0.3 });
+}, 300);

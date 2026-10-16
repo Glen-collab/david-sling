@@ -2300,6 +2300,7 @@ try {
   const pr = JSON.parse(localStorage.getItem("davidProgress") || "{}");
   david.olives = pr.olives || 0; david.lampOil = pr.lampOil || 0;
   if (pr.staff) { david.maxHearts++; david.hearts++; }   // Hanan's staff (End of World 3): one more heart, for good
+  if (pr.cloak) { david.maxHearts++; david.hearts++; }   // Tobi's scout cloak (End of World 5)
   if (pr.figCake > 0 && LEVEL_NAME !== "test") {   // eaten now: one extra heart for this stage
     david.maxHearts++; david.hearts++; pr.figCake--; localStorage.setItem("davidProgress", JSON.stringify(pr));
     setTimeout(() => toast("You ate the fig cake: an extra heart for this stage."), 1500);
@@ -3007,7 +3008,8 @@ function updateFinish(dt) {
     const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
     else if (LEVEL_STAGE === "3-4" && typeof w3ending !== "undefined") w3ending.start(journal);   // the end of World 3 (world3.js)
-    else if (LEVEL_STAGE === "4-4" && typeof w4ending !== "undefined") w4ending.start(journal);   // the end of World 4 (world4.js)
+    else if (LEVEL_STAGE === "4-4" && typeof w4ending !== "undefined") w4ending.start(journal);
+    else if (LEVEL_STAGE === "5-4" && typeof w5ending !== "undefined") w5ending.start(journal);   // the end of World 5 (world5.js)   // the end of World 4 (world4.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -3726,6 +3728,9 @@ function frame(now) {
   }
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w5ending !== "undefined" && w5ending.active) {   // the end of World 5 (world5.js) has the screen
+    pollInput(); w5ending.update(real); w5ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w5intro !== "undefined" && w5intro.active) {   // the opening of World 5, at Jesse's house (world5.js)
     pollInput(); w5intro.update(real); w5intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

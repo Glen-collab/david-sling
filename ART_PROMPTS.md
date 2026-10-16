@@ -827,3 +827,21 @@ cord, a few toasted brown grains spilling out. Pixar-style. Saved as `assets\ite
 
 **Vulture** (stand-in until then: the eagle): one row of 4 poses of a big griffon vulture gliding to the
 right, wings wide, a slow flap; pale ruff, bald pale head. Green background.
+
+### End of World 5: the camp, and the giant (2026-10-16)
+Paste the style block first. Sheets on green, save in `david-sling-art\world5\`. Until these come the game uses
+stand-ins: Eliab's war gear (greyed) for the commander, the running villagers for the soldiers, and a lookout's shape
+for the giant.
+- **Tobi's commander** (`commander.png`), 6 poses facing LEFT: a weathered Israelite captain of a thousand, about 50, grey
+  beard, a bronze helmet, a leather breastplate over a red-brown tunic, a sword at his belt. Poses: standing; running
+  forward, arms out (Tobi's alive!); hugging/gripping someone's shoulders; talking, one hand open; stern, arms crossed;
+  laughing with relief.
+- **Israelite soldiers running away** (`soldier_run.png`), 6 poses running to the LEFT, a full run cycle, terrified: a
+  young soldier in a plain tunic, leather cap, a spear held loosely, a small round shield, looking back over his
+  shoulder. (A second sheet with an older bearded soldier makes the crowd look less copied, if you like.)
+- **The keeper of the baggage** (`baggage_keeper.png`), 4 poses facing LEFT: a plump older man with a reed list-tally and
+  a stylus, a big apron, among sacks: standing; taking a sack; counting on his fingers; nodding.
+- **Goliath, in silhouette only** (`goliath_silhouette.png`), 4 poses FACING LEFT, a solid near-black silhouette (no face,
+  no colours) of a giant warrior in bronze scale armor and a crested helmet, a huge spear like a weaver's beam (1 Samuel
+  17:7), a shield-bearer tiny beside him: 1 standing; 2 shouting, spear raised; 3 pointing across the valley; 4 laughing,
+  head back. Background solid flat bright green (#00FF00).
