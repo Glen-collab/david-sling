@@ -574,7 +574,7 @@ Between stages, David walks a small map, one per world. The map is how the playe
 - **Map dots that aren't stages:**
   - 🏠 **Home / story spot:** a short scene (Jesse's house, Samuel's arrival, the palace gate).
   - 🔥 **Hanan's campfire:** rest, play the harp (refill hearts), read the Journal, hear an optional teaching.
-  - 🙋 **Someone who needs help:** a small favour; the reward is a heart, a shortcut, or a hint.
+  - 🙋 **Someone who needs help:** a small favor; the reward is a heart, a shortcut, or a hint.
   - ✨ **Bonus spot:** opens when you've found every lost sheep in that world. A short bonus area with a Psalm piece.
 - **A path in the map opens with each cleared stage,** drawn as a dotted line filling in, as in SMB3.
 - **The Journal's "real map" page** shows the true places (Bethlehem, the wilderness of Judah, Gibeah, the Valley of Elah). Distances will be checked before they go in.
@@ -758,7 +758,7 @@ Four short screens, no more:
    Caption: *David will say these words to King Saul years from now. Tonight is where they begin.*
 4. David sits at the fold's gate and plays. David's song, a little fuller than in 1-1.
 5. World code shown (as in Unicorn). **Unlock:** a 4th heart ("a shepherd's courage").
-6. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favourite, until the lion takes it.)
+6. **From here on, the rescued lamb follows David everywhere.** In co-op it's player 2. Solo, it trots along behind as a companion. (Before this point in co-op, P2 plays the same lamb, already David's favorite, until the lion takes it.)
 
 > **World 6 callback:** when David tells Saul about the lion (1 Sam 17:34–37, end of World 6), the game shows a replay of *this exact fight* the player won.
 
@@ -1182,7 +1182,7 @@ The road north from Bethlehem through vineyards and villages, past the walled ci
 
 ### End of World 4 — reflection scene
 1. Morning at Gibeah. Saul, rested, talks to David. He sends word to Jesse: *let David stay in my service, for I am pleased with him* (16:22).
-2. **Gift: the King's Favour.** David may come and go between Gibeah and Bethlehem. In fact, he went back and forth to tend his father's sheep (17:15).
+2. **Gift: the King's Favor.** David may come and go between Gibeah and Bethlehem. In fact, he went back and forth to tend his father's sheep (17:15).
    - **In the game:** this unlocks **fast travel** between all world maps you've visited, so going back for The One lambs and secrets becomes quick.
 3. The Steward:
    > "You didn't fix him, boy. Only God can. But you gave him rest tonight. That's a gift too."
@@ -1207,7 +1207,7 @@ The road north from Bethlehem through vineyards and villages, past the walled ci
 | 4-3 | The Steward *(made up)* | 👁️ Warning (tier 1): play steady, don't rush | |
 | Map: 🔥 Servants' fire | The Steward | 📜 Journal: who Saul was (1 Sam 9:1–2, 10:1) | Rest + harp |
 | 4-4 | The Steward | Tier 2 after a loss: wider timing, slower calm loss | |
-| End of World 4 | King Saul | | **Gift: the King's Favour** = fast travel between world maps |
+| End of World 4 | King Saul | | **Gift: the King's Favor** = fast travel between world maps |
 
 
 **Sprite list for this world:** [SPRITES.md](SPRITES.md#world-4--the-kings-court)
@@ -1333,7 +1333,7 @@ drawn and run in world4.js (OLD_LETTERS).
 - **Missed some? Come back later (Glen).** The cave is always open, but the wall carving that gives the clue only shows
   the letters David has found; the rest are worn away (blank). You can still guess your way across (a wrong stone is just
   a fall), or leave and go back for the letters you missed: the Journal keeps a page of the letters found so far, with
-  an empty space for each one still out there and a hint of which world it's in. World 4's gift (the King's Favour:
+  an empty space for each one still out there and a hint of which world it's in. World 4's gift (the King's Favor:
   fast travel between world maps) makes the trip back quick. The cave's reward waits until you cross.
 
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
@@ -1648,7 +1648,7 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 | The sling (Jesse's old sling) | Jesse, his father | 1 |
 | The leather sling pouch | The leatherworker of Tekoa | 2 |
 | The shepherd's staff | Hanan | 3 |
-| The King's Favour | King Saul | 4 |
+| The King's Favor | King Saul | 4 |
 | The scout's cloak | Tobi | 5 |
 | The shepherd's bag | Shammah | 6 |
 | Five smooth stones | the stream | 7 |

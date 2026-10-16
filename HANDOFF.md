@@ -78,7 +78,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## Next
 
-- **People as Grok clips:** (Jesse and the trader done) at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbour. Today they're names over their lines.
+- **People as Grok clips:** (Jesse and the trader done) at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbor. Today they're names over their lines.
 - **The ram's charge** clip (it uses its walk, sped up).
 - **World 2 (started 2026-10-13):** `game/world2.js` (loaded from world1.js, not index.html, so a cached index.html can't miss it) has the wild boar (scrape = the warning, then a straight charge; tap stones bounce, a full charged stone stuns it and it runs off), deadfalls (material 8, `deadfall()` in main.js: piled logs too tall to jump, only a charged stone breaks them) and Hanan sitting at his campfires (`hanan_sit`).
   - **2-1 The Forest Trail is built** (main.js, `LEVEL_NAME === "2-1"`): Abinadab's two lines, Hanan's fire teaches the charged sling right before the first deadfall, three boars, branches up to a ledge lamb, hornets by a honeybee hive, a second deadfall under a rock overhang, The One at the top of a treetop climb. Ground set `assets/terrain/w2f` (forest), background `w2_1`.
@@ -286,7 +286,7 @@ the harp phrase at 3-2's campfire.
   3-4 the storm (thunder, Saul frightened), 5-6 the new part (calm). Miss = dark +0.3; rushing (a press up to 0.8 s before
   a note) = +0.12, no rewind; a whole tune = -0.15. dark >= 1: "Leave me!" -> back to the fire; first time the Steward's
   tier-2 counsel (window 0.26 -> 0.32, dark gains x0.6). Calmed: Saul asleep, 1 Sam 16:23 (WEB). Fold blocked till then.
-  Not yet: End of World 4 scene (Saul's thanks 16:22, the King's Favour = fast travel, the Steward, Hanan at the gate),
+  Not yet: End of World 4 scene (Saul's thanks 16:22, the King's Favor = fast travel, the Steward, Hanan at the gate),
   World 4 Journal pages, the Psalm 121:8 / 22:29 / 33:3 / 34:18 scrolls, a follow-the-beat easy assist.
 - **The Journal rip-out is built** (2026-10-15, journal.js): JOURNAL_PAGES[w].rip = { at, text } (World 3: at 2, "Nobody even
   remembered me. My brothers always..."). The first time he writes after that stage (progress.ripped[w]), the Journal

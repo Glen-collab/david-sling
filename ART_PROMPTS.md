@@ -587,7 +587,7 @@ A single green olive, a single purple olive and a **golden olive** (glowing a li
 ### 6. People and animals (Grok video, green screen, one clip each)
 - **Lost sheep:** walking, grazing, and lying on its back with legs kicking (a cast sheep).
 - **Hanan ✦**, an old shepherd in a grey robe with a white beard: standing and talking; sitting by a fire.
-- **The neighbour shepherd ✦** (an old man) and **the shepherd girl ✦** with her goat: standing and talking.
+- **The neighbor shepherd ✦** (an old man) and **the shepherd girl ✦** with her goat: standing and talking.
 
 ### 6b. Jesse's courtyard people (Grok video, green screen)
 Make one **reference image** of each person first, then upload it with every clip so they always match. Converter: `python tools/vid2sprite.py <clip> <out> --height 300` (adults stand taller than David's 240).
