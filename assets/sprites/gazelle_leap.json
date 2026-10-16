@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 233,
+  "frame_h": 200,
+  "ms_per_frame": 130,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 116,
+  "anchor_y": 198,
+  "source": "gazelle.png"
+}

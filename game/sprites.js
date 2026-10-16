@@ -1332,6 +1332,30 @@ window.SPRITE_DATA = {
   "ay": 102,
   "align": "feet"
  },
+ "gazelle_leap": {
+  "src": "../assets/sprites/gazelle_leap.png",
+  "frames": 4,
+  "w": 233,
+  "h": 200,
+  "ms": 130,
+  "loop": true,
+  "pingpong": false,
+  "ax": 116,
+  "ay": 198,
+  "align": "feet"
+ },
+ "gazelle_stand": {
+  "src": "../assets/sprites/gazelle_stand.png",
+  "frames": 2,
+  "w": 125,
+  "h": 190,
+  "ms": 900,
+  "loop": true,
+  "pingpong": false,
+  "ax": 62,
+  "ay": 188,
+  "align": "feet"
+ },
  "gera": {
   "src": "../assets/sprites/gera.png",
   "frames": 6,
