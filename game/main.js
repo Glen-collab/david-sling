@@ -55,9 +55,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100, w3_4: 0, w4_1: 0, w4_2: 0, w4_3: 0, w4_4: 0 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 }, w3_4: { mid: 440, near: 200 }, w4_1: { mid: 400, near: 190 }, w4_2: { mid: 420, near: 170 }, w4_3: { mid: 420, near: 170 }, w4_4: { mid: 440, near: 160 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
-  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true, w3_4: true, w3_end: true, w4_1: true, w4_2: true, w4_3: true, w4_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100, w3_4: 0, w4_1: 0, w4_2: 0, w4_3: 0, w4_4: 0, w5_1: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 }, w3_4: { mid: 440, near: 200 }, w4_1: { mid: 400, near: 190 }, w4_2: { mid: 420, near: 170 }, w4_3: { mid: 420, near: 170 }, w4_4: { mid: 440, near: 160 }, w5_1: { mid: 400, near: 180 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true, w3_4: true, w3_end: true, w4_1: true, w4_2: true, w4_3: true, w4_4: true, w5_1: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -345,7 +345,7 @@ const STAGE_INFO = {
   "4-3": { cols: 214, bg: "w4_3", ter: "w2s", name: "The Broken String" },   // Glen's Gibeah market set
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
-  "5-1": { cols: 250, bg: "w2_2", ter: "w2s", name: "The Supply Road" },   // (World 2's dry wadi stands in until Glen's 5-1 set)
+  "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },   // Glen's hot-afternoon road west
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
@@ -3455,7 +3455,7 @@ function updateWorld(dt) {
 const BG = {};
 // a set can borrow layers it doesn't have yet from another set (1-4 night: its own sky, World 1's hills until Glen's arrive)
 const BG_BORROW = {};   // e.g. { w1_2: { near: "w1" } } while a set is still missing a layer
-for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4"]) {
+for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
     if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }
