@@ -76,17 +76,19 @@ const MAP_WORLDS = {
       { id: "4-4", label: "The King's Hall", x: 820, y: 150, trail: [[800, 200]] },
     ],
   },
-  // World 5: until Glen's World 5 painting, the stops sit on the journey painting's own road west (the farmhouse, the
-  // watchtower, the rocky hills, the stream down to the camps).
+  // World 5: Glen's painting of the road west (2048 x 1152): Jesse's house and fig tree bottom-left, the round watchtower
+  // by the road, the fleeing family's tents and donkey, the cliff trail up past a lookout tower, the cave of the Name
+  // (the glowing water) and Tobi's fire above it, the lookouts' ridge with the signal-fire pile on top, the terebinths,
+  // and down the right side into the Valley of Elah, the two camps facing each other.
   5: {
-    name: "The Road to the Valley", src: "../assets/maps/journey_map.jpg",
-    david: { far: 0.36, near: 0.6, y0: 250, y1: 950 },
+    name: "The Road to the Valley", src: "../assets/maps/world5_map.jpg",
+    david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
     stops: [
-      { id: "home", label: "Jesse's house", x: 1165, y: 600 },
-      { id: "5-1", label: "The Supply Road", x: 1700, y: 650, trail: [[1290, 600], [1420, 640], [1560, 660]] },
-      { id: "5-2", label: "The Mountain Trail", x: 1290, y: 350, trail: [[1640, 560], [1520, 470], [1400, 400]] },
-      { id: "5-3", label: "The Lookouts' Ridge", x: 1850, y: 420, trail: [[1420, 300], [1600, 330], [1760, 380]] },
-      { id: "5-4", label: "Down to Elah", x: 1640, y: 470, trail: [[1780, 470], [1700, 480]] },
+      { id: "home", label: "Jesse's house", x: 235, y: 1020 },
+      { id: "5-1", label: "The Supply Road", x: 480, y: 900, trail: [[310, 985], [390, 945]] },
+      { id: "5-2", label: "The Mountain Trail", x: 820, y: 530, trail: [[615, 820], [715, 715], [780, 615]] },
+      { id: "5-3", label: "The Lookouts' Ridge", x: 1085, y: 175, trail: [[840, 450], [920, 340], [1000, 265]] },
+      { id: "5-4", label: "Down to Elah", x: 1590, y: 635, trail: [[1230, 205], [1380, 360], [1485, 490]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
