@@ -785,6 +785,7 @@ function chParts(ch) {
     horses: { x0: ch.x + dir * 424 * s + Math.min(-260 * dir, 83 * dir) * s, x1: ch.x + dir * 424 * s + Math.max(-260 * dir, 83 * dir) * s, y0: gy - 250 * s, y1: gy },
     archer: { x0: ch.x + dir * 11 * s - 45 * s, x1: ch.x + dir * 11 * s + 45 * s, y0: cy - 270 * s, y1: cy - 110 * s } };
 }
+const chFront = ch => ch.x + ch.dir * (424 + 83) * chS();   // the horses' front hooves
 function chariotFight() { return !!(chariot && chariot.on && !chariot.beaten && david.deadT <= 0); }
 function startChariot() {
   const ch = chariot; Object.assign(ch, { on: true, phase: 1, state: "drive", t: 0, archer: "drive", at: 0, archerHits: 0, wheelHits: 0, dir: -1, x: ch.a1 + 300, v: W5.CH_PATROL, arrows: [] });
@@ -822,13 +823,14 @@ function updateChariot(dt) {
     if (ch.t > (W5.counsel2 ? W5.CH_WHIP2 : W5.CH_WHIP)) { ch.state = "ram"; ch.t = 0; ch.turnX = chariotTurnX(ch); sfx("thunder_2", ch.x, 0.3, 2.2); }
   } else if (ch.state === "ram") {   // the charge: on past David, then it slows to turn
     ch.v = Math.min(speed, ch.v + 900 * dt); ch.x += ch.dir * ch.v * dt;
+    if (ch.phase === 3 && onRough(chFront(ch))) { crashChariot(); return; }   // the horses balk at the rocks; the cracked wheel slews into them
     if ((ch.x - ch.turnX) * ch.dir > 0) { ch.state = "brake"; ch.t = 0; }
   } else if (ch.state === "brake") {
     ch.v = Math.max(0, ch.v - 1400 * dt); ch.x += ch.dir * ch.v * dt;
+    if (ch.phase === 3 && onRough(chFront(ch))) { crashChariot(); return; }
     if (ch.v <= 0) {
-      if (ch.phase === 3 && onRough(P.wx)) { crashChariot(); return; }
       ch.dir = -ch.dir; ch.state = "whip"; ch.t = 0;   // wheels round on the smooth road
-      if (ch.phase === 3 && !W5.roughTold) { W5.roughTold = true; toast(chariotWarned() ? "Tobi: \"The rocks, David! Get it to turn on the rough ground!\"" : "It wheels round on the smooth road. Could it turn like that on the rocks?"); }
+      if (ch.phase === 3 && !W5.roughTold) { W5.roughTold = true; toast(chariotWarned() ? "Tobi: \"The rocks, David! Stand on the rocks and let it charge you!\"" : "It wheels round on the smooth road. Could that cracked wheel take the rocks? Stand on them and let it charge."); }
     }
   }
   // the horses and the cart run you down; the horses never get hurt
@@ -861,7 +863,7 @@ function updateArrows(dt) {
 function crashChariot() {
   const ch = chariot; ch.state = "crash"; ch.t = 0; ch.v = 0; ch.on = true;
   sfx("lion_defeated", ch.x, 0.6); sfx("stone_hit", ch.x, 0.9, 0.5);
-  toast("The cracked wheel hits the rocks and breaks apart! The chariot can't turn on the rough ground.");
+  toast("The horses balk at the rocks, and the cracked wheel slews into them and breaks apart!");
 }
 function updateChariotCrash(dt) {
   const ch = chariot;
@@ -894,7 +896,7 @@ function stoneHitsChariot(s) {
     const need = W5.counsel2 ? 1 : W5.CH_WHEEL_HP;
     if (ch.wheelHits >= need) {
       ch.phase = 3;
-      toast(chariotWarned() ? "The wheel cracks and wobbles! Remember Tobi: a chariot can't turn on rough ground. Lead it onto the rocks!" : "The wheel cracks and wobbles! It still turns on the smooth road, though...");
+      toast(chariotWarned() ? "The wheel cracks and wobbles! Remember Tobi: a chariot can't take rough ground. Stand on the rocks to the right and let it charge you!" : "The wheel cracks and wobbles! See the rocks to the right? Stand on them and let it charge.");
     } else toast(`The wheel cracks a little more. (${ch.wheelHits} of ${need})`);
     return true;
   }
@@ -908,10 +910,12 @@ function stoneHitsChariot(s) {
 function drawChariot(camX) {
   for (const r of roughs) {   // the rough ground: rocks strewn across the road (it flashes once Tobi's warning matters)
     const x0 = r.x0 - camX; if (x0 > W || x0 + r.w * T < 0) continue;
-    for (let k = 0; k < r.w * 3; k++) { const x = x0 + k * T / 3 + ((k * 37) % 17) - 8, sz = 0.03 + ((k * 7) % 5) * 0.008;
-      ctx.save(); ctx.translate(x, GR * T + 10 + ((k * 13) % 7)); ctx.scale(1.3, 0.7); drawItem("boulder_grey", 0, 0, sz); ctx.restore(); }   // low, flat stones
-    if (chariot && chariot.phase === 3 && chariotWarned() && !chariot.beaten && Math.floor(performance.now() / 300) % 2) {
-      ctx.fillStyle = "rgba(255,230,120,0.22)"; ctx.fillRect(x0, GR * T - 40, r.w * T, 46);
+    for (let k = 0, n = Math.ceil(r.w * T / 80); k < n; k++) {   // rubble and rock piles strewn across the road
+      const x = x0 + (k + 0.5) * r.w * T / n + ((k * 37) % 13) - 6;
+      drawItem(k % 2 ? "rock_pile_tan" : "rubble_stones", x, GR * T + 8, k % 2 ? 0.15 : 0.2);
+    }
+    if (chariot && chariot.phase === 3 && !chariot.beaten && Math.floor(performance.now() / 300) % 2) {
+      ctx.fillStyle = "rgba(255,200,90,0.16)"; ctx.fillRect(x0, GR * T - 60, r.w * T, 66);
     }
   }
   const ch = chariot; if (!ch) return;
