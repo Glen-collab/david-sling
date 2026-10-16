@@ -489,7 +489,7 @@ function drawGear(camX) {
 }
 const lostThings4 = lostThingsTally;
 lostThingsTally = function () {
-  if (tobiGear.length) return { found: tobiGear.filter(g => g.taken).length, total: tobiGear.length, things: "of Tobi's things", icon: "gear" };
+  if (tobiGear.length) return { found: tobiGear.filter(g => g.taken).length, total: tobiGear.length, things: "Tobi's things", icon: "gear" };
   if (cairns.length) return { found: cairns.filter(c => c.up).length, total: cairns.length, things: "scout markers", icon: "cairn" };
   return lostThings4();
 };

@@ -3190,8 +3190,16 @@ function drawFinishBanner() {
   ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px sans-serif";
   ctx.fillText("Stage " + LEVEL_STAGE + " clear!", W / 2, 215);
   ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif";
-  ctx.fillText(`Lost ${finish.things || "sheep"} found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`, W / 2 + 20, 262);
-  if (finish.icon === "goat") drawSprite("goat_stand", 0, W / 2 - 200, 272, 1, 0.45); else if (finish.things) drawItem("gift_honey", W / 2 - 200, 270, 0.26); else hudIcon("sheep", W / 2 - 200, 234, 38);
+  const lostLine = `Lost ${finish.things || "sheep"} found: ${finish.found} of ${finish.total}${finish.found === finish.total && finish.total ? "  (+1 life!)" : ""}`;
+  ctx.fillText(lostLine, W / 2 + 20, 262);
+  const ix = W / 2 + 20 - ctx.measureText(lostLine).width / 2 - 34, ic = finish.icon;   // the icon just left of the line, however long it is
+  if (ic === "goat") drawSprite("goat_stand", 0, ix, 272, 1, 0.45);
+  else if (ic === "hen") drawSprite("chicken_peck", 0, ix, 272, 1, 1.2);
+  else if (ic === "gear") drawItem("tobi_sandal", ix, 274, 0.26);
+  else if (ic === "cairn") drawItem("cairn_up", ix, 278, 0.17);
+  else if (ic === "donkey") drawSprite("donkey_idle", 0, ix, 276, 1, 0.45);
+  else if (ic === "lamp") drawItem("hall_lamp_lit", ix, 274, 0.17);
+  else if (finish.things) drawItem("gift_honey", ix, 270, 0.26); else hudIcon("sheep", ix, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
   ctx.fillText(olive, W / 2, 330);
   if (!finish.gold) { ctx.fillStyle = "#ffd84a"; ctx.font = "18px sans-serif"; ctx.fillText(next, W / 2, 352); }
