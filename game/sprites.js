@@ -2184,6 +2184,18 @@ window.SPRITE_DATA = {
   "ay": 334,
   "align": "feet"
  },
+ "lookout_spot": {
+  "src": "../assets/sprites/lookout_spot.png",
+  "frames": 4,
+  "w": 396,
+  "h": 350,
+  "ms": 500,
+  "loop": true,
+  "pingpong": false,
+  "ax": 162,
+  "ay": 348,
+  "align": "feet"
+ },
  "lookout_walk": {
   "src": "../assets/sprites/lookout_walk.png",
   "frames": 6,
@@ -2194,6 +2206,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 121,
   "ay": 343,
+  "align": "feet"
+ },
+ "lookout_watch": {
+  "src": "../assets/sprites/lookout_watch.png",
+  "frames": 4,
+  "w": 402,
+  "h": 350,
+  "ms": 500,
+  "loop": true,
+  "pingpong": false,
+  "ax": 168,
+  "ay": 348,
   "align": "feet"
  },
  "messenger_dismount": {
