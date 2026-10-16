@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 650,
+  "frame_h": 497,
+  "ms_per_frame": 420,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 55,
+  "anchor_y": 434,
+  "source": "world5/chariot_crash.png (Glen's 3x2 green grid, aligned on the horses; same scale and anchor as chariot_full_run)"
+}

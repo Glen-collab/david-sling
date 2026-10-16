@@ -384,6 +384,18 @@ window.SPRITE_DATA = {
   "ay": 334,
   "align": "feet"
  },
+ "chariot_crash": {
+  "src": "../assets/sprites/chariot_crash.png",
+  "frames": 6,
+  "w": 650,
+  "h": 497,
+  "ms": 420,
+  "loop": false,
+  "pingpong": false,
+  "ax": 55,
+  "ay": 434,
+  "align": "feet"
+ },
  "chariot_crew_flee": {
   "src": "../assets/sprites/chariot_crew_flee.png",
   "frames": 6,

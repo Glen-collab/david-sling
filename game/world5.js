@@ -729,7 +729,7 @@ Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH
   CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
   ARROW_SPEED: 620, CH_ARENA: 1.6, DONKEY_FOLLOW: 3,   // CH_ARENA: the fight's width, in screens (the camera follows inside it)
   ROUGH_FLASH: true });
-for (const n of ["chariot_full_run", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
+for (const n of ["chariot_full_run", "chariot_crash", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
 
 // --- the pack donkeys
 CRITTER_ART.packdonkey = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 90, y1: k.y }) };
@@ -927,6 +927,14 @@ function drawChariot(camX) {
   const P = chParts(ch), now = performance.now() / 1000, x = ch.x - camX;
   if (x < -700 || x > W + 700) return;
   const dir = ch.dir, flt = ch.flash > 0 ? "brightness(1.8)" : "";
+  if ((ch.state === "crash" || ch.state === "free") && SPR.chariot_crash) {   // Glen's crash: the wheel cracks, shatters, the archer is thrown, the wreck drags to a stop
+    if (ch.state === "crash") drawSprite("chariot_crash", Math.min(5, Math.floor(ch.t / 0.42)), x, P.gy, dir);
+    else {   // he picks himself up: the wreck fades, and the crew run off back up the road (nobody hurt)
+      drawSprite("chariot_crash", 5, x, P.gy, dir, 1, Math.max(0, 1 - ch.t / 0.9));
+      drawSprite("chariot_crew_flee", frameOf("chariot_crew_flee", now), x - ch.t * 260, P.gy, 1, 0.85, Math.min(1, ch.t * 3) * Math.max(0, 1 - ch.t / 4));
+    }
+    return;
+  }
   if (ch.state === "crash" || ch.state === "free") {   // the broken chariot, tipped down on its axle; the wheel in pieces
     drawItem("chariot_wheel_broken", P.wx - camX, GR * T + 8, 0.42 * P.s / 0.65);
     const crewOut = ch.state === "free" || ch.t > 1.4;
