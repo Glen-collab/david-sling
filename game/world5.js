@@ -729,7 +729,7 @@ Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH
   CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
   ARROW_SPEED: 620, CH_ARENA: 1.6, DONKEY_FOLLOW: 3,   // CH_ARENA: the fight's width, in screens (the camera follows inside it)
   ROUGH_FLASH: true });
-for (const n of ["chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
+for (const n of ["chariot_full_run", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
 
 // --- the pack donkeys
 CRITTER_ART.packdonkey = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 90, y1: k.y }) };
@@ -784,8 +784,10 @@ function chParts(ch) {
   return { s, gy, cy, wx: ch.x + dir * 21 * s, wy: cy - 34 * s, wr: 70 * s, hx: ch.x + dir * 424 * s,
     cart: { x0: ch.x + Math.min(-73 * dir, 150 * dir) * s, x1: ch.x + Math.max(-73 * dir, 150 * dir) * s, y0: cy - 130 * s, y1: gy },
     horses: { x0: ch.x + dir * 424 * s + Math.min(-260 * dir, 83 * dir) * s, x1: ch.x + dir * 424 * s + Math.max(-260 * dir, 83 * dir) * s, y0: gy - 250 * s, y1: gy },
-    archer: { x0: ch.x + dir * 11 * s - 45 * s, x1: ch.x + dir * 11 * s + 45 * s, y0: cy - 270 * s, y1: cy - 110 * s } };
+    archer: chFull(ch) ? { x0: ch.x + dir * 56 * s - 50 * s, x1: ch.x + dir * 56 * s + 50 * s, y0: gy - 330 * s, y1: gy - 190 * s }   // Glen's whole chariot: the archer stands higher, further forward
+                       : { x0: ch.x + dir * 11 * s - 45 * s, x1: ch.x + dir * 11 * s + 45 * s, y0: cy - 270 * s, y1: cy - 110 * s } };
 }
+const chFull = ch => ch.phase === 1 && !!SPR.chariot_full_run;   // phase 1: the chariot is Glen's one galloping picture (horses, cart and archer)
 const chFront = ch => ch.x + ch.dir * (424 + 83) * chS();   // the horses' front hooves
 function chariotFight() { return !!(chariot && chariot.on && !chariot.beaten && david.deadT <= 0); }
 function startChariot() {
@@ -939,6 +941,14 @@ function drawChariot(camX) {
     return;
   }
   const moving = ch.v > 30;
+  if (chFull(ch)) {   // phase 1: Glen's whole chariot, galloping, the archer drawing; the glint at his bow is the tell
+    drawSprite("chariot_full_run", moving ? frameOf("chariot_full_run", now * (ch.v / W5.CH_PATROL)) : 0, x, P.gy, dir, 1, 1, flt);
+    if (ch.archer === "raise") {
+      const gx = x + dir * 162 * P.s, gy = P.gy - 290 * P.s, a = 0.5 + 0.5 * Math.sin(now * 20);
+      ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(gx, gy, 1, gx, gy, 30); g.addColorStop(0, `rgba(255,255,220,${a})`); g.addColorStop(1, "rgba(255,240,150,0)"); ctx.fillStyle = g; ctx.fillRect(gx - 30, gy - 30, 60, 60); ctx.restore();
+    }
+    return;
+  }
   // the horses (galloping, or pawing while the driver whips them)
   drawSprite("chariot_horses_run", moving ? frameOf("chariot_horses_run", now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 4) % 2, P.hx - camX, P.gy, dir);
   // the cart: the archer's pose, or the driver whipping

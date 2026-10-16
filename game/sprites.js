@@ -396,6 +396,18 @@ window.SPRITE_DATA = {
   "ay": 304,
   "align": "feet"
  },
+ "chariot_full_run": {
+  "src": "../assets/sprites/chariot_full_run.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
  "chariot_horses_rear": {
   "src": "../assets/sprites/chariot_horses_rear.png",
   "frames": 4,
