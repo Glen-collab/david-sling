@@ -25,8 +25,9 @@ SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w4_2": ("4-2 far.png", "4-2 mid.png", "4-2 near.png"),   # 4-2 The Training Yard
         "w4_3": ("4-3 far.png", "4-3 mid.png", "4-3 near.png"),   # 4-3 The Broken String
         "w4_4": ("4-4 far.png", "4-4 mid.png", "4-4 near.png"),
-        "w5_1": ("5-1 far.png", "5-1 mid.png", "5-1 near.png")}   # 5-1 The Supply Road (hot afternoon, smoke far off)   # 4-4 The King's Hall (night)   # 4-3 The Broken String (Gibeah's market, late afternoon)   # 4-2 The Training Yard (Gibeah's fortress)   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
-MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1"}
+        "w5_1": ("5-1 far.png", "5-1 mid.png", "5-1 near.png"),
+        "w5_2": ("5-2 far.png", "5-2 mid.png", "5-2 near.png")}   # 5-2 The Mountain Trail (night, full moon)   # 5-1 The Supply Road (hot afternoon, smoke far off)   # 4-4 The King's Hall (night)   # 4-3 The Broken String (Gibeah's market, late afternoon)   # 4-2 The Training Yard (Gibeah's fortress)   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
+MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):
@@ -59,7 +60,7 @@ def key_magenta(img, strict=False):
     return out
 
 NO_PINK = {"w2_3", "w2s"}   # sets with nothing pink in them, so any pink tinge is cleaned off (2-2's oleanders are pink: not in here)
-MAGENTA_SETS = {"w4_4", "w5_1"}   # magenta, though the picture's corners aren't (4-4's mid layer has stone in its top corners)
+MAGENTA_SETS = {"w4_4", "w5_1", "w5_2"}   # magenta, though the picture's corners aren't (4-4's mid layer has stone in its top corners)
 def key_backdrop(img, name=""):   # green or magenta, whichever the corners are
     if name in MAGENTA_SETS: return key_magenta(img)
     c = np.asarray(img.convert("RGB"))[2:12, 2:12].reshape(-1, 3).mean(0)
