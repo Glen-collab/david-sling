@@ -1136,11 +1136,11 @@ if (LEVEL_NAME === "test") {
   critter("packdonkey", 196);
   talk(200, "Tobi", "Listen... wheels. David, that's the chariot. Remember: it can't turn on rough ground.");
   campfire(206);                                                 // the last fire before it (and where Tobi's counsel waits)
-  // BOSS: the Philistine Chariot. The arena is one screen from col 214; rough rocky ground near its right end.
+  // BOSS: the Philistine Chariot. The arena is W5.CH_ARENA screens from col 214 (to about 270); rough rocky ground near its right end, room to run past it.
   setPiece("chariot", 214);
-  setPiece("rough", 238, GR, { w: 7 });
-  oliveRow(256, 16, 6);
-  sheepfold(272);                                                // a shepherds' fold at the edge of the camp
+  setPiece("rough", 251, GR, { w: 8 });
+  oliveRow(272, 16, 4);
+  sheepfold(280);                                                // a shepherds' fold at the edge of the camp
 } else if (LEVEL_NAME === "5-3") {
   // ---- 5-3 The Lookouts' Ridge, at night: the high ridge above the Valley of Elah, both camps' fires far below.
   //      Philistine lookouts with torches watch stretches of it (their light is a cone; it shrinks when the moon goes

@@ -727,7 +727,8 @@ function drawWorld53(camX) { drawLookouts(camX); drawCairns(camX); }
 // ===========================================================================
 Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH_TELL2: 1.3, CH_ARCHER_HP: 3, CH_WHEEL_HP: 2,
   CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
-  ARROW_SPEED: 620, DONKEY_FOLLOW: 3, ROUGH_FLASH: true });
+  ARROW_SPEED: 620, CH_ARENA: 1.6, DONKEY_FOLLOW: 3,   // CH_ARENA: the fight's width, in screens (the camera follows inside it)
+  ROUGH_FLASH: true });
 for (const n of ["chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
 
 // --- the pack donkeys
@@ -773,7 +774,7 @@ function drawPackDonkey(k, x) {
 // --- the chariot
 const chPiece = setPieces.find(p => p.kind === "chariot");
 const roughs = setPieces.filter(p => p.kind === "rough").map(p => ({ x0: p.c * T, x1: (p.c + p.w) * T, c: p.c, w: p.w }));
-const chariot = chPiece ? { a0: chPiece.c * T, a1: chPiece.c * T + W, on: false, beaten: false, phase: 1, x: 0, dir: 1, v: 0, state: "wait", t: 0,
+const chariot = chPiece ? { a0: chPiece.c * T, a1: chPiece.c * T + Math.round(W * W5.CH_ARENA), on: false, beaten: false, phase: 1, x: 0, dir: 1, v: 0, state: "wait", t: 0,
   archer: "drive", at: 0, archerHits: 0, wheelHits: 0, wheelA: 0, flash: 0, arrows: [] } : null;
 const chS = () => SCALE * W5.CH_SIZE;
 const onRough = x => roughs.some(r => x > r.x0 && x < r.x1);
@@ -954,7 +955,7 @@ function drawChariot(camX) {
   ctx.save(); ctx.translate(P.wx - camX, P.wy + wob); ctx.rotate(ch.wheelA); drawItem(img, 0, P.wr, ws, 1); ctx.restore();
 }
 // the camera stays on the arena while the chariot fight is on (caves.js camLimits asks)
-function chariotCam() { return chariot && chariot.on && !chariot.beaten ? [chariot.a0, chariot.a0] : null; }
+function chariotCam() { return chariot && chariot.on && !chariot.beaten ? [chariot.a0, chariot.a1 - W] : null; }
 function chariotBlocking() { return chariot && !chariot.beaten ? "The chariot! Deal with it first." : null; }
 const lostThings5 = lostThingsTally;
 lostThingsTally = function () {
