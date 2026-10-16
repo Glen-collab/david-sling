@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 270,
+  "frame_h": 321,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 191,
+  "anchor_y": 319,
+  "source": "v_braidgirl_run_m.png"
+}

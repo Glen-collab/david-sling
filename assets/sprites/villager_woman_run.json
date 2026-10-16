@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 244,
+  "frame_h": 320,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 167,
+  "anchor_y": 318,
+  "source": "v_woman_run_m.png"
+}

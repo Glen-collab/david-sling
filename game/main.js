@@ -1107,7 +1107,7 @@ if (LEVEL_NAME === "test") {
   //      into the abandoned watchtower: climb the broken stairs. Single jump only (the double jump is 5-2). ----
   ground(0, 249);
   campfire(5);
-  oliveRow(10, 16, 5);
+  oliveRow(10, 16, 5); setPiece("fleeing", 12);
   talk(16, "The fleeing father", "You're going that way? Boy, there's a giant in that valley. Turn around! The raiders scattered our sheep all over these hills. If you find any, we'll be at the fold down the road.");
   lostSheep("sheep", 27, 16);                                   // the first one, right by the road
   rock(32, 15, 3, 2); rock(35, 13, 3, 4); oliveRow(35, 12, 3); special(36, 8);
@@ -1116,7 +1116,7 @@ if (LEVEL_NAME === "test") {
   setPiece("vultures", 52);
   wall(56, 15, 4, 2);                                           // a dry-stone field wall
   rock(61, 13, 5, 4); lostSheep("sheep2", 64, 12, "ledge");     // up on the rocks: play the harp below
-  oliveArc(68, 16, 5);
+  oliveArc(68, 16, 5); setPiece("fleeing", 68);
   campfire(74);
   rock(79, 14, 4, 3); inscription(80, 15, "dalet");             // scratched on a roadside rock: the old letter Dalet
   critter("scorpion", 86);
@@ -1126,7 +1126,7 @@ if (LEVEL_NAME === "test") {
   rock(103, 15, 6, 2); rock(109, 13, 6, 4); rock(115, 11, 6, 6); oliveRow(110, 12, 4); oliveRow(116, 10, 4);
   lostSheep("lamb", 119, 10, "ledge");
   special(117, 6);
-  snake("viper", 125); critter("raider", 130);
+  snake("viper", 125); critter("raider", 130); setPiece("fleeing", 132);
   campfire(138);
   // the abandoned watchtower: The One ran up the broken stairs
   stair(142, 4); plat(150, 9, 3);                               // the broken stairs, and a beam where a floor was
@@ -1139,7 +1139,7 @@ if (LEVEL_NAME === "test") {
   rock(188, 15, 3, 2); rock(191, 13, 4, 4); special(192, 8);
   campfire(198);
   snake("viper", 204); critter("raider", 210);
-  oliveRow(214, 16, 6);
+  oliveRow(214, 16, 6); setPiece("fleeing", 206);
   talk(222, "The fleeing father", "Our sheep! Bring them into the fold, boy. We'll take them from there.");
   sheepfold(232);                                               // the fold by the road, where the family waits
 } else if (LEVEL_NAME === "4-2") {

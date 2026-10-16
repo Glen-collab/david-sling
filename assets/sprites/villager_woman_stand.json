@@ -1,0 +1,11 @@
+{
+  "frames": 1,
+  "frame_w": 108,
+  "frame_h": 350,
+  "ms_per_frame": 120,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 58,
+  "anchor_y": 348,
+  "source": "v_woman_stand_m.png"
+}

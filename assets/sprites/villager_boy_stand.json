@@ -1,0 +1,11 @@
+{
+  "frames": 1,
+  "frame_w": 138,
+  "frame_h": 350,
+  "ms_per_frame": 120,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 72,
+  "anchor_y": 349,
+  "source": "v_boy_stand_m.png"
+}

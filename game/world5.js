@@ -6,7 +6,8 @@
 //   critter("raider", c)       a Philistine raider up in the hills for grain and livestock: he comes running down the road
 //                              at David and snatches a loaf or a cheese. Hit him and he drops it and runs. (Glen's raider
 //                              sheets.)
-//   setPiece("vultures", c)    vultures circling high over the road: they follow armies. Scenery, not a target.
+//   setPiece("vultures", c)    vultures pecking by the road; they flap up and circle when David comes. Scenery.
+//   setPiece("fleeing", c)     a family running past, back toward Bethlehem. Scenery.
 //   the fleeing father         talk(c, "The fleeing father", ...): a family running from the Philistines. (World 2's
 //                              leatherworker stands in until his own sheet.) Bring his scattered flock to the fold and he
 //                              tells you about the soldier hiding in a cave on the mountain trail (the Secret, for 5-2).
@@ -17,9 +18,13 @@ const W5 = {
   DROP_LIFE: 7,          // seconds a dropped loaf or cheese lies there before it's gone (it blinks for the last 2)
   RAIDER_SEE: 11,        // tiles: he comes for David when David's this close
   RAIDER_RUN: 300, RAIDER_FLEE: 280,
-  FATHER_SIZE: 1.25,
+  FATHER_SIZE: 1.2,
   RAIDER_SIZE: 1.2,      // a grown man: taller than David
-  VULTURE_SIZE: 0.45,
+  VULTURE_SIZE: 0.45,    // circling high up
+  VULTURE_GROUND: 0.6,   // pecking by the road
+  VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
+  VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
+  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8 },
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
 // what David is carrying: full at the start of 5-1, then whatever made it through the stage before
@@ -138,20 +143,64 @@ function drawRaider(k, x) {
 }
 
 // ---------------------------------------------------------------------------
-// Vultures circling high over the road (scenery: they follow armies). World 2's eagle stands in.
+// Vultures (scenery: they follow armies). setPiece("vultures", c): three pecking at something by the road (Glen's
+// vulture_stand); when David comes close they flap up (vulture_fly) and circle high overhead from then on.
 // ---------------------------------------------------------------------------
-const vultures = setPieces.filter(p => p.kind === "vultures").map(p => ({ x: p.x, y: 3.5 * T, n: 3 }));
-function drawVultures(camX) {
-  const now = performance.now() / 1000, nm = SPR.vulture_fly ? "vulture_fly" : "eagle_fly";
-  if (!SPR[nm]) return;
+const vultures = setPieces.filter(p => p.kind === "vultures").map(p => ({ x: p.x, up: false, t: 0,
+  birds: [0, 1, 2].map(k => ({ dx: (k - 1) * 70, ph: k * 2.1, lift: 0 })) }));
+function updateVultures(dt) {
   for (const v of vultures) {
-    for (let k = 0; k < v.n; k++) {
-      const a = now * 0.25 + k * Math.PI * 2 / v.n, x = v.x - camX + Math.cos(a) * 170, y = v.y + Math.sin(a) * 40 + k * 14;
-      if (x < -150 || x > W + 150) continue;
-      ctx.save(); ctx.filter = SPR.vulture_fly ? "none" : "brightness(0.55) saturate(0.6)";
-      drawSprite(nm, Math.floor(now * 2 + k) % SPR[nm].frames, x, y, -Math.sin(a) > 0 ? 1 : -1, W5.VULTURE_SIZE, 0.85); ctx.restore();
+    v.t += dt;
+    if (!v.up && Math.abs(david.x - v.x) < W5.VULTURE_SPOOK * T && david.deadT <= 0) {
+      v.up = true; v.t = 0;
+      if (!W5.vultureTold) { W5.vultureTold = true; toast("Vultures. They follow armies, waiting. The Philistines can't be far."); }
     }
-    if (!W5.vultureTold && Math.abs(v.x - david.x) < 8 * T) { W5.vultureTold = true; toast("Vultures, circling. They follow armies, waiting. The Philistines can't be far."); }
+    if (v.up) for (const b of v.birds) b.lift = Math.min(1, b.lift + dt * (0.35 + b.ph * 0.05));
+  }
+}
+function drawVultures(camX) {
+  if (!SPR.vulture_fly) return;
+  const now = performance.now() / 1000;
+  for (const v of vultures) {
+    for (const b of v.birds) {
+      if (!v.up) {   // on the ground, pecking
+        const x = v.x + b.dx - camX; if (x < -150 || x > W + 150) continue;
+        if (SPR.vulture_stand) drawSprite("vulture_stand", Math.floor((now + b.ph) * 3.2) % SPR.vulture_stand.frames, x, GR * T, b.dx < 0 ? 1 : -1, W5.VULTURE_GROUND);
+        continue;
+      }
+      // up and away into a wide slow circle above the road
+      const a = now * 0.25 + b.ph, cx = v.x + Math.cos(a) * 200, cy = 3.5 * T + Math.sin(a) * 40 + b.ph * 8;
+      const f = b.lift, ease = f * f * (3 - 2 * f);
+      const x = (v.x + b.dx) + (cx - v.x - b.dx) * ease - camX, y = (GR * T - 60) + (cy - GR * T + 60) * ease;
+      if (x < -200 || x > W + 200) continue;
+      const flap = f < 1 || Math.sin(now * 0.7 + b.ph) > 0.85 ? Math.floor(now * 9 + b.ph) % 6 : 2;   // soaring, a few wingbeats now and then
+      drawSprite("vulture_fly", flap, x, y, f < 1 || -Math.sin(a) > 0 ? 1 : -1, W5.VULTURE_GROUND + (W5.VULTURE_SIZE - W5.VULTURE_GROUND) * ease);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Families running from the Philistines, back toward Bethlehem (Glen's villager_*_run). setPiece("fleeing", c): when
+// David gets near, a family comes running down the road from ahead and past him. They're no danger, and pass by.
+// ---------------------------------------------------------------------------
+const FAMILIES = [["man", "woman", "boy"], ["staffman", "girl"], ["woman", "braidgirl"], ["man", "boy"]];
+const fleeGroups = setPieces.filter(p => p.kind === "fleeing").map((p, i) => ({ x: p.x, go: false, who: FAMILIES[i % FAMILIES.length], people: [] }));
+const surfaceY = x => { const c = Math.floor(x / T); for (let r = 0; r < ROWS; r++) if (isSolid(c, r)) return r * T; return GR * T; };
+function updateFleeing(dt) {
+  for (const g of fleeGroups) {
+    if (!g.go && david.x > g.x - 12 * T && david.x < g.x + 4 * T) {
+      g.go = true;
+      g.people = g.who.map((w, k) => ({ w, x: camX + W + 80 + k * 110 + Math.random() * 30, sp: W5.VILLAGER_RUN * (1 - k * 0.05), t: Math.random(), y: 0 }));
+      if (!W5.fleeTold) { W5.fleeTold = true; toast("People running the other way, back toward Bethlehem. Everyone's running from the valley."); }
+    }
+    for (const q of g.people) { q.x -= q.sp * dt; q.t += dt; const sy = surfaceY(q.x); q.y = q.y ? q.y + (sy - q.y) * Math.min(1, dt * 10) : sy; }
+    g.people = g.people.filter(q => q.x > camX - 300);
+  }
+}
+function drawFleeing(camX) {
+  for (const g of fleeGroups) for (const q of g.people) {
+    const nm = "villager_" + q.w + "_run", x = q.x - camX; if (!SPR[nm] || x < -200 || x > W + 200) continue;
+    drawSprite(nm, frameOf(nm, q.t), x, q.y, -1, W5.VILLAGER_SIZE[q.w]);
   }
 }
 
@@ -168,16 +217,25 @@ function updateFather() {
                                     : "You found some of them. Thank you, boy. Listen: there's a cave up on the mountain trail. I saw a soldier hiding in it, one of ours. Maybe you can help him.");
   try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.tobiSecret = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
 }
+// Glen's father_flee (faces right): 0 catching his breath, 1 talking, 2 pointing back down the road, 3 a tear, shaking
+// his head, 4 hands together (thankful), 5 waving goodbye. At the fold his wife and the children wait with him.
 function drawFather(camX) {
-  if (!SPR.father_idle) return;
+  if (!SPR.father_flee) return;
   const now = performance.now() / 1000;
-  for (const f of fleeing) {
-    const fx = f.x + 2 * T, x = fx - camX; if (x < -200 || x > W + 200) continue;
-    if (f !== fleeing[fleeing.length - 1] && david.x > fx + 40 * T) continue;   // (he's gone on ahead to the fold)
-    const talking = dialog.t > 0 && dialog.who === "The fleeing father" && Math.abs(david.x - fx) < 12 * T;
-    const nm = talking ? "father_talk" : "father_idle";
-    drawSprite(nm, frameOf(nm, now), x, GR * T, -(Math.sign(david.x - fx) || -1), 1);
-  }
+  fleeing.forEach((f, n) => {
+    const atFold = n === fleeing.length - 1, fx = f.x + 2 * T, x = fx - camX;
+    if (x < -300 || x > W + 300) return;
+    if (!atFold && david.x > fx + 40 * T) return;   // (he's gone on ahead to the fold)
+    const talking = dialog.t > 0 && dialog.who === "The fleeing father" && Math.abs(david.x - fx) < 14 * T;
+    let i = 0;
+    if (talking) i = atFold && W5.secretGiven ? [1, 4][Math.floor(now * 0.8) % 2] : atFold ? 1 : [1, 2, 3][Math.floor(now * 0.7) % 3];
+    else if (atFold && W5.secretGiven) i = 4;
+    else if (!atFold && f.done) i = david.x > fx + 3 * T ? 5 : 0;
+    const face = Math.sign(david.x - fx) || -1;
+    if (atFold) for (const [w, dx] of [["woman", -1.6], ["braidgirl", -2.7], ["boy", -3.6]])   // his family, waiting
+      drawSprite("villager_" + w + "_stand", 0, x + dx * T, GR * T, face, W5.VILLAGER_SIZE[w]);
+    drawSprite("father_flee", i, x, GR * T, face, W5.FATHER_SIZE);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -185,7 +243,7 @@ function drawFather(camX) {
 // ---------------------------------------------------------------------------
 function updateWorld5(dt) {
   if (WORLD !== 5) return;
-  updateProvisions(dt); updateFather();
+  updateProvisions(dt); updateFather(); updateVultures(dt); updateFleeing(dt);
   if (finish.active && finish.phase === "clear" && !W5.provSaved) {   // what's left goes on to the next stage, and to the camp at the end
     W5.provSaved = true;
     try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.prov = { bread: prov.bread, cheese: prov.cheese };
@@ -194,7 +252,7 @@ function updateWorld5(dt) {
 }
 function drawWorld5(camX) {
   if (WORLD !== 5) return;
-  drawVultures(camX); drawFather(camX); drawProvisionDrops(camX);
+  drawVultures(camX); drawFleeing(camX); drawFather(camX); drawProvisionDrops(camX);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 181,
+  "frame_h": 300,
+  "ms_per_frame": 110,
+  "loop": true,
+  "align": "body",
+  "anchor_x": 90,
+  "anchor_y": 150,
+  "source": "vulture_fly.png"
+}
