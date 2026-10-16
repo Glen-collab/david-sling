@@ -808,7 +808,7 @@ function updateChariot(dt) {
   // keep David on the screen with it (the camera is locked to the arena, main.js camLimits)
   if (!ch.beaten) d.x = Math.max(ch.a0 + 20, Math.min(ch.a1 - 20, d.x));
   ch.t += dt; ch.flash = Math.max(0, ch.flash - dt);
-  if (ch.state === "crash" || ch.state === "free") { updateCrash(dt); updateArrows(dt); return; }
+  if (ch.state === "crash" || ch.state === "free") { updateChariotCrash(dt); updateArrows(dt); return; }
   const P = chParts(ch), speed = ch.state === "ram" ? W5.CH_RAM : W5.CH_PATROL;
   ch.wheelA += ch.dir * ch.v * dt / Math.max(10, P.wr);
   if (ch.state === "drive") {   // phase 1: up and down the road, the archer shooting
@@ -860,7 +860,7 @@ function crashChariot() {
   sfx("lion_defeated", ch.x, 0.6); sfx("stone_hit", ch.x, 0.9, 0.5);
   toast("The cracked wheel hits the rocks and breaks apart! The chariot can't turn on the rough ground.");
 }
-function updateCrash(dt) {
+function updateChariotCrash(dt) {
   const ch = chariot;
   if (ch.state === "crash" && ch.t > 2.6) { ch.state = "free"; ch.t = 0; }
   if (ch.state === "free" && !ch.beaten) {
