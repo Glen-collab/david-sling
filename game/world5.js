@@ -787,7 +787,7 @@ function chParts(ch) {
     archer: chFull(ch) ? { x0: ch.x + dir * 56 * s - 50 * s, x1: ch.x + dir * 56 * s + 50 * s, y0: gy - 330 * s, y1: gy - 190 * s }   // Glen's whole chariot: the archer stands higher, further forward
                        : { x0: ch.x + dir * 11 * s - 45 * s, x1: ch.x + dir * 11 * s + 45 * s, y0: cy - 270 * s, y1: cy - 110 * s } };
 }
-const chFull = ch => ch.phase === 1 && !!SPR.chariot_full_run;   // phase 1: the chariot is Glen's one galloping picture (horses, cart and archer)
+const chFull = ch => !!SPR.chariot_full_run;   // the chariot is Glen's one galloping picture (horses, cart and archer) the whole fight
 const chFront = ch => ch.x + ch.dir * (424 + 83) * chS();   // the horses' front hooves
 function chariotFight() { return !!(chariot && chariot.on && !chariot.beaten && david.deadT <= 0); }
 function startChariot() {
@@ -953,9 +953,13 @@ function drawChariot(camX) {
     return;
   }
   const moving = ch.v > 30;
-  if (chFull(ch)) {   // phase 1: Glen's whole chariot, galloping, the archer drawing; the glint at his bow is the tell
-    drawSprite("chariot_full_run", moving ? frameOf("chariot_full_run", now * (ch.v / W5.CH_PATROL)) : 0, x, P.gy, dir, 1, 1, flt);
-    if (ch.archer === "raise") {
+  if (chFull(ch)) {   // Glen's whole chariot, galloping (standing still while the driver whips); the glint at the bow is phase 1's tell
+    drawSprite("chariot_full_run", moving ? frameOf("chariot_full_run", now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 3) % 2, x, P.gy, dir, 1, 1, flt);
+    if (ch.phase === 3) {   // the cracked wheel, wobbling, over the painted one
+      const wr = 66 * P.s, wob = Math.sin(now * 25) * 3;
+      ctx.save(); ctx.translate(P.wx - camX, P.gy - wr + 6 + wob); ctx.rotate(ch.wheelA); drawItem("chariot_wheel_cracked", 0, wr * 1.04, wr * 2.08 / 260, 1); ctx.restore();
+    }
+    if (ch.phase === 1 && ch.archer === "raise") {
       const gx = x + dir * 162 * P.s, gy = P.gy - 290 * P.s, a = 0.5 + 0.5 * Math.sin(now * 20);
       ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(gx, gy, 1, gx, gy, 30); g.addColorStop(0, `rgba(255,255,220,${a})`); g.addColorStop(1, "rgba(255,240,150,0)"); ctx.fillStyle = g; ctx.fillRect(gx - 30, gy - 30, 60, 60); ctx.restore();
     }
