@@ -739,3 +739,91 @@ of golden beeswax with a honeycomb pattern. They replace the drawn icons as asse
 - **Backgrounds** (save 4-4 far/mid/near.png): far = Saul's great hall at night (stone walls, beams, red/purple banners,
   stormy windows with lightning, lamplight, deep shadow); mid = columns, a great staircase, balconies, tapestries, #FF00FF
   above; near = polished stone floor, rug edge, cushion, bronze bowl, reed mats, #FF00FF above.
+
+
+## World 5 — The Road to the Valley: map and 5-1 art (2026-10-15)
+Paste the style block first, as always. Sheets are one row of poses on solid green (#00FF00); single items and
+backgrounds' middle/near layers on magenta (#FF00FF). **Save in** `david-sling-art\world5\`.
+
+### World 5 map (one message, ready to paste; add the map lines)
+```
+World 5: the road west from Bethlehem to the Valley of Elah, on the eve of war. The path, in order:
+1. Bottom-left: Jesse's small stone house with a courtyard and a fig tree (the start).
+2. A long dusty road west through dry brown hills, olive terraces and dry stone walls, with a crumbling
+   round watchtower beside it (first level dot).
+3. Beside the road: a family's camp of two small tents and a loaded donkey, as if they left home in a hurry
+   (a landmark spot).
+4. A narrow trail climbing along a cliff edge into rocky mountains, darker here, with a big moon above
+   (second level dot).
+5. Just off the trail, a dark cave mouth in the cliff with a faint glow of water inside (a small extra spot).
+6. Higher up: a small cave with a warm campfire glowing in its mouth (a landmark spot).
+7. A long high ridge with two or three small wooden lookout towers and an unlit signal-fire pile on top
+   (third level dot).
+8. Off to one side of the ridge: a grove of big spreading terebinth trees (a small extra spot).
+9. The road winding down into a wide green valley with a dry streambed of pale stones and chariot wheel
+   ruts in the dust (fourth level dot).
+10. At the far right: two camps of tents on opposite hillsides facing each other across the valley, brown
+    and tan tents on the left hill, blue and dark red tents on the right (the end).
+Mood: travel and adventure at the start, growing tension toward the valley; the cliff trail and ridge at
+night, the valley at dawn.
+```
+Four plain level dots (5-1 to 5-4) plus Jesse's house, the family's camp, the cave of the Name, Tobi's fire,
+the terebinth grove and the two camps. **Save as** `david-sling-art\world 5 map.png`.
+
+### 5-1 The Supply Road (hot dry afternoon): backgrounds
+Use the same Format lines as 4-1 (very wide, about 3072 x 1024, seamless left/right edges, no characters).
+**Far:**
+```
+World 5, a hot hazy afternoon on the road west. A pale dusty sky, white-gold near the horizon, a few thin
+streaks of cloud. Along the bottom half: dry brown and tan hills rolling away layer behind layer, a few dark
+olive trees, the hills paler and bluer in the distance. Far off on one hill, a thin column of smoke rising
+(a village burned by raiders). Lonely, quiet, a little uneasy.
+```
+**Middle:**
+```
+World 5 middle distance: dry rocky hillsides with olive terraces held up by low dry-stone walls, sun-bleached
+grass, scattered limestone boulders, a crumbling round stone watchtower with its top fallen in, a few
+abandoned flat-roofed houses with dark doorways, and a dusty road curving between them. Hot afternoon light.
+Softer and a little hazy compared with the foreground. EVERYTHING above the hills is solid flat bright
+magenta (#FF00FF), no sky, no clouds.
+```
+**Near:**
+```
+World 5 foreground strip, the bottom quarter only: the dusty edge of a dry road with cart ruts, small
+stones, tufts of dry yellow grass, a thistle, a dropped broken clay pot, full colour and sharp in hot
+afternoon light. EVERYTHING above it is solid flat bright magenta (#FF00FF).
+```
+**Save as** `5-1 far.png`, `5-1 mid.png`, `5-1 near.png`.
+
+### 5-1 sprites (one message each)
+**Philistine raider** (stand-in until then: the thief)
+```
+A sprite sheet: one row of 6 poses of the same Philistine raider running to the right, a full run cycle,
+full body, seen straight from the side. Pixar-style 3D, soft lighting. A lean young man, clean-shaven, a
+headband with a short row of upright reeds (the Philistine headdress), a short patterned kilt with a
+fringed hem, bare chest with a leather strap across it, a small round shield on his back, sandals. NO
+weapon in his hands; he's after livestock and grain. Same size, feet on the same line, clear gaps between
+poses. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Raider grabbing and fleeing** (same raider, same size): one row of 6: bending to grab a grain sack;
+lifting it onto his shoulder; hit and stumbling, dropping the sack; then 3 poses running away to the LEFT,
+arms up, scared. Green background.
+
+**The fleeing father** (made up; facing left)
+```
+A sprite sheet: one row of 6 poses of the same village father, full body, seen from the side, FACING LEFT.
+Pixar-style 3D, soft lighting. About forty, a dusty black beard, a sweat-stained brown headcloth, a plain
+undyed wool tunic, a rolled blanket tied across his back, a shepherd's staff, sandals. Worried and
+exhausted but kind. Poses: standing; talking with one hand open; pointing back down the road (warning);
+shaking his head (turn around!); hands together, thankful; waving goodbye. Same size, feet on the same
+line, clear gaps. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+**Fleeing villagers walking** (two or three people, one sheet each): a mother carrying a bundle and leading
+a little girl; an old man with a cane. One row of 6 walking poses each, walking to the LEFT, tired and
+hurried. Green background.
+
+**Grain sack** (single item, magenta): a small rough cloth sack of roasted grain, tied at the neck with
+cord, a few toasted brown grains spilling out. Pixar-style. Saved as `assets\items\grain_sack`.
+
+**Vulture** (stand-in until then: the eagle): one row of 4 poses of a big griffon vulture gliding to the
+right, wings wide, a slow flap; pale ruff, bald pale head. Green background.
