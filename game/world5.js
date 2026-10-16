@@ -1136,7 +1136,9 @@ const w5ending = {
   },
 };
 function drawCommander(x, y, talking, now) {   // Glen's commander when he comes; until then a soldier's shape (Eliab's war gear, aged)
-  if (SPR.commander_talk) { drawSprite(talking ? "commander_talk" : "commander_idle", frameOf(talking ? "commander_talk" : "commander_idle", now), x, y, -1); return; }
+  // Glen's commander (commander_poses: 0 standing, 1 talking, 2 arms crossed, 3 laughing with relief). His running-
+  // to-Tobi and gripping-his-shoulders poses come after Glen's Photoshop pass.
+  if (SPR.commander_poses) { drawSprite("commander_poses", talking ? [1, 3][Math.floor(now * 0.9) % 2] : 0, x, y, -1, 1.05); return; }
   drawSprite(talking ? "eliab_war_talk" : "eliab_war_idle", frameOf("eliab_war_idle", now), x, y, -1, 1.05, 1, "saturate(0.5) brightness(0.85)");
 }
 function drawGiant(now, bt) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now

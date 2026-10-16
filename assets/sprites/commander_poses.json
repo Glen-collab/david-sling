@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 174,
+  "frame_h": 304,
+  "ms_per_frame": 600,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 60,
+  "anchor_y": 303,
+  "source": "cmd_m.png"
+}

@@ -444,6 +444,18 @@ window.SPRITE_DATA = {
   "ay": 84,
   "align": "feet"
  },
+ "commander_poses": {
+  "src": "../assets/sprites/commander_poses.png",
+  "frames": 4,
+  "w": 174,
+  "h": 304,
+  "ms": 600,
+  "loop": true,
+  "pingpong": false,
+  "ax": 60,
+  "ay": 303,
+  "align": "feet"
+ },
  "david_anoint_sheep": {
   "src": "../assets/sprites/david_anoint_sheep.png",
   "frames": 12,
