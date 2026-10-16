@@ -2233,6 +2233,10 @@ function drawHelp() {
     "Shift = Select (SNES Y): play the harp   R: back to the campfire   M: set up a controller (NES or SNES)   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
+  if (readPad()) {   // what the game hears right now (to check a D-pad's diagonals): the buttons held, and the raw axes
+    const p = readPad(), on = BUTTONS.filter(b => held(b));
+    lines.push("Pressing: " + (on.length ? on.join(" + ") : "nothing") + "     axes: " + [...p.axes].map(v => v.toFixed(2)).join("  "));
+  }
   ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fillRect(10, 10, Math.max(...lines.map(l => ctx.measureText(l).width)) + 22, 14 + lines.length * 21);   // as wide as the longest line
   ctx.fillStyle = "#fff";
   lines.forEach((l, i) => ctx.fillText(l, 20, 32 + i * 21));
