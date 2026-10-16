@@ -306,6 +306,7 @@ function updateCritters(dt) {
     else if (k.kind === "hyena") updateHyena(k, dx, sameLevel, dt);
     else if (k.kind === "tobi") updateTobi(k, dx, sameLevel, dt);
     else if (k.kind === "gazelle") updateGazelle(k, dx, sameLevel, dt);
+    else if (k.kind === "packdonkey") updatePackDonkey(k, dx, sameLevel, dt);
     else if (k.kind === "dove") updateDove(k, dx, sameLevel, dt);
     else if (k.kind === "guarddog") updateGuardDog(k, dx, sameLevel, dt);
   }
@@ -431,6 +432,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "hyena") return stoneHitsHyena(k, s);
     if (k.kind === "tobi") return stoneHitsTobi(k, s);
     if (k.kind === "gazelle") return stoneHitsGazelle(k, s);
+    if (k.kind === "packdonkey") return stoneHitsPackDonkey(k, s);
     if (k.kind === "dove") { stoneHitsDove(k, s); continue; }
     if (k.kind === "guarddog") return stoneHitsGuardDog(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
@@ -476,6 +478,7 @@ function drawCritters(camX) {
     if (k.kind === "hyena") { drawHyena(k, x); continue; }
     if (k.kind === "tobi") { drawTobi(k, x); continue; }
     if (k.kind === "gazelle") { drawGazelle(k, x); continue; }
+    if (k.kind === "packdonkey") { drawPackDonkey(k, x); continue; }
     if (k.kind === "dove") { drawDove(k, x); continue; }
     if (k.kind === "guarddog") { drawVillageDog(k, x); continue; }
     const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)

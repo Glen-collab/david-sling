@@ -346,6 +346,7 @@ const STAGE_INFO = {
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
+  "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
@@ -1101,6 +1102,42 @@ if (LEVEL_NAME === "test") {
   critter("villagedog", 276); critter("dove", 280);
   oliveRow(284, 16, 6);
   sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+} else if (LEVEL_NAME === "5-4") {
+  // ---- 5-4 Down to Elah, at dawn: the descent into the Valley of Elah. Terebinths (elah = terebinth), the dry
+  //      streambed, chariot ruts; both camps on the hills across the valley, and now and then a huge voice booming
+  //      across it. The camp's pack donkeys bolted when the giant shouted (the lost things). The One among the
+  //      terebinths, behind a fallen trunk. Then wheels behind you: BOSS, the Philistine Chariot. Tobi is with you. ----
+  ground(0, 315);
+  campfire(4); setPiece("tobistart", 2);
+  deco("oak", 10, 16, 0.5); critter("packdonkey", 16);
+  talk(14, "Tobi", "Those are terebinths. That's why they call it the Valley of Elah: elah means terebinth. Our camp's on the far hill... and theirs is across from it.");
+  oliveRow(20, 16, 5);
+  rock(28, 15, 3, 2); rock(31, 13, 3, 4); plat(36, 10, 4); special(37, 6);
+  snake("viper", 42);
+  deco("oak", 48, 16, 0.45); critter("packdonkey", 52);
+  critter("raider", 60);
+  // the dry streambed: smooth stones, scorpions under them
+  for (const c of [66, 70, 75, 79]) deco("boulder_grey", c, 16, 0.18);
+  critter("scorpion", 72); critter("scorpion", 78);
+  campfire(86);
+  deco("oak", 92, 16, 0.55); oliveArc(94, 16, 6);
+  // The One: behind a fallen terebinth trunk, among the trees
+  deadfall(102, 13, 2, 4); deco("oak_fallen", 104, 16, 0.4); lostSheep("lamb", 107, 16, "one");
+  deco("oak", 112, 16, 0.5); critter("packdonkey", 116);
+  rock(122, 15, 3, 2); rock(125, 12, 3, 5); plat(129, 8, 4); critter("packdonkey", 130, 7);   // a donkey up on the rocks: jump to it
+  snake("viper", 138); critter("raider", 146);
+  campfire(154);
+  deco("oak", 160, 16, 0.5); oliveRow(164, 16, 6);
+  critter("scorpion", 172); deco("oak", 180, 16, 0.45);
+  rock(186, 15, 2, 2); rock(188, 13, 2, 4); special(189, 8);
+  critter("packdonkey", 196);
+  talk(200, "Tobi", "Listen... wheels. David, that's the chariot. Remember: it can't turn on rough ground.");
+  campfire(206);                                                 // the last fire before it (and where Tobi's counsel waits)
+  // BOSS: the Philistine Chariot. The arena is one screen from col 214; rough rocky ground near its right end.
+  setPiece("chariot", 214);
+  setPiece("rough", 238, GR, { w: 7 });
+  oliveRow(256, 16, 6);
+  sheepfold(272);                                                // a shepherds' fold at the edge of the camp
 } else if (LEVEL_NAME === "5-3") {
   // ---- 5-3 The Lookouts' Ridge, at night: the high ridge above the Valley of Elah, both camps' fires far below.
   //      Philistine lookouts with torches watch stretches of it (their light is a cone; it shrinks when the moon goes
@@ -2904,7 +2941,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null) || (typeof chariotBlocking === "function" ? chariotBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);
@@ -3481,7 +3518,7 @@ function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
   const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
-  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight());
+  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight()) || (typeof chariotFight === "function" && chariotFight());
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   if (!fight && typeof bear !== "undefined" && bear.on && bear.state === "pen") bossIntroPlayed = false;

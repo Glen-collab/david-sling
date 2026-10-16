@@ -19,6 +19,7 @@ let caveAmbVol = 0;
 const darkCanvas = document.createElement("canvas"); darkCanvas.width = W; darkCanvas.height = H;
 
 function camLimits() {
+  if (!cave.room && typeof chariotCam === "function") { const c = chariotCam(); if (c) return c; }   // 5-4: the chariot fight (world5.js)
   if (!cave.room) return [0, MAIN_COLS * T - W];
   const a = cave.room.c0 * T - 2 * T, b = (cave.room.c0 + cave.room.w) * T + 2 * T - W;
   return a > b ? [(a + b) / 2, (a + b) / 2] : [a, b];

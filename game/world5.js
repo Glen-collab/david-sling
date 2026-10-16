@@ -697,7 +697,7 @@ function drawGazelle(k, x) {
   else drawSprite("gazelle_stand", Math.floor(k.t / 2.5) % 2, x, k.y, k.facing, 1, k.alpha);
 }
 
-function stoneHitsWorld5(s) { return stoneHitsLeopard(s) || stoneHitsLookout(s); }
+function stoneHitsWorld5(s) { return stoneHitsLeopard(s) || stoneHitsLookout(s) || stoneHitsChariot(s); }
 function updateWorld53(dt) {
   updateLookouts(dt); updateCairns(dt);
   if (!W5.warnSaved && talks.some(k => k.done && k.who === "Tobi" && k.say.includes("chariot"))) {   // tier-1 counsel for the chariot (5-4)
@@ -711,8 +711,262 @@ function updateWorld53(dt) {
 }
 function drawWorld53(camX) { drawLookouts(camX); drawCairns(camX); }
 
-function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); updateWorld53(dt); }
-function drawWorld52(camX) { drawTobiCave(camX); drawSpikePits(camX); drawLeopards(camX); drawGear(camX); drawWorld53(camX); }
+// ===========================================================================
+// 5-4 Down to Elah (dawn) and BOSS: the Philistine Chariot (DESIGN 5e). Nobody is killed: the crew run back to their
+// lines and the horses go free.
+//   critter("packdonkey", c)   one of the camp's pack donkeys, run off when the giant shouted (the lost things): walk up
+//                              to it and it follows; bring them to the fold
+//   setPiece("chariot", c)      the arena: 35 columns from c (one screen). The fight starts when David walks in.
+//   setPiece("rough", c, GR, {w}) rough rocky ground: a chariot can't turn on it (Tobi's warning, 5-3)
+// Phase 1, the archer: the chariot drives back and forth; the archer raises his bow (a glint = the tell), draws, looses,
+//   and ducks behind his shield. Hit him while he's drawing: 3 hits and he drops his bow.
+// Phase 2, the ram: the driver whips the horses and charges David (jump them: the scout's leap). Don't hit the horses.
+//   Charged stones at the wheel as it passes: 3 (tier 2: 2) and it cracks and wobbles.
+// Phase 3, rough ground: it charges, passes and wheels round to come again; if it has to turn on the rough ground the
+//   cracked wheel breaks. The horses rear, the crew jump down and run, the horses trot off free.
+// ===========================================================================
+Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 540, CH_TELL: 0.85, CH_TELL2: 1.3, CH_ARCHER_HP: 3, CH_WHEEL_HP: 3,
+  ARROW_SPEED: 620, DONKEY_FOLLOW: 3, ROUGH_FLASH: true });
+for (const n of ["chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
+
+// --- the pack donkeys
+CRITTER_ART.packdonkey = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 90, y1: k.y }) };
+const packDonkeys = () => critters.filter(k => k.kind === "packdonkey");
+function updatePackDonkey(k, dx, sameLevel, dt) {
+  const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); };
+  if (!k.found) {
+    if (k.state === "idle") setCrit(k, "graze");
+    fall(); k.facing = k.home % 2 ? 1 : -1;
+    if (Math.abs(dx) < 1.6 * T && Math.abs(david.y - k.y) < 80 && david.deadT <= 0) {
+      k.found = true; setCrit(k, "follow"); sfx("olive_pickup", k.x, 0.8, 0.7);
+      const n = packDonkeys().filter(q => q.found).length, all = packDonkeys().length;
+      toast(n === all ? `All ${all} of the camp's pack donkeys found! Lead them down to the fold.` : `A pack donkey from the Israelite camp! It follows you. (${n} of ${all})`);
+    }
+    return;
+  }
+  if (k.state === "leap") {
+    const f = Math.min(1, k.t / 0.75), base = k.ly0 + (k.ly1 - k.ly0) * f;
+    k.x = k.lx0 + (k.lx1 - k.lx0) * f; k.y = base - Math.sin(f * Math.PI) * (Math.max(k.ly0, k.ly1) - k.ltop);
+    if (f >= 1) { k.y = k.ly1; k.vy = 0; k.onGround = true; setCrit(k, "follow"); }
+    return;
+  }
+  if (k.state === "idle") setCrit(k, "follow");   // (after a fall)
+  if (chariot && chariot.on) { fall(); return; }  // they wait out the fight
+  const idx = packDonkeys().filter(q => q.found).indexOf(k), want = (W5.DONKEY_FOLLOW + 1.8 * (idx + (tobi ? 1 : 0))) * T;
+  if (david.deadT > 0) { fall(); return; }
+  if (david.onGround && Math.abs(david.y - k.y) > 30 && Math.abs(dx) < 12 * T) { let tx = david.x - (Math.sign(dx) || 1) * want * 0.6; if (!standable(tx, david.y)) tx = david.x; goatLeap(k, tx, david.y); return; }
+  if (Math.abs(dx) > 22 * T && david.onGround) { k.x = david.x - (david.facing || 1) * want; k.y = david.y; k.vy = 0; if (!standable(k.x, k.y)) k.x = david.x; }
+  if (Math.abs(dx) > want) {
+    k.facing = Math.sign(dx); k.moving = true;
+    const moved = runCritter(k, 190 + Math.min(260, Math.abs(dx) - want), dt);
+    if (!moved && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
+  } else { k.moving = false; fall(); }
+}
+function stoneHitsPackDonkey(k, s) { if (!W5.donkeyStoned) { W5.donkeyStoned = true; toast("Easy! That's one of our own pack donkeys."); } return false; }
+function drawPackDonkey(k, x) {
+  const nm = !k.found ? "donkey_graze" : k.moving || k.state === "leap" ? "donkey_walk" : "donkey_idle";
+  drawSprite(nm, frameOf(nm, k.t), x, k.y, k.facing, 1, k.alpha);
+  if (!k.found) goldGlow(x, k.y, k.t);
+}
+
+// --- the chariot
+const chPiece = setPieces.find(p => p.kind === "chariot");
+const roughs = setPieces.filter(p => p.kind === "rough").map(p => ({ x0: p.c * T, x1: (p.c + p.w) * T, c: p.c, w: p.w }));
+const chariot = chPiece ? { a0: chPiece.c * T, a1: chPiece.c * T + W, on: false, beaten: false, phase: 1, x: 0, dir: 1, v: 0, state: "wait", t: 0,
+  archer: "drive", at: 0, archerHits: 0, wheelHits: 0, wheelA: 0, flash: 0, arrows: [] } : null;
+const chS = () => SCALE * W5.CH_SIZE;
+const onRough = x => roughs.some(r => x > r.x0 && x < r.x1);
+// where the pieces are (cart anchor at ch.x; the wheel under the box; the horses ahead on the pole)
+function chParts(ch) {
+  const s = chS(), gy = GR * T, cy = gy - 36 * s, dir = ch.dir;
+  return { s, gy, cy, wx: ch.x + dir * 21 * s, wy: cy - 34 * s, wr: 70 * s, hx: ch.x + dir * 424 * s,
+    cart: { x0: ch.x + Math.min(-73 * dir, 150 * dir) * s, x1: ch.x + Math.max(-73 * dir, 150 * dir) * s, y0: cy - 130 * s, y1: gy },
+    horses: { x0: ch.x + dir * 424 * s + Math.min(-260 * dir, 83 * dir) * s, x1: ch.x + dir * 424 * s + Math.max(-260 * dir, 83 * dir) * s, y0: gy - 250 * s, y1: gy },
+    archer: { x0: ch.x + dir * 11 * s - 45 * s, x1: ch.x + dir * 11 * s + 45 * s, y0: cy - 270 * s, y1: cy - 110 * s } };
+}
+function chariotFight() { return !!(chariot && chariot.on && !chariot.beaten && david.deadT <= 0); }
+function startChariot() {
+  const ch = chariot; Object.assign(ch, { on: true, phase: 1, state: "drive", t: 0, archer: "drive", at: 0, archerHits: 0, wheelHits: 0, dir: -1, x: ch.a1 + 300, v: W5.CH_PATROL, arrows: [] });
+  sfx("lion_roar", undefined, 0.35, 1.6);
+  toast("Wheels thunder behind you: a Philistine chariot, hunting scouts on the road! Its archer is the danger first: hit him while he draws his bow.");
+}
+function chariotTurnX(ch) {   // where a charging chariot stops to turn: a few strides past David
+  return Math.max(ch.a0 + 3 * T, Math.min(ch.a1 - 3 * T, david.x + ch.dir * 5 * T));
+}
+function updateChariot(dt) {
+  const ch = chariot; if (!ch) return;
+  const d = david;
+  if (!ch.on && !ch.beaten && d.x > ch.a0 + 3 * T && d.x < ch.a1 && d.deadT <= 0) startChariot();
+  if (!ch.on) { ch.t += dt; updateArrows(dt); return; }
+  if (d.deadT > 0 && !ch.beaten) {   // David fell: the chariot rides off; back to the fire, and Tobi's counsel
+    ch.on = false; ch.arrows = [];
+    if (!W5.counsel2) { W5.counsel2 = true; setTimeout(() => {   // tier-2 counsel: a longer tell, a weaker wheel, +1 heart
+      sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And the wheel's old: two good charged stones will crack it.");
+      d.hearts += 1; }, 2200); }
+    return;
+  }
+  // keep David on the screen with it (the camera is locked to the arena, main.js camLimits)
+  if (!ch.beaten) d.x = Math.max(ch.a0 + 20, Math.min(ch.a1 - 20, d.x));
+  ch.t += dt; ch.flash = Math.max(0, ch.flash - dt);
+  if (ch.state === "crash" || ch.state === "free") { updateCrash(dt); updateArrows(dt); return; }
+  const P = chParts(ch), speed = ch.state === "ram" ? W5.CH_RAM : W5.CH_PATROL;
+  ch.wheelA += ch.dir * ch.v * dt / Math.max(10, P.wr);
+  if (ch.state === "drive") {   // phase 1: up and down the road, the archer shooting
+    ch.v = Math.min(speed, ch.v + 400 * dt); ch.x += ch.dir * ch.v * dt;
+    if ((ch.dir > 0 && ch.x > ch.a1 + 250) || (ch.dir < 0 && ch.x < ch.a0 - 250)) { ch.dir = -ch.dir; }   // turns off the screen
+    updateArcher(dt, P);
+  } else if (ch.state === "whip") {   // phase 2/3 tell: at the edge, the driver whips the reins
+    ch.v = 0; if (ch.t > (W5.counsel2 ? W5.CH_TELL2 : W5.CH_TELL)) { ch.state = "ram"; ch.t = 0; ch.turnX = chariotTurnX(ch); sfx("thunder_2", ch.x, 0.3, 2.2); }
+  } else if (ch.state === "ram") {   // the charge: on past David, then it slows to turn
+    ch.v = Math.min(speed, ch.v + 900 * dt); ch.x += ch.dir * ch.v * dt;
+    if ((ch.x - ch.turnX) * ch.dir > 0) { ch.state = "brake"; ch.t = 0; }
+  } else if (ch.state === "brake") {
+    ch.v = Math.max(0, ch.v - 1400 * dt); ch.x += ch.dir * ch.v * dt;
+    if (ch.v <= 0) {
+      if (ch.phase === 3 && onRough(P.wx)) { crashChariot(); return; }
+      ch.dir = -ch.dir; ch.state = "whip"; ch.t = 0;   // wheels round on the smooth road
+      if (ch.phase === 3 && !W5.roughTold) { W5.roughTold = true; toast(chariotWarned() ? "Tobi: \"The rocks, David! Get it to turn on the rough ground!\"" : "It wheels round on the smooth road. Could it turn like that on the rocks?"); }
+    }
+  }
+  // the horses and the cart run you down; the horses never get hurt
+  if (ch.state === "ram" || ch.state === "brake" || ch.state === "drive") {
+    if (ch.v > 60 && (touchesDavid(P.horses) || touchesDavid(P.cart))) hurtDavid(ch.x + ch.dir * 200);
+  }
+  updateArrows(dt);
+}
+const chariotWarned = () => { try { return !!JSON.parse(localStorage.getItem("davidProgress") || "{}").chariotWarn; } catch (e) { return false; } };
+function updateArcher(dt, P) {
+  const ch = chariot; ch.at += dt;
+  const tell = W5.counsel2 ? W5.CH_TELL2 : W5.CH_TELL, onScreen = ch.x > ch.a0 - 100 && ch.x < ch.a1 + 100;
+  if (ch.archer === "drive" && ch.at > 1.6 && onScreen) { ch.archer = "raise"; ch.at = 0; }
+  else if (ch.archer === "raise" && ch.at > tell) { ch.archer = "draw"; ch.at = 0; }
+  else if (ch.archer === "draw" && ch.at > 0.45) {
+    ch.archer = "loose"; ch.at = 0;
+    const sx = (P.archer.x0 + P.archer.x1) / 2, sy = P.archer.y0 + 40 * P.s, dx = david.x - sx, dy = david.y - 50 - sy, L = Math.hypot(dx, dy) || 1;
+    ch.arrows.push({ x: sx, y: sy, vx: dx / L * W5.ARROW_SPEED, vy: dy / L * W5.ARROW_SPEED - 120, t: 0 }); sfx("sling_throw_quick", sx, 0.6, 1.4);
+  } else if (ch.archer === "loose" && ch.at > 0.3) { ch.archer = "duck"; ch.at = 0; }
+  else if (ch.archer === "duck" && ch.at > 1.1) { ch.archer = "drive"; ch.at = 0; }
+}
+function updateArrows(dt) {
+  const ch = chariot;
+  for (let i = ch.arrows.length - 1; i >= 0; i--) {
+    const a = ch.arrows[i]; a.t += dt; a.vy += 500 * dt; a.x += a.vx * dt; a.y += a.vy * dt;
+    if (Math.abs(a.x - david.x) < 22 && a.y > david.y - david.h && a.y < david.y) { hurtDavid(a.x - a.vx); ch.arrows.splice(i, 1); continue; }
+    if (a.y > GR * T || a.t > 3) ch.arrows.splice(i, 1);
+  }
+}
+function crashChariot() {
+  const ch = chariot; ch.state = "crash"; ch.t = 0; ch.v = 0; ch.on = true;
+  sfx("lion_defeated", ch.x, 0.6); sfx("stone_hit", ch.x, 0.9, 0.5);
+  toast("The cracked wheel hits the rocks and breaks apart! The chariot can't turn on the rough ground.");
+}
+function updateCrash(dt) {
+  const ch = chariot;
+  if (ch.state === "crash" && ch.t > 2.6) { ch.state = "free"; ch.t = 0; }
+  if (ch.state === "free" && !ch.beaten) {
+    ch.beaten = true; sfx("heal", undefined, 0.7);
+    toast("The crew jump down and run back toward their own lines. The horses trot off, free. Nobody is hurt.");
+    setTimeout(() => sayLine("", "Years later, David would write: \"Some trust in chariots, and some in horses, but we trust in the name of the LORD our God.\" (Psalm 20:7)"), 3500);
+    setTimeout(() => sayLine("Tobi", "You did it! And the horses are fine. Come on, David. The camp's just over there."), 11000);
+  }
+}
+function stoneHitsChariot(s) {
+  const ch = chariot; if (!ch || !ch.on || ch.beaten || ch.state === "crash") return false;
+  const P = chParts(ch), inB = b => s.x > b.x0 && s.x < b.x1 && s.y > b.y0 && s.y < b.y1;
+  if (ch.phase === 1 && inB(P.archer)) {
+    if (ch.archer === "raise" || ch.archer === "draw") {
+      ch.archerHits++; ch.flash = 0.3; ch.archer = "duck"; ch.at = 0; stoneHit(s); sfx("lion_hit", ch.x, 0.6, 1.5);
+      if (ch.archerHits >= W5.CH_ARCHER_HP) {
+        ch.phase = 2; ch.state = "brake"; ch.t = 0;
+        toast("You knocked his bow away! The driver whips the horses: he's going to run you down. Jump them (the scout's leap), and hit the wheel with charged stones as it passes.");
+      } else toast(`Got him! (${ch.archerHits} of ${W5.CH_ARCHER_HP})`);
+    } else { stoneHit(s, 0.4); if (!W5.shieldTold) { W5.shieldTold = true; toast("He's behind his shield. Wait for the glint of his bow: hit him while he draws."); } }
+    return true;
+  }
+  if (Math.hypot(s.x - P.wx, s.y - P.wy) < P.wr) {
+    if (ch.phase !== 2) { stoneHit(s, 0.4); return true; }
+    if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W5.tapTold) { W5.tapTold = true; toast("A tap stone just bounces off the wheel. Hold B for a charged stone!"); } return true; }
+    ch.wheelHits++; ch.flash = 0.3; stoneHit(s); sfx("stone_hit", P.wx, 1, 0.6);
+    const need = W5.counsel2 ? 2 : W5.CH_WHEEL_HP;
+    if (ch.wheelHits >= need) {
+      ch.phase = 3;
+      toast(chariotWarned() ? "The wheel cracks and wobbles! Remember Tobi: a chariot can't turn on rough ground. Lead it onto the rocks!" : "The wheel cracks and wobbles! It still turns on the smooth road, though...");
+    } else toast(`The wheel cracks a little more. (${ch.wheelHits} of ${need})`);
+    return true;
+  }
+  if (inB(P.horses)) {
+    if (!W5.horseTold) { W5.horseTold = true; toast("Not the horses! They're only pulling the cart. Aim for the wheel."); }
+    return false;   // the stone flies on
+  }
+  if (inB(P.cart)) { stoneHit(s, 0.4); return true; }
+  return false;
+}
+function drawChariot(camX) {
+  for (const r of roughs) {   // the rough ground: rocks strewn across the road (it flashes once Tobi's warning matters)
+    const x0 = r.x0 - camX; if (x0 > W || x0 + r.w * T < 0) continue;
+    for (let k = 0; k < r.w * 3; k++) { const x = x0 + k * T / 3 + ((k * 37) % 17) - 8, sz = 0.03 + ((k * 7) % 5) * 0.008;
+      ctx.save(); ctx.translate(x, GR * T + 10 + ((k * 13) % 7)); ctx.scale(1.3, 0.7); drawItem("boulder_grey", 0, 0, sz); ctx.restore(); }   // low, flat stones
+    if (chariot && chariot.phase === 3 && chariotWarned() && !chariot.beaten && Math.floor(performance.now() / 300) % 2) {
+      ctx.fillStyle = "rgba(255,230,120,0.22)"; ctx.fillRect(x0, GR * T - 40, r.w * T, 46);
+    }
+  }
+  const ch = chariot; if (!ch) return;
+  for (const a of ch.arrows) { ctx.save(); ctx.translate(a.x - camX, a.y); ctx.rotate(Math.atan2(a.vy, a.vx)); drawItem("arrow", 0, 10, 0.5); ctx.restore(); }
+  if (!ch.on && !ch.beaten) return;
+  const P = chParts(ch), now = performance.now() / 1000, x = ch.x - camX;
+  if (x < -700 || x > W + 700) return;
+  const dir = ch.dir, flt = ch.flash > 0 ? "brightness(1.8)" : "";
+  if (ch.state === "crash" || ch.state === "free") {   // the broken chariot, tipped down on its axle; the wheel in pieces
+    drawItem("chariot_wheel_broken", P.wx - camX, GR * T + 8, 0.42 * P.s / 0.65);
+    const crewOut = ch.state === "free" || ch.t > 1.4;
+    ctx.save(); ctx.translate(x, P.gy); ctx.rotate(-dir * 0.12); ctx.translate(-x, -P.gy);
+    if (crewOut) { ctx.beginPath(); ctx.rect(x - 400, P.cy + 30 * P.s + (200 - 334) * P.s, 800, 400); ctx.clip(); }   // the crew have jumped down: just the empty car
+    drawSprite("chariot_cart", 0, x, P.cy + 30 * P.s, dir);
+    ctx.restore();
+    const ht = ch.state === "free" ? ch.t : 0;
+    if (ch.state === "crash") drawSprite("chariot_horses_rear", Math.min(3, Math.floor(ch.t / 0.6)), P.hx - camX, P.gy, dir);
+    else drawSprite("chariot_horses_run", frameOf("chariot_horses_run", now), P.hx - camX + dir * ht * 160, P.gy, dir, 1, Math.max(0, 1 - ht / 4));   // free, trotting off
+    if (crewOut) { const ct = ch.state === "free" ? ch.t + 1.2 : ch.t - 1.4; drawSprite("chariot_crew_flee", frameOf("chariot_crew_flee", now), x + ct * 260, P.gy, 1, 0.85, Math.max(0, 1 - ct / 4)); }
+    return;
+  }
+  const moving = ch.v > 30;
+  // the horses (galloping, or pawing while the driver whips them)
+  drawSprite("chariot_horses_run", moving ? frameOf("chariot_horses_run", now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 4) % 2, P.hx - camX, P.gy, dir);
+  // the cart: the archer's pose, or the driver whipping
+  let ci = 0;
+  if (ch.phase === 1) ci = { drive: 0, raise: 1, draw: 2, loose: 3, duck: 4 }[ch.archer];
+  else ci = ch.state === "whip" || ch.state === "ram" ? 5 : 0;
+  drawSprite("chariot_cart", ci, x, P.cy, dir, 1, 1, flt);
+  if (ch.phase === 1 && ch.archer === "raise") {   // the glint: the tell
+    const gx = (P.archer.x0 + P.archer.x1) / 2 - camX + dir * 40 * P.s, gy = P.archer.y0 + 20 * P.s, a = 0.5 + 0.5 * Math.sin(now * 20);
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(gx, gy, 1, gx, gy, 26); g.addColorStop(0, `rgba(255,255,220,${a})`); g.addColorStop(1, "rgba(255,240,150,0)"); ctx.fillStyle = g; ctx.fillRect(gx - 26, gy - 26, 52, 52); ctx.restore();
+  }
+  // the wheel, turning (cracked and wobbling in phase 3)
+  const wob = ch.phase === 3 ? Math.sin(now * 25) * 3 : 0, img = ch.phase === 3 ? "chariot_wheel_cracked" : "chariot_wheel", ws = P.wr * 2 / 260;
+  ctx.save(); ctx.translate(P.wx - camX, P.wy + wob); ctx.rotate(ch.wheelA); drawItem(img, 0, P.wr, ws, 1); ctx.restore();
+}
+// the camera stays on the arena while the chariot fight is on (caves.js camLimits asks)
+function chariotCam() { return chariot && chariot.on && !chariot.beaten ? [chariot.a0, chariot.a0] : null; }
+function chariotBlocking() { return chariot && !chariot.beaten ? "The chariot! Deal with it first." : null; }
+const lostThings5 = lostThingsTally;
+lostThingsTally = function () {
+  const pd = packDonkeys();
+  if (pd.length) return { found: pd.filter(k => k.found).length, total: pd.length, things: "pack donkeys", icon: "donkey" };
+  return lostThings5();
+};
+// a voice across the valley, now and then: you can't make out the words yet
+let voiceT = 9;
+function updateVoice(dt) {
+  if (LEVEL_STAGE !== "5-4" || (chariot && chariot.on)) return;
+  voiceT -= dt;
+  if (voiceT <= 0) { voiceT = 26 + Math.random() * 12; sfx("lion_roar", undefined, 0.25, 0.55);
+    toast(W5.voiceTold ? "The voice again, booming across the valley." : "A huge voice booms across the valley, too far off to make out the words. Tobi goes pale."); W5.voiceTold = true; }
+}
+function updateWorld54(dt) { updateChariot(dt); updateVoice(dt); }
+function drawWorld54(camX) { drawChariot(camX); }
+
+function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); updateWorld53(dt); updateWorld54(dt); }
+function drawWorld52(camX) { drawTobiCave(camX); drawSpikePits(camX); drawLeopards(camX); drawGear(camX); drawWorld53(camX); drawWorld54(camX); }
 
 // ---------------------------------------------------------------------------
 // Hooks: world1.js (critters), main.js (each frame, drawing, the HUD)
