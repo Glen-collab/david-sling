@@ -76,6 +76,19 @@ const MAP_WORLDS = {
       { id: "4-4", label: "The King's Hall", x: 820, y: 150, trail: [[800, 200]] },
     ],
   },
+  // World 5: until Glen's World 5 painting, the stops sit on the journey painting's own road west (the farmhouse, the
+  // watchtower, the rocky hills, the stream down to the camps).
+  5: {
+    name: "The Road to the Valley", src: "../assets/maps/journey_map.jpg",
+    david: { far: 0.36, near: 0.6, y0: 250, y1: 950 },
+    stops: [
+      { id: "home", label: "Jesse's house", x: 1165, y: 600 },
+      { id: "5-1", label: "The Supply Road", x: 1700, y: 650, trail: [[1290, 600], [1420, 640], [1560, 660]] },
+      { id: "5-2", label: "The Mountain Trail", x: 1290, y: 350, trail: [[1640, 560], [1520, 470], [1400, 400]] },
+      { id: "5-3", label: "The Lookouts' Ridge", x: 1850, y: 420, trail: [[1420, 300], [1600, 330], [1760, 380]] },
+      { id: "5-4", label: "Down to Elah", x: 1640, y: 470, trail: [[1780, 470], [1700, 480]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -93,8 +106,8 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1, 2, 3, 4];   // worlds you can go into from the journey map so far
-const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_WORLDS = [1, 2, 3, 4, 5];   // worlds you can go into from the journey map so far
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }

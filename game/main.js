@@ -345,6 +345,7 @@ const STAGE_INFO = {
   "4-3": { cols: 214, bg: "w4_3", ter: "w2s", name: "The Broken String" },   // Glen's Gibeah market set
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
+  "5-1": { cols: 250, bg: "w2_2", ter: "w2s", name: "The Supply Road" },   // (World 2's dry wadi stands in until Glen's 5-1 set)
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
@@ -1097,6 +1098,50 @@ if (LEVEL_NAME === "test") {
   critter("villagedog", 276); critter("dove", 280);
   oliveRow(284, 16, 6);
   sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+} else if (LEVEL_NAME === "5-1") {
+  // ---- 5-1 The Supply Road: west from Bethlehem with the provisions for the brothers (1 Samuel 17:17-18). Families
+  //      coming the other way, running from the Philistines; raiders up in the hills after grain (they snatch a loaf or a
+  //      cheese: hit them and they drop it); vultures circling (they follow armies); vipers and scorpions in the rocks.
+  //      The lost things: the fleeing family's flock, scattered in their panic: bring them to the fold where the family
+  //      waits, and the father tells you about the soldier in the cave (5-2). Dalet on a roadside rock. The One ran up
+  //      into the abandoned watchtower: climb the broken stairs. Single jump only (the double jump is 5-2). ----
+  ground(0, 249);
+  campfire(5);
+  oliveRow(10, 16, 5);
+  talk(16, "The fleeing father", "You're going that way? Boy, there's a giant in that valley. Turn around! The raiders scattered our sheep all over these hills. If you find any, we'll be at the fold down the road.");
+  lostSheep("sheep", 27, 16);                                   // the first one, right by the road
+  rock(32, 15, 3, 2); rock(35, 13, 3, 4); oliveRow(35, 12, 3); special(36, 8);
+  snake("viper", 41);
+  critter("raider", 48);                                        // down the road at you, for the provisions
+  setPiece("vultures", 52);
+  wall(56, 15, 4, 2);                                           // a dry-stone field wall
+  rock(61, 13, 5, 4); lostSheep("sheep2", 64, 12, "ledge");     // up on the rocks: play the harp below
+  oliveArc(68, 16, 5);
+  campfire(74);
+  rock(79, 14, 4, 3); inscription(80, 15, "dalet");             // scratched on a roadside rock: the old letter Dalet
+  critter("scorpion", 86);
+  critter("raider", 92);
+  lostSheep("sheepblack", 99, 16);
+  // the olive terraces: up and up, a lamb at the top
+  rock(103, 15, 6, 2); rock(109, 13, 6, 4); rock(115, 11, 6, 6); oliveRow(110, 12, 4); oliveRow(116, 10, 4);
+  lostSheep("lamb", 119, 10, "ledge");
+  special(117, 6);
+  snake("viper", 125); critter("raider", 130);
+  campfire(138);
+  // the abandoned watchtower: The One ran up the broken stairs
+  stair(142, 4); plat(150, 9, 3);                               // the broken stairs, and a beam where a floor was
+  house(153, 5, 7);                                             // the old watchtower (Glen's tall town house)
+  lostSheep("lamb", 155, 6, "one"); oliveRow(153, 6, 2);
+  setPiece("vultures", 162);
+  critter("scorpion", 166);
+  wall(170, 15, 3, 2); critter("raider", 176);
+  lostSheep("sheep", 182, 16);
+  rock(188, 15, 3, 2); rock(191, 13, 4, 4); special(192, 8);
+  campfire(198);
+  snake("viper", 204); critter("raider", 210);
+  oliveRow(214, 16, 6);
+  talk(222, "The fleeing father", "Our sheep! Bring them into the fold, boy. We'll take them from there.");
+  sheepfold(232);                                               // the fold by the road, where the family waits
 } else if (LEVEL_NAME === "4-2") {
   // ---- 4-2 The Training Yard: David arrives at Gibeah and the captain of the yard wants to see what the shepherd can do
   //      (he's one of Saul's armor-bearers now, 1 Samuel 16:21). Gera, an old left-handed slinger of Benjamin (Judges
@@ -2721,6 +2766,7 @@ function drawSheep(camX) {
   for (const sh of lost) drawSheepOne(sh, camX);
 }
 function drawSheepCount() {
+  if (typeof drawProvisions === "function") drawProvisions();   // World 5: the loaves and cheeses (world5.js)
   if (typeof drawLostThings === "function" && drawLostThings()) return;   // World 4: the lost gifts (world4.js)
   if (!lostCount()) return;
   hudIcon("sheep", HUD_X - 4, 194, 36);
@@ -3401,7 +3447,8 @@ function updateWorld(dt) {
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
   if (typeof updateWorld3 === "function") updateWorld3(dt);
-  if (typeof updateWorld4 === "function") updateWorld4(dt);   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
+  if (typeof updateWorld4 === "function") updateWorld4(dt);
+  if (typeof updateWorld5 === "function") updateWorld5(dt);   // world5.js: the provisions, raiders, the fleeing father   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
 // background layers: Glen's art, three per world. far = sky + distant hills (slowest), mid = rolling hills, near = grass strip
@@ -3554,6 +3601,9 @@ function frame(now) {
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
+  if (typeof w5intro !== "undefined" && w5intro.active) {   // the opening of World 5, at Jesse's house (world5.js)
+    pollInput(); w5intro.update(real); w5intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
   if (typeof w4intro !== "undefined" && w4intro.active) {   // the opening of World 4, at Jesse's door (world4.js)
     pollInput(); w4intro.update(real); w4intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
@@ -3587,7 +3637,8 @@ function frame(now) {
   drawTiles(camX);
   drawCaveFeatures(camX);
   drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);
-  if (typeof drawWorld4 === "function") drawWorld4(camX);   // world3.js: houses, ladders, barley, granary
+  if (typeof drawWorld4 === "function") drawWorld4(camX);
+  if (typeof drawWorld5 === "function") drawWorld5(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
   drawPickups(camX);

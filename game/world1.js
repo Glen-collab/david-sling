@@ -7,7 +7,8 @@
 // copy of index.html (the scripts themselves always load fresh).
 document.write('<script src="world2.js?v=' + (window.BUILD || 0) + '"><\/script>');
 document.write('<script src="world3.js?v=' + (window.BUILD || 0) + '"><\/script>');   // Bethlehem: houses, crows, rats
-document.write('<script src="world4.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the road to Gibeah: the gift donkey, dogs, bandits, doves
+document.write('<script src="world4.js?v=' + (window.BUILD || 0) + '"><\/script>');
+document.write('<script src="world5.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the road to the valley: the provisions, raiders, vultures   // the road to Gibeah: the gift donkey, dogs, bandits, doves
 document.write('<script src="harp_songs.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the harp-duel charts (tools/make_harp_chart.py)
 
 const W1 = {
@@ -301,6 +302,7 @@ function updateCritters(dt) {
     else if (k.kind === "giftdonkey") updateGiftDonkey(k, dx, sameLevel, dt);   // world4.js
     else if (k.kind === "villagedog") updateVillageDog(k, dx, sameLevel, dt);
     else if (k.kind === "bandit") updateBandit(k, dx, sameLevel, dt);
+    else if (k.kind === "raider") updateRaider(k, dx, sameLevel, dt);   // world5.js
     else if (k.kind === "dove") updateDove(k, dx, sameLevel, dt);
     else if (k.kind === "guarddog") updateGuardDog(k, dx, sameLevel, dt);
   }
@@ -422,6 +424,7 @@ function stoneHitsCritters(s) {
     if (k.kind === "giftdonkey") return stoneHitsGiftDonkey(k, s);   // world4.js
     if (k.kind === "villagedog") return stoneHitsVillageDog(k, s);
     if (k.kind === "bandit") return stoneHitsBandit(k, s);
+    if (k.kind === "raider") return stoneHitsRaider(k, s);
     if (k.kind === "dove") { stoneHitsDove(k, s); continue; }
     if (k.kind === "guarddog") return stoneHitsGuardDog(k, s);
     if (k.kind === "ram") {   // stones just bounce off those horns
@@ -463,6 +466,7 @@ function drawCritters(camX) {
     if (k.kind === "giftdonkey") { drawGiftDonkey(k, x); continue; }   // world4.js
     if (k.kind === "villagedog") { drawVillageDog(k, x); continue; }
     if (k.kind === "bandit") { drawBandit(k, x); continue; }
+    if (k.kind === "raider") { drawRaider(k, x); continue; }
     if (k.kind === "dove") { drawDove(k, x); continue; }
     if (k.kind === "guarddog") { drawVillageDog(k, x); continue; }
     const a = CRITTER_ART[k.art || k.kind];   // (k.art: the same animal with other art, e.g. World 3's stray dog as a jackal)

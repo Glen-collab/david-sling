@@ -301,3 +301,14 @@ the harp phrase at 3-2's campfire.
   17:15 WEB); the Steward's line (DESIGN); 1 Sam 16:23; then the Bethlehem gate (w3_1, a drawn dusty road) and Hanan
   (no staff: he gave it to David) "I told you I'd be here" / "Did you find the one who tells you the truth?". A advances.
 
+
+## World 5 (started 2026-10-15)
+- `game/world5.js` (loaded from world1.js after world4.js): the provisions (10 loaves, 10 cheeses: a hit knocks one
+  loose for `W5.DROP_LIFE` s; what's left is saved as progress.prov at the clear card and carried to the next stage),
+  raiders (`critter("raider")`: run down the road at David, snatch one, a stone makes them drop it), vultures
+  (`setPiece("vultures")`, scenery), the fleeing father (World 2's leatherworker stands in; gives the Tobi secret,
+  progress.tobiSecret, at the clear), the opening scene `w5intro` (`?w5intro` replays it).
+- **5-1 The Supply Road** (main.js): 250 cols, 5 of the family's sheep + The One on the old watchtower (Glen's tall town
+  house), Dalet on a roadside rock. Stand-in art: World 2's `w2_2` backgrounds, the thief for raiders, the eagle for
+  vultures. The World 5 map is the journey painting until Glen's World 5 map (MAP_WORLDS[5] in map.js).
+- Art prompts for the map and 5-1: ART_PROMPTS.md, "World 5 — The Road to the Valley".
