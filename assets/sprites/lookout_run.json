@@ -1,0 +1,11 @@
+{
+  "frames": 5,
+  "frame_w": 359,
+  "frame_h": 336,
+  "ms_per_frame": 90,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 221,
+  "anchor_y": 334,
+  "source": "lk_run_m.png"
+}

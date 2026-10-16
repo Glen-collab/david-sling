@@ -2172,6 +2172,30 @@ window.SPRITE_DATA = {
   "ay": 185,
   "align": "feet"
  },
+ "lookout_run": {
+  "src": "../assets/sprites/lookout_run.png",
+  "frames": 5,
+  "w": 359,
+  "h": 336,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 221,
+  "ay": 334,
+  "align": "feet"
+ },
+ "lookout_walk": {
+  "src": "../assets/sprites/lookout_walk.png",
+  "frames": 6,
+  "w": 197,
+  "h": 345,
+  "ms": 130,
+  "loop": true,
+  "pingpong": false,
+  "ax": 121,
+  "ay": 343,
+  "align": "feet"
+ },
  "messenger_dismount": {
   "src": "../assets/sprites/messenger_dismount.png",
   "frames": 14,
@@ -2892,6 +2916,18 @@ window.SPRITE_DATA = {
   "ay": 108,
   "align": "feet"
  },
+ "signal_fire": {
+  "src": "../assets/sprites/signal_fire.png",
+  "frames": 5,
+  "w": 381,
+  "h": 306,
+  "ms": 120,
+  "loop": true,
+  "pingpong": false,
+  "ax": 154,
+  "ay": 304,
+  "align": "feet"
+ },
  "snake_strike": {
   "src": "../assets/sprites/snake_strike.png",
   "frames": 8,
@@ -3385,4 +3421,4 @@ window.SPRITE_DATA = {
   "align": "feet"
  }
 };
-window.ITEM_LIST = ["barley", "beehive_tree", "boulder_grey", "boulder_mound", "boulder_tan", "bread", "bridge_post", "brother_elihu", "brother_nethanel", "brother_ozem", "brother_raddai", "bush", "campfire", "cave", "cave_1", "cave_2", "cave_exit", "cave_ledge", "cave_rock_tile", "cave_rock_top", "cheese", "cliff_edge", "cloth_stall", "crops", "date_palm", "dates", "davids_journal", "fig_cake", "fig_tree", "figs", "fold_wall_end_l", "fold_wall_end_r", "fold_wall_mid_1", "fold_wall_mid_2", "fold_wall_mid_3", "fold_wall_post", "gate_panel", "gate_post", "gift_bread", "gift_cheese", "gift_figs", "gift_honey", "gift_oil", "grain_sack", "grape_vine", "grapes", "hall_lamp_lit", "hall_lamp_unlit", "honey", "lamp_lit", "lamp_unlit", "ledge_chunk_1", "ledge_chunk_2", "ledge_chunk_3", "ledge_chunk_4", "ledge_cracked", "ledge_long", "ledge_medium", "ledge_short", "lentils", "log_broken", "log_long", "log_short", "map_cairn", "map_stop", "map_stop_done", "map_stop_next", "name_stone_1", "name_stone_2", "name_stone_3", "name_stone_4", "name_stone_broken", "oak", "oak_fallen", "oak_gashed", "oak_split", "oleander", "olive_golden", "olive_green", "olive_purple", "olive_tree", "olives", "pen_pillar_l", "pen_pillar_r", "pen_post_tall", "pen_wall_1", "pen_wall_2", "pen_wall_low", "poison_berries", "pomegranate", "pomegranate_tree", "quest_peg", "quest_string", "quest_wax", "raisins", "roasted_grain", "rock_ledge", "rock_pile_grey", "rock_pile_tan", "rope_bridge", "rope_bridge_and_post", "rubble_dirt", "rubble_mound", "rubble_sticks", "rubble_stones", "signpost", "sling_pouch", "spike_pit", "staff", "stalactite", "stalagmite", "stone_remembrance", "stone_remembrance_glow", "stone_wall", "stump_cut", "stump_roots", "tent", "thistle", "thorn_bush", "throne", "tobi_horn", "tobi_pack", "tobi_sandal", "tobi_staff", "tobi_waterskin", "town_barn", "town_barn_long", "town_brick_stack", "town_clay_pots", "town_fig_rack", "town_grain_baskets", "town_house_big", "town_house_corner", "town_house_fort", "town_house_parapet", "town_house_shed", "town_house_small", "town_house_tall", "town_house_tower", "town_hut_round", "town_ladder", "town_ladder_wall", "town_limestone_blocks", "town_log_stack", "town_low_wall", "town_rock_heap", "town_roof_slab", "town_roof_tiles", "town_side_beam", "town_side_brick_wall", "town_side_clay_pots", "town_side_fig_rack", "town_side_grain_baskets", "town_side_ladder_wall", "town_side_limestone_wall", "town_side_log_stack", "town_side_low_wall", "town_side_rock_heap", "town_side_roof_tiles", "town_side_stairs", "town_side_stone_house", "town_side_thatched_hut", "town_side_threshing_floor", "town_side_window_frame", "town_stair_tower", "town_stairs", "town_stone_house", "town_thatched_hut", "town_threshing_floor", "town_window_frame", "toxic_mushroom", "vineyard", "wasp_large", "wasp_small", "wild_gourds", "wineskin"];
+window.ITEM_LIST = ["barley", "beehive_tree", "boulder_grey", "boulder_mound", "boulder_tan", "bread", "bridge_post", "brother_elihu", "brother_nethanel", "brother_ozem", "brother_raddai", "bush", "cairn_down", "cairn_up", "campfire", "cave", "cave_1", "cave_2", "cave_exit", "cave_ledge", "cave_rock_tile", "cave_rock_top", "cheese", "cliff_edge", "cloth_stall", "crops", "date_palm", "dates", "davids_journal", "fig_cake", "fig_tree", "figs", "fold_wall_end_l", "fold_wall_end_r", "fold_wall_mid_1", "fold_wall_mid_2", "fold_wall_mid_3", "fold_wall_post", "gate_panel", "gate_post", "gift_bread", "gift_cheese", "gift_figs", "gift_honey", "gift_oil", "grain_sack", "grape_vine", "grapes", "hall_lamp_lit", "hall_lamp_unlit", "honey", "lamp_lit", "lamp_unlit", "ledge_chunk_1", "ledge_chunk_2", "ledge_chunk_3", "ledge_chunk_4", "ledge_cracked", "ledge_long", "ledge_medium", "ledge_short", "lentils", "log_broken", "log_long", "log_short", "map_cairn", "map_stop", "map_stop_done", "map_stop_next", "name_stone_1", "name_stone_2", "name_stone_3", "name_stone_4", "name_stone_broken", "oak", "oak_fallen", "oak_gashed", "oak_split", "oleander", "olive_golden", "olive_green", "olive_purple", "olive_tree", "olives", "pen_pillar_l", "pen_pillar_r", "pen_post_tall", "pen_wall_1", "pen_wall_2", "pen_wall_low", "poison_berries", "pomegranate", "pomegranate_tree", "quest_peg", "quest_string", "quest_wax", "raisins", "roasted_grain", "rock_ledge", "rock_pile_grey", "rock_pile_tan", "rope_bridge", "rope_bridge_and_post", "rubble_dirt", "rubble_mound", "rubble_sticks", "rubble_stones", "signpost", "sling_pouch", "spike_pit", "staff", "stalactite", "stalagmite", "stone_remembrance", "stone_remembrance_glow", "stone_wall", "stump_cut", "stump_roots", "tent", "thistle", "thorn_bush", "throne", "tobi_horn", "tobi_pack", "tobi_sandal", "tobi_staff", "tobi_waterskin", "town_barn", "town_barn_long", "town_brick_stack", "town_clay_pots", "town_fig_rack", "town_grain_baskets", "town_house_big", "town_house_corner", "town_house_fort", "town_house_parapet", "town_house_shed", "town_house_small", "town_house_tall", "town_house_tower", "town_hut_round", "town_ladder", "town_ladder_wall", "town_limestone_blocks", "town_log_stack", "town_low_wall", "town_rock_heap", "town_roof_slab", "town_roof_tiles", "town_side_beam", "town_side_brick_wall", "town_side_clay_pots", "town_side_fig_rack", "town_side_grain_baskets", "town_side_ladder_wall", "town_side_limestone_wall", "town_side_log_stack", "town_side_low_wall", "town_side_rock_heap", "town_side_roof_tiles", "town_side_stairs", "town_side_stone_house", "town_side_thatched_hut", "town_side_threshing_floor", "town_side_window_frame", "town_stair_tower", "town_stairs", "town_stone_house", "town_thatched_hut", "town_threshing_floor", "town_window_frame", "toxic_mushroom", "vineyard", "wasp_large", "wasp_small", "wild_gourds", "wineskin"];

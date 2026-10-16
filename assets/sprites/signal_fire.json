@@ -1,0 +1,11 @@
+{
+  "frames": 5,
+  "frame_w": 381,
+  "frame_h": 306,
+  "ms_per_frame": 120,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 154,
+  "anchor_y": 304,
+  "source": "signal_fire.png"
+}
