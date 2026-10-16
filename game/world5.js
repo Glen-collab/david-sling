@@ -238,12 +238,294 @@ function drawFather(camX) {
   });
 }
 
+
+// ===========================================================================
+// 5-2 The Mountain Trail (night). Hyenas that laugh before they lunge, the leopard in the tree (a mini-boss), Tobi in
+// his cave (light the fire, play the harp, and he teaches the scout's leap: the double jump), his dropped gear (the lost
+// things), spiked crevices, and The One on a shelf only the new jump reaches.
+//   critter("hyena", c)            prowls; when David comes near it LAUGHS (the warning), crouches, and lunges. A stone
+//                                  sends it off for good.
+//   setPiece("leopard", c)         a tree (Glen's oak) with the leopard in it: eyes shine in the branches, then it drops
+//                                  on the spot where David stood. On the ground it stalks and swipes; 3 hits and it goes
+//                                  back up its tree and away. It climbs back up after a while and drops again.
+//   setPiece("tobicave", c)        the overhang where Tobi hides (rock + campfire placed in main.js); Tobi stands at c+5
+//   setPiece("gear", c, r, {name}) one of Tobi's things: waterskin, sandal, horn, pack, staff
+//   setPiece("spikes", c, GR, {w}) draws Glen's spiked crevice over a pit w columns wide
+// ===========================================================================
+Object.assign(W5, {
+  HYENA_SEE: 9, HYENA_LAUGH: 1.1, HYENA_CROUCH: 0.45, HYENA_LUNGE: 640, HYENA_SIZE: 1.0,
+  LEOPARD_SIZE: 1.35, LEOPARD_HP: 3, LEOPARD_SEE: 8, LEOPARD_WATCH: 1.3, LEOPARD_WALK: 150, LEOPARD_GROUND: 4.5,
+  TOBI_CALM: 2.0, TOBI_FOLLOW: 3, TOBI_WALK: 200,
+});
+Object.assign(TUNE.SPRITE_SIZE, { leopard_walk: W5.LEOPARD_SIZE, leopard_run: W5.LEOPARD_SIZE, leopard_pounce: W5.LEOPARD_SIZE });
+
+// --- hyenas
+CRITTER_ART.hyena = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 60, y1: k.y }) };
+function updateHyena(k, dx, sameLevel, dt) {
+  const grav = () => { k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt); };
+  if (k.state === "idle" || k.state === "prowl") {   // pacing about its spot, nose down
+    if (k.state === "idle") setCrit(k, "prowl");
+    if (Math.abs(k.x - k.home) > 2.5 * T) k.facing = Math.sign(k.home - k.x);
+    k.cool = Math.max(0, (k.cool || 0) - dt);
+    if (!runCritter(k, 55, dt)) k.facing = -k.facing;
+    if (!k.cool && sameLevel && Math.abs(dx) < W5.HYENA_SEE * T && david.deadT <= 0) {
+      setCrit(k, "laugh"); k.facing = Math.sign(dx) || 1; k.vx = 0;
+      sfx("hyena_" + (1 + Math.floor(Math.random() * 3)), k.x, 0.8);
+      if (!W5.hyenaTold) { W5.hyenaTold = true; toast("A hyena! It laughs before it lunges: when you hear it, get ready to jump."); }
+    }
+    return;
+  }
+  if (k.state === "laugh") { k.vx = 0; grav(); if (k.t > W5.HYENA_LAUGH) setCrit(k, "crouch"); return; }
+  if (k.state === "crouch") { k.vx = 0; grav(); k.facing = Math.sign(dx) || k.facing; if (k.t > W5.HYENA_CROUCH) { setCrit(k, "lunge"); k.vy = -520; k.onGround = false; } return; }
+  if (k.state === "lunge") {
+    k.vx = k.facing * W5.HYENA_LUNGE; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 50, 44, dt);
+    if (touchesDavid(critterBox(k))) hurtDavid(k.x);
+    if (k.onGround && k.t > 0.25) setCrit(k, "run");
+    return;
+  }
+  if (k.state === "run") {   // on past, then it turns and settles again
+    if (!runCritter(k, 380, dt) || k.t > 1.1) { setCrit(k, "prowl"); k.home = k.x; k.cool = 2.2; k.facing = Math.sign(dx) || 1; }
+  }
+}
+function stoneHitsHyena(k, s) {
+  k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 460; stoneHit(s, 0.7);
+  sfx("hyena_2", k.x, 0.6, 1.4);
+  if (!W5.hyenaGone) { W5.hyenaGone = true; toast("The hyena slinks off into the dark."); }
+  return !s.power;
+}
+function drawHyena(k, x) {
+  const st = k.state, nm = st === "laugh" ? "hyena_laugh" : st === "crouch" ? "hyena_crouch" : st === "lunge" ? "hyena_lunge" : st === "run" || k.gone ? "hyena_run" : "hyena_stalk";
+  let i = frameOf(nm, k.t);
+  if (st === "crouch") i = Math.min(SPR[nm].frames - 1, Math.floor(k.t / W5.HYENA_CROUCH * SPR[nm].frames));
+  if (st === "lunge") i = Math.min(SPR[nm].frames - 1, Math.floor(k.t / 0.5 * SPR[nm].frames));
+  drawSprite(nm, i, x, k.y, k.facing, W5.HYENA_SIZE, k.alpha);
+}
+
+// --- the leopard (mini-boss)
+const leopards = setPieces.filter(p => p.kind === "leopard").map(p => ({ tx: p.x, x: p.x, y: GR * T, perch: GR * T - 6.5 * T,
+  state: "perch", t: 0, hp: W5.LEOPARD_HP, facing: -1, flash: 0, alpha: 1, gone: false }));
+const leoBox = L => ({ x0: L.x - 60, x1: L.x + 60, y0: L.y - 70, y1: L.y });
+function setLeo(L, s) { L.state = s; L.t = 0; }
+function leoArc(L, tx, ty, dur, then) { Object.assign(L, { ax0: L.x, ay0: L.y, ax1: tx, ay1: ty, adur: dur, athen: then, facing: Math.sign(tx - L.x) || L.facing }); setLeo(L, "arc"); }
+function updateLeopards(dt) {
+  const d = david;
+  for (const L of leopards) {
+    if (L.gone) continue;
+    L.t += dt; L.flash = Math.max(0, L.flash - dt);
+    const dx = d.x - L.x;
+    if (L.state === "perch") {   // up in the branches
+      L.x = L.tx; L.y = L.perch;
+      if (L.t > 1.5 && Math.abs(d.x - L.tx) < W5.LEOPARD_SEE * T && d.deadT <= 0) {
+        setLeo(L, "watch"); sfx("wolf_growl", L.x, 0.5, 0.75);
+        if (!W5.leoTold) { W5.leoTold = true; toast("Two eyes shine in the branches... a leopard! \"A leopard will watch against their cities\" (Jeremiah 5:6). Keep moving when it drops!"); }
+      }
+    } else if (L.state === "watch") {   // the eyes, the rustle... then it drops where David stood
+      L.mark = L.mark || d.x;
+      if (L.t > W5.LEOPARD_WATCH) { const tx = L.mark; L.mark = 0; leoArc(L, tx, GR * T, 0.7, "land"); }
+      else if (L.t > W5.LEOPARD_WATCH - 0.5 && !L.mark2) { L.mark2 = 1; L.mark = d.x; }   // it picks its spot half a second before
+    } else if (L.state === "arc") {
+      const f = Math.min(1, L.t / L.adur), top = Math.min(L.ay0, L.ay1) - 60;
+      L.x = L.ax0 + (L.ax1 - L.ax0) * f; L.y = L.ay0 + (L.ay1 - L.ay0) * f - Math.sin(f * Math.PI) * (Math.max(L.ay0, L.ay1) - top) * (L.ay1 > L.ay0 ? 0.3 : 1);
+      if (L.athen === "land" && touchesDavid(leoBox(L))) hurtDavid(L.x);
+      if (f >= 1) {
+        L.mark2 = 0;
+        if (L.athen === "land") { setLeo(L, "prowl"); L.ground = 0; sfx("stone_hit", L.x, 0.3, 0.6); }
+        else if (L.athen === "perch") setLeo(L, "perch");
+        else if (L.athen === "away") { L.gone = true; toast("The leopard slips away through the branches and is gone. You're safe."); sfx("heal", undefined, 0.5); }
+      }
+    } else if (L.state === "prowl") {   // stalking toward David; close in, then a swipe
+      L.ground += dt; L.facing = Math.sign(dx) || L.facing;
+      if (Math.abs(dx) > 70) L.x += L.facing * W5.LEOPARD_WALK * dt;
+      if (Math.abs(dx) < 2.4 * T && Math.abs(d.y - L.y) < 80 && L.t > 0.6) { setLeo(L, "swipe"); L.sx = L.x; }
+      if (touchesDavid(leoBox(L))) hurtDavid(L.x);
+      if (L.ground > W5.LEOPARD_GROUND) setLeo(L, "toTree");
+    } else if (L.state === "swipe") {   // a quick pounce forward
+      const f = Math.min(1, L.t / 0.55); L.x = L.sx + L.facing * 2.4 * T * Math.sin(f * Math.PI / 2);
+      if (L.t > 0.15 && touchesDavid(leoBox(L))) hurtDavid(L.x);
+      if (f >= 1) setLeo(L, "prowl");
+    } else if (L.state === "toTree" || L.state === "retreat") {   // back to its tree, and up
+      L.facing = Math.sign(L.tx - L.x) || 1; L.x += L.facing * 420 * dt;
+      if (Math.abs(L.tx - L.x) < 20) leoArc(L, L.tx, L.perch - (L.state === "retreat" ? 2 * T : 0), 0.6, L.state === "retreat" ? "away" : "perch");
+    } else if (L.state === "stagger") {
+      L.x -= L.facing * 120 * dt;
+      if (L.t > 0.45) setLeo(L, L.hp <= 0 ? "retreat" : "prowl");
+    }
+    if (L.state === "retreat" || (L.state === "arc" && L.athen === "away")) L.alpha = L.state === "arc" ? Math.max(0, 1 - L.t / L.adur) : 1;
+  }
+}
+function stoneHitsLeopard(s) {
+  for (const L of leopards) {
+    if (L.gone || !["prowl", "swipe", "toTree", "stagger"].includes(L.state)) continue;
+    const b = leoBox(L);
+    if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 - 10 || s.y > b.y1) continue;
+    L.hp -= s.power ? 3 : s.charged ? 2 : 1; L.flash = 0.25; stoneHit(s); sfx("lion_hit", L.x, 0.6, 1.4);
+    setLeo(L, "stagger");
+    if (L.hp <= 0) toast("The leopard has had enough!");
+    return true;
+  }
+  return false;
+}
+function drawLeopards(camX) {
+  const now = performance.now() / 1000;
+  for (const L of leopards) {
+    const tx = L.tx - camX; if (tx < -500 || tx > W + 500) continue;
+    drawItem("oak", tx + 20, GR * T + 8, 0.42);   // its tree
+    if (L.gone) continue;
+    const x = L.x - camX;
+    if (L.state === "perch" || L.state === "watch") {   // hidden in the leaves: only the eyes (and only once it's watching)
+      continue;   // (the eyes are drawn over the night: drawLeopardEyes)
+    }
+    let nm = "leopard_walk", i = frameOf(nm, L.t);
+    if (L.state === "arc") { nm = "leopard_pounce"; i = Math.min(SPR[nm].frames - 1, Math.floor(L.t / L.adur * SPR[nm].frames)); }
+    else if (L.state === "swipe") { nm = "leopard_pounce"; i = Math.min(SPR[nm].frames - 1, 3 + Math.floor(L.t / 0.55 * 7)); }
+    else if (L.state === "toTree" || L.state === "retreat") { nm = "leopard_run"; i = frameOf(nm, L.t); }
+    drawSprite(nm, i, x, L.y, L.facing, 1, L.alpha, L.flash > 0 ? "brightness(2)" : "");
+  }
+}
+
+// --- Tobi
+const tobiCave = setPieces.find(p => p.kind === "tobicave");
+const tobi = tobiCave ? { x: tobiCave.x + 5 * T, y: GR * T, home: tobiCave.x + 5 * T, y0: GR * T, vx: 0, vy: 0, onGround: true, facing: -1, state: "hide", t: 0, calmT: 0, kind: "tobi", alpha: 1 } : null;
+if (tobi) critters.push(tobi);
+CRITTER_ART.tobi = { box: k => ({ x0: k.x - 20, x1: k.x + 20, y0: k.y - 90, y1: k.y }) };
+const tobiQueue = [];
+function tobiSay(lines) { tobiQueue.push(...lines); }
+function updateTobi(k, dx, sameLevel, dt) {
+  if (dialog.t <= 0.05 && tobiQueue.length) { const L = tobiQueue.shift(); if (typeof L === "function") L(); else sayLine(L[0], L[1]); }
+  if (k.state === "idle") {   // (after a fall, the critters are reset: he's back in his cave, or right behind David)
+    if (!k.rescued) setCrit(k, "hide");
+    else { setCrit(k, "follow"); k.x = david.x - (david.facing || 1) * 2 * T; k.y = david.y; if (!standable(k.x, k.y)) k.x = david.x; }
+  }
+  const fall = () => { k.vx = 0; k.vy = Math.min(TUNE.MAX_FALL, k.vy + TUNE.GRAVITY * dt); collideBody(k, 30, 80, dt); };
+  if (k.state === "hide") {
+    fall(); k.facing = Math.sign(dx) || -1;
+    if (!k.seen && Math.abs(dx) < 9 * T && david.deadT <= 0) {
+      k.seen = true;
+      let secret = false; try { secret = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").tobiSecret; } catch (e) {}
+      tobiSay([["Tobi", "Who's there?! ... You're not a Philistine. You're just a boy."],
+               ["Tobi", "I'm a scout. I'm supposed to be fast. I heard him, the giant, shouting across the valley, and I just... ran. I've been hiding here two days."],
+               ["", secret ? "The soldier the fleeing father saw. He's shaking. Light the fire, and play the harp for him (Select)." : "He's shaking with cold and fear. Light the fire, and play the harp for him (Select)."]]);
+    }
+    if (k.seen && david.state === "harp" && Math.abs(dx) < 8 * T) {
+      k.calmT += dt;
+      if (k.calmT > W5.TOBI_CALM) {
+        setCrit(k, "talk");
+        tobiSay([["Tobi", "That song... my mother sings that one. ... Thank you. My name is Tobi."],
+                 ["Tobi", "You're taking bread to the army? Down there, toward him? ... Then I'm coming with you. I won't run this time."],
+                 ["Tobi", "Here, let me show you something. Scouts learn to push off anything: a rock, a branch, even a bit of nothing. Jump, then jump again. Like this."],
+                 () => { setCrit(k, "demo"); k.rescued = true; learnSkill("leap"); },
+                 ["Tobi", "See? Now you. Jump, and press A again in the air. That cliff behind the cave? We'll go up it."]]);
+      }
+    }
+    return;
+  }
+  if (k.state === "talk") { fall(); k.facing = Math.sign(dx) || 1; return; }
+  if (k.state === "demo") {   // the scout's leap, in place
+    fall(); if (k.t > 1.0) setCrit(k, "follow");
+    return;
+  }
+  if (k.state === "leap") {
+    const f = Math.min(1, k.t / 0.75), base = k.ly0 + (k.ly1 - k.ly0) * f;
+    k.x = k.lx0 + (k.lx1 - k.lx0) * f; k.y = base - Math.sin(f * Math.PI) * (Math.max(k.ly0, k.ly1) - k.ltop);
+    if (f >= 1) { k.y = k.ly1; k.vy = 0; k.onGround = true; setCrit(k, "follow"); k.stuckT = 0; }
+    return;
+  }
+  // following David (like the gift donkey): up and down rocks in one bound, round anything he can't get past
+  if (david.deadT > 0) { fall(); return; }
+  if (david.onGround && k.onGround && Math.abs(david.y - k.y) > 30 && Math.abs(dx) < 10 * T) {
+    let tx = david.x - (Math.sign(dx) || 1) * 60; if (!standable(tx, david.y)) tx = david.x;
+    goatLeap(k, tx, david.y); return;
+  }
+  if (Math.abs(dx) > 16 * T && david.onGround) { k.x = david.x - (david.facing || 1) * 2 * T; k.y = david.y; k.vy = 0; if (!standable(k.x, k.y)) k.x = david.x; }
+  if (Math.abs(dx) > W5.TOBI_FOLLOW * T) {
+    k.facing = Math.sign(dx); k.moving = true;
+    const moved = runCritter(k, W5.TOBI_WALK + Math.min(260, Math.abs(dx) - W5.TOBI_FOLLOW * T), dt);
+    if (!moved && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
+    k.stuckT = moved ? 0 : (k.stuckT || 0) + dt;
+    if (k.stuckT > 1.2 && david.onGround) { k.stuckT = 0; let tx = david.x - (Math.sign(dx) || 1) * 2 * T; if (!standable(tx, david.y)) tx = david.x; goatLeap(k, tx, david.y); }
+  } else { k.moving = false; fall(); k.facing = Math.sign(dx) || k.facing; }
+}
+function stoneHitsTobi(k, s) { return false; }   // the stone flies on past him
+function drawTobi(k, x) {
+  let nm = "tobi_cave", i = 0;
+  if (k.state === "hide") i = david.state === "harp" && k.seen ? 2 : k.seen ? 1 : 0;
+  else if (k.state === "talk") { nm = "tobi_talk"; i = dialog.t > 0 && dialog.who === "Tobi" ? [0, 3, 1, 0][Math.floor(performance.now() / 700) % 4] : 0; }
+  else if (k.state === "demo") { nm = "tobi_leap"; i = Math.min(5, Math.floor(k.t / 1.0 * 6)); }
+  else if (k.state === "leap") { nm = "tobi_leap"; i = Math.min(4, 1 + Math.floor(k.t / 0.75 * 4)); }
+  else if (k.moving) { nm = "tobi_run"; i = frameOf(nm, k.t); }
+  else { nm = dialog.t > 0 && dialog.who === "Tobi" ? "tobi_talk" : "tobi_cave"; i = nm === "tobi_talk" ? [0, 4][Math.floor(performance.now() / 700) % 2] : 5; }
+  drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
+}
+function tobiBlocking() { return tobi && !["follow", "leap", "demo"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
+function drawTobiCave(camX) {   // the dark under the overhang
+  if (!tobiCave) return;
+  const x = tobiCave.x - camX; if (x < -400 || x > W + 600) return;
+  const g = ctx.createLinearGradient(0, GR * T - 4 * T, 0, GR * T);
+  g.addColorStop(0, "rgba(5,8,18,0.85)"); g.addColorStop(1, "rgba(5,8,18,0.35)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x - T / 2, GR * T - 3.6 * T, 9 * T, 3.6 * T, [40, 40, 0, 0]); ctx.fill();
+}
+
+// --- Tobi's gear (the lost things of 5-2)
+const GEAR_NAMES = { waterskin: "his waterskin", sandal: "his other sandal", horn: "his ram's horn", pack: "his scout's pack", staff: "his staff" };
+const tobiGear = setPieces.filter(p => p.kind === "gear").map(p => ({ name: p.name, x: p.x, y: p.y, taken: false, t: Math.random() * 6 }));
+function updateGear(dt) {
+  for (const g of tobiGear) {
+    g.t += dt; if (g.taken) continue;
+    if (Math.abs(david.x - g.x) < 42 && Math.abs(david.y - g.y) < 80 && david.deadT <= 0) {
+      g.taken = true; sfx("olive_pickup", g.x, 1, 0.9); if (typeof chime === "function") chime(6);
+      const n = tobiGear.filter(q => q.taken).length, met = tobi && tobi.state !== "hide";
+      toast(n === tobiGear.length ? `You found ${GEAR_NAMES[g.name]}! That's all five of the scout's things.` : met ? `You found ${GEAR_NAMES[g.name]}! (${n} of ${tobiGear.length})` : `Someone dropped this, running: a scout's ${g.name}. (${n} of ${tobiGear.length})`);
+      if (met && tobi.state === "follow" && n === tobiGear.length) sayLine("Tobi", "My horn! My pack! You picked up everything I threw away. ... I'll never forget that.");
+    }
+  }
+}
+function drawGear(camX) {
+  for (const g of tobiGear) {
+    if (g.taken) continue; const x = g.x - camX; if (x < -80 || x > W + 80) continue;
+    goldGlow(x, g.y, g.t); drawItem("tobi_" + g.name, x, g.y + 2 + Math.sin(g.t * 2) * 2, g.name === "staff" ? 0.5 : 0.36);
+  }
+}
+const lostThings4 = lostThingsTally;
+lostThingsTally = function () {
+  if (tobiGear.length) return { found: tobiGear.filter(g => g.taken).length, total: tobiGear.length, things: "of Tobi's things", icon: "gear" };
+  return lostThings4();
+};
+
+// --- Glen's spiked crevice, drawn over a pit
+const spikePits = setPieces.filter(p => p.kind === "spikes");
+function drawSpikePits(camX) {
+  const img = ITEM.spike_pit; if (!img || !img.naturalWidth) return;
+  const W0 = img.naturalWidth, H0 = img.naturalHeight, sx0 = W0 * 0.39, sx1 = W0 * 0.61, sy0 = H0 * 0.55;   // the spikes between its two cliffs
+  for (const p of spikePits) {
+    const x0 = p.c * T - camX, w = p.w * T; if (x0 > W || x0 + w < 0) continue;
+    const y0 = GR * T + 0.6 * T, h = H - y0 + 40;
+    ctx.drawImage(img, sx0, sy0, sx1 - sx0, H0 - sy0, x0 - 6, y0, w + 12, h);
+  }
+}
+
+function drawLeopardEyes(camX) {   // main.js, after the night tint: two eyes shining in the dark branches
+  const now = performance.now() / 1000;
+  for (const L of leopards) {
+    if (L.gone || L.state !== "watch") continue;
+    const x = L.x - camX, y = L.y - 30, blink = Math.sin(now * 2.3) > 0.97 ? 0.15 : 1, a = (0.75 + Math.sin(now * 9) * 0.25) * blink;
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    for (const ex of [-9, 9]) {
+      const g = ctx.createRadialGradient(x + ex, y, 0.5, x + ex, y, 9); g.addColorStop(0, `rgba(255,250,200,${a})`); g.addColorStop(0.35, `rgba(255,215,70,${a * 0.85})`); g.addColorStop(1, "rgba(255,170,20,0)");
+      ctx.fillStyle = g; ctx.fillRect(x + ex - 9, y - 9, 18, 18);
+      ctx.fillStyle = `rgba(20,10,0,${0.8 * blink})`; ctx.fillRect(x + ex - 0.8, y - 3, 1.6, 6);   // the slit pupil
+    }
+    ctx.restore();
+  }
+}
+function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); }
+function drawWorld52(camX) { drawTobiCave(camX); drawSpikePits(camX); drawLeopards(camX); drawGear(camX); }
+
 // ---------------------------------------------------------------------------
 // Hooks: world1.js (critters), main.js (each frame, drawing, the HUD)
 // ---------------------------------------------------------------------------
 function updateWorld5(dt) {
   if (WORLD !== 5) return;
-  updateProvisions(dt); updateFather(); updateVultures(dt); updateFleeing(dt);
+  updateProvisions(dt); updateFather(); updateVultures(dt); updateFleeing(dt); updateWorld52(dt);
   if (finish.active && finish.phase === "clear" && !W5.provSaved) {   // what's left goes on to the next stage, and to the camp at the end
     W5.provSaved = true;
     try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.prov = { bread: prov.bread, cheese: prov.cheese };
@@ -252,7 +534,7 @@ function updateWorld5(dt) {
 }
 function drawWorld5(camX) {
   if (WORLD !== 5) return;
-  drawVultures(camX); drawFleeing(camX); drawFather(camX); drawProvisionDrops(camX);
+  drawVultures(camX); drawWorld52(camX); drawFleeing(camX); drawFather(camX); drawProvisionDrops(camX);
 }
 
 // ---------------------------------------------------------------------------

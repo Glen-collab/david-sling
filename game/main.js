@@ -345,7 +345,8 @@ const STAGE_INFO = {
   "4-3": { cols: 214, bg: "w4_3", ter: "w2s", name: "The Broken String" },   // Glen's Gibeah market set
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
-  "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },   // Glen's hot-afternoon road west
+  "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
+  "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
 const WORLD = +LEVEL_STAGE.split("-")[0];
@@ -466,7 +467,8 @@ const talk = (c, who, say, teach = null) => talks.push({ x: c * T, who, say, tea
 //   aimUp: Abinadab, 1-1 · harpCall: Hanan, 1-2 (the harp gathers sheep) · roll: Shammah, 1-3 · charge: Hanan, 2-1
 // The movement test (#test) and "?allskills" have everything.
 const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp calls lost sheep to you", roll: "Roll: {roll}", charge: "Charged sling: hold B",
-  quick: "Quick release: tap B twice, quick, for two stones" };   // quick: Gera, 4-2
+  quick: "Quick release: tap B twice, quick, for two stones",
+  leap: "The scout's leap: press A again in the air to jump again" };   // leap: Tobi, 5-2   // quick: Gera, 4-2
 const skills = new Set();
 try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
@@ -1098,6 +1100,43 @@ if (LEVEL_NAME === "test") {
   critter("villagedog", 276); critter("dove", 280);
   oliveRow(284, 16, 6);
   sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+} else if (LEVEL_NAME === "5-2") {
+  // ---- 5-2 The Mountain Trail, at night: a narrow trail along the cliffs. Hyenas laugh before they lunge; the leopard
+  //      waits in its tree. A frightened scout dropped his things all along the trail as he ran (the lost things), and
+  //      he's hiding in a cave: light the fire, play the harp, and Tobi teaches the scout's leap (the double jump). The very
+  //      next thing is a cliff you could never have climbed, and The One is up there. Spiked crevices; the last one is too
+  //      wide for one jump. Psalm 4:8. ----
+  ground(0, 20); ground(25, 101); ground(106, 157); ground(170, 251);
+  campfire(4);
+  oliveRow(8, 16, 4);
+  setPiece("gear", 14, 16, { name: "waterskin" });               // the first of the scout's things, right on the trail
+  setPiece("spikes", 21, GR, { w: 4 });                          // a crevice: one good jump
+  rock(28, 15, 3, 2); rock(31, 13, 3, 4); plat(36, 11, 4); setPiece("gear", 37, 10, { name: "sandal" });
+  critter("hyena", 42);
+  rock(48, 15, 2, 2); oliveArc(50, 16, 5); special(52, 9);
+  critter("hyena", 58); critter("hyena", 63);
+  campfire(68);
+  setPiece("leopard", 84);                                       // the leopard's tree, by the trail
+  rock(92, 15, 3, 2); oliveRow(93, 14, 3);
+  setPiece("gear", 99, 16, { name: "horn" });
+  setPiece("spikes", 102, GR, { w: 4 });
+  critter("hyena", 112);
+  // Tobi's cave: an overhang over a cold fire
+  rock(119, 11, 10, 3);
+  setPiece("tobicave", 120); campfire(122, GR - 1);
+  // the cliff behind the cave: only the scout's leap gets up it. The One is up top.
+  rock(132, 10, 6, 7); rock(138, 8, 5, 9); plat(141, 4, 3); lostSheep("lamb", 142, 3, "one");
+  oliveRow(132, 9, 5);
+  rock(143, 12, 4, 5); setPiece("gear", 150, 16, { name: "pack" });
+  setPiece("spikes", 158, GR, { w: 12 });                        // the wide crevice: one jump won't do it
+  oliveArc(159, 12, 10);
+  critter("hyena", 180); critter("hyena", 186);
+  rock(192, 14, 3, 3); rock(195, 11, 3, 6); plat(199, 7, 3); setPiece("gear", 200, 6, { name: "staff" });
+  campfire(206);
+  special(214, 5); plat(212, 9, 4);
+  oliveRow(220, 16, 6);
+  talk(226, "Tobi", "There. Down the far side of this ridge is the road to the valley. \"In peace I will both lay myself down and sleep\" (Psalm 4:8). My mother says that one too.");
+  sheepfold(234);
 } else if (LEVEL_NAME === "5-1") {
   // ---- 5-1 The Supply Road: west from Bethlehem with the provisions for the brothers (1 Samuel 17:17-18). Families
   //      coming the other way, running from the Philistines; raiders up in the hills after grain (they snatch a loaf or a
@@ -1464,7 +1503,7 @@ function updateDavid(dt) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
       setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
-    } else if (CAN_DOUBLE_JUMP && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
+    } else if ((CAN_DOUBLE_JUMP || skills.has("leap")) && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
       d.flipUsed = true; sfx("jump", undefined, 0.5, 1.3);   // the second jump: same sound, higher
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
@@ -1813,7 +1852,8 @@ function updateStones(dt) {
     if (s.life > 0 && stoneHitsLion(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
     if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
-    if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;   // world4.js: 4-2's targets and jars       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsLeopard === "function" && stoneHitsLeopard(s)) s.life = 0;   // world5.js (5-2)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -2817,7 +2857,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);
@@ -3358,7 +3398,8 @@ const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
   "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated",
   "thunder", "thunder_2", "thunder_3",   // 3-4's storm (Glen's lightning sounds)
-  "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip"];   // Glen's animal sounds (2026-10-15); hyena_1-3 are saved for later
+  "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip",
+  "hyena_1", "hyena_2", "hyena_3"];   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
@@ -3662,6 +3703,7 @@ function frame(now) {
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
   ctx.restore();
   drawNight(camX);
+  if (typeof drawLeopardEyes === "function") drawLeopardEyes(camX);   // 5-2: eyes in the branches (world5.js)
   if (typeof drawStorm === "function") drawStorm(camX);   // 3-4: rain, the dark, lightning (world3.js)
   drawCaveDarkness(camX);
   drawFinalBlow();
