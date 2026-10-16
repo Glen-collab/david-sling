@@ -935,7 +935,7 @@ function drawChariot(camX) {
     const ht = ch.state === "free" ? ch.t : 0;
     if (ch.state === "crash") drawSprite("chariot_horses_rear", Math.min(3, Math.floor(ch.t / 0.6)), P.hx - camX, P.gy, dir);
     else drawSprite("chariot_horses_run", frameOf("chariot_horses_run", now), P.hx - camX + dir * ht * 160, P.gy, dir, 1, Math.max(0, 1 - ht / 4));   // free, trotting off
-    if (crewOut) { const ct = ch.state === "free" ? ch.t + 1.2 : ch.t - 1.4; drawSprite("chariot_crew_flee", frameOf("chariot_crew_flee", now), x + ct * 260, P.gy, 1, 0.85, Math.max(0, 1 - ct / 4)); }
+    if (crewOut) { const ct = ch.state === "free" ? ch.t + 1.2 : ch.t - 1.4; drawSprite("chariot_crew_flee", frameOf("chariot_crew_flee", now), x - ct * 260, P.gy, 1, 0.85, Math.max(0, 1 - ct / 4)); }
     return;
   }
   const moving = ch.v > 30;
