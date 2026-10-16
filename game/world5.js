@@ -4,8 +4,8 @@
 //                              off and lies there a few seconds, so grab it back. What's left carries on to the next stage.
 //                              Carrying never slows him (DESIGN rule 1): it's a score you protect, not a weight.
 //   critter("raider", c)       a Philistine raider up in the hills for grain and livestock: he comes running down the road
-//                              at David and snatches a loaf or a cheese. Hit him and he drops it and runs. (Glen's thief art
-//                              stands in until the raider sheet.)
+//                              at David and snatches a loaf or a cheese. Hit him and he drops it and runs. (Glen's raider
+//                              sheets.)
 //   setPiece("vultures", c)    vultures circling high over the road: they follow armies. Scenery, not a target.
 //   the fleeing father         talk(c, "The fleeing father", ...): a family running from the Philistines. (World 2's
 //                              leatherworker stands in until his own sheet.) Bring his scattered flock to the fold and he
@@ -18,6 +18,7 @@ const W5 = {
   RAIDER_SEE: 11,        // tiles: he comes for David when David's this close
   RAIDER_RUN: 300, RAIDER_FLEE: 280,
   FATHER_SIZE: 1.25,
+  RAIDER_SIZE: 1.2,      // a grown man: taller than David
   VULTURE_SIZE: 0.45,
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
@@ -85,7 +86,8 @@ if (WORLD === 5) {
 // ---------------------------------------------------------------------------
 // Philistine raiders: down the road at David for the provisions. Hit him and he drops it.
 // ---------------------------------------------------------------------------
-CRITTER_ART.raider = { box: k => ({ x0: k.x - 34, x1: k.x + 34, y0: k.y - rustlerH() - 30, y1: k.y }) };
+CRITTER_ART.raider = { box: k => ({ x0: k.x - 34, x1: k.x + 34, y0: k.y - 290 * SCALE * W5.RAIDER_SIZE, y1: k.y }) };
+for (const n of ["raider_run", "raider_grab", "raider_flee", "raider_hit"]) TUNE.SPRITE_SIZE[n] = W5.RAIDER_SIZE;
 function updateRaider(k, dx, sameLevel, dt) {
   if (k.state === "idle") {   // waiting out of sight up the road
     k.alpha = 0;
@@ -104,11 +106,12 @@ function updateRaider(k, dx, sameLevel, dt) {
     if (touchesDavid(critterBox(k)) && david.deadT <= 0) {
       const g = provCount() ? (prov.bread >= prov.cheese ? "bread" : "cheese") : null;
       if (g) { prov[g]--; k.carry = g; toast(`He snatched ${PROV_NAMES[g]}! Hit him before he gets away!`); }
-      setCrit(k, "flee");   // and off, away from David
+      setCrit(k, g ? "grab" : "flee"); k.vx = 0;   // a quick snatch, and off, away from David
     }
     if (k.t > 9) { k.gone = true; }
     return;
   }
+  if (k.state === "grab") { k.vx = 0; if (k.t > 0.4) setCrit(k, "flee"); return; }
   if (k.state === "flee") {   // away from David; gone for good if he gets far enough
     k.facing = Math.sign(k.x - david.x) || 1;
     if (!runCritter(k, W5.RAIDER_FLEE, dt) && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
@@ -119,14 +122,19 @@ function stoneHitsRaider(k, s) {
   if (k.state === "idle") return false;
   if (k.carry) { prov.drops.push({ name: k.carry, x: k.x, y: k.y - 60, vx: 0, vy: -300, t: 0, landed: false }); toast(`He dropped ${PROV_NAMES[k.carry]} and ran! Pick it up.`); k.carry = null; }
   else toast("The raider turned and ran.");
-  k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * W5.RAIDER_FLEE * 1.5; stoneHit(s);
+  setCrit(k, "hit"); k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * W5.RAIDER_FLEE * 1.5; stoneHit(s);
   return !s.power;
 }
+// Glen's raider (art faces right): raider_run coming at David, raider_grab the snatch, raider_flee running off scared
+// (the loaf drawn in his arms), raider_hit arms up when the stone gets him, then the scared run as he fades away
 function drawRaider(k, x) {
-  if (!thiefArt()) return;
-  const nm = SPR.raider_run ? "raider_run" : "thief_run";   // (Glen's raider sheet, when it comes)
-  drawSprite(nm, frameOf(nm, k.t), x, k.y, k.facing, 1, k.alpha);
-  if (k.carry) { const sc = SCALE * (TUNE.SPRITE_SIZE[nm] || 1); drawProvision(k.carry, x - k.facing * 4 * sc, k.y - W3.THIEF_HAND * sc + 10, 0.8); }
+  if (!SPR.raider_run) return;
+  let nm = "raider_run", i = frameOf(nm, k.t);
+  if (k.state === "grab") { nm = "raider_grab"; i = Math.min(2, Math.floor(k.t / 0.4 * 3)); }
+  else if (k.state === "flee" || (k.state === "hit" && k.alpha < 0.7)) { nm = "raider_flee"; i = frameOf(nm, k.t); }
+  else if (k.state === "hit") { nm = "raider_hit"; i = 0; }
+  drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
+  if (k.carry && k.state === "flee") drawProvision(k.carry, x + k.facing * 30 * SCALE * W5.RAIDER_SIZE, k.y - 105 * SCALE * W5.RAIDER_SIZE, 0.55);   // hugged to his chest
 }
 
 // ---------------------------------------------------------------------------
@@ -151,7 +159,6 @@ function drawVultures(camX) {
 // The fleeing father (made up): his family running from the Philistines, their flock scattered in the hills. At the
 // fold he gets his sheep back and tells David about the soldier in the cave (the Secret that leads to Tobi in 5-2).
 // ---------------------------------------------------------------------------
-TUNE.SPRITE_SIZE.raider_run = TUNE.SPRITE_SIZE.raider_run || TUNE.SPRITE_SIZE.thief_run;
 const fleeing = talks.filter(t => t.who === "The fleeing father");
 function updateFather() {
   if (LEVEL_STAGE !== "5-1" || !finish.active || W5.secretGiven || finish.phase !== "clear") return;

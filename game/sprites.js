@@ -2388,6 +2388,54 @@ window.SPRITE_DATA = {
   "ay": 243,
   "align": "feet"
  },
+ "raider_flee": {
+  "src": "../assets/sprites/raider_flee.png",
+  "frames": 4,
+  "w": 241,
+  "h": 325,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 151,
+  "ay": 323,
+  "align": "feet"
+ },
+ "raider_grab": {
+  "src": "../assets/sprites/raider_grab.png",
+  "frames": 3,
+  "w": 343,
+  "h": 350,
+  "ms": 130,
+  "loop": false,
+  "pingpong": false,
+  "ax": 190,
+  "ay": 348,
+  "align": "feet"
+ },
+ "raider_hit": {
+  "src": "../assets/sprites/raider_hit.png",
+  "frames": 1,
+  "w": 178,
+  "h": 365,
+  "ms": 120,
+  "loop": true,
+  "pingpong": false,
+  "ax": 88,
+  "ay": 364,
+  "align": "feet"
+ },
+ "raider_run": {
+  "src": "../assets/sprites/raider_run.png",
+  "frames": 6,
+  "w": 235,
+  "h": 315,
+  "ms": 85,
+  "loop": true,
+  "pingpong": false,
+  "ax": 150,
+  "ay": 313,
+  "align": "feet"
+ },
  "ram_butt": {
   "src": "../assets/sprites/ram_butt.png",
   "frames": 10,
