@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 264,
+  "frame_h": 305,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 134,
+  "anchor_y": 303,
+  "source": "c_soldier_run_m.png"
+}

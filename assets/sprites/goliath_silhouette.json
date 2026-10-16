@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 295,
+  "frame_h": 345,
+  "ms_per_frame": 700,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 117,
+  "anchor_y": 343,
+  "source": "c_goliath_silhouette_m.png"
+}

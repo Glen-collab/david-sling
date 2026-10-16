@@ -1104,8 +1104,12 @@ const w5ending = {
       if (SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? [0, 1][Math.floor(now * 1.4) % 2] : 5, W * 0.42, y, 1);
       if (B.cmd) drawCommander(W * 0.56, y, B.who === "Tobi's commander", now);
       if (B.prov) { drawItem("grain_sack", W * 0.68, y + 2, 0.3); drawProvision("bread", W * 0.73, y, 1.2); drawProvision("cheese", W * 0.77, y, 1.2); }
+      if (SPR.baggage_keeper) {   // Glen's keeper of the baggage: 0 standing, 1 taking a sack, 2 counting, 3 pleased
+        const kp = B.prov ? (this.bt < 2.5 ? 1 : this.bt < 5 ? 2 : 3) : 0;
+        drawSprite("baggage_keeper", kp, W * 0.86, y, -1, 1.05);
+      }
     } else {   // the battle line
-      if (B.giant) drawGiant(now, this.bt);
+      if (B.giant) drawGiant(now, this.bt, this.i);
       const fleeing = B.flee, ft = fleeing ? this.bt : 0;
       if (!fleeing && !B.still) {   // the brothers in their war gear
         drawSprite(B.eli ? "eliab_war_talk" : "eliab_war_idle", frameOf(B.eli ? "eliab_war_talk" : "eliab_war_idle", now), W * 0.62, y, -1);
@@ -1141,10 +1145,12 @@ function drawCommander(x, y, talking, now) {   // Glen's commander when he comes
   if (SPR.commander_poses) { drawSprite("commander_poses", talking ? [1, 3][Math.floor(now * 0.9) % 2] : 0, x, y, -1, 1.05); return; }
   drawSprite(talking ? "eliab_war_talk" : "eliab_war_idle", frameOf("eliab_war_idle", now), x, y, -1, 1.05, 1, "saturate(0.5) brightness(0.85)");
 }
-function drawGiant(now, bt) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now
+function drawGiant(now, bt, beat) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now
   const a = Math.min(1, bt * 0.8 + 0.3), x = W * 0.84, y = GR * T - 215, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
   ctx.save(); ctx.globalAlpha = a * 0.88;   // across the valley: twice the height of the men around him, even from here
-  drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), x, y, -1, nm === "lookout_spot" ? 0.95 : 1, 1, "brightness(0) blur(0.8px)");
+  // Glen's silhouette: 0 standing, 1 shouting with the spear up, 2 pointing across the valley, 3 laughing
+  const gp = beat <= 7 ? (bt < 1.2 ? 0 : 1) : beat === 8 ? 2 : 3;
+  drawSprite(nm, nm === "lookout_spot" ? 3 : gp, x, y, -1, nm === "lookout_spot" ? 0.95 : 1.1, 1, "brightness(0) blur(0.8px)");
   ctx.fillStyle = "rgba(10,8,8,0.8)";   // the Philistine ranks at his feet, small
   for (let k = -6; k <= 6; k++) if (k) { const mx = x + k * 18, h = 26 + (k % 3) * 3; ctx.beginPath(); ctx.ellipse(mx, y - h, 5, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(mx - 5, y - h + 4, 10, h - 4); }
   ctx.restore();
@@ -1154,7 +1160,7 @@ function drawFleeingArmy(now, t) {   // soldiers running past David on both side
   for (let k = 0; k < 9; k++) {
     const nm = who[k % who.length], x = W + 100 + k * 130 - t * (420 + (k % 3) * 60), y = GR * T + (k % 2 ? 6 : -4);
     if (x < -150 || x > W + 150) continue;
-    drawSprite(nm, frameOf(nm, now + k * 0.13), x, y, -1, SPR.soldier_run ? 1 : 1.15, 1, f);
+    drawSprite(nm, frameOf(nm, now + k * 0.13), x, y, -1, SPR.soldier_run ? 1.05 + (k % 3) * 0.06 : 1.15, 1, SPR.soldier_run ? ["", "brightness(0.85) sepia(0.2)", "brightness(1.08) hue-rotate(-8deg)"][k % 3] : f);   // a little variety in the crowd
   }
 }
 // "?w5end" plays the End of World 5 straight away (testing); "?w5end=8" starts at that beat

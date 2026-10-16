@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 262,
+  "frame_h": 304,
+  "ms_per_frame": 700,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 120,
+  "anchor_y": 303,
+  "source": "c_baggage_keeper_m.png"
+}

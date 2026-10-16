@@ -72,6 +72,18 @@ window.SPRITE_DATA = {
   "ay": 256,
   "align": "feet"
  },
+ "baggage_keeper": {
+  "src": "../assets/sprites/baggage_keeper.png",
+  "frames": 4,
+  "w": 262,
+  "h": 304,
+  "ms": 700,
+  "loop": true,
+  "pingpong": false,
+  "ax": 120,
+  "ay": 303,
+  "align": "feet"
+ },
  "bat_fly": {
   "src": "../assets/sprites/bat_fly.png",
   "frames": 8,
@@ -1510,6 +1522,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 63,
   "ay": 162,
+  "align": "feet"
+ },
+ "goliath_silhouette": {
+  "src": "../assets/sprites/goliath_silhouette.png",
+  "frames": 4,
+  "w": 295,
+  "h": 345,
+  "ms": 700,
+  "loop": true,
+  "pingpong": false,
+  "ax": 117,
+  "ay": 343,
   "align": "feet"
  },
  "hanan_counsel": {
@@ -3046,6 +3070,18 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 105,
   "ay": 74,
+  "align": "feet"
+ },
+ "soldier_run": {
+  "src": "../assets/sprites/soldier_run.png",
+  "frames": 6,
+  "w": 264,
+  "h": 305,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 134,
+  "ay": 303,
   "align": "feet"
  },
  "steward": {
