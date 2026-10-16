@@ -886,7 +886,8 @@ function stoneHitsChariot(s) {
     } else { stoneHit(s, 0.4); if (!W5.shieldTold) { W5.shieldTold = true; toast("He's behind his shield. Wait for the glint of his bow: hit him while he draws."); } }
     return true;
   }
-  if (Math.hypot(s.x - P.wx, s.y - P.wy) < P.wr) {
+  // the wheel and the axle above it, up to the cart bed: a standing throw leaves David's hand about as high as the wheel's top
+  if (Math.abs(s.x - P.wx) < P.wr * 1.4 && s.y > P.gy - P.wr * 2.6 && s.y < P.gy) {
     if (ch.phase !== 2) { stoneHit(s, 0.4); return true; }
     if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W5.tapTold) { W5.tapTold = true; toast("A tap stone just bounces off the wheel. Hold B for a charged stone!"); } return true; }
     ch.wheelHits++; ch.flash = 0.3; stoneHit(s); sfx("stone_hit", P.wx, 1, 0.6);
