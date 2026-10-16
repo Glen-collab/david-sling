@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 334,
+  "frame_h": 335,
+  "ms_per_frame": 220,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 182,
+  "anchor_y": 333,
+  "source": "c_chariot_horses_rear_m.png"
+}

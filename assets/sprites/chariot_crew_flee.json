@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 253,
+  "frame_h": 305,
+  "ms_per_frame": 85,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 141,
+  "anchor_y": 304,
+  "source": "c_chariot_crew_flee_m.png"
+}

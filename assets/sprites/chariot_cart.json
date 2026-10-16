@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 318,
+  "frame_h": 336,
+  "ms_per_frame": 300,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 119,
+  "anchor_y": 334,
+  "source": "c_chariot_cart_m.png"
+}

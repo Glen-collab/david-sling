@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 353,
+  "frame_h": 307,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 265,
+  "anchor_y": 305,
+  "source": "c_chariot_horses_run_m.png"
+}
