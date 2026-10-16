@@ -1913,8 +1913,9 @@ function drawTiles(camX) {
     }
     ctx.fillRect(fx, r * T, fw, T + 0.5);
   }
-  // 3b) where limestone sits on earth, sink it into the soil (Glen's limestone base pieces)
-  for (let r = 0; r < ROWS - 1; r++) {
+  // 3b) where limestone sits on earth, sink it into the soil (Glen's limestone base pieces). Not for 5-2's mountain set:
+  //     its base pieces are whole cliff feet with rubble, too tall for this thin band, and the rock meets the gravel well.
+  for (let r = 0; r < ROWS - 1 && STAGE_INFO.ter !== "w5m"; r++) {
     let start = -1;
     for (let c = c0 - 4; c <= c1 + 1; c++) {
       const on = c <= c1 && matAt(c, r) === 2 && matAt(c, r + 1) === 1;
