@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 225,
+  "frame_h": 286,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 132,
+  "anchor_y": 285,
+  "source": "t_cave_m.png"
+}

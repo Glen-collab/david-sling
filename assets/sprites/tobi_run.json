@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 196,
+  "frame_h": 244,
+  "ms_per_frame": 85,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 132,
+  "anchor_y": 243,
+  "source": "t_run_m.png"
+}

@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 212,
+  "frame_h": 276,
+  "ms_per_frame": 150,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 106,
+  "anchor_y": 274,
+  "source": "tobi_leap.png"
+}
