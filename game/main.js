@@ -474,7 +474,10 @@ const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp
 const skills = new Set();
 try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
-const hasSkill = k => ALL_SKILLS || skills.has(k);
+// Every stage after the one that teaches a skill has it, even if that talk was missed (or the save lost it)
+const SKILL_STAGE = { aimUp: "1-1", harpCall: "1-2", roll: "1-3", charge: "2-1", quick: "4-2", leap: "5-2" };
+const stageNum = st => { const m = /^(\d+)-(\d+)$/.exec(st || ""); return m ? +m[1] * 100 + +m[2] : 0; };
+const hasSkill = k => ALL_SKILLS || skills.has(k) || (SKILL_STAGE[k] && stageNum(LEVEL_STAGE) > stageNum(SKILL_STAGE[k]));
 function learnSkill(k) {
   if (!k || skills.has(k)) return;
   skills.add(k);
@@ -1587,7 +1590,7 @@ function updateDavid(dt) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
       d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
       setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
-    } else if ((CAN_DOUBLE_JUMP || skills.has("leap")) && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
+    } else if ((CAN_DOUBLE_JUMP || hasSkill("leap")) && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
       d.flipUsed = true; sfx("jump", undefined, 0.5, 1.3);   // the second jump: same sound, higher
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
