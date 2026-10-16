@@ -384,9 +384,11 @@ function drawLeopards(camX) {
 }
 
 // --- Tobi
-const tobiCave = setPieces.find(p => p.kind === "tobicave");
-const tobi = tobiCave ? { x: tobiCave.x + 5 * T, y: GR * T, home: tobiCave.x + 5 * T, y0: GR * T, vx: 0, vy: 0, onGround: true, facing: -1, state: "hide", t: 0, calmT: 0, kind: "tobi", alpha: 1 } : null;
+const tobiCave = setPieces.find(p => p.kind === "tobicave"), tobiStart = setPieces.find(p => p.kind === "tobistart");
+const tobiX = tobiCave ? tobiCave.x + 5 * T : tobiStart ? tobiStart.x : 0;
+const tobi = tobiCave || tobiStart ? { x: tobiX, y: GR * T, home: tobiX, y0: GR * T, vx: 0, vy: 0, onGround: true, facing: -1, state: "hide", t: 0, calmT: 0, kind: "tobi", alpha: 1 } : null;
 if (tobi) critters.push(tobi);
+if (tobi && tobiStart) Object.assign(tobi, { x: tobiStart.x, home: tobiStart.x, state: "follow", rescued: true });   // 5-3 on: he's with David
 CRITTER_ART.tobi = { box: k => ({ x0: k.x - 20, x1: k.x + 20, y0: k.y - 90, y1: k.y }) };
 const tobiQueue = [];
 function tobiSay(lines) { tobiQueue.push(...lines); }
@@ -456,7 +458,7 @@ function drawTobi(k, x) {
   else { nm = dialog.t > 0 && dialog.who === "Tobi" ? "tobi_talk" : "tobi_cave"; i = nm === "tobi_talk" ? [0, 4][Math.floor(performance.now() / 700) % 2] : 5; }
   drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
 }
-function tobiBlocking() { return tobi && !["follow", "leap", "demo"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
+function tobiBlocking() { return tobi && tobiCave && !["follow", "leap", "demo"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
 function drawTobiCave(camX) {   // the dark under the overhang
   if (!tobiCave) return;
   const x = tobiCave.x - camX; if (x < -400 || x > W + 600) return;
@@ -488,6 +490,7 @@ function drawGear(camX) {
 const lostThings4 = lostThingsTally;
 lostThingsTally = function () {
   if (tobiGear.length) return { found: tobiGear.filter(g => g.taken).length, total: tobiGear.length, things: "of Tobi's things", icon: "gear" };
+  if (cairns.length) return { found: cairns.filter(c => c.up).length, total: cairns.length, things: "scout markers", icon: "cairn" };
   return lostThings4();
 };
 
@@ -517,8 +520,199 @@ function drawLeopardEyes(camX) {   // main.js, after the night tint: two eyes sh
     ctx.restore();
   }
 }
-function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); }
-function drawWorld52(camX) { drawTobiCave(camX); drawSpikePits(camX); drawLeopards(camX); drawGear(camX); }
+// ===========================================================================
+// 5-3 The Lookouts' Ridge (night): light stealth. Philistine lookouts with torches watch stretches of the ridge; their
+// torchlight is a cone ahead of them. When the moon goes behind a cloud the light shrinks (Tobi: "that's your moment").
+// Seen = he shades his eyes, points, shouts, and runs to light his signal fire, and a couple of raiders come. Never a
+// fail state, just a harder few seconds. A quick stone knocks the torch out of his hand (no light, no fire). Get through
+// unseen for the "Not seen" bonus. Knocked-over scout cairns are the lost things; gazelles bound across (leave them).
+//   setPiece("lookout", c, r, { face: -1, patrol: 0, fire: c2 })  r = the row he stands on (GR - 1 = the ground);
+//                         patrol = tiles he walks each way (Glen's second lookout); fire = the column of his signal fire
+//   setPiece("tower", c, r)       a rough wooden lookout tower: a platform at row r on stilts (plat() is placed in main.js)
+//   setPiece("cairn", c, r)       a knocked-over cairn: stand by it a moment and it's stacked again
+//   critter("gazelle", c)          harmless: grazes, bounds away when David comes close
+//   setPiece("tobistart", c)       Tobi, already with David, following
+// ===========================================================================
+Object.assign(W5, { CONE_LEN: 8, CONE_HALF: 0.42, CONE_CLOUD: 0.3, SPOT_T: 1.3, LOOK_TURN: 5, PATROL_WALK: 70, CAIRN_T: 0.6,
+  LOOKOUT_SIZE: 1.15, GAZELLE_SPOOK: 6 });
+for (const n of ["lookout_watch", "lookout_spot", "lookout_run", "lookout_walk"]) TUNE.SPRITE_SIZE[n] = W5.LOOKOUT_SIZE;
+if (LEVEL_STAGE === "5-3") Object.assign(W1, { CLOUD_EVERY: 9, CLOUD_TIME: 3.5, CLOUD_DARK: 0.4 });   // clouds pass more often up here
+const cloudNow = () => { const k = (performance.now() / 1000) % W1.CLOUD_EVERY; return k < W1.CLOUD_TIME ? Math.sin(Math.PI * k / W1.CLOUD_TIME) : 0; };
+const fireAt = c => setPieces.find(p => p.kind === "signalfire" && p.c === c);
+const lookouts = setPieces.filter(p => p.kind === "lookout").map(p => ({ hx: p.x, x: p.x, y: (p.r + 1) * T, face: p.face || -1, patrol: (p.patrol || 0) * T,
+  fireX: p.fire ? p.fire * T + T / 2 : null, fireLit: false, fireT: 0, state: "watch", t: Math.random() * 3, turnT: 0, torch: true, seenOnce: false }));
+let seenOnRidge = false;
+const LOOKOUT_TORCH = [75, -277];   // the torch flame on lookout_watch, sheet px from his feet when he faces right
+function torchPos(L) { const s = SCALE * W5.LOOKOUT_SIZE; return { x: L.x + L.face * LOOKOUT_TORCH[0] * s, y: L.y + LOOKOUT_TORCH[1] * s }; }
+function coneDrop(L, tp) { return Math.max(0, GR * T - 50 - tp.y); }   // how far the beam falls over its length (to David's middle on the ground)
+function coneLen(L) { return W5.CONE_LEN * T * (1 - (1 - W5.CONE_CLOUD) * cloudNow()); }
+function inCone(L) {
+  const d = david, tp = torchPos(L), dx = (d.x - tp.x) * L.face, len = coneLen(L) * (d.h < STAND_H ? 0.65 : 1);   // keeping low helps
+  if (dx < 0 || dx > len) return false;
+  const mid = tp.y + coneDrop(L, tp) * dx / coneLen(L), dy = (d.y - d.h / 2) - mid;   // the light slopes down onto the path
+  return Math.abs(dy) < Math.tan(W5.CONE_HALF) * dx + 30;
+}
+function updateLookouts(dt) {
+  for (const L of lookouts) {
+    L.t += dt;
+    if (L.fireLit) L.fireT += dt;
+    if (!L.torch) continue;
+    if (L.state === "watch") {
+      if (L.patrol) {   // Glen's walking lookout: up and down his stretch
+        L.x += L.face * W5.PATROL_WALK * dt;
+        if (Math.abs(L.x - L.hx) > L.patrol) { L.x = L.hx + Math.sign(L.x - L.hx) * L.patrol; L.face = -L.face; }
+      } else {
+        L.turnT += dt;
+        if (L.turnT > W5.LOOK_TURN) { L.turnT = 0; L.face = -L.face; }   // he looks the other way now and then
+      }
+      L.cool = Math.max(0, (L.cool || 0) - dt);
+      if (!L.cool && inCone(L) && david.deadT <= 0) {
+        L.state = "spot"; L.t = 0; L.seenOnce = true; seenOnRidge = true;
+        toast(L.fireX && !L.fireLit ? "He's seen you! He's running for the signal fire!" : L.called ? "He's seen you again! Keep moving!" : "He's seen you! He's shouting for help!");
+      }
+    } else if (L.state === "spot") {   // shades his eyes, points, shouts
+      L.face = Math.sign(david.x - L.x) || L.face;
+      if (L.t > W5.SPOT_T) {
+        if (L.fireX && !L.fireLit) { L.state = "run"; L.t = 0; }
+        else { if (!L.called) { L.called = true; raidersCome(); } L.state = "watch"; L.t = 0; L.cool = 4; }   // one wave per lookout
+      }
+    } else if (L.state === "run") {   // to the brushwood pile, and lights it
+      L.face = Math.sign(L.fireX - L.x) || 1; L.x += L.face * 300 * dt;
+      if (Math.abs(L.fireX - L.x) < 24) {
+        L.fireLit = true; L.fireT = 0; L.called = true; sfx("thunder_3", L.fireX, 0.25, 1.8); raidersCome();
+        toast("The signal fire is lit! Raiders are coming. Stand your ground, or keep going.");
+        L.state = "back"; L.t = 0;
+      }
+    } else if (L.state === "back") {
+      L.face = Math.sign(L.hx - L.x) || 1; L.x += L.face * 160 * dt;
+      if (Math.abs(L.hx - L.x) < 10) { L.x = L.hx; L.state = "watch"; L.t = 0; L.turnT = 0; L.face = -1; L.cool = 4; }
+    }
+  }
+}
+function raidersCome() {   // a couple of raiders, from ahead, for the provisions (world5.js raiders)
+  for (let n = 0; n < 2; n++) {
+    critter("raider", Math.floor(david.x / T) + 12 + n * 5);
+    const k = critters[critters.length - 1]; k.home = david.x + (12 + n * 5) * T; k.x = k.home;
+  }
+}
+function stoneHitsLookout(s) {
+  for (const L of lookouts) {
+    if (!L.torch) continue;
+    const tp = torchPos(L), s2 = SCALE * W5.LOOKOUT_SIZE;
+    const hitTorch = Math.hypot(s.x - tp.x, s.y - tp.y) < 34, hitBody = Math.abs(s.x - L.x) < 30 && s.y > L.y - 300 * s2 && s.y < L.y;
+    if (!hitTorch && !hitBody) continue;
+    L.torch = false; L.state = "dark"; L.t = 0; stoneHit(s, 0.6);
+    for (let k = 0; k < 14; k++) bits.push({ x: tp.x, y: tp.y, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 300, life: 0.7, color: k % 2 ? "#ffb040" : "#ffe08a" });
+    toast(hitTorch ? "You knocked the torch right out of his hand! In the dark he can't see a thing." : "The stone knocks him off balance and his torch goes flying. He can't see a thing now.");
+    return true;
+  }
+  return false;
+}
+function drawLookouts(camX) {
+  const now = performance.now() / 1000;
+  for (const p of setPieces) if (p.kind === "tower") drawTower(p, camX);
+  for (const p of setPieces) if (p.kind === "signalfire") {
+    const x = p.x - camX; if (x < -200 || x > W + 200) continue;
+    const L = lookouts.find(q => q.fireX && Math.abs(q.fireX - p.x) < T);
+    let i = 0; if (L && L.fireLit) i = L.fireT < 0.4 ? 1 : L.fireT < 0.9 ? 2 : 3 + Math.floor(now * 8) % 2;
+    drawSprite("signal_fire", i, x, (p.r + 1) * T + 6, 1, 0.8);
+  }
+  for (const L of lookouts) {
+    const x = L.x - camX; if (x < -300 || x > W + 300) continue;
+    let nm = "lookout_watch", i = Math.floor(now * 0.6 + L.hx) % 2;
+    if (!L.torch) { nm = "lookout_spot"; i = 1; }   // shading his eyes in the dark, no torch
+    else if (L.state === "spot") { nm = "lookout_spot"; i = Math.min(3, 1 + Math.floor(L.t / W5.SPOT_T * 3)); }
+    else if (L.state === "run" || L.state === "back") { nm = "lookout_run"; i = frameOf(nm, L.t); }
+    else if (L.patrol) { nm = "lookout_walk"; i = frameOf(nm, L.t); }
+    drawSprite(nm, i, x, L.y, L.face, 1, 1, L.torch ? "" : "brightness(0.6)");
+  }
+}
+function drawLookoutLight(camX) {   // main.js, after the night tint: the torch cones and the signal fires glow
+  const now = performance.now() / 1000;
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (const L of lookouts) {
+    if (L.fireLit) {
+      const x = L.fireX - camX, y = L.y - 40, r = 260 + Math.sin(now * 9) * 14;
+      if (x > -r && x < W + r) { const g = ctx.createRadialGradient(x, y, 10, x, y, r); g.addColorStop(0, "rgba(255,150,50,0.5)"); g.addColorStop(1, "rgba(255,90,20,0)"); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); }
+    }
+    if (!L.torch) continue;
+    const tp = torchPos(L), x = tp.x - camX, y = tp.y; if (x < -500 || x > W + 500) continue;
+    const len = coneLen(L), h = Math.tan(W5.CONE_HALF) * len, alert = L.state === "spot" ? 0.12 : 0, ey = y + coneDrop(L, tp);
+    const g = ctx.createRadialGradient(x, y, 10, x, y, Math.hypot(len, ey - y) * 0.97);   // fades out by the far end
+    g.addColorStop(0, `rgba(255,200,110,${0.34 + alert})`); g.addColorStop(0.6, `rgba(255,180,80,${0.14 + alert / 2})`); g.addColorStop(1, "rgba(255,170,70,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x + L.face * len, ey - h); ctx.lineTo(x + L.face * len, ey + h); ctx.lineTo(x, y + 8); ctx.closePath(); ctx.fill();
+    const fg = ctx.createRadialGradient(x, y, 2, x, y, 60); fg.addColorStop(0, "rgba(255,190,90,0.55)"); fg.addColorStop(1, "rgba(255,140,40,0)");
+    ctx.fillStyle = fg; ctx.fillRect(x - 60, y - 60, 120, 120);
+  }
+  ctx.restore();
+}
+function drawTower(p, camX) {   // rough poles and a plank floor, a ladder up the side
+  const x0 = p.c * T - camX, w = 4 * T, top = p.r * T, bot = GR * T + 10;
+  if (x0 > W + 50 || x0 + w < -50) return;
+  ctx.save(); ctx.fillStyle = "#3b2c22"; ctx.strokeStyle = "#2a1f18"; ctx.lineWidth = 4;
+  for (const px of [6, w / 2 - 4, w - 14]) ctx.fillRect(x0 + px, top, 9, bot - top);
+  ctx.beginPath(); ctx.moveTo(x0 + 10, top + 20); ctx.lineTo(x0 + w - 10, bot - 20); ctx.moveTo(x0 + w - 10, top + 20); ctx.lineTo(x0 + 10, bot - 20); ctx.stroke();
+  ctx.fillStyle = "#4e3a2b"; ctx.fillRect(x0 - 6, top - 6, w + 12, 14);
+  ctx.fillStyle = "#5c4532"; for (let k = 0; k < 6; k++) ctx.fillRect(x0 - 6 + k * (w + 12) / 6, top - 8, (w + 12) / 6 - 3, 6);
+  ctx.restore();
+}
+
+// --- the scout cairns (the lost things of 5-3)
+const cairns = setPieces.filter(p => p.kind === "cairn").map(p => ({ x: p.x, y: p.y, up: false, still: 0, t: Math.random() * 5 }));
+function updateCairns(dt) {
+  for (const c of cairns) {
+    c.t += dt; if (c.up) continue;
+    const near = Math.abs(david.x - c.x) < 1.6 * T && Math.abs(david.y - c.y) < 60 && david.onGround && david.deadT <= 0;
+    c.still = near ? c.still + dt : 0;
+    if (c.still > W5.CAIRN_T) {
+      c.up = true; sfx("stone_hit", c.x, 0.5, 0.8); setTimeout(() => sfx("stone_hit", c.x, 0.5, 1.0), 150); if (typeof chime === "function") chime(5);
+      const n = cairns.filter(q => q.up).length;
+      toast(n === cairns.length ? `All ${n} scout markers stand again. The next scout won't lose his way.` : `You stacked the stones: a scout's marker again. (${n} of ${cairns.length})`);
+    }
+  }
+}
+function drawCairns(camX) {
+  for (const c of cairns) {
+    const x = c.x - camX; if (x < -80 || x > W + 80) continue;
+    if (!c.up) { goldGlow(x, c.y, c.t); drawItem("cairn_down", x, c.y + 4, 0.38); if (c.still > 0) { ctx.fillStyle = "rgba(255,230,140,0.9)"; ctx.fillRect(x - 20, c.y - 50, 40 * Math.min(1, c.still / W5.CAIRN_T), 4); } }
+    else drawItem("cairn_up", x, c.y + 4, 0.4);
+  }
+}
+
+// --- gazelles (harmless)
+CRITTER_ART.gazelle = { box: k => ({ x0: k.x - 34, x1: k.x + 34, y0: k.y - 70, y1: k.y }) };
+function updateGazelle(k, dx, sameLevel, dt) {
+  if (k.state === "bound") { k.x += k.facing * 420 * dt; if (k.t > 2.2) { k.gone = true; k.vx = k.facing * 420; } return; }
+  if (k.state === "idle") setCrit(k, "graze");
+  k.facing = k.home % 2 ? 1 : -1;
+  if (Math.abs(dx) < W5.GAZELLE_SPOOK * T && david.deadT <= 0) { setCrit(k, "bound"); k.facing = -Math.sign(dx) || 1; }
+}
+function stoneHitsGazelle(k, s) {
+  setCrit(k, "bound"); k.facing = Math.sign(k.x - david.x) || 1;
+  if (!W5.gazelleTold) { W5.gazelleTold = true; toast("A gazelle! It's no danger to anyone. Leave them be."); }
+  return false;
+}
+function drawGazelle(k, x) {
+  if (k.state === "bound") { const f = k.t * 7.7 % 4, hop = Math.sin(k.t * Math.PI * 1.9) * 0; drawSprite("gazelle_leap", Math.floor(f), x, k.y - hop, k.facing, 1, k.alpha); }
+  else drawSprite("gazelle_stand", Math.floor(k.t / 2.5) % 2, x, k.y, k.facing, 1, k.alpha);
+}
+
+function stoneHitsWorld5(s) { return stoneHitsLeopard(s) || stoneHitsLookout(s); }
+function updateWorld53(dt) {
+  updateLookouts(dt); updateCairns(dt);
+  if (!W5.warnSaved && talks.some(k => k.done && k.who === "Tobi" && k.say.includes("chariot"))) {   // tier-1 counsel for the chariot (5-4)
+    W5.warnSaved = true;
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.chariotWarn = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  }
+  if (LEVEL_STAGE === "5-3" && finish.active && finish.phase === "clear" && !W5.notSeenGiven) {
+    W5.notSeenGiven = true;
+    if (!seenOnRidge) { toast("Not seen! You crossed the whole ridge without a single lookout seeing you. +20 olives"); david.olives = (david.olives || 0) + 20; }
+  }
+}
+function drawWorld53(camX) { drawLookouts(camX); drawCairns(camX); }
+
+function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); updateWorld53(dt); }
+function drawWorld52(camX) { drawTobiCave(camX); drawSpikePits(camX); drawLeopards(camX); drawGear(camX); drawWorld53(camX); }
 
 // ---------------------------------------------------------------------------
 // Hooks: world1.js (critters), main.js (each frame, drawing, the HUD)

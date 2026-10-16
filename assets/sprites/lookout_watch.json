@@ -1,11 +1,11 @@
 {
   "frames": 4,
-  "frame_w": 402,
+  "frame_w": 558,
   "frame_h": 350,
   "ms_per_frame": 500,
   "loop": true,
   "align": "feet",
-  "anchor_x": 168,
+  "anchor_x": 240,
   "anchor_y": 348,
   "source": "lookout_watch.png"
 }

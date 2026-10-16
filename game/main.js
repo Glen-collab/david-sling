@@ -346,6 +346,7 @@ const STAGE_INFO = {
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
+  "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
   "3-4": { cols: 310, bg: "w3_4", name: "The Chosen Shepherd", storm: true },   // Glen's storm layers (rain, dark and lightning drawn on top in world3.js)
 }[LEVEL_NAME];
@@ -1100,6 +1101,51 @@ if (LEVEL_NAME === "test") {
   critter("villagedog", 276); critter("dove", 280);
   oliveRow(284, 16, 6);
   sheepfold(300);                                                // a village fold below Gibeah: the strays in, then up to the fortress
+} else if (LEVEL_NAME === "5-3") {
+  // ---- 5-3 The Lookouts' Ridge, at night: the high ridge above the Valley of Elah, both camps' fires far below.
+  //      Philistine lookouts with torches watch stretches of it (their light is a cone; it shrinks when the moon goes
+  //      behind a cloud: that's the moment to go). Seen = he runs to light his signal fire and raiders come; a quick stone
+  //      knocks his torch away. High routes over the lookouts for the scout's leap. Scout cairns knocked over by the
+  //      Philistines (the lost things); gazelles (leave them). The One in the hollow under a lookout's tower. Tobi is
+  //      with David; at the end, his warning about the chariot (tier 1 counsel for 5-4). Psalm 27:1. ----
+  ground(0, 247);
+  campfire(4); setPiece("tobistart", 2);
+  talk(7, "Tobi", "Keep low up here. The lookouts can see a long way by their torches. But watch the moon: when it goes behind a cloud, their light shrinks. That's your moment.");
+  setPiece("cairn", 13, 16);
+  talk(12, "Tobi", "See that pile of stones? It was a scout's marker, showing the safe path. They kicked it over. Stand by it a moment and stack it up again.");
+  critter("gazelle", 20); critter("gazelle", 23);
+  // lookout 1: on the ground, his signal fire behind him
+  rock(28, 15, 2, 2);
+  setPiece("lookout", 36, GR - 1, { face: -1, fire: 40 }); setPiece("signalfire", 40, GR - 1);
+  plat(30, 10, 4); plat(36, 8, 4); plat(42, 10, 4); oliveRow(36, 7, 4);       // the high way over him (the scout's leap)
+  rock(46, 14, 3, 3); setPiece("cairn", 47, 13);
+  critter("gazelle", 54);
+  // the patrolling lookout (Glen's second man)
+  setPiece("lookout", 66, GR - 1, { face: 1, patrol: 6 });
+  rock(58, 15, 2, 2); rock(74, 15, 2, 2); special(66, 6); plat(64, 9, 5);
+  setPiece("cairn", 79, 16);
+  campfire(84);
+  // the tower: a lookout up on a platform, his fire beside it. The One is in the hollow under it.
+  setPiece("tower", 100, 12); plat(100, 12, 4);
+  setPiece("lookout", 102, 11, { face: -1, fire: 108 }); setPiece("signalfire", 108, GR - 1);
+  lostSheep("lamb", 101, 16, "one");
+  rock(112, 14, 3, 3); rock(115, 11, 3, 6); setPiece("cairn", 116, 10);
+  critter("gazelle", 124); critter("gazelle", 127);
+  setPiece("lookout", 140, GR - 1, { face: 1 });   // looking ahead: come up behind him (he turns now and then)
+  rock(132, 15, 2, 2); plat(144, 10, 4); oliveArc(146, 16, 6);
+  setPiece("cairn", 152, 16);
+  campfire(160);
+  setPiece("lookout", 178, GR - 1, { face: -1, fire: 183 }); setPiece("signalfire", 183, GR - 1);
+  setPiece("lookout", 194, GR - 1, { face: -1, patrol: 4 });
+  plat(172, 10, 4); plat(179, 7, 4); plat(186, 9, 4); plat(192, 7, 4); special(181, 3);   // the high way
+  rock(200, 15, 3, 2); setPiece("cairn", 204, 16);
+  critter("gazelle", 210);
+  talk(214, "Tobi", "Listen. Down in the valley there's a Philistine chariot that hunts scouts on the road. If it comes for us, don't try to outrun it. A chariot can't turn on rough ground. Get to the rocks.");
+  talk(218, "Tobi", "My father taught me the Law: \"When you go out to battle against your enemies, and see horses, chariots, and a people more numerous than you, you shall not be afraid of them; for the LORD your God... is with you\" (Deuteronomy 20:1).");
+  oliveRow(220, 16, 5);
+  talk(224, "Tobi", "Look down there, David. Those are our fires. We're nearly there.");
+  talk(229, "", "Years later, David would write: \"The LORD is my light and my salvation. Whom shall I fear? The LORD is the strength of my life. Of whom shall I be afraid?\" (Psalm 27:1)");
+  sheepfold(232);
 } else if (LEVEL_NAME === "5-2") {
   // ---- 5-2 The Mountain Trail, at night: a narrow trail along the cliffs. Hyenas laugh before they lunge; the leopard
   //      waits in its tree. A frightened scout dropped his things all along the trail as he ran (the lost things), and
@@ -1135,7 +1181,8 @@ if (LEVEL_NAME === "test") {
   campfire(206);
   special(214, 5); plat(212, 9, 4);
   oliveRow(220, 16, 6);
-  talk(226, "Tobi", "There. Down the far side of this ridge is the road to the valley. \"In peace I will both lay myself down and sleep\" (Psalm 4:8). My mother says that one too.");
+  talk(224, "Tobi", "There. Down the far side of this ridge is the road to the valley. I'm not afraid of the dark any more. \"Be strong and courageous. Don't be afraid... for the LORD your God himself is who goes with you\" (Deuteronomy 31:6).");
+  talk(229, "", "Years later, David would write: \"In peace I will both lay myself down and sleep, for you alone, LORD, make me live in safety.\" (Psalm 4:8)");
   sheepfold(234);
 } else if (LEVEL_NAME === "5-1") {
   // ---- 5-1 The Supply Road: west from Bethlehem with the provisions for the brothers (1 Samuel 17:17-18). Families
@@ -1853,7 +1900,7 @@ function updateStones(dt) {
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
     if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
-    if (s.life > 0 && typeof stoneHitsLeopard === "function" && stoneHitsLeopard(s)) s.life = 0;   // world5.js (5-2)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -3703,7 +3750,7 @@ function frame(now) {
   drawCodeWalls(camX); if (typeof drawDeadfalls === "function") drawDeadfalls(camX);
   ctx.restore();
   drawNight(camX);
-  if (typeof drawLeopardEyes === "function") drawLeopardEyes(camX);   // 5-2: eyes in the branches (world5.js)
+  if (typeof drawLeopardEyes === "function") { drawLeopardEyes(camX); drawLookoutLight(camX); }   // world5.js: eyes in the branches (5-2), torchlight and signal fires (5-3)
   if (typeof drawStorm === "function") drawStorm(camX);   // 3-4: rain, the dark, lightning (world3.js)
   drawCaveDarkness(camX);
   drawFinalBlow();

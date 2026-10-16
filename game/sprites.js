@@ -2199,24 +2199,24 @@ window.SPRITE_DATA = {
  "lookout_run": {
   "src": "../assets/sprites/lookout_run.png",
   "frames": 5,
-  "w": 359,
+  "w": 450,
   "h": 336,
   "ms": 90,
   "loop": true,
   "pingpong": false,
-  "ax": 221,
+  "ax": 240,
   "ay": 334,
   "align": "feet"
  },
  "lookout_spot": {
   "src": "../assets/sprites/lookout_spot.png",
   "frames": 4,
-  "w": 396,
+  "w": 551,
   "h": 350,
   "ms": 500,
   "loop": true,
   "pingpong": false,
-  "ax": 162,
+  "ax": 234,
   "ay": 348,
   "align": "feet"
  },
@@ -2235,12 +2235,12 @@ window.SPRITE_DATA = {
  "lookout_watch": {
   "src": "../assets/sprites/lookout_watch.png",
   "frames": 4,
-  "w": 402,
+  "w": 558,
   "h": 350,
   "ms": 500,
   "loop": true,
   "pingpong": false,
-  "ax": 168,
+  "ax": 240,
   "ay": 348,
   "align": "feet"
  },
