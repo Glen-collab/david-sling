@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 201,
+  "frame_h": 260,
+  "ms_per_frame": 100,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 100,
+  "anchor_y": 257,
+  "source": "world5/chariot_free_run.png (Glen's 3x2 green grid, split into the horses and the archer)"
+}

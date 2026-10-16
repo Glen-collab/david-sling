@@ -372,6 +372,18 @@ window.SPRITE_DATA = {
   "ay": 291,
   "align": "feet"
  },
+ "chariot_archer_flee": {
+  "src": "../assets/sprites/chariot_archer_flee.png",
+  "frames": 4,
+  "w": 201,
+  "h": 260,
+  "ms": 100,
+  "loop": true,
+  "pingpong": false,
+  "ax": 100,
+  "ay": 257,
+  "align": "feet"
+ },
  "chariot_cart": {
   "src": "../assets/sprites/chariot_cart.png",
   "frames": 6,
@@ -418,6 +430,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 50,
   "ay": 358,
+  "align": "feet"
+ },
+ "chariot_horses_free": {
+  "src": "../assets/sprites/chariot_horses_free.png",
+  "frames": 6,
+  "w": 404,
+  "h": 293,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 202,
+  "ay": 290,
   "align": "feet"
  },
  "chariot_horses_rear": {
