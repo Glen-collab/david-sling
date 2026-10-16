@@ -725,7 +725,8 @@ function drawWorld53(camX) { drawLookouts(camX); drawCairns(camX); }
 // Phase 3, rough ground: it charges, passes and wheels round to come again; if it has to turn on the rough ground the
 //   cracked wheel breaks. The horses rear, the crew jump down and run, the horses trot off free.
 // ===========================================================================
-Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 540, CH_TELL: 0.85, CH_TELL2: 1.3, CH_ARCHER_HP: 3, CH_WHEEL_HP: 3,
+Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH_TELL2: 1.3, CH_ARCHER_HP: 3, CH_WHEEL_HP: 2,
+  CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
   ARROW_SPEED: 620, DONKEY_FOLLOW: 3, ROUGH_FLASH: true });
 for (const n of ["chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
 
@@ -791,7 +792,7 @@ function startChariot() {
   toast("Wheels thunder behind you: a Philistine chariot, hunting scouts on the road! Its archer is the danger first: hit him while he draws his bow.");
 }
 function chariotTurnX(ch) {   // where a charging chariot stops to turn: a few strides past David
-  return Math.max(ch.a0 + 3 * T, Math.min(ch.a1 - 3 * T, david.x + ch.dir * 5 * T));
+  return Math.max(ch.a0 + 3 * T, Math.min(ch.a1 - 3 * T, david.x + ch.dir * W5.CH_OVERRUN * T));
 }
 function updateChariot(dt) {
   const ch = chariot; if (!ch) return;
@@ -801,7 +802,7 @@ function updateChariot(dt) {
   if (d.deadT > 0 && !ch.beaten) {   // David fell: the chariot rides off; back to the fire, and Tobi's counsel
     ch.on = false; ch.arrows = [];
     if (!W5.counsel2) { W5.counsel2 = true; setTimeout(() => {   // tier-2 counsel: a longer tell, a weaker wheel, +1 heart
-      sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And the wheel's old: two good charged stones will crack it.");
+      sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And when he stops to whip the horses, that old wheel stands still: one good charged stone will crack it.");
       d.hearts += 1; }, 2200); }
     return;
   }
@@ -816,7 +817,9 @@ function updateChariot(dt) {
     if ((ch.dir > 0 && ch.x > ch.a1 + 250) || (ch.dir < 0 && ch.x < ch.a0 - 250)) { ch.dir = -ch.dir; }   // turns off the screen
     updateArcher(dt, P);
   } else if (ch.state === "whip") {   // phase 2/3 tell: at the edge, the driver whips the reins
-    ch.v = 0; if (ch.t > (W5.counsel2 ? W5.CH_TELL2 : W5.CH_TELL)) { ch.state = "ram"; ch.t = 0; ch.turnX = chariotTurnX(ch); sfx("thunder_2", ch.x, 0.3, 2.2); }
+    ch.v = 0;
+    if (ch.phase === 2 && !W5.whipTold) { W5.whipTold = true; toast("He's stopped to whip the horses. Now! Hold B, and hit the wheel while it stands still."); }
+    if (ch.t > (W5.counsel2 ? W5.CH_WHIP2 : W5.CH_WHIP)) { ch.state = "ram"; ch.t = 0; ch.turnX = chariotTurnX(ch); sfx("thunder_2", ch.x, 0.3, 2.2); }
   } else if (ch.state === "ram") {   // the charge: on past David, then it slows to turn
     ch.v = Math.min(speed, ch.v + 900 * dt); ch.x += ch.dir * ch.v * dt;
     if ((ch.x - ch.turnX) * ch.dir > 0) { ch.state = "brake"; ch.t = 0; }
@@ -878,7 +881,7 @@ function stoneHitsChariot(s) {
       ch.archerHits++; ch.flash = 0.3; ch.archer = "duck"; ch.at = 0; stoneHit(s); sfx("lion_hit", ch.x, 0.6, 1.5);
       if (ch.archerHits >= W5.CH_ARCHER_HP) {
         ch.phase = 2; ch.state = "brake"; ch.t = 0;
-        toast("You knocked his bow away! The driver whips the horses: he's going to run you down. Jump them (the scout's leap), and hit the wheel with charged stones as it passes.");
+        toast("You knocked his bow away! The driver whips the horses: he's going to run you down. Jump them (the scout's leap). When he stops to whip them again, hit the wheel with a charged stone.");
       } else toast(`Got him! (${ch.archerHits} of ${W5.CH_ARCHER_HP})`);
     } else { stoneHit(s, 0.4); if (!W5.shieldTold) { W5.shieldTold = true; toast("He's behind his shield. Wait for the glint of his bow: hit him while he draws."); } }
     return true;
@@ -887,7 +890,7 @@ function stoneHitsChariot(s) {
     if (ch.phase !== 2) { stoneHit(s, 0.4); return true; }
     if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W5.tapTold) { W5.tapTold = true; toast("A tap stone just bounces off the wheel. Hold B for a charged stone!"); } return true; }
     ch.wheelHits++; ch.flash = 0.3; stoneHit(s); sfx("stone_hit", P.wx, 1, 0.6);
-    const need = W5.counsel2 ? 2 : W5.CH_WHEEL_HP;
+    const need = W5.counsel2 ? 1 : W5.CH_WHEEL_HP;
     if (ch.wheelHits >= need) {
       ch.phase = 3;
       toast(chariotWarned() ? "The wheel cracks and wobbles! Remember Tobi: a chariot can't turn on rough ground. Lead it onto the rocks!" : "The wheel cracks and wobbles! It still turns on the smooth road, though...");
