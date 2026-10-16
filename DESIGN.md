@@ -1230,6 +1230,8 @@ West from Bethlehem through dry hills, down a mountain trail, along a ridge watc
 ```
  [🏠 Jesse's house] ──> (5-1) ──> [🙋 Fleeing family] ──> (5-2)
                                                             │
+                                        [𐤉 Cave of the Name] ┤
+                                                            │
  [✨ Terebinth grove] <── (5-3) <── [🔥 Tobi's cave] <──────┘
           │                │
           └───────────> (5-4 🐎 Valley road)
@@ -1243,6 +1245,7 @@ West from Bethlehem through dry hills, down a mountain trail, along a ridge watc
 | 5-1 | The Supply Road |
 | 🙋 Fleeing family | *(made up)* A village family running from the Philistines with their scattered flock. Help gather it (5-1) and they give you a Secret. |
 | 5-2 | The Mountain Trail (night) |
+| 𐤉 Cave of the Name | *(decided 2026-10-15)* A side dot off 5-2, opened once 5-2 is cleared (you need the double jump). Always open after that, so you can come back with letters you missed. See "The Cave of the Name" below. |
 | 🔥 Tobi's cave | Tobi's campfire. Rest, Journal, counsel. |
 | 5-3 | The Lookouts' Ridge |
 | ✨ Terebinth grove | Opens when all World 5 sheep are found. Bonus stage plus a Psalm piece. The Valley of Elah is named after these trees: *elah* is the Hebrew word for terebinth. |
@@ -1256,7 +1259,7 @@ West from Bethlehem through dry hills, down a mountain trail, along a ridge watc
 4. Title card: **WORLD 5 — THE ROAD TO THE VALLEY**
 
 ### Carrying the provisions
-David carries the provisions through every stage. **If he's hit, a loaf or a cheese drops** and bounces nearby (like coins spilling): grab it back before it's gone. How much arrives at the camp is shown in the stage score and in the end scene. **Carrying never slows David's movement** (rule 1). It's a score you protect, not a weight.
+David carries the provisions through every stage. **If he's hit, a loaf or a cheese drops** and bounces nearby (like coins spilling): grab it back before it's gone. (Built on 4-1's gift drops: gift_bread and gift_cheese already exist; a grain sack is new.) How much arrives at the camp is shown in the stage score and in the end scene. **Carrying never slows David's movement** (rule 1). It's a score you protect, not a weight.
 
 ### 5-1 · The Supply Road — *fear on the road*
 - **Level:** a long dusty road west through dry hills, a crumbling watchtower, dry stone walls, olive terraces. Villagers **coming the other way**, fleeing the Philistines.
@@ -1271,6 +1274,8 @@ David carries the provisions through every stage. **If he's hit, a loaf or a che
 
 ### 5-2 · The Mountain Trail — *night; meet Tobi; learn the double jump*
 - **Level:** a narrow trail along cliffs at night, under a big moon and stars. Rock shelves, narrow ledges, gaps, loose stones.
+- **Lost things (5): Tobi's gear** *(decided 2026-10-15)*, dropped along the trail as he ran: his waterskin, a sandal, his horn, his pack, his scout's staff. You find his story before you find him; he's glad to have them back. (Replaces "5 sheep" for this stage.)
+- **Order in the stage:** hyenas → **the leopard** → Tobi's cave → the double jump → the cliff. The leopard comes *before* Tobi, so David reaches the cave shaken too, the way Tobi was.
 - **Striped hyenas** come out at night. **They laugh before they lunge,** a warning you can hear before you see it. (Journal fact: the striped hyena is real and still lives in Israel.)
 - **Mid-stage mini-boss: the leopard.** It stalks you along the trail from the trees above. The leopard is real, and the prophets describe one lying in wait by the road (Jeremiah 5:6, Hosea 13:7).
   - Tell: leaves rustle, and two eyes shine in the branches. It drops on you from above. Roll away, then hit it on the ground. After 3 hits it retreats up the tree and leaves.
@@ -1297,7 +1302,10 @@ It's the only extra jump in the game and it arrives late, so the last four world
 - **The gateposts grow** from World 5 on, so the top olive needs the double jump.
 
 #### The Cave of the Name *(Glen's idea, 2026-10-15: a puzzle like Indiana Jones' "Word of God")*
-A side cave off the mountain trail in 5-2: an underground stream crossed on **stepping stones carved with old Hebrew
+**Its own map dot (decided 2026-10-15):** not inside 5-2 (already full: the leopard, Tobi, the double jump, The One) but a
+side dot off it, opened when 5-2 is cleared. The stones are spaced so it's the first real test of the double jump, and
+since it's a dot you can walk back to it any time with letters you missed.
+A side cave off the mountain trail: an underground stream crossed on **stepping stones carved with old Hebrew
 letters** (the Paleo-Hebrew script of David's day). Only the right letters hold; a wrong stone crumbles into the water
 (a fall: one heart, back to the bank). A carving on the wall gives the clue for each crossing.
 - **Crossing 1, the warm-up: David's own name.** In Hebrew it's three letters, **Dalet-Waw-Dalet** (DWD). It reads the
@@ -1338,6 +1346,7 @@ drawn and run in world4.js (OLD_LETTERS).
 
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
+- **Lost things (5): knocked-over scout cairns** *(decided 2026-10-15)*. Israelite scouts stack small stone piles to mark the safe path; the Philistines kicked them over. Stand by one and it's rebuilt, for the next scout who comes this way (Tobi shows you the first).
 - **Lookouts (light stealth):** each one watches a stretch of ridge with a torchlight cone. If he sees you, he shouts and lights a **signal fire**, and a few extra raiders come. **Being seen is never a fail state**, just a harder few seconds. Sneaking past (or knocking the torch out of his hand with a quick shot) earns a "Not seen" bonus.
 - **Tobi** knows the ridge:
   > "The lookouts change every time the moon moves behind a cloud. That's your moment."
@@ -1348,6 +1357,7 @@ drawn and run in world4.js (OLD_LETTERS).
 
 ### 5-4 · Down to Elah — *the valley road*
 - **Level:** the descent into the Valley of Elah at dawn. Terebinth trees, a dry streambed (seen for the first time; World 6 begins here), **chariot wheel ruts** in the dust. Both camps are visible on the hills across the valley in the background. Every so often a **distant booming voice** echoes across the valley. You can't make out the words yet.
+- **Lost things (5): the camp's strayed pack donkeys** *(decided 2026-10-15)*, run off when the giant shouted. Lead them down to the road (Glen's donkey art). (Replaces "5 sheep".)
 - **Scroll:** **Psalm 20:7**: some trust in chariots and some in horses, but we trust in the name of the LORD our God. (A psalm of David, placed right before the chariot.)
 - **The One:** among the terebinths, behind a fallen trunk.
 - **Stage ending:** wheels thunder behind you. A **Philistine chariot** comes over the rise, hunting scouts on the road.
@@ -1377,9 +1387,10 @@ drawn and run in world4.js (OLD_LETTERS).
 | Stage | New thing | Sheep | People | Scroll |
 |---|---|---|---|---|
 | 5-1 | Carrying the provisions, raiders, fleeing villagers | 5 (the fleeing family's) + The One | Jesse, Hanan, the fleeing father | Exodus 20:12 |
-| 5-2 | Night trail, hyenas, **leopard mini-boss**, **double jump** | 5 + The One | **Tobi** | Psalm 4:8 |
-| 5-3 | Light stealth past the lookouts, signal fires | 5 + The One | **Tobi** | Psalm 27:1 |
-| 5-4 end | The valley road; **Boss:** the Philistine Chariot | 5 + The One | **Tobi** | Psalm 20:7 |
+| 5-2 | Night trail, hyenas, **leopard mini-boss**, **double jump** | 5 of Tobi's gear + The One | **Tobi** | Psalm 4:8 |
+| 𐤉 dot | The Cave of the Name: DWD, then YHWH right to left | stone of remembrance | | |
+| 5-3 | Light stealth past the lookouts, signal fires | 5 scout cairns + The One | **Tobi** | Psalm 27:1 |
+| 5-4 end | The valley road; **Boss:** the Philistine Chariot | 5 pack donkeys + The One | **Tobi** | Psalm 20:7 |
 
 ### World 5 — who gives what
 | Where | Person | Card | Gift / effect |

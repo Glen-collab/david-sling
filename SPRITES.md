@@ -140,7 +140,9 @@ Frame counts are starting targets. Fewer frames is fine if the motion reads.
 - **Harmless:** ☐ horses (the chariot's team: don't hit them) · ☐ gazelle (run 4) · reuse tortoise
 - **People:** ☐ **Tobi the scout** (hide/cower 2, follow 6, demo leap 6) · ☐ fleeing villagers (walk 4, 2–3 types) · ☐ keeper of supplies · ☐ Israelite soldiers (idle 2, shout 2, run away scared 4) · ☐ commander of the thousand
 - **Boss — the Philistine Chariot:** ☐ chariot galloping (6) · ☐ archer drawing/firing (4) · ☐ archer ducking behind shield (2) · ☐ wheel cracked / wobbling (3) · ☐ wheel broken, chariot stopped, horses rearing (4) · ☐ crew running away on foot (6) · ☐ arrow (2)
-- **Objects:** ☐ provisions (grain sack, loaves, cheeses: dropped and carried) · ☐ signal fire (unlit / lit 4) · ☐ chariot wheel ruts · ☐ terebinth trees · ☐ rough-ground rocks
+- **Lost things:** ☐ Tobi's gear (waterskin, sandal, horn, pack, staff: items) · ☐ scout cairn (knocked over / stacked) · reuse donkey_bare_walk for the pack donkeys
+- **Sound:** ☐ hyena laugh
+- **Objects:** ☐ provisions (grain sack new; loaves and cheeses = gift_bread, gift_cheese) · ☐ signal fire (unlit / lit 4) · ☐ chariot wheel ruts · ☐ terebinth trees · ☐ rough-ground rocks
 - **Tiles/backgrounds:** ☐ supply road · ☐ night mountain trail · ☐ ridge with lookouts · ☐ descent into the Valley of Elah, with both camps in the background
 - **Map:** ☐ World 5 map
 - **Ending scene:** ☐ Goliath in silhouette only, far away, shouting (a dark shape; his full sprite isn't seen until World 6)
