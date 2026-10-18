@@ -1629,6 +1629,12 @@ throw code, a thing you have to know. A carving on a boulder at the water's edge
 **Two crossings, two hazards (Glen, 2026-10-18):** the warm-up (David's name) is over **a pit of spikes** in the dry
 part of the streambed; the Name is over **the deepest pool**. Same rule both times: a wrong stone crumbles, the jump is
 locked, a life.
+**The first step of the Name: "Oh wait..." (Glen, 2026-10-18):** the first stone of the Name crossing offers **Yod**
+(the first letter, if you read left to right like English) against **He** (the right one, read from the right). The
+first time a player steps on Yod there, it's a scripted near-miss, not a lost life: the stone cracks, David scrambles
+back to the bank, and says *"Oh wait. Our fathers read from the right. Start at the end: He, Waw, He, Yod."* (the
+Steward's 4-4 hint, remembered). After that, Yod there crumbles like any wrong stone. A player who steps on He first
+already knew, and gets a line instead: *"From the right, like the Steward said."*
 **The clue, then the Journal (Glen, 2026-10-18):** before each crossing a carving on the rock wall gives the clue
 (only the letters David has found are legible). Standing at it, **Select opens the Journal** at the Old letters page, so
 the player reads what each letter looked like and meant before stepping out.
