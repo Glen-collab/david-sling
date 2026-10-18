@@ -845,3 +845,86 @@ for the giant.
   no colours) of a giant warrior in bronze scale armor and a crested helmet, a huge spear like a weaver's beam (1 Samuel
   17:7), a shield-bearer tiny beside him: 1 standing; 2 shouting, spear raised; 3 pointing across the valley; 4 laughing,
   head back. Background solid flat bright green (#00FF00).
+
+## World 6 — The Valley of Elah: map and 6-1 art (2026-10-18)
+Paste the style block first, as always. Sheets are one row of poses on solid green (#00FF00); single items and
+backgrounds' middle/near layers on magenta (#FF00FF). **Save in** `david-sling-art\world6\`.
+Already in the game and reused: Eliab, Abinadab and Shammah in war gear, the running soldier, Tobi, the commander,
+your Philistine silhouettes, vipers, scorpions, the vulture, the hedgehog, sheep.
+
+### World 6 map (one message, ready to paste; add the map lines)
+```
+World 6: the Valley of Elah, two armies facing each other across a valley. The path, in order:
+1. Bottom-left, on the Israelite hillside: a big camp of brown and tan tents, supply wagons, cooking smoke
+   (the start).
+2. Through the middle of the camp: tents, rope lines, a wooden watch platform (first level dot).
+3. At the edge of the camp, above the valley: a few big clay water jars stacked by a path (a landmark spot).
+4. Down the slope into the open ground between the armies: rocks and dips for cover, arrows stuck in the
+   ground (second level dot).
+5. A small campfire behind a big rock on the Israelite side (a landmark spot).
+6. The valley floor: a winding streambed of smooth pale stones with a few deep blue pools and reeds
+   (third level dot).
+7. Off to one side of the streambed: a tiny hidden spring under a terebinth tree, glowing softly (a small
+   extra spot).
+8. On the right, at the edge of the Philistine side: a tall wooden siege tower on wheels with archers'
+   windows, and its long shadow across the stream (fourth level dot).
+9. Back up the Israelite hill at the top: one larger tent with a banner, the king's tent (the end).
+Far right, on the opposite hillside: the Philistine camp, blue and dark red tents, rows of tiny shields and
+spear points. Mood: two armies facing each other, tense, bright hard morning light.
+```
+Four plain level dots (6-1 to 6-4) plus the camp, the water jars, the brothers' fire, the quiet spring and Saul's
+tent. **Save as** `david-sling-art\world 6 map.png`.
+
+### 6-1 The Camp of Fear (bright morning, the Israelite camp): backgrounds
+Same Format lines as before (very wide, about 3072 x 1024, seamless left/right edges, no characters).
+**Far:**
+```
+World 6, a bright hard morning in the Valley of Elah. A clear pale blue sky. Along the bottom half: the far side of
+the valley, a long brown hillside with the Philistine camp along its top, blue and dark red tents, tiny banners,
+smoke rising, a tall wooden siege tower at one edge; the valley floor below it hazy, a pale winding streambed.
+Tense and still.
+```
+**Middle:**
+```
+World 6 middle distance: the Israelite army camp on a dry hillside, rows of brown and tan goat-hair tents, tethered
+donkeys, stacked shields and spears leaning together, cooking fires with thin smoke, a wooden watch platform on
+poles, supply carts. Morning light. Softer and a little hazy compared with the foreground. EVERYTHING above the
+hills is solid flat bright magenta (#FF00FF), no sky, no clouds.
+```
+**Near:**
+```
+World 6 foreground strip, the bottom quarter only: trampled dusty ground of an army camp, tent pegs and ropes, a
+dropped water skin, a cooking pot on three stones, dry grass, full colour and sharp in morning light. EVERYTHING
+above it is solid flat bright magenta (#FF00FF).
+```
+**Save as** `6-1 far.png`, `6-1 mid.png`, `6-1 near.png`.
+
+### 6-1 sprites (one message each)
+**The frightened soldier** (the lost things of World 6: five per stage; the harp lifts each one)
+```
+A sprite sheet: one row of 6 poses of the same young Israelite soldier, full body, seen from the side, facing
+RIGHT. Pixar-style 3D, soft lighting. About twenty, a short dark beard, a leather cap, a plain brown tunic with a
+leather belt, sandals, a spear and a small round shield. Poses: 1 curled up on the ground hugging his knees,
+hiding, shaking; 2 peeking up over his arms, scared; 3 listening, his face softening; 4 standing up slowly; 5
+picking up his spear and shield, standing tall; 6 a small nod of thanks, ready. Same size, feet on the same line,
+clear gaps between poses. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+A second sheet with an older soldier (grey beard, bald under the cap) makes the five look less copied, if you like.
+Then one row of 6 **walking back to his post** to the right, spear on his shoulder, for both.
+
+**Soldiers at the cooking fire** (the opening scene: "Forty days." "Nobody's going to do it.")
+```
+A sprite sheet: one row of 4 poses of an Israelite soldier sitting on a rock by a fire, seen from the side, facing
+RIGHT. Pixar-style 3D. Tired and gloomy, a leather cap, a brown tunic, his spear leaning beside him. Poses: sitting,
+staring at the fire; talking, one hand open; shaking his head; looking up at someone, surprised. Same size, clear
+gaps. Background solid flat bright green (#00FF00). No shadows, no text.
+```
+Two or three different men if you can (one bearded, one young, one old), the same 4 poses each.
+
+**Eliab, angry** (same Eliab in war gear as in the game now, facing LEFT): one row of 4 poses: red-faced, pointing at
+someone; both hands thrown up; jabbing a finger back up the hill ("those few sheep"); turning away and stomping off.
+Green background.
+
+**Camp pieces** (single items, magenta; save to `world6\`): a goat-hair army tent seen from the side (David can
+bounce on its roof); a wooden supply wagon with sacks and jars; a stack of shields and spears leaning together; a
+big clay water jar; a wooden watch platform on poles with a ladder.
