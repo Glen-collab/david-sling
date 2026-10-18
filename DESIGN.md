@@ -1599,6 +1599,17 @@ throw code, a thing you have to know. A carving on a boulder at the water's edge
   left to right you must step on them last letter first: He, Waw, He, Yod. The clue says so:
   > "Four letters, Yod, He, Waw, He. And remember: our fathers read from the right."
 - Decoy letters on the other stones (Aleph, Bet, Gimel, Kaf, Lamed, Mem, Shin...), looking just as real.
+- **The bridge (Glen, 2026-10-18):** a broken causeway of Glen's sandstone blocks (assets/items/bridge_*) across the
+  pool, with the letter stones in the gaps. Each step is a **low stone and a high stone**: drop to one or double-jump to
+  the other; only one holds. Some right stones are **really hard to reach** (a long double jump, a high ledge), so
+  the obvious stone isn't always the safe one. All letter stones are the same stone (name_stone_plain) and every
+  letter glows the same (Glen's glowing letters, assets/items/name_letter_*), so only reading tells them apart.
+  Mock-up: david-sling-art/claude-checks/name_bridge_mockup.png.
+- **A stone that holds** swaps to Glen's lit stone (name_stone_glow) and its letter brightens; look back and the Name
+  is lit up behind you.
+- **A wrong stone (Glen):** the moment David lands, **the controls lock: no jump**, so he can't hop off it quickly. The
+  stone cracks and crumbles (sprite name_stone_crumble, 5 frames) while David slips (david_slip), and he goes down into
+  the water with the pieces. A life lost; back at the last fire.
 - **Why here:** minutes later, in 8-1, David tells Goliath *"I come to you in the name of the LORD of Armies"* (17:45).
   He crosses on the Name before he says it. And the whole stage is about choosing the right stones: not every stone holds.
 - **Reward:** at the far side, a stone of remembrance and a Journal fact: why English Bibles print "the LORD" in small
