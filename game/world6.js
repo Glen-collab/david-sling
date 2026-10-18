@@ -11,6 +11,7 @@
 //   setPiece("eliab", c)       6-1's end: Eliab hears David asking about the giant (17:28-30), a scene over the stage
 //   setPiece("volley", c, GR, { to, shot })  6-2: open ground from c to `to` under the far slope's archers (shot "stones":
 //                              slingers). A shout, shadows on the ground, then the volley; rocks are cover.
+//   setPiece("carriers"/"fill"/"cistern"/"brother") 6-3: the water carriers on David's footsteps (see below)
 //   setPiece("giantview", c, r) 6-2: on a rise, David watches the giant's morning shout (17:4-10); the Field Guide card
 // The opening scene (w6intro): the soldiers at the cooking fire, "Forty days" (17:16, 17:25), the title card.
 
@@ -31,6 +32,14 @@ const LIFT_LINES = [
   "Forty days I've heard him. That's the first thing I've heard in forty days that wasn't him.",
 ];
 
+const CARRY_LINES = [   // 6-3: the carriers who refused to go down
+  "I told the captain I'd go tomorrow. I've told him that for a week. ...Give me a jar.",
+  "That song... my father sang it at the well. All right. I'll carry.",
+  "If a boy can walk down there, I can too. Wait for me!",
+  "I dropped my jar and ran the first day. Is there a spare? I'll follow you.",
+  "The camp is thirsty and I've been hiding in the reeds. No more. I'm coming.",
+];
+
 // --- the frightened soldiers (the lost things)
 const fearful = setPieces.filter(p => p.kind === "fearful").map((p, i) => ({ x: p.x, y: p.y, look: p.look ?? i, state: "hide", t: 0, song: 0, dir: p.dir || 1, alpha: 1, told: false }));
 function updateFearful(dt) {
@@ -48,10 +57,10 @@ function updateFearful(dt) {
       if (s.song >= W6.LIFT_T) {
         s.state = "rise"; s.t = 0; if (typeof chime === "function") chime(fearful.filter(q => q.state !== "hide").length + 3);
         const n = fearful.filter(q => q.state !== "hide").length;
-        sayLine("A soldier", LIFT_LINES[(n - 1) % LIFT_LINES.length]);
+        sayLine(carrierSpots.length ? "A water carrier" : "A soldier", (carrierSpots.length ? CARRY_LINES : LIFT_LINES)[(n - 1) % LIFT_LINES.length]);
         if (n === fearful.length) setTimeout(() => toast(`All ${n} frightened soldiers are back at their posts.`), 4500);
       }
-    } else if (s.state === "rise") { if (s.t > 2.4) { s.state = "go"; s.t = 0; } }
+    } else if (s.state === "rise") { if (s.t > 2.4) { if (carrierSpots.length) { s.state = "posted"; carrierJoin(s.x, s.y, s.look); } else { s.state = "go"; s.t = 0; } } }   // 6-3: he picks up a jar and joins the line
     else if (s.state === "go") { s.x += s.dir * W6.SOLDIER_RUN * dt; s.alpha = Math.max(0, 1 - s.t / 3); if (s.alpha <= 0) s.state = "posted"; }
   }
 }
@@ -365,16 +374,148 @@ function drawFarGiant(camX) {   // small on the far hill, after David has seen h
 const drawBackground6 = drawBackground;
 drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) drawFarGiant(cx); };   // the giant, small on the far hill
 
+// --- 6-3: the water carriers (DESIGN 6-3). setPiece("carriers", c, GR - 1, { n }) n men with empty jars, waiting at the
+// top of the path down; when David reaches them they fall in behind him (on his footsteps, like the sheep line).
+// setPiece("fill", c, GR, { w }) a pool still holding water: a carrier with an empty jar who walks through it fills it.
+// When the far side shouts, the carriers duck where they are; an arrow or stone that hits a man spills his jar (fill
+// it again at the next pool). setPiece("cistern", c) the camp's water jars at the end: how many full jars get there.
+// In 6-3 the frightened soldiers are the carriers who refused to go: lifted, they pick up a jar and join the line.
+// Shammah comes along with a jar of his own; setPiece("brother", c, GR - 1, { who: "abinadab" }) Abinadab, by the
+// path, with his counsel for the tower (progress.towerCounsel).
+Object.assign(W6, {
+  CARRIER_GAP: 74,       // px along David's path between carriers (behind the lamb and any sheep)
+  CARRIER_SIZE: 1.0,
+  DUCK_H: 50,            // a ducking carrier's height (arrows over that miss him)
+});
+const carriers = [];
+const carrierSpots = setPieces.filter(p => p.kind === "carriers");
+for (const p of carrierSpots) for (let k = 0; k < (p.n || 3); k++) carriers.push({ x: p.x - k * 46, y: p.y, jar: "empty", state: "wait", look: k + 2, t: Math.random(), who: "" });
+const fills = setPieces.filter(p => p.kind === "fill").map(p => ({ x0: p.c * T, x1: (p.c + p.w) * T, c: p.c, w: p.w }));
+const cisternSpot = setPieces.find(p => p.kind === "cistern");
+const brothers6 = setPieces.filter(p => p.kind === "brother");
+const water6 = { told: {}, reached: false };
+if (LEVEL_STAGE === "6-3") carriers.push({ x: (carrierSpots[0] ? carrierSpots[0].x : 6 * T) + 70, y: GR * T, jar: "empty", state: "wait", look: 0, t: 0, who: "Shammah" });
+function carrierJoin(x, y, look) { carriers.push({ x, y, jar: "empty", state: "follow", look, t: 0, who: "" }); }
+function updateCarriers(dt) {
+  if (!carriers.length) return;
+  const d = david, nLine = line.filter(sh => sh.how === "rescued").length;
+  const ducking = !!(volley.plan || volley.shots.length);
+  let k = 0;
+  for (const c of carriers) {
+    c.t += dt; c.moved = 0;
+    if (c.state === "wait") {
+      if (Math.abs(d.x - c.x) < 4 * T && d.deadT <= 0) {
+        for (const q of carriers) if (q.state === "wait") q.state = "follow";
+        sayLine("A water carrier", "You're the shepherd boy who walked toward the giant? ...All right. We'll follow you down. Lead us to the water, and back.");
+      }
+      continue;
+    }
+    c.duck = ducking;
+    const i = k++;
+    if (ducking || d.deadT > 0) continue;   // heads down until the volley's over
+    const tgt = trailAt(TUNE.LAMB_GAP + TUNE.SHEEP_GAP * nLine + W6.CARRIER_GAP * (i + 1));
+    if (!tgt) continue;
+    const x0 = c.x, far = Math.hypot(tgt.x - c.x, tgt.y - c.y);
+    moveToward(c, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.WALK_SPEED * 1.15, far * 5)), dt);
+    c.moved = Math.abs(c.x - x0) / Math.max(dt, 1e-4); if (Math.abs(c.x - x0) > 0.3) c.facing = Math.sign(c.x - x0);
+    if (c.jar === "empty") for (const f of fills) if (c.x > f.x0 && c.x < f.x1) {
+      c.jar = "full"; c.splash = 0.6; sfx("heal", c.x, 0.35, 1.3);
+      if (!water6.told.fill) { water6.told.fill = true; setTimeout(() => sayLine("", "Years later, David would write: \"He makes me lie down in green pastures. He leads me beside still waters.\" (Psalm 23:2)"), 1800); toast("The jars fill at the pool. Now get them back to the camp."); }
+    }
+    c.splash = Math.max(0, (c.splash || 0) - dt);
+  }
+  // arrows and stones from the far side: a hit spills his jar
+  for (let i = volley.shots.length - 1; i >= 0; i--) {
+    const s = volley.shots[i]; if (s.t < 0) continue;
+    const c = carriers.find(q => q.state === "follow" && Math.abs(s.x - q.x) < 14 && s.y > q.y - (q.duck ? W6.DUCK_H : 90) && s.y < q.y);
+    if (!c) continue;
+    volley.shots.splice(i, 1); c.hit = 0.5;
+    if (c.jar === "full") {
+      c.jar = "empty"; c.splash = 0.8; sfx("stone_hit", c.x, 0.5, 0.8);
+      toast(c.who ? "Shammah's jar is hit! The water's gone. He can fill it at the next pool." : "A jar is hit! The water's gone. He can fill it at the next pool.");
+    }
+  }
+  for (const c of carriers) c.hit = Math.max(0, (c.hit || 0) - dt);
+  // brothers by the path
+  for (const b of brothers6) if (!b.told && Math.abs(d.x - b.x) < 3 * T) {
+    b.told = true;
+    sayLine("Abinadab", "Going for the tower, are you? Those towers are top-heavy. Knock the pins out of the front wheels and it'll lean. Lean it far enough and it goes over.");
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.towerCounsel = Math.max(1, p.towerCounsel || 0); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  }
+  // Shammah, once he's filled his jar at the first pool
+  const sham = carriers.find(c => c.who === "Shammah");
+  if (sham && sham.jar === "full" && !water6.told.stones) { water6.told.stones = true; setTimeout(() => sayLine("Shammah", "The streambed's full of good stones, you know. Round ones. Smooth. Just the kind you like."), 6000); }
+  // the camp's water at the end
+  if (cisternSpot && !water6.reached && d.x > cisternSpot.x - T) {
+    water6.reached = true;
+    const n = carriers.filter(c => c.state === "follow" && c.jar === "full").length, m = carriers.filter(c => c.state === "follow").length;
+    toast(n === m && m ? `Every jar full: ${n} jars of water reach the camp!` : `${n} of ${m} jars of water reach the camp.`);
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.water6 = Math.max(n, p.water6 || 0); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  }
+}
+function drawCarriers(camX) {
+  const now = performance.now() / 1000;
+  for (const c of carriers) {
+    const x = c.x - camX; if (x < -150 || x > W + 150) continue;
+    const dir = c.facing || 1, f = c.who ? "" : W6.LOOKS[c.look % W6.LOOKS.length];
+    let top;   // where the jar sits
+    if (c.who === "Shammah") {
+      const nm = c.duck ? "shammah_war_ready" : c.moved > 20 ? "shammah_war_walk" : "shammah_war_ready";
+      drawSprite(nm, frameOf(nm, now + 0.3), x, c.y + (c.duck ? 18 : 0), dir, 1, 1, c.hit > 0 ? "brightness(1.6)" : "");
+      top = c.y - (c.duck ? 84 : 126);
+    } else if (c.duck) {
+      drawSprite("tobi_cave", 0, x, c.y, dir, W6.SOLDIER_SIZE, 1, f + (c.hit > 0 ? " brightness(1.6)" : ""));   // stand-in: curled up
+      top = c.y - 58;
+    } else {
+      const run = c.moved > 20, nm = SPR.soldier_run ? "soldier_run" : "villager_man_run";
+      drawSprite(nm, run ? frameOf(nm, now * 0.7 + c.look) : 0, x, c.y, dir, W6.CARRIER_SIZE, 1, f + (c.hit > 0 ? " brightness(1.6)" : ""));
+      top = c.y - 122;
+    }
+    // the jar on his shoulder: clay, and a glint of water when it's full
+    const jx = x - dir * 20;
+    ctx.fillStyle = "#9a5a32"; ctx.beginPath(); ctx.ellipse(jx, top, 9, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#7a4424"; ctx.fillRect(jx - 5, top - 16, 10, 6);
+    if (c.jar === "full") { ctx.fillStyle = "rgba(150,210,240,0.95)"; ctx.fillRect(jx - 4, top - 17, 8, 3); }
+    if (c.splash > 0) {   // water flying (filling, or spilled)
+      ctx.fillStyle = `rgba(160,215,245,${c.splash})`;
+      for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.arc(jx + Math.cos(k + now * 9) * 16 * (1.2 - c.splash), top - 8 + Math.sin(k * 2.1) * 10 * (1.2 - c.splash), 3, 0, Math.PI * 2); ctx.fill(); }
+    }
+  }
+  // the count, while the line is out
+  const out = carriers.filter(c => c.state === "follow");
+  if (out.length) {
+    const full = out.filter(c => c.jar === "full").length;
+    ctx.save(); ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.beginPath(); ctx.roundRect(W - 230, 250, 200, 40, 10); ctx.fill();
+    ctx.fillStyle = "#cfe9f7"; ctx.font = "bold 20px sans-serif"; ctx.fillText(`Water jars: ${full} / ${out.length}`, W - 214, 277); ctx.restore();
+  }
+}
+function drawFills(camX) {   // the pools still holding water: a shallow sheet over the streambed's floor, with reeds
+  const now = performance.now() / 1000;
+  for (const f of fills) {
+    const x0 = f.x0 - camX, w = f.x1 - f.x0; if (x0 > W || x0 + w < 0) continue;
+    ctx.save(); ctx.fillStyle = "rgba(90,150,160,0.55)"; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 4, w / 2, 9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(230,245,250,0.6)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 3, w / 2.6 + Math.sin(now * 2) * 4, 4, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "#5e7a34"; ctx.lineWidth = 3;   // reeds at each end
+    for (const e of [x0 + 6, x0 + w - 6]) for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(e + k * 5, GR * T + 6); ctx.quadraticCurveTo(e + k * 7, GR * T - 30, e + k * 9 + Math.sin(now + k) * 3, GR * T - 56 - Math.abs(k) * 6); ctx.stroke(); }
+    ctx.restore();
+  }
+  for (const b of brothers6) {
+    const x = b.x - camX; if (x < -150 || x > W + 150) continue;
+    drawSprite("abinadab_war_idle", frameOf("abinadab_war_idle", now), x, b.y, -1);
+  }
+  if (cisternSpot) { const x = cisternSpot.x - camX; if (x > -200 && x < W + 200) for (let k = 0; k < 3; k++) drawItem("town_clay_pots", x + k * 60, GR * T + 4, 0.16); }
+}
+
 // --- hooks: main.js (each frame, drawing)
 function updateWorld6(dt) {
   if (WORLD !== 6) return;
-  updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt);
+  updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt);
 }
 function drawWorld6(camX) {
   if (WORLD !== 6) return;
   drawTents(camX);
   for (const p of setPieces) if (p.kind === "tower") drawTower(p, camX);
-  drawStanding(camX); drawFearful(camX); drawVolleys(camX);
+  drawFills(camX); drawStanding(camX); drawFearful(camX); drawCarriers(camX); drawVolleys(camX);
 }
 
 // ---------------------------------------------------------------------------

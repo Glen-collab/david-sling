@@ -347,7 +347,8 @@ const STAGE_INFO = {
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
   "6-1": { cols: 246, bg: "w5_4", ter: "w2s", name: "The Camp of Fear" },
-  "6-2": { cols: 230, bg: "w5_4", ter: "w2s", name: "No-Man's Land" },   // stand-in background until the 6-2 set   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
+  "6-2": { cols: 230, bg: "w5_4", ter: "w2s", name: "No-Man's Land" },
+  "6-3": { cols: 240, bg: "w5_4", ter: "w2s", name: "The Water Carriers" },   // stand-in background until the 6-3 set   // stand-in background until the 6-2 set   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1226,6 +1227,55 @@ if (LEVEL_NAME === "test") {
   talk(224, "Tobi", "There. Down the far side of this ridge is the road to the valley. I'm not afraid of the dark any more. \"Be strong and courageous. Don't be afraid... for the LORD your God himself is who goes with you\" (Deuteronomy 31:6).");
   talk(229, "", "Years later, David would write: \"In peace I will both lay myself down and sleep, for you alone, LORD, make me live in safety.\" (Psalm 4:8)");
   sheepfold(234);
+} else if (LEVEL_NAME === "6-3") {
+  // ---- 6-3 The Water Carriers: down into the streambed for water. The water carriers (and Shammah, with a jar of his
+  //      own) follow David on his footsteps; the tower's archers on the far side fire volleys, and the carriers duck.
+  //      On the way down the jars are empty and a hit costs nothing; they fill at the pool (Psalm 23:2), and from then
+  //      on a hit spills a jar. Undercut banks are long enough to shelter the whole line. The lost things: 5 carriers
+  //      who refused to go, hiding in the reeds; lifted, they pick up a jar and join the line. The One: on a reed
+  //      ledge over the deepest pool (double jump from the rock in the middle). Abinadab by the path: the tower's
+  //      wheel pins (counsel, tier 1). ----
+  ground(0, 117); ground(132, 239);
+  const bank = (c, w) => rock(c, 13, w, 1);   // an undercut bank: the line walks in under it and ducks
+  campfire(3);
+  talk(5, "The water captain", "My men won't go down there. I don't blame them. The tower's archers shoot at anyone who goes near the water. ...But if you're going, they might follow you.");
+  setPiece("carriers", 12, GR - 1, { n: 3 });
+  rock(18, 15, 3, 2);
+  // the way down: volleys, but the jars are still empty (learn to lead the line under the banks)
+  setPiece("volley", 24, GR, { to: 66 });
+  bank(26, 8);
+  setPiece("fearful", 30, GR - 1, { look: 0, dir: -1 });       // in the reeds under the bank
+  snake("viper", 38);
+  bank(42, 10);
+  rock(55, 15, 2, 2); special(56, 13);
+  setPiece("fearful", 60, GR - 1, { look: 1, dir: -1 });
+  bank(57, 8);
+  // the first pool still holding water: fill the jars
+  setPiece("fill", 70, GR, { w: 6 });
+  critter("scorpion", 80);
+  rock(84, 15, 3, 2); rock(87, 14, 2, 3);
+  setPiece("brother", 92, GR - 1, { who: "abinadab" });        // Abinadab, by the path
+  // full jars now: every hit spills one
+  setPiece("volley", 96, GR, { to: 114 });
+  bank(97, 12); setPiece("fearful", 99, GR - 1, { look: 2, dir: -1 });
+  snake("viper", 112);
+  // the deepest pool: stepping stones, a rock standing up in the middle, and The One on the reeds above it
+  setPiece("pool", 118, GR, { w: 14, say: "Splash! Into the deep pool. Hop the stones." });
+  stepStone(120); stepStone(122); pillar(124, 13, 2); stepStone(127); stepStone(129);
+  plat(124, 7, 2); lostSheep("lamb", 124, 6, "one");             // up on the reeds: double jump from the rock
+  // a second pool to fill a spilled jar, then the long way back up
+  setPiece("fill", 137, GR, { w: 5 });
+  setPiece("fearful", 146, GR - 1, { look: 3, dir: -1 });
+  campfire(150);
+  setPiece("volley", 156, GR, { to: 214, shot: "stones" });
+  bank(158, 11);
+  critter("scorpion", 172);
+  bank(176, 12); setPiece("fearful", 179, GR - 1, { look: 4, dir: -1 });
+  snake("viper", 192); special(193, 12);
+  bank(197, 12);
+  rock(211, 15, 3, 2);
+  setPiece("cistern", 220);                                      // the camp's water jars
+  sheepfold(226);
 } else if (LEVEL_NAME === "6-2") {
   // ---- 6-2 No-Man's Land: down the slope from the camp and out into the open ground between the armies. The archers
   //      and slingers on the far slope fire volleys (world6.js): a shout, shadows on the ground, then the rain; get
@@ -1233,7 +1283,7 @@ if (LEVEL_NAME === "test") {
   //      Field Guide card fills in. The lost things: 5 frightened soldiers pinned behind rocks; lifted, they run back up
   //      the hill. The One: a lamb wandered right out into the open. ----
   ground(0, 229);
-  const shelter = (c, w) => { rock(c, 13, w, 1); rock(c + w - 1, 14, 1, 3); };   // an overhanging rock, open on the camp side: duck in under it
+  const shelter = (c, w) => rock(c, 13, w, 1);   // an overhanging rock: walk in under it (the volleys come down nearly straight)
   campfire(3);
   setPiece("standing", 8, GR - 1, { look: 1 });
   talk(7, "A soldier", "You're going down there? Their archers shoot at anything that moves. When you hear the shout, watch the ground for the shadows, and get in under one of the big overhanging rocks.");

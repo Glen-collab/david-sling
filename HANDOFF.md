@@ -96,6 +96,15 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   page when the Journal's read from the map). After it, the giant stands small on the far hill and booms every
   W6.GIANT_BOOM s. Card weights are the WEB's footnotes (coat about 110 pounds, spearhead about 13). Sounds
   `phil_shout` / `arrow_volley` are wired but not made yet (silent).
+- **6-3 The Water Carriers is built** (2026-10-18). setPiece "carriers" (3 men + Shammah, start of stage) fall in
+  behind David on his footsteps (trailAt, after the lamb and sheep). setPiece "fill": a pool still holding water,
+  empty jars fill walking through (first fill: Psalm 23:2 as narration). Volleys reuse 6-2's; on the shout the line
+  ducks (W6.DUCK_H), a hit on a full jar spills it. Cover is `bank(c, w)`: a long undercut bank (a rock slab, no
+  post, so you walk under it; 6-2's shelters lost their posts too, the post was a wall). The 5 frightened soldiers
+  are the carriers who refused: lifted, they join the line with a jar (CARRY_LINES). Abinadab (setPiece "brother")
+  gives the tower counsel, tier 1 (progress.towerCounsel). The deepest pool: stepping stones, a rock in the middle,
+  The One on a ledge a double jump above it. setPiece "cistern" at the end counts the full jars (progress.water6;
+  not used for anything yet: the water captain's trust/shortcut could read it). HUD box "Water jars: n / m".
 - **Playtested by Glen (2026-10-18):** 5-2 (the leopard) and 5-3 (hiding from the lookouts) are good as they are; the
   lookouts who spot you may get tuned later. The 5-4 chariot is beaten and tuned. Next: World 6 (art requests for
   the map and 6-1 are in ART_PROMPTS.md; DESIGN 5f is still marked draft).

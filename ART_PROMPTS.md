@@ -1003,3 +1003,26 @@ A **shield bearer** (one pose, carrying a tall body shield, walking LEFT) to sta
 **Sounds** (mp3s in `assets/sounds/`): `phil_shout.mp3` (a rough shout of many men from far off, about a second),
 `arrow_volley.mp3` (a whoosh of many arrows loosed at once, then the hiss of them coming down, about 1.5 s).
 
+## World 6 — 6-3 The Water Carriers (2026-10-18)
+Built with stand-ins (5-4's background; the carriers are Glen's running soldier, tinted, with a drawn clay jar).
+
+**Background** (`6-3 far.png`, `6-3 mid.png`, `6-3 near.png`)
+```
+World 6, down in the dry streambed of the Valley of Elah. Far: the valley walls, the Israelite camp's tents high on
+the left hill, and on the right far bank a tall wooden siege tower with archers, small with distance. Middle: the
+streambed winding along, smooth round stones, cracked dry mud, a few pools still holding green water, reeds and
+rushes, terebinth trees with roots showing along the undercut banks. Near strip, the bottom quarter only: smooth
+pale stones of every size, sand, a few reeds. Pixar-style 3D, wide panorama, no people, no text.
+```
+**The water carrier** (one row of 6 walking poses, facing RIGHT, green background): `an Israelite man carrying a
+big clay water jar on his shoulder, one hand steadying it, plain tunic, sandals; a calm walk cycle.` And one row of 2:
+`the same man crouching with his arms over his head, the jar held tight against him.` (The game will tint him for
+the different men; or make two or three different men if you like.)
+
+**The undercut bank** (single item, magenta; save to `world6\`): `a long low earth-and-rock bank of a dry streambed,
+undercut so it hangs out over a hollow a man could crouch in, roots hanging down from the overhang, seen from the
+side. Pixar-style 3D. Solid magenta background (#FF00FF). No shadow, no text.`
+
+**A pool still holding water** (single item, magenta): `a small shallow pool of clear green water among smooth
+stones in a dry streambed, reeds at both ends, seen from the side and a little above.`
+

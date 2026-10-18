@@ -1450,6 +1450,7 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
 - **5 frightened soldiers:** the water carriers who refused to go. Lift them and they join the line.
 - **Scroll:** **Psalm 23:2**: he leads me beside quiet waters.
 - **The One:** in the reeds at the deepest pool, reached by a double jump across the water.
+- *(Built 2026-10-18.)* The line follows on David's footsteps like the sheep. The jars are empty on the way down (the volleys there are practice), fill at the pool, and a hit spills a full one; there's a second pool to refill. Long undercut banks shelter the whole line, which ducks on each shout. The count of full jars at the camp's water jars is saved for the water captain's trust.
 
 ### 6-4 · The Tower's Shadow — *toward the tower*
 - **Level:** along the streambed toward the tower, then up the bank under it. The tower **rolls forward slowly** along the edge of the valley as you go, and its shadow falls across the level. Archers' volleys get tighter. Philistine skirmishers come down to block the path.
