@@ -78,6 +78,10 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## Next
 
+- **The Stones of the Name moved to 7-3** (Glen, 2026-10-18; DESIGN 7-3): no more side dot off 5-2. The letter trail
+  stays in Worlds 4-5 (Yod 4-1, He 4-2, Waw 4-3, He 4-4, Dalet 5-1). Required to finish 7-3 but not a boss; a wrong
+  stone costs a **life**. The Journal (read from a map) now has an "Old letters" page (journal.js `lettersSpread`):
+  each found letter copied in ink, missing ones as "( ? )" with a hint of where. Build the pool itself with World 7.
 - **People as Grok clips:** (Jesse and the trader done) at the stall, Hanan, Shammah, Eliab, the shepherd girl, the neighbor. Today they're names over their lines.
 - **The ram's charge** clip (it uses its walk, sped up).
 - **World 2 (started 2026-10-13):** `game/world2.js` (loaded from world1.js, not index.html, so a cached index.html can't miss it) has the wild boar (scrape = the warning, then a straight charge; tap stones bounce, a full charged stone stuns it and it runs off), deadfalls (material 8, `deadfall()` in main.js: piled logs too tall to jump, only a charged stone breaks them) and Hanan sitting at his campfires (`hanan_sit`).

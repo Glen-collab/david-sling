@@ -238,10 +238,11 @@ function layoutPage(blocks, side, step, stones) {
         if (s.text === "\n") { x = x0; y += lh; first = true; continue; }
         if (s.at > step) continue;
         const text = b.stones ? s.text.replace("{stones}", stones) : s.text;
+        measureCtx.font = s.glyph ? `bold ${px * 1.5}px "Segoe UI Historic"` : `${px}px Caveat`;   // an old Hebrew letter, copied in ink
         for (const w of text.split(" ")) {
           const ww = measureCtx.measureText(w).width;
           if (!first && x + ww > x1) { x = x0 + (WRAP_INDENT[b.size] || 0) * k; y += lh; }
-          words.push({ text: w, x, y, w: ww, px, kind: b.size, at: s.at, strike: s.strike && s.strike <= step ? s.strike : 0, block: b });
+          words.push({ text: w, x, y, w: ww, px, kind: b.size, at: s.at, strike: s.strike && s.strike <= step ? s.strike : 0, block: b, glyph: !!s.glyph });
           x += ww + space; first = false;
         }
       }
@@ -296,7 +297,7 @@ function drawFlatPage(side, page, step, t) {
   page.words.forEach((w, i) => {
     let f = w.at < step ? 1 : w.r1 === undefined ? 0 : Math.max(0, Math.min(1, (t - w.r0) / (w.r1 - w.r0)));
     if (f <= 0) return;
-    g.font = `${w.px}px Caveat`; g.fillStyle = w.kind === "ref" ? JTUNE.INK_REF : JTUNE.INK;
+    g.font = w.glyph ? `bold ${w.px * 1.5}px "Segoe UI Historic"` : `${w.px}px Caveat`; g.fillStyle = w.kind === "ref" ? JTUNE.INK_REF : JTUNE.INK;
     if (f < 1) { g.save(); g.beginPath(); g.rect(w.x - 4, w.y - w.px * 1.2, (w.w + 8) * f, w.px * 1.7); g.clip(); pen = [w.x + w.w * f, w.y - w.px * 0.25]; }
     g.fillText(w.text, w.x, w.y);
     if (f < 1) g.restore();
@@ -405,6 +406,9 @@ const Journal = {
     // reading the Journal later: a page with the pieces of the throw Father has given you (DESIGN §4c)
     const learned = typeof throwLearned === "function" ? throwLearned() : 0;
     if (opts.read && learned > 0) { this.P = Object.assign({}, this.P, { throw: throwSpread(learned) }); this.pages.push({ spread: "throw", step: 5 }); }
+    // and the old letters he's found (DESIGN 7-3, the Stones of the Name): copied down, with the ones still out there
+    const lf = lettersFound();
+    if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf) }); this.pages.push({ spread: "letters", step: 5 }); }
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
     this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
@@ -699,5 +703,27 @@ function throwSpread(n) {
   for (let k = 0; k < n; k++) left.push({ at: 5, size: "small", segs: [{ text: THROW_LINES[k], at: 5 }] });
   const right = [{ at: 5, size: "entry", segs: [{ text: n >= 8 ? "That's all of it. I know it by heart now." : "There's more to it. Father says I'll learn the rest on the way.", at: 5 }] },
                  { at: 5, size: "small", segs: [{ text: "When the giant's head is open, I will need every piece, in the right order, without stopping to think.", at: 5 }] }];
+  return { left, right };
+}
+
+// "Old letters": the Paleo-Hebrew letters David has found carved in Worlds 4 and 5 (world4.js OLD_LETTERS, saved in
+// progress.letters), copied into the Journal for the Stones of the Name in 7-3. A missing one gets an empty space and a
+// hint of where it is. (Two He's are carved, in 4-2 and 4-4; either one counts.)
+const LETTER_PAGE = [
+  { k: "yod",   ch: "\u{10909}", name: "Yod",   pic: "a hand.",                       where: "on the road to Gibeah, somewhere hidden." },
+  { k: "he",    ch: "\u{10904}", name: "He",    pic: "a man with his arms raised.",   where: "at the training yard, or in the king's hall." },
+  { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, on a doorway." },
+  { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks." },
+];
+function lettersFound() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}").letters || []; } catch (e) { return []; } }
+function lettersSpread(found) {
+  const left = [{ at: 5, size: "entry", segs: [{ text: "Old letters, carved in the rock here and there. I copied them down:", at: 5 }] }];
+  for (const L of LETTER_PAGE) left.push(found.includes(L.k)
+    ? { at: 5, size: "small", segs: [{ text: L.ch, at: 5, glyph: true }, { text: `${L.name}: ${L.pic}`, at: 5 }] }
+    : { at: 5, size: "small", segs: [{ text: "( ? )  Not found yet. Maybe " + L.where, at: 5 }] });
+  const all = LETTER_PAGE.every(L => found.includes(L.k)), dwd = found.includes("dalet") && found.includes("waw");
+  const right = [{ at: 5, size: "entry", segs: [{ text: all ? "I have them all now." : "There are more out there. I'll keep looking.", at: 5 }] }];
+  if (dwd) right.push({ at: 5, size: "small", segs: [{ text: "Dalet, Waw, Dalet: my own name.", at: 5 }] });
+  right.push({ at: 5, size: "small", segs: [{ text: "Someday these letters will matter. I'll keep them close.", at: 5 }] });
   return { left, right };
 }

@@ -1230,8 +1230,6 @@ West from Bethlehem through dry hills, down a mountain trail, along a ridge watc
 ```
  [🏠 Jesse's house] ──> (5-1) ──> [🙋 Fleeing family] ──> (5-2)
                                                             │
-                                        [𐤉 Cave of the Name] ┤
-                                                            │
  [✨ Terebinth grove] <── (5-3) <── [🔥 Tobi's cave] <──────┘
           │                │
           └───────────> (5-4 🐎 Valley road)
@@ -1245,7 +1243,6 @@ West from Bethlehem through dry hills, down a mountain trail, along a ridge watc
 | 5-1 | The Supply Road |
 | 🙋 Fleeing family | *(made up)* A village family running from the Philistines with their scattered flock. Help gather it (5-1) and they give you a Secret. |
 | 5-2 | The Mountain Trail (night) |
-| 𐤉 Cave of the Name | *(decided 2026-10-15)* A side dot off 5-2, opened once 5-2 is cleared (you need the double jump). Always open after that, so you can come back with letters you missed. See "The Cave of the Name" below. |
 | 🔥 Tobi's cave | Tobi's campfire. Rest, Journal, counsel. |
 | 5-3 | The Lookouts' Ridge |
 | ✨ Terebinth grove | Opens when all World 5 sheep are found. Bonus stage plus a Psalm piece. The Valley of Elah is named after these trees: *elah* is the Hebrew word for terebinth. |
@@ -1301,48 +1298,9 @@ It's the only extra jump in the game and it arrives late, so the last four world
 - **Worlds 5–8 are built around it:** 5-3's ridge has high routes past the lookouts; the chariot (5-4) is jumped over; the watchtower (6-4) is climbed; the shield-bearer (7-4) is double-jumped over; Goliath's spear sweeps (8-2, phase 1) are dodged forward through the air, which is how you "run to meet him".
 - **The gateposts grow** from World 5 on, so the top olive needs the double jump.
 
-#### The Cave of the Name *(Glen's idea, 2026-10-15: a puzzle like Indiana Jones' "Word of God")*
-**Its own map dot (decided 2026-10-15):** not inside 5-2 (already full: the leopard, Tobi, the double jump, The One) but a
-side dot off it, opened when 5-2 is cleared. The stones are spaced so it's the first real test of the double jump, and
-since it's a dot you can walk back to it any time with letters you missed.
-A side cave off the mountain trail: an underground stream crossed on **stepping stones carved with old Hebrew
-letters** (the Paleo-Hebrew script of David's day). Only the right letters hold; a wrong stone crumbles into the water
-(a fall: one heart, back to the bank). A carving on the wall gives the clue for each crossing.
-- **Crossing 1, the warm-up: David's own name.** In Hebrew it's three letters, **Dalet-Waw-Dalet** (DWD). It reads the
-  same either way, so the first crossing teaches how the puzzle works.
-- **Crossing 2: the Name.** The name God told Moses at the burning bush (Exodus 3:15): four letters, **Yod-He-Waw-He**
-  (YHWH), the name behind every "the LORD" in small capitals. The twist: **Hebrew is read right to left**, so walking
-  left to right you must step on them last letter first: He, Waw, He, Yod. The clue says so:
-  > "Four letters, Yod, He, Waw, He. And remember: our fathers read from the right."
-- Decoy letters on the other stones (Aleph, Bet, Gimel, Kaf, Lamed, Mem, Shin...), looking just as real.
-- **Reward:** at the far side, a stone of remembrance and a Journal fact: why English Bibles print "the LORD" in small
-  capitals (it stands for the four-letter name), and that Hebrew is written right to left. Psalm 20:7 later in this
-  world ("we trust in the name of the LORD our God") echoes it.
-- **Reverence:** the tiles show only the old Hebrew letters, never the name spelled out in English; the game's own text
-  keeps "the LORD" (WEB style), and the Journal explains it.
-- **Art:** blank carved stepping stones (Glen) with the letters drawn on them in code, so every letter shape is exact
-  (an image model would get the old letters wrong).
-  Done (2026-10-15): Glen's stones are assets/items/name_stone_1-4 (blank) and name_stone_broken. The letters come from
-  the Phoenician block of Unicode (the same script as Paleo-Hebrew) in the font "Segoe UI Historic" (Windows): Aleph
-  U+10900, Bet 10901, Gimel 10902, Dalet 10903, He 10904, Waw 10905, Yod 10909, Kaf 1090A, Lamed 1090B, Mem 1090C, Shin
-  10914. Draw them carved: a dark groove with a pale lip 2 px below. (Preview: david-sling-art/claude-checks/
-  name_stones_preview.png.) If a machine lacks the font, fall back to baked letter images.
-
-**The trail of old letters (Glen, 2026-10-15):** before the cave, the letters turn up faintly carved here and there in
-Worlds 4 and 5, never pointed out. Stand still beside one and a clue comes up (what the letter pictured, and a nudge);
-found letters are saved (progress.letters) for the Journal and the cave. `inscription(c, r, letter)` in main.js,
-drawn and run in world4.js (OLD_LETTERS).
-- 4-1: **Yod** (a hand), on the wall inside the secret hollow with the jar of oil. *(In.)*
-- 4-2: **He** (a man with arms raised), scratched on the training-yard wall behind a target.
-- 4-3: **Waw** (a tent peg, "and"), cut into a doorpost in the Gibeah market.
-- 4-4: the second **He**, on a column in the king's hall, and the **Steward**, the one who tells the truth, gives the
-  how-to-read hint: *"Our fathers wrote from right to left, boy. Most people here have forgotten."*
-- 5-1: **Dalet** (a door), on a rock by the supply road, with the clue toward David's own name (DWD) for the warm-up.
-- **Missed some? Come back later (Glen).** The cave is always open, but the wall carving that gives the clue only shows
-  the letters David has found; the rest are worn away (blank). You can still guess your way across (a wrong stone is just
-  a fall), or leave and go back for the letters you missed: the Journal keeps a page of the letters found so far, with
-  an empty space for each one still out there and a hint of which world it's in. World 4's gift (the King's Favor:
-  fast travel between world maps) makes the trip back quick. The cave's reward waits until you cross.
+#### The Stones of the Name: moved to 7-3 *(Glen, 2026-10-18)*
+The letter trail stays in Worlds 4 and 5 (below); the crossing itself is now part of **7-3 Five Smooth Stones**. See
+"The Stones of the Name" there.
 
 ### 5-3 · The Lookouts' Ridge — *don't be seen*
 - **Level:** the high ridge above the Valley of Elah. Philistine **lookouts** with torches stand on rocks and towers.
@@ -1388,7 +1346,6 @@ drawn and run in world4.js (OLD_LETTERS).
 |---|---|---|---|---|
 | 5-1 | Carrying the provisions, raiders, fleeing villagers | 5 (the fleeing family's) + The One | Jesse, Hanan, the fleeing father | Exodus 20:12 |
 | 5-2 | Night trail, hyenas, **leopard mini-boss**, **double jump** | 5 of Tobi's gear + The One | **Tobi** | Psalm 4:8 |
-| 𐤉 dot | The Cave of the Name: DWD, then YHWH right to left | stone of remembrance | | |
 | 5-3 | Light stealth past the lookouts, signal fires | 5 scout cairns + The One | **Tobi** | Psalm 27:1 |
 | 5-4 end | The valley road; **Boss:** the Philistine Chariot | 5 pack donkeys + The One | **Tobi** | Psalm 20:7 |
 
@@ -1625,8 +1582,54 @@ A short map: Saul's tent at the top of the Israelite hill, the path down, the st
 - **Shepherd's Judgment:** vipers and scorpions under the stones; a hedgehog and a whip snake too. Look before you throw, one last time.
 - **"Why five?"** A Journal card: the Bible doesn't say why David took five stones. Some preachers point out he was being sensible in case he missed. Others note that Goliath had relatives in Gath who were also giants (2 Samuel 21:22). Either way, he needed only one.
 - **Scroll:** **Psalm 62:6**: he alone is my rock and my salvation.
-- **The One:** a lamb from the army's flock, standing on a rock in the middle of the deepest pool.
+- **The Stones of the Name** *(Glen's idea, 2026-10-15, a puzzle like Indiana Jones' "Word of God"; placed here 2026-10-18)*.
+  The stage can't be finished without crossing them.
+- **The One:** a lamb from the army's flock, standing on a rock in the middle of the deepest pool (beside the stones of the Name, a double jump off the right path).
 - **Stage ending:** David stands up with the five stones in his bag, staff in one hand, sling in the other, exactly as 17:40 describes. He walks out onto the open ground.
+
+#### The Stones of the Name (7-3)
+The deepest pool in the streambed is crossed on **stepping stones carved with old Hebrew letters** (the Paleo-Hebrew script of David's day). Only the right letters hold; a wrong stone crumbles into the water
+and **costs a life** (Glen: not just a heart, so going back for missed letters is worth it). You start again at the
+last fire, and the pool is still in the way: it's **required, not a boss** (no health bar, no boss music), like the
+throw code, a thing you have to know. A carving on a boulder at the water's edge gives the clue for each crossing.
+- **Crossing 1, the warm-up: David's own name.** In Hebrew it's three letters, **Dalet-Waw-Dalet** (DWD). It reads the
+  same either way, so the first crossing teaches how the puzzle works.
+- **Crossing 2: the Name.** The name God told Moses at the burning bush (Exodus 3:15): four letters, **Yod-He-Waw-He**
+  (YHWH), the name behind every "the LORD" in small capitals. The twist: **Hebrew is read right to left**, so walking
+  left to right you must step on them last letter first: He, Waw, He, Yod. The clue says so:
+  > "Four letters, Yod, He, Waw, He. And remember: our fathers read from the right."
+- Decoy letters on the other stones (Aleph, Bet, Gimel, Kaf, Lamed, Mem, Shin...), looking just as real.
+- **Why here:** minutes later, in 8-1, David tells Goliath *"I come to you in the name of the LORD of Armies"* (17:45).
+  He crosses on the Name before he says it. And the whole stage is about choosing the right stones: not every stone holds.
+- **Reward:** at the far side, a stone of remembrance and a Journal fact: why English Bibles print "the LORD" in small
+  capitals (it stands for the four-letter name), and that Hebrew is written right to left. Psalm 20:7 back in World 5 ("we
+  trust in the name of the LORD our God") pointed to it.
+- **Reverence:** the tiles show only the old Hebrew letters, never the name spelled out in English; the game's own text
+  keeps "the LORD" (WEB style), and the Journal explains it.
+- **Art:** blank carved stepping stones (Glen) with the letters drawn on them in code, so every letter shape is exact
+  (an image model would get the old letters wrong).
+  Done (2026-10-15): Glen's stones are assets/items/name_stone_1-4 (blank) and name_stone_broken. The letters come from
+  the Phoenician block of Unicode (the same script as Paleo-Hebrew) in the font "Segoe UI Historic" (Windows): Aleph
+  U+10900, Bet 10901, Gimel 10902, Dalet 10903, He 10904, Waw 10905, Yod 10909, Kaf 1090A, Lamed 1090B, Mem 1090C, Shin
+  10914. Draw them carved: a dark groove with a pale lip 2 px below. (Preview: david-sling-art/claude-checks/
+  name_stones_preview.png.) If a machine lacks the font, fall back to baked letter images.
+
+**The trail of old letters (Glen, 2026-10-15):** long before the pool, the letters turn up faintly carved here and there in
+Worlds 4 and 5, never pointed out. Stand still beside one and a clue comes up (what the letter pictured, and a nudge);
+found letters are saved (progress.letters) for the Journal and the pool. `inscription(c, r, letter)` in main.js,
+drawn and run in world4.js (OLD_LETTERS).
+- 4-1: **Yod** (a hand), on the wall inside the secret hollow with the jar of oil. *(In.)*
+- 4-2: **He** (a man with arms raised), scratched on the training-yard wall behind a target.
+- 4-3: **Waw** (a tent peg, "and"), cut into a doorpost in the Gibeah market.
+- 4-4: the second **He**, on a column in the king's hall, and the **Steward**, the one who tells the truth, gives the
+  how-to-read hint: *"Our fathers wrote from right to left, boy. Most people here have forgotten."*
+- 5-1: **Dalet** (a door), on a rock by the supply road, with the clue toward David's own name (DWD) for the warm-up.
+- **Missed some? Come back later (Glen: Castlevania-style, the letters are spread through the game).** The boulder's carving that gives the clue only shows
+  the letters David has found; the rest are worn away (blank). You can still guess your way across (a wrong stone costs a life), or leave and go back for the letters you missed: **the Journal keeps a page of the letters found so far**
+  (built 2026-10-18), each one sketched with what it pictured, an empty space for each one still out there, and a hint
+  of where it is. Open the Journal at the pool and check before you step. World 4's gift (the King's Favor:
+  fast travel between world maps) makes the trip back quick. 7-2's memories already send David back through the old worlds.
+
 
 ### 7-4 · The Giant's Shadow — *out onto the valley floor*
 - **A short, quiet, tense stage.** David walks out across the open valley floor toward the Philistine line. **No enemies, no music**: only a slow drum, the wind, and the armies' noise on the hills.
