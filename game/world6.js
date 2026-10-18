@@ -320,8 +320,14 @@ const goliathWatch = {
     if (B.giant) {
       const a = Math.min(1, (this.i === 1 ? this.bt : 2) * 0.8), gx = W * 0.8, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
       ctx.save(); ctx.globalAlpha = a;
-      if (ITEM.phil_sil_shield1) drawItem("phil_sil_shield1", gx - 60, hy + 4, 0.2, a);   // the shield bearer, out in front
-      drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, hy + 4, -1, nm === "lookout_spot" ? 1.3 : 0.62, 1, "brightness(0) blur(0.4px)");
+      if (SPR.goliath_full) {
+        const f = this.i === 7 ? 2 : B.boom ? 1 : 0;
+        drawSprite("goliath_full", 3, gx - 110, hy + 4, -1, 0.9, 1, "brightness(0) blur(0.4px)");   // the shield bearer, out in front
+        drawSprite("goliath_full", f, gx, hy + 4, -1, 0.9, 1, "brightness(0) blur(0.4px)");
+      } else {
+        if (ITEM.phil_sil_shield1) drawItem("phil_sil_shield1", gx - 60, hy + 4, 0.2, a);   // the shield bearer, out in front
+        drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, hy + 4, -1, nm === "lookout_spot" ? 1.3 : 0.62, 1, "brightness(0) blur(0.4px)");
+      }
       ctx.restore();
     }
     drawSprite("david_idle", frameOf("david_idle", now), W * 0.55, y, 1);
@@ -359,9 +365,9 @@ function goliathNote() {
 function updateGiantSpot(dt) {
   if (giantSpot && !goliathWatch.done && !goliathWatch.active && david.x > giantSpot.x - T && david.onGround && david.deadT <= 0) goliathWatch.start();
   if (!goliathWatch.done) return;
-  W6.boomT = (W6.boomT || 0) + dt;   // from now on, his voice booms across the valley every so often
+  W6.boomT = (W6.boomT || 0) + dt; W6.shake = Math.max(0, (W6.shake || 0) - dt);   // from now on, his voice booms across the valley every so often (W6.shake: he's mid-shout)
   if (W6.boomT > W6.GIANT_BOOM) {
-    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; sfx("lion_roar", undefined, 0.35, 0.45);
+    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("lion_roar", undefined, 0.35, 0.45);
     toast(["The giant's voice booms across the valley: \"Give me a man, that we may fight together!\"", "\"I defy the armies of Israel today!\" The ground seems to shake.", "\"Am I not a Philistine, and you servants to Saul?\""][W6.boomN % 3]);
   }
 }
@@ -369,8 +375,8 @@ function drawFarGiant(camX) {   // small on the far hill, after David has seen h
   if (!goliathWatch.done || !giantSpot || w6ending.active) return;
   const now = performance.now() / 1000, gx = W * 0.86 - (camX - giantSpot.x + W * 0.3) * 0.06, gy = GR * T - 222;
   if (gx < -100 || gx > W + 100) return;
-  const nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
-  ctx.save(); ctx.globalAlpha = 0.55; drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, gy, -1, nm === "lookout_spot" ? 0.6 : 0.28, 1, "brightness(0) blur(0.8px)"); ctx.restore();
+  const nm = SPR.goliath_full ? "goliath_full" : SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
+  ctx.save(); ctx.globalAlpha = 0.55; drawSprite(nm, nm === "goliath_full" ? (W6.shake > 0 ? 1 : 0) : nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, gy, -1, nm === "lookout_spot" ? 0.6 : 0.24, 1, "brightness(0) blur(0.8px)"); ctx.restore();
 }
 const drawBackground6 = drawBackground;
 drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) { drawFarGiant(cx); drawFarTower(cx); } };   // the giant, small on the far hill
@@ -494,6 +500,7 @@ function drawFills(camX) {   // the pools still holding water: a shallow sheet o
   const now = performance.now() / 1000;
   for (const f of fills) {
     const x0 = f.x0 - camX, w = f.x1 - f.x0; if (x0 > W || x0 + w < 0) continue;
+    if (ITEM.reed_pool) { drawItem("reed_pool", x0 + w / 2, GR * T + 16, w * 1.35 / 590); continue; }
     ctx.save(); ctx.fillStyle = "rgba(90,150,160,0.55)"; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 4, w / 2, 9, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "rgba(230,245,250,0.6)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 3, w / 2.6 + Math.sin(now * 2) * 4, 4, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = "#5e7a34"; ctx.lineWidth = 3;   // reeds at each end
@@ -798,6 +805,12 @@ function updateTowerFall(dt) {
 function updateDust(dt) {
   for (let i = tw.dust.length - 1; i >= 0; i--) { const p = tw.dust[i]; p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.bow) p.vy += 600 * dt; else p.vy *= 0.97; if (p.t > (p.bow ? 1.4 : 3)) tw.dust.splice(i, 1); }
 }
+function drawTwDust(camX) {
+  for (const p of tw.dust) {
+    if (p.bow) { ctx.save(); ctx.translate(p.x - camX, p.y); ctx.rotate(p.t * 9); ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 20, -1.1, 1.1); ctx.stroke(); ctx.restore(); continue; }
+    ctx.fillStyle = `rgba(200,170,120,${Math.max(0, 0.5 - p.t / 6)})`; ctx.beginPath(); ctx.arc(p.x - camX, p.y, p.puff * (1 + p.t), 0, Math.PI * 2); ctx.fill();
+  }
+}
 // the tower, drawn (a stand-in until Glen's art): rough planks, a leather-covered front, three floors, a wicker parapet
 // on top, four wheels (two show). (x, y) = its front-bottom corner on the ground; s = scale; lean in degrees.
 function drawTowerShape(x, y, s, lean, far) {
@@ -813,8 +826,12 @@ function drawTowerShape(x, y, s, lean, far) {
   ctx.strokeStyle = "#a07e4e"; ctx.lineWidth = 3;
   for (let px = x; px <= x + w; px += 14 * s) { ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, top - 50 * s); ctx.stroke(); }   // wicker
   ctx.fillStyle = "#3e2614"; ctx.fillRect(x + w * 0.5, top - 110 * s, 14 * s, 110 * s); ctx.fillRect(x + w * 0.5, top - 110 * s, w * 0.5 + 10, 14 * s);   // the top beam
-  for (const fx of [44, W6.TW_W * T - 44]) {   // the wheels
+  for (const fx of [44, W6.TW_W * T - 44]) {   // the wheels (Glen's; the front one sags once its pins are out)
     const wx = x + fx * s, wy = y - 36 * s, r = 36 * s;
+    if (ITEM.tw_wheel) {
+      const sag = !far && fx === 44 && tw && (tw.phase >= 3 || tw.state === "fall") ? 0.22 : 0;
+      ctx.save(); ctx.translate(wx, y); ctx.rotate(sag); drawItem("tw_wheel", 0, 4 * s, 84 * s / 320); ctx.restore(); continue;
+    }
     ctx.fillStyle = "#4a3018"; ctx.beginPath(); ctx.arc(wx, wy, r, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "#7a5a34"; ctx.lineWidth = 6 * s; ctx.beginPath(); ctx.arc(wx, wy, r - 5 * s, 0, Math.PI * 2); ctx.stroke();
     for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; ctx.beginPath(); ctx.moveTo(wx, wy); ctx.lineTo(wx + Math.cos(a) * r, wy + Math.sin(a) * r); ctx.stroke(); }
@@ -826,6 +843,10 @@ function drawWatchtower(camX) {
   const now = performance.now() / 1000, x = tw.x0 - camX, y = GR * T, jx = tw.jolt * Math.sin(now * 50) * 4;
   if (x > W + 600 || x + tw.w + 500 < 0) return;
   ctx.save(); ctx.translate(jx, 0);
+  if (tw.state === "down" && ITEM.tw_wreck) {   // Glen's wreck where it fell (backward, away from David), its broken wheel by the base
+    drawItem("tw_wreck", x + tw.w + 170, y + 8, 0.46); if (ITEM.tw_wheel_broken) drawItem("tw_wheel_broken", x + 40, y + 6, 0.22);
+    ctx.restore(); drawTwDust(camX); return;
+  }
   drawTowerShape(x, y, 1, tw.lean, false);
   ctx.save(); ctx.translate(x + tw.w, y); ctx.rotate(tw.lean * Math.PI / 180); ctx.translate(-x - tw.w, -y);
   // the windows: shut, creaking open (the tell), open with an archer leaning out, or dark (his bow knocked away)
@@ -837,14 +858,20 @@ function drawWatchtower(camX) {
       ctx.fillStyle = "#d8c49a"; for (let f = -2; f <= 2; f++) ctx.fillRect(wx - 4 + f * 4 - 1, wy - 26, 3, 12);
       ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(wx - 22, wy + 4, 20, -1.1, 1.1); ctx.stroke();
     }
-    if (w.state !== "done") {   // the shutter, swinging out on its hinge
+    if (w.state !== "done" && ITEM.tw_shutter) {   // Glen's shutter: shut, edge-on as it creaks open, then swung out
+      if (w.state === "shut") drawItem("tw_shutter", wx, wy + 28, 56 / 260);
+      else if (w.state === "tell") drawItem(open < 0.25 ? "tw_shutter" : "tw_shutter_edge", wx + (open < 0.25 ? 0 : 22), wy + 28, 56 / 260);
+      else drawItem("tw_shutter_open", wx + 34, wy + 28, 56 / 260);
+      if (w.state === "tell" && Math.floor(now * 10) % 2) { ctx.fillStyle = "rgba(255,220,140,0.35)"; ctx.fillRect(wx - 24, wy - 28, 48, 56); }
+    } else if (w.state !== "done") {   // the shutter, swinging out on its hinge
       ctx.save(); ctx.translate(wx + 22, wy - 26); ctx.scale(1 - open * 1.6, 1);
       ctx.fillStyle = "#7a5634"; ctx.fillRect(-44, 0, 44, 52); ctx.strokeStyle = "#3e2614"; ctx.lineWidth = 2; ctx.strokeRect(-44, 0, 44, 52); ctx.restore();
       if (w.state === "tell" && Math.floor(now * 10) % 2) { ctx.fillStyle = "rgba(255,220,140,0.35)"; ctx.fillRect(wx - 24, wy - 28, 48, 56); }
     }
   }
   // the rope ladder's upper half, cut: two frayed ends hanging from the roof (the ladder itself is main.js ladder())
-  if (tw.state === "fight" || tw.state === "wait") {
+  if ((tw.state === "fight" || tw.state === "wait") && ITEM.tw_ladder_cut) drawItem("tw_ladder_cut", x - T, W6.TW_ROOF * T + 78, 78 / 260);
+  else if (tw.state === "fight" || tw.state === "wait") {
     ctx.strokeStyle = "#b08850"; ctx.lineWidth = 3;
     for (const rx of [x - 2 * T + 6, x - 6]) { ctx.beginPath(); ctx.moveTo(rx, W6.TW_ROOF * T); ctx.quadraticCurveTo(rx + 4, W6.TW_ROOF * T + 40, rx - 2 + Math.sin(now * 2) * 3, W6.TW_ROOF * T + 76); ctx.stroke(); }
     ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 2 * T + 6, W6.TW_ROOF * T + 30); ctx.lineTo(x - 6, W6.TW_ROOF * T + 30); ctx.stroke();
@@ -870,10 +897,7 @@ function drawWatchtower(camX) {
     const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.soldier_run ? "soldier_run" : "villager_man_run";
     for (let k = 0; k < 6; k++) drawSprite(nm, frameOf(nm, now + k * 0.2), x + tw.w + 30 + k * 40 + t * 260, GR * T, 1, 0.95, Math.max(0, 1 - t / 4), W6.PHIL);
   }
-  for (const p of tw.dust) {
-    if (p.bow) { ctx.save(); ctx.translate(p.x - camX, p.y); ctx.rotate(p.t * 9); ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 20, -1.1, 1.1); ctx.stroke(); ctx.restore(); continue; }
-    ctx.fillStyle = `rgba(200,170,120,${Math.max(0, 0.5 - p.t / 6)})`; ctx.beginPath(); ctx.arc(p.x - camX, p.y, p.puff * (1 + p.t), 0, Math.PI * 2); ctx.fill();
-  }
+  drawTwDust(camX);
 }
 function stoneHitsWorld6(s) { return WORLD === 6 && (stoneHitsTower(s) || stoneHitsSkirm(s)); }   // main.js stone loop
 if (LEVEL_STAGE === "6-4") Object.assign(W6, { VOLLEY_EVERY: 3.2 });   // tighter volleys under the tower
@@ -883,8 +907,20 @@ function updateWorld6(dt) {
   if (WORLD !== 6) return;
   updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt); updateSkirms(dt); updateTower(dt);
 }
+function drawCover(camX) {   // Glen's leaning rock (6-2) and undercut bank (6-3, 6-4), drawn over the slab you shelter under
+  for (const p of setPieces) {
+    if (p.kind !== "shelter" && p.kind !== "bank") continue;
+    const x0 = p.c * T - camX, w = p.w * T; if (x0 > W + 200 || x0 + w < -200) continue;
+    if (p.kind === "shelter" && ITEM.shelter_rock) drawItem("shelter_rock", x0 + w / 2, GR * T + 8, Math.max(0.38, w * 1.15 / 557));
+    if (p.kind === "bank" && ITEM.undercut_bank) {
+      const n = Math.max(1, Math.round(p.w / 6)), cw = w / n, s = cw * 1.12 / 475;
+      for (let k = 0; k < n; k++) drawItem("undercut_bank", x0 + cw * (k + 0.5), 13 * T - 14 + 420 * s, s);   // the grass on top level with the slab's top
+    }
+  }
+}
 function drawWorld6(camX) {
   if (WORLD !== 6) return;
+  drawCover(camX);
   drawTents(camX);
   for (const p of setPieces) if (p.kind === "tower") drawTower(p, camX);
   drawWatchtower(camX); drawFills(camX); drawStanding(camX); drawFearful(camX); drawCarriers(camX); drawSkirms(camX); drawVolleys(camX); drawTowerShadow(camX);
@@ -920,7 +956,9 @@ const w6intro = {
     bgWorld = "w5_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
     ctx.fillStyle = "rgba(255,200,120,0.08)"; ctx.fillRect(0, 0, W, H);
     drawItem("campfire", W * 0.55, y + 4, 0.3);   // the cooking fire
+    const POSE = [[0, 0, 0], [0, 0, 0], [2, 0, 0], [0, 1, 0], [2, 0, 3], [2, 2, 2]][this.step] || [0, 0, 0];   // who's talking, who looks up at David
     for (const [k, fx, dir] of [[0, 0.45, 1], [1, 0.66, -1], [2, 0.74, -1]]) {
+      if (SPR.soldier_sit) { drawSprite("soldier_sit", POSE[k], W * fx, y, dir, 1.3, 1, W6.LOOKS[k] + " brightness(0.9)"); continue; }
       const nm = k === 1 ? "abinadab_war_idle" : "eliab_war_idle";
       drawSprite(nm, frameOf(nm, now + k * 0.7), W * fx, y, dir, 1.02, 1, W6.LOOKS[k] + " brightness(0.85)");
     }

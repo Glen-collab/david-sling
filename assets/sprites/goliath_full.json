@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 311,
+  "frame_h": 344,
+  "ms_per_frame": 600,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 147,
+  "anchor_y": 343,
+  "source": "goliath_full_sheet.png"
+}

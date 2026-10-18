@@ -1235,7 +1235,7 @@ if (LEVEL_NAME === "test") {
   //      BOSS: the Philistine Watchtower (arena from col 160; the tower at 183-188, its rope ladder at 181). The One:
   //      under the tower's ramp, at the very end. ----
   ground(0, 229);
-  const bank = (c, w) => rock(c, 13, w, 1);   // an overhang to duck under (the volleys come down nearly straight)
+  const bank = (c, w) => { rock(c, 13, w, 1); setPiece("bank", c, 13, { w }); };   // an overhang to duck under (the volleys come down nearly straight)
   campfire(3);
   talk(6, "A soldier", "The forward trench is round the bend. Five of ours are pinned down in it, and that tower keeps creeping closer. Every day its shadow's longer.");
   rock(11, 15, 3, 2);
@@ -1277,7 +1277,7 @@ if (LEVEL_NAME === "test") {
   //      ledge over the deepest pool (double jump from the rock in the middle). Abinadab by the path: the tower's
   //      wheel pins (counsel, tier 1). ----
   ground(0, 117); ground(132, 239);
-  const bank = (c, w) => rock(c, 13, w, 1);   // an undercut bank: the line walks in under it and ducks
+  const bank = (c, w) => { rock(c, 13, w, 1); setPiece("bank", c, 13, { w }); };   // an undercut bank: the line walks in under it and ducks
   campfire(3);
   talk(5, "The water captain", "My men won't go down there. I don't blame them. The tower's archers shoot at anyone who goes near the water. ...But if you're going, they might follow you.");
   setPiece("carriers", 12, GR - 1, { n: 3 });
@@ -1324,7 +1324,7 @@ if (LEVEL_NAME === "test") {
   //      Field Guide card fills in. The lost things: 5 frightened soldiers pinned behind rocks; lifted, they run back up
   //      the hill. The One: a lamb wandered right out into the open. ----
   ground(0, 229);
-  const shelter = (c, w) => rock(c, 13, w, 1);   // an overhanging rock: walk in under it (the volleys come down nearly straight)
+  const shelter = (c, w) => { rock(c, 13, w, 1); setPiece("shelter", c, 13, { w }); };   // an overhanging rock: walk in under it (the volleys come down nearly straight)
   campfire(3);
   setPiece("standing", 8, GR - 1, { look: 1 });
   talk(7, "A soldier", "You're going down there? Their archers shoot at anything that moves. When you hear the shout, watch the ground for the shadows, and get in under one of the big overhanging rocks.");

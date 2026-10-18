@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 142,
+  "frame_h": 177,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 65,
+  "anchor_y": 177,
+  "source": "sit_m.png"
+}

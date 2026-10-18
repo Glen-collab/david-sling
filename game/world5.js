@@ -649,6 +649,7 @@ function drawLookoutLight(camX) {   // main.js, after the night tint: the torch 
 function drawTower(p, camX) {   // rough poles and a plank floor, a ladder up the side
   const x0 = p.c * T - camX, w = 4 * T, top = p.r * T, bot = GR * T + 10;
   if (x0 > W + 50 || x0 + w < -50) return;
+  if (ITEM.tw_frame_tower) { drawItem("tw_frame_tower", x0 + w / 2, bot, (bot - top + 12) / (900 * 0.82)); return; }   // Glen's trestle (World 6 art)
   ctx.save(); ctx.fillStyle = "#3b2c22"; ctx.strokeStyle = "#2a1f18"; ctx.lineWidth = 4;
   for (const px of [6, w / 2 - 4, w - 14]) ctx.fillRect(x0 + px, top, 9, bot - top);
   ctx.beginPath(); ctx.moveTo(x0 + 10, top + 20); ctx.lineTo(x0 + w - 10, bot - 20); ctx.moveTo(x0 + w - 10, top + 20); ctx.lineTo(x0 + 10, bot - 20); ctx.stroke();
