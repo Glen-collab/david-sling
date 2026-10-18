@@ -86,6 +86,16 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   soldiers standing about (Eliab/Abinadab war sprites, tinted) with 17:25 lines; the Eliab scene at col 212
   (eliabScene: 17:26-30, Shammah, Proverbs 15:1 as narration); The One on the stacked wagons; the food flock's fold.
   Background: 5-4's dawn valley until Glen's 6-1 set. Map: World 5's painting with World 6's stops until his World 6 map.
+- **6-2 No-Man's Land is built** (2026-10-18; world6.js, layout in main.js before 6-1). Volleys (setPiece "volley",
+  c, GR, { to, shot }): on that ground the far slope shouts ("Loose!" / "Sling!"), shadows mark where every arrow will
+  land (traced against the tiles, so they show on roofs too), then it comes down nearly straight. The bands shift
+  each volley. Cover = `shelter(c, w)` in the layout: an overhanging rock open on the camp side (tall rocks don't
+  shade a standing boy at that angle; tested). Knobs: W6.VOLLEY_EVERY/WARN, ARROW_VX/VY, BAND/GAP. The rise at col
+  120 (setPiece "giantview") plays goliathWatch: 17:16, 17:4-7 with the Field Guide card filling in, Goliath's
+  17:8-10, David, Psalm 3:6 as narration; then David writes the card in his Journal (progress.goliathCard; also a
+  page when the Journal's read from the map). After it, the giant stands small on the far hill and booms every
+  W6.GIANT_BOOM s. Card weights are the WEB's footnotes (coat about 110 pounds, spearhead about 13). Sounds
+  `phil_shout` / `arrow_volley` are wired but not made yet (silent).
 - **Playtested by Glen (2026-10-18):** 5-2 (the leopard) and 5-3 (hiding from the lookouts) are good as they are; the
   lookouts who spot you may get tuned later. The 5-4 chariot is beaten and tuned. Next: World 6 (art requests for
   the map and 6-1 are in ART_PROMPTS.md; DESIGN 5f is still marked draft).

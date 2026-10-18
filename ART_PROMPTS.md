@@ -978,3 +978,28 @@ Replace [GROUND] with one of:
 - **town** (4-3): `worn stone paving of a town street, the bottom of a wooden doorpost, a little straw and dust`
 - **hall** (4-4): `a cool smooth stone palace floor at night, warm lamplight from one side, the foot of a stone column`
 - **stream** (7-3): `smooth round pebbles of a dry streambed, a little water glinting at the edge, a few reeds`
+
+## World 6 — 6-2 No-Man's Land (2026-10-18)
+Built with stand-ins (5-4's dawn valley, the plain rock tiles, the goliath_silhouette). What would make it look right:
+
+**Background** (three layers like the others; save as `6-2 far.png`, `6-2 mid.png`, `6-2 near.png`)
+```
+World 6, no-man's land in the Valley of Elah, a hard bright morning. Far: across the valley, the Philistine camp on
+the opposite hillside, rows of dark tents and a long line of soldiers with spears and shields along the ridge, small
+with distance. Middle: the open valley floor, dry yellow grass, scattered boulders, a few terebinth trees, the dry
+streambed winding through. Near strip, the bottom quarter only: trampled dry ground, broken arrows stuck in the dirt,
+stones, tufts of grass. Pixar-style 3D, wide panorama, no people in the foreground, no text.
+```
+**The shelter rock** (single item, magenta; save to `world6\`): `A big weathered sandstone boulder that leans over,
+making a low overhang a boy could crouch under, open on the left side, seen from the side. Pixar-style 3D. Solid
+magenta background (#FF00FF). No shadow, no text.` (About 5 tiles wide, 4 tall: the game will fit it over the shelter.)
+
+**Goliath, far off, in full** (for the watching scene; one row of 4 poses, facing LEFT, green background): `the
+Philistine champion, huge, bronze helmet, bronze scale coat, bronze shin guards, a javelin across his back, a
+massive spear; 1 standing, spear grounded; 2 shouting, one fist raised; 3 spreading his arms wide, mocking; 4
+laughing, head back.` Shown small and dark against the sky, so a strong clear outline matters more than detail.
+A **shield bearer** (one pose, carrying a tall body shield, walking LEFT) to stand in front of him.
+
+**Sounds** (mp3s in `assets/sounds/`): `phil_shout.mp3` (a rough shout of many men from far off, about a second),
+`arrow_volley.mp3` (a whoosh of many arrows loosed at once, then the hiss of them coming down, about 1.5 s).
+

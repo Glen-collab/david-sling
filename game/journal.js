@@ -417,6 +417,9 @@ const Journal = {
     // and the old letters he's found (DESIGN 7-3, the Stones of the Name): copied down, with the ones still out there
     const lf = lettersFound();
     if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf) }); this.pages.push({ spread: "letters", step: 5 }); }
+    // and the Field Guide card he wrote down watching the giant in 6-2 (world6.js goliathNote)
+    let gc = false; try { gc = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").goliathCard; } catch (e) {}
+    if (opts.read && gc && typeof goliathNote === "function") { this.P = Object.assign({}, this.P, { goliath: goliathNote() }); this.pages.push({ spread: "goliath", step: 5 }); }
     this.note = false;
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();

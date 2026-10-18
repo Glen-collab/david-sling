@@ -346,7 +346,8 @@ const STAGE_INFO = {
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
-  "6-1": { cols: 246, bg: "w5_4", ter: "w2s", name: "The Camp of Fear" },   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
+  "6-1": { cols: 246, bg: "w5_4", ter: "w2s", name: "The Camp of Fear" },
+  "6-2": { cols: 230, bg: "w5_4", ter: "w2s", name: "No-Man's Land" },   // stand-in background until the 6-2 set   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1225,6 +1226,55 @@ if (LEVEL_NAME === "test") {
   talk(224, "Tobi", "There. Down the far side of this ridge is the road to the valley. I'm not afraid of the dark any more. \"Be strong and courageous. Don't be afraid... for the LORD your God himself is who goes with you\" (Deuteronomy 31:6).");
   talk(229, "", "Years later, David would write: \"In peace I will both lay myself down and sleep, for you alone, LORD, make me live in safety.\" (Psalm 4:8)");
   sheepfold(234);
+} else if (LEVEL_NAME === "6-2") {
+  // ---- 6-2 No-Man's Land: down the slope from the camp and out into the open ground between the armies. The archers
+  //      and slingers on the far slope fire volleys (world6.js): a shout, shadows on the ground, then the rain; get
+  //      behind a rock or into a gap. Halfway, on a rise, David watches the giant's morning shout (17:4-10) and the
+  //      Field Guide card fills in. The lost things: 5 frightened soldiers pinned behind rocks; lifted, they run back up
+  //      the hill. The One: a lamb wandered right out into the open. ----
+  ground(0, 229);
+  const shelter = (c, w) => { rock(c, 13, w, 1); rock(c + w - 1, 14, 1, 3); };   // an overhanging rock, open on the camp side: duck in under it
+  campfire(3);
+  setPiece("standing", 8, GR - 1, { look: 1 });
+  talk(7, "A soldier", "You're going down there? Their archers shoot at anything that moves. When you hear the shout, watch the ground for the shadows, and get in under one of the big overhanging rocks.");
+  setPiece("tent", 11, GR, { w: 4 });
+  rock(18, 15, 3, 2);
+  // the open ground: arrows. The shelters are cover; the tall rocks are just in the way
+  setPiece("volley", 24, GR, { to: 110 });
+  rock(28, 14, 2, 3);
+  shelter(33, 5); setPiece("fearful", 35, GR - 1, { look: 0, dir: -1 });   // pinned under the rock
+  snake("viper", 42);
+  shelter(47, 5);
+  special(48, 11);
+  shelter(55, 5); setPiece("fearful", 57, GR - 1, { look: 1, dir: -1 });
+  critter("hedgehog", 63);
+  rock(68, 15, 3, 2); rock(71, 13, 2, 4);
+  shelter(79, 5); setPiece("fearful", 81, GR - 1, { look: 2, dir: -1 });
+  lostSheep("lamb", 92, GR - 1, "one");                                      // right out in the open: between volleys
+  shelter(96, 4);
+  snake("viper", 102);
+  rock(106, 14, 2, 3);
+  // the rise: from the top of it David can see across to the Philistine lines (the scene)
+  rock(113, 15, 3, 2); rock(116, 14, 9, 3);
+  setPiece("giantview", 120, 13);
+  rock(125, 15, 3, 2);
+  // the slingers' ground, closer under the far slope
+  setPiece("volley", 130, GR, { to: 168, shot: "stones" });
+  shelter(133, 4);
+  shelter(141, 5); setPiece("fearful", 143, GR - 1, { look: 3, dir: -1 });
+  critter("scorpion", 150);
+  shelter(152, 4); special(153, 11);
+  rock(161, 15, 3, 2); rock(164, 14, 2, 3);
+  // and arrows again, the last stretch back toward the camp's edge
+  setPiece("volley", 172, GR, { to: 214 });
+  shelter(175, 4);
+  snake("viper", 181);
+  shelter(185, 5); setPiece("fearful", 187, GR - 1, { look: 4, dir: -1 });
+  shelter(195, 5);
+  critter("hedgehog", 204);
+  shelter(207, 4); special(208, 11);
+  campfire(217);
+  sheepfold(222);
 } else if (LEVEL_NAME === "6-1") {
   // ---- 6-1 The Camp of Fear: the Israelite camp on its hill above the Valley of Elah, forty days into the giant's
   //      shouting (1 Samuel 17:16). Tents to bounce on, supply wagons, the watch platform, cooking fires. The lost things:
@@ -3552,7 +3602,8 @@ const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "
   "thunder", "thunder_2", "thunder_3",   // 3-4's storm (Glen's lightning sounds)
   "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip",
   "hyena_1", "hyena_2", "hyena_3",   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2
-  "horses"];   // the chariot horses whinnying (5-4)
+  "horses",   // the chariot horses whinnying (5-4)
+  "phil_shout", "arrow_volley"];   // 6-2's volleys: the shout from the far slope, the arrows loosed (until Glen's, silent)
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
@@ -3799,6 +3850,9 @@ function frame(now) {
   }
   if (typeof w6intro !== "undefined" && w6intro.active) {   // the opening of World 6, the camp of fear (world6.js)
     pollInput(); w6intro.update(real); w6intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof goliathWatch !== "undefined" && goliathWatch.active) {   // 6-2: the giant, seen in full (world6.js)
+    pollInput(); goliathWatch.update(real); goliathWatch.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof eliabScene !== "undefined" && eliabScene.active) {   // 6-1: Eliab hears David (world6.js)
     pollInput(); eliabScene.update(real); eliabScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
