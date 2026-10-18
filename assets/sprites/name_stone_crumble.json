@@ -1,0 +1,11 @@
+{
+  "frames": 5,
+  "frame_w": 222,
+  "frame_h": 329,
+  "ms_per_frame": 110,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 111,
+  "anchor_y": 95,
+  "source": "world7/Sandstone Platform Sprite Sheet.png, row 5 (Glen): the plain stone cracking and breaking, top edges aligned; anchor = the bottom of the whole stone"
+}
