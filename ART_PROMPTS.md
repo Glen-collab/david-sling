@@ -928,3 +928,34 @@ Green background.
 **Camp pieces** (single items, magenta; save to `world6\`): a goat-hair army tent seen from the side (David can
 bounce on its roof); a wooden supply wagon with sacks and jars; a stack of shields and spears leaning together; a
 big clay water jar; a wooden watch platform on poles with a ladder.
+
+### World 6: five different frightened soldiers (2026-10-18)
+One sheet per man, the same 6 poses, so each hidden soldier in a stage looks like his own person. Save as
+`world6\soldier_fear_1.png` ... `soldier_fear_5.png`, and a walk sheet for each as `soldier_walk_1.png` ...
+**The prompt (paste the style block first, then this, then ONE of the five men below):**
+```
+A sprite sheet: one row of 6 poses of the same Israelite soldier from about 1000 BC, full body, seen straight from
+the side, facing RIGHT. Pixar-style 3D animation, soft warm lighting. He has been frightened for forty days by a
+giant's shouting. Poses, left to right: 1 curled up on the ground hugging his knees, head down, shaking; 2 peeking
+up over his arms, scared; 3 still sitting, listening to music, his face softening; 4 getting up on one knee; 5
+standing tall, spear upright in one hand and his small round shield on the other arm, brave again; 6 a small nod of
+thanks, smiling a little. Same size in every pose, feet on the same line, clear gaps between poses, nothing
+overlapping. Background solid flat bright green (#00FF00). No shadows on the ground, no text, no other people.
+```
+**The five men (add one at the end):**
+1. `A young soldier about eighteen, thin, no beard yet, curly black hair under a leather cap, a plain undyed tunic, a
+   rope belt, bare feet.`
+2. `A big broad-shouldered soldier about thirty, a thick black beard, a bald head with a dark headband, a brown tunic
+   with a leather belt, sandals, a heavy spear.`
+3. `An old soldier about fifty-five, a long grey beard, a lined kind face, a faded blue headcloth, a long tan tunic,
+   a worn leather jerkin, sandals.`
+4. `A short stocky soldier about twenty-five, a short reddish-brown beard, a round leather helmet, a rust-red tunic,
+   leather bands on his wrists, sandals, a sling tucked in his belt as well as his spear.`
+5. `A tall lanky soldier about thirty-five, a narrow face, a trimmed dark beard with a grey streak, a white headcloth
+   tied with a cord, a striped brown-and-cream tunic, sandals.`
+**The walk back to his post (same man, same size), one message each:**
+```
+A sprite sheet: one row of 6 poses of this same soldier walking to the RIGHT, a full walk cycle, spear resting on
+his shoulder, shield on his arm, head up, calm and steady. Same size, feet on the same line, clear gaps. Background
+solid flat bright green (#00FF00). No shadows, no text.
+```
