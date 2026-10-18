@@ -729,7 +729,7 @@ Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH
   CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
   ARROW_SPEED: 620, CH_ARENA: 1.6, DONKEY_FOLLOW: 3,   // CH_ARENA: the fight's width, in screens (the camera follows inside it)
   ROUGH_FLASH: true });
-for (const n of ["chariot_full_run", "chariot_crash", "chariot_horses_free", "chariot_archer_flee", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
+for (const n of ["chariot_full_run", "chariot_full_run_without_bow", "chariot_draw_bow", "chariot_disarmed", "chariot_damaged_wheel", "chariot_fall_off", "chariot_no_rider", "charioteer_run_away", "chariot_crash", "chariot_horses_free", "chariot_archer_flee", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
 
 // --- the pack donkeys
 CRITTER_ART.packdonkey = { box: k => ({ x0: k.x - 50, x1: k.x + 50, y0: k.y - 90, y1: k.y }) };
@@ -873,7 +873,7 @@ function updateChariotCrash(dt) {
   if (ch.state === "crash" && ch.t > 2.6) { ch.state = "free"; ch.t = 0; }
   if (ch.state === "free" && !ch.beaten) {
     ch.beaten = true; sfx("heal", undefined, 0.7);
-    toast("The crew jump down and run back toward their own lines. The horses trot off, free. Nobody is hurt.");
+    toast(SPR.chariot_fall_off ? "The archer picks himself up and runs back toward his own lines. The horses gallop off with the empty chariot. Nobody is hurt." : "The crew jump down and run back toward their own lines. The horses trot off, free. Nobody is hurt.");
     setTimeout(() => sayLine("", "Years later, David would write: \"Some trust in chariots, and some in horses, but we trust in the name of the LORD our God.\" (Psalm 20:7)"), 3500);
     setTimeout(() => sayLine("Tobi", "You did it! And the horses are fine. Come on, David. The camp's just over there."), 11000);
   }
@@ -885,7 +885,7 @@ function stoneHitsChariot(s) {
     if (ch.archer === "raise" || ch.archer === "draw") {
       ch.archerHits++; ch.flash = 0.3; ch.archer = "duck"; ch.at = 0; stoneHit(s); sfx("lion_hit", ch.x, 0.6, 1.5);
       if (ch.archerHits >= W5.CH_ARCHER_HP) {
-        ch.phase = 2; ch.state = "brake"; ch.t = 0;
+        ch.phase = 2; ch.state = "brake"; ch.t = 0; ch.disarmAt = performance.now() / 1000;   // Glen's disarm: the bow spins away
         toast("You knocked his bow away! The driver whips the horses: he's going to run you down. Jump them (the scout's leap). When he stops to whip them again, hit the wheel with a charged stone.");
       } else toast(`Got him! (${ch.archerHits} of ${W5.CH_ARCHER_HP})`);
     } else { stoneHit(s, 0.4); if (!W5.shieldTold) { W5.shieldTold = true; toast("He's behind his shield. Wait for the glint of his bow: hit him while he draws."); } }
@@ -927,6 +927,16 @@ function drawChariot(camX) {
   const P = chParts(ch), now = performance.now() / 1000, x = ch.x - camX;
   if (x < -700 || x > W + 700) return;
   const dir = ch.dir, flt = ch.flash > 0 ? "brightness(1.8)" : "";
+  if ((ch.state === "crash" || ch.state === "free") && SPR.chariot_fall_off) {   // Glen's fall: the wheel gives, the archer is thrown off; then the horses run on with the empty chariot and he runs home
+    if (ch.state === "crash") drawSprite("chariot_fall_off", Math.min(5, Math.floor(ch.t / 0.42)), x, P.gy, dir);
+    else {
+      const t = ch.t, inA = Math.min(1, t * 3), outA = Math.max(0, 1 - t / 4.5);
+      drawSprite("chariot_fall_off", 5, x, P.gy, dir, 1, Math.max(0, 1 - t / 0.5));
+      drawSprite("chariot_no_rider", frameOf("chariot_no_rider", now), x + dir * t * 430, P.gy, dir, 1, inA * outA);   // the horses gallop on, free
+      if (SPR.charioteer_run_away) drawSprite("charioteer_run_away", frameOf("charioteer_run_away", now), x + dir * (290 * P.s - Math.max(0, t - 0.4) * 280), P.gy, -dir, 1, inA * outA);   // up, and back to his own lines
+    }
+    return;
+  }
   if ((ch.state === "crash" || ch.state === "free") && SPR.chariot_crash) {   // Glen's crash: the wheel cracks, shatters, the archer is thrown, the wreck drags to a stop
     if (ch.state === "crash") drawSprite("chariot_crash", Math.min(5, Math.floor(ch.t / 0.42)), x, P.gy, dir);
     else {   // he picks himself up: the wreck fades, and the crew run off back up the road (nobody hurt)
@@ -954,8 +964,13 @@ function drawChariot(camX) {
   }
   const moving = ch.v > 30;
   if (chFull(ch)) {   // Glen's whole chariot, galloping (standing still while the driver whips); the glint at the bow is phase 1's tell
-    drawSprite("chariot_full_run", moving ? frameOf("chariot_full_run", now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 3) % 2, x, P.gy, dir, 1, 1, flt);
-    if (ch.phase === 3) {   // the cracked wheel, wobbling, over the painted one
+    const has = n => SPR[n] ? n : "chariot_full_run", dA = now - (ch.disarmAt || -9);
+    let nm = has(ch.phase === 1 ? (["raise", "draw", "loose"].includes(ch.archer) ? "chariot_draw_bow" : "chariot_full_run_without_bow")
+                 : ch.wheelHits > 0 || ch.phase === 3 ? "chariot_damaged_wheel" : "chariot_full_run_without_bow");
+    if (ch.phase === 1 && !SPR.chariot_draw_bow) nm = "chariot_full_run";
+    if (ch.phase > 1 && SPR.chariot_disarmed && dA < 0.72) drawSprite("chariot_disarmed", Math.floor(dA / 0.12), x, P.gy, dir, 1, 1, flt);   // the bow knocked out of his hands
+    else drawSprite(nm, moving ? frameOf(nm, now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 3) % 2, x, P.gy, dir, 1, 1, flt);
+    if (ch.phase === 3 && !SPR.chariot_damaged_wheel) {   // the cracked wheel, wobbling, over the painted one
       const wr = 66 * P.s, wob = Math.sin(now * 25) * 3;
       ctx.save(); ctx.translate(P.wx - camX, P.gy - wr + 6 + wob); ctx.rotate(ch.wheelA); drawItem("chariot_wheel_cracked", 0, wr * 1.04, wr * 2.08 / 260, 1); ctx.restore();
     }

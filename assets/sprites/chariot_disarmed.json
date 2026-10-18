@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 614,
+  "frame_h": 543,
+  "ms_per_frame": 120,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 50,
+  "anchor_y": 518,
+  "source": "world5/chariot_for_photoshop/chariot_disarmed_sheet.png (Glen; scaled 1.12 and aligned on the wheel to chariot_full_run, 160px taller for the flying bow)"
+}

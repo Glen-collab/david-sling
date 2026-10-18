@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 614,
+  "frame_h": 383,
+  "ms_per_frame": 420,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 50,
+  "anchor_y": 358,
+  "source": "world5/chariot_for_photoshop/chariot_fall_off.png (Glen, same frame and anchor as chariot_full_run)"
+}

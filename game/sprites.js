@@ -420,8 +420,68 @@ window.SPRITE_DATA = {
   "ay": 304,
   "align": "feet"
  },
+ "chariot_damaged_wheel": {
+  "src": "../assets/sprites/chariot_damaged_wheel.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
+ "chariot_disarmed": {
+  "src": "../assets/sprites/chariot_disarmed.png",
+  "frames": 6,
+  "w": 614,
+  "h": 543,
+  "ms": 120,
+  "loop": false,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 518,
+  "align": "feet"
+ },
+ "chariot_draw_bow": {
+  "src": "../assets/sprites/chariot_draw_bow.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
+ "chariot_fall_off": {
+  "src": "../assets/sprites/chariot_fall_off.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 420,
+  "loop": false,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
  "chariot_full_run": {
   "src": "../assets/sprites/chariot_full_run.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
+ "chariot_full_run_without_bow": {
+  "src": "../assets/sprites/chariot_full_run_without_bow.png",
   "frames": 6,
   "w": 614,
   "h": 383,
@@ -466,6 +526,30 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 265,
   "ay": 305,
+  "align": "feet"
+ },
+ "chariot_no_rider": {
+  "src": "../assets/sprites/chariot_no_rider.png",
+  "frames": 6,
+  "w": 614,
+  "h": 383,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 358,
+  "align": "feet"
+ },
+ "charioteer_run_away": {
+  "src": "../assets/sprites/charioteer_run_away.png",
+  "frames": 6,
+  "w": 202,
+  "h": 235,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 101,
+  "ay": 232,
   "align": "feet"
  },
  "chicken_peck": {
