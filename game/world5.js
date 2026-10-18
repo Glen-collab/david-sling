@@ -821,7 +821,10 @@ function updateChariot(dt) {
     ch.v = Math.min(speed, ch.v + 400 * dt); ch.x += ch.dir * ch.v * dt;
     if ((ch.dir > 0 && ch.x > ch.a1 + 250) || (ch.dir < 0 && ch.x < ch.a0 - 250)) { ch.dir = -ch.dir; }   // turns off the screen
     if (ch.phase === 1) updateArcher(dt, P);
-    if (ch.phase === 3 && onRough(chFront(ch))) { crashChariot(true); return; }   // the cracked wheel can't take the rocks
+    if (ch.phase === 3 && onRough(chFront(ch))) {   // the rocks: only if he's charging David standing on them; otherwise the driver eases over
+      if (onRough(david.x) || onRough(david.x - T) || onRough(david.x + T)) { crashChariot(true); return; }
+      if (!W5.easeTold && ch.x > ch.a0 && ch.x < ch.a1) { W5.easeTold = true; toast("The driver eases the cracked wheel carefully over the rocks. Stand on them, and he'll charge you without looking!"); }
+    }
   } else if (ch.state === "whip") {   // phase 2/3 tell: at the edge, the driver whips the reins
     ch.v = 0;
     if (ch.phase === 2 && !W5.whipTold) { W5.whipTold = true; toast("He's stopped to whip the horses. Now! Hold B, and hit the wheel while it stands still."); }
