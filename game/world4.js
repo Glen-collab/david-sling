@@ -299,6 +299,7 @@ function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true
   else if (L.icon === "gear") drawItem("tobi_sandal", HUD_X + 14, 228, 0.24);
   else if (L.icon === "cairn") drawItem("cairn_up", HUD_X + 14, 232, 0.16);
   else if (L.icon === "donkey") drawSprite("donkey_idle", 0, HUD_X + 14, 230, 1, 0.42);
+  else if (L.icon === "soldier") drawSprite("soldier_run", 0, HUD_X + 14, 236, 1, 0.2);
   else if (L.icon === "lamp") drawItem("hall_lamp_lit", HUD_X + 14, 228, 0.16); else drawItem("gift_honey", HUD_X + 14, 224, 0.24);
   hudText(`${L.found}/${L.total}`, HUD_X + 40, 220);
   questItems.forEach((q, i) => { ctx.save(); ctx.globalAlpha = q.taken ? 1 : 0.35; drawQuestIcon(q.name, HUD_X + 6 + i * 44, 290, 0.8); ctx.restore(); });   // 4-3: the harp's three things

@@ -91,6 +91,18 @@ const MAP_WORLDS = {
       { id: "5-4", label: "Down to Elah", x: 1590, y: 635, trail: [[1230, 205], [1380, 360], [1485, 490]] },
     ],
   },
+  // World 6: stand-in until Glen's World 6 painting: World 5's map (the two camps are at its right edge)
+  6: {
+    name: "The Valley of Elah", src: "../assets/maps/world5_map.jpg",
+    david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
+    stops: [
+      { id: "home", label: "The camp of Israel", x: 1590, y: 635 },
+      { id: "6-1", label: "The Camp of Fear", x: 1700, y: 560, trail: [[1640, 600]] },
+      { id: "6-2", label: "No-Man's Land", x: 1820, y: 640, trail: [[1760, 600]] },
+      { id: "6-3", label: "The Water Carriers", x: 1880, y: 760, trail: [[1860, 700]] },
+      { id: "6-4", label: "The Tower's Shadow", x: 1960, y: 640, trail: [[1930, 700]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -108,8 +120,8 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1, 2, 3, 4, 5];   // worlds you can go into from the journey map so far
-const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_WORLDS = [1, 2, 3, 4, 5, 6];   // worlds you can go into from the journey map so far
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4", "6-1"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }

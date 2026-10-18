@@ -346,6 +346,7 @@ const STAGE_INFO = {
   "4-2": { cols: 232, bg: "w4_2", ter: "w2s", name: "The Training Yard" },   // Glen's fortress set; dusty ground
   "4-1": { cols: 316, bg: "w4_1", name: "The Road to Gibeah" },   // Glen's vineyards-and-Jebus layers
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
+  "6-1": { cols: 246, bg: "w5_4", ter: "w2s", name: "The Camp of Fear" },   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1224,6 +1225,55 @@ if (LEVEL_NAME === "test") {
   talk(224, "Tobi", "There. Down the far side of this ridge is the road to the valley. I'm not afraid of the dark any more. \"Be strong and courageous. Don't be afraid... for the LORD your God himself is who goes with you\" (Deuteronomy 31:6).");
   talk(229, "", "Years later, David would write: \"In peace I will both lay myself down and sleep, for you alone, LORD, make me live in safety.\" (Psalm 4:8)");
   sheepfold(234);
+} else if (LEVEL_NAME === "6-1") {
+  // ---- 6-1 The Camp of Fear: the Israelite camp on its hill above the Valley of Elah, forty days into the giant's
+  //      shouting (1 Samuel 17:16). Tents to bounce on, supply wagons, the watch platform, cooking fires. The lost things:
+  //      5 frightened soldiers hidden about the camp; play the harp beside each one (world6.js). David goes from man to
+  //      man asking about the giant (17:25-27), and at the top of the camp Eliab hears him (17:28-30): a scene, not a
+  //      fight. The One: a lamb from the army's food flock, loose on top of the supply wagons. ----
+  ground(0, 245);
+  campfire(4);
+  setPiece("standing", 9, GR - 1, { look: 0 });
+  talk(8, "A soldier", "You're Jesse's boy? Your brothers are up the hill. Keep your head down when he shouts. Everyone does.");
+  setPiece("tent", 13, GR, { w: 4 }); setPiece("fearful", 18, GR - 1, { look: 0 });             // behind the first tents
+  setPiece("tent", 21, GR, { w: 5 });
+  critter("hen", 28);
+  setPiece("wagon", 31, GR, { w: 4 }); special(33, 10);
+  rock(38, 15, 3, 2); rock(41, 13, 3, 4);
+  setPiece("standing", 47, GR - 1, { look: 1 });
+  talk(46, "A soldier", "Have you seen this man who has come up? He has surely come up to defy Israel. (1 Samuel 17:25)");
+  setPiece("tent", 51, GR, { w: 4 }); setPiece("tent", 56, GR, { w: 5 });
+  setPiece("wagon", 63, GR, { w: 4 }); setPiece("fearful", 65, GR - 1, { look: 1, dir: -1 });  // under the wagon
+  snake("viper", 71);
+  campfire(76);
+  // the rocks at the camp's edge, a man hiding up on top
+  rock(82, 15, 4, 2); rock(86, 13, 4, 4); rock(90, 11, 5, 6); setPiece("fearful", 93, 10, { look: 2 });
+  special(91, 6);
+  setPiece("tent", 98, GR, { w: 5 });
+  setPiece("standing", 106, GR - 1, { look: 2 });
+  talk(105, "A soldier", "The king will give great riches to the man who kills him, and will give him his daughter, and will make his father's house tax-free in Israel. (1 Samuel 17:25)");
+  // the watch platform: a man up there who won't look out over the valley any more
+  setPiece("tower", 112, 11); plat(112, 11, 4); setPiece("fearful", 114, 10, { look: 3 });
+  setPiece("wagon", 118, GR, { w: 4 });
+  critter("scorpion", 125); critter("hen", 129);
+  campfire(134);
+  setPiece("tent", 139, GR, { w: 4 }); setPiece("tent", 144, GR, { w: 4 }); setPiece("tent", 149, GR, { w: 5 });
+  rock(155, 15, 3, 2); special(156, 10);
+  setPiece("standing", 161, GR - 1, { look: 3 });
+  talk(160, "A soldier", "Forty days. Morning and evening, he comes out and shouts, and we all go and stand in the line, and nobody moves.");
+  setPiece("tent", 165, GR, { w: 5 }); setPiece("fearful", 171, GR - 1, { look: 4, dir: -1 });  // curled up behind the last tent
+  snake("viper", 176);
+  // the supply wagons, stacked high with sacks: The One got up on top
+  setPiece("wagon", 182, GR, { w: 4 }); rock(186, 13, 3, 4); setPiece("wagon", 189, GR, { w: 4 });
+  plat(185, 10, 3); plat(188, 7, 3);
+  lostSheep("lamb", 189, 6, "one");
+  campfire(196);
+  setPiece("tent", 201, GR, { w: 4 });
+  setPiece("standing", 207, GR - 1, { look: 4 });
+  // the top of the camp, by the commanders' tents: David asks about the giant, and Eliab hears him
+  setPiece("eliab", 212);
+  setPiece("tent", 218, GR, { w: 5 });
+  sheepfold(228);                                               // the pen of the army's food flock
 } else if (LEVEL_NAME === "5-1") {
   // ---- 5-1 The Supply Road: west from Bethlehem with the provisions for the brothers (1 Samuel 17:17-18). Families
   //      coming the other way, running from the Philistines; raiders up in the hills after grain (they snatch a loaf or a
@@ -3205,6 +3255,7 @@ function drawFinishBanner() {
   else if (ic === "gear") drawItem("tobi_sandal", ix, 274, 0.26);
   else if (ic === "cairn") drawItem("cairn_up", ix, 278, 0.17);
   else if (ic === "donkey") drawSprite("donkey_idle", 0, ix, 276, 1, 0.45);
+  else if (ic === "soldier") drawSprite("soldier_run", 0, ix, 280, 1, 0.22);
   else if (ic === "lamp") drawItem("hall_lamp_lit", ix, 274, 0.17);
   else if (finish.things) drawItem("gift_honey", ix, 270, 0.26); else hudIcon("sheep", ix, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
@@ -3592,6 +3643,7 @@ function updateWorld(dt) {
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
   if (typeof updateWorld3 === "function") updateWorld3(dt);
   if (typeof updateWorld4 === "function") updateWorld4(dt);
+  if (typeof updateWorld6 === "function") updateWorld6(dt);   // world6.js: the frightened soldiers, the tents, Eliab
   if (typeof updateWorld5 === "function") updateWorld5(dt);   // world5.js: the provisions, raiders, the fleeing father   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
@@ -3745,6 +3797,12 @@ function frame(now) {
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
+  if (typeof w6intro !== "undefined" && w6intro.active) {   // the opening of World 6, the camp of fear (world6.js)
+    pollInput(); w6intro.update(real); w6intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof eliabScene !== "undefined" && eliabScene.active) {   // 6-1: Eliab hears David (world6.js)
+    pollInput(); eliabScene.update(real); eliabScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
   if (typeof w5ending !== "undefined" && w5ending.active) {   // the end of World 5 (world5.js) has the screen
     pollInput(); w5ending.update(real); w5ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
@@ -3785,6 +3843,7 @@ function frame(now) {
   drawCaveFeatures(camX);
   drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);
   if (typeof drawWorld4 === "function") drawWorld4(camX);
+  if (typeof drawWorld6 === "function") drawWorld6(camX);   // world6.js
   if (typeof drawWorld5 === "function") drawWorld5(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js

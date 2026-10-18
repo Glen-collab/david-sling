@@ -1367,7 +1367,7 @@ The letter trail stays in Worlds 4 and 5 (below); the crossing itself is now par
 ## 5f. World 6 — The Valley of Elah *(DRAFT FOR REVIEW)*
 
 **Bible:** 1 Samuel 17:25–37.
-**What happens:** the soldiers talk about the reward Saul has promised to whoever defeats the giant (17:25). David asks about it, and asks who this Philistine is to defy the armies of the living God (17:26). **Eliab** hears him and burns with anger: why has David come, who is looking after "those few sheep in the wilderness," and David only came to watch the battle (17:28). David answers, *"Now what have I done? Can't I even speak?"* and turns to ask someone else (17:29–30). His words reach Saul, who sends for him (17:31). David says no one should lose heart; he will go and fight (17:32). Saul says he's only a young man and the giant has been a warrior since his youth (17:33). David tells him about the lion and the bear (17:34–37). Saul: *"Go, and the LORD be with you"* (17:37).
+**What happens:** the soldiers talk about the reward Saul has promised to whoever defeats the giant (17:25). David asks about it, and asks who this Philistine is to defy the armies of the living God (17:26). **Eliab** hears him and burns with anger: why has David come, who is looking after "those few sheep in the wilderness," and David only came to watch the battle (17:28). David answers, *"What have I now done? Is there not a cause?"* and turns to ask someone else (17:29–30). His words reach Saul, who sends for him (17:31). David says no one should lose heart; he will go and fight (17:32). Saul says he's only a young man and the giant has been a warrior since his youth (17:33). David tells him about the lion and the bear (17:34–37). Saul: *"Go, and the LORD be with you"* (17:37).
 **The lost one:** **the whole army.** For forty days they've heard the giant morning and evening (17:16), and they've lost heart.
 **The big idea:** courage is catching. David's harp and his words lift frightened soldiers, and soldiers who've been lifted help in return.
 **Invented, and labelled so:** the Philistine watchtower and the water carriers. The Bible goes straight from Eliab's rebuke to Saul sending for David. The game puts a few hours of camp life in between, then picks the story back up at 17:31.
@@ -1419,10 +1419,11 @@ The Valley of Elah: the Israelite camp on the left hill, the Philistine camp on 
   > "Who is he, that he should defy the armies of the living God?" — David, to the men (17:26)
 - **Eliab, at the end of the stage.** A cut-scene, not a fight:
   - Eliab, red-faced: *"Why have you come down here? And who's looking after those few sheep in the wilderness? You came down just to watch the battle."* (17:28. The Journal links back to World 2: David really *was* out in the wilderness with them.)
-  - David: *"Now what have I done? Can't I even speak?"* (17:29)
+  - David: *"What have I now done? Is there not a cause?"* (17:29, WEB)
   - **David doesn't argue. He just turns and keeps asking** (17:30). The player sees what David didn't do.
   - Shammah, quietly, after Eliab stomps off: *"He's afraid too. He just shows it by being angry."*
-- **Scroll:** **Proverbs 15:1**: a gentle answer turns away wrath.
+- **Scroll:** **Proverbs 15:1**: a gentle answer turns away wrath. (Solomon's, so it comes as narration after the Eliab
+  scene: "Years later, his son Solomon would write: ...")
 - **The One:** a lamb from the army's food flock, loose on top of the supply wagons.
 
 ### 6-2 · No-Man's Land — *see the giant*
