@@ -1626,6 +1626,18 @@ throw code, a thing you have to know. A carving on a boulder at the water's edge
   10914. Draw them carved: a dark groove with a pale lip 2 px below. (Preview: david-sling-art/claude-checks/
   name_stones_preview.png.) If a machine lacks the font, fall back to baked letter images.
 
+**Two crossings, two hazards (Glen, 2026-10-18):** the warm-up (David's name) is over **a pit of spikes** in the dry
+part of the streambed; the Name is over **the deepest pool**. Same rule both times: a wrong stone crumbles, the jump is
+locked, a life.
+**The clue, then the Journal (Glen, 2026-10-18):** before each crossing a carving on the rock wall gives the clue
+(only the letters David has found are legible). Standing at it, **Select opens the Journal** at the Old letters page, so
+the player reads what each letter looked like and meant before stepping out.
+**Every letter, written down as it's found (built 2026-10-18):** when David reads a new old letter in Worlds 4-5, the
+game cuts to his Journal (leaned in on the book) and he copies the letter, big, with what it pictured and a thought
+(journal.js `Journal.openNote` + `letterNote`, from world4.js updateInscriptions). A letter he already has just gets a
+line. **Art to come (Glen):** an over-the-shoulder view of David looking down at the book, standing, grass or stone at
+his feet (`assets/journal/note_reading.jpg` → SCENES.note); until then the note opens straight onto the book.
+
 **The trail of old letters (Glen, 2026-10-15):** long before the pool, the letters turn up faintly carved here and there in
 Worlds 4 and 5, never pointed out. Stand still beside one and a clue comes up (what the letter pictured, and a nudge);
 found letters are saved (progress.letters) for the Journal and the pool. `inscription(c, r, letter)` in main.js,

@@ -323,9 +323,14 @@ function updateInscriptions(dt) {
     const near = Math.abs(david.x - n.x) < 1.6 * T && Math.abs(david.y - n.y) < 3 * T && Math.abs(david.vx) < 20 && david.onGround && david.deadT <= 0;
     n.still = near ? n.still + dt : 0;
     if (n.still > 0.7 && !n.read) {
-      n.read = true; sayLine("", OLD_LETTERS[n.letter].clue); if (typeof chime === "function") chime(3);
+      n.read = true; if (typeof chime === "function") chime(3);
+      let isNew = false;
       try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.letters = p.letters || [];
-        if (!p.letters.includes(n.letter)) { p.letters.push(n.letter); localStorage.setItem("davidProgress", JSON.stringify(p)); } } catch (e) {}
+        if (!p.letters.includes(n.letter)) { isNew = true; p.letters.push(n.letter); localStorage.setItem("davidProgress", JSON.stringify(p)); } } catch (e) {}
+      // a new one: he sits and copies it into his Journal, with what it pictured (Glen, 2026-10-18)
+      const note = isNew && typeof letterNote === "function" && caveatReady ? letterNote(n.letter, OLD_LETTERS[n.letter].clue) : null;
+      if (note) { david.vx = 0; hushLoops(); Journal.openNote(note); }
+      else sayLine("", OLD_LETTERS[n.letter].clue + (isNew ? "" : " (It's already in your Journal.)"));
     }
   }
 }

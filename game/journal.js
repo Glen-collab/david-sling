@@ -210,7 +210,7 @@ function drawBent(g, flat, e, alpha = 1) {
 // Layout: blocks -> words with positions (flat page coordinates)
 // ----------------------------------------------------------------------------
 const measureCtx = document.createElement("canvas").getContext("2d");
-const fontPx = (kind, k) => Math.round({ entry: JTUNE.SIZE_ENTRY, ref: JTUNE.SIZE_REF, psalm: JTUNE.SIZE_PSALM, small: JTUNE.SIZE_SMALL }[kind] * k);
+const fontPx = (kind, k) => Math.round({ entry: JTUNE.SIZE_ENTRY, ref: JTUNE.SIZE_REF, psalm: JTUNE.SIZE_PSALM, small: JTUNE.SIZE_SMALL, glyph: 120 }[kind] * k);   // glyph: an old letter copied big (letterNote)
 const WRAP_INDENT = { ref: 16, psalm: 34 };   // a wrapped line of the song is indented, like poetry
 // which conditional lines show (set when the Journal opens): "missingOne" or "allOnes" for this world's The One lambs
 let journalFlags = {};
@@ -409,12 +409,23 @@ const Journal = {
     // and the old letters he's found (DESIGN 7-3, the Stones of the Name): copied down, with the ones still out there
     const lf = lettersFound();
     if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf) }); this.pages.push({ spread: "letters", step: 5 }); }
+    this.note = false;
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
     this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
     this.view = 0; this.viewWant = 0; this.turn = null;
     if (this.rip) this.view = this.viewWant = 1;   // leaned in close, to see it
     this.active = true;
+    if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
+  },
+  // a quick note in the middle of a stage (Glen, 2026-10-18): David copies an old letter he's just found, with what it
+  // pictured. Leaned in on the book (Glen's own looking-down-at-the-book scene, SCENES.note, when it comes); A closes it
+  openNote(spread, onClose) {
+    Object.assign(this, { P: { note: spread }, world: WORLD, onClose: onClose || null, preview: false, stones: 0, rip: null, read: false, note: true,
+      pages: [{ spread: "note", step: 5 }] });
+    journalFlags = {};
+    this.layoutAll();
+    Object.assign(this, { cur: 0, phase: "write", doneT: 0, fade: 0, closing: false, time: 0, view: 1, viewWant: 1, turn: null, active: true });
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
   },
   openPreview(step, stones) {   // 1-4 = after that stage; 5 = the world's end (the 1-4 lesson, then the page turn)
@@ -604,7 +615,7 @@ const Journal = {
   },
   shadowText(t, x, y, color) { ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillText(t, x + 1, y + 1); ctx.fillStyle = color; ctx.fillText(t, x, y); },
   drawScene() {   // Glen's scene, with the words on the book in David's hands
-    const sc = SCENES[this.world] || SCENES[1], img = sc.img;
+    const sc = (this.note && SCENES.note && SCENES.note.img.naturalWidth ? SCENES.note : null) || SCENES[this.world] || SCENES[1], img = sc.img;
     if (!img.naturalWidth) return;
     const g = sceneCanvas.getContext("2d");
     g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(img, 0, 0, 1536, 1024);
@@ -710,10 +721,10 @@ function throwSpread(n) {
 // progress.letters), copied into the Journal for the Stones of the Name in 7-3. A missing one gets an empty space and a
 // hint of where it is. (Two He's are carved, in 4-2 and 4-4; either one counts.)
 const LETTER_PAGE = [
-  { k: "yod",   ch: "\u{10909}", name: "Yod",   pic: "a hand.",                       where: "on the road to Gibeah, somewhere hidden." },
-  { k: "he",    ch: "\u{10904}", name: "He",    pic: "a man with his arms raised.",   where: "at the training yard, or in the king's hall." },
-  { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, on a doorway." },
-  { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks." },
+  { k: "yod",   ch: "\u{10909}", name: "Yod",   pic: "a hand.",                       where: "on the road to Gibeah, somewhere hidden.", thought: "The first letter of a name worth remembering, the old ones say. Whose name?" },
+  { k: "he",    ch: "\u{10904}", name: "He",    pic: "a man with his arms raised.",   where: "at the training yard, or in the king's hall.", thought: "Arms up, as if he's shouting for joy. Or praying." },
+  { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, on a doorway.", thought: "A peg holds a tent together. So the word waw means \"and\": it joins things." },
+  { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks.", thought: "Two Dalets with a Waw between them spell a shepherd boy's name. Mine!" },
 ];
 function lettersFound() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}").letters || []; } catch (e) { return []; } }
 function lettersSpread(found) {
@@ -725,5 +736,16 @@ function lettersSpread(found) {
   const right = [{ at: 5, size: "entry", segs: [{ text: all ? "I have them all now." : "There are more out there. I'll keep looking.", at: 5 }] }];
   if (dwd) right.push({ at: 5, size: "small", segs: [{ text: "Dalet, Waw, Dalet: my own name.", at: 5 }] });
   right.push({ at: 5, size: "small", segs: [{ text: "Someday these letters will matter. I'll keep them close.", at: 5 }] });
+  return { left, right };
+}
+// the note David writes when he finds an old letter (world4.js updateInscriptions): the letter, big, and what it pictured
+function letterNote(k, where) {
+  const L = LETTER_PAGE.find(q => q.k === k); if (!L) return null;
+  const left = [{ at: 5, size: "entry", segs: [{ text: "Carved here, worn almost smooth:", at: 5 }] },
+                { at: 5, size: "glyph", segs: [{ text: L.ch, at: 5, glyph: true }] },
+                { at: 5, size: "entry", segs: [{ text: `${L.name}: ${L.pic}`, at: 5 }] }];
+  const right = [{ at: 5, size: "entry", segs: [{ text: L.thought || where, at: 5 }] }];
+  const n = lettersFound().length;
+  right.push({ at: 5, size: "small", segs: [{ text: n >= LETTER_PAGE.length ? "That makes all of them. I wonder what they spell." : "There must be more of these. I'll copy down every one I find.", at: 5 }] });
   return { left, right };
 }
