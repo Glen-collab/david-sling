@@ -55,3 +55,5 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | hyena_1, hyena_2, hyena_3 | hyena.mp3, hyena (1).mp3, hyena (2).mp3 | not used yet (later) | ? |
 | fox_1, fox_2, fox_3 | fox.mp3, fox2.mp3, fox3_two_barks.mp3 (Glen's shorter re-saves, 2026-10-15) | a fox coming for the lamb, one at random | ? |
 | paper_rip | paper-rip.mp3 (Glen), slowed to 0.82x (lower, heavier) | the rip-out cutaway: David tearing the page | ? |
+| horses | horses.mp3 (Glen, 2026-10-18) | the chariot horses whinnying: when the chariot appears and when it crashes (5-4) | ? |
+| horse-gallop | horse-gallop.mp3 (Glen, 2026-10-18), looped | the chariot galloping (5-4), louder near the middle of the screen; follows the free horses after the crash | ? |

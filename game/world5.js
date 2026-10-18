@@ -793,7 +793,7 @@ const chFront = ch => ch.x + ch.dir * (424 + 83) * chS();   // the horses' front
 function chariotFight() { return !!(chariot && chariot.on && !chariot.beaten && david.deadT <= 0); }
 function startChariot() {
   const ch = chariot; Object.assign(ch, { on: true, phase: 1, state: "drive", t: 0, archer: "drive", at: 0, archerHits: 0, wheelHits: 0, dir: -1, x: ch.a1 + 300, v: W5.CH_PATROL, arrows: [] });
-  sfx("lion_roar", undefined, 0.35, 1.6);
+  sfx("horses", undefined, 0.8);
   toast("Wheels thunder behind you: a Philistine chariot, hunting scouts on the road! Its archer is the danger first: hit him while he draws his bow.");
 }
 function chariotTurnX(ch) {   // where a charging chariot stops to turn: a few strides past David
@@ -867,7 +867,7 @@ function updateArrows(dt) {
 }
 function crashChariot(rocks) {
   const ch = chariot; ch.state = "crash"; ch.t = 0; ch.v = 0; ch.on = true;
-  sfx("lion_defeated", ch.x, 0.6); sfx("stone_hit", ch.x, 0.9, 0.5);
+  sfx("horses", ch.x, 0.9); sfx("stone_hit", ch.x, 0.9, 0.5);
   toast(rocks ? "The cracked wheel hits the rocks and breaks apart! The archer is thrown from the chariot!" : "The cracked wheel breaks apart, and the archer is thrown from the chariot!");
 }
 function updateChariotCrash(dt) {
@@ -1011,7 +1011,20 @@ function updateVoice(dt) {
   if (voiceT <= 0) { voiceT = 26 + Math.random() * 12; sfx("lion_roar", undefined, 0.25, 0.55);
     toast(W5.voiceTold ? "The voice again, booming across the valley." : "A huge voice booms across the valley, too far off to make out the words. Tobi goes pale."); W5.voiceTold = true; }
 }
-function updateWorld54(dt) { updateChariot(dt); updateVoice(dt); }
+// the chariot's gallop (Glen's horse-gallop, looped): louder the nearer it is to the middle of the screen, silent while
+// it stands; after the crash it follows the horses running off free
+const gallopLoop = loopAudio("horse-gallop", false); let gallopVol = 0;
+function updateGallop(dt) {
+  const ch = chariot; let want = 0;
+  if (ch && (ch.on || ch.beaten) && david.deadT <= 0 && !finish.active && audioUnlocked) {
+    const hx = ch.state === "free" ? ch.x + ch.dir * ch.t * 430 : ch.x, moving = ch.state === "free" ? ch.t < 8 : ch.state !== "crash" && ch.v > 30;
+    if (moving) want = TUNE.SFX_VOLUME * 0.55 * Math.max(0, Math.min(1, 1.25 - Math.abs(hx - (camX + W / 2)) / (W * 0.9)));
+  }
+  gallopVol = fadeLoop(gallopLoop, gallopVol, want, dt, 3);
+}
+const hushLoops5 = hushLoops;
+hushLoops = function (keepRain) { hushLoops5(keepRain); if (!gallopLoop.paused) gallopLoop.pause(); };
+function updateWorld54(dt) { updateChariot(dt); updateVoice(dt); if (LEVEL_STAGE === "5-4") updateGallop(dt); }
 function drawWorld54(camX) { drawChariot(camX); }
 
 function updateWorld52(dt) { updateLeopards(dt); updateGear(dt); updateWorld53(dt); updateWorld54(dt); }
