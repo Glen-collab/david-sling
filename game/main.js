@@ -348,7 +348,8 @@ const STAGE_INFO = {
   "5-1": { cols: 250, bg: "w5_1", ter: "w2s", name: "The Supply Road" },
   "6-1": { cols: 246, bg: "w5_4", ter: "w2s", name: "The Camp of Fear" },
   "6-2": { cols: 230, bg: "w5_4", ter: "w2s", name: "No-Man's Land" },
-  "6-3": { cols: 240, bg: "w5_4", ter: "w2s", name: "The Water Carriers" },   // stand-in background until the 6-3 set   // stand-in background until the 6-2 set   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
+  "6-3": { cols: 240, bg: "w5_4", ter: "w2s", name: "The Water Carriers" },
+  "6-4": { cols: 230, bg: "w5_4", ter: "w2s", name: "The Tower's Shadow" },   // stand-in background until the 6-4 set   // stand-in background until the 6-3 set   // stand-in background until the 6-2 set   // stand-in: Glen's dawn valley (5-4) until the 6-1 set
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1227,6 +1228,46 @@ if (LEVEL_NAME === "test") {
   talk(224, "Tobi", "There. Down the far side of this ridge is the road to the valley. I'm not afraid of the dark any more. \"Be strong and courageous. Don't be afraid... for the LORD your God himself is who goes with you\" (Deuteronomy 31:6).");
   talk(229, "", "Years later, David would write: \"In peace I will both lay myself down and sleep, for you alone, LORD, make me live in safety.\" (Psalm 4:8)");
   sheepfold(234);
+} else if (LEVEL_NAME === "6-4") {
+  // ---- 6-4 The Tower's Shadow: along the streambed toward the Philistine watchtower, its shadow lengthening over the
+  //      level (world6.js). Tighter volleys; Philistine skirmishers charge out to block the way. The lost things: 5
+  //      soldiers pinned in the forward trench; lifted, they're the ones throwing stones from the slope in the fight.
+  //      BOSS: the Philistine Watchtower (arena from col 160; the tower at 183-188, its rope ladder at 181). The One:
+  //      under the tower's ramp, at the very end. ----
+  ground(0, 229);
+  const bank = (c, w) => rock(c, 13, w, 1);   // an overhang to duck under (the volleys come down nearly straight)
+  campfire(3);
+  talk(6, "A soldier", "The forward trench is round the bend. Five of ours are pinned down in it, and that tower keeps creeping closer. Every day its shadow's longer.");
+  rock(11, 15, 3, 2);
+  setPiece("volley", 16, GR, { to: 58 });
+  bank(18, 6);
+  setPiece("skirmisher", 30);
+  bank(32, 6); special(34, 11);
+  snake("viper", 42);
+  bank(46, 7);
+  setPiece("skirmisher", 56);
+  // the forward trench: a low wall of rocks and shields, overhangs, five men pinned down behind them
+  setPiece("volley", 62, GR, { to: 100 });
+  rock(63, 16, 1, 1); bank(64, 8); setPiece("fearful", 66, GR - 1, { look: 0, dir: -1 }); setPiece("fearful", 69, GR - 1, { look: 1, dir: -1 });
+  rock(73, 16, 1, 1); bank(74, 8); setPiece("fearful", 76, GR - 1, { look: 2, dir: -1 }); setPiece("fearful", 79, GR - 1, { look: 3, dir: -1 });
+  critter("scorpion", 84);
+  rock(86, 16, 1, 1); bank(87, 6); setPiece("fearful", 90, GR - 1, { look: 4, dir: -1 });
+  setPiece("skirmisher", 98);
+  campfire(104);
+  rock(110, 15, 3, 2); rock(113, 13, 3, 4); special(114, 10);
+  // closer under the tower: slingers' stones, and more skirmishers
+  setPiece("volley", 120, GR, { to: 152, shot: "stones" });
+  bank(122, 6); setPiece("skirmisher", 132);
+  bank(136, 7); snake("viper", 144);
+  bank(146, 6); setPiece("skirmisher", 151);
+  campfire(156);
+  // BOSS: the Philistine Watchtower. Its rope ladder down the left side; the rungs above row 12 are cut.
+  setPiece("watchtower", 160);
+  ladder(181, 12);
+  // past it, where it stood: its ramp, and The One under it
+  plat(206, 14, 4); lostSheep("lamb", 207, GR - 1, "one");
+  special(208, 12);
+  sheepfold(218);
 } else if (LEVEL_NAME === "6-3") {
   // ---- 6-3 The Water Carriers: down into the streambed for water. The water carriers (and Shammah, with a jar of his
   //      own) follow David on his footsteps; the tower's archers on the far side fire volleys, and the carriers duck.
@@ -1788,7 +1829,7 @@ function updateDavid(dt) {
     if (hasSkill("quick") && !d.charging && pressed("b") && !d.carrying && !d.harp && d.throwT > 0.04) d.quickQueued = true;   // tapped again during the throw
     if (d.thrown && d.quickQueued && !d.quickUsed && d.throwT >= relAt + 0.07) {   // quick release (Gera, 4-2): the second stone, right behind the first
       d.quickUsed = true; const st = stones[stones.length - 1];
-      if (st) { stones.push({ ...st, x: d.x + d.facing * 30, y: st.charged ? st.y : d.y - (d.h === LOW_H ? 40 : 78), vx: st.vx, vy: st.vy, charged: false, power: false, life: 2.5, trail: undefined });
+      if (st) { stones.push({ ...st, x: d.x + d.facing * 30, y: st.charged ? st.y : d.y - (d.h === LOW_H ? 40 : 78), vx: st.vx, vy: st.vy, charged: false, power: false, life: 2.5, trail: undefined, quick: true });
         sfx("sling_throw_quick", undefined, 0.9, 1.05); }
     }
     if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; d.quickUsed = false; d.quickQueued = false; }
@@ -2090,7 +2131,8 @@ function updateStones(dt) {
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
     if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
-    if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsWorld6 === "function" && stoneHitsWorld6(s)) s.life = 0;   // world6.js: the watchtower, the skirmishers   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -3099,7 +3141,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null) || (typeof chariotBlocking === "function" ? chariotBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null) || (typeof chariotBlocking === "function" ? chariotBlocking() : null) || (typeof towerBlocking === "function" ? towerBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);
@@ -3688,7 +3730,7 @@ function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
   const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
-  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight()) || (typeof chariotFight === "function" && chariotFight());
+  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight()) || (typeof chariotFight === "function" && chariotFight()) || (typeof towerFight === "function" && towerFight());
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   if (!fight && typeof bear !== "undefined" && bear.on && bear.state === "pen") bossIntroPlayed = false;

@@ -105,6 +105,24 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   gives the tower counsel, tier 1 (progress.towerCounsel). The deepest pool: stepping stones, a rock in the middle,
   The One on a ledge a double jump above it. setPiece "cistern" at the end counts the full jars (progress.water6;
   not used for anything yet: the water captain's trust/shortcut could read it). HUD box "Water jars: n / m".
+- **6-4 The Tower's Shadow + BOSS the Philistine Watchtower are built** (2026-10-18; world6.js). Stage: tighter
+  volleys (VOLLEY_EVERY 3.2), skirmishers (setPiece "skirmisher": charge with shield up, 2 stones / 1 charged and
+  he drops it and runs), the forward trench (5 frightened soldiers under overhangs), the tower small on the far hill
+  and its shadow creeping in. Every lifted soldier in World 6 is saved (progress.lift6[stage]; courage6() sums it).
+  The tower (setPiece "watchtower" 160: one-screen arena, tower body cols 183-188 drawn procedurally, `ladder(181, 12)`
+  in the layout, roof plat row 6 added only in phase 3):
+  phase 1 four shutters (tell = creak open W6.TW_TELL, open TW_OPEN), 2 stones into an open window knock his bow
+  away (quick stones now carry `quick: true` in main.js, not used yet); seen side-on, misses fly on past the tower.
+  Lower windows: flat throw from 4-6 tiles; upper: aimed up close in, or a jump throw. Courage: stones from the
+  slope; an archer sometimes shoots at them, and a stone arriving at an open window makes him duck.
+  phase 2 front-wheel pins, charged only (glint if progress.towerCounsel from Abinadab in 6-3; else a hint after 9 s),
+  TW_PIN_HP 3 (counsel 2: 2); skirmishers every TW_SKIRM_EVERY. phase 3 up the ladder, double jump to the roof
+  (the cut upper rungs), slingers lob stones (a charged stone knocks one out of the air), top beam TW_BEAM_HP 4
+  (charged = 2), only from the roof. Falls backward, David leaps clear, the ladder goes with it, dust, shake;
+  Abinadab quotes Deuteronomy 31:6 (Moses' words, so a character may say them). A fall in the fight resets it and
+  Abinadab's tier-2 counsel (+1 heart, longer shutters, 2 pins). Boss music, camera lock and the finish gate are hooked
+  like the chariot (towerFight/towerCam/towerBlocking). The One: under the tower's ramp at col 207. Not built yet:
+  the End of World 6 scene (Saul's tent, the lion/bear flashbacks, Shammah's bag).
 - **Playtested by Glen (2026-10-18):** 5-2 (the leopard) and 5-3 (hiding from the lookouts) are good as they are; the
   lookouts who spot you may get tuned later. The 5-4 chariot is beaten and tuned. Next: World 6 (art requests for
   the map and 6-1 are in ART_PROMPTS.md; DESIGN 5f is still marked draft).

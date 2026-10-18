@@ -11,6 +11,7 @@
 //   setPiece("eliab", c)       6-1's end: Eliab hears David asking about the giant (17:28-30), a scene over the stage
 //   setPiece("volley", c, GR, { to, shot })  6-2: open ground from c to `to` under the far slope's archers (shot "stones":
 //                              slingers). A shout, shadows on the ground, then the volley; rocks are cover.
+//   setPiece("skirmisher", c) a Philistine who charges with his shield up; setPiece("watchtower", c) 6-4's boss (below)
 //   setPiece("carriers"/"fill"/"cistern"/"brother") 6-3: the water carriers on David's footsteps (see below)
 //   setPiece("giantview", c, r) 6-2: on a rise, David watches the giant's morning shout (17:4-10); the Field Guide card
 // The opening scene (w6intro): the soldiers at the cooking fire, "Forty days" (17:16, 17:25), the title card.
@@ -56,7 +57,7 @@ function updateFearful(dt) {
       s.song = near && d.state === "harp" && d.deadT <= 0 ? s.song + dt : Math.max(0, s.song - dt * 0.5);
       if (s.song >= W6.LIFT_T) {
         s.state = "rise"; s.t = 0; if (typeof chime === "function") chime(fearful.filter(q => q.state !== "hide").length + 3);
-        const n = fearful.filter(q => q.state !== "hide").length;
+        const n = fearful.filter(q => q.state !== "hide").length; saveLift6();   // courage, for the watchtower fight
         sayLine(carrierSpots.length ? "A water carrier" : "A soldier", (carrierSpots.length ? CARRY_LINES : LIFT_LINES)[(n - 1) % LIFT_LINES.length]);
         if (n === fearful.length) setTimeout(() => toast(`All ${n} frightened soldiers are back at their posts.`), 4500);
       }
@@ -372,7 +373,7 @@ function drawFarGiant(camX) {   // small on the far hill, after David has seen h
   ctx.save(); ctx.globalAlpha = 0.55; drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, gy, -1, nm === "lookout_spot" ? 0.6 : 0.28, 1, "brightness(0) blur(0.8px)"); ctx.restore();
 }
 const drawBackground6 = drawBackground;
-drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) drawFarGiant(cx); };   // the giant, small on the far hill
+drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) { drawFarGiant(cx); drawFarTower(cx); } };   // the giant, small on the far hill
 
 // --- 6-3: the water carriers (DESIGN 6-3). setPiece("carriers", c, GR - 1, { n }) n men with empty jars, waiting at the
 // top of the path down; when David reaches them they fall in behind him (on his footsteps, like the sheep line).
@@ -506,16 +507,387 @@ function drawFills(camX) {   // the pools still holding water: a shallow sheet o
   if (cisternSpot) { const x = cisternSpot.x - camX; if (x > -200 && x < W + 200) for (let k = 0; k < 3; k++) drawItem("town_clay_pots", x + k * 60, GR * T + 4, 0.16); }
 }
 
+// --- Courage (DESIGN 5f): every frightened soldier lifted anywhere in World 6 is saved (progress.lift6[stage]); in the
+// watchtower fight they throw stones from the Israelite slope to draw the archers' fire. More courage, more cover.
+function saveLift6() {
+  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.lift6 = p.lift6 || {};
+    p.lift6[LEVEL_STAGE] = Math.max(p.lift6[LEVEL_STAGE] || 0, fearful.filter(s => s.state !== "hide").length); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+}
+function courage6() { try { const l = JSON.parse(localStorage.getItem("davidProgress") || "{}").lift6 || {}; return Object.values(l).reduce((a, b) => a + b, 0); } catch (e) { return 0; } }
+
+// --- Philistine skirmishers (6-4, and out of the tower in its fight). setPiece("skirmisher", c): he waits behind his
+// shield; when David comes near he charges. Two stones (a charged one counts double) and he drops his shield and runs
+// back to his own lines. Nobody dies. Stand-in: the running soldier, darkened and reddened (Philistine).
+Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 2, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
+const skirms = setPieces.filter(p => p.kind === "skirmisher").map(p => ({ x: p.x, y: p.y, home: p.x, state: "wait", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0 }));
+function addSkirm(x) { skirms.push({ x, y: GR * T, home: x, state: "run", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0, spawned: true }); }
+function updateSkirms(dt) {
+  const d = david;
+  for (let i = skirms.length - 1; i >= 0; i--) {
+    const k = skirms[i]; k.t += dt; k.flash = Math.max(0, k.flash - dt);
+    if (k.state === "wait" && Math.abs(d.x - k.x) < W6.SKIRM_RANGE * T && d.deadT <= 0) {
+      k.state = "run"; k.t = 0;
+      if (!W6.skirmTold) { W6.skirmTold = true; toast("A Philistine skirmisher, shield up, charging! Two stones (or one charged) and he'll run."); }
+    }
+    if (k.state === "run") {
+      const dir = Math.sign(d.x - k.x) || -1; k.dir = dir;
+      if (d.deadT <= 0) k.x += dir * W6.SKIRM_SPEED * dt;
+      if (Math.abs(d.x - k.x) < 30 && d.y > k.y - 100 && d.deadT <= 0) hurtDavid(k.x);
+    } else if (k.state === "flee") {
+      k.x += 320 * dt; k.alpha = Math.max(0, 1 - k.t / 2.5);
+      if (k.alpha <= 0) { if (k.spawned) skirms.splice(i, 1); else k.state = "gone"; }
+    }
+  }
+}
+function stoneHitsSkirm(s) {
+  for (const k of skirms) {
+    if (k.state !== "run" && k.state !== "wait") continue;
+    if (Math.abs(s.x - k.x) < 26 && s.y > k.y - 110 && s.y < k.y) {
+      k.hp -= s.charged || s.power ? 2 : 1; k.flash = 0.25; stoneHit(s);
+      if (k.hp <= 0) { k.state = "flee"; k.t = 0; sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
+      return true;
+    }
+  }
+  return false;
+}
+function drawSkirms(camX) {
+  const now = performance.now() / 1000, nm = SPR.soldier_run ? "soldier_run" : "villager_man_run";
+  for (const k of skirms) {
+    if (k.state === "gone") continue;
+    const x = k.x - camX; if (x < -150 || x > W + 150) continue;
+    const dir = k.state === "flee" ? 1 : k.dir || -1, moving = k.state !== "wait";
+    drawSprite(nm, moving ? frameOf(nm, now + k.home) : 0, x, k.y, dir, 1.05, k.alpha, W6.PHIL + (k.flash > 0 ? " brightness(2)" : ""));
+    ctx.save(); ctx.globalAlpha = k.alpha;
+    if (k.state !== "flee") {   // the shield, out in front; a feathered headdress (the Philistine look)
+      ctx.fillStyle = "#8a6a3a"; ctx.strokeStyle = "#4a3418"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(x + dir * 20, k.y - 60, 13, 30, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    } else { ctx.fillStyle = "#8a6a3a"; ctx.beginPath(); ctx.ellipse(k.home - camX, GR * T - 6, 30, 8, 0, 0, Math.PI * 2); ctx.fill(); }   // dropped
+    ctx.fillStyle = "#c9b48a"; for (let f = -2; f <= 2; f++) ctx.fillRect(x + f * 4 - 2, k.y - 128 - Math.abs(f) * -2, 3, 16);
+    ctx.restore();
+  }
+}
+
+// --- 6-4: the tower's shadow. The Philistine watchtower rolls slowly along the far edge of the valley as David comes on;
+// its shadow lengthens over the level, darker the nearer the arena.
+function drawTowerShadow(camX) {
+  if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait")) return;
+  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), now = performance.now() / 1000;
+  const sx = W * (1.15 - 0.5 * f) + Math.sin(now * 0.2) * 10;   // the shadow's edge creeps in from the right
+  ctx.save(); const g = ctx.createLinearGradient(sx - 300, 0, sx + 200, 0);
+  g.addColorStop(0, "rgba(20,12,6,0)"); g.addColorStop(1, `rgba(20,12,6,${0.18 + 0.22 * f})`);
+  ctx.fillStyle = g; ctx.fillRect(sx - 300, 0, W - sx + 300, H); ctx.restore();
+}
+function drawFarTower(cx) {   // the tower far off, small, rolling along the far edge (background)
+  if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait")) return;
+  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - 215;
+  ctx.save(); ctx.globalAlpha = 0.6; ctx.filter = "brightness(0.5) saturate(0.5) blur(0.7px)"; drawTowerShape(x, y, s, 0, false); ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// BOSS: the Philistine Watchtower (end of 6-4; DESIGN "BOSS · The Philistine Watchtower"). Made up, and nobody dies:
+// when it goes over, the crew climb down the back and run. setPiece("watchtower", c): the arena is one screen from
+// column c; the tower stands at its right, its rope ladder down the left side (ladder() in the layout).
+// Phase 1, the archers: a shutter creaks open (the tell), an archer leans out, then looses. Two stones into the open
+//   window while he's there (the quick release, Gera's) and his bow is knocked away. 4 windows.
+// Phase 2, the wheel: the front wheel's pins (they glint if Abinadab told you, 6-3). Each takes a charged stone; the
+//   tower jolts and leans. Skirmishers run out from behind it to block you.
+// Phase 3, the top: up the rope ladder (its upper rungs are cut: the scout's leap the rest of the way) to the roof.
+//   The slingers up there sling at you; a charged stone knocks theirs out of the air. Hit the top beam until it goes.
+// Counsel tier 2 (Abinadab, after a fall in the fight): shutters stay open longer, the pins take 2, +1 heart.
+// The lifted soldiers (courage6) throw stones from the Israelite slope: an archer sometimes shoots at them instead.
+// ---------------------------------------------------------------------------
+Object.assign(W6, {
+  TW_TELL: 0.65,          // seconds the shutter takes to swing open (the tell)
+  TW_OPEN: 1.4, TW_OPEN2: 2.1,   // seconds the archer stays out (counsel 2: longer)
+  TW_GAP: 1.2,            // seconds between one window shutting and the next opening
+  TW_WIN_HITS: 2,         // stones into an open window to knock his bow away (the quick release puts two in at once)
+  TW_PIN_HP: 3, TW_PIN_HP2: 2,
+  TW_BEAM_HP: 4,          // stones on the top beam (a charged one counts 2)
+  TW_SLING_EVERY: 2.3,    // seconds between the slingers' throws in phase 3
+  TW_SKIRM_EVERY: 6.5,    // seconds between skirmishers out from behind the tower in phase 2
+  TW_ARROW: 640,
+  TW_W: 6, TW_ROOF: 6,    // the tower: 6 tiles wide; its roof at row 6
+});
+const twPiece = setPieces.find(p => p.kind === "watchtower");
+const tw = twPiece ? (() => {
+  const a0 = twPiece.c * T, x0 = a0 + 23 * T, w = W6.TW_W * T;
+  return { a0, a1: a0 + W, x0, w, on: false, beaten: false, state: "wait", phase: 1, t: 0, lean: 0, leanTo: 0, jolt: 0,
+    wins: [[0.3, 14.7], [0.72, 14.7], [0.3, 10.5], [0.72, 10.5]].map(([fx, r]) => ({ x: x0 + w * fx, y: r * T, state: "shut", t: 0, hits: 0 })),
+    gapT: 0, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 0, coverT: 3, cover: [], dust: [] };
+})() : null;
+function towerFight() { return !!(tw && tw.on && !tw.beaten && david.deadT <= 0); }
+function towerCam() { return tw && tw.on && !tw.beaten ? [tw.a0, tw.a0] : null; }
+function towerBlocking() { return tw && !tw.beaten ? "The watchtower! Its archers cover the whole valley. Deal with it first." : null; }
+const twPinHP = () => W6.counsel2 ? W6.TW_PIN_HP2 : W6.TW_PIN_HP;
+const twCounsel = () => { try { return (JSON.parse(localStorage.getItem("davidProgress") || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
+const twWheel = () => ({ x: tw.x0 + 44, y: GR * T - 36, r: 36 });
+const twBeam = () => ({ x0: tw.x0 + tw.w * 0.5, x1: tw.x0 + tw.w + 10, y0: W6.TW_ROOF * T - 110, y1: W6.TW_ROOF * T });
+function startTower() {
+  Object.assign(tw, { on: true, state: "fight", phase: 1, t: 0, lean: 0, leanTo: 0, gapT: 0.8, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 2, coverT: 3, cover: [], dust: [] });
+  for (const w of tw.wins) Object.assign(w, { state: "shut", t: 0, hits: 0 });
+  for (let i = skirms.length - 1; i >= 0; i--) if (skirms[i].spawned) skirms.splice(i, 1);
+  setRoof(false);
+  toast(W6.towerSeen ? "The watchtower again. Watch the shutters." : "The Philistine watchtower! Archers behind every shutter. When one creaks open, put two stones in it: the quick release.");
+  W6.towerSeen = true;
+}
+function setRoof(on) { for (let c = Math.floor(tw.x0 / T) - 2; c < Math.floor(tw.x0 / T) + W6.TW_W; c++) oneway[W6.TW_ROOF][c] = on; }
+function updateTower(dt) {
+  if (!tw) return;
+  const d = david;
+  tw.jolt = Math.max(0, tw.jolt - dt * 2); tw.lean += (tw.leanTo - tw.lean) * Math.min(1, dt * 4);
+  if (!tw.on && !tw.beaten && d.x > tw.a0 + 3 * T && d.deadT <= 0) startTower();
+  updateDust(dt);
+  if (!tw.on) return;
+  if (d.deadT > 0 && !tw.beaten) {   // David fell: the fight resets; back at the fire, Abinadab's second counsel
+    tw.on = false; tw.state = "wait"; tw.arrows = []; tw.slung = []; tw.lean = tw.leanTo = 0; setRoof(false);
+    if (!W6.counsel2) { W6.counsel2 = true; setTimeout(() => {
+      sayLine("Abinadab", "Sit down. Tell me what happened. ... Those shutters: count to two after the creak, then throw. And that front wheel's rotten; two good stones will have the pins out. Here, have some of my bread first.");
+      d.hearts += 1; }, 2200); }
+    return;
+  }
+  tw.t += dt;
+  // keep David on his side of it: in front of the tower, unless he's up on the roof
+  const onRoof = d.y <= W6.TW_ROOF * T + 4 && tw.phase === 3;
+  if (!tw.beaten && tw.state === "fight") d.x = Math.max(tw.a0 + 20, Math.min(onRoof ? tw.x0 + 1.6 * T : tw.x0 - 6, d.x));
+  if (tw.state === "fall" || tw.state === "down") { updateTowerFall(dt); updateTwShots(dt); return; }
+  if (tw.phase === 1) updateWindows(dt);
+  else if (tw.phase === 2) {
+    tw.skirmT -= dt; if (tw.skirmT <= 0) { tw.skirmT = W6.TW_SKIRM_EVERY; addSkirm(tw.x0 + tw.w * 0.5); }
+    if (!twCounsel() && !W6.pinHint && tw.t > 9) { W6.pinHint = true; toast("The tower creaks and settles on its front wheel. That wheel's held on with wooden pins..."); }
+  } else if (tw.phase === 3) {
+    tw.slingT -= dt;
+    if (tw.slingT <= 0 && d.deadT <= 0) {   // a slinger rises over the parapet and slings at David
+      tw.slingT = W6.TW_SLING_EVERY; tw.slingUp = 0.5;
+      const sx = tw.x0 + tw.w * (0.6 + Math.random() * 0.3), sy = W6.TW_ROOF * T - 80, tt = 0.9, g = 700;
+      tw.slung.push({ x: sx, y: sy, vx: (d.x - sx) / tt, vy: (d.y - 50 - sy - 0.5 * g * tt * tt) / tt, g, t: 0 });
+      sfx("sling_throw_quick", sx, 0.5, 1.2);
+    }
+    tw.slingUp = Math.max(0, (tw.slingUp || 0) - dt);
+  }
+  updateCover(dt); updateTwShots(dt);
+}
+function updateWindows(dt) {
+  const open = tw.wins.find(w => w.state === "tell" || w.state === "open");
+  if (!open) {
+    tw.gapT -= dt;
+    const left = tw.wins.filter(w => w.state !== "done");
+    if (tw.gapT <= 0 && left.length) { const w = left[Math.floor(Math.random() * left.length)]; w.state = "tell"; w.t = 0; w.hits = 0; sfx("jump", w.x, 0.25, 0.5); }
+    return;
+  }
+  const w = open; w.t += dt;
+  if (w.state === "tell" && w.t > W6.TW_TELL) { w.state = "open"; w.t = 0; w.shot = false; w.atSlope = courage6() > 0 && Math.random() < Math.min(0.45, courage6() * 0.03); }
+  else if (w.state === "open") {
+    const stay = W6.counsel2 ? W6.TW_OPEN2 : W6.TW_OPEN;
+    if (!w.shot && w.t > stay * 0.7) {   // he looses: at David, or at the stones coming from the slope
+      w.shot = true;
+      const tx = w.atSlope ? tw.a0 - 400 : david.x, ty = w.atSlope ? GR * T - 300 : david.y - 50, dx = tx - w.x, dy = ty - w.y, L = Math.hypot(dx, dy) || 1;
+      tw.arrows.push({ x: w.x, y: w.y, vx: dx / L * W6.TW_ARROW, vy: dy / L * W6.TW_ARROW - 120, t: 0 }); sfx("sling_throw_quick", w.x, 0.6, 1.4);
+      if (w.atSlope && !W6.coverTold) { W6.coverTold = true; toast("He's shooting at the slope! The soldiers you lifted are throwing stones at the tower, drawing its fire."); }
+    }
+    if (w.t > stay) { w.state = "shut"; w.t = 0; tw.gapT = W6.TW_GAP; }
+  }
+}
+function updateCover(dt) {   // stones from the Israelite slope: more lifted soldiers, more often
+  const c = courage6(); if (!c) return;
+  tw.coverT -= dt;
+  if (tw.coverT <= 0) {
+    tw.coverT = 2.5 + 30 / (c + 3);
+    const w = tw.wins[Math.floor(Math.random() * tw.wins.length)], sx = tw.a0 - 40, sy = GR * T - 320, tt = 1.3, g = 600;
+    tw.cover.push({ x: sx, y: sy, vx: (w.x - sx) / tt, vy: (w.y - sy - 0.5 * g * tt * tt) / tt, g, t: 0, tt, w });
+  }
+  for (let i = tw.cover.length - 1; i >= 0; i--) {
+    const s = tw.cover[i]; s.t += dt; s.vy += s.g * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+    if (s.t >= s.tt) {
+      tw.cover.splice(i, 1); stoneHit(s, 0.3);
+      if (s.w.state === "open" && !s.w.shot) { s.w.state = "shut"; s.w.t = 0; tw.gapT = W6.TW_GAP; }   // he ducks back in
+    }
+  }
+}
+function updateTwShots(dt) {
+  const d = david;
+  for (let i = tw.arrows.length - 1; i >= 0; i--) {
+    const a = tw.arrows[i]; a.t += dt; a.vy += 500 * dt; a.x += a.vx * dt; a.y += a.vy * dt;
+    if (Math.abs(a.x - d.x) < 22 && a.y > d.y - d.h && a.y < d.y) { hurtDavid(a.x - a.vx); tw.arrows.splice(i, 1); continue; }
+    if (a.y > GR * T || a.t > 3) tw.arrows.splice(i, 1);
+  }
+  for (let i = tw.slung.length - 1; i >= 0; i--) {
+    const s = tw.slung[i]; s.t += dt; s.vy += s.g * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+    if (Math.abs(s.x - d.x) < 20 && s.y > d.y - d.h && s.y < d.y) { hurtDavid(s.x - s.vx); tw.slung.splice(i, 1); continue; }
+    if (s.y > GR * T + 20 || s.t > 3) tw.slung.splice(i, 1);
+  }
+}
+function stoneHitsTower(s) {
+  if (!tw || !tw.on || tw.beaten || tw.state !== "fight") return false;
+  // phase 3: knock their stones out of the air (a charged one)
+  for (let i = tw.slung.length - 1; i >= 0; i--) {
+    const q = tw.slung[i];
+    if (Math.hypot(q.x - s.x, q.y - s.y) < 22) {
+      if (s.charged || s.power) { tw.slung.splice(i, 1); stoneHit(s, 0.7); if (!W6.knockTold) { W6.knockTold = true; toast("Knocked it out of the air!"); } return true; }
+      return false;
+    }
+  }
+  const inTower = false;   // (seen side-on: a stone that misses the windows flies on past the tower; only the targets stop it)
+  if (tw.phase === 1) {
+    for (const w of tw.wins) if (Math.abs(s.x - w.x) < 30 && Math.abs(s.y - w.y) < 40) {
+      if (w.state === "open") {
+        w.hits++; stoneHit(s); sfx("lion_hit", w.x, 0.5, 1.6); w.flash = 0.25;
+        if (w.hits >= W6.TW_WIN_HITS) {
+          w.state = "done"; w.t = 0; tw.gapT = W6.TW_GAP; tw.dust.push({ x: w.x, y: w.y, vx: -60, vy: -120, t: 0, bow: true });
+          const left = tw.wins.filter(q => q.state !== "done").length;
+          if (!left) { tw.phase = 2; tw.t = 0; tw.skirmT = 1.5; toast(twCounsel() ? "Every bow knocked away! Now Abinadab's counsel: the pins in the front wheel. Charged stones (hold B)!" : "Every bow knocked away! Skirmishers are coming out from behind the tower..."); }
+          else toast(`His bow went flying! (${4 - left} of 4)`);
+        } else if (!W6.oneTold) { W6.oneTold = true; toast("One! Quick, the second stone (tap B twice)!"); }
+      } else { stoneHit(s, 0.4); if (!W6.shutTold) { W6.shutTold = true; toast("Thunk. The shutter's shut. Wait for one to creak open."); } }
+      return true;
+    }
+    if (inTower) { stoneHit(s, 0.35); return true; }
+    return false;
+  }
+  if (tw.phase === 2) {
+    const wh = twWheel();
+    if (Math.hypot(s.x - wh.x, s.y - wh.y) < wh.r + 10) {
+      if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W6.pinTapTold) { W6.pinTapTold = true; toast("A tap stone won't shift a wheel pin. Hold B for a charged stone!"); } return true; }
+      tw.pins++; stoneHit(s); sfx("stone_hit", wh.x, 1, 0.55); tw.jolt = 1; tw.leanTo += 1.4; if (typeof w2Shake !== "undefined") w2Shake.v = 0.8;
+      if (tw.pins >= twPinHP()) {
+        tw.phase = 3; tw.t = 0; tw.slingT = 2.5; setRoof(true);
+        for (const k of skirms) if (k.spawned && k.state === "run") { k.state = "flee"; k.t = 0; }
+        toast("The pin's out! The tower lurches and leans on its broken wheel. Now the top: up the rope ladder. Its top rungs are cut, so leap the rest (A again in the air).");
+      } else toast(`A pin knocked loose! The tower jolts. (${tw.pins} of ${twPinHP()})`);
+      return true;
+    }
+    if (inTower) { stoneHit(s, 0.35); return true; }
+    return false;
+  }
+  if (tw.phase === 3) {
+    const b = twBeam();
+    if (s.x > b.x0 && s.x < b.x1 && s.y > b.y0 && s.y < b.y1) {
+      if (david.y > W6.TW_ROOF * T + 4) { stoneHit(s, 0.4); if (!W6.lowTold) { W6.lowTold = true; toast("From down here the stones just thunk off the planks. Get up on top!"); } return true; }
+      tw.beam += s.charged || s.power ? 2 : 1; stoneHit(s); sfx("stone_hit", s.x, 1, 0.7); tw.jolt = 1; tw.leanTo += 1.2;
+      if (tw.beam >= W6.TW_BEAM_HP) towerFall();
+      else toast("The top beam cracks! The whole tower sways.");
+      return true;
+    }
+    if (inTower) { stoneHit(s, 0.35); return true; }
+  }
+  return false;
+}
+function towerFall() {
+  Object.assign(tw, { state: "fall", t: 0, slung: [], arrows: [] }); setRoof(false);
+  const lc = Math.floor(tw.x0 / T) - 2, li = ladders.findIndex(l => l.c === lc);   // its rope ladder goes over with it
+  if (li >= 0) { for (const r of ladders[li].rungs) for (let c = lc; c < lc + 2; c++) { oneway[r][c] = false; if (typeof ladderRungs !== "undefined") ladderRungs.delete(c + "," + r); } ladders.splice(li, 1); }
+  const d = david;
+  if (d.x > tw.x0 - 2.5 * T && d.y < GR * T - 10) { d.vx = -380; d.vy = -520; d.onGround = false; setState("jump"); }   // David leaps clear
+  sfx("thunder_2", tw.x0, 0.6, 0.7);
+  toast("The beam gives! The crew scramble down the back of the tower and run. Jump clear, David!");
+}
+function updateTowerFall(dt) {
+  tw.t += dt;
+  if (tw.state === "fall") {
+    tw.lean = tw.leanTo = Math.min(90, tw.lean + (6 + tw.t * tw.t * 60) * dt * 5);
+    if (tw.lean >= 90) {
+      tw.state = "down"; tw.t = 0; tw.beaten = true; sfx("thunder", tw.x0, 0.9, 0.8); sfx("stone_hit", tw.x0, 1, 0.4);
+      if (typeof w2Shake !== "undefined") w2Shake.v = 1.6;
+      for (let k = 0; k < 40; k++) tw.dust.push({ x: tw.x0 + tw.w + Math.random() * 420, y: GR * T - Math.random() * 40, vx: (Math.random() - 0.3) * 160, vy: -40 - Math.random() * 120, t: 0, puff: 20 + Math.random() * 30 });
+      for (let i = skirms.length - 1; i >= 0; i--) if (skirms[i].spawned) { skirms[i].state = "flee"; skirms[i].t = 0; }
+      setTimeout(() => toast("The Philistine watchtower lies in the dust. Its crew are running for their own lines. Nobody is hurt."), 1500);
+      setTimeout(() => sayLine("Abinadab", "Moses told our fathers: \"Be strong and courageous. Don't be afraid or scared of them, for the LORD your God himself is who goes with you. He will not fail you nor forsake you.\" (Deuteronomy 31:6)"), 6500);
+      const c = courage6(); if (c) setTimeout(() => toast(`Up on the slope, ${c} soldiers who were hiding a day ago are cheering your name.`), 14000);
+    }
+  }
+}
+function updateDust(dt) {
+  for (let i = tw.dust.length - 1; i >= 0; i--) { const p = tw.dust[i]; p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.bow) p.vy += 600 * dt; else p.vy *= 0.97; if (p.t > (p.bow ? 1.4 : 3)) tw.dust.splice(i, 1); }
+}
+// the tower, drawn (a stand-in until Glen's art): rough planks, a leather-covered front, three floors, a wicker parapet
+// on top, four wheels (two show). (x, y) = its front-bottom corner on the ground; s = scale; lean in degrees.
+function drawTowerShape(x, y, s, lean, far) {
+  const w = W6.TW_W * T * s, top = y - (GR - W6.TW_ROOF) * T * s;
+  ctx.save(); ctx.translate(x + w, y); ctx.rotate(lean * Math.PI / 180); ctx.translate(-x - w, -y);
+  if (far) { ctx.fillStyle = "#3a2a1c"; ctx.fillRect(x, top - 50 * s, w, y - top + 50 * s); ctx.restore(); return; }
+  ctx.fillStyle = "#6e4e30"; ctx.fillRect(x, top, w, y - 30 * s - top);                       // the plank body
+  ctx.strokeStyle = "rgba(40,24,10,0.5)"; ctx.lineWidth = 2;
+  for (let px = x + 18 * s; px < x + w; px += 18 * s) { ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, y - 30 * s); ctx.stroke(); }
+  ctx.fillStyle = "#4a2e1a"; for (const r of [9, 13]) ctx.fillRect(x, r * T * s + (y - GR * T * s) - 6 * s, w, 12 * s);   // the floors' beams
+  ctx.fillStyle = "#5a3a22"; ctx.fillRect(x - 6 * s, top, 16 * s, y - 30 * s - top);         // the leather-covered front
+  ctx.fillStyle = "#8a6a40"; ctx.fillRect(x - 4, top - 60 * s, w + 8, 14 * s);                // the parapet rail
+  ctx.strokeStyle = "#a07e4e"; ctx.lineWidth = 3;
+  for (let px = x; px <= x + w; px += 14 * s) { ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, top - 50 * s); ctx.stroke(); }   // wicker
+  ctx.fillStyle = "#3e2614"; ctx.fillRect(x + w * 0.5, top - 110 * s, 14 * s, 110 * s); ctx.fillRect(x + w * 0.5, top - 110 * s, w * 0.5 + 10, 14 * s);   // the top beam
+  for (const fx of [44, W6.TW_W * T - 44]) {   // the wheels
+    const wx = x + fx * s, wy = y - 36 * s, r = 36 * s;
+    ctx.fillStyle = "#4a3018"; ctx.beginPath(); ctx.arc(wx, wy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#7a5a34"; ctx.lineWidth = 6 * s; ctx.beginPath(); ctx.arc(wx, wy, r - 5 * s, 0, Math.PI * 2); ctx.stroke();
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; ctx.beginPath(); ctx.moveTo(wx, wy); ctx.lineTo(wx + Math.cos(a) * r, wy + Math.sin(a) * r); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+function drawWatchtower(camX) {
+  if (!tw) return;
+  const now = performance.now() / 1000, x = tw.x0 - camX, y = GR * T, jx = tw.jolt * Math.sin(now * 50) * 4;
+  if (x > W + 600 || x + tw.w + 500 < 0) return;
+  ctx.save(); ctx.translate(jx, 0);
+  drawTowerShape(x, y, 1, tw.lean, false);
+  ctx.save(); ctx.translate(x + tw.w, y); ctx.rotate(tw.lean * Math.PI / 180); ctx.translate(-x - tw.w, -y);
+  // the windows: shut, creaking open (the tell), open with an archer leaning out, or dark (his bow knocked away)
+  for (const w of tw.wins) {
+    const wx = w.x - camX, wy = w.y, open = w.state === "open" ? 1 : w.state === "tell" ? Math.min(1, w.t / W6.TW_TELL) * 0.5 : 0;
+    ctx.fillStyle = "#1c120a"; ctx.fillRect(wx - 22, wy - 26, 44, 52);
+    if (w.state === "open") {   // the archer: a feathered headdress, a bow
+      ctx.fillStyle = (w.flash = Math.max(0, (w.flash || 0) - 1 / 60)) > 0 ? "#fff" : "#a0704a"; ctx.beginPath(); ctx.arc(wx - 4, wy - 4, 11, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#d8c49a"; for (let f = -2; f <= 2; f++) ctx.fillRect(wx - 4 + f * 4 - 1, wy - 26, 3, 12);
+      ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(wx - 22, wy + 4, 20, -1.1, 1.1); ctx.stroke();
+    }
+    if (w.state !== "done") {   // the shutter, swinging out on its hinge
+      ctx.save(); ctx.translate(wx + 22, wy - 26); ctx.scale(1 - open * 1.6, 1);
+      ctx.fillStyle = "#7a5634"; ctx.fillRect(-44, 0, 44, 52); ctx.strokeStyle = "#3e2614"; ctx.lineWidth = 2; ctx.strokeRect(-44, 0, 44, 52); ctx.restore();
+      if (w.state === "tell" && Math.floor(now * 10) % 2) { ctx.fillStyle = "rgba(255,220,140,0.35)"; ctx.fillRect(wx - 24, wy - 28, 48, 56); }
+    }
+  }
+  // the rope ladder's upper half, cut: two frayed ends hanging from the roof (the ladder itself is main.js ladder())
+  if (tw.state === "fight" || tw.state === "wait") {
+    ctx.strokeStyle = "#b08850"; ctx.lineWidth = 3;
+    for (const rx of [x - 2 * T + 6, x - 6]) { ctx.beginPath(); ctx.moveTo(rx, W6.TW_ROOF * T); ctx.quadraticCurveTo(rx + 4, W6.TW_ROOF * T + 40, rx - 2 + Math.sin(now * 2) * 3, W6.TW_ROOF * T + 76); ctx.stroke(); }
+    ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 2 * T + 6, W6.TW_ROOF * T + 30); ctx.lineTo(x - 6, W6.TW_ROOF * T + 30); ctx.stroke();
+  }
+  // the front wheel's pins (phase 2): they glint if Abinadab told you
+  if (tw.phase === 2 && tw.state === "fight") {
+    const wh = twWheel(), n = twPinHP() - tw.pins;
+    for (let k = 0; k < n; k++) { const a = -Math.PI / 2 + k * 0.9; ctx.fillStyle = "#c9a066"; ctx.fillRect(wh.x - camX + Math.cos(a) * 12 - 4, wh.y + Math.sin(a) * 12 - 4, 8, 8); }
+    if (twCounsel() && Math.floor(now * 3) % 2) { ctx.fillStyle = "rgba(255,230,140,0.45)"; ctx.beginPath(); ctx.arc(wh.x - camX, wh.y, 20, 0, Math.PI * 2); ctx.fill(); }
+  }
+  // the slingers on the roof (phase 3): they rise over the parapet to throw
+  if (tw.phase === 3 && tw.state === "fight") {
+    const nm = SPR.soldier_run ? "soldier_run" : "villager_man_run", up = tw.slingUp > 0 ? 40 : 0;
+    for (const fx of [0.68, 0.88]) drawSprite(nm, up ? 3 : 0, x + tw.w * fx, W6.TW_ROOF * T + 50 - up, -1, 0.95, 1, W6.PHIL);
+  }
+  ctx.restore();
+  ctx.restore();
+  // shots
+  for (const a of tw.arrows) { ctx.save(); ctx.translate(a.x - camX, a.y); ctx.rotate(Math.atan2(a.vy, a.vx)); drawItem("arrow", 0, 10, 0.5); ctx.restore(); }
+  ctx.fillStyle = "#6e6458"; for (const s of [...tw.slung, ...tw.cover]) { ctx.beginPath(); ctx.arc(s.x - camX, s.y, 6, 0, Math.PI * 2); ctx.fill(); }
+  // the crew climbing down the back and running (as it falls), the knocked-away bows, the dust
+  if (tw.state === "fall" || (tw.state === "down" && tw.t < 5)) {
+    const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.soldier_run ? "soldier_run" : "villager_man_run";
+    for (let k = 0; k < 6; k++) drawSprite(nm, frameOf(nm, now + k * 0.2), x + tw.w + 30 + k * 40 + t * 260, GR * T, 1, 0.95, Math.max(0, 1 - t / 4), W6.PHIL);
+  }
+  for (const p of tw.dust) {
+    if (p.bow) { ctx.save(); ctx.translate(p.x - camX, p.y); ctx.rotate(p.t * 9); ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 20, -1.1, 1.1); ctx.stroke(); ctx.restore(); continue; }
+    ctx.fillStyle = `rgba(200,170,120,${Math.max(0, 0.5 - p.t / 6)})`; ctx.beginPath(); ctx.arc(p.x - camX, p.y, p.puff * (1 + p.t), 0, Math.PI * 2); ctx.fill();
+  }
+}
+function stoneHitsWorld6(s) { return WORLD === 6 && (stoneHitsTower(s) || stoneHitsSkirm(s)); }   // main.js stone loop
+if (LEVEL_STAGE === "6-4") Object.assign(W6, { VOLLEY_EVERY: 3.2 });   // tighter volleys under the tower
+
 // --- hooks: main.js (each frame, drawing)
 function updateWorld6(dt) {
   if (WORLD !== 6) return;
-  updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt);
+  updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt); updateSkirms(dt); updateTower(dt);
 }
 function drawWorld6(camX) {
   if (WORLD !== 6) return;
   drawTents(camX);
   for (const p of setPieces) if (p.kind === "tower") drawTower(p, camX);
-  drawFills(camX); drawStanding(camX); drawFearful(camX); drawCarriers(camX); drawVolleys(camX);
+  drawWatchtower(camX); drawFills(camX); drawStanding(camX); drawFearful(camX); drawCarriers(camX); drawSkirms(camX); drawVolleys(camX); drawTowerShadow(camX);
 }
 
 // ---------------------------------------------------------------------------

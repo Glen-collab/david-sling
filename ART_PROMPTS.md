@@ -1026,3 +1026,34 @@ side. Pixar-style 3D. Solid magenta background (#FF00FF). No shadow, no text.`
 **A pool still holding water** (single item, magenta): `a small shallow pool of clear green water among smooth
 stones in a dry streambed, reeds at both ends, seen from the side and a little above.`
 
+## World 6 — 6-4 The Tower's Shadow and the Philistine Watchtower (2026-10-18)
+Built with stand-ins: the tower is drawn with plain shapes, the skirmishers and the tower crew are your running
+soldier darkened and reddened, the archers are a head and a bow in the window.
+
+**The watchtower** (the big one; a sheet of separate pieces on magenta so the game can animate them):
+```
+A Philistine siege watchtower from about 1000 BC, seen exactly side-on, Pixar-style 3D. Three floors of rough
+wooden planks on four big solid wooden wheels (two show), the front face covered in stitched leather hides, a wicker
+parapet around the open top floor, a heavy top crossbeam, rope ladders hanging down the left side. Each of the two
+lower floors has two square window openings on the side facing us, each with a plank shutter on a hinge. About twice
+as tall as it is wide. Solid magenta background (#FF00FF). No people, no shadow, no text.
+```
+Then, as separate pieces on magenta: one **shutter** (closed, and swung open), the **front wheel** on its own (and
+the same wheel with its wooden pins knocked out, tilted), the **fallen tower** lying on its back with broken planks
+and a dust cloud, and a **rope ladder** whose upper rungs have been cut.
+
+**The archer in the window** (one row of 4, facing LEFT, green background): `a Philistine archer with a feathered
+headdress, leaning out of a window frame from the chest up: 1 hidden, just eyes; 2 leaning out drawing his bow; 3
+loosing; 4 his bow knocked out of his hands, surprised.`
+
+**The skirmisher** (one row of 6 running, facing LEFT, plus one row of 3: dropping the shield, turning, running away
+to the RIGHT; green background): `a Philistine skirmisher, feathered headdress, a short kilt and leather chest
+straps, a round shield held up in front, a short spear.`
+
+**The slingers on top** (one row of 4, facing LEFT): `a Philistine slinger behind a wicker parapet: ducking; rising;
+whirling a sling over his head; the throw.` And the **crew running away** (one row of 6, facing RIGHT).
+
+**6-4 background** (`6-4 far.png`, `6-4 mid.png`, `6-4 near.png`): `the far end of the Valley of Elah's
+streambed, late afternoon, long shadows; on the right bank a tall wooden siege tower looms over the valley, its
+shadow stretching across the stones; trenches and low walls of piled rocks and shields; arrows stuck in the ground.`
+
