@@ -373,7 +373,13 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
   4: { src: "../assets/journal/w4_reading.jpg", y: -40, lamp: [1392, 712],   // a servant's room in Saul's palace, the storm outside
        left:  { top: [[652, 462], [770, 482], [892, 520]], bot: [[556, 776], [660, 804], [772, 828]] },
        right: { top: [[900, 520], [1032, 532], [1168, 564]], bot: [[780, 832], [928, 868], [1080, 892]] } },
+  // the letter note (Glen, 2026-10-18): David standing, looking down at the open book, the ground at his feet (his cut-out
+  // over his ground pictures, put together in david-sling-art/journal_note). No lamp: it's out of doors (or the hall's own)
+  note_road: { src: "../assets/journal/note_road.jpg", y: 0,
+       left:  { top: [[180, 172], [380, 166], [584, 186]], bot: [[262, 800], [492, 780], [732, 748]] },
+       right: { top: [[606, 184], [806, 134], [1000, 100]], bot: [[750, 744], [976, 702], [1192, 664]] } },
 };
+SCENES.note_hall = { ...SCENES.note_road, src: "../assets/journal/note_hall.jpg" };   // 4-4, the king's hall at night
 for (const sc of Object.values(SCENES)) { sc.img = new Image(); sc.img.src = sc.src + "?v=" + (window.BUILD || 0); }
 const newCanvas = () => Object.assign(document.createElement("canvas"), { width: 1536, height: 1024 });
 const sceneCanvas = newCanvas(), pageCanvas = { left: newCanvas(), right: newCanvas() }, farCanvas = newCanvas();
@@ -425,7 +431,8 @@ const Journal = {
       pages: [{ spread: "note", step: 5 }] });
     journalFlags = {};
     this.layoutAll();
-    Object.assign(this, { cur: 0, phase: "write", doneT: 0, fade: 0, closing: false, time: 0, view: 1, viewWant: 1, turn: null, active: true });
+    const nk = LEVEL_STAGE === "4-4" ? SCENES.note_hall : SCENES.note_road, lean = nk.img.naturalWidth ? 0 : 1;   // his own looking-down view, once it's loaded
+    Object.assign(this, { cur: 0, phase: "write", doneT: 0, fade: 0, closing: false, time: 0, view: lean, viewWant: lean, turn: null, active: true });
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
   },
   openPreview(step, stones) {   // 1-4 = after that stage; 5 = the world's end (the 1-4 lesson, then the page turn)
@@ -615,7 +622,8 @@ const Journal = {
   },
   shadowText(t, x, y, color) { ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillText(t, x + 1, y + 1); ctx.fillStyle = color; ctx.fillText(t, x, y); },
   drawScene() {   // Glen's scene, with the words on the book in David's hands
-    const sc = (this.note && SCENES.note && SCENES.note.img.naturalWidth ? SCENES.note : null) || SCENES[this.world] || SCENES[1], img = sc.img;
+    const nk = this.note && (LEVEL_STAGE === "4-4" ? SCENES.note_hall : SCENES.note_road);
+    const sc = (nk && nk.img.naturalWidth ? nk : null) || SCENES[this.world] || SCENES[1], img = sc.img;
     if (!img.naturalWidth) return;
     const g = sceneCanvas.getContext("2d");
     g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(img, 0, 0, 1536, 1024);
@@ -632,10 +640,12 @@ const Journal = {
     } else words(this.page(), 1);
     // the lamp flickers
     const now = performance.now(), fl = 0.8 + Math.sin(now / 83) * 0.08 + Math.sin(now / 31) * 0.05 + Math.sin(now / 211) * 0.07;
+    if (sc.lamp) {
     g.globalCompositeOperation = "lighter";
     const gr = g.createRadialGradient(sc.lamp[0], sc.lamp[1], 10, sc.lamp[0], sc.lamp[1], 520);
     gr.addColorStop(0, `rgba(255,170,70,${0.16 * fl})`); gr.addColorStop(0.4, `rgba(255,140,50,${0.06 * fl})`); gr.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = gr; g.fillRect(0, 0, 1536, 1024); g.globalCompositeOperation = "source-over";
+    }
     // fill the screen, drifting very slowly in toward the book
     const z = 1 + 0.04 * ease(Math.min(1, this.time / 30)), s = Math.max(W / 1536, H / 1024) * z;
     const bookX = 850, bookY = 640, k = (z - 1) / 0.04;
