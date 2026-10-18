@@ -380,6 +380,8 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
        right: { top: [[606, 184], [806, 134], [1000, 100]], bot: [[750, 744], [976, 702], [1192, 664]] } },
 };
 SCENES.note_hall = { ...SCENES.note_road, src: "../assets/journal/note_hall.jpg" };   // 4-4, the king's hall at night
+SCENES.note_town = { ...SCENES.note_road, src: "../assets/journal/note_town.jpg" };   // 4-3, Gibeah's paved street
+const noteScene = () => ({ "4-3": SCENES.note_town, "4-4": SCENES.note_hall })[LEVEL_STAGE] || SCENES.note_road;   // the ground at David's feet
 for (const sc of Object.values(SCENES)) { sc.img = new Image(); sc.img.src = sc.src + "?v=" + (window.BUILD || 0); }
 const newCanvas = () => Object.assign(document.createElement("canvas"), { width: 1536, height: 1024 });
 const sceneCanvas = newCanvas(), pageCanvas = { left: newCanvas(), right: newCanvas() }, farCanvas = newCanvas();
@@ -431,7 +433,7 @@ const Journal = {
       pages: [{ spread: "note", step: 5 }] });
     journalFlags = {};
     this.layoutAll();
-    const nk = LEVEL_STAGE === "4-4" ? SCENES.note_hall : SCENES.note_road, lean = nk.img.naturalWidth ? 0 : 1;   // his own looking-down view, once it's loaded
+    const nk = noteScene(), lean = nk.img.naturalWidth ? 0 : 1;   // his own looking-down view, once it's loaded
     Object.assign(this, { cur: 0, phase: "write", doneT: 0, fade: 0, closing: false, time: 0, view: lean, viewWant: lean, turn: null, active: true });
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
   },
@@ -622,7 +624,7 @@ const Journal = {
   },
   shadowText(t, x, y, color) { ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillText(t, x + 1, y + 1); ctx.fillStyle = color; ctx.fillText(t, x, y); },
   drawScene() {   // Glen's scene, with the words on the book in David's hands
-    const nk = this.note && (LEVEL_STAGE === "4-4" ? SCENES.note_hall : SCENES.note_road);
+    const nk = this.note && noteScene();
     const sc = (nk && nk.img.naturalWidth ? nk : null) || SCENES[this.world] || SCENES[1], img = sc.img;
     if (!img.naturalWidth) return;
     const g = sceneCanvas.getContext("2d");
