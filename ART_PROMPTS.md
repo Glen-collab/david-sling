@@ -959,3 +959,22 @@ A sprite sheet: one row of 6 poses of this same soldier walking to the RIGHT, a 
 his shoulder, shield on his arm, head up, calm and steady. Same size, feet on the same line, clear gaps. Background
 solid flat bright green (#00FF00). No shadows, no text.
 ```
+
+### The letter note: David standing, looking down at his Journal (2026-10-18)
+Same over-the-shoulder framing as the Journal reading scenes, but David is STANDING where he found the letter, and the
+ground at his feet shows where he is. 1536 x 1024. Save as `assets\journal\note_road.jpg`, `note_town.jpg`,
+`note_hall.jpg`, `note_stream.jpg`. Paste the style block first:
+```
+Over-the-shoulder view from just behind and above a shepherd boy's right shoulder (David, about 15, curly dark hair,
+a plain undyed tunic), standing and looking down at an open leather-bound journal held in both hands in front of
+him. The two blank cream pages fill the middle of the picture, flat and clearly visible, nothing written on them,
+nothing covering them. Below and around the book we see his sandaled feet and the ground he is standing on:
+[GROUND]. Soft daylight, Pixar-style 3D, warm and calm, shallow depth of field so the ground is a little soft and
+the book is sharp. No text anywhere.
+```
+Replace [GROUND] with one of:
+- **road** (4-1, 4-2, 5-1): `a dusty dry road with small pale stones, a tuft of dry grass, the edge of a weathered
+  limestone rock with old carving marks, hot afternoon light`
+- **town** (4-3): `worn stone paving of a town street, the bottom of a wooden doorpost, a little straw and dust`
+- **hall** (4-4): `a cool smooth stone palace floor at night, warm lamplight from one side, the foot of a stone column`
+- **stream** (7-3): `smooth round pebbles of a dry streambed, a little water glinting at the edge, a few reeds`
