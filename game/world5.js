@@ -1197,13 +1197,27 @@ function drawCommander(x, y, talking, now) {   // Glen's commander when he comes
 }
 function drawGiant(now, bt, beat) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now
   const a = Math.min(1, bt * 0.8 + 0.3), x = W * 0.84, y = GR * T - 215, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
+  drawPhilistineRanks(y, Math.min(1, bt * 0.8 + 0.5));
   ctx.save(); ctx.globalAlpha = a * 0.88;   // across the valley: twice the height of the men around him, even from here
   // Glen's silhouette: 0 standing, 1 shouting with the spear up, 2 pointing across the valley, 3 laughing
   const gp = beat <= 7 ? (bt < 1.2 ? 0 : 1) : beat === 8 ? 2 : 3;
   drawSprite(nm, nm === "lookout_spot" ? 3 : gp, x, y, -1, nm === "lookout_spot" ? 0.95 : 1.1, 1, "brightness(0) blur(0.8px)");
-  ctx.fillStyle = "rgba(10,8,8,0.8)";   // the Philistine ranks at his feet, small
-  for (let k = -6; k <= 6; k++) if (k) { const mx = x + k * 18, h = 26 + (k % 3) * 3; ctx.beginPath(); ctx.ellipse(mx, y - h, 5, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(mx - 5, y - h + 4, 10, h - 4); }
   ctx.restore();
+}
+// the Philistine army in array on its hill (Glen's silhouettes, cut to items, facing Israel): a back rank, a front rank,
+// and a gap in the front where the champion has stepped out of the ranks (17:23)
+const PHIL_RANKS = [
+  ["squad", 0.655, 1], ["rider", 0.715, 1], ["spear3", 0.775, 1], ["shield3", 0.885, 1], ["small1", 0.93, 1], ["small2", 0.955, 1], ["small3", 0.98, 1],
+  ["shield1", 0.685, 0], ["spear1", 0.725, 0], ["archer", 0.77, 0], ["spear2", 0.905, 0], ["shield2", 0.945, 0], ["chariot", 1.0, 0],
+];
+function drawPhilistineRanks(y, a) {
+  if (!ITEM.phil_sil_spear1) {   // stand-in: little shapes
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = "rgba(10,8,8,0.8)";
+    for (let k = -6; k <= 6; k++) if (k) { const mx = W * 0.84 + k * 18, h = 26 + (k % 3) * 3; ctx.beginPath(); ctx.ellipse(mx, y - h, 5, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(mx - 5, y - h + 4, 10, h - 4); }
+    ctx.restore(); return;
+  }
+  for (const [nm, fx, back] of PHIL_RANKS) ctx.filter = "blur(0.6px)", drawItem("phil_sil_" + nm, W * fx, y - back * 6, back ? 0.19 : 0.23, a * (back ? 0.7 : 0.9));
+  ctx.filter = "none";
 }
 function drawFleeingArmy(now, t) {   // soldiers running past David on both sides, away from the giant
   const who = SPR.soldier_run ? ["soldier_run"] : ["villager_man_run", "villager_staffman_run"], f = SPR.soldier_run ? "" : "sepia(0.4) brightness(0.8)";
