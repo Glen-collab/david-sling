@@ -720,13 +720,14 @@ function drawWorld53(camX) { drawLookouts(camX); drawCairns(camX); }
 //   setPiece("rough", c, GR, {w}) rough rocky ground: a chariot can't turn on it (Tobi's warning, 5-3)
 // Phase 1, the archer: the chariot drives back and forth; the archer raises his bow (a glint = the tell), draws, looses,
 //   and ducks behind his shield. Hit him while he's drawing: 3 hits and he drops his bow.
-// Phase 2, the ram: the driver whips the horses and charges David (jump them: the scout's leap). Don't hit the horses.
-//   Charged stones at the wheel as it passes: 3 (tier 2: 2) and it cracks and wobbles.
-// Phase 3, rough ground: it charges, passes and wheels round to come again; if it has to turn on the rough ground the
-//   cracked wheel breaks. The horses rear, the crew jump down and run, the horses trot off free.
+// Phase 2, the wheel: no bow now, the chariot keeps driving back and forth at the same speed, trying to run David down
+//   (jump the horses: the scout's leap). Don't hit the horses. A charged stone at the wheel as it passes (tier 2: any
+//   stone) and it cracks and wobbles (Glen's damaged-wheel sprite).
+// Phase 3, the damaged wheel: one more hit, or driving over the rough ground (Tobi's warning), and it breaks; the archer
+//   is thrown off, the horses run on free and he runs home. (Glen, Oct 2026: steady speed, no whip stops, no turning in place.)
 // ===========================================================================
 Object.assign(W5, { CH_SIZE: 1.4, CH_PATROL: 230, CH_RAM: 420, CH_TELL: 0.85, CH_TELL2: 1.3, CH_ARCHER_HP: 3, CH_WHEEL_HP: 2,
-  CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // after a charge it stops CH_OVERRUN tiles past David and whips for CH_WHIP s: the time to charge a stone at the wheel
+  CH_WHIP: 2.4, CH_WHIP2: 3.2, CH_OVERRUN: 8,   // (unused since the chariot keeps a steady speed: the old ram / whip-stop phase)
   ARROW_SPEED: 620, CH_ARENA: 1.6, DONKEY_FOLLOW: 3,   // CH_ARENA: the fight's width, in screens (the camera follows inside it)
   ROUGH_FLASH: true });
 for (const n of ["chariot_full_run", "chariot_full_run_without_bow", "chariot_draw_bow", "chariot_disarmed", "chariot_damaged_wheel", "chariot_fall_off", "chariot_no_rider", "charioteer_run_away", "chariot_crash", "chariot_horses_free", "chariot_archer_flee", "chariot_cart", "chariot_horses_run", "chariot_horses_rear", "chariot_crew_flee"]) TUNE.SPRITE_SIZE[n] = W5.CH_SIZE;
@@ -806,7 +807,7 @@ function updateChariot(dt) {
   if (d.deadT > 0 && !ch.beaten) {   // David fell: the chariot rides off; back to the fire, and Tobi's counsel
     ch.on = false; ch.arrows = [];
     if (!W5.counsel2) { W5.counsel2 = true; setTimeout(() => {   // tier-2 counsel: a longer tell, a weaker wheel, +1 heart
-      sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And when he stops to whip the horses, that old wheel stands still: one good charged stone will crack it.");
+      sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And that old wheel's weaker than it looks: jump the horses, turn, and even a quick stone will crack it.");
       d.hearts += 1; }, 2200); }
     return;
   }
@@ -819,7 +820,8 @@ function updateChariot(dt) {
   if (ch.state === "drive") {   // phase 1: up and down the road, the archer shooting
     ch.v = Math.min(speed, ch.v + 400 * dt); ch.x += ch.dir * ch.v * dt;
     if ((ch.dir > 0 && ch.x > ch.a1 + 250) || (ch.dir < 0 && ch.x < ch.a0 - 250)) { ch.dir = -ch.dir; }   // turns off the screen
-    updateArcher(dt, P);
+    if (ch.phase === 1) updateArcher(dt, P);
+    if (ch.phase === 3 && onRough(chFront(ch))) { crashChariot(true); return; }   // the cracked wheel can't take the rocks
   } else if (ch.state === "whip") {   // phase 2/3 tell: at the edge, the driver whips the reins
     ch.v = 0;
     if (ch.phase === 2 && !W5.whipTold) { W5.whipTold = true; toast("He's stopped to whip the horses. Now! Hold B, and hit the wheel while it stands still."); }
@@ -863,10 +865,10 @@ function updateArrows(dt) {
     if (a.y > GR * T || a.t > 3) ch.arrows.splice(i, 1);
   }
 }
-function crashChariot() {
+function crashChariot(rocks) {
   const ch = chariot; ch.state = "crash"; ch.t = 0; ch.v = 0; ch.on = true;
   sfx("lion_defeated", ch.x, 0.6); sfx("stone_hit", ch.x, 0.9, 0.5);
-  toast("The horses balk at the rocks, and the cracked wheel slews into them and breaks apart!");
+  toast(rocks ? "The cracked wheel hits the rocks and breaks apart! The archer is thrown from the chariot!" : "The cracked wheel breaks apart, and the archer is thrown from the chariot!");
 }
 function updateChariotCrash(dt) {
   const ch = chariot;
@@ -885,22 +887,19 @@ function stoneHitsChariot(s) {
     if (ch.archer === "raise" || ch.archer === "draw") {
       ch.archerHits++; ch.flash = 0.3; ch.archer = "duck"; ch.at = 0; stoneHit(s); sfx("lion_hit", ch.x, 0.6, 1.5);
       if (ch.archerHits >= W5.CH_ARCHER_HP) {
-        ch.phase = 2; ch.state = "brake"; ch.t = 0; ch.disarmAt = performance.now() / 1000;   // Glen's disarm: the bow spins away
-        toast("You knocked his bow away! The driver whips the horses: he's going to run you down. Jump them (the scout's leap). When he stops to whip them again, hit the wheel with a charged stone.");
+        ch.phase = 2; ch.disarmAt = performance.now() / 1000;   // Glen's disarm: the bow spins away; the chariot drives on at the same speed
+        toast("You knocked his bow away! Now he'll try to run you down. Jump the horses (the scout's leap), and hit the wheel with a charged stone as it goes by.");
       } else toast(`Got him! (${ch.archerHits} of ${W5.CH_ARCHER_HP})`);
     } else { stoneHit(s, 0.4); if (!W5.shieldTold) { W5.shieldTold = true; toast("He's behind his shield. Wait for the glint of his bow: hit him while he draws."); } }
     return true;
   }
   // the wheel and the axle above it, up to the cart bed: a standing throw leaves David's hand about as high as the wheel's top
   if (Math.abs(s.x - P.wx) < P.wr * 1.4 && s.y > P.gy - P.wr * 2.6 && s.y < P.gy) {
-    if (ch.phase !== 2) { stoneHit(s, 0.4); return true; }
-    if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W5.tapTold) { W5.tapTold = true; toast("A tap stone just bounces off the wheel. Hold B for a charged stone!"); } return true; }
+    if (ch.phase === 1) { stoneHit(s, 0.4); return true; }
+    if (!(s.charged || s.power) && !W5.counsel2) { stoneHit(s, 0.4); if (!W5.tapTold) { W5.tapTold = true; toast("A tap stone just bounces off the wheel. Hold B for a charged stone!"); } return true; }
     ch.wheelHits++; ch.flash = 0.3; stoneHit(s); sfx("stone_hit", P.wx, 1, 0.6);
-    const need = W5.counsel2 ? 1 : W5.CH_WHEEL_HP;
-    if (ch.wheelHits >= need) {
-      ch.phase = 3;
-      toast(chariotWarned() ? "The wheel cracks and wobbles! Remember Tobi: a chariot can't take rough ground. Stand on the rocks to the right and let it charge you!" : "The wheel cracks and wobbles! See the rocks to the right? Stand on them and let it charge.");
-    } else toast(`The wheel cracks a little more. (${ch.wheelHits} of ${need})`);
+    if (ch.wheelHits >= W5.CH_WHEEL_HP) crashChariot();
+    else { ch.phase = 3; toast(chariotWarned() ? "The wheel cracks and wobbles! One more good hit, or remember Tobi: lead it onto the rough ground." : "The wheel cracks and wobbles! One more good hit. (Could that wheel take the rocks?)"); }
     return true;
   }
   if (inB(P.horses)) {
@@ -930,7 +929,7 @@ function drawChariot(camX) {
   if ((ch.state === "crash" || ch.state === "free") && SPR.chariot_fall_off) {   // Glen's fall: the wheel gives, the archer is thrown off; then the horses run on with the empty chariot and he runs home
     if (ch.state === "crash") drawSprite("chariot_fall_off", Math.min(5, Math.floor(ch.t / 0.42)), x, P.gy, dir);
     else {
-      const t = ch.t, inA = Math.min(1, t * 3), outA = Math.max(0, 1 - t / 4.5);
+      const t = ch.t, inA = Math.min(1, t * 3), outA = 1;   // they run on until they're off the screen
       drawSprite("chariot_fall_off", 5, x, P.gy, dir, 1, Math.max(0, 1 - t / 0.5));
       drawSprite("chariot_no_rider", frameOf("chariot_no_rider", now), x + dir * t * 430, P.gy, dir, 1, inA * outA);   // the horses gallop on, free
       if (SPR.charioteer_run_away) drawSprite("charioteer_run_away", frameOf("charioteer_run_away", now), x + dir * (290 * P.s - Math.max(0, t - 0.4) * 280), P.gy, -dir, 1, inA * outA);   // up, and back to his own lines
@@ -969,7 +968,7 @@ function drawChariot(camX) {
                  : ch.wheelHits > 0 || ch.phase === 3 ? "chariot_damaged_wheel" : "chariot_full_run_without_bow");
     if (ch.phase === 1 && !SPR.chariot_draw_bow) nm = "chariot_full_run";
     if (ch.phase > 1 && SPR.chariot_disarmed && dA < 0.72) drawSprite("chariot_disarmed", Math.floor(dA / 0.12), x, P.gy, dir, 1, 1, flt);   // the bow knocked out of his hands
-    else drawSprite(nm, moving ? frameOf(nm, now * (ch.v / W5.CH_PATROL)) : Math.floor(now * 3) % 2, x, P.gy, dir, 1, 1, flt);
+    else drawSprite(nm, frameOf(nm, now), x, P.gy, dir, 1, 1, flt);   // always the same gallop
     if (ch.phase === 3 && !SPR.chariot_damaged_wheel) {   // the cracked wheel, wobbling, over the painted one
       const wr = 66 * P.s, wob = Math.sin(now * 25) * 3;
       ctx.save(); ctx.translate(P.wx - camX, P.gy - wr + 6 + wob); ctx.rotate(ch.wheelA); drawItem("chariot_wheel_cracked", 0, wr * 1.04, wr * 2.08 / 260, 1); ctx.restore();
