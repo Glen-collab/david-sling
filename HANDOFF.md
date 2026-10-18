@@ -78,6 +78,9 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## Next
 
+- **Playtested by Glen (2026-10-18):** 5-2 (the leopard) and 5-3 (hiding from the lookouts) are good as they are; the
+  lookouts who spot you may get tuned later. The 5-4 chariot is beaten and tuned. Next: World 6 (art requests for
+  the map and 6-1 are in ART_PROMPTS.md; DESIGN 5f is still marked draft).
 - **The Stones of the Name moved to 7-3** (Glen, 2026-10-18; DESIGN 7-3): no more side dot off 5-2. The letter trail
   stays in Worlds 4-5 (Yod 4-1, He 4-2, Waw 4-3, He 4-4, Dalet 5-1). Required to finish 7-3 but not a boss; a wrong
   stone costs a **life**. The Journal (read from a map) now has an "Old letters" page (journal.js `lettersSpread`):
