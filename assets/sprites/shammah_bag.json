@@ -1,0 +1,11 @@
+{
+  "frames": 4,
+  "frame_w": 189,
+  "frame_h": 273,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 66,
+  "anchor_y": 272,
+  "source": "sham_bag_m.png"
+}

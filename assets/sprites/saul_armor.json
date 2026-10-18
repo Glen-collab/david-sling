@@ -1,0 +1,11 @@
+{
+  "frames": 6,
+  "frame_w": 210,
+  "frame_h": 316,
+  "ms_per_frame": 400,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 114,
+  "anchor_y": 315,
+  "source": "saul_armor_m.png"
+}

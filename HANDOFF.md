@@ -123,6 +123,12 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   Abinadab's tier-2 counsel (+1 heart, longer shutters, 2 pins). Boss music, camera lock and the finish gate are hooked
   like the chariot (towerFight/towerCam/towerBlocking). The One: under the tower's ramp at col 207. Not built yet:
   the End of World 6 scene (Saul's tent, the lion/bear flashbacks, Shammah's bag).
+- **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
+  Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
+  surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,
+  then impressed/surprised), `shammah_bag` (4: holding it out, laughing, patting it, a nod), item `shepherd_bag`.
+  17:31-37 in WEB; David's lion and bear come back as sepia memories in a frame (stills of the World 1/2 sprites,
+  not a replay of the player's own fight yet). Gift: progress.bag (no effect yet: meant to hold special stones).
 - **Playtested by Glen (2026-10-18):** 5-2 (the leopard) and 5-3 (hiding from the lookouts) are good as they are; the
   lookouts who spot you may get tuned later. The 5-4 chariot is beaten and tuned. Next: World 6 (art requests for
   the map and 6-1 are in ART_PROMPTS.md; DESIGN 5f is still marked draft).

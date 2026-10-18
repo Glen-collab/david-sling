@@ -3208,7 +3208,8 @@ function updateFinish(dt) {
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
     else if (LEVEL_STAGE === "3-4" && typeof w3ending !== "undefined") w3ending.start(journal);   // the end of World 3 (world3.js)
     else if (LEVEL_STAGE === "4-4" && typeof w4ending !== "undefined") w4ending.start(journal);
-    else if (LEVEL_STAGE === "5-4" && typeof w5ending !== "undefined") w5ending.start(journal);   // the end of World 5 (world5.js)   // the end of World 4 (world4.js)
+    else if (LEVEL_STAGE === "5-4" && typeof w5ending !== "undefined") w5ending.start(journal);
+    else if (LEVEL_STAGE === "6-4" && typeof w6ending !== "undefined") w6ending.start(journal);   // the end of World 6: Saul's tent (world6.js)   // the end of World 5 (world5.js)   // the end of World 4 (world4.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -3948,6 +3949,9 @@ function frame(now) {
   }
   if (typeof eliabScene !== "undefined" && eliabScene.active) {   // 6-1: Eliab hears David (world6.js)
     pollInput(); eliabScene.update(real); eliabScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w6ending !== "undefined" && w6ending.active) {   // the end of World 6 (world6.js) has the screen
+    pollInput(); w6ending.update(real); w6ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w5ending !== "undefined" && w5ending.active) {   // the end of World 5 (world5.js) has the screen
     pollInput(); w5ending.update(real); w5ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

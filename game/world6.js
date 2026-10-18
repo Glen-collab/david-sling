@@ -366,7 +366,7 @@ function updateGiantSpot(dt) {
   }
 }
 function drawFarGiant(camX) {   // small on the far hill, after David has seen him
-  if (!goliathWatch.done || !giantSpot) return;
+  if (!goliathWatch.done || !giantSpot || w6ending.active) return;
   const now = performance.now() / 1000, gx = W * 0.86 - (camX - giantSpot.x + W * 0.3) * 0.06, gy = GR * T - 222;
   if (gx < -100 || gx > W + 100) return;
   const nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
@@ -578,7 +578,7 @@ function drawTowerShadow(camX) {
   ctx.fillStyle = g; ctx.fillRect(sx - 300, 0, W - sx + 300, H); ctx.restore();
 }
 function drawFarTower(cx) {   // the tower far off, small, rolling along the far edge (background)
-  if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait")) return;
+  if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait") || w6ending.active) return;
   const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - 215;
   ctx.save(); ctx.globalAlpha = 0.6; ctx.filter = "brightness(0.5) saturate(0.5) blur(0.7px)"; drawTowerShape(x, y, s, 0, false); ctx.restore();
 }
@@ -941,3 +941,103 @@ if (LEVEL_STAGE === "6-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w6intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w6intro")) w6intro.start();
 }
+
+// ---------------------------------------------------------------------------
+// The End of World 6 (DESIGN "End of World 6 — before Saul"), after 6-4: word of what David has been saying reaches
+// Saul (17:31). Saul's tent (Glen's tent and Saul in his war gear): 17:32-37, with David's lion and bear coming back
+// as memories while he tells them (the World 1 and World 2 fights, sepia, in a frame), and Saul's "Go! The LORD will be
+// with you." Outside, Shammah gives him a new shepherd's bag with a pouch for his stones (progress.bag; sets up 17:40).
+// "?w6end" plays it straight away (testing); "?w6end=8" starts at that beat.
+// ---------------------------------------------------------------------------
+const TENT_BG = Object.assign(new Image(), { src: "../assets/backgrounds/saul_tent.jpg?v=" + (window.BUILD || 0) });
+const w6ending = {
+  active: false,
+  beats: [
+    { at: "camp", who: "", text: "The water carriers came up the hill with full jars, and the soldiers who had been hiding were on their feet again, cheering." },
+    { at: "camp", who: "", text: "When the words were heard which David spoke, they rehearsed them before Saul; and he sent for him. (1 Samuel 17:31)" },
+    { at: "tent", who: "David", text: "Let no man's heart fail because of him. Your servant will go and fight with this Philistine. (1 Samuel 17:32)", saul: 0, cmd: [0, 1] },
+    { at: "tent", who: "King Saul", text: "You are not able to go against this Philistine to fight with him; for you are but a youth, and he a man of war from his youth. (1 Samuel 17:33)", saul: 1, cmd: [0, 1] },
+    { at: "tent", who: "David", text: "Your servant was keeping his father's sheep; and when a lion or a bear came and took a lamb out of the flock, (1 Samuel 17:34)", saul: 2, cmd: [0, 1], flash: "lion" },
+    { at: "tent", who: "David", text: "I went out after him, struck him, and rescued it out of his mouth. When he arose against me, I caught him by his beard, struck him, and killed him. (1 Samuel 17:35)", saul: 2, cmd: [0, 3], flash: "lion2" },
+    { at: "tent", who: "David", text: "Your servant struck both the lion and the bear. This uncircumcised Philistine shall be as one of them, since he has defied the armies of the living God. (1 Samuel 17:36)", saul: 3, cmd: [2, 3], flash: "bear" },
+    { at: "tent", who: "David", text: "The LORD, who delivered me out of the paw of the lion and out of the paw of the bear, will deliver me out of the hand of this Philistine. (1 Samuel 17:37)", saul: 3, cmd: [2, 3] },
+    { at: "tent", who: "", text: "The king looked at the shepherd boy for a long time.", saul: 4, cmd: [2, 3] },
+    { at: "tent", who: "King Saul", text: "Go! The LORD will be with you. (1 Samuel 17:37)", saul: 5, cmd: [2, 3], close: true },
+    { at: "camp", who: "Shammah", text: "David! Wait. ...Here. I made you a new bag, with a pouch sewn on the front. For your stones.", sham: 0, night: true },
+    { at: "camp", card: true, sham: 2, night: true },
+    { at: "camp", who: "Shammah", text: "Father would be proud of you. ...Don't tell Eliab I said that.", sham: 1, night: true },
+    { at: "camp", who: "", text: "That night David played his harp by the fire, and the men who had been afraid sat and listened.", harp: true, night: true },
+    { at: "camp", who: "", text: "To be continued in World 7: The Giant's Shadow.", harp: true, night: true },
+  ],
+  start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, fade: 0, out: 0, gave: false }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt; this.fade = Math.min(1, this.t / 1.2);
+    const B = this.beats[this.i];
+    if (B.card && !this.gave) {
+      this.gave = true; sfx("extra_life", undefined, 0.7);
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.bag = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    }
+    if (this.out > 0) { this.out += dt; if (this.out > 1.2) { this.active = false; const cb = this.done; this.done = null; cb && cb(); } return; }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < this.beats.length - 1) {
+        const was = this.beats[this.i].at; this.i++; this.bt = 0;
+        if (this.beats[this.i].at !== was) { this.t = 0; this.fade = 0; }
+      } else this.out = 0.001;
+    }
+  },
+  draw() {
+    const B = this.beats[this.i], y = GR * T, now = performance.now() / 1000;
+    if (B.at === "tent") {
+      if (TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
+      else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
+      const fy = H - 6, dx = B.close ? W * 0.42 : W * 0.22, z = 1.9;   // close to the camera: bigger than in a stage
+      if (B.cmd) for (const [k, fx] of [[0, 0.79], [1, 0.92]]) drawSprite("commander_tent", B.cmd[k], W * fx, fy - 10, -1, z * 0.92);
+      drawSprite(SPR.saul_armor ? "saul_armor" : "saul", SPR.saul_armor ? B.saul : 0, W * 0.6, fy, -1, z);
+      drawSprite("david_idle", frameOf("david_idle", now), dx, fy, 1, z);
+      if (B.flash) drawMemory(B.flash, this.bt, now);
+    } else {
+      const keep = bgWorld; bgWorld = "w5_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+      if (B.night) { ctx.fillStyle = "rgba(10,14,40,0.55)"; ctx.fillRect(0, 0, W, H); drawItem("campfire", W * 0.46, y + 4, 0.3); ctx.fillStyle = "rgba(255,170,80,0.12)"; ctx.fillRect(0, 0, W, H); }
+      if (B.harp) drawSprite("david_play_harp", frameOf("david_play_harp", now), W * 0.36, y, 1);
+      else drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);
+      if (B.sham !== undefined) drawSprite(SPR.shammah_bag ? "shammah_bag" : "shammah_idle", SPR.shammah_bag ? B.sham : 0, W * 0.52, y, -1);
+      if (B.harp) for (const [k, fx] of [[0, 0.58], [1, 0.68], [2, 0.8]]) drawSprite(k === 1 ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.02, 1, W6.LOOKS[k] + " brightness(0.75)");
+      if (!B.night) for (let k = 0; k < 3; k++) drawSprite(SPR.soldier_run ? "soldier_run" : "villager_man_run", 0, W * (0.6 + k * 0.1), y, -1, 1, 1, W6.LOOKS[k]);
+    }
+    if (B.card) {   // the gift
+      const cy = 80, a = Math.min(1, this.bt * 2);
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = "rgba(25,14,6,0.9)"; ctx.beginPath(); ctx.roundRect(W / 2 - 440, cy, 880, 180, 16); ctx.fill();
+      ctx.strokeStyle = "rgba(255,214,120,0.6)"; ctx.lineWidth = 2; ctx.stroke();
+      drawItem("shepherd_bag", W / 2 - 350, cy + 162, 0.33, a);
+      ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 26px sans-serif"; ctx.fillText("Shammah's Shepherd's Bag", W / 2 + 60, cy + 46);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("A new leather bag, with a pouch sewn on the front.", W / 2 + 60, cy + 80);
+      ctx.fillText("It will hold the special stones you find from now on.", W / 2 + 60, cy + 104);
+      ctx.font = "italic 17px Georgia, serif"; ctx.fillText("\"You'll want somewhere to keep your stones.\"", W / 2 + 60, cy + 146);
+      ctx.restore(); ctx.textAlign = "left"; caption("A: next", 0.8, true);
+    } else drawStoryBox(B.who, B.text, this.i === this.beats.length - 1 ? "A: continue" : "A: next", true);
+    const a = Math.min(this.fade, 1 - Math.min(1, this.out / 1.2));
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};
+// a memory, while David tells it (17:34-36): his lion (World 1) and his bear (World 2), sepia, in a soft frame
+function drawMemory(kind, bt, now) {
+  const w = 640, h = 250, x = W / 2 - w / 2, y = 168, a = Math.min(1, bt * 1.5);
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 18); ctx.clip();
+  const sky = ctx.createLinearGradient(0, y, 0, y + h); sky.addColorStop(0, "#e8d2a8"); sky.addColorStop(1, "#c9a878");
+  ctx.fillStyle = sky; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = "#b39062"; ctx.beginPath(); ctx.ellipse(x + w * 0.3, y + h - 20, w * 0.5, 60, 0, Math.PI, 0); ctx.fill();   // the hills he kept the sheep on
+  ctx.filter = "sepia(0.85) brightness(1.05) contrast(0.95)";
+  const gy = y + h - 18;
+  ctx.fillStyle = "#9c7a4e"; ctx.fillRect(x, gy, w, 18);
+  const beast = kind === "bear" ? "bear_rear_roar" : kind === "lion" ? "lion_carry_lamb" : "lion_leap";
+  drawSprite(beast, frameOf(beast, now), x + w * 0.68, gy, -1, kind === "bear" ? 0.95 : 0.9);
+  drawSprite("david_sling_throw", frameOf("david_sling_throw", now), x + w * 0.22, gy, 1, 1);
+  ctx.filter = "none"; ctx.restore();
+  ctx.save(); ctx.globalAlpha = a * 0.8; ctx.strokeStyle = "rgba(255,230,180,0.7)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(x, y, w, h, 18); ctx.stroke(); ctx.restore();
+}
+if (new URLSearchParams(location.search).has("w6end")) setTimeout(() => {
+  w6ending.start(() => location.reload());
+  const at = Number(new URLSearchParams(location.search).get("w6end")) || 0; if (at) Object.assign(w6ending, { i: at, fade: 1, t: 2 });
+}, 300);
