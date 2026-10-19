@@ -373,6 +373,11 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
   4: { src: "../assets/journal/w4_reading.jpg", y: -40, lamp: [1392, 712],   // a servant's room in Saul's palace, the storm outside
        left:  { top: [[652, 462], [770, 482], [892, 520]], bot: [[556, 776], [660, 804], [772, 828]] },
        right: { top: [[900, 520], [1032, 532], [1168, 564]], bot: [[780, 832], [928, 868], [1080, 892]] } },
+  // Glen's World 5 scene (2026-10-19): on the hillside over the Valley of Elah, the camps' fires below. Mirrored from the
+  // others: the lamp on the left, David on the right
+  5: { src: "../assets/journal/w5_reading.jpg", y: -40, lamp: [144, 848],
+       left:  { top: [[350, 531], [455, 538], [557, 573]], bot: [[430, 820], [535, 826], [637, 832]] },
+       right: { top: [[560, 570], [660, 532], [755, 519]], bot: [[640, 830], [740, 800], [850, 767]] } },
   // the letter note (Glen, 2026-10-18): David standing, looking down at the open book, the ground at his feet (his cut-out
   // over his ground pictures, put together in david-sling-art/journal_note). No lamp: it's out of doors (or the hall's own)
   note_road: { src: "../assets/journal/note_road.jpg", y: 0,
