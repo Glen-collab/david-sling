@@ -622,15 +622,15 @@ const Journal = {
     try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.ripped = p.ripped || {}; p.ripped[this.world] = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
     this.page().t = 0; this.page().nextAct = 0; this.phase = "write";
   },
-  drawRipFire() {   // David by the fire at night (3-2's far pasture, dark), tearing the page out and throwing it in
+  drawRipFire() {   // David by the fire at night, tearing the page out and throwing it in: World 3 in 3-2's far pasture, World 6 in the army camp (6-1)
     const r = this.rip, t = r.t, gy = H * 0.88, dx = W * 0.36, fx = W * 0.62, now = performance.now(), SZ = 2.3;
-    const L = typeof BG !== "undefined" && BG.w3_2;
+    const bw = this.world === 6 ? "w6_1" : "w3_2", L = typeof BG !== "undefined" && BG[bw], LH = (TUNE.BG_LAYER_HEIGHTS || {})[bw] || {};
     ctx.fillStyle = "#0b1020"; ctx.fillRect(0, 0, W, H);
-    if (L && L.far && L.far.naturalWidth) { ctx.save(); ctx.filter = "brightness(0.6) saturate(0.7)"; ctx.drawImage(L.far, 0, -H * 0.12, W, H); ctx.restore();
+    if (L && L.far && L.far.naturalWidth) { ctx.save(); ctx.filter = "brightness(0.6) saturate(0.7)"; ctx.drawImage(L.far, 0, bw === "w3_2" ? -H * 0.12 : 0, W, H); ctx.restore();
     }
-    // the pasture's own hills and ground (3-2's layers and the stage's topsoil and earth), then all of it moonlit
-    if (L && L.mid && L.mid.naturalWidth) drawLayerRepeating(L.mid, 0, 1, gy + 10, 360, true);
-    if (L && L.near && L.near.naturalWidth) drawLayerRepeating(L.near, 0, 1, gy + 26, 150, true);
+    // the place's own hills and ground (the stage's layers, topsoil and earth), then all of it moonlit
+    if (L && L.mid && L.mid.naturalWidth) drawLayerRepeating(L.mid, 0, 1, gy + 10, bw === "w3_2" ? 360 : LH.mid || 360, true);
+    if (L && L.near && L.near.naturalWidth) drawLayerRepeating(L.near, 0, 1, gy + 26, bw === "w3_2" ? 150 : LH.near || 150, true);
     ctx.fillStyle = (typeof terPattern === "function" && terPattern("sediment", TUNE.TER_FILL_SCALE)) || "#2a2418"; ctx.fillRect(0, gy - 2, W, H - gy + 2);
     if (typeof terStrip === "function") terStrip("topsoil", -4, W + 4, gy - TUNE.TER_GRASS_RISE, TUNE.TER_TOPSOIL_H);
     ctx.save(); ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = "#33406e"; ctx.fillRect(0, 0, W, H); ctx.restore();   // moonlit blue
