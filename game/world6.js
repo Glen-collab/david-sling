@@ -545,8 +545,9 @@ function courage6() { try { const l = JSON.parse(localStorage.getItem("davidProg
 
 // --- Philistine skirmishers (6-4, and out of the tower in its fight). setPiece("skirmisher", c): he waits behind his
 // shield; when David comes near he charges. Two stones (a charged one counts double) and he drops his shield and runs
-// back to his own lines. Nobody dies. Stand-in: the running soldier, darkened and reddened (Philistine).
-Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 2, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
+// back to his own lines. Nobody dies. Glen's Philistine (phil_run far off, phil_charge shield-up when close, phil_drop,
+// phil_flee); without them, the running soldier, darkened and reddened.
+Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 2, DROP_MS: 150, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
 const skirms = setPieces.filter(p => p.kind === "skirmisher").map(p => ({ x: p.x, y: p.y, home: p.x, state: "wait", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0 }));
 function addSkirm(x) { skirms.push({ x, y: GR * T, home: x, state: "run", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0, spawned: true }); }
 function updateSkirms(dt) {
@@ -561,6 +562,8 @@ function updateSkirms(dt) {
       const dir = Math.sign(d.x - k.x) || -1; k.dir = dir;
       if (d.deadT <= 0) k.x += dir * W6.SKIRM_SPEED * dt;
       if (Math.abs(d.x - k.x) < 30 && d.y > k.y - 100 && d.deadT <= 0) hurtDavid(k.x);
+    } else if (k.state === "drop") {   // he throws down his shield and spear and turns
+      if (k.t * 1000 >= W6.DROP_MS * SPR.phil_drop.frames) { k.state = "flee"; k.t = 0; }
     } else if (k.state === "flee") {
       k.x += 320 * dt; k.alpha = Math.max(0, 1 - k.t / 2.5);
       if (k.alpha <= 0) { if (k.spawned) skirms.splice(i, 1); else k.state = "gone"; }
@@ -572,7 +575,7 @@ function stoneHitsSkirm(s) {
     if (k.state !== "run" && k.state !== "wait") continue;
     if (Math.abs(s.x - k.x) < 26 && s.y > k.y - 110 && s.y < k.y) {
       k.hp -= s.charged || s.power ? 2 : 1; k.flash = 0.25; stoneHit(s);
-      if (k.hp <= 0) { k.state = "flee"; k.t = 0; sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
+      if (k.hp <= 0) { k.state = SPR.phil_drop ? "drop" : "flee"; k.t = 0; k.dropX = k.x; sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
       return true;
     }
   }
@@ -584,6 +587,19 @@ function drawSkirms(camX) {
     if (k.state === "gone") continue;
     const x = k.x - camX; if (x < -150 || x > W + 150) continue;
     const dir = k.state === "flee" ? 1 : k.dir || -1, moving = k.state !== "wait";
+    if (SPR.phil_charge) {
+      if (k.state === "flee" && k.dropX !== undefined) {   // his shield and spear, left lying where he dropped them
+        const gx = k.dropX - camX, gy = GR * T; ctx.save(); ctx.globalAlpha = k.alpha;
+        ctx.strokeStyle = "#5a3e20"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(gx - 50, gy - 3); ctx.lineTo(gx + 40, gy - 4); ctx.stroke();
+        ctx.fillStyle = "#9a7440"; ctx.strokeStyle = "#5a3e20"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(gx - 22, gy - 5, 26, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
+      }
+      const near = Math.abs(david.x - k.x) < 5 * T, fl = k.flash > 0 ? "brightness(2)" : "";
+      if (k.state === "wait") drawSprite("phil_charge", 0, x, k.y, dir, 1, k.alpha, fl);
+      else if (k.state === "run") { const nm = near ? "phil_charge" : "phil_run"; drawSprite(nm, frameOf(nm, now + k.home), x, k.y, dir, 1, k.alpha, fl); }
+      else if (k.state === "drop") drawSprite("phil_drop", frameOf("phil_drop", k.t, W6.DROP_MS), x, k.y, -(k.dir || -1), 1, k.alpha, fl);   // (the sheet starts facing left)
+      else drawSprite("phil_flee", frameOf("phil_flee", now + k.home), x, k.y, 1, 1, k.alpha);
+      continue;
+    }
     drawSprite(nm, moving ? frameOf(nm, now + k.home) : 0, x, k.y, dir, 1.05, k.alpha, W6.PHIL + (k.flash > 0 ? " brightness(2)" : ""));
     ctx.save(); ctx.globalAlpha = k.alpha;
     if (k.state !== "flee") {   // the shield, out in front; a feathered headdress (the Philistine look)
@@ -631,6 +647,7 @@ Object.assign(W6, {
   TW_WIN_HITS: 2,         // stones into an open window to knock his bow away (the quick release puts two in at once)
   TW_PIN_HP: 3, TW_PIN_HP2: 2,
   TW_BEAM_HP: 4,          // stones on the top beam (a charged one counts 2)
+  TW_SLING_Y: 60, TW_ROOF_CLIP: 0,   // the roof slingers: feet this far below the roof line; hidden below roof + CLIP
   TW_SLING_EVERY: 2.3,    // seconds between the slingers' throws in phase 3
   TW_SKIRM_EVERY: 6.5,    // seconds between skirmishers out from behind the tower in phase 2
   TW_ARROW: 640,
@@ -892,7 +909,14 @@ function drawWatchtower(camX) {
   for (const w of tw.wins) {
     const wx = w.x - camX, wy = w.y, open = w.state === "open" ? 1 : w.state === "tell" ? Math.min(1, w.t / W6.TW_TELL) * 0.5 : 0;
     if (!ITEM.tw_body) { ctx.fillStyle = "#1c120a"; ctx.fillRect(wx - 22, wy - 26, 44, 52); }   // (Glen's tower has its own dark holes)
-    if (w.state === "open") {   // the archer: a feathered headdress, a bow
+    if (w.state === "open" && SPR.phil_bow) {   // Glen's archer, waist-up in the window, leaning out: he draws, aims, looses at 70%
+      const u = w.t / (W6.counsel2 ? W6.TW_OPEN2 : W6.TW_OPEN), hh = ITEM.tw_body ? 21 : 28;
+      const f = u < 0.7 ? [0, 1, 5, 6, 7, 8, 9, 10][Math.min(7, Math.floor(u / 0.7 * 8))] : 11;   // (frames 2-4 have an arrow already in flight)
+      w.flash = Math.max(0, (w.flash || 0) - 1 / 60);
+      ctx.save(); ctx.beginPath(); ctx.rect(wx - 80, wy - hh, 80 + hh, hh * 2); ctx.clip();
+      drawSprite("phil_bow", f, wx + 4, wy - hh + 100, -1, 0.75, 1, w.flash > 0 ? "brightness(2)" : "");
+      ctx.restore();
+    } else if (w.state === "open") {   // the archer: a feathered headdress, a bow
       ctx.fillStyle = (w.flash = Math.max(0, (w.flash || 0) - 1 / 60)) > 0 ? "#fff" : "#a0704a"; ctx.beginPath(); ctx.arc(wx - 4, wy - 4, 11, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "#d8c49a"; for (let f = -2; f <= 2; f++) ctx.fillRect(wx - 4 + f * 4 - 1, wy - 26, 3, 12);
       ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(wx - 22, wy + 4, 20, -1.1, 1.1); ctx.stroke();
@@ -924,8 +948,18 @@ function drawWatchtower(camX) {
   }
   // the slingers on the roof (phase 3): they rise over the parapet to throw
   if (tw.phase === 3 && tw.state === "fight") {
+    if (SPR.phil_sling) {   // Glen's slinger, waist-up over the parapet: he whirls it up, then lets fly (frame 10) as the stone leaves
+      const u = 1 - Math.max(0, tw.slingT) / W6.TW_SLING_EVERY;
+      ctx.save(); ctx.beginPath(); ctx.rect(x, W6.TW_ROOF * T - 400, tw.w + 200, 400 + W6.TW_ROOF_CLIP); ctx.clip();
+      [0.68, 0.88].forEach((fx, k) => {
+        const f = tw.slingUp > 0 ? (tw.slingUp > 0.25 ? 10 : 11) : Math.max(0, Math.min(9, Math.floor(u * 10)) - k);
+        drawSprite("phil_sling", f, x + tw.w * fx, W6.TW_ROOF * T + W6.TW_SLING_Y, -1, 0.95);
+      });
+      ctx.restore();
+    } else {
     const nm = SPR.soldier_run ? "soldier_run" : "villager_man_run", up = tw.slingUp > 0 ? 40 : 0;
     for (const fx of [0.68, 0.88]) drawSprite(nm, up ? 3 : 0, x + tw.w * fx, W6.TW_ROOF * T + 50 - up, -1, 0.95, 1, W6.PHIL);
+    }
   }
   ctx.restore();
   ctx.restore();
@@ -934,8 +968,8 @@ function drawWatchtower(camX) {
   ctx.fillStyle = "#6e6458"; for (const s of [...tw.slung, ...tw.cover]) { ctx.beginPath(); ctx.arc(s.x - camX, s.y, 6, 0, Math.PI * 2); ctx.fill(); }
   // the crew climbing down the back and running (as it falls), the knocked-away bows, the dust
   if (tw.state === "fall" || (tw.state === "down" && tw.t < 5)) {
-    const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.soldier_run ? "soldier_run" : "villager_man_run";
-    for (let k = 0; k < 6; k++) drawSprite(nm, frameOf(nm, now + k * 0.2), x + tw.w + 30 + k * 40 + t * 260, GR * T, 1, 0.95, Math.max(0, 1 - t / 4), W6.PHIL);
+    const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.phil_flee ? "phil_flee" : SPR.soldier_run ? "soldier_run" : "villager_man_run";
+    for (let k = 0; k < 6; k++) drawSprite(nm, frameOf(nm, now + k * 0.2), x + tw.w + 30 + k * 40 + t * 260, GR * T, 1, 0.95, Math.max(0, 1 - t / 4), nm === "phil_flee" ? "" : W6.PHIL);
   }
   drawTwDust(camX);
 }

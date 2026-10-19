@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 431,
+  "frame_h": 344,
+  "ms_per_frame": 89,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 218,
+  "anchor_y": 342,
+  "source": "phil_charge.mp4",
+  "video_frames": [
+    34,
+    36,
+    38,
+    40,
+    42,
+    45,
+    47,
+    49
+  ]
+}

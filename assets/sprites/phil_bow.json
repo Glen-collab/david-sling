@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 610,
+  "frame_h": 377,
+  "ms_per_frame": 389,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 300,
+  "anchor_y": 375,
+  "source": "phil_bow.mp4",
+  "video_frames": [
+    34,
+    44,
+    54,
+    64,
+    74,
+    84,
+    95,
+    105,
+    115,
+    125,
+    135,
+    145
+  ]
+}

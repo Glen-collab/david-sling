@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 662,
+  "frame_h": 377,
+  "ms_per_frame": 264,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 334,
+  "anchor_y": 375,
+  "source": "phil_sling.mp4",
+  "video_frames": [
+    70,
+    77,
+    84,
+    90,
+    97,
+    104,
+    111,
+    118,
+    125,
+    131,
+    138,
+    145
+  ]
+}

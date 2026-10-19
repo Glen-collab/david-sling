@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 739,
+  "frame_h": 360,
+  "ms_per_frame": 296,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 420,
+  "anchor_y": 357,
+  "source": "phil_flee.mp4",
+  "video_frames": [
+    14,
+    22,
+    30,
+    37,
+    45,
+    53,
+    61,
+    68,
+    76,
+    84
+  ]
+}

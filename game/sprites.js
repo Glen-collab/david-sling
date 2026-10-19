@@ -2736,6 +2736,78 @@ window.SPRITE_DATA = {
   "ay": 226,
   "align": "feet"
  },
+ "phil_bow": {
+  "src": "../assets/sprites/phil_bow.png",
+  "frames": 12,
+  "w": 610,
+  "h": 377,
+  "ms": 389,
+  "loop": false,
+  "pingpong": false,
+  "ax": 300,
+  "ay": 375,
+  "align": "feet"
+ },
+ "phil_charge": {
+  "src": "../assets/sprites/phil_charge.png",
+  "frames": 8,
+  "w": 494,
+  "h": 336,
+  "ms": 94,
+  "loop": true,
+  "pingpong": false,
+  "ax": 302,
+  "ay": 334,
+  "align": "feet"
+ },
+ "phil_drop": {
+  "src": "../assets/sprites/phil_drop.png",
+  "frames": 10,
+  "w": 739,
+  "h": 360,
+  "ms": 296,
+  "loop": false,
+  "pingpong": false,
+  "ax": 420,
+  "ay": 357,
+  "align": "feet"
+ },
+ "phil_flee": {
+  "src": "../assets/sprites/phil_flee.png",
+  "frames": 8,
+  "w": 403,
+  "h": 345,
+  "ms": 125,
+  "loop": true,
+  "pingpong": false,
+  "ax": 246,
+  "ay": 343,
+  "align": "feet"
+ },
+ "phil_run": {
+  "src": "../assets/sprites/phil_run.png",
+  "frames": 8,
+  "w": 431,
+  "h": 344,
+  "ms": 89,
+  "loop": true,
+  "pingpong": false,
+  "ax": 218,
+  "ay": 342,
+  "align": "feet"
+ },
+ "phil_sling": {
+  "src": "../assets/sprites/phil_sling.png",
+  "frames": 12,
+  "w": 662,
+  "h": 377,
+  "ms": 264,
+  "loop": false,
+  "pingpong": false,
+  "ax": 334,
+  "ay": 375,
+  "align": "feet"
+ },
  "raddai_idle": {
   "src": "../assets/sprites/raddai_idle.png",
   "frames": 2,
