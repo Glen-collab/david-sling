@@ -189,7 +189,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 
 **What happened:** *The king was troubled tonight. I played for him, and the shadows left him for a while.* <sub>1 Samuel 16:23</sub>
 
-### World 5: The Road to the Valley
+### World 5: The Road to the Valley *(Glen approved as written, 2026-10-19; in journal.js)*
 | Stage | Lesson | David writes |
 |---|---|---|
 | 5-1 Provisions, the fleeing family | Help the stranger | *The LORD defends the orphan and the widow and loves the stranger. So I stopped to help.* — Deuteronomy 10:18–19 |
@@ -206,7 +206,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 
 **What happened:** *Father sent me with bread and cheese for my brothers. At the camp I heard the giant for the first time, and everyone ran.* <sub>1 Samuel 17:17–24</sub>
 
-### World 6: The Valley of Elah *(one scratch-out)*
+### World 6: The Valley of Elah *(one scratch-out; Glen approved as written, 2026-10-19; in journal.js)*
 | Stage | Lesson | David writes |
 |---|---|---|
 | 6-1 Eliab's anger *(rip-out first)* | Answer gently | *Joseph's brothers hurt him, and he answered them with kindness. Eliab was angry. I will not be.* — Genesis 50:20–21 |
@@ -221,7 +221,7 @@ Each world: the four stage lessons (left page), the psalm page stage by stage (r
 | 6-3 | *…I will not run.* (the whole army ran) |
 | 6-4 | *…I will not ~~run~~ be afraid.* (He *will* run, toward the giant, 17:48. It was never about running.) |
 
-**What happened:** *I told King Saul about the lion and the bear. He said, "Go, and the LORD be with you."* <sub>1 Samuel 17:34–37</sub> *(the game replays your World 1 lion fight here)*
+**What happened:** *I told King Saul about the lion and the bear. He said, "Go! The LORD will be with you."* <sub>1 Samuel 17:34–37</sub> *(the game replays your World 1 lion fight here)*
 
 ### World 7: The Giant's Shadow *(one scratch-out)*
 | Stage | Lesson | David writes |

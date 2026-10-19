@@ -162,6 +162,75 @@ const JOURNAL_PAGES = {
       ],
     },
   },
+  // Worlds 5 and 6: JOURNAL_TEXT.md's first draft, which Glen approved as written (2026-10-19)
+  5: {
+    name: "The Road to the Valley",
+    stages: ["The Supply Road", "The Mountain Trail", "The Lookouts' Ridge", "Down to Elah"],
+    draft: {
+      left: [
+        ...E(1, "The LORD defends the orphan and the widow and loves the stranger. So I stopped to help.", "Deuteronomy 10:18–19"),
+        ...E(2, "Be strong and courageous. Tobi was afraid, and so was I, but the LORD was with us both.", "Joshua 1:9"),
+        ...E(3, "He went ahead of our people in a pillar of fire by night, so they could travel in the dark.", "Exodus 13:21"),
+        ...E(4, "When you see horses and chariots bigger than yours, do not be afraid. The LORD is with you.", "Deuteronomy 20:1"),
+      ],
+      right: [   // everyone on the road is running; then not his sling, God's care
+        { at: 1, size: "psalm", segs: [
+          { text: "When the darkness surrounds me,", at: 1 }, { text: "\n" },
+          { text: "and I cannot", at: 1 }, { text: "outrun it,", at: 1, strike: 2 }, { text: "see the way,", at: 2 }, { text: "\n" },
+          { text: "I know Your hand is on me,", at: 3 }, { text: "\n" },
+          { text: "and", at: 3 }, { text: "my sling", at: 3, strike: 4 }, { text: "Your rod", at: 4 }, { text: "will keep me safe.", at: 3 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 17:17–24",
+          segs: [{ text: "Father sent me with bread and cheese for my brothers. At the camp I heard the giant for the first time, and everyone ran.", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the song's second verse, as far as he's written it
+        { at: 5, size: "psalm", segs: [{ text: "You lead me down the right road;", at: 5 }, { text: "\n" }, { text: "when the shadows gather, You remain the same.", at: 5 }, { text: "\n" },
+          { text: "When the darkness surrounds me,", at: 5 }, { text: "\n" }, { text: "and I cannot see the way,", at: 5 }, { text: "\n" },
+          { text: "I know Your hand is on me,", at: 5 }, { text: "\n" }, { text: "and Your rod will keep me safe.", at: 5 }] },
+      ],
+    },
+  },
+  6: {
+    name: "The Valley of Elah",
+    stages: ["The Camp of Fear", "No-Man's Land", "The Water Carriers", "The Tower's Shadow"],
+    // the second rip-out (JOURNAL_TEXT.md): after Eliab's anger he starts this, tears it out and burns it, then writes Joseph
+    rip: { at: 1, text: "Eliab thinks he's so..." },
+    draft: {
+      left: [
+        ...E(1, "Joseph's brothers hurt him, and he answered them with kindness. Eliab was angry. I will not be.", "Genesis 50:20–21"),
+        ...E(2, "The spies felt like grasshoppers next to the giants. Only Caleb said, \"We can do it.\"", "Numbers 13:30–33"),
+        ...E(3, "When Moses grew tired, Aaron and Hur held up his hands. Today we held each other up.", "Exodus 17:12"),
+        ...E(4, "Be strong. Do not be afraid. The LORD goes with you, and He will never leave you.", "Deuteronomy 31:6"),
+      ],
+      right: [   // the whole army ran; he will run too, toward the giant (17:48), so it was never about running
+        { at: 1, size: "psalm", segs: [
+          { text: "Through the darkest valley,", at: 1 }, { text: "\n" },
+          { text: "You will lead me safely home.", at: 2 }, { text: "\n" },
+          { text: "I will not", at: 3 }, { text: "run.", at: 3, strike: 4 }, { text: "be afraid.", at: 4 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 17:34–37",
+          segs: [{ text: "I told King Saul about the lion and the bear. He said, \"Go! The LORD will be with you.\"", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the chorus, as far as he's written it
+        { at: 5, size: "psalm", segs: [{ text: "Through the darkest valley,", at: 5 }, { text: "\n" }, { text: "You will lead me safely home.", at: 5 }, { text: "\n" },
+          { text: "I will not be afraid.", at: 5 }] },
+      ],
+    },
+  },
 };
 
 // ----------------------------------------------------------------------------
