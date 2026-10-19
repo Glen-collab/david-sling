@@ -3388,12 +3388,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/soldier1_fear.png",
   "frames": 12,
   "w": 392,
-  "h": 277,
+  "h": 317,
   "ms": 200,
   "loop": false,
   "pingpong": false,
   "ax": 151,
-  "ay": 275,
+  "ay": 315,
   "align": "feet"
  },
  "soldier1_go": {
@@ -3412,12 +3412,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/soldier2_fear.png",
   "frames": 12,
   "w": 248,
-  "h": 257,
+  "h": 297,
   "ms": 200,
   "loop": false,
   "pingpong": false,
   "ax": 112,
-  "ay": 255,
+  "ay": 295,
   "align": "feet"
  },
  "soldier2_go": {
@@ -3436,12 +3436,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/soldier3_fear.png",
   "frames": 12,
   "w": 180,
-  "h": 279,
+  "h": 319,
   "ms": 200,
   "loop": false,
   "pingpong": false,
   "ax": 88,
-  "ay": 277,
+  "ay": 317,
   "align": "feet"
  },
  "soldier3_go": {
@@ -3460,12 +3460,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/soldier4_fear.png",
   "frames": 12,
   "w": 164,
-  "h": 273,
+  "h": 313,
   "ms": 200,
   "loop": false,
   "pingpong": false,
   "ax": 71,
-  "ay": 271,
+  "ay": 311,
   "align": "feet"
  },
  "soldier4_go": {
@@ -3484,12 +3484,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/soldier5_fear.png",
   "frames": 12,
   "w": 129,
-  "h": 266,
+  "h": 306,
   "ms": 200,
   "loop": false,
   "pingpong": false,
   "ax": 49,
-  "ay": 264,
+  "ay": 304,
   "align": "feet"
  },
  "soldier5_go": {

@@ -1,12 +1,12 @@
 {
   "frames": 12,
   "frame_w": 180,
-  "frame_h": 279,
+  "frame_h": 319,
   "ms_per_frame": 200,
   "loop": false,
   "align": "feet",
   "anchor_x": 88,
-  "anchor_y": 277,
+  "anchor_y": 317,
   "source": "soldier3_run.mp4",
   "times": [
     0.0,

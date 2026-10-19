@@ -1,12 +1,12 @@
 {
   "frames": 12,
   "frame_w": 248,
-  "frame_h": 257,
+  "frame_h": 297,
   "ms_per_frame": 200,
   "loop": false,
   "align": "feet",
   "anchor_x": 112,
-  "anchor_y": 255,
+  "anchor_y": 295,
   "source": "soldier2.mp4",
   "times": [
     0.0,
