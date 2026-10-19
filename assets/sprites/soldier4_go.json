@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 151,
+  "frame_h": 279,
+  "ms_per_frame": 99,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 94,
+  "anchor_y": 276,
+  "source": "soldier4.mp4",
+  "video_frames": [
+    167,
+    169,
+    172,
+    174,
+    177,
+    179,
+    181,
+    184
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 213,
+  "frame_h": 246,
+  "ms_per_frame": 151,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 149,
+  "anchor_y": 244,
+  "source": "soldier3_run.mp4",
+  "video_frames": [
+    203,
+    207,
+    210,
+    214,
+    217,
+    221,
+    225,
+    228
+  ]
+}

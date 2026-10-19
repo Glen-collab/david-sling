@@ -70,7 +70,13 @@ function drawFearful(camX) {
   for (const s of fearful) {
     if (s.state === "posted") continue;
     const x = s.x - camX; if (x < -150 || x > W + 150) continue;
-    const f = W6.LOOKS[s.look % W6.LOOKS.length];
+    const f = W6.LOOKS[s.look % W6.LOOKS.length], man = "soldier" + (s.look % 5 + 1);
+    if (s.state === "hide" && s.song > 0) { ctx.fillStyle = "rgba(255,230,140,0.9)"; ctx.fillRect(x - 24, s.y - 130, 48 * Math.min(1, s.song / W6.LIFT_T), 4); }
+    if (SPR[man + "_fear"]) {   // Glen's five men, each his own clip: _fear 0 hiding ... 11 standing; _go walking back to his post
+      if (s.state === "go") { drawSprite(man + "_go", frameOf(man + "_go", now), x, s.y, s.dir, 1, s.alpha); continue; }
+      const fr = s.state === "rise" ? Math.min(11, 2 + Math.floor(s.t / 2.4 * 10)) : s.song > 0.2 ? 1 : 0;
+      drawSprite(man + "_fear", fr, x + (fr === 0 && Math.abs(david.x - s.x) > 3 * T ? Math.sin(now * 40) * 1.2 : 0), s.y, s.dir, 1, 1); continue;
+    }
     if (s.state === "go") { drawSprite(SPR.soldier_walk ? "soldier_walk" : "soldier_run", frameOf(SPR.soldier_walk ? "soldier_walk" : "soldier_run", now), x, s.y, s.dir, 1, s.alpha, f); continue; }
     if (SPR.soldier_fear) {   // Glen's frightened soldier: 0 curled up, 1 peeking, 2 listening, 3 standing up, 4 spear up, 5 a nod
       const fr = s.state === "rise" ? Math.min(5, 3 + Math.floor(s.t / 0.8)) : s.song > 0.2 ? 2 : Math.abs(david.x - s.x) < 5 * T ? 1 : 0;
@@ -79,7 +85,6 @@ function drawFearful(camX) {
     // stand-in: Tobi's hiding poses (0 curled up, 1 peeking, 3 getting up, 4 standing scared, 5 standing)
     const fr = s.state === "rise" ? [3, 4, 5][Math.min(2, Math.floor(s.t / 0.8))] : s.song > 0.2 ? 2 : Math.abs(david.x - s.x) < 5 * T ? 1 : 0;
     drawSprite("tobi_cave", fr, x + (fr === 0 ? Math.sin(now * 40) * 1.2 : 0), s.y, s.dir, W6.SOLDIER_SIZE, 1, f);
-    if (s.state === "hide" && s.song > 0) { ctx.fillStyle = "rgba(255,230,140,0.9)"; ctx.fillRect(x - 24, s.y - 130, 48 * Math.min(1, s.song / W6.LIFT_T), 4); }
   }
 }
 const lostThings6 = lostThingsTally;
@@ -161,7 +166,10 @@ const eliabScene = {
     for (const [k, fx] of [[0, 0.5], [1, 0.82]]) drawSprite(k ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.05, 1, W6.LOOKS[k + 2] + " brightness(0.85)");   // the men he asked
     if (B.eli !== "gone") {
       const walking = B.eli === "go", nm = walking ? "eliab_war_walk" : B.who === "Eliab" ? "eliab_war_talk" : "eliab_war_idle";
-      drawSprite(nm, frameOf(nm, now), this.eliX, y, walking ? 1 : -1, 1, 1, B.eli === "angry" ? "saturate(1.3) sepia(0.25) hue-rotate(-12deg)" : "");   // red in the face
+      if (B.eli === "angry" && SPR.eliab_angry) {   // Glen's clip: 0 arms crossed, glaring; 1-14 the rant (arms flung out, up); 15 glaring
+        const fr = B.who === "Eliab" ? (this.bt < 6 ? Math.min(15, Math.floor(this.bt / 0.378)) : 4 + Math.floor((this.bt - 6) / 0.378) % 9) : B.who === "David" ? 15 : 0;
+        drawSprite("eliab_angry", fr, this.eliX, y, -1);
+      } else drawSprite(nm, frameOf(nm, now), this.eliX, y, walking ? 1 : -1, 1, 1, B.eli === "angry" ? "saturate(1.3) sepia(0.25) hue-rotate(-12deg)" : "");   // red in the face
     }
     if (B.sham) drawSprite("shammah_war_ready", frameOf("shammah_war_ready", now), W * 0.58, y, -1);
     ctx.textAlign = "center"; ctx.fillStyle = "rgba(60,36,14,0.85)"; ctx.font = "italic 22px Georgia, serif"; ctx.fillText("The camp of Israel", W / 2, 50); ctx.textAlign = "left";
