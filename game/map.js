@@ -91,16 +91,19 @@ const MAP_WORLDS = {
       { id: "5-4", label: "Down to Elah", x: 1590, y: 635, trail: [[1230, 205], [1380, 360], [1485, 490]] },
     ],
   },
-  // World 6: stand-in until Glen's World 6 painting: World 5's map (the two camps are at its right edge)
+  // World 6: Glen's Valley of Elah (2048 x 1152): Israel's camp bottom-left with its cooking fires and wagons, the
+  // water jars, the open ground with arrows in it, the streambed winding up the middle, the glowing spring under the
+  // terebinth, the brothers' fire behind its rock, the Philistine camp and their siege tower top-right, Saul's tent
+  // with its banner top-left (the end of the world).
   6: {
-    name: "The Valley of Elah", src: "../assets/maps/world5_map.jpg",
+    name: "The Valley of Elah", src: "../assets/maps/world6_map.jpg",
     david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
     stops: [
-      { id: "home", label: "The camp of Israel", x: 1590, y: 635 },
-      { id: "6-1", label: "The Camp of Fear", x: 1700, y: 560, trail: [[1640, 600]] },
-      { id: "6-2", label: "No-Man's Land", x: 1820, y: 640, trail: [[1760, 600]] },
-      { id: "6-3", label: "The Water Carriers", x: 1880, y: 760, trail: [[1860, 700]] },
-      { id: "6-4", label: "The Tower's Shadow", x: 1960, y: 640, trail: [[1930, 700]] },
+      { id: "home", label: "The camp of Israel", x: 150, y: 720 },
+      { id: "6-1", label: "The Camp of Fear", x: 480, y: 890, trail: [[260, 800], [360, 860]] },
+      { id: "6-2", label: "No-Man's Land", x: 860, y: 760, trail: [[620, 880], [760, 820]] },
+      { id: "6-3", label: "The Water Carriers", x: 1330, y: 680, trail: [[1000, 790], [1180, 760]] },
+      { id: "6-4", label: "The Tower's Shadow", x: 1430, y: 500, trail: [[1400, 600]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
