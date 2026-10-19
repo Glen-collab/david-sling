@@ -8,6 +8,7 @@ usage:
   --stand    a time (s) when he is standing upright: his height there becomes --height pixels.
   --zoom     "1.3@1.0-3.0": the camera is 1.3x closer up to 1.0 s, easing to 1x by 3.0 s (each frame is shrunk to match).
   --thin     ignore things thinner than W video pixels when measuring the standing height (a spear sticking up).
+  --pad      add P pixels of empty space on the left, right and top of every frame (room to paint in Photoshop).
 Writes <out_prefix>_sheet.png and <out_prefix>.json (same fields as vid2sprite.py), feet on the bottom line.
 """
 import argparse, json, os, subprocess, tempfile, glob
@@ -21,7 +22,7 @@ ap.add_argument("--t0", type=float, default=0); ap.add_argument("--t1", type=flo
 ap.add_argument("--stand", type=float, required=True)
 ap.add_argument("--frames", type=int, default=12); ap.add_argument("--height", type=int, default=270)
 ap.add_argument("--zoom", default=""); ap.add_argument("--thin", type=int, default=0)
-ap.add_argument("--mirror", action="store_true")
+ap.add_argument("--mirror", action="store_true"); ap.add_argument("--pad", type=int, default=0)
 args = ap.parse_args()
 
 def grab(t):
@@ -73,11 +74,11 @@ for k in range(args.frames):
     cuts.append((im, ax, t))
 
 L = max(ax for im, ax, t in cuts); R = max(im.width - ax for im, ax, t in cuts)
-fw, fh = round(L + R) + 4, max(im.height for im, ax, t in cuts) + 2
+P = args.pad; fw, fh = round(L + R) + 4 + 2 * P, max(im.height for im, ax, t in cuts) + 2 + P
 sheet = Image.new("RGBA", (fw * len(cuts), fh))
-for k, (im, ax, t) in enumerate(cuts): sheet.alpha_composite(im, (k * fw + round(L - ax) + 2, fh - 2 - im.height))
+for k, (im, ax, t) in enumerate(cuts): sheet.alpha_composite(im, (k * fw + round(L - ax) + 2 + P, fh - 2 - im.height))
 sheet.save(args.out + "_sheet.png")
 json.dump({"frames": len(cuts), "frame_w": fw, "frame_h": fh, "ms_per_frame": 200, "loop": False, "align": "feet",
-           "anchor_x": round(L) + 2, "anchor_y": fh - 2, "source": os.path.basename(args.clip),
+           "anchor_x": round(L) + 2 + P, "anchor_y": fh - 2, "source": os.path.basename(args.clip),
            "times": [round(t, 2) for _, _, t in cuts]}, open(args.out + ".json", "w"), indent=2)
 print(f"{len(cuts)} frames of {fw}x{fh} -> {args.out}_sheet.png")

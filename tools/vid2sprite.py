@@ -17,6 +17,8 @@ usage:
   --thin W  measure the body without anything thinner than W video pixels (a spear or bow sticking up above the head),
             so the size and the head line-up come from the man, not the spear tip.
   --headroom H  add H pixels of empty space above the top of the sheet (room to paint in a spear tip cut off by the video).
+  --pad P   add P pixels of empty space on the left, right and top of every frame (room in Photoshop to paint back a
+            spear, bow or sling the video cut off). The feet stay on the bottom line; the anchors move to match.
   --green   also write <out_prefix>_green.png: the same frames, same layout, straight from the video (green screen
             and all), for borrowing parts in Photoshop.
 
@@ -40,6 +42,7 @@ ap.add_argument("--white", action="store_true", help="the clip is on a white bac
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 ap.add_argument("--min-loop", type=float, default=0.5, help="shortest loop in seconds (raise it if it finds half a stride)")
 ap.add_argument("--thin", type=int, default=0); ap.add_argument("--headroom", type=int, default=0)
+ap.add_argument("--pad", type=int, default=0)
 args = ap.parse_args()
 
 tmp = tempfile.mkdtemp()
@@ -168,15 +171,16 @@ if args.mirror:
     frames = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in frames]
     anchor_x = cw - anchor_x
 
-hr = args.headroom
-sheet = Image.new("RGBA", (cw * N, ch + hr))
-for k, f in enumerate(frames): sheet.alpha_composite(f, (k * cw, hr))
+hr, pd = args.headroom + args.pad, args.pad
+fw = cw + 2 * pd
+sheet = Image.new("RGBA", (fw * N, ch + hr))
+for k, f in enumerate(frames): sheet.alpha_composite(f, (k * fw + pd, hr))
 sheet.save(args.out + "_sheet.png")
 if args.green:   # the untouched video frames, cut and laid out exactly like the sheet
     gf = [im.raw.crop((a[1] + L, a[0] + T, a[1] + R, a[0] + B)).resize((cw, ch), Image.LANCZOS) for im, a in sel]
     if args.mirror: gf = [f.transpose(Image.FLIP_LEFT_RIGHT) for f in gf]
-    gs = Image.new("RGBA", (cw * N, ch + hr), (53, 188, 54, 255))
-    for k, f in enumerate(gf): gs.alpha_composite(f, (k * cw, hr))
+    gs = Image.new("RGBA", (fw * N, ch + hr), (53, 188, 54, 255))
+    for k, f in enumerate(gf): gs.alpha_composite(f, (k * fw + pd, hr))
     gs.save(args.out + "_green.png")
 
 ms = round(1000 * (length / fps) / N)
@@ -186,7 +190,7 @@ for f in frames:
     gif.append(bg.convert("RGB").resize((cw // 2 * 2 // 1, ch), Image.LANCZOS))
 gif[0].save(args.out + "_preview.gif", save_all=True, append_images=gif[1:], duration=ms, loop=0)
 
-json.dump({"frames": N, "frame_w": cw, "frame_h": ch + hr, "ms_per_frame": ms, "loop": not args.once,
-           "align": args.align, "anchor_x": anchor_x, "anchor_y": round(-T * sc) + hr,
+json.dump({"frames": N, "frame_w": fw, "frame_h": ch + hr, "ms_per_frame": ms, "loop": not args.once,
+           "align": args.align, "anchor_x": anchor_x + pd, "anchor_y": round(-T * sc) + hr,
            "source": os.path.basename(args.clip), "video_frames": [args.start + i for i in idx]}, open(args.out + ".json", "w"), indent=2)
-print(f"{N} frames of {cw}x{ch}, {ms} ms each -> {args.out}_sheet.png")
+print(f"{N} frames of {fw}x{ch + hr}, {ms} ms each -> {args.out}_sheet.png")
