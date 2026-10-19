@@ -197,7 +197,19 @@ Object.assign(W6, {
   GIANT_BOOM: 24,        // seconds between the giant's shouts across the valley (after David has seen him)
 });
 const volleyZones = setPieces.filter(p => p.kind === "volley").map(p => ({ x0: p.c * T, x1: (p.to || p.c + 20) * T, kind: p.shot || "arrows" }));
-const volley = { t: 0, n: 0, zone: null, shots: [], stuck: [], shout: 0, told: false };
+const volley = { t: 0, n: 0, zone: null, shots: [], stuck: [], shout: 0, told: false, sticks: 0 };
+// Glen's sounds: a volley is a quick spread of single arrows (his full volley recordings are too much every few seconds;
+// arrow_volley_1/2 are kept for the big moments), with now and then one sticking into wood. The war horn sounds when the
+// archers first open up and when the watchtower's fight starts; the sword fight is far off under 6-2 to 6-4.
+Object.assign(W6, { VOLLEY_ARROWS: 9, STICK_CHANCE: 0.12, BATTLE_VOL: 0.14, BATTLE_VOL_FIGHT: 0.3, battleVol: 0 });
+function arrowFlurry(n, vol, spread = 0.5) {   // n single arrows, loosed over `spread` seconds, each a little different
+  for (let k = 0; k < n; k++) setTimeout(() => sfx("arrow_single", undefined, vol * (0.6 + Math.random() * 0.4), 0.85 + Math.random() * 0.35), Math.random() * spread * 1000);
+}
+const battleLoop = loopAudio("ambience-sword-battle", false);
+function updateBattleSound(dt) {   // the clash of a skirmish somewhere down the valley
+  const want = /^6-[234]$/.test(LEVEL_STAGE) && david.deadT <= 0 ? (towerFight() ? W6.BATTLE_VOL_FIGHT : W6.BATTLE_VOL) : 0;
+  if (audioUnlocked) W6.battleVol = fadeLoop(battleLoop, W6.battleVol, want * TUNE.SFX_VOLUME, dt, 0.2);
+}
 function arrowBlocked(x, y) {
   const c = Math.floor(x / T), r = Math.floor(y / T);
   if (c < 0 || c >= COLS || r < 0) return false;
@@ -227,16 +239,24 @@ function updateVolleys(dt) {
       volley.t = 0; volley.n++; volley.shout = 1; volley.pending = [];
       const keep = volley.shots; volley.shots = []; volleyLaunch(z); volley.plan = volley.shots; volley.shots = keep;
       sfx("phil_shout", undefined, 0.6);
+      if (!W6.hornBlown) { W6.hornBlown = true; sfx("war_horn", undefined, 0.9); }   // the first time: the Philistine horn
       if (!volley.told) { volley.told = true; sayLine("", z.kind === "stones" ? "A shout from the far slope: slingers! Watch the shadows on the ground. Get in under an overhanging rock, or into a gap." : "A shout from the far slope: archers! Watch the shadows on the ground. Get in under an overhanging rock, or into a gap."); }
     }
-    if (volley.plan && volley.t >= W6.VOLLEY_WARN) { for (const s of volley.plan) volley.shots.push(s); volley.plan = null; sfx("arrow_volley", undefined, 0.7); sfx("sling_throw_quick", undefined, 0.4, 0.7); }
+    if (volley.plan && volley.t >= W6.VOLLEY_WARN) {
+      for (const s of volley.plan) volley.shots.push(s); volley.plan = null; volley.sticks = 0;
+      if (z.kind === "stones") sfx("sling_throw_quick", undefined, 0.4, 0.7);
+      else arrowFlurry(W6.VOLLEY_ARROWS, 0.45);
+    }
   }
   for (let i = volley.shots.length - 1; i >= 0; i--) {
     const s = volley.shots[i]; s.t += dt; if (s.t < 0) continue;
     s.x += s.vx * dt; s.y += s.vy * dt;
     if (d.deadT <= 0 && Math.abs(s.x - d.x) < 16 && s.y > d.y - d.h + 6 && s.y < d.y) { hurtDavid(s.x + 200); volley.shots.splice(i, 1); continue; }
     if (s.y >= s.ly) {
-      if (s.kind === "arrows") volley.stuck.push({ x: s.lx, y: s.ly, a: Math.atan2(s.vy, s.vx), t: 0 });
+      if (s.kind === "arrows") {
+        volley.stuck.push({ x: s.lx, y: s.ly, a: Math.atan2(s.vy, s.vx), t: 0 });
+        if (volley.sticks < 2 && Math.random() < W6.STICK_CHANCE) { volley.sticks++; sfx("arrow_with_stick-to-target", s.lx, 0.45, 0.9 + Math.random() * 0.2); }   // now and then one thunks in
+      }
       else volley.stuck.push({ x: s.lx, y: s.ly, t: 0, stone: true });
       if (Math.random() < 0.15) sfx("stone_hit", s.lx, 0.25, 1.3);
       volley.shots.splice(i, 1);
@@ -304,7 +324,7 @@ const goliathWatch = {
   update(dt) {
     this.t += dt; this.bt += dt; this.shake = Math.max(0, this.shake - dt);
     const B = this.beats[this.i];
-    if (B.boom && this.boomed !== this.i) { this.boomed = this.i; this.shake = 0.9; sfx("lion_roar", undefined, 0.55, 0.45); }
+    if (B.boom && this.boomed !== this.i) { this.boomed = this.i; this.shake = 0.9; sfx("taunting_yells", undefined, 0.8, 0.8); }
     if (this.out > 0) {
       this.out += dt;
       if (this.out > 0.8) {
@@ -375,7 +395,7 @@ function updateGiantSpot(dt) {
   if (!goliathWatch.done) return;
   W6.boomT = (W6.boomT || 0) + dt; W6.shake = Math.max(0, (W6.shake || 0) - dt);   // from now on, his voice booms across the valley every so often (W6.shake: he's mid-shout)
   if (W6.boomT > W6.GIANT_BOOM) {
-    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("lion_roar", undefined, 0.35, 0.45);
+    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("taunting_yells", undefined, 0.4, 0.75);   // far off
     toast(["The giant's voice booms across the valley: \"Give me a man, that we may fight together!\"", "\"I defy the armies of Israel today!\" The ground seems to shake.", "\"Am I not a Philistine, and you servants to Saul?\""][W6.boomN % 3]);
   }
 }
@@ -674,6 +694,7 @@ const twCounsel = () => { try { return (JSON.parse(localStorage.getItem("davidPr
 const twWheel = () => ({ x: tw.x0 + twPic(270, 0)[0], y: GR * T - 38, r: 38 });   // the front hub
 const twBeam = () => ({ x0: tw.x0 + tw.w * 0.45, x1: tw.x0 + tw.w + 30, y0: W6.TW_ROOF * T - 130, y1: W6.TW_ROOF * T });   // the frame over the roof
 function startTower() {
+  sfx("war_horn", undefined, 1); setTimeout(() => arrowFlurry(5, 0.35, 0.3), 2200);   // the horn, and the archers try their bows
   Object.assign(tw, { on: true, state: "fight", phase: 1, t: 0, lean: 0, leanTo: 0, gapT: 0.8, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 2, coverT: 3, cover: [], dust: [] });
   for (const w of tw.wins) Object.assign(w, { state: "shut", t: 0, hits: 0 });
   for (let i = skirms.length - 1; i >= 0; i--) if (skirms[i].spawned) skirms.splice(i, 1);
@@ -732,7 +753,7 @@ function updateWindows(dt) {
     if (!w.shot && w.t > stay * 0.7) {   // he looses: at David, or at the stones coming from the slope
       w.shot = true;
       const tx = w.atSlope ? tw.a0 - 400 : david.x, ty = w.atSlope ? GR * T - 300 : david.y - 50, dx = tx - w.x, dy = ty - w.y, L = Math.hypot(dx, dy) || 1;
-      tw.arrows.push({ x: w.x, y: w.y, vx: dx / L * W6.TW_ARROW, vy: dy / L * W6.TW_ARROW - 120, t: 0 }); sfx("sling_throw_quick", w.x, 0.6, 1.4);
+      tw.arrows.push({ x: w.x, y: w.y, vx: dx / L * W6.TW_ARROW, vy: dy / L * W6.TW_ARROW - 120, t: 0 }); sfx("arrow_single", w.x, 0.8, 0.95 + Math.random() * 0.1);
       if (w.atSlope && !W6.coverTold) { W6.coverTold = true; toast("He's shooting at the slope! The soldiers you lifted are throwing stones at the tower, drawing its fire."); }
     }
     if (w.t > stay) { w.state = "shut"; w.t = 0; tw.gapT = W6.TW_GAP; }
@@ -759,7 +780,7 @@ function updateTwShots(dt) {
   for (let i = tw.arrows.length - 1; i >= 0; i--) {
     const a = tw.arrows[i]; a.t += dt; a.vy += 500 * dt; a.x += a.vx * dt; a.y += a.vy * dt;
     if (Math.abs(a.x - d.x) < 22 && a.y > d.y - d.h && a.y < d.y) { hurtDavid(a.x - a.vx); tw.arrows.splice(i, 1); continue; }
-    if (a.y > GR * T || a.t > 3) tw.arrows.splice(i, 1);
+    if (a.y > GR * T || a.t > 3) { if (a.y > GR * T && Math.random() < 0.3) sfx("arrow_with_stick-to-target", a.x, 0.4); tw.arrows.splice(i, 1); }
   }
   for (let i = tw.slung.length - 1; i >= 0; i--) {
     const s = tw.slung[i]; s.t += dt; s.vy += s.g * dt; s.x += s.vx * dt; s.y += s.vy * dt;
@@ -979,7 +1000,7 @@ if (LEVEL_STAGE === "6-4") Object.assign(W6, { VOLLEY_EVERY: 3.2 });   // tighte
 // --- hooks: main.js (each frame, drawing)
 function updateWorld6(dt) {
   if (WORLD !== 6) return;
-  updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt); updateSkirms(dt); updateTower(dt);
+  updateBattleSound(dt); updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt); updateSkirms(dt); updateTower(dt);
 }
 function drawCover(camX) {   // Glen's leaning rock (6-2) and undercut bank (6-3, 6-4), drawn over the slab you shelter under
   for (const p of setPieces) {

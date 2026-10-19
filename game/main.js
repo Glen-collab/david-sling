@@ -3696,7 +3696,8 @@ const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "
   "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip",
   "hyena_1", "hyena_2", "hyena_3",   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2
   "horses",   // the chariot horses whinnying (5-4)
-  "phil_shout", "arrow_volley"];   // 6-2's volleys: the shout from the far slope, the arrows loosed (until Glen's, silent)
+  "phil_shout",   // 6-2's volleys: the shout from the far slope (until Glen's, silent)
+  "arrow_single", "arrow_with_stick-to-target", "arrow_volley_1", "arrow_volley_2", "taunting_yells", "war_horn"];   // Glen's World 6 sounds (2026-10-19)
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }
@@ -3756,6 +3757,7 @@ function updateSound(dt) {
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
 function hushLoops(keepRain = false) {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();
+  if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)
   if (!keepRain && !rainLoop.paused) { rainLoop.pause(); rainVol = 0; }
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
   if (typeof hushFlood === "function") hushFlood();
