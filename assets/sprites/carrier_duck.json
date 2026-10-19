@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 206,
+  "frame_h": 330,
+  "ms_per_frame": 245,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 105,
+  "anchor_y": 327,
+  "source": "carrier2.mp4",
+  "video_frames": [
+    54,
+    61,
+    67,
+    74,
+    80,
+    87,
+    93,
+    100
+  ]
+}

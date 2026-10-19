@@ -372,6 +372,42 @@ window.SPRITE_DATA = {
   "ay": 291,
   "align": "feet"
  },
+ "carrier_duck": {
+  "src": "../assets/sprites/carrier_duck.png",
+  "frames": 8,
+  "w": 206,
+  "h": 330,
+  "ms": 245,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 327,
+  "align": "feet"
+ },
+ "carrier_rise": {
+  "src": "../assets/sprites/carrier_rise.png",
+  "frames": 8,
+  "w": 246,
+  "h": 349,
+  "ms": 240,
+  "loop": false,
+  "pingpong": false,
+  "ax": 116,
+  "ay": 346,
+  "align": "feet"
+ },
+ "carrier_walk": {
+  "src": "../assets/sprites/carrier_walk.png",
+  "frames": 8,
+  "w": 167,
+  "h": 329,
+  "ms": 161,
+  "loop": true,
+  "pingpong": false,
+  "ax": 80,
+  "ay": 326,
+  "align": "feet"
+ },
  "chariot_archer_flee": {
   "src": "../assets/sprites/chariot_archer_flee.png",
   "frames": 4,

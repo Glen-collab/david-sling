@@ -425,6 +425,7 @@ function updateCarriers(dt) {
       }
       continue;
     }
+    c.duckT = ducking ? (c.duck ? (c.duckT || 0) + dt : 0) : 0; c.upT = !ducking ? (c.duck ? 0 : (c.upT ?? 9) + dt) : 0;   // how long he's been down, or back up (Glen's carrier sheets)
     c.duck = ducking;
     const i = k++;
     if (ducking || d.deadT > 0) continue;   // heads down until the volley's over
@@ -478,6 +479,18 @@ function drawCarriers(camX) {
       const nm = c.duck ? "shammah_war_ready" : c.moved > 20 ? "shammah_war_walk" : "shammah_war_ready";
       drawSprite(nm, frameOf(nm, now + 0.3), x, c.y + (c.duck ? 18 : 0), dir, 1, 1, c.hit > 0 ? "brightness(1.6)" : "");
       top = c.y - (c.duck ? 84 : 126);
+    } else if (SPR.carrier_walk) {   // Glen's water carrier: walking with the jar up on his shoulder, ducking down hugging it, getting back up
+      const hf = f + (c.hit > 0 ? " brightness(1.6)" : ""), sc = W6.CARRIER_SIZE;
+      if (c.duck) drawSprite("carrier_duck", Math.min(7, Math.floor((c.duckT || 0) / 0.05)), x, c.y, dir, sc, 1, hf);
+      else if ((c.upT ?? 9) < 0.45) drawSprite("carrier_rise", Math.min(7, Math.floor(c.upT / 0.055)), x, c.y, dir, sc, 1, hf);
+      else drawSprite("carrier_walk", c.moved > 20 ? frameOf("carrier_walk", now + c.look * 0.37) : 0, x, c.y, dir, sc, 1, hf);
+      const k = SCALE * sc, jx = x - dir * 11 * k, jy = c.y - 312 * k;   // the brim of his jar, walking
+      if (c.jar === "full" && !c.duck && (c.upT ?? 9) >= 0.45) { ctx.fillStyle = "rgba(150,210,240,0.9)"; ctx.beginPath(); ctx.ellipse(jx, jy + 3, 7, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
+      if (c.splash > 0) {
+        ctx.fillStyle = `rgba(160,215,245,${c.splash})`;
+        for (let q = 0; q < 6; q++) { ctx.beginPath(); ctx.arc(jx + Math.cos(q + now * 9) * 16 * (1.2 - c.splash), jy + 6 + Math.sin(q * 2.1) * 10 * (1.2 - c.splash), 3, 0, Math.PI * 2); ctx.fill(); }
+      }
+      continue;
     } else if (c.duck) {
       drawSprite("tobi_cave", 0, x, c.y, dir, W6.SOLDIER_SIZE, 1, f + (c.hit > 0 ? " brightness(1.6)" : ""));   // stand-in: curled up
       top = c.y - 58;
