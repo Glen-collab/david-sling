@@ -78,6 +78,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 
 ## Next
 
+- **World 6 backgrounds in (2026-10-18):** Glen's sets w6_1..w6_4 (tools/make_backgrounds.py, magenta, mirrored); layer heights in TUNE.BG_LAYER_HEIGHTS. The far layers have no tower or giant on purpose: world6.js draws those. The World 6 opening/ending camp scenes use w6_1.
 - **World 6 started (2026-10-18): 6-1 The Camp of Fear is built** with stand-ins (game/world6.js, loaded by world1.js;
   layout in main.js). The opening scene (w6intro: the cooking fire, 17:16, 17:25, the title card); 5 frightened
   soldiers (setPiece "fearful": play the harp beside one for W6.LIFT_T s and he stands and goes to his post; Tobi's
