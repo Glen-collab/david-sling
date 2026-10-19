@@ -550,7 +550,8 @@ function drawFills(camX) {   // the pools still holding water: a shallow sheet o
   }
   for (const b of brothers6) {
     const x = b.x - camX; if (x < -150 || x > W + 150) continue;
-    drawSprite("abinadab_war_idle", frameOf("abinadab_war_idle", now), x, b.y, -1);
+    const talk = dialog.t > 0 && dialog.who === "Abinadab" && SPR.abinadab_war_talk, nm = talk ? "abinadab_war_talk" : "abinadab_war_idle";   // his counsel: Glen's talking sheet
+    drawSprite(nm, frameOf(nm, now), x, b.y, david.x > b.x ? 1 : -1);
   }
   if (cisternSpot) { const x = cisternSpot.x - camX; if (x > -200 && x < W + 200) for (let k = 0; k < 3; k++) drawItem("town_clay_pots", x + k * 60, GR * T + 4, 0.16); }
 }
