@@ -953,7 +953,7 @@ const w6intro = {
   },
   draw() {
     const y = GR * T, now = performance.now() / 1000, keep = bgWorld;
-    bgWorld = "w5_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+    bgWorld = "w6_1"; drawBackground(0); bgWorld = keep; drawFlatGround(0);   // the camp
     ctx.fillStyle = "rgba(255,200,120,0.08)"; ctx.fillRect(0, 0, W, H);
     drawItem("campfire", W * 0.55, y + 4, 0.3);   // the cooking fire
     const POSE = [[0, 0, 0], [0, 0, 0], [2, 0, 0], [0, 1, 0], [2, 0, 3], [2, 2, 2]][this.step] || [0, 0, 0];   // who's talking, who looks up at David
@@ -1034,7 +1034,7 @@ const w6ending = {
       drawSprite("david_idle", frameOf("david_idle", now), dx, fy, 1, z);
       if (B.flash) drawMemory(B.flash, this.bt, now);
     } else {
-      const keep = bgWorld; bgWorld = "w5_4"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+      const keep = bgWorld; bgWorld = "w6_1"; drawBackground(0); bgWorld = keep; drawFlatGround(0);   // the camp
       if (B.night) { ctx.fillStyle = "rgba(10,14,40,0.55)"; ctx.fillRect(0, 0, W, H); drawItem("campfire", W * 0.46, y + 4, 0.3); ctx.fillStyle = "rgba(255,170,80,0.12)"; ctx.fillRect(0, 0, W, H); }
       if (B.harp) drawSprite("david_play_harp", frameOf("david_play_harp", now), W * 0.36, y, 1);
       else drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);
