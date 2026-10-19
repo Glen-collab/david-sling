@@ -110,7 +110,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   volleys (VOLLEY_EVERY 3.2), skirmishers (setPiece "skirmisher": charge with shield up, 2 stones / 1 charged and
   he drops it and runs), the forward trench (5 frightened soldiers under overhangs), the tower small on the far hill
   and its shadow creeping in. Every lifted soldier in World 6 is saved (progress.lift6[stage]; courage6() sums it).
-  The tower (setPiece "watchtower" 160: one-screen arena, tower body cols 183-188 drawn procedurally, `ladder(181, 12)`
+  The tower (setPiece "watchtower" 160: one-screen arena, tower body = Glen's picture `tw_body` (2026-10-19; W6.TW_PIC/TW_BODY map its pixels onto the roof row, hubs and window holes; stones fly past shut shutters to an open one; lower windows take a jump-throw, upper ones a throw from the ladder top), `ladder(181, 12)`
   in the layout, roof plat row 6 added only in phase 3):
   phase 1 four shutters (tell = creak open W6.TW_TELL, open TW_OPEN), 2 stones into an open window knock his bow
   away (quick stones now carry `quick: true` in main.js, not used yet); seen side-on, misses fly on past the tower.

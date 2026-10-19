@@ -594,8 +594,8 @@ function drawTowerShadow(camX) {
 }
 function drawFarTower(cx) {   // the tower far off, small, rolling along the far edge (background)
   if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait") || w6ending.active) return;
-  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - 215;
-  ctx.save(); ctx.globalAlpha = 0.6; ctx.filter = "brightness(0.5) saturate(0.5) blur(0.7px)"; drawTowerShape(x, y, s, 0, false); ctx.restore();
+  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - 140;   // its wheels on the far bank
+  ctx.save(); ctx.filter = "brightness(0.7) saturate(0.55) contrast(0.85) blur(0.6px)"; drawTowerShape(x, y, s, 0, false); ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -622,12 +622,18 @@ Object.assign(W6, {
   TW_SKIRM_EVERY: 6.5,    // seconds between skirmishers out from behind the tower in phase 2
   TW_ARROW: 640,
   TW_W: 6, TW_ROOF: 6,    // the tower: 6 tiles wide; its roof at row 6
+  // Glen's tower picture (tw_body, cut at half size from "world6/tower body.png"): measured in that picture's own
+  // pixels. Its front wall is at x 225, the floor inside the wicker at y 600, the axle hubs at y 2055, so 0.246 puts
+  // the roof on TW_ROOF and the hubs on the wheels' centres. TW_BODY: the body's width in the game (front to back wall).
+  TW_PIC: 0.246, TW_BODY: 164,
 });
+const twPic = (ix, iy) => [(ix - 225) * W6.TW_PIC, (iy - 600) * W6.TW_PIC];   // a point in Glen's picture -> offset from (front, roof)
 const twPiece = setPieces.find(p => p.kind === "watchtower");
 const tw = twPiece ? (() => {
-  const a0 = twPiece.c * T, x0 = a0 + 23 * T, w = W6.TW_W * T;
+  const a0 = twPiece.c * T, x0 = a0 + 23 * T, w = W6.TW_BODY;
   return { a0, a1: a0 + W, x0, w, on: false, beaten: false, state: "wait", phase: 1, t: 0, lean: 0, leanTo: 0, jolt: 0,
-    wins: [[0.3, 14.7], [0.72, 14.7], [0.3, 10.5], [0.72, 10.5]].map(([fx, r]) => ({ x: x0 + w * fx, y: r * T, state: "shut", t: 0, hits: 0 })),
+    wins: [[452, 1671], [688, 1671], [452, 1163], [681, 1163]].map(([ix, iy]) => { const [dx, dy] = twPic(ix, iy);   // the holes in Glen's picture
+      return { x: x0 + dx, y: W6.TW_ROOF * T + dy, state: "shut", t: 0, hits: 0 }; }),
     gapT: 0, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 0, coverT: 3, cover: [], dust: [] };
 })() : null;
 function towerFight() { return !!(tw && tw.on && !tw.beaten && david.deadT <= 0); }
@@ -635,8 +641,8 @@ function towerCam() { return tw && tw.on && !tw.beaten ? [tw.a0, tw.a0] : null; 
 function towerBlocking() { return tw && !tw.beaten ? "The watchtower! Its archers cover the whole valley. Deal with it first." : null; }
 const twPinHP = () => W6.counsel2 ? W6.TW_PIN_HP2 : W6.TW_PIN_HP;
 const twCounsel = () => { try { return (JSON.parse(localStorage.getItem("davidProgress") || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
-const twWheel = () => ({ x: tw.x0 + 44, y: GR * T - 36, r: 36 });
-const twBeam = () => ({ x0: tw.x0 + tw.w * 0.5, x1: tw.x0 + tw.w + 10, y0: W6.TW_ROOF * T - 110, y1: W6.TW_ROOF * T });
+const twWheel = () => ({ x: tw.x0 + twPic(270, 0)[0], y: GR * T - 38, r: 38 });   // the front hub
+const twBeam = () => ({ x0: tw.x0 + tw.w * 0.45, x1: tw.x0 + tw.w + 30, y0: W6.TW_ROOF * T - 130, y1: W6.TW_ROOF * T });   // the frame over the roof
 function startTower() {
   Object.assign(tw, { on: true, state: "fight", phase: 1, t: 0, lean: 0, leanTo: 0, gapT: 0.8, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 2, coverT: 3, cover: [], dust: [] });
   for (const w of tw.wins) Object.assign(w, { state: "shut", t: 0, hits: 0 });
@@ -645,7 +651,7 @@ function startTower() {
   toast(W6.towerSeen ? "The watchtower again. Watch the shutters." : "The Philistine watchtower! Archers behind every shutter. When one creaks open, put two stones in it: the quick release.");
   W6.towerSeen = true;
 }
-function setRoof(on) { for (let c = Math.floor(tw.x0 / T) - 2; c < Math.floor(tw.x0 / T) + W6.TW_W; c++) oneway[W6.TW_ROOF][c] = on; }
+function setRoof(on) { for (let c = Math.floor(tw.x0 / T) - 2; c < Math.ceil((tw.x0 + tw.w) / T); c++) oneway[W6.TW_ROOF][c] = on; }
 function updateTower(dt) {
   if (!tw) return;
   const d = david;
@@ -743,7 +749,9 @@ function stoneHitsTower(s) {
   }
   const inTower = false;   // (seen side-on: a stone that misses the windows flies on past the tower; only the targets stop it)
   if (tw.phase === 1) {
-    for (const w of tw.wins) if (Math.abs(s.x - w.x) < 30 && Math.abs(s.y - w.y) < 40) {
+    const at = tw.wins.filter(w => w.state !== "done" && Math.abs(s.x - w.x) < 30 && Math.abs(s.y - w.y) < 40);   // a dark window lets a stone through
+    const anyOpen = tw.wins.some(w => w.state === "open");   // seen side-on, a stone flies on past a shut shutter to the open window behind it
+    for (const w of at.filter(w => w.state === "open" || !anyOpen).slice(0, 1)) {
       if (w.state === "open") {
         w.hits++; stoneHit(s); sfx("lion_hit", w.x, 0.5, 1.6); w.flash = 0.25;
         if (w.hits >= W6.TW_WIN_HITS) {
@@ -822,6 +830,16 @@ function drawTwDust(camX) {
 // the tower, drawn (a stand-in until Glen's art): rough planks, a leather-covered front, three floors, a wicker parapet
 // on top, four wheels (two show). (x, y) = its front-bottom corner on the ground; s = scale; lean in degrees.
 function drawTowerShape(x, y, s, lean, far) {
+  if (ITEM.tw_body && !far) {   // Glen's tower, its two wheels (Glen's too) on its hubs; the front one sags once its pins are out
+    const k = W6.TW_PIC * s, roof = y - (GR - W6.TW_ROOF) * T * s, px = W6.TW_BODY * s;
+    ctx.save(); ctx.translate(x + px, y); ctx.rotate(lean * Math.PI / 180); ctx.translate(-x - px, -y);
+    drawItem("tw_body", x + (561 - 225) * k, roof + (2115 - 600) * k, k * 2);
+    for (const ix of [270, 860]) {
+      const sag = ix === 270 && tw && (tw.phase >= 3 || tw.state === "fall") && s === 1 ? 0.22 : 0;
+      ctx.save(); ctx.translate(x + (ix - 225) * k, y); ctx.rotate(sag); drawItem("tw_wheel", 0, 4 * s, 84 * s / 320); ctx.restore();
+    }
+    ctx.restore(); return;
+  }
   const w = W6.TW_W * T * s, top = y - (GR - W6.TW_ROOF) * T * s;
   ctx.save(); ctx.translate(x + w, y); ctx.rotate(lean * Math.PI / 180); ctx.translate(-x - w, -y);
   if (far) { ctx.fillStyle = "#3a2a1c"; ctx.fillRect(x, top - 50 * s, w, y - top + 50 * s); ctx.restore(); return; }
@@ -860,17 +878,18 @@ function drawWatchtower(camX) {
   // the windows: shut, creaking open (the tell), open with an archer leaning out, or dark (his bow knocked away)
   for (const w of tw.wins) {
     const wx = w.x - camX, wy = w.y, open = w.state === "open" ? 1 : w.state === "tell" ? Math.min(1, w.t / W6.TW_TELL) * 0.5 : 0;
-    ctx.fillStyle = "#1c120a"; ctx.fillRect(wx - 22, wy - 26, 44, 52);
+    if (!ITEM.tw_body) { ctx.fillStyle = "#1c120a"; ctx.fillRect(wx - 22, wy - 26, 44, 52); }   // (Glen's tower has its own dark holes)
     if (w.state === "open") {   // the archer: a feathered headdress, a bow
       ctx.fillStyle = (w.flash = Math.max(0, (w.flash || 0) - 1 / 60)) > 0 ? "#fff" : "#a0704a"; ctx.beginPath(); ctx.arc(wx - 4, wy - 4, 11, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "#d8c49a"; for (let f = -2; f <= 2; f++) ctx.fillRect(wx - 4 + f * 4 - 1, wy - 26, 3, 12);
       ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(wx - 22, wy + 4, 20, -1.1, 1.1); ctx.stroke();
     }
     if (w.state !== "done" && ITEM.tw_shutter) {   // Glen's shutter: shut, edge-on as it creaks open, then swung out
-      if (w.state === "shut") drawItem("tw_shutter", wx, wy + 28, 56 / 260);
-      else if (w.state === "tell") drawItem(open < 0.25 ? "tw_shutter" : "tw_shutter_edge", wx + (open < 0.25 ? 0 : 22), wy + 28, 56 / 260);
-      else drawItem("tw_shutter_open", wx + 34, wy + 28, 56 / 260);
-      if (w.state === "tell" && Math.floor(now * 10) % 2) { ctx.fillStyle = "rgba(255,220,140,0.35)"; ctx.fillRect(wx - 24, wy - 28, 48, 56); }
+      const hh = ITEM.tw_body ? 21 : 28, sc = hh * 2 / 260;   // half the hole's height; the shutter fits the hole
+      if (w.state === "shut") drawItem("tw_shutter", wx, wy + hh, sc);
+      else if (w.state === "tell") drawItem(open < 0.25 ? "tw_shutter" : "tw_shutter_edge", wx + (open < 0.25 ? 0 : hh * 0.8), wy + hh, sc);
+      else drawItem("tw_shutter_open", wx + hh * 1.2, wy + hh, sc);
+      if (w.state === "tell" && Math.floor(now * 10) % 2) { ctx.fillStyle = "rgba(255,220,140,0.35)"; ctx.fillRect(wx - hh * 0.85, wy - hh, hh * 1.7, hh * 2); }
     } else if (w.state !== "done") {   // the shutter, swinging out on its hinge
       ctx.save(); ctx.translate(wx + 22, wy - 26); ctx.scale(1 - open * 1.6, 1);
       ctx.fillStyle = "#7a5634"; ctx.fillRect(-44, 0, 44, 52); ctx.strokeStyle = "#3e2614"; ctx.lineWidth = 2; ctx.strokeRect(-44, 0, 44, 52); ctx.restore();
