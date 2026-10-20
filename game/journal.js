@@ -499,10 +499,23 @@ const Journal = {
     // and the Field Guide card he wrote down watching the giant in 6-2 (world6.js goliathNote)
     let gc = false; try { gc = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").goliathCard; } catch (e) {}
     if (opts.read && gc && typeof goliathNote === "function") { this.P = Object.assign({}, this.P, { goliath: goliathNote() }); this.pages.push({ spread: "goliath", step: 5 }); }
+    // the whole journey (Glen, 2026-10-20): the worlds before this one, already written, in front, so Left pages back through them
+    const mine = this.pages.length, earlier = [];
+    if (!opts.preview) {
+      let prog = {}; try { prog = JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) {}
+      for (let w = 1; w < opts.world; w++) {
+        const PW = JOURNAL_PAGES[w]; if (!PW) continue;
+        const last = [4, 3, 2, 1].find(k => prog[`${w}-${k}`] && prog[`${w}-${k}`].cleared); if (!last) continue;
+        earlier.push({ spread: "draft", step: last, w, P: PW, old: true });
+        if (last >= 4) earlier.push({ spread: "end", step: 5, w, P: PW, old: true });
+      }
+      this.pages = earlier.concat(this.pages);
+    }
     this.note = false;
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
-    this.cur = this.read ? this.pages.length - 1 : 0; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
+    // (after a stage it opens on the new page; the earlier worlds are behind it)
+    this.cur = this.read ? this.pages.length - 1 : earlier.length; this.phase = this.read ? "done" : "write"; this.doneT = 0; this.fade = 0; this.closing = false; this.time = 0;
     this.view = 0; this.viewWant = 0; this.turn = null;
     if (this.rip) this.view = this.viewWant = 1;   // leaned in close, to see it
     this.active = true;
@@ -524,9 +537,11 @@ const Journal = {
     this.open({ world: 1, stage: step === 5 ? 4 : step, preview: true, stones, noEnd: step === 4 });
   },
   layoutAll() {
-    const R = this.P.rip;
+    const flags = journalFlags, stones = this.stones;
     for (const pg of this.pages) {
-      const S = this.P[pg.spread], torn = R && pg.spread === "draft" && pg.step >= R.at;
+      const PP = pg.P || this.P, R = PP.rip;
+      journalFlags = pg.old ? onesFlags(pg.w) : flags; this.stones = pg.old ? stonesFound(pg.w) : stones;   // an earlier world's page, as it was written
+      const S = PP[pg.spread], torn = R && pg.spread === "draft" && pg.step >= R.at;
       const right = torn ? S.right.map(b => ({ ...b, segs: b.segs.filter(sg => !(sg.strike && sg.strike <= R.at)) })) : S.right;
       pg.lay = { left: layoutPage(S.left, "left", pg.step, this.stones), right: layoutPage(right, "right", pg.step, this.stones) };
       if (torn) pg.lay.book = BOOK_RIPPED;
@@ -537,8 +552,10 @@ const Journal = {
                       right: layoutPage(before.concat([{ at: R.at, size: "entry", segs: [{ text: R.text, at: R.at }] }]), "right", R.at, this.stones) };
         this.rip = { phase: "write", t: 0, step: R.at, lay, tl: buildTimeline(lay, R.at), next: 0 };
       }
-      pg.tl = buildTimeline(pg.lay, pg.step); pg.t = this.read ? pg.tl.total : 0; pg.nextAct = this.read ? pg.tl.acts.length : 0;
+      const done = this.read || pg.old;
+      pg.tl = buildTimeline(pg.lay, pg.step); pg.t = done ? pg.tl.total : 0; pg.nextAct = done ? pg.tl.acts.length : 0;
     }
+    journalFlags = flags; this.stones = stones;
     this.fontOk = caveatReady;   // laid out before the font arrived? do it again once it has
   },
   page() { return this.pages[this.cur]; },
