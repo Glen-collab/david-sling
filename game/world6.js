@@ -62,7 +62,17 @@ function updateFearful(dt) {
         if (n === fearful.length) setTimeout(() => toast(`All ${n} frightened soldiers are back at their posts.`), 4500);
       }
     } else if (s.state === "rise") { if (s.t > 2.4) { if (carrierSpots.length) { s.state = "posted"; carrierJoin(s.x, s.y, s.look); } else { s.state = "go"; s.t = 0; } } }   // 6-3: he picks up a jar and joins the line
-    else if (s.state === "go") { s.x += s.dir * W6.SOLDIER_RUN * dt; s.alpha = Math.max(0, 1 - s.t / 3); if (s.alpha <= 0) s.state = "posted"; }
+    else if (s.state === "go") {   // walk off; a man up on the rocks or the watch platform steps off the edge and drops to the ground first
+      s.x += s.dir * W6.SOLDIER_RUN * dt;
+      const c = Math.floor(s.x / T), under = r => isSolid(c, r) || isOneway(c, r);
+      if (!s.vy && under(Math.round(s.y / T))) s.vy = 0;
+      else {
+        const y0 = s.y; s.vy = (s.vy || 0) + TUNE.GRAVITY * dt; s.y += s.vy * dt;
+        for (let r = Math.floor(y0 / T) + 1; r * T <= s.y; r++) if (under(r)) { s.y = r * T; s.vy = 0; break; }
+      }
+      if (s.y >= GR * T - 1) s.fadeT = (s.fadeT || 0) + dt;   // he only fades once he's down on the ground and walking off
+      s.alpha = Math.max(0, 1 - (s.fadeT || 0) / 3); if (s.alpha <= 0) s.state = "posted";
+    }
   }
 }
 function drawFearful(camX) {
