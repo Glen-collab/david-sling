@@ -218,7 +218,8 @@ function arrowFlurry(n, vol, spread = 0.5) {   // n single arrows, loosed over `
 }
 const battleLoop = loopAudio("ambience-sword-battle", false);
 function updateBattleSound(dt) {   // the clash of a skirmish somewhere down the valley
-  const want = /^6-[234]$/.test(LEVEL_STAGE) && david.deadT <= 0 ? (towerFight() ? W6.BATTLE_VOL_FIGHT : W6.BATTLE_VOL) : 0;
+  const over = finish.active || (tw && tw.beaten);   // the stage is done, or the tower's down: the fighting stops
+  const want = /^6-[234]$/.test(LEVEL_STAGE) && david.deadT <= 0 && !over ? (towerFight() ? W6.BATTLE_VOL_FIGHT : W6.BATTLE_VOL) : 0;
   if (audioUnlocked) W6.battleVol = fadeLoop(battleLoop, W6.battleVol, want * TUNE.SFX_VOLUME, dt, 0.2);
 }
 function arrowBlocked(x, y) {
