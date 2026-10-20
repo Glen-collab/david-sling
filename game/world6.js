@@ -681,9 +681,10 @@ function drawTowerShadow(camX) {
   g.addColorStop(0, "rgba(20,12,6,0)"); g.addColorStop(1, `rgba(20,12,6,${0.18 + 0.22 * f})`);
   ctx.fillStyle = g; ctx.fillRect(sx - 300, 0, W - sx + 300, H); ctx.restore();
 }
+Object.assign(W6, { FAR_TOWER_UP: 108, FAR_TOWER_DROP: 16 });   // px above the ground line where the far tower's wheels sit, and how much lower by the arena
 function drawFarTower(cx) {   // the tower far off, small, rolling along the far edge (background)
   if (!twPiece || LEVEL_STAGE !== "6-4" || (tw && tw.state !== "wait") || w6ending.active) return;
-  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - 140;   // its wheels on the far bank
+  const f = Math.max(0, Math.min(1, david.x / (twPiece.c * T))), s = 0.2 + 0.18 * f, x = W * (0.8 - 0.2 * f), y = GR * T - W6.FAR_TOWER_UP + W6.FAR_TOWER_DROP * f;   // its wheels on the far plain, coming down a little as it nears
   ctx.save(); ctx.filter = "brightness(0.7) saturate(0.55) contrast(0.85) blur(0.6px)"; drawTowerShape(x, y, s, 0, false); ctx.restore();
 }
 

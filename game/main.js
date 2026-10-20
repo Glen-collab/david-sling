@@ -2666,7 +2666,8 @@ function drawSnakes(camX) {
 function updateFires(dt) {
   for (const f of fires) {
     const near = Math.abs(david.x - f.x) < 70 && Math.abs(david.y - f.y) < 40;
-    if (near && !f.lit) {
+    const passed = david.x > f.x + 70 && david.x < f.x + 8 * T && david.deadT <= 0 && !cave.room;   // jumped over it or ran past: it still counts
+    if ((near || passed) && !f.lit) {
       f.lit = true; checkpoint = { x: f.x - 30, y: f.y };
       if (f.who) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
       if (typeof fireLit === "function") fireLit(f);   // world3.js: 3-2's scenes back in town
