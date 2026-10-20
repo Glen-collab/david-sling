@@ -1078,6 +1078,13 @@ function onMud(x, y) {
 function drawMud(camX) {
   for (const m of muds) {
     const x0 = m.x0 - camX, x1 = m.x1 - camX; if (x1 < -40 || x0 > W + 40) continue;
+    const cv = typeof streamPiece === "function" && streamPiece("mud_slick", x1 - x0 + 2 * T, 0.3);
+    if (cv) {   // Glen's mud, a wet slick sunk into the topsoil, soft at the ends
+      ctx.save(); ctx.beginPath(); ctx.rect(x0 - T, m.y - 4, x1 - x0 + 2 * T, 30); ctx.clip(); ctx.drawImage(cv, x0 - T, m.y - 4);
+      ctx.strokeStyle = "rgba(235,225,210,0.35)"; ctx.lineWidth = 2;   // wet shine
+      for (let k = 0; k < (x1 - x0) / 60; k++) { const sx = x0 + 20 + k * 60 + (k % 2) * 17; ctx.beginPath(); ctx.moveTo(sx, m.y - 1); ctx.lineTo(sx + 22, m.y - 2); ctx.stroke(); }
+      ctx.restore(); continue;
+    }
     ctx.save();
     ctx.fillStyle = "rgba(58,40,26,0.92)"; ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, m.y + 2, (x1 - x0) / 2 + 10, 13, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "rgba(92,66,44,0.9)"; ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, m.y - 1, (x1 - x0) / 2, 8, 0, 0, Math.PI * 2); ctx.fill();

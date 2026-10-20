@@ -427,11 +427,36 @@ function drawFlood(camX) {
   const x1 = Math.min(W + 10, flood.x - camX); if (x1 < -10) return;
   ctx.save();
   const top = GR * T - W2.FLOOD_HEIGHT * T * flood.level;
+  const flow = ITEM.mud_flow;
+  if (flow && flow.naturalWidth) {   // Glen's flowing mud (david-sling-art/mud_flow.png): copies side by side (every other one mirrored so they join), rolling along
+    const k = (H + 30 - top) / (flow.naturalHeight * 0.8), fw = flow.naturalWidth * k, fh = flow.naturalHeight * k, y = top - fh * 0.2;
+    ctx.beginPath(); ctx.moveTo(-10, H);   // the curling nose from floodTop, raised so the splashes clear it
+    for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2);
+    ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); ctx.clip();
+    const o = (performance.now() / 1000 * 160) % (2 * fw);
+    for (let i = 0, xr = x1 + 2 * fw - o; xr > -fw; i++, xr -= fw) {
+      if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
+      else ctx.drawImage(flow, xr - fw, y, fw, fh);
+    }
+    ctx.restore();
+    ctx.save(); const now = performance.now() / 1000;
+    for (let k2 = 0; k2 < 14; k2++) {   // churning spray at the tip
+      const a = k2 * 2.4 + now * 3, fx = x1 - 20 - (k2 % 5) * 18 + Math.sin(a) * 8, fy = floodTop(flood.x - 20 - (k2 % 5) * 18) + 10 + (k2 * 13) % 60 + Math.cos(a) * 6;
+      ctx.fillStyle = `rgba(150,105,70,${0.55 + 0.3 * Math.sin(a)})`; ctx.beginPath(); ctx.arc(fx, fy, 5 + (k2 % 3) * 3, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore(); return;
+  }
   const g = ctx.createLinearGradient(0, top - 20, 0, H);
   g.addColorStop(0, "rgba(150,112,70,0.96)"); g.addColorStop(0.35, "rgba(110,80,48,0.97)"); g.addColorStop(1, "rgba(62,44,26,0.98)");
+  const mud = ITEM.mud_body && ITEM.mud_body.naturalWidth && (flood.pat || (flood.pat = ctx.createPattern(ITEM.mud_body, "repeat-x")));
   ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-10, H);
   for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX));
   ctx.lineTo(x1 + 18, GR * T + 6); ctx.lineTo(x1 + 18, H); ctx.closePath(); ctx.fill();
+  if (mud) {   // Glen's mud (david-sling-art/mud_slab.png): one tall strip, sliding along with the current
+    const k = (H - top + 40) / ITEM.mud_body.naturalHeight;
+    mud.setTransform(new DOMMatrix().translateSelf((performance.now() / 1000 * 220 - camX) % (ITEM.mud_body.naturalWidth * k), top - 30).scaleSelf(k, k));
+    ctx.fillStyle = mud; ctx.fill();
+  }
   ctx.save(); ctx.clip();   // the current: pale streaks racing along inside the water
   const tnow = performance.now() / 1000;
   for (let k = 0; k < 16; k++) {
