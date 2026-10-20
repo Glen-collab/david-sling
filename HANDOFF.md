@@ -161,8 +161,8 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
 - **Music themes (Glen, 2026-10-20), Mario-style, not one song a stage:** night stages (STAGE_INFO.night, plus
   DARK_STAGES 2-4 and 4-4) loop `music_night` (his "Harp of Shadows"), inside caves `music_cave` (the other take);
   TUNE.DARK_MUSIC_VOLUME 0.4; off in boss fights, while he plays the harp and in pass scenes, half at the finish; no birds
-  on dark stages. Day stages: birds only until Glen's day theme. "Harp's Dance" and "Cascading Harp" are saved in
-  david-sling-art/music, not used yet. Glen says one of his songs has singing in it: cut it out once he says where.
+  on dark stages. Day stages: `music_day_a` ("Cascading Harp", odd worlds) or `music_day_b` ("Harp's Dance", even
+  worlds) under the birds, TUNE.DAY_MUSIC_VOLUME 0.3. World 1 is to get Glen's 8-bit kid-friendly harp theme. Glen says one of his songs has singing in it: cut it out once he says where.
   Stage clear = his `ending_jingle_levels.mp3` (the lyre `stage_clear` is the fallback).
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,

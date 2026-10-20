@@ -68,6 +68,7 @@ const TUNE = {
   SFX_VOLUME: 0.8,        // sound effects (0 to 1)
   STEPS_VOLUME: 0.5,      // David's running footsteps
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
+  DAY_MUSIC_VOLUME: 0.3,  // Glen's day themes (Cascading Harp, Harp's Dance), under the birds
   DARK_MUSIC_VOLUME: 0.4, // Glen's darker themes (Harp of Shadows): night stages and caves, like Mario's underground music
   BOSS_MUSIC_VOLUME: 0.6, // the lion fight
   FINAL_SLOWMO: 0.18,     // the stone that beats a boss: game speed while it flies in (1 = normal)
@@ -3759,6 +3760,9 @@ const rainLoop = loopAudio("rain", false);   // the storm stages (STAGE_INFO.sto
 // one for inside caves. Not one song a stage: day stages keep the hills' birds.
 const nightMusic = loopAudio("music_night"), caveMusic = loopAudio("music_cave");
 const DARK_STAGES = ["2-4", "4-4"];
+// the day themes: Cascading Harp (worlds 1, 3, 5, 7) and Harp's Dance (2, 4, 6, 8). (World 1 gets Glen's 8-bit one when it's made)
+const dayMusic = loopAudio(WORLD % 2 ? "music_day_a" : "music_day_b");
+let dayVol = 0;
 let nightVol = 0, caveVol = 0;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
 function fadeLoop(a, cur, want, dt, speed) {
@@ -3780,6 +3784,7 @@ function updateSound(dt) {
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE) || cave.room ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
   const darkOn = !fight && !(david.state === "harp") && !(typeof passScene !== "undefined" && passScene.active) ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) : 0;
+  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
   nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
   rainVol = fadeLoop(rainLoop, rainVol, STAGE_INFO.storm && !cave.room ? TUNE.RAIN_VOLUME : 0, dt, 0.4);
@@ -3799,7 +3804,7 @@ function updateSound(dt) {
 // everything quiet: The One's card and the pause menu stop the footsteps, the hills, the lion music and the harp.
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
 function hushLoops(keepRain = false) {
-  for (const a of [stepsRun, ambience, bossMusic, harpMusic, nightMusic, caveMusic]) if (!a.paused) a.pause();
+  for (const a of [stepsRun, ambience, bossMusic, harpMusic, nightMusic, caveMusic, dayMusic]) if (!a.paused) a.pause();
   if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)
   if (!keepRain && !rainLoop.paused) { rainLoop.pause(); rainVol = 0; }
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
