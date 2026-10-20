@@ -228,6 +228,7 @@ function drawSaul7(camX) {
 
 // 7-1: the helmet over his eyes. The top of the screen goes dark down to the bronze rim, for a moment.
 function drawWorld7Over() {
+  if (WORLD === 7) drawMemoryOver();
   if (!inArmor() || armor.slipT <= 0) return;
   const p = 1 - armor.slipT / W7.SLIP_T, k = Math.max(0, Math.min(1, (p - 0.2) / 0.1, (1 - p) / 0.12)), edge = H * (0.18 + 0.5 * k);
   ctx.save();
@@ -240,12 +241,131 @@ function drawWorld7Over() {
   ctx.restore();
 }
 
+// ---------------------------------------------------------------------------
+// 7-2 Remember the Hills: memory sections (DESIGN 5g). setPiece("memory", c, GR, { to, bg, name, night }) from column c
+// to `to`: while David is in it the stage shows that old world's own background layers, under a warm wash, and (night)
+// the lion's dark. Crossing in or out the air shimmers gold, and the switch happens under the shimmer. The ground stays
+// 7-2's (one ground set a stage). setPiece("memsheep", c, r, { n }) a remembered sheep: reach it and it fades into
+// sparkles (the lost things of 7-2). setPiece("taunt", c, r, { n }) the giant's shouting from across the valley.
+// ---------------------------------------------------------------------------
+Object.assign(W7, {
+  SHIMMER_T: 0.9,        // seconds of the gold shimmer crossing into or out of a memory (the switch is at its brightest)
+  MEM_WASH: "rgba(255,196,120,0.22)",   // the memory's warm wash (soft-light), over a gold vignette
+  TITLE_T: 3.2,          // seconds "David remembers..." stays up
+  MEMSHEEP_REACH: 60,    // px
+});
+const memZones = setPieces.filter(p => p.kind === "memory").map(p => ({ c0: p.c, c1: p.to, bg: p.bg, name: p.name, night: !!p.night }));
+const memSheep = setPieces.filter(p => p.kind === "memsheep").map(p => ({ x: p.x, y: p.y, n: p.n, state: "wait", t: Math.random() * 3 }));
+const taunts = setPieces.filter(p => p.kind === "taunt").map(p => ({ x: p.x, n: p.n, done: false }));
+const mem = { shown: null, target: null, shT: -1, titleT: 0, title: "" };
+const MEMSHEEP_LINES = [
+  "The rocky pastures. I was so scared of that drop... and I went after her anyway.",
+  "The forest. Hanan's fire, and the boar. The LORD was with me then, too.",
+  "Up on the cliffs, by the spring. I thought I'd never get her down.",
+  "The lamb on the rooftops of Bethlehem. The whole town laughed at me.",
+  "The night of the lion. I can still hear it. And I can still feel how He held me.",
+];
+const TAUNTS = [   // 1 Samuel 17:8-10 (WEB), the giant's voice across the valley
+  "\"Why have you come out to set your battle in array? Am I not a Philistine, and you servants to Saul?\" (1 Samuel 17:8)",
+  "\"Choose a man for yourselves, and let him come down to me!\" (1 Samuel 17:8)",
+  "\"If he is able to fight with me and kill me, then will we be your servants.\" (1 Samuel 17:9)",
+  "\"I defy the ranks of Israel today! Give me a man, that we may fight together!\" (1 Samuel 17:10)",
+];
+const memZoneAt = x => memZones.find(z => x >= z.c0 * T && x < (z.c1 + 1) * T) || null;
+const dayNight7 = !!STAGE_INFO.night;
+if (memZones.length) {   // the background follows the memory David is in
+  const drawBg7 = drawBackground;
+  drawBackground = function (cx) { bgWorld = mem.shown ? mem.shown.bg : STAGE_INFO.bg; drawBg7(cx); };
+}
+function updateMemories(dt) {
+  if (!memZones.length) return;
+  const d = david, z = memZoneAt(d.x);
+  if (z !== mem.target) { mem.target = z; if (mem.shT < 0) mem.shT = 0; }
+  if (mem.shT >= 0) {
+    const was = mem.shT; mem.shT += dt;
+    if (was < W7.SHIMMER_T / 2 && mem.shT >= W7.SHIMMER_T / 2 && mem.shown !== mem.target) {   // under the brightest moment: switch
+      mem.shown = mem.target; STAGE_INFO.night = mem.shown ? mem.shown.night : dayNight7;
+      if (mem.shown) { mem.title = "David remembers... " + mem.shown.name; mem.titleT = W7.TITLE_T; }
+    }
+    if (mem.shT >= W7.SHIMMER_T) mem.shT = mem.shown !== mem.target ? 0 : -1;   // (he stepped back out mid-shimmer: once more)
+  }
+  mem.titleT = Math.max(0, mem.titleT - dt);
+  for (const s of memSheep) {
+    s.t += dt;
+    if (s.state === "wait" && Math.abs(d.x - s.x) < W7.MEMSHEEP_REACH && Math.abs(d.y - s.y) < 70 && d.deadT <= 0) {
+      s.state = "fade"; s.t = 0; if (typeof chime === "function") chime(memSheep.filter(q => q.state !== "wait").length + 2);
+      sfx("sheep_baa_" + (1 + (s.n % 7)), s.x, 0.5);
+      sayLine("David", MEMSHEEP_LINES[s.n % MEMSHEEP_LINES.length]);
+      const n = memSheep.filter(q => q.state !== "wait").length;
+      if (n === memSheep.length) setTimeout(() => toast(`All ${n} remembered sheep. He trained my hands, every one of those days.`), 4000);
+    } else if (s.state === "fade" && s.t > 1.4) s.state = "gone";
+  }
+  for (const tn of taunts) if (!tn.done && d.x > tn.x) {
+    tn.done = true;
+    sfx(["goliath_halo_anochi", "goliath_tenu_li_ish", "goliath_cheirafti", "goliath_halo_anochi_2"][tn.n % 4], undefined, 0.55);
+    toast("Across the valley, the giant: " + TAUNTS[tn.n % TAUNTS.length]);
+  }
+}
+const lostThings7 = lostThingsTally;
+lostThingsTally = function () {
+  if (memSheep.length) return { found: memSheep.filter(s => s.state !== "wait").length, total: memSheep.length, things: "remembered sheep", icon: "sheep" };
+  return lostThings7();
+};
+function drawMemSheep(camX) {
+  for (const s of memSheep) {
+    if (s.state === "gone") continue;
+    const x = s.x - camX; if (x < -100 || x > W + 100) continue;
+    const a = s.state === "fade" ? Math.max(0, 1 - s.t / 1.2) : 0.88;
+    ctx.save(); ctx.globalCompositeOperation = "lighter";   // a soft gold glow: it's a memory
+    const g = ctx.createRadialGradient(x, s.y - 26, 4, x, s.y - 26, 70);
+    g.addColorStop(0, `rgba(255,220,140,${0.45 * a})`); g.addColorStop(1, "rgba(255,200,120,0)");
+    ctx.fillStyle = g; ctx.fillRect(x - 70, s.y - 96, 140, 140); ctx.restore();
+    const nm = s.state === "fade" ? "sheep_stand" : "sheep_graze";
+    drawSprite(nm, frameOf(nm, s.t), x, s.y, s.n % 2 ? 1 : -1, 1, a, "sepia(0.35) brightness(1.08)");
+    if (s.state === "fade") {   // sparkles rising off it
+      ctx.save(); ctx.fillStyle = "#fff3c4";
+      for (let k = 0; k < 14; k++) {
+        const f = (s.t * 0.9 + k / 14) % 1, px = x + Math.sin(k * 7.3 + s.t * 3) * 34, py = s.y - 20 - f * 120;
+        ctx.globalAlpha = Math.max(0, (1 - f) * Math.min(1, 2.4 - s.t)); ctx.beginPath(); ctx.arc(px, py, 2.5 + (k % 3), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+}
+function drawMemoryOver() {   // the wash, the vignette, the shimmer and the title (after the night tint, before the HUD)
+  if (!memZones.length) return;
+  if (mem.shown) {
+    ctx.save();
+    ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = W7.MEM_WASH; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "source-over";
+    const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.7);
+    v.addColorStop(0, "rgba(90,55,15,0)"); v.addColorStop(1, "rgba(90,55,15,0.5)");
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  if (mem.shT >= 0) {
+    const k = Math.sin(Math.PI * Math.min(1, mem.shT / W7.SHIMMER_T));
+    ctx.save();
+    const g = ctx.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W * 0.75);
+    g.addColorStop(0, `rgba(255,250,225,${0.95 * k})`); g.addColorStop(1, `rgba(255,214,140,${0.85 * k})`);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  if (mem.titleT > 0) {
+    const a = Math.min(1, mem.titleT / 0.6, (W7.TITLE_T - mem.titleT) / 0.6);
+    ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.font = "italic 30px Georgia, serif";
+    ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillText(mem.title, W / 2 + 2, 112);
+    ctx.fillStyle = "#ffe9b8"; ctx.fillText(mem.title, W / 2, 110); ctx.restore();
+  }
+}
+
 function updateWorld7(dt) {
   if (WORLD !== 7) return;
-  updateArmor(dt);
+  updateArmor(dt); updateMemories(dt);
 }
 function drawWorld7(camX) {
   if (WORLD !== 7) return;
   drawSaul7(camX);
   drawArmorPile(camX);
+  drawMemSheep(camX);
 }

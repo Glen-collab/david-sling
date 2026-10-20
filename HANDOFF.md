@@ -177,6 +177,13 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   where the video cut it off are listed in each .json as helmet_cut_frames); the pile is the off clip's last frame. Art requests: ART_PROMPTS.md "World 7". Journal pages
   for World 7 are in journal.js (JOURNAL_TEXT.md's draft). Not built yet: the opening scene (Saul dresses him), Tobi's
   and Shammah's stops, 7-2 to 7-4 and the shield-bearer.
+- **7-2 Remember the Hills is built (2026-10-20):** the walk down the slope (Glen's w7_2 layers), the giant's taunts
+  (17:8-10, setPiece "taunt") between five memory sections (setPiece "memory": the old world's own background layers
+  under a gold shimmer + warm wash + "David remembers..."; the ground set stays 7-2's): 1-3 rocky pastures (crumbles,
+  rope bridge, ram), 2-1 forest (boars, a deadfall, hornets), 2-3 cliffs (crumbles over a drop), 3-3 rooftops (houses,
+  ladder), 1-4 the night of the lion (STAGE_INFO.night switched on inside it: night music and tint). Lost things: a
+  remembered sheep in each (setPiece "memsheep": reach it, a line, it fades into sparkles). The One on the lion's rocks.
+  Backgrounds for 7-3 (w7_3) and 7-4 (w7_4, far layer raised so the giant's shadow shows) are in, stages not built.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,

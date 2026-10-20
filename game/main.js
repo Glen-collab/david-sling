@@ -355,7 +355,8 @@ const STAGE_INFO = {
   "6-2": { cols: 230, bg: "w6_2", ter: "w2s", name: "No-Man's Land" },
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
-  "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
+  "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
+  "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1375,6 +1376,74 @@ if (LEVEL_NAME === "test") {
   critter("hedgehog", 204);
   shelter(207, 4); special(208, 11);
   sheepfold(222);
+} else if (LEVEL_NAME === "7-2") {
+  // ---- 7-2 Remember the Hills: the walk down from the camp toward the stream, both armies watching, the giant's
+  //      shouting echoing across the valley (17:8-10). Every so often the air shimmers and David is back on a stretch of
+  //      World 1, 2 or 3: setPiece("memory", c, GR, { to, bg, name, night }) (world7.js: the old world's own background,
+  //      a warm wash, "David remembers"). Remixed and harder, every move he has. The lost things: a remembered sheep in
+  //      each memory (setPiece("memsheep")): reach it and it fades into sparkles. The One: at the end of the lion's
+  //      rocks, the hardest memory. ----
+  ground(0, 24);
+  campfire(2);
+  setPiece("standing", 8, GR - 1, { look: 1 });
+  talk(7, "A soldier", "Look at him. Walking down there like he's going to fetch water.");
+  rock(13, 15, 3, 2); rock(17, 14, 3, 3); special(18, 9);
+  setPiece("taunt", 20, GR - 1, { n: 0 });
+  // memory 1: the rocky pastures (1-3): crumbling ledges over the drop, the rope bridge between the pillars
+  setPiece("memory", 25, GR, { to: 71, bg: "w1_3", name: "the rocky pastures, the first summer on his own" });
+  ground(25, 31);
+  crumble(33, 15, 2); crumble(37, 13, 2); crumble(41, 15, 2);
+  ground(45, 52); raven(48, 6); oliveArc(45, 16, 6);
+  pillar(53, 13, 2); bridge(55, 13, 6); pillar(61, 13, 2); raven(58, 5);
+  ground(63, 71); critter("ram", 66, GR - 1, 4);
+  setPiece("memsheep", 69, GR - 1, { n: 0 });
+  // now: the slope
+  ground(72, 83); campfire(74);
+  setPiece("standing", 79, GR - 1, { look: 2 }); setPiece("taunt", 80, GR - 1, { n: 1 });
+  // memory 2: the forest trail (2-1): boars, a deadfall, hornets
+  setPiece("memory", 84, GR, { to: 126, bg: "w2_1", name: "the forest trail, with Hanan" });
+  ground(84, 126);
+  critter("boar", 93);
+  deadfall(99, 13, 2, 4);                                       // a charged stone breaks it
+  hornet(104, 11); hornet(107, 9);
+  rock(110, 15, 3, 2); rock(113, 13, 3, 4); plat(117, 10, 3);
+  setPiece("memsheep", 118, 9, { n: 1 });                       // up on the branch
+  critter("boar", 122); oliveRow(113, 12, 3);
+  // now
+  ground(127, 137); setPiece("taunt", 131, GR - 1, { n: 2 }); special(134, 12);
+  // memory 3: the high cliffs (2-3): crumbling ledges up and over a long drop, ravens
+  setPiece("memory", 138, GR, { to: 181, bg: "w2_3", name: "the high cliffs, the spring" });
+  ground(138, 142); rock(141, 13, 3, 4);
+  crumble(146, 12, 2); crumble(150, 10, 2); crumble(154, 12, 2); raven(152, 4);
+  pillar(158, 11, 4); crumble(164, 13, 2); crumble(168, 11, 2); raven(166, 5);
+  ground(172, 181); rock(173, 11, 3, 6);
+  setPiece("memsheep", 174, 10, { n: 2 });
+  // now
+  ground(182, 192); campfire(184); setPiece("standing", 189, GR - 1, { look: 3 });
+  talk(188, "A soldier", "He keeps stopping and smiling. What's he remembering, out there?");
+  // memory 4: Bethlehem's rooftops (3-3)
+  setPiece("memory", 193, GR, { to: 239, bg: "w3_3", name: "the rooftops of Bethlehem" });
+  ground(193, 239);
+  ladder(195, 13); house(197, 5, 13); house(204, 5, 11); house(211, 4, 9); raven(214, 4);
+  house(217, 6, 12); critter("jackal", 222); house(225, 5, 10); oliveRow(225, 9, 5);
+  setPiece("memsheep", 227, 9, { n: 3 });
+  house(232, 4, 14);
+  // now
+  ground(240, 250); setPiece("taunt", 244, GR - 1, { n: 3 }); special(247, 13);
+  // memory 5, the hardest: the lion's moonlit rocks (1-4)
+  setPiece("memory", 251, GR, { to: 306, bg: "w1_4", night: true, name: "the night of the lion" });
+  ground(251, 257);
+  crumble(259, 14, 2); pillar(263, 12, 2); crumble(267, 10, 2); crumble(271, 12, 2); pillar(275, 11, 2); crumble(279, 13, 2);
+  ground(283, 306); critter("jackal", 288);
+  setPiece("memsheep", 291, GR - 1, { n: 4 });
+  critter("jackal", 295);
+  rock(298, 14, 3, 3); rock(301, 10, 5, 7);
+  lostSheep("lamb", 303, 9, "one");                             // The One, on top of the lion's rocks
+  // now: the last of the slope, down to the streambed
+  ground(307, 329); campfire(309);
+  setPiece("standing", 312, GR - 1, { look: 0 });
+  talk(311, "A soldier", "The stream's just there. Go on, boy. We're watching.");
+  sheepfold(313);
 } else if (LEVEL_NAME === "7-1") {
   // ---- 7-1 Saul's Armor (1 Samuel 17:38-39): the stage you win by taking it off. David starts in the king's armor
   //      beside Saul's tent: slow, a tiny hop, no sling, no roll, the helmet slipping down over his eyes (world7.js). A
