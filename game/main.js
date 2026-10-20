@@ -3711,10 +3711,23 @@ function sfx(name, x, vol = 1, rate = 1) {
   let v = vol * TUNE.SFX_VOLUME;
   if (x !== undefined) { const off = Math.abs(x - (camX + W / 2)); v *= Math.max(0, Math.min(1, 1.25 - off / (W * 0.9))); }
   if (v <= 0.01) return null;
-  const a = base.cloneNode(); a.volume = Math.min(1, v); a.playbackRate = rate; a.preservesPitch = false;
+  // reuse a few players per sound: Chrome stops making new ones past ~75 (the 6-4 volleys ran it out, and the sling went quiet)
+  const pool = base._pool || (base._pool = []);
+  let a = pool.find(p => p.paused || p.ended);
+  if (!a && pool.length < SFX_POOL) {
+    a = base.cloneNode(); a._pool = pool; pool.push(a); sfxAll.push(a);
+    while (sfxAll.length > SFX_MAX) {   // too many players in all: let go of the longest-idle one
+      const k = sfxAll.findIndex(p => p !== a && (p.paused || p.ended)); if (k < 0) break;
+      const old = sfxAll.splice(k, 1)[0]; old._pool.splice(old._pool.indexOf(old), 1); old.removeAttribute("src"); old.load();
+    }
+  }
+  if (!a) { a = pool.shift(); pool.push(a); a.pause(); }   // all busy: cut off the oldest
+  else { sfxAll.splice(sfxAll.indexOf(a), 1); sfxAll.push(a); }   // most recently used goes to the back
+  a.loop = false; a.currentTime = 0; a.volume = Math.min(1, v); a.playbackRate = rate; a.preservesPitch = false;
   a.play().catch(() => {});
   return a;
 }
+const SFX_POOL = 4, SFX_MAX = 150, sfxAll = [];   // players per sound, and in all (the loops and music are separate, about 10)
 const sfxOne = (names, x, vol = 1) => sfx(names[Math.floor(Math.random() * names.length)], x, vol, 0.94 + Math.random() * 0.12);   // one of a few, at random
 const baa = (x, vol = 0.8) => sfx("sheep_baa_" + (1 + Math.floor(Math.random() * 7)), x, vol, 0.92 + Math.random() * 0.16);
 // looping beds
