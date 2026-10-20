@@ -106,17 +106,19 @@ const MAP_WORLDS = {
       { id: "6-4", label: "The Tower's Shadow", x: 1430, y: 500, trail: [[1400, 600]] },
     ],
   },
-  // World 7 (stand-in: World 6's painting until Glen's World 7 map): from Saul's tent at the top of the camp, down the
-  // hill, into the streambed, and out onto the valley floor
+  // World 7: Glen's painting of the Valley of Elah in the late afternoon (2048 x 1152): Saul's tent with its banner top-left,
+  // the camp's tents and supplies, the terraced path down past the last campfire, the streambed with its willows and
+  // oleanders (the carved target beside it), and the open cracked valley floor under the giant's shadow, the Philistine
+  // line along the top right.
   7: {
-    name: "The Giant's Shadow", src: "../assets/maps/world6_map.jpg",
+    name: "The Giant's Shadow", src: "../assets/maps/world7_map.jpg",
     david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
     stops: [
-      { id: "home", label: "Saul's tent", x: 260, y: 600 },
-      { id: "7-1", label: "Saul's Armor", x: 480, y: 890, trail: [[300, 700], [380, 820]] },
-      { id: "7-2", label: "Remember the Hills", x: 860, y: 760, trail: [[620, 880], [760, 820]] },
-      { id: "7-3", label: "Five Smooth Stones", x: 1180, y: 760, trail: [[1000, 790], [1100, 770]] },
-      { id: "7-4", label: "The Giant's Shadow", x: 1430, y: 640, trail: [[1300, 720]] },
+      { id: "home", label: "Saul's tent", x: 184, y: 250 },
+      { id: "7-1", label: "Saul's Armor", x: 470, y: 430, trail: [[290, 320], [380, 380]] },
+      { id: "7-2", label: "Remember the Hills", x: 575, y: 850, trail: [[500, 560], [530, 700]] },
+      { id: "7-3", label: "Five Smooth Stones", x: 1180, y: 600, trail: [[800, 790], [1000, 690]] },
+      { id: "7-4", label: "The Giant's Shadow", x: 1690, y: 740, trail: [[1350, 650], [1520, 700]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
@@ -395,8 +397,8 @@ const WorldMap = {
     ctx.fillStyle = "rgba(25,14,6,0.76)"; ctx.beginPath(); ctx.roundRect(x, y, w, 78, 14); ctx.fill();
     ctx.textAlign = "center";
     if (st.id === "home") {
-      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText("Home: Jesse's house", W / 2, y + 32);
-      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText("A: go into the courtyard    Right: walk out to the hills", W / 2, y + 60);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(st.label === "Jesse's house" ? "Home: Jesse's house" : st.label, W / 2, y + 32);   // (World 6: the camp; World 7: Saul's tent)
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText(st.label === "Jesse's house" ? "A: go into the courtyard    Right: walk out to the hills" : "A: home to Jesse's courtyard    Right: set out", W / 2, y + 60);
       return;
     }
     if (st.story) {
