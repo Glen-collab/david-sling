@@ -1267,7 +1267,12 @@ const w6ending = {
       if (B.sham !== undefined) drawSprite(SPR.shammah_bag ? "shammah_bag" : "shammah_idle", SPR.shammah_bag ? B.sham : 0, W * 0.52, y, -1);
       if (B.harp && SPR.soldier_talk) for (const [nm, fx] of [["guard_young_idle", 0.58], ["soldier_talk", 0.68], ["guard_archer_idle", 0.8]]) drawSprite(nm, nm === "soldier_talk" ? 0 : frameOf(nm, now + fx * 3), W * fx, y, -1, W6.GUARD_SIZE, 1, "brightness(0.75)");   // the men who had been afraid, listening
       else if (B.harp) for (const [k, fx] of [[0, 0.58], [1, 0.68], [2, 0.8]]) drawSprite(k === 1 ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.02, 1, W6.LOOKS[k] + " brightness(0.75)");
-      if (!B.night) for (let k = 0; k < 3; k++) drawSprite(SPR.soldier_run ? "soldier_run" : "villager_man_run", 0, W * (0.6 + k * 0.1), y, -1, 1, 1, W6.LOOKS[k]);
+      if (!B.night) {   // (Glen) a water carrier up the hill with his full jar, one of the men who'd hidden walking back to his post, and Glen's own soldier
+        const walk = Math.min(1, this.bt / 4) * 70;
+        if (SPR.carrier_walk) drawSprite("carrier_walk", frameOf("carrier_walk", now), W * 0.64 - walk, y, -1);
+        if (SPR.soldier3_go) drawSprite("soldier3_go", frameOf("soldier3_go", now + 0.4), W * 0.76 - walk, y, -1);
+        if (SPR.guard_glen_idle) drawSprite("guard_glen_idle", frameOf("guard_glen_idle", now), W * 0.88, y, -1, W6.GUARD_SIZE);
+      }
     }
     if (B.card) {   // the gift
       const cy = 80, a = Math.min(1, this.bt * 2);
