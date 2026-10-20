@@ -446,7 +446,10 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
   // others: the lamp on the left, David on the right
   5: { src: "../assets/journal/w5_reading.jpg", y: -40, lamp: [144, 848],
        left:  { top: [[350, 531], [455, 538], [557, 573]], bot: [[430, 820], [535, 826], [637, 832]] },
-       right: { top: [[560, 570], [660, 532], [755, 519]], bot: [[640, 830], [740, 800], [850, 767]] } },
+       right: { top: [[560, 570], [660, 532], [755, 519]], bot: [[640, 830], [740, 800], [850, 767]] },
+       // his thumbs lie on the pages: the scene is drawn again inside these outlines, over the words (Glen, 2026-10-20)
+       thumbs: [[[522, 770], [526, 760], [537, 755], [550, 758], [558, 770], [565, 790], [571, 806], [578, 830], [527, 832]],
+                [[776, 667], [778, 657], [784, 651], [800, 653], [815, 656], [842, 648], [842, 700], [825, 697], [812, 690], [796, 687], [782, 678]]] },
   // Glen's World 6 scene (2026-10-19): the soldiers asleep round the fire, his harp on the rock, Shammah's new bag.
   // (Re-measured 2026-10-20: the left page's bottom had been pulled far in for his sleeve, which slanted every line)
   6: { src: "../assets/journal/w6_reading.jpg", y: -40, lamp: [1344, 848],
@@ -739,6 +742,10 @@ const Journal = {
       const f = Math.min(1, this.turn.t / JTUNE.FLIP_TIME);
       words(f < 0.5 ? this.pages[this.turn.from] : this.page(), Math.abs(1 - 2 * f));
     } else words(this.page(), 1);
+    for (const poly of sc.thumbs || []) {   // his thumbs over the words
+      g.save(); g.beginPath(); poly.forEach(([px, py], i) => i ? g.lineTo(px, py) : g.moveTo(px, py)); g.closePath(); g.clip();
+      g.drawImage(img, 0, 0, 1536, 1024); g.restore();
+    }
     // the lamp flickers
     const now = performance.now(), fl = 0.8 + Math.sin(now / 83) * 0.08 + Math.sin(now / 31) * 0.05 + Math.sin(now / 211) * 0.07;
     if (sc.lamp) {
