@@ -70,6 +70,8 @@ const TUNE = {
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
   DAY_MUSIC_VOLUME: 0.3,  // Glen's day themes (Cascading Harp, Harp's Dance), under the birds
   DARK_MUSIC_VOLUME: 0.4, // Glen's darker themes (Harp of Shadows): night stages and caves, like Mario's underground music
+  MUSIC_DUCK: 0.25,       // the music under a talk box in play: this much of its volume
+  MUSIC_SCENE: 0.1,       // ... and under a cut scene
   BOSS_MUSIC_VOLUME: 0.6, // the lion fight
   FINAL_SLOWMO: 0.18,     // the stone that beats a boss: game speed while it flies in (1 = normal)
   FINAL_LEAD: 0.12,       // game-seconds before that stone lands that slow motion starts
@@ -388,7 +390,7 @@ const stairTowers = [];
 // Glen's tower with its own stone stair: you run past in front of the tower, climb the stair (steps up to the right), then
 // jump up onto the tower top (a ledge you can jump up through, row 7: you stand behind the battlements). The tower's left edge is column c; its drawn top is row 6.
 const STAIR_TOWER_STEPS = [[4, 1], [5, 2], [6, 3], [7, 6]];   // [column after c, rows high]: fitted to the drawn stair
-const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c }); };
+const stairTower = (c) => { for (const [k, h] of STAIR_TOWER_STEPS) block(c + k, GR - h, 1, h, 9); plat(c, 7, 7); stairTowers.push({ c, top: 7, w: 7 }); };   // (its top is the tower picture: no ledge drawn, world3.js)
 const ladder = (c, r) => { const rungs = []; for (let y = r; y <= GR - 2; y += 3) rungs.push(y); ladders.push({ c, r, rungs }); };
 // the roof beside the top of a ladder: which side (0 = none) and the row of its top, which can be a row or two above the
 // top rung (3-3's town wall). A side counts if its top is at the rung or up to 2 rows higher.
@@ -3764,7 +3766,7 @@ const DARK_STAGES = ["2-4", "4-4"];
 // Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out)
 const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
 let dayVol = 0;
-let nightVol = 0, caveVol = 0;
+let nightVol = 0, caveVol = 0, musicDuck = 1;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
 function fadeLoop(a, cur, want, dt, speed) {
   const v = want > cur ? Math.min(want, cur + dt * speed) : Math.max(want, cur - dt * speed);
@@ -3772,6 +3774,22 @@ function fadeLoop(a, cur, want, dt, speed) {
   if (v > 0 && a.paused && audioUnlocked) a.play().catch(() => {});
   if (v <= 0 && !a.paused) a.pause();
   return v;
+}
+// the stage music (day / night / cave), every frame the stage or one of its scenes has the screen (frame() calls it,
+// so it also runs under a held talk box and in the cut scenes, which skip updateSound)
+let musicFight = false;
+function updateMusic(dt) {
+  if (!audioUnlocked) return;
+  // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
+  const cutScene = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
+    "eliabScene", "goliathWatch", "w6intro", "w6ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
+  // and in cut scenes (Glen) it sinks lower still, faint under the story
+  const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
+  musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
+  const darkOn = !musicFight && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
+  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
+  caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
+  nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
 }
 function updateSound(dt) {
   if (!audioUnlocked) return;
@@ -3784,10 +3802,7 @@ function updateSound(dt) {
   bossVol = fadeLoop(bossMusic, bossVol, fight ? TUNE.BOSS_MUSIC_VOLUME : 0, dt, fight ? 0.5 : 0.4);
   const calm = !fight && !(david.state === "harp") && !finish.active;
   ambVol = fadeLoop(ambience, ambVol, STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE) || cave.room ? 0 : calm ? TUNE.AMBIENCE_VOLUME : (finish.active ? TUNE.AMBIENCE_VOLUME * 0.5 : 0), dt, 0.3);
-  const darkOn = !fight && !(david.state === "harp") && !(typeof passScene !== "undefined" && passScene.active) ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) : 0;
-  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
-  caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
-  nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
+  musicFight = fight;
   rainVol = fadeLoop(rainLoop, rainVol, STAGE_INFO.storm && !cave.room ? TUNE.RAIN_VOLUME : 0, dt, 0.4);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
@@ -3805,7 +3820,7 @@ function updateSound(dt) {
 // everything quiet: The One's card and the pause menu stop the footsteps, the hills, the lion music and the harp.
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
 function hushLoops(keepRain = false) {
-  for (const a of [stepsRun, ambience, bossMusic, harpMusic, nightMusic, caveMusic, dayMusic]) if (!a.paused) a.pause();
+  for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();   // (the stage music isn't stopped here: updateMusic lowers it)
   if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)
   if (!keepRain && !rainLoop.paused) { rainLoop.pause(); rainVol = 0; }
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
@@ -3989,6 +4004,7 @@ function frame(now) {
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
   }
+  updateMusic(real);   // the stage music: low under words, silent in cut scenes (Glen)
   if (typeof afterAnoint !== "undefined" && afterAnoint.active) {   // back at the Anointing stop afterward (world3.js)
     pollInput(); afterAnoint.update(real); afterAnoint.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }

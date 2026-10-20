@@ -23,6 +23,7 @@ function onLadder(d) {   // main.js: standing on a rung? (Down steps down it)
   return on;
 }
 for (const p of setPieces) if (p.kind === "stepstone") specialPlat.add(p.c + "," + GR);
+for (const t of stairTowers) for (let c = t.c; c < t.c + t.w; c++) specialPlat.add(c + "," + t.top);   // the stair tower's top: you stand on the picture (Glen: no ledge sticking out)
 
 // a narrow lane between two tall houses, walls too high to jump out of on either side: falling in counts as a pit
 // (Glen: it looks the same, but it's a fall). Found from the map: ground-level gaps with walls 5+ rows high both sides.
