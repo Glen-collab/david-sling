@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 126,
+  "frame_h": 285,
+  "ms_per_frame": 148,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 48,
+  "anchor_y": 284,
+  "source": "soldier_talk.mp4",
+  "video_frames": [
+    46,
+    50,
+    53,
+    57,
+    60,
+    64,
+    67,
+    71,
+    74,
+    78,
+    82,
+    85,
+    89,
+    92,
+    96,
+    99
+  ]
+}

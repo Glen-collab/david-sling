@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 165,
+  "frame_h": 278,
+  "ms_per_frame": 115,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 85,
+  "anchor_y": 277,
+  "source": "guard_archer_idle.mp4",
+  "video_frames": [
+    35,
+    38,
+    41,
+    43,
+    46,
+    49,
+    51,
+    54,
+    57,
+    60,
+    63,
+    65,
+    68,
+    71,
+    73,
+    76
+  ]
+}

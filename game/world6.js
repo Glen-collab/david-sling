@@ -105,10 +105,17 @@ lostThingsTally = function () {
 };
 
 // --- soldiers standing about the camp (scenery beside the talk() lines)
+W6.GUARD_SIZE = 1.15;   // the camp men, against Eliab and David
+const GUARDS = ["soldier_talk", "guard_big_idle", "guard_archer_idle", "guard_young_idle"];   // Glen's clips (world6/guards)
+const soldierTalking = x => dialog.t > 0 && dialog.who === "A soldier" && Math.abs(david.x - x) < 10 * T;   // his words are up: his mouth moves
 function drawStanding(camX) {
   const now = performance.now() / 1000;
   for (const p of setPieces) if (p.kind === "standing") {
     const x = p.x - camX; if (x < -150 || x > W + 150) continue;
+    if (SPR.soldier_talk) {   // Glen's camp men: the soldier who talks to David (look 0, and every 4th), and three guards
+      const nm = GUARDS[(p.look || 0) % GUARDS.length], talking = nm === "soldier_talk" && soldierTalking(p.x);
+      drawSprite(nm, nm === "soldier_talk" && !talking ? 0 : frameOf(nm, now + p.c * 0.37), x, p.y, p.dir || -1, W6.GUARD_SIZE, 1, "brightness(0.95)"); continue;
+    }
     const nm = p.look % 2 ? "abinadab_war_idle" : "eliab_war_idle";
     drawSprite(nm, frameOf(nm, now + p.c), x, p.y, p.dir || -1, 1.05, 1, W6.LOOKS[(p.look || 0) % W6.LOOKS.length] + " brightness(0.9)");
   }
@@ -174,7 +181,10 @@ const eliabScene = {
     const B = this.beats[this.i], y = GR * T, now = performance.now() / 1000;
     drawBackground(camX); drawFlatGround(0);
     drawSprite("david_idle", frameOf("david_idle", now), W * 0.36, y, 1);
-    for (const [k, fx] of [[0, 0.5], [1, 0.82]]) drawSprite(k ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.05, 1, W6.LOOKS[k + 2] + " brightness(0.85)");   // the men he asked
+    if (SPR.soldier_talk) {   // the men he asked: the soldier who answers him (17:27), and a big guard
+      drawSprite("soldier_talk", B.who === "A soldier" ? frameOf("soldier_talk", now) : 0, W * 0.5, y, -1, W6.GUARD_SIZE, 1, "brightness(0.9)");
+      drawSprite("guard_big_idle", frameOf("guard_big_idle", now), W * 0.82, y, -1, W6.GUARD_SIZE, 1, "brightness(0.9)");
+    } else for (const [k, fx] of [[0, 0.5], [1, 0.82]]) drawSprite(k ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.05, 1, W6.LOOKS[k + 2] + " brightness(0.85)");   // the men he asked
     if (B.eli !== "gone") {
       const walking = B.eli === "go", nm = walking ? "eliab_war_walk" : B.who === "Eliab" ? "eliab_war_talk" : "eliab_war_idle";
       if (B.eli === "angry" && SPR.eliab_angry) {   // Glen's clip: 0 arms crossed, glaring; 1-14 the rant (arms flung out, up); 15 glaring
@@ -1189,7 +1199,8 @@ const w6ending = {
       if (B.harp) drawSprite("david_play_harp", frameOf("david_play_harp", now), W * 0.36, y, 1);
       else drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);
       if (B.sham !== undefined) drawSprite(SPR.shammah_bag ? "shammah_bag" : "shammah_idle", SPR.shammah_bag ? B.sham : 0, W * 0.52, y, -1);
-      if (B.harp) for (const [k, fx] of [[0, 0.58], [1, 0.68], [2, 0.8]]) drawSprite(k === 1 ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.02, 1, W6.LOOKS[k] + " brightness(0.75)");
+      if (B.harp && SPR.soldier_talk) for (const [nm, fx] of [["guard_young_idle", 0.58], ["soldier_talk", 0.68], ["guard_archer_idle", 0.8]]) drawSprite(nm, nm === "soldier_talk" ? 0 : frameOf(nm, now + fx * 3), W * fx, y, -1, W6.GUARD_SIZE, 1, "brightness(0.75)");   // the men who had been afraid, listening
+      else if (B.harp) for (const [k, fx] of [[0, 0.58], [1, 0.68], [2, 0.8]]) drawSprite(k === 1 ? "abinadab_war_idle" : "eliab_war_idle", frameOf("eliab_war_idle", now + k), W * fx, y, -1, 1.02, 1, W6.LOOKS[k] + " brightness(0.75)");
       if (!B.night) for (let k = 0; k < 3; k++) drawSprite(SPR.soldier_run ? "soldier_run" : "villager_man_run", 0, W * (0.6 + k * 0.1), y, -1, 1, 1, W6.LOOKS[k]);
     }
     if (B.card) {   // the gift

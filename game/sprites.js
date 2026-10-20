@@ -1740,6 +1740,42 @@ window.SPRITE_DATA = {
   "ay": 343,
   "align": "feet"
  },
+ "guard_archer_idle": {
+  "src": "../assets/sprites/guard_archer_idle.png",
+  "frames": 16,
+  "w": 165,
+  "h": 278,
+  "ms": 115,
+  "loop": true,
+  "pingpong": false,
+  "ax": 85,
+  "ay": 277,
+  "align": "feet"
+ },
+ "guard_big_idle": {
+  "src": "../assets/sprites/guard_big_idle.png",
+  "frames": 16,
+  "w": 136,
+  "h": 278,
+  "ms": 112,
+  "loop": true,
+  "pingpong": false,
+  "ax": 58,
+  "ay": 277,
+  "align": "feet"
+ },
+ "guard_young_idle": {
+  "src": "../assets/sprites/guard_young_idle.png",
+  "frames": 16,
+  "w": 117,
+  "h": 282,
+  "ms": 154,
+  "loop": true,
+  "pingpong": false,
+  "ax": 46,
+  "ay": 280,
+  "align": "feet"
+ },
  "hanan_counsel": {
   "src": "../assets/sprites/hanan_counsel.png",
   "frames": 30,
@@ -3526,6 +3562,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 65,
   "ay": 177,
+  "align": "feet"
+ },
+ "soldier_talk": {
+  "src": "../assets/sprites/soldier_talk.png",
+  "frames": 16,
+  "w": 126,
+  "h": 285,
+  "ms": 148,
+  "loop": true,
+  "pingpong": false,
+  "ax": 48,
+  "ay": 284,
   "align": "feet"
  },
  "steward": {

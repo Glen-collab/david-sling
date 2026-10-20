@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 117,
+  "frame_h": 282,
+  "ms_per_frame": 154,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 46,
+  "anchor_y": 280,
+  "source": "guard_young_idle.mp4",
+  "video_frames": [
+    7,
+    11,
+    14,
+    18,
+    22,
+    25,
+    29,
+    33,
+    37,
+    40,
+    44,
+    48,
+    51,
+    55,
+    59,
+    62
+  ]
+}

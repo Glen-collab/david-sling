@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 136,
+  "frame_h": 278,
+  "ms_per_frame": 112,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 58,
+  "anchor_y": 277,
+  "source": "guard_big_idle.mp4",
+  "video_frames": [
+    86,
+    89,
+    91,
+    94,
+    97,
+    99,
+    102,
+    105,
+    108,
+    110,
+    113,
+    116,
+    118,
+    121,
+    124,
+    126
+  ]
+}
