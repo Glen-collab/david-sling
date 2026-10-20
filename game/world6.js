@@ -1287,7 +1287,8 @@ const w6ending = {
 };
 // a memory, while David tells it (17:34-36): his lion (World 1) and his bear (World 2), sepia, in a soft frame
 function drawMemory(kind, bt, now) {
-  const w = 640, h = 250, x = W / 2 - w / 2, y = 168, a = Math.min(1, bt * 1.5);
+  const bottom = 430, y = 208;   // just below the story box (76..194, drawStoryBox): the frame's top is cropped, its ground stays put
+  const w = 640, h = bottom - y, x = W / 2 - w / 2, a = Math.min(1, bt * 1.5);
   ctx.save(); ctx.globalAlpha = a;
   ctx.beginPath(); ctx.roundRect(x, y, w, h, 18); ctx.clip();
   const sky = ctx.createLinearGradient(0, y, 0, y + h); sky.addColorStop(0, "#e8d2a8"); sky.addColorStop(1, "#c9a878");
