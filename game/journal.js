@@ -230,6 +230,38 @@ const JOURNAL_PAGES = {
           { text: "I will not be afraid.", at: 5 }] },
       ],
     },
+  },  // World 7: JOURNAL_TEXT.md's first draft (2026-10-20), until Glen locks the words
+  7: {
+    name: "The Giant's Shadow",
+    stages: ["Saul's Armor", "Remember the Hills", "Five Smooth Stones", "The Giant's Shadow"],
+    draft: {
+      left: [
+        ...E(1, "Gideon's army was cut to three hundred, so no one could say their own strength won.", "Judges 7:2"),
+        ...E(2, "Remember how the LORD led you all the way. I remember the lion, the bear, the flood.", "Deuteronomy 8:2"),
+        ...E(3, "The LORD will fight for you. You only need to be still.", "Exodus 14:14"),
+        ...E(4, "One of you can chase a thousand, because the LORD fights for you.", "Joshua 23:10"),
+      ],
+      right: [   // he took Saul's armor off
+        { at: 1, size: "psalm", segs: [
+          { text: "You set a table before me,", at: 1 }, { text: "\n" },
+          { text: "even while my enemies stand near,", at: 2 }, { text: "\n" },
+          { text: "and You", at: 3 }, { text: "give me armor.", at: 3, strike: 4 }, { text: "replace my fear.", at: 4 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 17:38–40",
+          segs: [{ text: "The king put his armor on me. I couldn't even walk in it. I took it off, and chose five smooth stones from the stream.", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [
+        { at: 5, size: "psalm", segs: [{ text: "You set a table before me,", at: 5 }, { text: "\n" }, { text: "even while my enemies stand near,", at: 5 }, { text: "\n" },
+          { text: "and You replace my fear.", at: 5 }] },
+      ],
+    },
   },
 };
 

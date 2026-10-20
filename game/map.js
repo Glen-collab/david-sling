@@ -106,6 +106,19 @@ const MAP_WORLDS = {
       { id: "6-4", label: "The Tower's Shadow", x: 1430, y: 500, trail: [[1400, 600]] },
     ],
   },
+  // World 7 (stand-in: World 6's painting until Glen's World 7 map): from Saul's tent at the top of the camp, down the
+  // hill, into the streambed, and out onto the valley floor
+  7: {
+    name: "The Giant's Shadow", src: "../assets/maps/world6_map.jpg",
+    david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
+    stops: [
+      { id: "home", label: "Saul's tent", x: 260, y: 600 },
+      { id: "7-1", label: "Saul's Armor", x: 480, y: 890, trail: [[300, 700], [380, 820]] },
+      { id: "7-2", label: "Remember the Hills", x: 860, y: 760, trail: [[620, 880], [760, 820]] },
+      { id: "7-3", label: "Five Smooth Stones", x: 1180, y: 760, trail: [[1000, 790], [1100, 770]] },
+      { id: "7-4", label: "The Giant's Shadow", x: 1430, y: 640, trail: [[1300, 720]] },
+    ],
+  },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,
   // one stop per world (2048 x 1152). A world counts as cleared when its 4th stage (the boss) is cleared.
   journey: {
@@ -123,8 +136,8 @@ const MAP_WORLDS = {
     ],
   },
 };
-const BUILT_WORLDS = [1, 2, 3, 4, 5, 6];   // worlds you can go into from the journey map so far
-const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4", "6-1", "6-2", "6-3", "6-4"];   // stages that exist so far (the rest say "coming soon")
+const BUILT_WORLDS = [1, 2, 3, 4, 5, 6, 7];   // worlds you can go into from the journey map so far
+const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4", "6-1", "6-2", "6-3", "6-4", "7-1"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
 function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }

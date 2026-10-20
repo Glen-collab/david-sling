@@ -165,6 +165,16 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   Jump"), World 2 `music_day_w2` ("Harps' Bounce"), then `music_day_a` ("Cascading Harp", 3/5/7) and `music_day_b`
   ("Harp's Dance", 4/8); World 6 `music_day_w6` ("Rhythmic Harp (1)", words taken out). Next (Glen): the dark songs for bosses. Glen says one of his songs has singing in it: cut it out once he says where.
   Stage clear = his `ending_jingle_levels.mp3` (the lyre `stage_clear` is the fallback).
+- **World 7 started (2026-10-20): 7-1 Saul's Armor is built** (`game/world7.js`, layout in main.js `LEVEL_NAME === "7-1"`).
+  David starts in Saul's armor (17:38): `W7.ARMOR_SPEED` walk, no running, `W7.ARMOR_HOP` hop, no sling, roll or
+  double jump (main.js asks `ARMORED()`), clanks and thuds (made in code, no sound files), the helmet slipping over
+  his eyes every few seconds (`drawWorld7Over`), 3 grey armor hearts hit first. Select standing still takes it off
+  ("I cannot go in these", 17:39), Saul (saul_armor poses) looks surprised, then nods; the armor stays on the ground.
+  The course stops him at the wall at col 45 (a real jump). Then 6-1's camp pieces (world6.js now runs in World 7
+  too): 5 frightened soldiers, The One on Saul's tent roof. Stand-ins: 6-1's backgrounds, World 6's map painting for
+  the World 7 map (map.js), and armored David drawn in code. Art requests: ART_PROMPTS.md "World 7". Journal pages
+  for World 7 are in journal.js (JOURNAL_TEXT.md's draft). Not built yet: the opening scene (Saul dresses him), Tobi's
+  and Shammah's stops, 7-2 to 7-4 and the shield-bearer.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,

@@ -140,7 +140,7 @@ function updateTents(dt) {
   const d = david;
   if (d.onGround && d.vy >= 0 && !held("down") && d.deadT <= 0) for (const a of tents6) {
     if (d.x > a.c * T && d.x < (a.c + a.w) * T && Math.abs(d.y - a.r * T) < 3) {
-      d.vy = -TUNE.JUMP_SPEED * W6.TENT_BOUNCE * (held("a") ? 1.13 : 1); d.onGround = false; a.boing = 1; sfx("jump", d.x, 0.5, 0.75);
+      d.vy = -TUNE.JUMP_SPEED * W6.TENT_BOUNCE * (held("a") ? 1.13 : 1) * (ARMORED() ? W7.ARMOR_HOP : 1); d.onGround = false; a.boing = 1; sfx("jump", d.x, 0.5, 0.75);
       if (!W6.tentTold) { W6.tentTold = true; toast("Boing! The tent roofs are springy. Hold A on the bounce to go higher; hold Down to land on one."); }
       break;
     }
@@ -1118,7 +1118,7 @@ if (LEVEL_STAGE === "6-4") Object.assign(W6, { VOLLEY_EVERY: 3.2 });   // tighte
 
 // --- hooks: main.js (each frame, drawing)
 function updateWorld6(dt) {
-  if (WORLD !== 6) return;
+  if (WORLD !== 6 && WORLD !== 7) return;   // (7-1 is back in the same camp)
   updateBattleSound(dt); updateFearful(dt); updateTents(dt); updateEliabSpot(); updateVolleys(dt); updateGiantSpot(dt); updateCarriers(dt); updateSkirms(dt); updateTower(dt);
 }
 function drawCover(camX) {   // Glen's leaning rock (6-2) and undercut bank (6-3, 6-4), drawn over the slab you shelter under
@@ -1146,7 +1146,7 @@ function drawStreamFront(camX) {   // in front of David and the carriers: the wa
   }
 }
 function drawWorld6(camX) {
-  if (WORLD !== 6) return;
+  if (WORLD !== 6 && WORLD !== 7) return;
   drawCover(camX);
   drawTents(camX);
   for (const p of setPieces) if (p.kind === "tower") drawTower(p, camX);

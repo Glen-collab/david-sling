@@ -10,6 +10,7 @@ document.write('<script src="world3.js?v=' + (window.BUILD || 0) + '"><\/script>
 document.write('<script src="world4.js?v=' + (window.BUILD || 0) + '"><\/script>');
 document.write('<script src="world5.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the road to the valley: the provisions, raiders, vultures   // the road to Gibeah: the gift donkey, dogs, bandits, doves
 document.write('<script src="world6.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Valley of Elah: the frightened soldiers, the tents, Eliab
+document.write('<script src="world7.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Giant's Shadow: Saul's armor
 document.write('<script src="harp_songs.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the harp-duel charts (tools/make_harp_chart.py)
 
 const W1 = {

@@ -1057,3 +1057,68 @@ whirling a sling over his head; the throw.` And the **crew running away** (one r
 streambed, late afternoon, long shadows; on the right bank a tall wooden siege tower looms over the valley, its
 shadow stretching across the stones; trenches and low walls of piled rocks and shields; arrows stuck in the ground.`
 
+
+## World 7 — The Giant's Shadow: map and 7-1 art (2026-10-20)
+7-1 is built with stand-ins: 6-1's camp layers, World 6's map, and David's own sprites with a bronze coat, a helmet
+and a sword drawn over them in code. Paste the style block first, as always. **Save in** `david-sling-art\world7\`.
+Already in the game and reused: Saul's six armor poses (he stands by his tent and nods when the armor comes off),
+the tents, wagons, frightened soldiers and camp props from World 6.
+
+### World 7 map (one message, ready to paste; add the map lines)
+```
+World 7: the Valley of Elah in the late afternoon, closer and more dramatic than before, long dark shadows across
+the ground. The path, in order:
+1. Top-left, on the Israelite hill: one big tent with a banner, the king's tent (the start).
+2. Down through the edge of the camp: tents, rope lines, stacked shields (first level dot).
+3. At the edge of the camp, a lone soldier's spot by a rock (a landmark spot).
+4. The walk down the hillside toward the valley floor: a winding path, both armies watching from the slopes
+   (second level dot).
+5. A small campfire, the last one on the Israelite side (a landmark spot).
+6. The dry streambed in the middle of the valley, glittering with smooth pale stones, a few deep pools (third
+   level dot).
+7. Beside the streambed, a little sandstone shelf with a target carved on a rock (a small extra spot).
+8. Out on the open valley floor, toward the right: flat dry ground with cracks (fourth level dot).
+Far right, on the opposite hillside: the Philistine battle line, rows of tiny shields and spear points. A huge dark
+shadow of a giant figure falls across the valley floor from the right edge (the giant himself is NOT shown).
+Mood: dread, but with a warm light still on the streambed.
+```
+Four plain level dots (7-1 to 7-4) plus Saul's tent, Tobi's rock, Shammah's fire and Gera's sling range. **Save
+as** `david-sling-art\world 7 map.png`.
+
+### David in Saul's armor (Grok clips: start from a picture, side view facing RIGHT, plain green screen, camera still)
+The picture first (GPT), then one clip from it for each move:
+```
+David, the same shepherd boy as always (curly dark hair, plain tunic, sandals), dressed in King Saul's armor, which
+is FAR too big for him: a long bronze scale coat hanging past his knees, the sleeves over his hands, a big bronze
+helmet sitting down over his eyebrows, a sword belt with a long sword whose tip drags on the ground. Funny and a bit
+sad, not silly. Full body, seen from the side, facing RIGHT. Solid flat bright green background (#00FF00), no shadow.
+```
+1. **Walking:** slow, stiff, clanking steps, the coat swinging, the sword dragging behind. (A loop.)
+2. **Standing:** shifting his weight, tugging at the coat's collar. (A loop.)
+3. **The helmet slips:** it slides down over his eyes, he pushes it back up with both hands.
+4. **A little hop:** he tries to jump, barely leaves the ground, lands heavily with a wobble.
+5. **Taking it off:** he lifts the helmet off, unbuckles the sword, pulls the coat over his head, sets it all down
+   in a neat pile, and stands up straight in his own tunic (the end of the clip is plain David).
+
+**The armor on the ground** (single item, magenta): `King Saul's bronze scale coat folded neatly on the ground,
+the bronze helmet resting on top, the sword in its sheath laid beside them. Side view.` Save as `saul_armor_pile.png`.
+
+### 7-1 Saul's Armor (late afternoon, the top of the Israelite camp): backgrounds
+Same Format lines as before (very wide, about 3072 x 1024, seamless left/right edges, no characters).
+**Far:** `World 7, late afternoon in the Valley of Elah, the sun low on the left and the light turning gold. Along
+the bottom half: the far side of the valley, the Philistine battle line along its top, rows of tiny shields and
+spear points glinting, their tents behind; a long dark shadow stretching across the valley floor below. Tense and
+quiet.`
+**Middle:** `World 7 middle distance: the top of the Israelite army camp on its hill, the king's big tent with a
+banner, rows of brown goat-hair tents, stacked shields, soldiers' cooking fires with thin smoke, everything in long
+late-afternoon light. EVERYTHING above the hills is solid flat bright magenta (#FF00FF), no sky.`
+**Near:** `World 7 foreground strip, the bottom quarter only: trampled dusty ground at the edge of an army camp,
+tent ropes and pegs, a dropped shield, dry grass lit gold from the side. EVERYTHING above it is solid flat bright
+magenta (#FF00FF).`
+**Save as** `7-1 far.png`, `7-1 mid.png`, `7-1 near.png`.
+
+### The World 7 Journal scene (one message)
+`Over David's shoulder, the same framing as the other Journal scenes: David sitting on a rock at the edge of the
+Israelite camp in the late afternoon, his open Journal in his hands (both pages blank), his shepherd's bag and
+staff beside him, and a few smooth stones on the rock. Below, the valley floor in long gold light and the dry
+streambed; on the far slope the Philistine line, tiny. Pixar-style 3D, warm.` Save as `world7\w7_reading.jpg`.

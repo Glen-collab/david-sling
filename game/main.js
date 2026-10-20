@@ -354,7 +354,8 @@ const STAGE_INFO = {
   "6-1": { cols: 246, bg: "w6_1", ter: "w2s", name: "The Camp of Fear" },   // Glen's camp morning
   "6-2": { cols: 230, bg: "w6_2", ter: "w2s", name: "No-Man's Land" },
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
-  "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },   // Glen's World 6 sets (6-1 to 6-4)
+  "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
+  "7-1": { cols: 232, bg: "w6_1", ter: "w2s", name: "Saul's Armor" },   // (6-1's camp layers stand in until Glen's 7-1 art)   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -1374,6 +1375,48 @@ if (LEVEL_NAME === "test") {
   critter("hedgehog", 204);
   shelter(207, 4); special(208, 11);
   sheepfold(222);
+} else if (LEVEL_NAME === "7-1") {
+  // ---- 7-1 Saul's Armor (1 Samuel 17:38-39): the stage you win by taking it off. David starts in the king's armor
+  //      beside Saul's tent: slow, a tiny hop, no sling, no roll, the helmet slipping down over his eyes (world7.js). A
+  //      little training course of crates, a low wall and a ladder gets him a short way; the wall at its end needs a
+  //      real jump. Stand still and press Select to take the armor off. Then a fast run through the camp to the edge of
+  //      the hill, every move back. The lost things: the last 5 frightened soldiers (the harp, as in World 6). The One:
+  //      up on the roof of Saul's tent, too high for a hop in armor. ----
+  ground(0, 231);
+  setPiece("saul7", 7);
+  talk(4, "King Saul", "Here. My own coat of armor, and my own bronze helmet. And my sword. Let's see you walk in them.");
+  setPiece("tent", 9, GR, { w: 6 }); lostSheep("lamb", 12, 11, "one");   // Saul's tent; The One up on its roof (too high for a hop in armor)
+  // the training course: everything a step or a hop high
+  rock(16, 16, 2, 1);
+  rock(21, 16, 1, 1); rock(22, 15, 2, 2);
+  wall(27, 16, 3, 1);
+  ladder(32, 13); rock(34, 13, 4, 4);                            // up the crates, and a long drop down the far side (thud)
+  setPiece("prop", 41, GR, { nm: "camp_shields", size: 0.14 });
+  wall(45, 14, 2, 3);                                            // too high for a hop in armor: a real jump
+  campfire(49);
+  setPiece("fearful", 52, GR - 1, { look: 0, dir: -1 });         // behind the wall
+  setPiece("tent", 55, GR, { w: 4 }); setPiece("tent", 60, GR, { w: 5 });
+  critter("hen", 66);
+  setPiece("wagon", 69, GR, { w: 4 }); special(71, 10);
+  rock(76, 15, 3, 2); rock(79, 13, 3, 4); setPiece("fearful", 81, 12, { look: 1 });   // up on the rocks
+  snake("viper", 86);
+  campfire(91);
+  setPiece("tent", 95, GR, { w: 4 }); setPiece("tent", 100, GR, { w: 5 }); setPiece("fearful", 106, GR - 1, { look: 2, dir: -1 });
+  setPiece("standing", 111, GR - 1, { look: 3 });
+  talk(110, "A soldier", "The boy's going down there? Without the king's armor? With a stick and a sling?");
+  setPiece("tower", 116, 11); plat(116, 11, 4); setPiece("fearful", 118, 10, { look: 3 });   // the watch platform
+  setPiece("wagon", 124, GR, { w: 4 }); setPiece("wagon", 130, GR, { w: 4 });
+  critter("scorpion", 136);
+  rock(140, 15, 4, 2); rock(144, 13, 4, 4); rock(148, 11, 5, 6); special(150, 7);
+  campfire(157);
+  setPiece("tent", 162, GR, { w: 5 }); critter("hen", 169); snake("viper", 173);
+  setPiece("tent", 176, GR, { w: 4 }); setPiece("fearful", 181, GR - 1, { look: 4, dir: -1 });   // behind the last tent
+  rock(186, 15, 3, 2); setPiece("wagon", 192, GR, { w: 4 });
+  plat(198, 11, 4); special(199, 10);
+  campfire(204);
+  setPiece("standing", 210, GR - 1, { look: 0 });
+  talk(209, "A soldier", "From here it's all downhill to the stream. Then it's just you and him.");
+  sheepfold(215);                                               // the army's food flock, at the edge of the camp
 } else if (LEVEL_NAME === "6-1") {
   // ---- 6-1 The Camp of Fear: the Israelite camp on its hill above the Valley of Elah, forty days into the giant's
   //      shouting (1 Samuel 17:16). Tents to bounce on, supply wagons, the watch platform, cooking fires. The lost things:
@@ -1653,6 +1696,7 @@ function drawSprite(name, i, x, y, facing, extraScale = 1, alpha = 1, filter = "
 // David
 // ============================================================================
 const STAND_H = 96, LOW_H = 64, BODY_W = 34;
+const ARMORED = () => typeof inArmor === "function" && inArmor();   // 7-1: in Saul's armor (world7.js): slow, a tiny hop, no sling, no roll
 const david = {
   x: spawn.x, y: spawn.y, vx: 0, vy: 0, facing: 1, onGround: false, h: STAND_H,
   coyote: 0, jumpBuf: 0, flipUsed: false, holdDirT: 0,
@@ -1765,7 +1809,7 @@ function updateDavid(dt) {
                (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout";
 
   // --- harp (Select): kneel and play while standing still
-  if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30) {
+  if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30 && !(ARMORED() && armorOff())) {   // in Saul's armor, Select takes it off (world7.js)
     if (d.harp) { d.harp = false; setState("standup"); } else if (!(typeof harpBroken === "function" && harpBroken())) { d.harp = true; setState("kneel"); }   // (4-3: a broken string)
   }
   // Up, any direction, A or B: put the harp away and stand up
@@ -1778,7 +1822,7 @@ function updateDavid(dt) {
   }
 
   // --- roll: Down + A on the ground (running, or from a crouch: he rolls the way he's facing)
-  if (hasSkill("roll") && !d.carrying && !d.harp && d.onGround && !busy && ((held("down") && pressed("a")) || pressed("x"))) {
+  if (hasSkill("roll") && !ARMORED() && !d.carrying && !d.harp && d.onGround && !busy && ((held("down") && pressed("a")) || pressed("x"))) {
     if (dir) d.facing = dir;
     setState("roll"); d.rollT = 0; d.vx = d.facing * TUNE.ROLL_SPEED; d.jumpBuf = 0;
   }
@@ -1790,9 +1834,9 @@ function updateDavid(dt) {
 
   if (!busy && !d.harp) {
     if (d.jumpBuf > 0 && d.coyote > 0 && headroom(d, STAND_H)) {
-      d.vy = -TUNE.JUMP_SPEED; d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
-      setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5);
-    } else if ((CAN_DOUBLE_JUMP || hasSkill("leap")) && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
+      d.vy = -TUNE.JUMP_SPEED * (ARMORED() ? W7.ARMOR_HOP : 1); d.onGround = false; d.coyote = 0; d.jumpBuf = 0; d.flipUsed = false;
+      setState(d.carrying ? "carry" : "jump"); sfx("jump", undefined, 0.5, ARMORED() ? 0.6 : 1);
+    } else if ((CAN_DOUBLE_JUMP || hasSkill("leap")) && !ARMORED() && pressed("a") && !d.onGround && !d.flipUsed && d.coyote <= 0) {
       d.flipUsed = true; sfx("jump", undefined, 0.5, 1.3);   // the second jump: same sound, higher
       if (d.carrying) { d.vy = -TUNE.FLIP_SPEED * TUNE.CARRY_JUMP2; d.carryHop = 0.25; }   // a second hop, lamb and all
       else { d.vy = -TUNE.FLIP_SPEED; setState("flip"); }
@@ -1803,7 +1847,7 @@ function updateDavid(dt) {
   // --- sling (B): tap to throw, hold to charge
   // A + B together (either order, within a moment of each other) = Power Sling
   const justStarted = d.throwT < 0 || (d.charging && d.charge < 0.15);
-  if (!d.carrying && !d.harp && !busy && d.specialStones > 0 && justStarted &&
+  if (!d.carrying && !d.harp && !busy && !ARMORED() && d.specialStones > 0 && justStarted &&
       ((pressed("b") && held("a")) || (pressed("a") && held("b")))) {
     d.specialStones--;
     d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
@@ -1815,7 +1859,7 @@ function updateDavid(dt) {
     sfx("sling_power");
     toast(`Power Sling! (${d.specialStones} stone${d.specialStones === 1 ? "" : "s"} of remembrance left)`);
   }
-  if (!d.carrying && !d.harp && !busy) {
+  if (!d.carrying && !d.harp && !busy && !ARMORED()) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; d.quickUsed = false; d.quickQueued = false; }
     if (d.throwT >= 0 && !d.thrown) d.aimingUp = aimHeld("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
@@ -1919,6 +1963,7 @@ function updateDavid(dt) {
     let target = dir * (d.holdDirT > TUNE.RUN_DELAY ? TUNE.RUN_SPEED : TUNE.WALK_SPEED);
     if (lowPose) target = dir * TUNE.CRAWL_SPEED;
     if (d.carrying) target *= 0.8;
+    if (ARMORED()) target = dir * TUNE.WALK_SPEED * W7.ARMOR_SPEED;   // clank, clank: no running in a coat of armor
     const mud = d.onGround && typeof onMud === "function" && onMud(d.x, d.y) ? TUNE.MUD_GRIP : 1;   // 3-4's mud slicks (world3.js)
     const acc = (d.onGround ? (dir !== 0 ? TUNE.ACCEL_GROUND : TUNE.FRICTION) : TUNE.ACCEL_AIR) * mud;
     if (d.vx < target) d.vx = Math.min(target, d.vx + acc * dt);
@@ -1983,6 +2028,7 @@ function sitHarpScale(i) { const a = TUNE.SIT_HARP_SIZES; return a[Math.min(i, a
 function drawDavid(camX) {
   const d = david, x = d.x - camX, y = d.y;
   if (drawCaveDavid(d, x, y)) return;
+  if (ARMORED() && drawArmorDavid(d, x, y)) return;   // world7.js
   // the sling throw is drawn on top of whatever the legs are doing when standing; in the air we use the throw frames too
   if (d.throwT >= 0 && d.state !== "roll" && d.state !== "flip") {
     let i, gx, gy;
@@ -2531,6 +2577,7 @@ const inCutscene = () => david.state === "toLamb" || david.state === "rescue" ||
 function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
+  if (ARMORED() && armorHit(fromX)) return;   // the armor's grey hearts go first (world7.js)
   d.hearts--; d.inv = TUNE.HURT_INVINCIBLE;
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
@@ -3853,7 +3900,8 @@ function updateWorld(dt) {
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
   if (typeof updateWorld3 === "function") updateWorld3(dt);
   if (typeof updateWorld4 === "function") updateWorld4(dt);
-  if (typeof updateWorld6 === "function") updateWorld6(dt);   // world6.js: the frightened soldiers, the tents, Eliab
+  if (typeof updateWorld6 === "function") updateWorld6(dt);
+  if (typeof updateWorld7 === "function") updateWorld7(dt);   // world7.js: Saul's armor   // world6.js: the frightened soldiers, the tents, Eliab
   if (typeof updateWorld5 === "function") updateWorld5(dt);   // world5.js: the provisions, raiders, the fleeing father   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
@@ -3938,6 +3986,7 @@ function drawHearts() {   // right to left; half hearts when it's x.5
     const v = david.hearts - i, name = v >= 1 ? "heart_full" : v >= 0.5 ? "heart_half" : "heart_empty";
     hudIcon(name, W - 50 - (david.maxHearts - 1 - i) * 36, 12, 32);
   }
+  if (ARMORED()) drawArmorHearts(W - 50 - david.maxHearts * 36);   // Saul's armor: grey hearts to the left (world7.js)
 }
 const HUD_X = W - 150;   // the column under the hearts
 function drawSpecialCount() {
@@ -4065,6 +4114,7 @@ function frame(now) {
   drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);
   if (typeof drawWorld4 === "function") drawWorld4(camX);
   if (typeof drawWorld6 === "function") drawWorld6(camX);   // world6.js
+  if (typeof drawWorld7 === "function") drawWorld7(camX);   // world7.js
   if (typeof drawWorld5 === "function") drawWorld5(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
@@ -4090,7 +4140,8 @@ function frame(now) {
   ctx.restore();
   drawNight(camX);
   if (typeof drawLeopardEyes === "function") { drawLeopardEyes(camX); drawLookoutLight(camX); }   // world5.js: eyes in the branches (5-2), torchlight and signal fires (5-3)
-  if (typeof drawStorm === "function") drawStorm(camX);   // 3-4: rain, the dark, lightning (world3.js)
+  if (typeof drawStorm === "function") drawStorm(camX);
+  if (typeof drawWorld7Over === "function") drawWorld7Over();   // 7-1: the helmet slips down over his eyes (world7.js)   // 3-4: rain, the dark, lightning (world3.js)
   drawCaveDarkness(camX);
   drawFinalBlow();
   if (david.deadT > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.8, 1.2 - david.deadT)})`; ctx.fillRect(0, 0, W, H); }
