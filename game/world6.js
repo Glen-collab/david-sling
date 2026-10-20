@@ -238,7 +238,7 @@ function updateVolleys(dt) {
     if (!volley.plan && volley.t >= W6.VOLLEY_EVERY) {   // the shout: plan the volley now so its shadows show
       volley.t = 0; volley.n++; volley.shout = 1; volley.pending = [];
       const keep = volley.shots; volley.shots = []; volleyLaunch(z); volley.plan = volley.shots; volley.shots = keep;
-      sfx("phil_shout", undefined, 0.6);
+      sfxOne(["phil_shout", "phil_shout_2", "phil_shout_3"], undefined, 0.6);   // "Yeru!" (Shoot!), a dozen men on the far slope
       if (!W6.hornBlown) { W6.hornBlown = true; sfx("war_horn", undefined, 0.9); }   // the first time: the Philistine horn
       if (!volley.told) { volley.told = true; sayLine("", z.kind === "stones" ? "A shout from the far slope: slingers! Watch the shadows on the ground. Get in under an overhanging rock, or into a gap." : "A shout from the far slope: archers! Watch the shadows on the ground. Get in under an overhanging rock, or into a gap."); }
     }
@@ -324,7 +324,7 @@ const goliathWatch = {
   update(dt) {
     this.t += dt; this.bt += dt; this.shake = Math.max(0, this.shake - dt);
     const B = this.beats[this.i];
-    if (B.boom && this.boomed !== this.i) { this.boomed = this.i; this.shake = 0.9; sfx("taunting_yells", undefined, 0.8, 0.8); }
+    if (B.boom && this.boomed !== this.i) { this.boomed = this.i; this.shake = 0.9; sfx("taunting_yells", undefined, 0.8, 0.8); setTimeout(() => this.active && sfx("phil_roar", undefined, 0.5), 2600); }   // and his army roars and jeers
     if (this.out > 0) {
       this.out += dt;
       if (this.out > 0.8) {
@@ -395,7 +395,7 @@ function updateGiantSpot(dt) {
   if (!goliathWatch.done) return;
   W6.boomT = (W6.boomT || 0) + dt; W6.shake = Math.max(0, (W6.shake || 0) - dt);   // from now on, his voice booms across the valley every so often (W6.shake: he's mid-shout)
   if (W6.boomT > W6.GIANT_BOOM) {
-    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("taunting_yells", undefined, 0.4, 0.75);   // far off
+    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("taunting_yells", undefined, 0.4, 0.75); setTimeout(() => sfx("phil_roar", undefined, 0.22), 2600);   // far off; his army roars after him
     toast(["The giant's voice booms across the valley: \"Give me a man, that we may fight together!\"", "\"I defy the armies of Israel today!\" The ground seems to shake.", "\"Am I not a Philistine, and you servants to Saul?\""][W6.boomN % 3]);
   }
 }
@@ -570,13 +570,13 @@ function courage6() { try { const l = JSON.parse(localStorage.getItem("davidProg
 // phil_flee); without them, the running soldier, darkened and reddened.
 Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 2, DROP_MS: 150, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
 const skirms = setPieces.filter(p => p.kind === "skirmisher").map(p => ({ x: p.x, y: p.y, home: p.x, state: "wait", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0 }));
-function addSkirm(x) { skirms.push({ x, y: GR * T, home: x, state: "run", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0, spawned: true }); }
+function addSkirm(x) { sfxOne(["phil_hedad", "phil_hedad_2"], x, 0.55); skirms.push({ x, y: GR * T, home: x, state: "run", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0, spawned: true }); }
 function updateSkirms(dt) {
   const d = david;
   for (let i = skirms.length - 1; i >= 0; i--) {
     const k = skirms[i]; k.t += dt; k.flash = Math.max(0, k.flash - dt);
     if (k.state === "wait" && Math.abs(d.x - k.x) < W6.SKIRM_RANGE * T && d.deadT <= 0) {
-      k.state = "run"; k.t = 0;
+      k.state = "run"; k.t = 0; sfxOne(["phil_hedad", "phil_hedad_2"], k.x, 0.75);   // "Hedad!", his battle cry (Jeremiah 51:14)
       if (!W6.skirmTold) { W6.skirmTold = true; toast("A Philistine skirmisher, shield up, charging! Two stones (or one charged) and he'll run."); }
     }
     if (k.state === "run") {
@@ -596,7 +596,7 @@ function stoneHitsSkirm(s) {
     if (k.state !== "run" && k.state !== "wait") continue;
     if (Math.abs(s.x - k.x) < 26 && s.y > k.y - 110 && s.y < k.y) {
       k.hp -= s.charged || s.power ? 2 : 1; k.flash = 0.25; stoneHit(s);
-      if (k.hp <= 0) { k.state = SPR.phil_drop ? "drop" : "flee"; k.t = 0; k.dropX = k.x; sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
+      if (k.hp <= 0) { k.state = SPR.phil_drop ? "drop" : "flee"; k.t = 0; k.dropX = k.x; setTimeout(() => sfx("phil_nusu_1", k.x, 0.7), 500); /* "Nusu!" (Run!) */ sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
       return true;
     }
   }
@@ -853,6 +853,7 @@ function towerFall() {
   const d = david;
   if (d.x > tw.x0 - 2.5 * T && d.y < GR * T - 10) { d.vx = -380; d.vy = -520; d.onGround = false; setState("jump"); }   // David leaps clear
   sfx("thunder_2", tw.x0, 0.6, 0.7);
+  sfx("phil_nusu", tw.x0, 0.8);   // the crew: "Nusu! Nusu!"
   toast("The beam gives! The crew scramble down the back of the tower and run. Jump clear, David!");
 }
 function updateTowerFall(dt) {

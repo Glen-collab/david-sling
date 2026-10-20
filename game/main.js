@@ -3696,7 +3696,7 @@ const SFX_FILES = ["sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "
   "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip",
   "hyena_1", "hyena_2", "hyena_3",   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2
   "horses",   // the chariot horses whinnying (5-4)
-  "phil_shout",   // 6-2's volleys: the shout from the far slope (until Glen's, silent)
+  "phil_shout", "phil_shout_2", "phil_shout_3", "phil_hedad", "phil_hedad_2", "phil_nusu", "phil_nusu_1", "phil_roar",   // Glen's voice as the Philistines (tools/crowd.py)
   "arrow_single", "arrow_with_stick-to-target", "arrow_volley_1", "arrow_volley_2", "taunting_yells", "war_horn"];   // Glen's World 6 sounds (2026-10-19)
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};

@@ -95,8 +95,10 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   120 (setPiece "giantview") plays goliathWatch: 17:16, 17:4-7 with the Field Guide card filling in, Goliath's
   17:8-10, David, Psalm 3:6 as narration; then David writes the card in his Journal (progress.goliathCard; also a
   page when the Journal's read from the map). After it, the giant stands small on the far hill and booms every
-  W6.GIANT_BOOM s. Card weights are the WEB's footnotes (coat about 110 pounds, spearhead about 13). Sounds
-  `phil_shout` / `arrow_volley` are wired but not made yet (silent).
+  W6.GIANT_BOOM s. Card weights are the WEB's footnotes (coat about 110 pounds, spearhead about 13). Sounds:
+  Glen's own voice as the Philistines (his takes in david-sling-art/world6/voices, mixed into crowds by tools/crowd.py):
+  phil_shout(_2,_3) "Yeru!" (Shoot!) before each volley, phil_hedad(_2) a skirmisher's charge, phil_nusu(_1) "Run!",
+  phil_roar the army jeering after Goliath. Volleys are arrow_single x9 with the odd arrow_with_stick-to-target.
 - **6-3 The Water Carriers is built** (2026-10-18). setPiece "carriers" (3 men + Shammah, start of stage) fall in
   behind David on his footsteps (trailAt, after the lamb and sheep). setPiece "fill": a pool still holding water,
   empty jars fill walking through (first fill: Psalm 23:2 as narration). Volleys reuse 6-2's; on the shout the line
