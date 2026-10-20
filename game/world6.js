@@ -324,7 +324,11 @@ const goliathWatch = {
   update(dt) {
     this.t += dt; this.bt += dt; this.shake = Math.max(0, this.shake - dt);
     const B = this.beats[this.i];
-    if (B.boom && this.boomed !== this.i) { this.boomed = this.i; this.shake = 0.9; sfx("taunting_yells", undefined, 0.8, 0.8); setTimeout(() => this.active && sfx("phil_roar", undefined, 0.5), 2600); }   // and his army roars and jeers
+    if (B.boom && this.boomed !== this.i) {   // his own words in Hebrew (Glen's voice): 17:8 "Halo anochi ha-Plishti?", 17:10 "Cheirafti... tenu li ish!"; 17:9 his scream
+      this.boomed = this.i; this.shake = 0.9;
+      const v = B.text.includes("17:8") ? goliathSays("halo_anochi", 0.85) : B.text.includes("17:10") ? goliathSays("cheirafti", 0.85, "tenu_li_ish") : (sfx("taunting_yells", undefined, 0.8, 0.8), 2.6);
+      setTimeout(() => this.active && sfx("phil_roar", undefined, 0.5), v * 1000);   // and his army roars and jeers
+    }
     if (this.out > 0) {
       this.out += dt;
       if (this.out > 0.8) {
@@ -390,12 +394,22 @@ function goliathNote() {
              { at: 5, size: "small", segs: [{ text: "He defies the armies of the living God. The lion and the bear were bigger than me too.", at: 5 }] });
   return { left, right };
 }
+// Goliath speaks (Glen's Hebrew, pitched down: assets/sounds/goliath_*.mp3, two takes each); then `then`, 2.2 s later.
+// Returns about how many seconds it takes, so the army's roar can come after.
+function goliathSays(line, vol, then) {
+  const take = n => "goliath_" + n + (Math.random() < 0.5 ? "" : "_2");
+  if ((SFX[take(line)] || {}).missing) { sfx("taunting_yells", undefined, vol, 0.8); return 2.6; }
+  sfx(take(line), undefined, vol);
+  if (then) { setTimeout(() => sfx(take(then), undefined, vol), 2200); return 5.2; }
+  return 3.2;
+}
 function updateGiantSpot(dt) {
   if (giantSpot && !goliathWatch.done && !goliathWatch.active && david.x > giantSpot.x - T && david.onGround && david.deadT <= 0) goliathWatch.start();
   if (!goliathWatch.done) return;
   W6.boomT = (W6.boomT || 0) + dt; W6.shake = Math.max(0, (W6.shake || 0) - dt);   // from now on, his voice booms across the valley every so often (W6.shake: he's mid-shout)
   if (W6.boomT > W6.GIANT_BOOM) {
-    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5; sfx("taunting_yells", undefined, 0.4, 0.75); setTimeout(() => sfx("phil_roar", undefined, 0.22), 2600);   // far off; his army roars after him
+    W6.boomT = 0; W6.boomN = (W6.boomN || 0) + 1; W6.shake = 2.5;
+    const v = goliathSays(["tenu_li_ish", "cheirafti", "halo_anochi"][W6.boomN % 3], 0.4); setTimeout(() => sfx("phil_roar", undefined, 0.22), v * 1000);   // far off (the same words as the line below); his army roars after him
     toast(["The giant's voice booms across the valley: \"Give me a man, that we may fight together!\"", "\"I defy the armies of Israel today!\" The ground seems to shake.", "\"Am I not a Philistine, and you servants to Saul?\""][W6.boomN % 3]);
   }
 }
