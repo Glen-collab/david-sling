@@ -172,7 +172,9 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   ("I cannot go in these", 17:39), Saul (saul_armor poses) looks surprised, then nods; the armor stays on the ground.
   The course stops him at the wall at col 45 (a real jump). Then 6-1's camp pieces (world6.js now runs in World 7
   too): 5 frightened soldiers, The One on Saul's tent roof. Stand-ins: 6-1's backgrounds, World 6's map painting for
-  the World 7 map (map.js), and armored David drawn in code. Art requests: ART_PROMPTS.md "World 7". Journal pages
+  the World 7 map (map.js). Armored David is Glen's clips (david-sling-art/world7/david_armor):
+  `david_armor_idle/walk/hop/slip/off`, cut with 50 px headroom for Glen to paint the helmet tops back in (the frames
+  where the video cut it off are listed in each .json as helmet_cut_frames); the pile is the off clip's last frame. Art requests: ART_PROMPTS.md "World 7". Journal pages
   for World 7 are in journal.js (JOURNAL_TEXT.md's draft). Not built yet: the opening scene (Saul dresses him), Tobi's
   and Shammah's stops, 7-2 to 7-4 and the shield-bearer.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).

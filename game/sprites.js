@@ -672,6 +672,66 @@ window.SPRITE_DATA = {
   "ay": 266,
   "align": "feet"
  },
+ "david_armor_hop": {
+  "src": "../assets/sprites/david_armor_hop.png",
+  "frames": 12,
+  "w": 176,
+  "h": 324,
+  "ms": 52,
+  "loop": true,
+  "pingpong": false,
+  "ax": 86,
+  "ay": 322,
+  "align": "feet"
+ },
+ "david_armor_idle": {
+  "src": "../assets/sprites/david_armor_idle.png",
+  "frames": 12,
+  "w": 143,
+  "h": 324,
+  "ms": 222,
+  "loop": true,
+  "pingpong": true,
+  "ax": 71,
+  "ay": 322,
+  "align": "feet"
+ },
+ "david_armor_off": {
+  "src": "../assets/sprites/david_armor_off.png",
+  "frames": 28,
+  "w": 379,
+  "h": 325,
+  "ms": 171,
+  "loop": false,
+  "pingpong": false,
+  "ax": 136,
+  "ay": 323,
+  "align": "feet"
+ },
+ "david_armor_slip": {
+  "src": "../assets/sprites/david_armor_slip.png",
+  "frames": 20,
+  "w": 185,
+  "h": 325,
+  "ms": 208,
+  "loop": false,
+  "pingpong": false,
+  "ax": 78,
+  "ay": 322,
+  "align": "feet"
+ },
+ "david_armor_walk": {
+  "src": "../assets/sprites/david_armor_walk.png",
+  "frames": 12,
+  "w": 213,
+  "h": 311,
+  "ms": 174,
+  "loop": true,
+  "pingpong": false,
+  "ax": 135,
+  "ay": 309,
+  "align": "feet"
+ },
  "david_arms_crossed": {
   "src": "../assets/sprites/david_arms_crossed.png",
   "frames": 8,

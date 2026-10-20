@@ -6,21 +6,23 @@
 //       hit first. Stand still and press Select to take it off: "I cannot go in these" (17:39), and Saul nods.
 //       It stays off for the rest of the stage (a respawn doesn't put it back on).
 //   setPiece("saul7", c)  King Saul beside his tent (Glen's saul_armor poses), watching David try the armor.
-// Stand-in art until Glen's: David is his own sprite with a bronze coat tinted over his body, a big bronze helmet and a
-// sword dragging behind; the armor he takes off is drawn as a little pile.
+// Glen's clips (2026-10-20): david_armor_idle / walk / hop / slip / off (world7/david_armor). The off clip ends with the
+// armor in a pile beside him: that last frame, without David, stays on the ground.
 
 const W7 = {
   ARMOR_SPEED: 0.42,     // x WALK_SPEED: no running in a coat of armor
   ARMOR_HOP: 0.55,       // x JUMP_SPEED: a hop about a third as high (a crate, never a wall)
   ARMOR_HEARTS: 3,       // grey hearts, hit before his own
   SLIP_EVERY: [3.5, 6],  // seconds of walking between the helmet slipping down
-  SLIP_T: 1.1,           // seconds it covers his eyes
+  SLIP_T: 1.6,           // seconds of the helmet slipping down and being pushed back (david_armor_slip from SLIP_FROM)
+  SLIP_FROM: 5,          // the slip sheet's first frames are him looking up at it, tipped back: start where he grabs it
+  OFF_MS: 120,           // ms per frame taking the armor off (david_armor_off, 28 frames)
   CLANK_EVERY: 0.5,      // seconds between clanks while he walks
   STUCK_T: 1.4,          // seconds pushing against something before the "take it off" reminder
   SAUL_SIZE: 1.0,
 };
 
-const armor = { on: LEVEL_STAGE === "7-1", hearts: W7.ARMOR_HEARTS, walkT: 0, nextSlip: 4, slipT: 0, clankT: 0, stuckT: 0,
+const armor = { on: LEVEL_STAGE === "7-1", removing: 0, hearts: W7.ARMOR_HEARTS, walkT: 0, nextSlip: 4, slipT: 0, clankT: 0, stuckT: 0,
                 told: false, stuckTold: false, wasGround: true, pile: null, offT: 0, bTold: false };
 function inArmor() { return armor.on && WORLD === 7; }
 
@@ -58,13 +60,20 @@ function thud(vol = 0.5) {   // landing in armor
 function armorOff() {
   const d = david;
   if (!armor.on) return false;
-  armor.on = false; armor.slipT = 0; armor.offT = 0.001;
-  armor.pile = { x: d.x - d.facing * 34, y: d.y, facing: d.facing };
-  d.vx = 0; setState("idle");
-  clank(0.35, 0.9); setTimeout(() => clank(0.3, 1.1), 180); setTimeout(() => thud(0.35), 420);
-  sayLine("David", "I cannot go in these, because I am not used to them. (1 Samuel 17:39)");
+  if (armor.removing > 0) return true;
+  armor.slipT = 0; d.vx = 0; setState("idle");
+  if (!SPR.david_armor_off) { armorDone(); return true; }
+  armor.removing = 0.001;   // Glen's clip: the helmet, the coat, the shin guards, one by one (updateArmor)
   return true;
 }
+function armorDone() {
+  const d = david;
+  armor.on = false; armor.removing = 0; armor.offT = 0.001;
+  armor.pile = { x: d.x, y: d.y, facing: d.facing, drawn: !SPR.david_armor_off };
+  if (!SPR.david_armor_off) { armor.pile.x -= d.facing * 34; clank(0.35, 0.9); setTimeout(() => thud(0.35), 420); }
+  sayLine("David", "I cannot go in these, because I am not used to them. (1 Samuel 17:39)");
+}
+const armorSpeed = () => (armor.removing > 0 || armor.slipT > 0 ? 0 : W7.ARMOR_SPEED);   // (he stops to fix the helmet)
 // a hit while he's in it: the armor takes it (a clank, a small shove) until its grey hearts are gone
 function armorHit(fromX) {
   if (!armor.on || armor.hearts <= 0) return false;
@@ -85,6 +94,13 @@ function updateArmor(dt) {
   const d = david;
   if (armor.offT > 0) armor.offT += dt;
   if (!armor.on) return;
+  if (armor.removing > 0) {   // taking it off: he stands there; a clank as each piece comes down
+    const f0 = Math.floor(armor.removing * 1000 / W7.OFF_MS); armor.removing += dt; d.vx = 0;
+    const f1 = Math.floor(armor.removing * 1000 / W7.OFF_MS);
+    if (f1 !== f0 && [4, 9, 14, 19, 24].includes(f1)) { clank(0.3, 0.8 + f1 * 0.02); if (f1 === 9) thud(0.3); }
+    if (f1 >= SPR.david_armor_off.frames) armorDone();
+    return;
+  }
   const walking = d.onGround && Math.abs(d.vx) > 20;
   if (!armor.told && !dialogHeld() && dialog.t <= 0) { armor.told = true; toast("Saul's armor is heavy: slow, a little hop, and no sling. Stand still and press Select to take it off."); }
   if (pressed("b") && !armor.bTold && !d.harp) { armor.bTold = true; toast("You can't swing a sling in a coat of armor."); clank(0.2, 1.2); }
@@ -114,6 +130,22 @@ function updateArmor(dt) {
 // ---------------------------------------------------------------------------
 const armorCanvas = document.createElement("canvas");
 function drawArmorDavid(d, x, y) {
+  if (!SPR.david_armor_walk || !SPR.david_armor_walk.img.naturalWidth) return drawArmorDavidDrawn(d, x, y);
+  const t = d.t;
+  if (armor.removing > 0) { drawSprite("david_armor_off", Math.min(SPR.david_armor_off.frames - 1, Math.floor(armor.removing * 1000 / W7.OFF_MS)), x, y, d.facing); return true; }
+  if (armor.slipT > 0) {
+    const n = SPR.david_armor_slip.frames, p = 1 - armor.slipT / W7.SLIP_T;
+    drawSprite("david_armor_slip", Math.min(n - 1, W7.SLIP_FROM + Math.floor(p * (n - W7.SLIP_FROM))), x, y, d.facing); return true;
+  }
+  if (!d.onGround) {   // the hop: crouch, up, down, from how fast he's rising or falling
+    const v0 = TUNE.JUMP_SPEED * W7.ARMOR_HOP, k = Math.max(0, Math.min(1, (d.vy + v0) / (2 * v0)));
+    drawSprite("david_armor_hop", 3 + Math.round(k * 6), x, y, d.facing); return true;
+  }
+  if (Math.abs(d.vx) > 15) { drawSprite("david_armor_walk", frameOf("david_armor_walk", t * Math.max(0.5, Math.abs(d.vx) / (TUNE.WALK_SPEED * W7.ARMOR_SPEED))), x, y, d.facing); return true; }
+  drawSprite("david_armor_idle", frameOf("david_armor_idle", t), x, y, d.facing);
+  return true;
+}
+function drawArmorDavidDrawn(d, x, y) {   // (until the sheets load: drawn over his own sprite)
   const t = d.t, H = TUNE.DAVID_HEIGHT;
   let nm, i, yy = y;
   if (!d.onGround) { nm = "david_jump_air"; i = 5; yy = y - d.h / 2 - 6; }
@@ -160,7 +192,14 @@ function drawHelmet(x, y, r, facing, lying = false) {
 function drawArmorPile(camX) {
   const p = armor.pile; if (!p) return;
   const x = p.x - camX, y = p.y, H = TUNE.DAVID_HEIGHT;
-  if (x < -100 || x > W + 100) return;
+  if (x < -300 || x > W + 300) return;
+  if (!p.drawn && SPR.david_armor_off) {   // the pile from the last frame of Glen's clip, without David
+    const s = SPR.david_armor_off, sc = SCALE, edge = 39 * sc;
+    ctx.save(); ctx.beginPath();
+    if (p.facing > 0) ctx.rect(x + edge, y - s.h * sc, s.w * sc, s.h * sc + 4); else ctx.rect(x - edge - s.w * sc, y - s.h * sc, s.w * sc, s.h * sc + 4);
+    ctx.clip(); drawSprite("david_armor_off", s.frames - 1, x, y, p.facing); ctx.restore();
+    return;
+  }
   ctx.save();
   const g = ctx.createLinearGradient(0, y - 30, 0, y);   // the coat, folded on the ground
   g.addColorStop(0, "#d7a24c"); g.addColorStop(1, "#6b4316");
@@ -190,7 +229,7 @@ function drawSaul7(camX) {
 // 7-1: the helmet over his eyes. The top of the screen goes dark down to the bronze rim, for a moment.
 function drawWorld7Over() {
   if (!inArmor() || armor.slipT <= 0) return;
-  const k = Math.min(1, (W7.SLIP_T - armor.slipT) / 0.12, armor.slipT / 0.25), edge = H * (0.18 + 0.5 * k);
+  const p = 1 - armor.slipT / W7.SLIP_T, k = Math.max(0, Math.min(1, (p - 0.2) / 0.1, (1 - p) / 0.12)), edge = H * (0.18 + 0.5 * k);
   ctx.save();
   ctx.fillStyle = "rgba(14,8,2,0.94)";
   ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.lineTo(W, edge - 40); ctx.quadraticCurveTo(W / 2, edge + 40, 0, edge - 40); ctx.closePath(); ctx.fill();

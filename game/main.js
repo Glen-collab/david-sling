@@ -1806,7 +1806,7 @@ function updateDavid(dt) {
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
-               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout";
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout" || (ARMORED() && armor.removing > 0);
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30 && !(ARMORED() && armorOff())) {   // in Saul's armor, Select takes it off (world7.js)
@@ -1963,7 +1963,7 @@ function updateDavid(dt) {
     let target = dir * (d.holdDirT > TUNE.RUN_DELAY ? TUNE.RUN_SPEED : TUNE.WALK_SPEED);
     if (lowPose) target = dir * TUNE.CRAWL_SPEED;
     if (d.carrying) target *= 0.8;
-    if (ARMORED()) target = dir * TUNE.WALK_SPEED * W7.ARMOR_SPEED;   // clank, clank: no running in a coat of armor
+    if (ARMORED()) target = dir * TUNE.WALK_SPEED * armorSpeed();   // clank, clank: no running in a coat of armor
     const mud = d.onGround && typeof onMud === "function" && onMud(d.x, d.y) ? TUNE.MUD_GRIP : 1;   // 3-4's mud slicks (world3.js)
     const acc = (d.onGround ? (dir !== 0 ? TUNE.ACCEL_GROUND : TUNE.FRICTION) : TUNE.ACCEL_AIR) * mud;
     if (d.vx < target) d.vx = Math.min(target, d.vx + acc * dt);

@@ -1,0 +1,20 @@
+{
+  "frames": 12,
+  "frame_w": 176,
+  "frame_h": 324,
+  "ms_per_frame": 52,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 86,
+  "anchor_y": 322,
+  "source": "world7/david_armor/clip_b.mp4 (Glen, 2026-10-20); 50 px headroom to paint the helmet back in",
+  "helmet_cut_frames": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ]
+}
