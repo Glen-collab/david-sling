@@ -805,10 +805,11 @@ if (LEVEL_NAME === "test") {
   setPiece("pool", 104, GR, { w: 17 });
   critter("tortoise", 112, 18, 8);
   oliveArc(104, 14, 5);
-  // The One: high on the canyon wall, its first ledge out over the middle of the pool (reached from the shell)
-  plat(112, 13, 3); plat(116, 10, 3); plat(120, 7, 3); plat(125, 4, 3);
-  lostSheep("lamb", 126, 3, "one");
-  oliveRow(112, 12, 3); oliveRow(116, 9, 3);
+  // The One: high on the canyon wall, climbed from the far bank (no ledge over the pool: the shell is the only way across).
+  // The first ledge is 6 tiles up, past a single jump (~5): come back for it with the double jump (5-2)
+  plat(122, 11, 3); plat(118, 9, 3); plat(120, 6, 3); plat(125, 3, 3);
+  lostSheep("lamb", 126, 2, "one");
+  oliveRow(122, 10, 3); oliveRow(118, 8, 3);
   special(118, 16);
   bridge(131, GR, 4);
   ground(135, 168);

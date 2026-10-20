@@ -1165,6 +1165,7 @@ function drawSmallCritter(k, x, name) {
 // ---------------------------------------------------------------------------
 Object.assign(W2, { TORTOISE_WALK: 62, TORTOISE_HIDE: 3.2 });
 CRITTER_ART.tortoise = { idle: "tortoise_walk", move: "tortoise_walk", len: 100, h: 70, box: k => spriteBox(k, "tortoise_walk", 70) };
+for (const p of setPieces) if (p.kind === "pool") for (let c = p.c; c < p.c + p.w; c++) specialPlat.add(c + "," + GR);   // the shell's footing is the shell itself: no rock ledge drawn on it
 function shellSpan(k) {   // the columns the shell covers (its back is a stepping stone)
   const b = critterBox(k), pad = (b.x1 - b.x0) * 0.16;
   return [Math.floor((b.x0 + pad) / T), Math.floor((b.x1 - pad) / T)];
