@@ -656,24 +656,35 @@ function saveLift6() {
 function courage6() { try { const l = JSON.parse(localStorage.getItem("davidProgress") || "{}").lift6 || {}; return Object.values(l).reduce((a, b) => a + b, 0); } catch (e) { return 0; } }
 
 // --- Philistine skirmishers (6-4, and out of the tower in its fight). setPiece("skirmisher", c): he waits behind his
-// shield; when David comes near he charges. Two stones (a charged one counts double) and he drops his shield and runs
+// shield; when David comes near he charges. Three stones (or one charged) and he drops his shield and runs
 // back to his own lines. Nobody dies. Glen's Philistine (phil_run far off, phil_charge shield-up when close, phil_drop,
 // phil_flee); without them, the running soldier, darkened and reddened.
-Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 2, DROP_MS: 150, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
+// Glen 2026-10-20: he paces a few tiles behind his shield until David's in range, charges, and after a hit on David
+// backs off (SKIRM_BACK s) and comes again. Three stones, or one charged.
+Object.assign(W6, { SKIRM_PACE: 1.5, SKIRM_PACE_SPEED: 70, SKIRM_BACK: 0.9, SKIRM_BACK_SPEED: 230, SKIRM_REST: 0.5 });
+Object.assign(W6, { SKIRM_RANGE: 9, SKIRM_SPEED: 210, SKIRM_HP: 3, DROP_MS: 150, PHIL: "sepia(0.55) hue-rotate(-28deg) saturate(1.5) brightness(0.72)" });
 const skirms = setPieces.filter(p => p.kind === "skirmisher").map(p => ({ x: p.x, y: p.y, home: p.x, state: "wait", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0 }));
 function addSkirm(x) { sfxOne(["phil_hedad", "phil_hedad_2"], x, 0.55); skirms.push({ x, y: GR * T, home: x, state: "run", hp: W6.SKIRM_HP, t: 0, alpha: 1, flash: 0, spawned: true }); }
 function updateSkirms(dt) {
   const d = david;
   for (let i = skirms.length - 1; i >= 0; i--) {
     const k = skirms[i]; k.t += dt; k.flash = Math.max(0, k.flash - dt);
+    if (k.state === "wait") {   // pacing in front of his lines, back and forth over a few tiles
+      k.pdir = k.pdir || -1; k.x += k.pdir * W6.SKIRM_PACE_SPEED * dt; k.dir = k.pdir;
+      if (Math.abs(k.x - k.home) > W6.SKIRM_PACE * T && Math.sign(k.x - k.home) === k.pdir) k.pdir = -k.pdir;
+    }
     if (k.state === "wait" && Math.abs(d.x - k.x) < W6.SKIRM_RANGE * T && d.deadT <= 0) {
       k.state = "run"; k.t = 0; sfxOne(["phil_hedad", "phil_hedad_2"], k.x, 0.75);   // "Hedad!", his battle cry (Jeremiah 51:14)
-      if (!W6.skirmTold) { W6.skirmTold = true; toast("A Philistine skirmisher, shield up, charging! Two stones (or one charged) and he'll run."); }
+      if (!W6.skirmTold) { W6.skirmTold = true; toast("A Philistine skirmisher, shield up, charging! Three stones (or one charged) and he'll run."); }
     }
     if (k.state === "run") {
       const dir = Math.sign(d.x - k.x) || -1; k.dir = dir;
       if (d.deadT <= 0) k.x += dir * W6.SKIRM_SPEED * dt;
-      if (Math.abs(d.x - k.x) < 30 && d.y > k.y - 100 && d.deadT <= 0) hurtDavid(k.x);
+      if (Math.abs(d.x - k.x) < 30 && d.y > k.y - 100 && d.deadT <= 0) { hurtDavid(k.x); k.state = "back"; k.t = 0; }   // one hit, then he backs off
+    } else if (k.state === "back") {   // shield still up, facing David, backing away; then a breath, and he comes again
+      k.dir = Math.sign(d.x - k.x) || -1;
+      if (k.t < W6.SKIRM_BACK) k.x -= k.dir * W6.SKIRM_BACK_SPEED * dt * (1 - k.t / W6.SKIRM_BACK * 0.5);
+      else if (k.t > W6.SKIRM_BACK + W6.SKIRM_REST) { k.state = "run"; k.t = 0; }
     } else if (k.state === "drop") {   // he throws down his shield and spear and turns
       if (k.t * 1000 >= W6.DROP_MS * SPR.phil_drop.frames) { k.state = "flee"; k.t = 0; }
     } else if (k.state === "flee") {
@@ -684,9 +695,9 @@ function updateSkirms(dt) {
 }
 function stoneHitsSkirm(s) {
   for (const k of skirms) {
-    if (k.state !== "run" && k.state !== "wait") continue;
+    if (k.state !== "run" && k.state !== "wait" && k.state !== "back") continue;
     if (Math.abs(s.x - k.x) < 26 && s.y > k.y - 110 && s.y < k.y) {
-      k.hp -= s.charged || s.power ? 2 : 1; k.flash = 0.25; stoneHit(s);
+      k.hp -= s.charged || s.power ? W6.SKIRM_HP : 1; k.flash = 0.25; stoneHit(s);   // three stones, or one charged
       if (k.hp <= 0) { k.state = SPR.phil_drop ? "drop" : "flee"; k.t = 0; k.dropX = k.x; setTimeout(() => sfx("phil_nusu_1", k.x, 0.7), 500); /* "Nusu!" (Run!) */ sfx("lion_hit", k.x, 0.4, 1.6); if (!W6.fleeTold) { W6.fleeTold = true; toast("He drops his shield and runs back to his own lines."); } }
       return true;
     }
@@ -706,7 +717,8 @@ function drawSkirms(camX) {
         ctx.fillStyle = "#9a7440"; ctx.strokeStyle = "#5a3e20"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(gx - 22, gy - 5, 26, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
       }
       const near = Math.abs(david.x - k.x) < 5 * T, fl = k.flash > 0 ? "brightness(2)" : "";
-      if (k.state === "wait") drawSprite("phil_charge", 0, x, k.y, dir, 1, k.alpha, fl);
+      if (k.state === "wait") drawSprite("phil_run", frameOf("phil_run", (now + k.home) * 0.45), x, k.y, dir, 1, k.alpha, fl);   // pacing: his run, slowed to a walk
+      else if (k.state === "back") drawSprite("phil_charge", frameOf("phil_charge", now * 0.6), x, k.y, dir, 1, k.alpha, fl);
       else if (k.state === "run") { const nm = near ? "phil_charge" : "phil_run"; drawSprite(nm, frameOf(nm, now + k.home), x, k.y, dir, 1, k.alpha, fl); }
       else if (k.state === "drop") drawSprite("phil_drop", frameOf("phil_drop", k.t, W6.DROP_MS), x, k.y, -(k.dir || -1), 1, k.alpha, fl);   // (the sheet starts facing left)
       else drawSprite("phil_flee", frameOf("phil_flee", now + k.home), x, k.y, 1, 1, k.alpha);
@@ -795,7 +807,7 @@ function startTower() {
   toast(W6.towerSeen ? "The watchtower again. Watch the shutters." : "The Philistine watchtower! Archers behind every shutter. When one creaks open, put two stones in it: the quick release.");
   W6.towerSeen = true;
 }
-function setRoof(on) { for (let c = Math.floor(tw.x0 / T) - 2; c < Math.ceil((tw.x0 + tw.w) / T); c++) oneway[W6.TW_ROOF][c] = on; }
+function setRoof(on) { for (let c = Math.floor(tw.x0 / T) - 2; c < Math.ceil((tw.x0 + tw.w) / T); c++) { oneway[W6.TW_ROOF][c] = on; specialPlat.add(c + "," + W6.TW_ROOF); } }   // the tower's own roof: stood on, never drawn as a rock ledge
 function updateTower(dt) {
   if (!tw) return;
   const d = david;
