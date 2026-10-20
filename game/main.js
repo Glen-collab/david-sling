@@ -3975,6 +3975,8 @@ function frame(now) {
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)
+    for (const a of [dayMusic, nightMusic, caveMusic, ambience, bossMusic]) if (!a.paused) a.pause();   // nor the stage music or the birds (they fade back in after)
+    dayVol = nightVol = caveVol = ambVol = bossVol = 0;
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
     // Start on a map or in the courtyard: the pause menu (settings)
