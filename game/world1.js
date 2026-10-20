@@ -284,12 +284,17 @@ function runCritter(k, speed, dt) {   // move along the ground; stop at a pit ed
   const x0 = k.x; collideBody(k, 50, 44, dt);
   return Math.abs(k.x - x0) > 0.2 * speed * dt;   // false = stuck
 }
+const CHASERS = new Set(["fox", "jackal", "wolf", "boar", "hyena", "villagedog", "bandit", "raider", "ram"]);
 function updateCritters(dt) {
   for (const k of critters) {
     if (k.gone) { if (k.alpha > 0) { k.alpha -= dt * 1.2; k.x += k.vx * dt; if (k.fly) k.y += k.vy * dt; } continue; }
     if (k.fell) { k.gone = true; k.alpha = 0; continue; }   // ran into a pit
     k.t += dt;
-    const dx = david.x - k.x, sameLevel = Math.abs(david.y - k.y) < 90;
+    const sameLevel = Math.abs(david.y - k.y) < 90;
+    // (Glen) a chaser right under David on a ledge used to flip left-right every frame: within 2 tiles below him it keeps
+    // going the way it was facing, runs on past, turns, and comes back under: pacing, not jittering
+    let dx = david.x - k.x;
+    if (!sameLevel && CHASERS.has(k.kind) && k.facing && Math.abs(dx) < 2 * T) dx = k.facing * 2 * T;
     if (k.kind === "fox") updateFox(k, dx, sameLevel, dt);
     else if (k.kind === "jackal") updateJackal(k, dx, sameLevel, dt);
     else if (k.kind === "ram") updateRam(k, dx, sameLevel, dt);

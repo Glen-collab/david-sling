@@ -678,11 +678,12 @@ function updateSkirms(dt) {
       if (!W6.skirmTold) { W6.skirmTold = true; toast("A Philistine skirmisher, shield up, charging! Three stones (or one charged) and he'll run."); }
     }
     if (k.state === "run") {
-      const dir = Math.sign(d.x - k.x) || -1; k.dir = dir;
+      const above = d.y < k.y - 90 && Math.abs(d.x - k.x) < 2 * T;   // David up on a ledge over him: run on past, then turn (no jitter)
+      const dir = above && k.dir ? k.dir : Math.sign(d.x - k.x) || -1; k.dir = dir;
       if (d.deadT <= 0) k.x += dir * W6.SKIRM_SPEED * dt;
       if (Math.abs(d.x - k.x) < 30 && d.y > k.y - 100 && d.deadT <= 0) { hurtDavid(k.x); k.state = "back"; k.t = 0; }   // one hit, then he backs off
     } else if (k.state === "back") {   // shield still up, facing David, backing away; then a breath, and he comes again
-      k.dir = Math.sign(d.x - k.x) || -1;
+      if (Math.abs(d.x - k.x) > 20) k.dir = Math.sign(d.x - k.x) || -1;
       if (k.t < W6.SKIRM_BACK) k.x -= k.dir * W6.SKIRM_BACK_SPEED * dt * (1 - k.t / W6.SKIRM_BACK * 0.5);
       else if (k.t > W6.SKIRM_BACK + W6.SKIRM_REST) { k.state = "run"; k.t = 0; }
     } else if (k.state === "drop") {   // he throws down his shield and spear and turns
