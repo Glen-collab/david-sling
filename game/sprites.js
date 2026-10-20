@@ -2676,6 +2676,30 @@ window.SPRITE_DATA = {
   "ay": 326,
   "align": "feet"
  },
+ "mud_settle": {
+  "src": "../assets/sprites/mud_settle.png",
+  "frames": 15,
+  "w": 976,
+  "h": 304,
+  "ms": 83,
+  "loop": false,
+  "pingpong": false,
+  "ax": 488,
+  "ay": 303,
+  "align": "feet"
+ },
+ "mud_surge": {
+  "src": "../assets/sprites/mud_surge.png",
+  "frames": 18,
+  "w": 976,
+  "h": 304,
+  "ms": 83,
+  "loop": true,
+  "pingpong": false,
+  "ax": 488,
+  "ay": 303,
+  "align": "feet"
+ },
  "name_stone_crumble": {
   "src": "../assets/sprites/name_stone_crumble.png",
   "frames": 5,

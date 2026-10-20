@@ -432,18 +432,33 @@ function drawFlood(camX) {
     const k = (H + 30 - top) / (flow.naturalHeight * 0.8), fw = flow.naturalWidth * k, fh = flow.naturalHeight * k, y = top - fh * 0.2;
     const front = ITEM.mud_front && ITEM.mud_front.naturalWidth ? ITEM.mud_front : null;
     const surf = y + fh * 0.236, ffh = fh * 0.93, ffw = front ? front.naturalWidth * ffh / front.naturalHeight : 0;
-    const xf = x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
-    ctx.beginPath();
-    if (front) ctx.rect(-10, 0, xf + ffw * 0.1 + 10, H);
-    else { ctx.moveTo(-10, H); for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2); ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); }
-    ctx.save(); ctx.clip();
-    const right = front ? xf + ffw * 0.1 : x1, o = (performance.now() / 1000 * 160) % (2 * fw);
-    for (let i = 0, xr = right + 2 * fw - o; xr > -fw; i++, xr -= fw) {
-      if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
-      else ctx.drawImage(flow, xr - fw, y, fw, fh);
+    // Glen's mudslide clip (mud_flow_clip.mp4): once he's out, its ending (mud_settle) fades in and plays as the wall sinks and
+    // fades. (Its surge, mud_surge, is cut too, but at 976x304 it blurs drawn this big: the chase keeps his still front.)
+    const lv = flood.level, wallA = flood.done ? Math.max(0, Math.min(1, (lv - 0.55) / 0.4)) : 1;
+    const anim = flood.done ? SPR.mud_settle : W2.FLOOD_SURGE ? SPR.mud_surge : null, live = anim && anim.img.naturalWidth;
+    const ah = live ? fh * 1.17 : 0, aw = live ? anim.w * ah / anim.h : 0, ax = x1 - aw * (flood.done ? 0.9 : 0.8);   // solid mud at the deadly line (draining: it spreads a little past it)
+    const ai = !live ? 0 : flood.done ? Math.min(anim.frames - 1, Math.floor((1 - lv) * 1.15 * anim.frames)) : Math.floor(performance.now() / anim.ms) % anim.frames;
+    const surging = live && !flood.done, xf = surging ? ax - ffw * 0.1 : x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
+    if (wallA > 0) {
+      ctx.save(); ctx.globalAlpha = wallA; ctx.beginPath();
+      if (surging) ctx.rect(-10, 0, ax + aw * 0.1 + 10, H);
+      else if (front) ctx.rect(-10, 0, xf + ffw * 0.1 + 10, H);
+      else { ctx.moveTo(-10, H); for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2); ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); }
+      ctx.save(); ctx.clip();
+      const right = surging ? ax + aw * 0.1 : front ? xf + ffw * 0.1 : x1, o = (performance.now() / 1000 * 160) % (2 * fw);
+      for (let i = 0, xr = right + 2 * fw - o; xr > -fw; i++, xr -= fw) {
+        if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
+        else ctx.drawImage(flow, xr - fw, y, fw, fh);
+      }
+      ctx.restore();
+      if (surging) ctx.drawImage(anim.img, ai * anim.w, 0, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah);
+      else if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
+      ctx.restore();
     }
-    ctx.restore();
-    if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
+    if (live && flood.done) {   // the ending: in as the wall goes, out as the last of it soaks away
+      ctx.save(); ctx.globalAlpha = Math.min(1, (1 - lv) * 3, lv * 5);
+      ctx.drawImage(anim.img, ai * anim.w, 0, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah); ctx.restore();
+    }
     ctx.restore(); return;
   }
   const g = ctx.createLinearGradient(0, top - 20, 0, H);
