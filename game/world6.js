@@ -860,7 +860,7 @@ function stoneHitsTower(s) {
   }
   if (tw.phase === 2) {
     const wh = twWheel();
-    if (Math.hypot(s.x - wh.x, s.y - wh.y) < wh.r + 10) {
+    if (Math.abs(s.x - wh.x) < wh.r + 12 && s.y > wh.y - wh.r - W6.TW_WHEEL_UP && s.y < wh.y + wh.r) {   // the whole wheel, and a little over it (a flat throw goes in chest-high)
       if (!(s.charged || s.power)) { stoneHit(s, 0.4); if (!W6.pinTapTold) { W6.pinTapTold = true; toast("A tap stone won't shift a wheel pin. Hold B for a charged stone!"); } return true; }
       tw.pins++; stoneHit(s); sfx("stone_hit", wh.x, 1, 0.55); tw.jolt = 1; tw.leanTo += 1.4; if (typeof w2Shake !== "undefined") w2Shake.v = 0.8;
       if (tw.pins >= twPinHP()) {
@@ -924,16 +924,16 @@ function drawTwDust(camX) {
 // on top, four wheels (two show). (x, y) = its front-bottom corner on the ground; s = scale; lean in degrees.
 // a flat throw from David at an open (or opening) window: the angle that arcs the stone into it (null: no help)
 function towerAim(x, y, sp, charged, facing) {
-  if (!tw || tw.phase !== 1 || !towerFight()) return null;
-  const w = tw.wins.filter(q => (q.state === "open" || q.state === "tell") && Math.sign(q.x - x) === facing).sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0];
-  if (!w) return null;
+  if (!tw || (tw.phase !== 1 && tw.phase !== 2) || !towerFight()) return null;
+  const w = tw.phase === 2 ? twWheel() : tw.wins.filter(q => (q.state === "open" || q.state === "tell") && Math.sign(q.x - x) === facing).sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0];   // phase 2: the front hub
+  if (!w || Math.sign(w.x - x) !== facing) return null;
   const g = TUNE.STONE_GRAVITY * (charged ? 0.45 : 1), dx = Math.abs(w.x - x), dy = y - w.y;   // dy: how far up the window is
   if (dx < 40 || dx > W6.TW_AIM_RANGE) return null;
   const v2 = sp * sp, disc = v2 * v2 - g * (g * dx * dx + 2 * dy * v2); if (disc < 0) return null;
   const th = Math.atan((v2 - Math.sqrt(disc)) / (g * dx));   // the low arc
   return th > W6.TW_AIM_MAX ? null : -th;
 }
-Object.assign(W6, { TW_AIM_RANGE: 900, TW_AIM_MAX: 1.0 });   // the window aim: how far off, and the steepest arc (radians) it'll throw
+Object.assign(W6, { TW_AIM_RANGE: 900, TW_AIM_MAX: 1.0, TW_WHEEL_UP: 40 });   // ... and TW_WHEEL_UP: px above the wheel's rim that still counts as hitting it   // the window aim: how far off, and the steepest arc (radians) it'll throw
 function drawTowerShape(x, y, s, lean, far) {
   if (ITEM.tw_body && !far) {   // Glen's tower, its two wheels (Glen's too) on its hubs; the front one sags once its pins are out
     const k = W6.TW_PIC * s, roof = y - (GR - W6.TW_ROOF) * T * s, px = W6.TW_BODY * s;
