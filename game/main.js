@@ -3659,6 +3659,7 @@ function updateHornets(dt) {
       h.x += (h.hx - h.x) * Math.min(1, dt * 1.8); h.y += (h.hy - h.y) * Math.min(1, dt * 1.8);
       if (h.t > 1.2) { h.state = "hover"; h.t = 0; }
     }
+    if (Math.abs(dx) > 12) h.facing = dx > 0 ? 1 : -1;   // always watching David, even flying back to its spot or past him (Glen: no tail-first swoops)
     const reach = h.kind === "raven" ? 52 : 26;
     if (Math.abs(h.x - david.x) < reach && h.y > david.y - david.h - 10 && h.y < david.y) hurtDavid(h.x);
   }
