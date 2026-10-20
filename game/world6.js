@@ -76,6 +76,7 @@ function updateFearful(dt) {
     }
   }
 }
+Object.assign(TUNE.SPRITE_SIZE, { soldier2_fear: 0.8, soldier2_go: 0.88 });   // Glen: the second man (helmet, arms round his knees) sat nearly as tall as David
 function drawFearful(camX) {
   const now = performance.now() / 1000;
   for (const s of fearful) {
@@ -295,12 +296,12 @@ function updateVolleys(dt) {
         volley.stuck.push({ x: s.lx, y: s.ly, a: Math.atan2(s.vy, s.vx), t: 0 });
         if (volley.sticks < 2 && Math.random() < W6.STICK_CHANCE) { volley.sticks++; sfx("arrow_with_stick-to-target", s.lx, 0.45, 0.9 + Math.random() * 0.2); }   // now and then one thunks in
       }
-      else volley.stuck.push({ x: s.lx, y: s.ly, t: 0, stone: true });
+      else volley.stuck.push({ x: s.lx, y: s.ly, t: 0, stone: true, k: s.k });
       if (Math.random() < 0.15) sfx("stone_hit", s.lx, 0.25, 1.3);
       volley.shots.splice(i, 1);
     }
   }
-  for (let i = volley.stuck.length - 1; i >= 0; i--) if ((volley.stuck[i].t += dt) > 2.5) volley.stuck.splice(i, 1);
+  for (let i = volley.stuck.length - 1; i >= 0; i--) if ((volley.stuck[i].t += dt) > (volley.stuck[i].stone ? 6 : 2.5)) volley.stuck.splice(i, 1);
 }
 function drawVolleys(camX) {
   const show = [...(volley.plan || []), ...volley.shots];   // shadows: from the shout until each one lands
@@ -317,8 +318,11 @@ function drawVolleys(camX) {
   }
   for (const s of volley.stuck) {
     const x = s.x - camX; if (x < -60 || x > W + 60) continue;
-    ctx.save(); ctx.globalAlpha = Math.min(1, (2.5 - s.t) / 0.6);
-    if (s.stone) { ctx.fillStyle = "#6e6458"; ctx.beginPath(); ctx.ellipse(x, s.y - 3, 6, 4, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.save(); ctx.globalAlpha = Math.min(1, ((s.stone ? 6 : 2.5) - s.t) / 0.6);
+    if (s.stone) {   // a slingstone where it struck: half buried, Glen's brown stone cut off at the ground (Glen, 2026-10-20)
+      ctx.beginPath(); ctx.rect(x - 20, s.y - 30, 40, 30 + 2); ctx.clip();
+      drawStoneItem(ENEMY_STONES[(s.k = s.k ?? Math.floor(Math.random() * 3))], x, s.y + 1, 24, { spin: (s.k + 1) * 0.4 });
+    }
     else { ctx.translate(x, s.y); ctx.rotate(s.a); drawItem("arrow", -14, 10, 0.5); }   // stuck in the ground, half in
     ctx.restore();
   }
