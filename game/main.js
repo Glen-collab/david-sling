@@ -1349,6 +1349,7 @@ if (LEVEL_NAME === "test") {
   rock(113, 15, 3, 2); rock(116, 14, 9, 3);
   setPiece("giantview", 120, 13);
   rock(125, 15, 3, 2);
+  campfire(128);                                                            // halfway: rest after watching the giant
   // the slingers' ground, closer under the far slope
   setPiece("volley", 130, GR, { to: 168, shot: "stones" });
   shelter(133, 4);
@@ -1356,6 +1357,7 @@ if (LEVEL_NAME === "test") {
   critter("scorpion", 150);
   shelter(152, 4); special(153, 11);
   rock(161, 15, 3, 2); rock(164, 14, 2, 3);
+  campfire(169);                                                            // between the slingers and the last arrows
   // and arrows again, the last stretch back toward the camp's edge
   setPiece("volley", 172, GR, { to: 214 });
   shelter(175, 4);
@@ -1364,7 +1366,6 @@ if (LEVEL_NAME === "test") {
   shelter(195, 5);
   critter("hedgehog", 204);
   shelter(207, 4); special(208, 11);
-  campfire(217);
   sheepfold(222);
 } else if (LEVEL_NAME === "6-1") {
   // ---- 6-1 The Camp of Fear: the Israelite camp on its hill above the Valley of Elah, forty days into the giant's
@@ -3926,6 +3927,7 @@ function frame(now) {
   }
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
+    if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
     // Start on a map or in the courtyard: the pause menu (settings)
