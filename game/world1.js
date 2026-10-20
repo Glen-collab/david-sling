@@ -28,7 +28,7 @@ Object.assign(TUNE.SPRITE_SIZE, { fox_trot: 0.8, fox_sit: 0.8, jackal_run: 0.85,
 // Words from people: campfires (who/say) and talk() spots along the way
 // ---------------------------------------------------------------------------
 const dialog = { who: "", say: "", t: 0 };
-function sayLine(who, say) { Object.assign(dialog, { who, say, t: Math.max(W1.DIALOG_SECS, say.split(" ").length * 0.33) }); toastTime = 0; }
+function sayLine(who, say) { Object.assign(dialog, { who, say, t: Math.max(W1.DIALOG_SECS, say.split(" ").length * 0.33), hold: true }); toastTime = 0; }   // hold: the stage waits until A (main.js frame)
 function updateTalks(dt) {
   dialog.t = Math.max(0, dialog.t - dt);
   for (const k of talks) if (!k.done && david.x > k.x && david.x < MAIN_COLS * T && david.deadT <= 0) { k.done = true; sayLine(k.who, k.say); learnSkill(k.teach); }
@@ -47,6 +47,7 @@ function drawDialog() {
   ctx.fillStyle = "#ffd98a"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "left"; ctx.fillText(dialog.who, W / 2 - 388, y + 28);
   ctx.fillStyle = "#fff"; ctx.font = "19px sans-serif";
   lines.forEach((l, i) => ctx.fillText(l, W / 2 - 388, y + 56 + i * 26));
+  if (dialog.hold) { ctx.fillStyle = "rgba(255,217,138,0.75)"; ctx.font = "15px sans-serif"; ctx.textAlign = "right"; ctx.fillText(keyText("A: next"), W / 2 + 396, y + h - 10); ctx.textAlign = "left"; }
   ctx.restore();
 }
 

@@ -301,7 +301,7 @@ function checkCombo(dt) {
 }
 
 let toastText = "", toastTime = 0;
-function toast(t) { toastText = keyText(t); toastTime = 4; }
+function toast(t) { toastText = keyText(t); toastTime = Math.max(4, t.split(" ").length * 0.4); }   // long enough to read every word
 // "{ROLL}" / "{roll}" in what people say: the roll on the controller in use. A SNES pad has its own roll button (X); an
 // NES pad only has Down + A. The controller picked in the settings, or the pad that's plugged in if it says keyboard.
 function controllerKind() {
@@ -3980,6 +3980,7 @@ function frame(now) {
   if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
   else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
+  else if (dialog.hold && dialog.t > 0) { if (pressed("a") || pressed("b")) { dialog.hold = false; dialog.t = Math.min(dialog.t, 0.25); } }   // someone's talking: the stage waits until A (or B), so every line can be read
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)
   const targetCam = Math.max(camLo, Math.min(camHi, david.x - W * 0.4 + david.facing * 80));
