@@ -800,14 +800,15 @@ if (LEVEL_NAME === "test") {
   setPiece("oleander", 95); deco("oleander", 95, 16, 0.75);
   lostSheep("sheep", 100, 16, "thorns");                       // caught in the thorns: sling the bush
   // a pool too wide to jump, and a tortoise plodding along its bottom: ride across on its shell
-  for (let c = 104; c <= 114; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = r >= 19 ? 1 : 0;
-  setPiece("pool", 104, GR, { w: 11 });
-  critter("tortoise", 109, 18, 4);
+  // (17 wide, Glen 2026-10-20: 11 could be jumped; a running jump carries ~9 tiles, so the shell is the only way over)
+  for (let c = 104; c <= 120; c++) for (let r = GR; r < ROWS; r++) solid[r][c] = r >= 19 ? 1 : 0;
+  setPiece("pool", 104, GR, { w: 17 });
+  critter("tortoise", 112, 18, 8);
   oliveArc(104, 14, 5);
-  // The One: high on the canyon wall
-  plat(108, 13, 3); plat(112, 10, 3); plat(116, 7, 3); plat(121, 4, 3);
-  lostSheep("lamb", 122, 3, "one");
-  oliveRow(108, 12, 3); oliveRow(112, 9, 3);
+  // The One: high on the canyon wall, its first ledge out over the middle of the pool (reached from the shell)
+  plat(112, 13, 3); plat(116, 10, 3); plat(120, 7, 3); plat(125, 4, 3);
+  lostSheep("lamb", 126, 3, "one");
+  oliveRow(112, 12, 3); oliveRow(116, 9, 3);
   special(118, 16);
   bridge(131, GR, 4);
   ground(135, 168);

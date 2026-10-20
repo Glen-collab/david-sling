@@ -1121,7 +1121,7 @@ function drawSmallCritter(k, x, name) {
 // Hit it with a stone and it pulls into its shell for a while (Glen's clip). Fall in the water: back to the bank, a heart.
 //   setPiece("pool", c, GR, { w })   water over columns c..c+w-1 (the level clears the ground there, keeping a floor)
 // ---------------------------------------------------------------------------
-Object.assign(W2, { TORTOISE_WALK: 48, TORTOISE_HIDE: 3.2 });
+Object.assign(W2, { TORTOISE_WALK: 62, TORTOISE_HIDE: 3.2 });
 CRITTER_ART.tortoise = { idle: "tortoise_walk", move: "tortoise_walk", len: 100, h: 70, box: k => spriteBox(k, "tortoise_walk", 70) };
 function shellSpan(k) {   // the columns the shell covers (its back is a stepping stone)
   const b = critterBox(k), pad = (b.x1 - b.x0) * 0.16;
