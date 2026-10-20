@@ -816,7 +816,7 @@ function updateTower(dt) {
   updateDust(dt);
   if (!tw.on) return;
   if (d.deadT > 0 && !tw.beaten) {   // David fell: the fight resets; back at the fire, Abinadab's second counsel
-    tw.on = false; tw.state = "wait"; tw.arrows = []; tw.slung = []; tw.lean = tw.leanTo = 0; setRoof(false);
+    tw.on = false; tw.state = "wait"; tw.arrows = []; tw.slung = []; tw.cover = []; tw.lean = tw.leanTo = 0; setRoof(false);
     if (!W6.counsel2) { W6.counsel2 = true; setTimeout(() => {
       sayLine("Abinadab", "Sit down. Tell me what happened. ... Those shutters: count to two after the creak, then throw. And that front wheel's rotten; two good stones will have the pins out. Here, have some of my bread first.");
       d.hearts += 1; }, 2200); }
@@ -965,7 +965,7 @@ function updateTowerFall(dt) {
   if (tw.state === "fall") {
     tw.lean = tw.leanTo = Math.min(90, tw.lean + (6 + tw.t * tw.t * 60) * dt * 5);
     if (tw.lean >= 90) {
-      tw.state = "down"; tw.t = 0; tw.beaten = true; sfx("thunder", tw.x0, 0.9, 0.8); sfx("stone_hit", tw.x0, 1, 0.4);
+      tw.state = "down"; tw.t = 0; tw.beaten = true; tw.slung = []; tw.cover = []; sfx("thunder", tw.x0, 0.9, 0.8); sfx("stone_hit", tw.x0, 1, 0.4);
       if (typeof w2Shake !== "undefined") w2Shake.v = 1.6;
       for (let k = 0; k < 40; k++) tw.dust.push({ x: tw.x0 + tw.w + Math.random() * 420, y: GR * T - Math.random() * 40, vx: (Math.random() - 0.3) * 160, vy: -40 - Math.random() * 120, t: 0, puff: 20 + Math.random() * 30 });
       for (let i = skirms.length - 1; i >= 0; i--) if (skirms[i].spawned) { skirms[i].state = "flee"; skirms[i].t = 0; }
@@ -1104,7 +1104,7 @@ function drawWatchtower(camX) {
   ctx.restore();
   // shots
   for (const a of tw.arrows) { ctx.save(); ctx.translate(a.x - camX, a.y); ctx.rotate(Math.atan2(a.vy, a.vx)); drawItem("arrow", 0, 10, 0.5); ctx.restore(); }
-  for (const s of [...tw.slung, ...tw.cover]) drawStoneItem(ENEMY_STONES[(s.k = s.k ?? Math.floor(Math.random() * 3))], s.x - camX, s.y, 15, s);
+  if (tw.on && !tw.beaten) for (const s of [...tw.slung, ...tw.cover]) drawStoneItem(ENEMY_STONES[(s.k = s.k ?? Math.floor(Math.random() * 3))], s.x - camX, s.y, 15, s);
   // the crew climbing down the back and running (as it falls), the knocked-away bows, the dust
   if (tw.state === "fall" || (tw.state === "down" && tw.t < 5)) {
     const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.phil_flee ? "phil_flee" : SPR.soldier_run ? "soldier_run" : "villager_man_run";
