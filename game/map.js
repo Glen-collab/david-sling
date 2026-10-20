@@ -133,7 +133,7 @@ function stageCleared(id, info) {
   const p = loadProgress();
   const old = p[id] || {};
   p[id] = { cleared: true, sheep: Math.max(old.sheep || 0, info.sheep || 0), total: info.total || old.total || 0,
-            one: !!(old.one || info.one), stones: Math.max(old.stones || 0, info.stones || 0) };
+            one: !!(old.one || info.one), stones: Math.min(3, Math.max(old.stones || 0, info.stones || 0)) };   // 3 a stage (2-3 once had 4)
   p.justCleared = id; p.at = id;
   if (info.olives !== undefined) p.olives = info.olives;   // what's in the purse now (spent at the market, §4c)
   if (info.lampOil !== undefined) p.lampOil = info.lampOil;
@@ -393,7 +393,7 @@ const WorldMap = {
     }
     ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`${st.id}  ${st.label}`, W / 2, y + 32);
     ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
-    let line = p.cleared ? `Sheep found ${p.sheep || 0}/${p.total || 5}${p.one ? "  ·  The One ✓" : "  ·  The One: still out there"}  ·  stones ${p.stones || 0}/3` : BUILT_STAGES.includes(st.id) ? "A: play" : "Not built yet";
+    let line = p.cleared ? `Sheep found ${p.sheep || 0}/${p.total || 5}${p.one ? "  ·  The One ✓" : "  ·  The One: still out there"}  ·  stones ${Math.min(3, p.stones || 0)}/3` : BUILT_STAGES.includes(st.id) ? "A: play" : "Not built yet";
     if (p.cleared) line += "     A: play again";
     ctx.fillText(line, W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";
