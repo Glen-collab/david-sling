@@ -1,11 +1,11 @@
 {
-  "frames": 6,
-  "frame_w": 202,
-  "frame_h": 235,
-  "ms_per_frame": 90,
+  "frames": 16,
+  "frame_w": 221,
+  "frame_h": 236,
+  "ms_per_frame": 109,
   "loop": true,
   "align": "feet",
-  "anchor_x": 101,
-  "anchor_y": 232,
-  "source": "world5/chariot_for_photoshop/charioteer_run_away.png (Glen; cropped to him, same scale as the chariot)"
+  "anchor_x": 141,
+  "anchor_y": 234,
+  "source": "world5/charioteer_run_away_clip.mp4 (Glen, 2026-10-20; vid2sprite --loop --start 3 --frames 16 --height 228)"
 }

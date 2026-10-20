@@ -578,14 +578,14 @@ window.SPRITE_DATA = {
  },
  "charioteer_run_away": {
   "src": "../assets/sprites/charioteer_run_away.png",
-  "frames": 6,
-  "w": 202,
-  "h": 235,
-  "ms": 90,
+  "frames": 16,
+  "w": 221,
+  "h": 236,
+  "ms": 109,
   "loop": true,
   "pingpong": false,
-  "ax": 101,
-  "ay": 232,
+  "ax": 141,
+  "ay": 234,
   "align": "feet"
  },
  "chicken_peck": {
