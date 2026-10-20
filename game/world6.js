@@ -849,7 +849,7 @@ function stoneHitsTower(s) {
         if (w.hits >= W6.TW_WIN_HITS) {
           w.state = "done"; w.t = 0; tw.gapT = W6.TW_GAP; tw.dust.push({ x: w.x, y: w.y, vx: -60, vy: -120, t: 0, bow: true });
           const left = tw.wins.filter(q => q.state !== "done").length;
-          if (!left) { tw.phase = 2; tw.t = 0; tw.skirmT = 1.5; toast(twCounsel() ? "Every bow knocked away! Now Abinadab's counsel: the pins in the front wheel. Charged stones (hold B)!" : "Every bow knocked away! Skirmishers are coming out from behind the tower..."); }
+          if (!left) { tw.phase = 2; tw.t = 0; tw.skirmT = 1.5; toast(twCounsel() ? "Every bow knocked away! Now Abinadab's counsel: the pins in the front wheel. Charged stones (hold B)!" : "Every bow knocked away! Skirmishers are coming out from behind the tower... and that front wheel creaks. Hit its pins with charged stones (hold B)."); }
           else toast(`His bow went flying! (${4 - left} of 4)`);
         } else if (!W6.oneTold) { W6.oneTold = true; toast("One! Quick, the second stone (tap B twice)!"); }
       } else { stoneHit(s, 0.4); if (!W6.shutTold) { W6.shutTold = true; toast("Thunk. The shutter's shut. Wait for one to creak open."); } }
