@@ -35,6 +35,7 @@ const TUNE = {
   STONE_SPEED_CHARGED: 1250,
   CHARGE_TIME: 0.6,       // seconds holding B for a full charge
   STONE_GRAVITY: 900,     // lower = stones fly higher and farther
+  AIM_GRACE: 0.2,         // seconds after letting go of Up/Left/Right that a throw still aims that way
   POWER_SPEED: 1500,      // the Power Sling (A + B together, uses a special stone)
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   RUN_THROW_TIME: 0.6,    // the throw while running (legs keep running)
@@ -1722,9 +1723,12 @@ function autoWalk(d, tx, dt) {
   if (d.onGround && Math.abs(d.x - x0) < 0.5 * Math.abs(d.vx) * dt) d.vy = -TUNE.JUMP_SPEED;   // blocked: hop up
   return false;
 }
+const aimAgo = { up: 9, left: 9, right: 9 };
+const aimHeld = b => aimAgo[b] < TUNE.AIM_GRACE;   // held now, or a moment ago: a D-pad diagonal flickers, and a thumb comes off Up just before the stone leaves
 function updateDavid(dt) {
   const d = david;
   d.t += dt;
+  for (const b in aimAgo) aimAgo[b] = held(b) ? 0 : aimAgo[b] + dt;
   if (caveDavid(d, dt)) return;   // walking into or out of a cave (world1.js)
   if (updateCodeEntry(d, dt)) return;   // entering the throw at a carved wall (world1.js)
   if (typeof updateHarpDuel === "function" && updateHarpDuel(d, dt)) return;   // playing the harp for a frightened animal (world2.js)
@@ -1807,7 +1811,7 @@ function updateDavid(dt) {
   }
   if (!d.carrying && !d.harp && !busy) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; d.quickUsed = false; d.quickQueued = false; }
-    if (d.throwT >= 0 && !d.thrown) d.aimingUp = held("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
+    if (d.throwT >= 0 && !d.thrown) d.aimingUp = aimHeld("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
     if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
   }
   // a throw that hasn't left his hand is dropped if he picks up the lamb or the harp (or it would hang there, whirling, forever)
@@ -1820,9 +1824,10 @@ function updateDavid(dt) {
       d.thrown = true;
       const full = hasSkill("charge") ? Math.min(1, d.charge / TUNE.CHARGE_TIME) : 0;   // full power is taught in World 2
       const sp = full >= 1 ? TUNE.STONE_SPEED_CHARGED : TUNE.STONE_SPEED;
-      const aimUp = held("up") && hasSkill("aimUp"), straightUp = aimUp && !(held("left") || held("right"));
+      const aimUp = aimHeld("up") && hasSkill("aimUp"), straightUp = aimUp && !(aimHeld("left") || aimHeld("right"));
       const aimDown = held("down") && !d.onGround;   // Down + B in the air: throw diagonally down
-      const ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
+      let ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
+      if (!aimUp && !aimDown && typeof towerAim === "function") { const a = towerAim(d.x + d.facing * 30, d.y - (d.h === LOW_H ? 40 : 78), sp, full >= 1, d.facing); if (a !== null) ang = a; }   // world6.js: a flat throw at an open tower window arcs up into it
       stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : d.h === LOW_H ? 40 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
       sfx("sling_throw", undefined, full >= 1 ? 0.95 : 0.8, 0.95 + Math.random() * 0.1);   // always the whip of the throw
