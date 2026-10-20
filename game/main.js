@@ -3300,6 +3300,7 @@ function gatePost(x, bottom, w, h, far) {
   ctx.restore();
 }
 function goalCordY(f) { const by = GR * T; return by - 62 - (TUNE.GATE_POST_TILES * T - 66) * f; }
+const GATE_TOP = 34;   // (Glen) the posts stand this much taller than the olive's highest point, so it never rides above them
 const GATE_H = 2.3 * T;   // the gate's height in the middle (David has to jump it)
 // where everything stands, on screen
 function goalSpots(camX) {
@@ -3342,7 +3343,7 @@ function drawFold(camX) {   // behind David and the sheep: the far post and the 
   if (!fold) return;
   const { mx, by, fx, fby } = goalSpots(camX), ph = TUNE.GATE_POST_TILES * T;
   if (mx < -400 || mx > W + 600) return;
-  gatePost(fx, fby, 13, ph * GATE_FAR.scale, true);
+  gatePost(fx, fby, 13, ph * GATE_FAR.scale + GATE_TOP + 16, true);
   const sg = ctx.createRadialGradient(mx, by, 2, mx, by, GOAL_GAP * 1.6);   // a soft shadow on the grass between the posts
   sg.addColorStop(0, "rgba(40,28,10,0.3)"); sg.addColorStop(1, "rgba(40,28,10,0)");
   ctx.fillStyle = sg; ctx.fillRect(mx - GOAL_GAP * 1.7, by - 10, GOAL_GAP * 3.4, 18);
@@ -3363,7 +3364,7 @@ function drawFoldFront(camX) {   // in front of everything: the cord with the go
     drawOlive(mx, y + 2, "golden", 1.6);
   }
   // the near post, plain: David passes behind it, so nothing on it should get in the way of the illusion
-  gatePost(nx, nby, 22, ph + 8, false);
+  gatePost(nx, nby, 22, ph + 8 + GATE_TOP, false);
   ctx.restore();
   // the "+N" (or "Missed!") at the goal, floating up
   const pop = finish.pop;
