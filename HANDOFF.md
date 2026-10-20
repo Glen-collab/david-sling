@@ -144,7 +144,11 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   6-3's fill pools are now a stream sunk into the topsoil (feet W6.STREAM_SINK in the water; the near bank and a
   see-through layer of water drawn in front of David, `drawStreamFront`), replacing the reed_pool picture. The deep pool
   (setPiece "pool" with `stream: true`; world2's drawPools skips those) fills its pit with the water, the far bank's grass
-  along the top, and its stepping stones drawn as `stone_gray_big` standing up out of it. Other worlds' pools unchanged.
+  along the top, and its stepping stones drawn as `stone_gray_big` standing up out of it. The other pools (2-2's
+  tortoise pool, 3-2's two streams; world2.js drawPools) use `stream_water` alone, no banks (the pit edges are the
+  banks): with stepping stones the surface is GR*T+4 and the stones are redrawn in front with their feet in the water;
+  the tortoise pool's is GR*T+30 and see-through so his shell shows. Not changed: 2-2's flash flood (muddy, drawn) and
+  2-3's waterfall (Glen's sprite).
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,

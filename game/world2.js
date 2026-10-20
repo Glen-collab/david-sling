@@ -1164,6 +1164,16 @@ function drawPools(camX) {   // shallow green-brown water, in front of the torto
   for (const p of setPieces) if (p.kind === "pool" && !p.stream) {   // (stream: true = Glen's stream art, world6.js)
     const x0 = p.c * T - camX, w = p.w * T; if (x0 > W || x0 + w < 0) continue;
     const top = GR * T + 34;   // low enough that the top of the tortoise's shell shows
+    const stones = setPieces.filter(q => q.kind === "stepstone" && q.c >= p.c && q.c < p.c + p.w);
+    const wt = GR * T + (stones.length ? 4 : 30), wv = typeof streamPiece === "function" && streamPiece("stream_water", w + 2 * T, (ROWS * T - wt + 10) / 187, true);
+    if (wv) {   // Glen's side-on water (world6/stream.png, no banks: the pit's own edges are the banks); see-through so the tortoise's legs show
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, w, H); ctx.clip(); ctx.globalAlpha = stones.length ? 0.85 : 0.7; ctx.drawImage(wv, x0 - T, wt - 10);
+      if (stones.length && typeof drawStepStone === "function") {   // the stepping stones stand up out of it, their feet in the water
+        ctx.globalAlpha = 1; ctx.save(); ctx.translate(-camX, 0); for (const q of stones) drawStepStone(q); ctx.restore();
+        ctx.beginPath(); ctx.rect(x0, wt + 22, w, H); ctx.clip(); ctx.globalAlpha = 0.45; ctx.drawImage(wv, x0 - T, wt - 10);
+      }
+      ctx.restore(); continue;
+    }
     ctx.save();
     const g = ctx.createLinearGradient(0, top, 0, ROWS * T);
     g.addColorStop(0, "rgba(96,140,130,0.6)"); g.addColorStop(1, "rgba(44,70,62,0.92)");

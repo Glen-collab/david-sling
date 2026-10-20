@@ -609,15 +609,15 @@ W6.STREAM_S = 0.2;          // fill pools: picture scale
 W6.STREAM_SINK = 8;         // fill pools: the water's surface this far above the ground line (how deep the feet go)
 W6.STREAM_DEEP_TOP = 4;    // the deep pool: its surface below the ground line (the stepping stones stand out of it)
 const streamCache = {};
-function streamPiece(nm, wPx, s) {   // a soft-ended crop of the middle of the picture, wPx wide on screen
+function streamPiece(nm, wPx, s, hard) {   // a crop of the middle of the picture, wPx wide on screen, soft ends (hard: square ends, for a pit)
   const img = ITEM[nm]; if (!img || !img.naturalWidth) return null;
-  const key = nm + wPx + "/" + s; if (streamCache[key]) return streamCache[key];
+  const key = nm + wPx + "/" + s + (hard ? "h" : ""); if (streamCache[key]) return streamCache[key];
   const h = Math.round(img.naturalHeight * s), sw = Math.min(img.naturalWidth, wPx / s), sx = (img.naturalWidth - sw) / 2;
   const cv = document.createElement("canvas"); cv.width = Math.round(wPx); cv.height = h; const c = cv.getContext("2d");
   c.drawImage(img, sx, 0, sw, img.naturalHeight, 0, 0, cv.width, h);
   const g = c.createLinearGradient(0, 0, cv.width, 0), f = Math.min(0.2, 40 / cv.width);
   g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(f, "#000"); g.addColorStop(1 - f, "#000"); g.addColorStop(1, "rgba(0,0,0,0)");
-  c.globalCompositeOperation = "destination-in"; c.fillStyle = g; c.fillRect(0, 0, cv.width, h);
+  if (!hard) { c.globalCompositeOperation = "destination-in"; c.fillStyle = g; c.fillRect(0, 0, cv.width, h); }
   return (streamCache[key] = cv);
 }
 const STREAM_ROWS = { water: 145, near: 300 };   // in stream_back's pixels: where the water starts, where the near bank starts
