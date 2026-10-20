@@ -511,7 +511,7 @@ const Journal = {
       }
       this.pages = earlier.concat(this.pages);
     }
-    this.note = false;
+    this.note = false; this.sceneName = opts.scene || null;   // opts.scene: one of SCENES by name (home: David standing on the road, note_road)
     this.read = !!opts.read;   // read = opened from the map: everything's already written, just page through
     this.layoutAll();
     // (after a stage it opens on the new page; the earlier worlds are behind it)
@@ -723,7 +723,7 @@ const Journal = {
   },
   shadowText(t, x, y, color) { ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillText(t, x + 1, y + 1); ctx.fillStyle = color; ctx.fillText(t, x, y); },
   drawScene() {   // Glen's scene, with the words on the book in David's hands
-    const nk = this.note && noteScene();
+    const nk = this.note ? noteScene() : this.sceneName && SCENES[this.sceneName];
     const sc = (nk && nk.img.naturalWidth ? nk : null) || SCENES[this.world] || SCENES[1], img = sc.img;
     if (!img.naturalWidth) return;
     const g = sceneCanvas.getContext("2d");

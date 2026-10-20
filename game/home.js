@@ -157,7 +157,7 @@ const Courtyard = {
     const last = [4, 3, 2, 1].find(k => this.prog[`${this.world}-${k}`] && this.prog[`${this.world}-${k}`].cleared);
     if (!last) { this.say("", "The Journal is empty for now. Clear 1-1 and David will write in it."); return; }
     this.active = false;
-    Journal.open({ world: this.world, stage: last, read: true, onClose: () => { this.active = true; this.fade = 0; } });
+    Journal.open({ world: this.world, stage: last, read: true, scene: "note_road", onClose: () => { this.active = true; this.fade = 0; } });
   },
   useJesse() {
     if (!this.earned) { this.say("Jesse", "The lion's been near the flock, David. When you've faced it, come and find me here at the target. There's something I want to teach you about the throw."); return; }
