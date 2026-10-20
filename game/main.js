@@ -1383,11 +1383,11 @@ if (LEVEL_NAME === "test") {
   critter("hen", 28);
   setPiece("wagon", 31, GR, { w: 4 }); special(33, 10);
   rock(38, 15, 3, 2); rock(41, 13, 3, 4);
-  setPiece("standing", 47, GR - 1, { look: 1 });
+  setPiece("standing", 47, GR - 1, { look: 1 }); setPiece("prop", 44, GR, { nm: "camp_shields", size: 0.14 });
   talk(46, "A soldier", "Have you seen this man who has come up? He has surely come up to defy Israel. (1 Samuel 17:25)");
   setPiece("tent", 51, GR, { w: 4 }); setPiece("tent", 56, GR, { w: 5 });
   setPiece("wagon", 63, GR, { w: 4 }); setPiece("fearful", 65, GR - 1, { look: 1, dir: -1 });  // under the wagon
-  snake("viper", 71);
+  snake("viper", 71); setPiece("prop", 72, GR, { nm: "wagon_rails", size: 0.15 });
   campfire(76);
   // the rocks at the camp's edge, a man hiding up on top
   rock(82, 15, 4, 2); rock(86, 13, 4, 4); rock(90, 11, 5, 6); setPiece("fearful", 93, 10, { look: 2 });
@@ -1398,11 +1398,11 @@ if (LEVEL_NAME === "test") {
   // the watch platform: a man up there who won't look out over the valley any more
   setPiece("tower", 112, 11); plat(112, 11, 4); setPiece("fearful", 114, 10, { look: 3 });
   setPiece("wagon", 118, GR, { w: 4 });
-  critter("scorpion", 125); critter("hen", 129);
+  critter("scorpion", 125); critter("hen", 129); setPiece("prop", 127, GR, { nm: "wagon_arms_34", size: 0.12 });
   campfire(134);
   setPiece("tent", 139, GR, { w: 4 }); setPiece("tent", 144, GR, { w: 4 }); setPiece("tent", 149, GR, { w: 5 });
-  rock(155, 15, 3, 2); special(156, 10);
-  setPiece("standing", 161, GR - 1, { look: 3 });
+  setPiece("prop", 152, GR, { nm: "wagon_jars_34", size: 0.12 }); rock(155, 15, 3, 2); special(156, 10);
+  setPiece("standing", 161, GR - 1, { look: 3 }); setPiece("prop", 163, GR, { nm: "camp_spears", size: 0.16 });
   talk(160, "A soldier", "Forty days. Morning and evening, he comes out and shouts, and we all go and stand in the line, and nobody moves.");
   setPiece("tent", 165, GR, { w: 5 }); setPiece("fearful", 171, GR - 1, { look: 4, dir: -1 });  // curled up behind the last tent
   snake("viper", 176);
@@ -2376,12 +2376,18 @@ function drawLedgeRun(x0, x1, y) {
   terPiece("ledge_left", x0 - 6, y, h);
   terPiece("ledge_right", x1 + 6 - rw, y, h);
 }
+function drawStoneItem(nm, x, y, px, s) {   // Glen's stone art (items/stone = David's, stone_enemy_* = the Philistines', stone_glow kept for Goliath's slow motion), tumbling as it flies
+  const img = ITEM[nm];
+  if (!img || !img.naturalWidth) { ctx.fillStyle = "#6d6a63"; ctx.beginPath(); ctx.arc(x, y, px * 0.4, 0, Math.PI * 2); ctx.fill(); return; }
+  const h = px * img.naturalHeight / img.naturalWidth, a = s ? (s.spin = (s.spin || 0) + (s.vx || 0) * 0.0006) : 0;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.drawImage(img, -px / 2, -h / 2, px, h); ctx.restore();
+}
 function drawStones(camX) {
   for (const s of stones) if (s.power) {
     ctx.save(); ctx.globalCompositeOperation = "lighter";
     s.trail.forEach(([tx, ty], k) => { ctx.fillStyle = `rgba(255,220,120,${(k + 1) / s.trail.length * 0.5})`; ctx.beginPath(); ctx.arc(tx - camX, ty, 4 + k, 0, Math.PI * 2); ctx.fill(); });
     ctx.fillStyle = "rgba(255,240,180,0.9)"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 16, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-    ctx.fillStyle = "#fffbea"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 8, 0, Math.PI * 2); ctx.fill();
+    drawStoneItem("stone", s.x - camX, s.y, 17, s);
   }
   for (const s of stones) {
     if (s.power) continue;
@@ -2389,7 +2395,7 @@ function drawStones(camX) {
       ctx.save(); ctx.globalCompositeOperation = "lighter";
       ctx.fillStyle = "rgba(255,200,80,0.45)"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 12, 0, Math.PI * 2); ctx.fill(); ctx.restore();
     }
-    ctx.fillStyle = "#6d6a63"; ctx.beginPath(); ctx.arc(s.x - camX, s.y, 6, 0, Math.PI * 2); ctx.fill();
+    drawStoneItem("stone", s.x - camX, s.y, 15, s);
   }
 }
 

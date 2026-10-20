@@ -1,0 +1,11 @@
+{
+  "frames": 24,
+  "frame_w": 400,
+  "frame_h": 400,
+  "ms_per_frame": 250,
+  "loop": false,
+  "align": "center",
+  "anchor_x": 200,
+  "anchor_y": 200,
+  "source": "goliath_face_hit.mp4"
+}

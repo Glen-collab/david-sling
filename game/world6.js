@@ -6,7 +6,7 @@
 //                              Stand-in until Glen's soldiers: Tobi's hiding poses (tobi_cave), tinted per look.
 //   setPiece("standing", c, r, { look })  a soldier standing about the camp (scenery, for the talk() lines beside him)
 //   setPiece("tent", c, GR, { w })  an army tent, w tiles wide: land on the roof and it springs you up (like 4-3's awnings)
-//   setPiece("wagon", c, GR, { w }) a supply wagon: a bed to stand on (plat), sacks and jars on it
+//   setPiece("wagon", c, GR, { w, load }) a supply wagon (Glen's: wagon_jars / wagon_arms, alternating): stand on the rim
 //   setPiece("tower", c, r)    the watch platform (world5.js drawTower); place plat(c, r, 4) with it
 //   setPiece("eliab", c)       6-1's end: Eliab hears David asking about the giant (17:28-30), a scene over the stage
 //   setPiece("volley", c, GR, { to, shot })  6-2: open ground from c to `to` under the far slope's archers (shot "stones":
@@ -104,9 +104,11 @@ lostThingsTally = function () {
   return lostThings6();
 };
 
+const ENEMY_STONES = ["stone_enemy_a", "stone_enemy_b", "stone_enemy_c"];   // Glen's brown stones: the Philistine slingers'; David's is the grey one (items/stone)
+
 // --- soldiers standing about the camp (scenery beside the talk() lines)
 W6.GUARD_SIZE = 1.15;   // the camp men, against Eliab and David
-const GUARDS = ["soldier_talk", "guard_big_idle", "guard_archer_idle", "guard_young_idle"];   // Glen's clips (world6/guards)
+const GUARDS = ["soldier_talk", "guard_big_idle", "guard_archer_idle", "guard_young_idle", "guard_glen_idle"];   // Glen's clips (world6/guards)
 const soldierTalking = x => dialog.t > 0 && dialog.who === "A soldier" && Math.abs(david.x - x) < 10 * T;   // his words are up: his mouth moves
 function drawStanding(camX) {
   const now = performance.now() / 1000;
@@ -126,7 +128,9 @@ const tents6 = setPieces.filter(p => p.kind === "tent").map(p => {
   const s = (p.w || 4) * T * W6.TENT_DRAW / 211, h = 123 * s, r = Math.round((GR * T - h * 0.88) / T);   // drawn wider than the roof you land on (the item has a fence and pots either side)
   plat(p.c, r, p.w || 4); return { c: p.c, w: p.w || 4, r, s, boing: 0 };
 });
-const wagons6 = setPieces.filter(p => p.kind === "wagon").map(p => { plat(p.c, GR - 2, p.w || 4); return { c: p.c, w: p.w || 4 }; });
+W6.WAGONS = { wagon_jars: 0.53, wagon_arms: 0.47 };   // Glen's side-on wagons: how high up the picture the rim is (you stand on it)
+const wagons6 = setPieces.filter(p => p.kind === "wagon").map((p, i) => { plat(p.c, GR - 2, p.w || 4); return { c: p.c, w: p.w || 4, nm: p.load || (i % 2 ? "wagon_arms" : "wagon_jars") }; });
+const props6 = setPieces.filter(p => p.kind === "prop");   // scenery only: setPiece("prop", c, GR, { nm, size })
 function updateTents(dt) {
   const d = david;
   if (d.onGround && d.vy >= 0 && !held("down") && d.deadT <= 0) for (const a of tents6) {
@@ -144,12 +148,19 @@ function drawTents(camX) {
     const sq = 1 - a.boing * 0.06;
     ctx.save(); ctx.translate(x, GR * T + 6); ctx.scale(1, sq); drawItem("tent", 0, 0, a.s); ctx.restore();
   }
+  for (const p of props6) {
+    const x = p.x - camX; if (x < -300 || x > W + 300) continue;
+    drawItem(p.nm, x, GR * T + 4, p.size || 0.15);
+  }
   for (const g of wagons6) {
-    const x0 = g.c * T - camX, w = g.w * T, top = (GR - 2) * T; if (x0 > W + 100 || x0 + w < -100) continue;
-    ctx.fillStyle = "#6b4a2b"; ctx.fillRect(x0, top, w, 16); ctx.fillStyle = "#4e3520"; ctx.fillRect(x0, top + 16, w, 6);   // the bed
-    ctx.fillStyle = "#5a3d22"; ctx.fillRect(x0 - 4, top - 18, 6, 34); ctx.fillRect(x0 + w - 2, top - 18, 6, 34);           // the side boards
-    for (const k of [0.22, 0.78]) drawItem("chariot_wheel", x0 + w * k, GR * T + 4, 0.2);                                     // the wheels
-    drawItem("grain_sack", x0 + w * 0.3, top + 2, 0.22); drawItem("town_clay_pots", x0 + w * 0.68, top + 2, 0.13);
+    const x0 = g.c * T - camX, w = g.w * T; if (x0 > W + 100 || x0 + w < -100) continue;
+    const img = ITEM[g.nm];
+    if (!img || !img.naturalWidth) {   // stand-in until the picture loads
+      const top = (GR - 2) * T;
+      ctx.fillStyle = "#6b4a2b"; ctx.fillRect(x0, top, w, 16); ctx.fillStyle = "#4e3520"; ctx.fillRect(x0, top + 16, w, 6); continue;
+    }
+    const sz = w * 0.9 / img.naturalWidth, rim = img.naturalHeight * sz * W6.WAGONS[g.nm];
+    drawItem(g.nm, x0 + w / 2, (GR - 2) * T + rim + 2, sz);   // the rim lines up with the bed you stand on
   }
 }
 
@@ -296,7 +307,7 @@ function drawVolleys(camX) {
   }
   for (const s of volley.shots) {
     if (s.t < 0) continue; const x = s.x - camX; if (x < -60 || x > W + 60) continue;
-    if (s.kind === "stones") { ctx.fillStyle = "#6e6458"; ctx.beginPath(); ctx.arc(x, s.y, 6, 0, Math.PI * 2); ctx.fill(); continue; }
+    if (s.kind === "stones") { drawStoneItem(ENEMY_STONES[(s.k = s.k ?? Math.floor(Math.random() * 3))], x, s.y, 15, s); continue; }
     ctx.save(); ctx.translate(x, s.y); ctx.rotate(Math.atan2(s.vy, s.vx)); drawItem("arrow", 0, 10, 0.5); ctx.restore();
   }
   for (const s of volley.stuck) {
@@ -1051,7 +1062,7 @@ function drawWatchtower(camX) {
   ctx.restore();
   // shots
   for (const a of tw.arrows) { ctx.save(); ctx.translate(a.x - camX, a.y); ctx.rotate(Math.atan2(a.vy, a.vx)); drawItem("arrow", 0, 10, 0.5); ctx.restore(); }
-  ctx.fillStyle = "#6e6458"; for (const s of [...tw.slung, ...tw.cover]) { ctx.beginPath(); ctx.arc(s.x - camX, s.y, 6, 0, Math.PI * 2); ctx.fill(); }
+  for (const s of [...tw.slung, ...tw.cover]) drawStoneItem(ENEMY_STONES[(s.k = s.k ?? Math.floor(Math.random() * 3))], s.x - camX, s.y, 15, s);
   // the crew climbing down the back and running (as it falls), the knocked-away bows, the dust
   if (tw.state === "fall" || (tw.state === "down" && tw.t < 5)) {
     const t = tw.state === "fall" ? tw.t : tw.t + 1.5, nm = SPR.phil_flee ? "phil_flee" : SPR.soldier_run ? "soldier_run" : "villager_man_run";

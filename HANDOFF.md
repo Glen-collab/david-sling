@@ -126,6 +126,16 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   Abinadab's tier-2 counsel (+1 heart, longer shutters, 2 pins). Boss music, camera lock and the finish gate are hooked
   like the chariot (towerFight/towerCam/towerBlocking). The One: under the tower's ramp at col 207. Not built yet:
   the End of World 6 scene (Saul's tent, the lion/bear flashbacks, Shammah's bag).
+- **Art in, 2026-10-20:** Glen's wagons (david-sling-art/world6/wagons) replace the drawn ones in 6-1: `wagon_jars` /
+  `wagon_arms` alternate (or `{ load }`), rim = the GR-2 bed (W6.WAGONS = rim height as a fraction of the picture);
+  scenery `setPiece("prop", c, GR, { nm, size })`: wagon_rails, wagon_jars_34, wagon_arms_34, camp_shields, camp_spears
+  (camp_jar_small cut, unused). Stones (david-sling-art/stones.jpg): items `stone` (grey: David's, drawStoneItem in main.js,
+  tumbles), `stone_enemy_a/b/c` (brown: 6-2 volleys' slingstones, the tower slingers), `stone_gray_big` (spare),
+  `stone_glow` (gold sphere, kept for Goliath's slow-motion stone). Glen as a camp soldier: `guard_glen_idle`
+  (GUARDS[4], 6-1 col 207). **World 7 Goliath sprites (cut, not wired):** `goliath_yell` (loop), `goliath_spear` (turn,
+  throw, point; once), `goliath_fall` (24 frames from just after the clip's side-on stone left, so ours comes in from
+  the front; for slow motion), `goliath_face_hit` (close-up 400x400, center anchor, 24 frames: shouting, the stone
+  strikes the brow, helmet cracks, falls back). Clips in david-sling-art/world7/goliath.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,

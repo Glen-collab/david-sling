@@ -1,0 +1,33 @@
+{
+  "frames": 20,
+  "frame_w": 559,
+  "frame_h": 436,
+  "ms_per_frame": 225,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 219,
+  "anchor_y": 433,
+  "source": "goliath_yell_spear.mp4",
+  "video_frames": [
+    134,
+    140,
+    145,
+    151,
+    157,
+    162,
+    168,
+    173,
+    179,
+    185,
+    190,
+    196,
+    202,
+    207,
+    213,
+    218,
+    224,
+    230,
+    235,
+    241
+  ]
+}

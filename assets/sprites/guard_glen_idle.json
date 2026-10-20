@@ -1,0 +1,29 @@
+{
+  "frames": 16,
+  "frame_w": 108,
+  "frame_h": 290,
+  "ms_per_frame": 154,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 40,
+  "anchor_y": 287,
+  "source": "guard_glen_idle.mp4",
+  "video_frames": [
+    46,
+    50,
+    53,
+    57,
+    61,
+    64,
+    68,
+    72,
+    76,
+    79,
+    83,
+    87,
+    90,
+    94,
+    98,
+    101
+  ]
+}

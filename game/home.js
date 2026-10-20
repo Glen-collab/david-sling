@@ -414,8 +414,8 @@ const Courtyard = {
     if (s && s.released) {
       if (!s.landed) {   // a low arc to the wall
         const k = s.ft / HOME.STONE_FLIGHT, x = s.x0 + (s.x1 - s.x0) * k - cam, y = s.y0 + (s.y1 - s.y0) * k - Math.sin(k * Math.PI) * 40;
-        ctx.fillStyle = "#cfc6b4"; ctx.strokeStyle = "#6d6253"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.ellipse(x, y, 8, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        if (typeof drawStoneItem === "function") drawStoneItem("stone", x, y, 18, { spin: k * 9 });
+        else { ctx.fillStyle = "#cfc6b4"; ctx.beginPath(); ctx.ellipse(x, y, 8, 7, 0, 0, Math.PI * 2); ctx.fill(); }
       } else if (s.ringT < 1.2) {   // where it struck: a ring that spreads (gold for the middle)
         const r = 10 + s.ringT * 70, a = Math.max(0, 1 - s.ringT / 1.2);
         ctx.save(); ctx.globalAlpha = a; ctx.lineWidth = 5; ctx.strokeStyle = s.hit ? "#ffd84a" : "#fff";
