@@ -56,9 +56,9 @@ const TUNE = {
   BG_NEAR_SPEED: 0.55,
   BG_MID_HEIGHT: 300,     // how tall each layer is drawn on screen (pixels)
   BG_NEAR_HEIGHT: 150,
-  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100, w3_4: 0, w4_1: 0, w4_2: 0, w4_3: 0, w4_4: 0, w5_1: 0, w5_2: 0, w5_3: -80, w5_4: -110, w6_1: 0, w6_2: 0, w6_3: 0, w6_4: 0 },   // per world: push the far layer down (positive) or up (negative)
-  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 }, w3_4: { mid: 440, near: 200 }, w4_1: { mid: 400, near: 190 }, w4_2: { mid: 420, near: 170 }, w4_3: { mid: 420, near: 170 }, w4_4: { mid: 440, near: 160 }, w5_1: { mid: 400, near: 180 }, w5_2: { mid: 440, near: 190 }, w5_3: { mid: 300, near: 110 }, w5_4: { mid: 270, near: 120 }, w6_1: { mid: 380, near: 200 }, w6_2: { mid: 250, near: 120 }, w6_3: { mid: 320, near: 120 }, w6_4: { mid: 260, near: 120 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
-  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true, w3_4: true, w3_end: true, w4_1: true, w4_2: true, w4_3: true, w4_4: true, w5_1: true, w5_2: true, w5_3: true, w5_4: true, w6_1: true, w6_2: true, w6_3: true, w6_4: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
+  BG_FAR_DROP: { w1: -150, w2: 40, w1_2: 0, w1_3: 0, w1_4: 0, w2_1: 0, w2_2: 0, w2_3: 0, w2_4: 0, w3_1: 0, w3_2: -150, w3_3: -100, w3_4: 0, w4_1: 0, w4_2: 0, w4_3: 0, w4_4: 0, w5_1: 0, w5_2: 0, w5_3: -80, w5_4: -110, w6_1: 0, w6_2: 0, w6_3: 0, w6_4: 0, w7_1: 0 },   // per world: push the far layer down (positive) or up (negative)
+  BG_LAYER_HEIGHTS: { w1_2: { mid: 380, near: 170 }, w1_3: { mid: 400, near: 170 }, w1_4: { mid: 380, near: 170 }, w2_1: { mid: 420, near: 683 }, w2_2: { mid: 400, near: 190 }, w2_3: { mid: 440, near: 210 }, w2_4: { mid: 440, near: 230 }, w3_1: { mid: 430, near: 190 }, w3_2: { mid: 400, near: 190 }, w3_3: { mid: 420, near: 190 }, w3_4: { mid: 440, near: 200 }, w4_1: { mid: 400, near: 190 }, w4_2: { mid: 420, near: 170 }, w4_3: { mid: 420, near: 170 }, w4_4: { mid: 440, near: 160 }, w5_1: { mid: 400, near: 180 }, w5_2: { mid: 440, near: 190 }, w5_3: { mid: 300, near: 110 }, w5_4: { mid: 270, near: 120 }, w6_1: { mid: 380, near: 200 }, w6_2: { mid: 250, near: 120 }, w6_3: { mid: 320, near: 120 }, w6_4: { mid: 260, near: 120 }, w7_1: { mid: 380, near: 200 } },   // per world: mid / near heights on screen, if not BG_MID_HEIGHT / BG_NEAR_HEIGHT
+  BG_MIRROR: { w1_2: true, w1_3: true, w1_4: true, w2_1: true, w2_2: true, w2_3: true, w2_4: true, w3_1: true, w3_2: true, w3_3: true, w3_4: true, w3_end: true, w4_1: true, w4_2: true, w4_3: true, w4_4: true, w5_1: true, w5_2: true, w5_3: true, w5_4: true, w6_1: true, w6_2: true, w6_3: true, w6_4: true, w7_1: true },   // per world: every other copy of the mid/near layers is flipped, so pictures whose edges don't match still join cleanly
   HORNET_RANGE: 300,      // how close before a hornet dives at David
   HORNET_DIVE: 420,       // dive speed
   HARP_SETTLE_MS: 120,    // playing frames 1-8, once, after he sits down
@@ -355,7 +355,7 @@ const STAGE_INFO = {
   "6-2": { cols: 230, bg: "w6_2", ter: "w2s", name: "No-Man's Land" },
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
-  "7-1": { cols: 232, bg: "w6_1", ter: "w2s", name: "Saul's Armor" },   // (6-1's camp layers stand in until Glen's 7-1 art)   // Glen's World 6 sets (6-1 to 6-4)
+  "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
   "5-2": { cols: 252, bg: "w5_2", ter: "w5m", night: true, nightSky: true, name: "The Mountain Trail" },   // Glen's moonlit trail   // Glen's hot-afternoon road west
@@ -3909,7 +3909,7 @@ function updateWorld(dt) {
 const BG = {};
 // a set can borrow layers it doesn't have yet from another set (1-4 night: its own sky, World 1's hills until Glen's arrive)
 const BG_BORROW = {};   // e.g. { w1_2: { near: "w1" } } while a set is still missing a layer
-for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4"]) {
+for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1"]) {
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
     if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }
