@@ -428,22 +428,22 @@ function drawFlood(camX) {
   ctx.save();
   const top = GR * T - W2.FLOOD_HEIGHT * T * flood.level;
   const flow = ITEM.mud_flow;
-  if (flow && flow.naturalWidth) {   // Glen's flowing mud (david-sling-art/mud_flow.png): copies side by side (every other one mirrored so they join), rolling along
+  if (flow && flow.naturalWidth) {   // Glen's mud (david-sling-art/mud_flow.png, mud_front.png): his "coming in" front, the flowing mud behind it in copies side by side (every other one mirrored so they join), rolling along
     const k = (H + 30 - top) / (flow.naturalHeight * 0.8), fw = flow.naturalWidth * k, fh = flow.naturalHeight * k, y = top - fh * 0.2;
-    ctx.beginPath(); ctx.moveTo(-10, H);   // the curling nose from floodTop, raised so the splashes clear it
-    for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2);
-    ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); ctx.clip();
-    const o = (performance.now() / 1000 * 160) % (2 * fw);
-    for (let i = 0, xr = x1 + 2 * fw - o; xr > -fw; i++, xr -= fw) {
+    const front = ITEM.mud_front && ITEM.mud_front.naturalWidth ? ITEM.mud_front : null;
+    const surf = y + fh * 0.236, ffh = fh * 0.93, ffw = front ? front.naturalWidth * ffh / front.naturalHeight : 0;
+    const xf = x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
+    ctx.beginPath();
+    if (front) ctx.rect(-10, 0, xf + ffw * 0.1 + 10, H);
+    else { ctx.moveTo(-10, H); for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2); ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); }
+    ctx.save(); ctx.clip();
+    const right = front ? xf + ffw * 0.1 : x1, o = (performance.now() / 1000 * 160) % (2 * fw);
+    for (let i = 0, xr = right + 2 * fw - o; xr > -fw; i++, xr -= fw) {
       if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
       else ctx.drawImage(flow, xr - fw, y, fw, fh);
     }
     ctx.restore();
-    ctx.save(); const now = performance.now() / 1000;
-    for (let k2 = 0; k2 < 14; k2++) {   // churning spray at the tip
-      const a = k2 * 2.4 + now * 3, fx = x1 - 20 - (k2 % 5) * 18 + Math.sin(a) * 8, fy = floodTop(flood.x - 20 - (k2 % 5) * 18) + 10 + (k2 * 13) % 60 + Math.cos(a) * 6;
-      ctx.fillStyle = `rgba(150,105,70,${0.55 + 0.3 * Math.sin(a)})`; ctx.beginPath(); ctx.arc(fx, fy, 5 + (k2 % 3) * 3, 0, Math.PI * 2); ctx.fill();
-    }
+    if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
     ctx.restore(); return;
   }
   const g = ctx.createLinearGradient(0, top - 20, 0, H);

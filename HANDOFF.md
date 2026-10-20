@@ -150,7 +150,8 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   the tortoise pool's is GR*T+30 and see-through so his shell shows. Not changed: 2-2's flash flood (muddy, drawn) and
   2-3's waterfall (Glen's sprite).
   Glen's mud (david-sling-art/mud_slab.png, mud_flow.png, mud_trench.png): 2-2's flash flood is `mud_flow` (the
-  splashing wall), copies side by side, every other one mirrored, rolling along, clipped to floodTop's curling nose
+  splashing wall) in copies side by side, every other one mirrored, rolling along, led by `mud_front` (his "coming in"
+  picture, mud_front.png: solid mud reaches the deadly line, spray and rocks fly past it)
   (the drawn version is still the fallback); 3-4's mud slicks are `mud_slick` sunk into the topsoil (world3 drawMud);
   `mud_body` (mirrored, seamless) is spare. mud_trench (a 3D cross-section) is saved but not used.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
