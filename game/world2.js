@@ -364,6 +364,7 @@ Object.assign(W2, {
   FLOOD_START: 18,       // tiles behind David where it appears
   FLOOD_HEIGHT: 9,       // tiles of water above the riverbed
   FLOOD_DRAIN: 4,        // seconds for it to spread out and drain once David is out of the riverbed
+  FLOOD_SURGE: true,     // the chase front is Glen's HD mudslide clip (mud_surge); false = his still picture (mud_front)
   BOY_GAP: 40,           // how far behind David the boy walks (px along his path; the lamb is at 70)
 });
 const piece = kind => setPieces.find(p => p.kind === kind);
@@ -433,10 +434,11 @@ function drawFlood(camX) {
     const front = ITEM.mud_front && ITEM.mud_front.naturalWidth ? ITEM.mud_front : null;
     const surf = y + fh * 0.236, ffh = fh * 0.93, ffw = front ? front.naturalWidth * ffh / front.naturalHeight : 0;
     // Glen's mudslide clip (mud_flow_clip.mp4): once he's out, its ending (mud_settle) fades in and plays as the wall sinks and
-    // fades. (Its surge, mud_surge, is cut too, but at 976x304 it blurs drawn this big: the chase keeps his still front.)
+    // fades. While it chases, its surge (mud_surge, HD) loops at the front (W2.FLOOD_SURGE).
     const lv = flood.level, wallA = flood.done ? Math.max(0, Math.min(1, (lv - 0.55) / 0.4)) : 1;
     const anim = flood.done ? SPR.mud_settle : W2.FLOOD_SURGE ? SPR.mud_surge : null, live = anim && anim.img.naturalWidth;
     const ah = live ? fh * 1.17 : 0, aw = live ? anim.w * ah / anim.h : 0, ax = x1 - aw * (flood.done ? 0.9 : 0.8);   // solid mud at the deadly line (draining: it spreads a little past it)
+    const acols = live ? Math.max(1, Math.round(anim.img.naturalWidth / anim.w)) : 1;   // the clip sheets are grids (4 across)
     const ai = !live ? 0 : flood.done ? Math.min(anim.frames - 1, Math.floor((1 - lv) * 1.15 * anim.frames)) : Math.floor(performance.now() / anim.ms) % anim.frames;
     const surging = live && !flood.done, xf = surging ? ax - ffw * 0.1 : x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
     if (wallA > 0) {
@@ -451,13 +453,13 @@ function drawFlood(camX) {
         else ctx.drawImage(flow, xr - fw, y, fw, fh);
       }
       ctx.restore();
-      if (surging) ctx.drawImage(anim.img, ai * anim.w, 0, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah);
+      if (surging) ctx.drawImage(anim.img, (ai % acols) * anim.w, Math.floor(ai / acols) * anim.h, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah);
       else if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
       ctx.restore();
     }
     if (live && flood.done) {   // the ending: in as the wall goes, out as the last of it soaks away
       ctx.save(); ctx.globalAlpha = Math.min(1, (1 - lv) * 3, lv * 5);
-      ctx.drawImage(anim.img, ai * anim.w, 0, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah); ctx.restore();
+      ctx.drawImage(anim.img, (ai % acols) * anim.w, Math.floor(ai / acols) * anim.h, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah); ctx.restore();
     }
     ctx.restore(); return;
   }

@@ -9,7 +9,7 @@ for path in sorted(glob.glob(os.path.join(root, "assets", "sprites", "*.json")))
     name = os.path.basename(path)[:-5]
     d = json.load(open(path))
     out[name] = {
-        "src": f"../assets/sprites/{name}.png",
+        "src": f"../assets/sprites/{name}" + (".webp" if os.path.exists(os.path.join(root, "assets", "sprites", name + ".webp")) else ".png"),   # big sheets ship as WebP
         "frames": d["frames"], "w": d["frame_w"], "h": d["frame_h"],
         "ms": d["ms_per_frame"], "loop": d["loop"], "pingpong": d.get("pingpong", False),
         "ax": d["anchor_x"], "ay": d["anchor_y"], "align": d.get("align", "feet"),

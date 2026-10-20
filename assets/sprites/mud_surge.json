@@ -1,11 +1,12 @@
 {
-  "frames": 18,
-  "frame_w": 976,
-  "frame_h": 304,
-  "ms_per_frame": 83,
+  "frames": 36,
+  "frame_w": 1952,
+  "frame_h": 608,
+  "ms_per_frame": 42,
   "loop": true,
   "align": "feet",
-  "anchor_x": 488,
-  "anchor_y": 303,
-  "source": "mud_flow_clip.mp4"
+  "anchor_x": 976,
+  "anchor_y": 607,
+  "cols": 6,
+  "source": "mud_flow_clip_hd.mp4 frames 46-81 (every frame), loop crossfaded"
 }

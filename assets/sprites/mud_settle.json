@@ -1,11 +1,12 @@
 {
   "frames": 15,
-  "frame_w": 976,
-  "frame_h": 304,
+  "frame_w": 1952,
+  "frame_h": 608,
   "ms_per_frame": 83,
   "loop": false,
   "align": "feet",
-  "anchor_x": 488,
-  "anchor_y": 303,
-  "source": "mud_flow_clip.mp4 frames 116-145"
+  "anchor_x": 976,
+  "anchor_y": 607,
+  "cols": 5,
+  "source": "mud_flow_clip_hd.mp4 frames 116-145"
 }
