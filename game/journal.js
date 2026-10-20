@@ -448,9 +448,9 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
        left:  { top: [[350, 531], [455, 538], [557, 573]], bot: [[430, 820], [535, 826], [637, 832]] },
        right: { top: [[560, 570], [660, 532], [755, 519]], bot: [[640, 830], [740, 800], [850, 767]] } },
   // Glen's World 6 scene (2026-10-19): the soldiers asleep round the fire, his harp on the rock, Shammah's new bag.
-  // (The left page's bottom corner is pulled in clear of his sleeve)
+  // (Re-measured 2026-10-20: the left page's bottom had been pulled far in for his sleeve, which slanted every line)
   6: { src: "../assets/journal/w6_reading.jpg", y: -40, lamp: [1344, 848],
-       left:  { top: [[692, 556], [780, 575], [865, 610]], bot: [[712, 838], [750, 848], [782, 860]] },
+       left:  { top: [[688, 557], [776, 574], [865, 608]], bot: [[680, 828], [732, 844], [784, 860]] },
        right: { top: [[870, 610], [950, 597], [1042, 590]], bot: [[787, 860], [880, 857], [972, 860]] } },
   // the letter note (Glen, 2026-10-18): David standing, looking down at the open book, the ground at his feet (his cut-out
   // over his ground pictures, put together in david-sling-art/journal_note). No lamp: it's out of doors (or the hall's own)
