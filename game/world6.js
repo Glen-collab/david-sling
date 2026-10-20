@@ -380,9 +380,9 @@ const goliathWatch = {
     ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
   },
 };
-function drawGoliathCard(n, bt) {   // the Field Guide card, filling in line by line (top left, over the scene)
-  const x = 40, y = 175, w = 560, lh = 30;
-  ctx.save(); ctx.fillStyle = "rgba(240,226,196,0.94)"; ctx.beginPath(); ctx.roundRect(x, y, w, 64 + GOLIATH_CARD.length * lh, 10); ctx.fill();
+function drawGoliathCard(n, bt) {   // the Field Guide card, filling in line by line (top left, under the story box, as tall as the lines so far)
+  const x = 40, y = 208, w = 560, lh = 30, shown = Math.min(n, GOLIATH_CARD.length);
+  ctx.save(); ctx.fillStyle = "rgba(240,226,196,0.94)"; ctx.beginPath(); ctx.roundRect(x, y, w, 56 + shown * lh, 10); ctx.fill();
   ctx.strokeStyle = "rgba(90,58,24,0.8)"; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = "#5a2a10"; ctx.font = "bold 22px Georgia, serif"; ctx.fillText("Field Guide: the Philistine champion", x + 18, y + 34);
   ctx.font = "15px Georgia, serif";
