@@ -4044,7 +4044,7 @@ function frame(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
-  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); Menu.open("pause", true); requestAnimationFrame(frame); return; }
+  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, bossMusic]) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
   else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
   else if (dialogHeld()) { hushLoops(true); if (pressed("a") || pressed("b")) { dialog.hold = false; dialog.t = Math.min(dialog.t, 0.25); } }   // someone's talking: the stage waits until A (or B), so every line can be read

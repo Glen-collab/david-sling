@@ -792,7 +792,7 @@ const tw = twPiece ? (() => {
       return { x: x0 + dx, y: W6.TW_ROOF * T + dy, state: "shut", t: 0, hits: 0 }; }),
     gapT: 0, arrows: [], slung: [], pins: 0, beam: 0, slingT: 0, skirmT: 0, coverT: 3, cover: [], dust: [] };
 })() : null;
-function towerFight() { return !!(tw && tw.on && !tw.beaten && david.deadT <= 0); }
+function towerFight() { return !!(tw && !tw.beaten && david.deadT <= 0 && (tw.on || (twPiece && LEVEL_STAGE === "6-4" && david.x > tw.a0 - TUNE.BOSS_MUSIC_LEAD * T))); }   // (the boss music starts as he comes up to it, like the lion's)
 function towerCam() { return tw && tw.on && !tw.beaten ? [tw.a0, tw.a0] : null; }
 function towerBlocking() { return tw && !tw.beaten ? "The watchtower! Its archers cover the whole valley. Deal with it first." : null; }
 const twPinHP = () => W6.counsel2 ? W6.TW_PIN_HP2 : W6.TW_PIN_HP;
@@ -989,7 +989,7 @@ function drawTwDust(camX) {
 // on top, four wheels (two show). (x, y) = its front-bottom corner on the ground; s = scale; lean in degrees.
 // a flat throw from David at an open (or opening) window: the angle that arcs the stone into it (null: no help)
 function towerAim(x, y, sp, charged, facing) {
-  if (!tw || (tw.phase !== 1 && tw.phase !== 2) || !towerFight()) return null;
+  if (!tw || (tw.phase !== 1 && tw.phase !== 2) || !towerFight() || !tw.on) return null;
   const w = tw.phase === 2 ? twWheel() : tw.wins.filter(q => (q.state === "open" || q.state === "tell") && Math.sign(q.x - x) === facing).sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0];   // phase 2: the front hub
   if (!w || Math.sign(w.x - x) !== facing) return null;
   const g = TUNE.STONE_GRAVITY * (charged ? 0.45 : 1), dx = Math.abs(w.x - x), dy = y - w.y;   // dy: how far up the window is
