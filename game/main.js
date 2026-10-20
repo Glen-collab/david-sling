@@ -3761,8 +3761,8 @@ const rainLoop = loopAudio("rain", false);   // the storm stages (STAGE_INFO.sto
 const nightMusic = loopAudio("music_night"), caveMusic = loopAudio("music_cave");
 const DARK_STAGES = ["2-4", "4-4"];
 // the day themes: the fun early worlds get Glen's bouncy ones (1: 8-bit Harp Jump, 2: Harps' Bounce), then
-// Cascading Harp (3, 5, 7) and Harp's Dance (4, 6, 8)
-const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
+// Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out)
+const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
 let dayVol = 0;
 let nightVol = 0, caveVol = 0;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
