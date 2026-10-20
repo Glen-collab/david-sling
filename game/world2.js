@@ -1161,7 +1161,7 @@ function updatePools() {
 }
 function drawPools(camX) {   // shallow green-brown water, in front of the tortoise's legs
   const now = performance.now() / 1000;
-  for (const p of setPieces) if (p.kind === "pool") {
+  for (const p of setPieces) if (p.kind === "pool" && !p.stream) {   // (stream: true = Glen's stream art, world6.js)
     const x0 = p.c * T - camX, w = p.w * T; if (x0 > W || x0 + w < 0) continue;
     const top = GR * T + 34;   // low enough that the top of the tortoise's shell shows
     ctx.save();

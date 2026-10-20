@@ -140,6 +140,11 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   w 4 alternates `tent_goat` / `tent_shepherd` (or `{ look }`); the roof row is unchanged (still computed from the old
   picture so no jump changed), each picture is scaled so W6.TENTS (how far up it you land) meets that row. Tent roofs and
   wagon beds are in `specialPlat` so no rock ledge is drawn over them.
+  Glen's stream (world6/stream.png) cut into items `stream_back` (far bank + water), `stream_water`, `stream_near`:
+  6-3's fill pools are now a stream sunk into the topsoil (feet W6.STREAM_SINK in the water; the near bank and a
+  see-through layer of water drawn in front of David, `drawStreamFront`), replacing the reed_pool picture. The deep pool
+  (setPiece "pool" with `stream: true`; world2's drawPools skips those) fills its pit with the water, the far bank's grass
+  along the top, and its stepping stones drawn as `stone_gray_big` standing up out of it. Other worlds' pools unchanged.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,

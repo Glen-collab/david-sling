@@ -1302,7 +1302,7 @@ if (LEVEL_NAME === "test") {
   bank(97, 12); setPiece("fearful", 99, GR - 1, { look: 2, dir: -1 });
   snake("viper", 112);
   // the deepest pool: stepping stones, a rock standing up in the middle, and The One on the reeds above it
-  setPiece("pool", 118, GR, { w: 14, say: "Splash! Into the deep pool. Hop the stones." });
+  setPiece("pool", 118, GR, { w: 14, stream: true, say: "Splash! Into the deep pool. Hop the stones." });
   stepStone(120); stepStone(122); pillar(124, 13, 2); stepStone(127); stepStone(129);
   plat(124, 7, 2); lostSheep("lamb", 124, 6, "one");             // up on the reeds: double jump from the rock
   // a second pool to fill a spilled jar, then the long way back up
@@ -4045,6 +4045,7 @@ function frame(now) {
   if (inCutscene() || !(david.inv > 0 && Math.floor(now / 70) % 2)) drawDavid(camX);
   if (oilingSheep()) drawSheepOne(david.helpSheep, camX, true);   // the sheep he's oiling stands in front of him, kneeling
   drawFoldFront(camX);
+  if (typeof drawStreamFront === "function") drawStreamFront(camX);   // world6.js
   drawStones(camX); if (typeof drawFlood === "function") { drawPools(camX); drawFalls(camX); drawFlood(camX); drawEagles(camX); drawWind(); }   // world2.js
   drawDecor(camX, "front");
   drawFakeRock(camX);

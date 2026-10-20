@@ -602,16 +602,37 @@ function drawCarriers(camX) {
     ctx.fillStyle = "#cfe9f7"; ctx.font = "bold 20px sans-serif"; ctx.fillText(`Water jars: ${full} / ${out.length}`, W - 214, 277); ctx.restore();
   }
 }
-function drawFills(camX) {   // the pools still holding water: a shallow sheet over the streambed's floor, with reeds
+// Glen's stream (world6/stream.png), side on: stream_back = the far bank and the water, stream_water = the water alone,
+// stream_near = the near bank. A fill pool sinks into the topsoil at ground level (feet in the water); the deep pool
+// (setPiece "pool" with { stream: true }) fills its pit. Each span is a crop of the middle with soft ends, cached.
+W6.STREAM_S = 0.2;          // fill pools: picture scale
+W6.STREAM_SINK = 8;         // fill pools: the water's surface this far above the ground line (how deep the feet go)
+W6.STREAM_DEEP_TOP = 4;    // the deep pool: its surface below the ground line (the stepping stones stand out of it)
+const streamCache = {};
+function streamPiece(nm, wPx, s) {   // a soft-ended crop of the middle of the picture, wPx wide on screen
+  const img = ITEM[nm]; if (!img || !img.naturalWidth) return null;
+  const key = nm + wPx + "/" + s; if (streamCache[key]) return streamCache[key];
+  const h = Math.round(img.naturalHeight * s), sw = Math.min(img.naturalWidth, wPx / s), sx = (img.naturalWidth - sw) / 2;
+  const cv = document.createElement("canvas"); cv.width = Math.round(wPx); cv.height = h; const c = cv.getContext("2d");
+  c.drawImage(img, sx, 0, sw, img.naturalHeight, 0, 0, cv.width, h);
+  const g = c.createLinearGradient(0, 0, cv.width, 0), f = Math.min(0.2, 40 / cv.width);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(f, "#000"); g.addColorStop(1 - f, "#000"); g.addColorStop(1, "rgba(0,0,0,0)");
+  c.globalCompositeOperation = "destination-in"; c.fillStyle = g; c.fillRect(0, 0, cv.width, h);
+  return (streamCache[key] = cv);
+}
+const STREAM_ROWS = { water: 145, near: 300 };   // in stream_back's pixels: where the water starts, where the near bank starts
+function streamSpots() { return fills.map(f => ({ x0: f.x0 - T, w: f.x1 - f.x0 + 2 * T, deep: false })).concat(setPieces.filter(p => p.kind === "pool" && p.stream).map(p => ({ x0: p.c * T - T, w: (p.w + 2) * T, deep: true }))); }
+function streamScale(sp) { return sp.deep ? (ROWS * T - GR * T - W6.STREAM_DEEP_TOP) / 187 : W6.STREAM_S; }
+function streamTop(sp) { return GR * T + (sp.deep ? W6.STREAM_DEEP_TOP : -W6.STREAM_SINK); }   // the water's surface
+function drawFills(camX) {   // behind David: the far bank and the water
   const now = performance.now() / 1000;
-  for (const f of fills) {
-    const x0 = f.x0 - camX, w = f.x1 - f.x0; if (x0 > W || x0 + w < 0) continue;
-    if (ITEM.reed_pool) { drawItem("reed_pool", x0 + w / 2, GR * T + 16, w * 1.35 / 590); continue; }
-    ctx.save(); ctx.fillStyle = "rgba(90,150,160,0.55)"; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 4, w / 2, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "rgba(230,245,250,0.6)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x0 + w / 2, GR * T + 3, w / 2.6 + Math.sin(now * 2) * 4, 4, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = "#5e7a34"; ctx.lineWidth = 3;   // reeds at each end
-    for (const e of [x0 + 6, x0 + w - 6]) for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(e + k * 5, GR * T + 6); ctx.quadraticCurveTo(e + k * 7, GR * T - 30, e + k * 9 + Math.sin(now + k) * 3, GR * T - 56 - Math.abs(k) * 6); ctx.stroke(); }
-    ctx.restore();
+  for (const sp of streamSpots()) {
+    const x = sp.x0 - camX; if (x > W || x + sp.w < 0) continue;
+    const s = streamScale(sp), cv = streamPiece("stream_back", sp.w, s);
+    if (!cv) continue;
+    if (sp.deep) { ctx.save(); ctx.beginPath(); ctx.rect(x, 0, sp.w, GR * T - 4); ctx.clip(); }   // the deep pool: only the far bank's grass along the top (the stepping stones stand in the pit)
+    ctx.drawImage(cv, x, streamTop(sp) - STREAM_ROWS.water * s);
+    if (sp.deep) ctx.restore();
   }
   for (const b of brothers6) {
     const x = b.x - camX; if (x < -150 || x > W + 150) continue;
@@ -1091,6 +1112,19 @@ function drawCover(camX) {   // Glen's leaning rock (6-2) and undercut bank (6-3
       const n = Math.max(1, Math.round(p.w / 6)), cw = w / n, s = cw * 1.12 / 475;
       for (let k = 0; k < n; k++) drawItem("undercut_bank", x0 + cw * (k + 0.5), 13 * T - 14 + 420 * s, s);   // the grass on top level with the slab's top
     }
+  }
+}
+function drawStreamFront(camX) {   // in front of David and the carriers: the water over their feet, the near bank
+  if (WORLD !== 6) return;
+  for (const sp of streamSpots()) {
+    const x = sp.x0 - camX; if (x > W || x + sp.w < 0) continue;
+    const s = streamScale(sp), wv = streamPiece("stream_water", sp.w, s), nr = streamPiece("stream_near", sp.w, s), top = streamTop(sp);
+    if (wv) { ctx.save(); ctx.globalAlpha = sp.deep ? 0.8 : 0.55; ctx.drawImage(wv, x, top); ctx.restore(); }
+    if (sp.deep && ITEM.stone_gray_big) {   // the stepping stones stand up out of the water (Glen's big grey stone), their feet in it
+      for (const p of setPieces) if (p.kind === "stepstone" && p.c * T >= sp.x0 && p.c * T < sp.x0 + sp.w) drawItem("stone_gray_big", p.c * T + T / 2 - camX, GR * T + 47, T * 1.5 / 128);
+      if (wv) { ctx.save(); ctx.beginPath(); ctx.rect(x, top + 22, sp.w, H); ctx.clip(); ctx.globalAlpha = 0.45; ctx.drawImage(wv, x, top); ctx.restore(); }
+    }
+    if (nr && !sp.deep) ctx.drawImage(nr, x, top + (STREAM_ROWS.near - STREAM_ROWS.water) * s);
   }
 }
 function drawWorld6(camX) {
