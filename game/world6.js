@@ -124,6 +124,7 @@ function drawStanding(camX) {
 }
 
 // --- tents (springy roofs) and supply wagons
+for (const p of setPieces) if (p.kind === "tower") for (let c = p.c; c < p.c + 4; c++) specialPlat.add(c + "," + p.r);   // the watch platforms (5-3, 6-1): you stand on the wooden deck, no rock ledge drawn on it
 W6.TENTS = { tent_family: 0.9, tent_goat: 0.85, tent_shepherd: 0.8 };   // Glen's tents (world6/tents.png): how far up the picture you land on the roof
 const tents6 = setPieces.filter(p => p.kind === "tent").map((p, i) => {
   const s = (p.w || 4) * T * W6.TENT_DRAW / 211, h = 123 * s, r = Math.round((GR * T - h * 0.88) / T);   // the roof row (set when the tent was the old picture; kept so no jump changes)
