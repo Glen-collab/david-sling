@@ -487,6 +487,13 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
   6: { src: "../assets/journal/w6_reading.jpg", y: -40, lamp: [1344, 848],
        left:  { top: [[688, 557], [776, 574], [865, 608]], bot: [[680, 828], [732, 844], [784, 860]] },
        right: { top: [[870, 610], [950, 597], [1042, 590]], bot: [[787, 860], [880, 857], [972, 860]] } },
+  // Glen's World 7 scene (2026-10-20): on a rock above the valley in the late afternoon, the five stones beside his bag
+  // and staff. Out of doors: no lamp. His thumbs on the pages are drawn back over the words (thumbs).
+  7: { src: "../assets/journal/w7_reading.jpg", y: -40,
+       left:  { top: [[415, 580], [485, 577], [552, 590]], bot: [[497, 794], [565, 797], [635, 790]] },
+       right: { top: [[552, 590], [630, 567], [697, 544]], bot: [[640, 790], [710, 772], [770, 747]] },
+       thumbs: [[[526, 760], [530, 751], [540, 749], [547, 755], [550, 770], [552, 792], [525, 795]],
+                [[731, 657], [735, 651], [745, 649], [755, 654], [765, 665], [762, 672], [745, 670], [735, 666]]] },
   // the letter note (Glen, 2026-10-18): David standing, looking down at the open book, the ground at his feet (his cut-out
   // over his ground pictures, put together in david-sling-art/journal_note). No lamp: it's out of doors (or the hall's own)
   note_road: { src: "../assets/journal/note_road.jpg", y: 0,
