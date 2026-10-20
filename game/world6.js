@@ -61,7 +61,7 @@ function updateFearful(dt) {
         sayLine(carrierSpots.length ? "A water carrier" : "A soldier", (carrierSpots.length ? CARRY_LINES : LIFT_LINES)[(n - 1) % LIFT_LINES.length]);
         if (n === fearful.length) setTimeout(() => toast(`All ${n} frightened soldiers are back at their posts.`), 4500);
       }
-    } else if (s.state === "rise") { if (s.t > 2.4) { if (carrierSpots.length) { s.state = "posted"; carrierJoin(s.x, s.y, s.look); } else { s.state = "go"; s.t = 0; } } }   // 6-3: he picks up a jar and joins the line
+    } else if (s.state === "rise") { if (s.t > 2.4) { s.state = "go"; s.t = 0; if (carrierSpots.length) { s.dir = -1; s.forJar = true; } } }   // 6-3: he heads back for a jar (and comes in with one from behind: see "go")
     else if (s.state === "go") {   // walk off; a man up on the rocks or the watch platform steps off the edge and drops to the ground first
       s.x += s.dir * W6.SOLDIER_RUN * dt;
       const c = Math.floor(s.x / T), under = r => isSolid(c, r) || isOneway(c, r);
@@ -71,7 +71,8 @@ function updateFearful(dt) {
         for (let r = Math.floor(y0 / T) + 1; r * T <= s.y; r++) if (under(r)) { s.y = r * T; s.vy = 0; break; }
       }
       if (s.y >= GR * T - 1) s.fadeT = (s.fadeT || 0) + dt;   // he only fades once he's down on the ground and walking off
-      s.alpha = Math.max(0, 1 - (s.fadeT || 0) / 3); if (s.alpha <= 0) s.state = "posted";
+      s.alpha = Math.max(0, 1 - (s.fadeT || 0) / 3);
+      if (s.alpha <= 0) { s.state = "posted"; if (s.forJar) carrierJoin(Math.min(s.x, camX - 80), GR * T, s.look); }   // back with a jar, walking in from behind to join the line
     }
   }
 }
@@ -444,6 +445,7 @@ drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) { drawFar
 Object.assign(W6, {
   CARRIER_GAP: 74,       // px along David's path between carriers (behind the lamb and any sheep)
   CARRIER_SIZE: 1.0,
+  SHAM_JAR: 0.84,        // Shammah's jar, against his size (the carrier's jar, cut from his clip)
   DUCK_H: 50,            // a ducking carrier's height (arrows over that miss him)
 });
 const carriers = [];
@@ -454,7 +456,7 @@ const cisternSpot = setPieces.find(p => p.kind === "cistern");
 const brothers6 = setPieces.filter(p => p.kind === "brother");
 const water6 = { told: {}, reached: false };
 if (LEVEL_STAGE === "6-3") carriers.push({ x: (carrierSpots[0] ? carrierSpots[0].x : 6 * T) + 70, y: GR * T, jar: "empty", state: "wait", look: 0, t: 0, who: "Shammah" });
-function carrierJoin(x, y, look) { carriers.push({ x, y, jar: "empty", state: "follow", look, t: 0, who: "" }); }
+function carrierJoin(x, y, look) { carriers.push({ x, y, jar: "empty", state: "follow", look, t: 0, who: "", late: true }); }   // late: walking in to catch up
 function updateCarriers(dt) {
   if (!carriers.length) return;
   const d = david, nLine = line.filter(sh => sh.how === "rescued").length;
@@ -476,7 +478,8 @@ function updateCarriers(dt) {
     const tgt = trailAt(TUNE.LAMB_GAP + TUNE.SHEEP_GAP * nLine + W6.CARRIER_GAP * (i + 1));
     if (!tgt) continue;
     const x0 = c.x, far = Math.hypot(tgt.x - c.x, tgt.y - c.y);
-    moveToward(c, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.WALK_SPEED * 1.15, far * 5)), dt);
+    if (far < 60) c.late = false;
+    moveToward(c, tgt.x, tgt.y, Math.min(c.late ? TUNE.WALK_SPEED * 1.6 : 900, Math.max(TUNE.WALK_SPEED * 1.15, far * 5)), dt);
     c.moved = Math.abs(c.x - x0) / Math.max(dt, 1e-4); if (Math.abs(c.x - x0) > 0.3) c.facing = Math.sign(c.x - x0);
     if (c.jar === "empty") for (const f of fills) if (c.x > f.x0 && c.x < f.x1) {
       c.jar = "full"; c.splash = 0.6; sfx("heal", c.x, 0.35, 1.3);
@@ -520,8 +523,21 @@ function drawCarriers(camX) {
     const dir = c.facing || 1, f = c.who ? "" : W6.LOOKS[c.look % W6.LOOKS.length];
     let top;   // where the jar sits
     if (c.who === "Shammah") {
-      const nm = c.duck ? "shammah_war_ready" : c.moved > 20 ? "shammah_war_walk" : "shammah_war_ready";
-      drawSprite(nm, frameOf(nm, now + 0.3), x, c.y + (c.duck ? 18 : 0), dir, 1, 1, c.hit > 0 ? "brightness(1.6)" : "");
+      const nm = c.duck ? "shammah_war_ready" : c.moved > 20 ? "shammah_war_walk" : "shammah_war_ready", sy = c.y + (c.duck ? 18 : 0);
+      const jar = ITEM.carrier_jar, k = SCALE * (TUNE.SPRITE_SIZE[nm] || 1);
+      if (jar && jar.naturalWidth) {   // the carrier's clay jar (cut from Glen's carrier clip), up on his shoulder behind his head
+        const js = k * W6.SHAM_JAR, jw = jar.naturalWidth * js, jh = jar.naturalHeight * js, [ox, oy] = nm === "shammah_war_walk" ? [-10, -247] : [-8, -234];
+        ctx.save(); ctx.translate(x + dir * ox * k, sy + oy * k); ctx.scale(dir, 1); if (c.hit > 0) ctx.filter = "brightness(1.6)";
+        ctx.drawImage(jar, -jw * 0.52, -jh * 0.5, jw, jh); ctx.restore();
+      }
+      drawSprite(nm, frameOf(nm, now + 0.3), x, sy, dir, 1, 1, c.hit > 0 ? "brightness(1.6)" : "");
+      if (jar && jar.naturalWidth) {
+        if (c.splash > 0) {
+          ctx.fillStyle = `rgba(160,215,245,${c.splash})`;
+          for (let q = 0; q < 6; q++) { ctx.beginPath(); ctx.arc(x - dir * 10 * k + Math.cos(q + now * 9) * 16 * (1.2 - c.splash), sy - 290 * k + Math.sin(q * 2.1) * 10 * (1.2 - c.splash), 3, 0, Math.PI * 2); ctx.fill(); }
+        }
+        continue;
+      }
       top = c.y - (c.duck ? 84 : 126);
     } else if (SPR.carrier_walk) {   // Glen's water carrier: walking with the jar up on his shoulder, ducking down hugging it, getting back up
       const hf = f + (c.hit > 0 ? " brightness(1.6)" : ""), sc = W6.CARRIER_SIZE;
@@ -529,7 +545,6 @@ function drawCarriers(camX) {
       else if ((c.upT ?? 9) < 0.45) drawSprite("carrier_rise", Math.min(7, Math.floor(c.upT / 0.055)), x, c.y, dir, sc, 1, hf);
       else drawSprite("carrier_walk", c.moved > 20 ? frameOf("carrier_walk", now + c.look * 0.37) : 0, x, c.y, dir, sc, 1, hf);
       const k = SCALE * sc, jx = x - dir * 11 * k, jy = c.y - 312 * k;   // the brim of his jar, walking
-      if (c.jar === "full" && !c.duck && (c.upT ?? 9) >= 0.45) { ctx.fillStyle = "rgba(150,210,240,0.9)"; ctx.beginPath(); ctx.ellipse(jx, jy + 3, 7, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
       if (c.splash > 0) {
         ctx.fillStyle = `rgba(160,215,245,${c.splash})`;
         for (let q = 0; q < 6; q++) { ctx.beginPath(); ctx.arc(jx + Math.cos(q + now * 9) * 16 * (1.2 - c.splash), jy + 6 + Math.sin(q * 2.1) * 10 * (1.2 - c.splash), 3, 0, Math.PI * 2); ctx.fill(); }
