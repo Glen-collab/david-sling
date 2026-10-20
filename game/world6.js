@@ -124,12 +124,15 @@ function drawStanding(camX) {
 }
 
 // --- tents (springy roofs) and supply wagons
-const tents6 = setPieces.filter(p => p.kind === "tent").map(p => {
-  const s = (p.w || 4) * T * W6.TENT_DRAW / 211, h = 123 * s, r = Math.round((GR * T - h * 0.88) / T);   // drawn wider than the roof you land on (the item has a fence and pots either side)
-  plat(p.c, r, p.w || 4); return { c: p.c, w: p.w || 4, r, s, boing: 0 };
+W6.TENTS = { tent_family: 0.9, tent_goat: 0.85, tent_shepherd: 0.8 };   // Glen's tents (world6/tents.png): how far up the picture you land on the roof
+const tents6 = setPieces.filter(p => p.kind === "tent").map((p, i) => {
+  const s = (p.w || 4) * T * W6.TENT_DRAW / 211, h = 123 * s, r = Math.round((GR * T - h * 0.88) / T);   // the roof row (set when the tent was the old picture; kept so no jump changes)
+  const nm = p.look || ((p.w || 4) >= 5 ? "tent_family" : i % 2 ? "tent_shepherd" : "tent_goat");
+  plat(p.c, r, p.w || 4); for (let c = p.c; c < p.c + (p.w || 4); c++) specialPlat.add(c + "," + r);   // the roof is the picture: no ledge drawn
+  return { c: p.c, w: p.w || 4, r, s, nm, boing: 0 };
 });
 W6.WAGONS = { wagon_jars: 0.53, wagon_arms: 0.47 };   // Glen's side-on wagons: how high up the picture the rim is (you stand on it)
-const wagons6 = setPieces.filter(p => p.kind === "wagon").map((p, i) => { plat(p.c, GR - 2, p.w || 4); return { c: p.c, w: p.w || 4, nm: p.load || (i % 2 ? "wagon_arms" : "wagon_jars") }; });
+const wagons6 = setPieces.filter(p => p.kind === "wagon").map((p, i) => { plat(p.c, GR - 2, p.w || 4); for (let c = p.c; c < p.c + (p.w || 4); c++) specialPlat.add(c + "," + (GR - 2)); return { c: p.c, w: p.w || 4, nm: p.load || (i % 2 ? "wagon_arms" : "wagon_jars") }; });
 const props6 = setPieces.filter(p => p.kind === "prop");   // scenery only: setPiece("prop", c, GR, { nm, size })
 function updateTents(dt) {
   const d = david;
@@ -146,7 +149,8 @@ function drawTents(camX) {
   for (const a of tents6) {
     const x = (a.c + a.w / 2) * T - camX; if (x < -300 || x > W + 300) continue;
     const sq = 1 - a.boing * 0.06;
-    ctx.save(); ctx.translate(x, GR * T + 6); ctx.scale(1, sq); drawItem("tent", 0, 0, a.s); ctx.restore();
+    const img = ITEM[a.nm], sz = img && img.naturalWidth ? (GR - a.r) * T / (img.naturalHeight * W6.TENTS[a.nm]) : 0;
+    ctx.save(); ctx.translate(x, GR * T + 4); ctx.scale(1, sq); if (sz) drawItem(a.nm, 0, 0, sz); else drawItem("tent", 0, 2, a.s); ctx.restore();
   }
   for (const p of props6) {
     const x = p.x - camX; if (x < -300 || x > W + 300) continue;
