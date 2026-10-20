@@ -1901,6 +1901,9 @@ function updateDavid(dt) {
     const crouching = d.onGround && held("down") && !d.carrying;
     const stuckLow = d.onGround && !headroom(d, STAND_H);
     lowPose = crouching || stuckLow;
+    // inside rock (no room even crouched: a respawn or a shove put him in it): after a moment, up onto the top of it
+    d.inRockT = !headroom(d, LOW_H) ? (d.inRockT || 0) + dt : 0;
+    if (d.inRockT > 0.5) { for (let k = 0; k < 8 && !headroom(d, STAND_H); k++) d.y = (Math.floor((d.y - 1) / T)) * T; d.vy = 0; d.inRockT = 0; }
     if (dir !== 0) { d.facing = dir; d.holdDirT += dt; } else d.holdDirT = 0;
     let target = dir * (d.holdDirT > TUNE.RUN_DELAY ? TUNE.RUN_SPEED : TUNE.WALK_SPEED);
     if (lowPose) target = dir * TUNE.CRAWL_SPEED;
