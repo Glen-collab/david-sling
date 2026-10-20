@@ -3221,7 +3221,7 @@ function updateFinish(dt) {
   const allIn = finish.flock.every(s => s.state === "in");
   if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; if (finish.flock.length > 1) sfx("flock_baa", undefined, 0.7); }
   if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
-  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; hushLoops(true); sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
+  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; hushLoops(true); finish.jingle = sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
@@ -3990,7 +3990,7 @@ function frame(now) {
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)
-    for (const a of [dayMusic, nightMusic, caveMusic, ambience, bossMusic]) if (!a.paused) a.pause();   // nor the stage music or the birds (they fade back in after)
+    for (const a of [dayMusic, nightMusic, caveMusic, ambience, bossMusic, finish.jingle]) if (a && !a.paused) a.pause();   // (and the stage-clear jingle, if he turned the page before it ended)   // nor the stage music or the birds (they fade back in after)
     dayVol = nightVol = caveVol = ambVol = bossVol = 0;
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
