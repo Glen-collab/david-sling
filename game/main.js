@@ -3760,8 +3760,9 @@ const rainLoop = loopAudio("rain", false);   // the storm stages (STAGE_INFO.sto
 // one for inside caves. Not one song a stage: day stages keep the hills' birds.
 const nightMusic = loopAudio("music_night"), caveMusic = loopAudio("music_cave");
 const DARK_STAGES = ["2-4", "4-4"];
-// the day themes: Cascading Harp (worlds 1, 3, 5, 7) and Harp's Dance (2, 4, 6, 8). (World 1 gets Glen's 8-bit one when it's made)
-const dayMusic = loopAudio(WORLD % 2 ? "music_day_a" : "music_day_b");
+// the day themes: the fun early worlds get Glen's bouncy ones (1: 8-bit Harp Jump, 2: Harps' Bounce), then
+// Cascading Harp (3, 5, 7) and Harp's Dance (4, 6, 8)
+const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
 let dayVol = 0;
 let nightVol = 0, caveVol = 0;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
