@@ -15,6 +15,7 @@ const W7 = {
   ARMOR_HEARTS: 3,       // grey hearts, hit before his own
   SLIP_EVERY: [3.5, 6],  // seconds of walking between the helmet slipping down
   SLIP_T: 1.6,           // seconds of the helmet slipping down and being pushed back (david_armor_slip from SLIP_FROM)
+  HELM_HOLE_Y: 395,      // helmet_view.png: the top of its eye holes, px
   SLIP_FROM: 5,          // the slip sheet's first frames are him looking up at it, tipped back: start where he grabs it
   OFF_MS: 120,           // ms per frame taking the armor off (david_armor_off, 28 frames)
   CLANK_EVERY: 0.5,      // seconds between clanks while he walks
@@ -237,6 +238,13 @@ function drawWorld7Over() {
   if (WORLD === 7) { drawShadow74(); drawMemoryOver(); drawCloseup(); }
   if (!inArmor() || armor.slipT <= 0) return;
   const p = 1 - armor.slipT / W7.SLIP_T, k = Math.max(0, Math.min(1, (p - 0.2) / 0.1, (1 - p) / 0.12)), edge = H * (0.18 + 0.5 * k);
+  const img = ITEM.helmet_view;
+  if (img && img.naturalWidth) {   // Glen's clip from inside the helmet (assets/items/helmet_view.png, the eye holes cut out): it slides down over the view
+    const s = W / img.naturalWidth, hole = W7.HELM_HOLE_Y * s, y = -40 - hole + (H * 0.5 + 40) * k;
+    ctx.save(); ctx.fillStyle = `rgba(10,6,2,${0.28 * k})`; ctx.fillRect(0, 0, W, H);   // a little darker in there
+    ctx.globalAlpha = Math.min(1, k * 3); ctx.drawImage(img, 0, Math.round(y), W, img.naturalHeight * s); ctx.restore();
+    return;
+  }
   ctx.save();
   ctx.fillStyle = "rgba(14,8,2,0.94)";
   ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.lineTo(W, edge - 40); ctx.quadraticCurveTo(W / 2, edge + 40, 0, edge - 40); ctx.closePath(); ctx.fill();
