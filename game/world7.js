@@ -749,6 +749,7 @@ Object.assign(W7, {
   SHIELD_W: 74, SHIELD_H: 168,
   GOLIATH_SIZE: 1.55,
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
+  SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
 });
@@ -881,7 +882,7 @@ function stoneHitsShield(s) {
   return true;
 }
 function shieldFalls() {
-  sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 5;   // (where it lies in the last frame of sb_drop)
+  sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 5; sb.dropX = sb.x; sb.dropY = sb.y;   // (where it lies in the last frame of sb_drop)
   sfx("final_stone", sb.x, 0.8); setTimeout(() => { thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2; sfx("stone_hit", sb.x, 0.9, 0.5); }, 600);
 }
 function updateShieldFall(dt) {
@@ -928,7 +929,11 @@ function drawShieldBearer(camX) {
     const k = W7.SB_SPR, warn = sb.state === "lift" && (tobiWarned() || w7Counsel2);
     if (sb.beaten && sb.state === "back") {   // the shield stays where it fell (Glen's flat shield when it comes)
       const sx = sb.shieldX - camX;
-      if (ITEM.sb_shield_flat && ITEM.sb_shield_flat.naturalWidth) { const w = 182, sc = w / ITEM.sb_shield_flat.naturalWidth; ctx.save(); ctx.translate(sx + sb.dir * w / 2, 0); ctx.scale(-sb.dir, 1); drawItem("sb_shield_flat", 0, GR * T + 2, sc); ctx.restore(); }
+      if (ITEM.sb_shield && ITEM.sb_shield.naturalWidth) {   // Glen's shield on its own, laid exactly over the one in sb_drop's last frame
+        const sc = SCALE * W7.SB_SPR * (TUNE.SPRITE_SIZE.sb_drop || 1), [fx, fy, fs] = W7.SB_SHIELD_AT;   // (fitted against that frame)
+        ctx.save(); ctx.translate(Math.round(sb.dropX - camX), Math.round(sb.dropY)); ctx.scale(sb.dir, 1);
+        drawItem("sb_shield", (fx - SPR.sb_drop.ax) * sc, (fy - SPR.sb_drop.ay) * sc, fs * sc); ctx.restore();
+      }
       else drawFallenShield(sx, sb.dir);
     }
     if (sb.state === "fall" || sb.state === "stare") drawSprite("sb_drop", frameOf("sb_drop", sb.state === "fall" ? sb.t : 9), x, sb.y, sb.dir, k, 1, fl);
