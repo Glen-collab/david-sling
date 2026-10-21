@@ -399,6 +399,7 @@ Object.assign(W7, {
   PICK_REACH: 58,        // px: close enough to lift a stone
   PICK_SHINE: 190,       // px: stones start to shine faintly
   BAG: 5,                // smooth stones he needs (1 Samuel 17:40)
+  PICK_GROUND: 40,       // px, the biggest side of a stone lying in the streambed (Glen's pictures)
   NAME_LOCK: 0.8,        // seconds stuck on a wrong stone while it cracks (no jumping off it)
   NAME_SINK: 1.5,        // seconds of falling in with the pieces, before the campfire
   NAME_W: 3,             // columns wide, each carved stone
@@ -516,7 +517,9 @@ function drawPickStones(camX) {
       const g = ctx.createRadialGradient(x, s.y - 8, 2, x, s.y - 8, 34); g.addColorStop(0, `rgba(255,236,170,${a})`); g.addColorStop(1, "rgba(255,220,140,0)");
       ctx.fillStyle = g; ctx.fillRect(x - 36, s.y - 44, 72, 72); ctx.restore();
     }
-    drawStoneShape(x, s.y - 8, 11, s.look === "egg" || s.look === "smooth" ? "smooth" : s.look === "flat" ? "smooth" : s.look, s.c);   // (in the streambed they all look much the same: you have to pick them up)
+    const imgs = PICK_IMG[s.look], img = imgs && ITEM[imgs[s.c % imgs.length]];
+    if (img && img.naturalWidth) { const f = W7.PICK_GROUND / Math.max(img.naturalWidth, img.naturalHeight); ctx.drawImage(img, x - img.naturalWidth * f / 2, s.y + 2 - img.naturalHeight * f, img.naturalWidth * f, img.naturalHeight * f); }   // Glen's stones, lying in the streambed as they are
+    else drawStoneShape(x, s.y - 8, 11, s.look, s.c);
     if (near > 0.75 && Math.abs(s.x - d.x) < W7.PICK_REACH && Math.abs(s.y - d.y) < 40) {
       ctx.save(); ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
       const t = keyText("Down: look at it"); ctx.strokeText(t, x, s.y - 40); ctx.fillText(t, x, s.y - 40); ctx.restore();
