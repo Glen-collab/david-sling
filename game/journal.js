@@ -880,7 +880,7 @@ function throwSpread(n) {
 const LETTER_PAGE = [
   { k: "yod",   ch: "\u{10909}", name: "Yod",   pic: "a hand.",                       where: "on the road to Gibeah, somewhere hidden.", thought: "The first letter of a name worth remembering, the old ones say. Whose name?" },
   { k: "he",    ch: "\u{10904}", name: "He",    pic: "a man with his arms raised.",   where: "at the training yard, or in the king's hall.", thought: "Arms up, as if he's shouting for joy. Or praying." },
-  { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, on a doorway.", thought: "A peg holds a tent together. So the word waw means \"and\": it joins things." },
+  { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, by a house.", thought: "A peg holds a tent together. So the word waw means \"and\": it joins things." },
   { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks.", thought: "Two Dalets with a Waw between them spell a shepherd boy's name. Mine!" },
 ];
 function lettersFound() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}").letters || []; } catch (e) { return []; } }

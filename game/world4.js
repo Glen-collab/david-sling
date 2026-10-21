@@ -316,9 +316,10 @@ function drawLostThings() {   // main.js drawSheepCount: World 4's counter (true
 const OLD_LETTERS = {
   yod:   { ch: "\u{10909}", clue: "Old letters carved in the rock, worn almost smooth. This one is Yod: it was drawn as a hand. The first letter of a name worth remembering." },
   he:    { ch: "\u{10904}", clue: "A letter carved here long ago: He. It was drawn as a man with his arms raised, as if shouting for joy." },
-  waw:   { ch: "\u{10905}", clue: "A letter cut into the post: Waw, a tent peg. A peg joins things together, and the word waw means \"and\"." },
+  waw:   { ch: "\u{10905}", clue: "A letter cut into the rock: Waw, a tent peg. A peg joins things together, and the word waw means \"and\"." },
   dalet: { ch: "\u{10903}", clue: "A letter scratched here: Dalet, a door. Two Dalets with a Waw between them spell a shepherd boy's name." },
 };
+W4.LETTER_H = 60;   // px tall, Glen's gold letters (name_letter_*) where the old letters are carved
 const letterFont = () => { try { return document.fonts.check('40px "Segoe UI Historic"'); } catch (e) { return true; } };
 function updateInscriptions(dt) {
   for (const n of inscriptions) {
@@ -337,7 +338,24 @@ function updateInscriptions(dt) {
   }
 }
 function drawInscriptions(camX) {
-  if (!inscriptions.length || !letterFont()) return;
+  if (!inscriptions.length) return;
+  const now = performance.now() / 1000;
+  if (inscriptions.every(n => ITEM["name_letter_" + n.letter] && ITEM["name_letter_" + n.letter].naturalWidth)) {   // Glen's gold letters, burning in the rock
+    for (const n of inscriptions) {
+      const x = n.x - camX; if (x < -60 || x > W + 60) continue;
+      const img = ITEM["name_letter_" + n.letter], h = W4.LETTER_H, w = img.naturalWidth * h / img.naturalHeight;
+      const flick = 0.06 * Math.sin(now * 7.3 + n.x) + 0.04 * Math.sin(now * 13.1 + n.y);
+      const a = Math.min(1, 0.9 + flick);
+      ctx.save(); ctx.globalCompositeOperation = "lighter";   // a warm halo behind it
+      const g = ctx.createRadialGradient(x, n.y, 4, x, n.y, h * 0.9); g.addColorStop(0, `rgba(255,200,80,${0.32 * a})`); g.addColorStop(1, "rgba(255,170,40,0)");
+      ctx.fillStyle = g; ctx.fillRect(x - h, n.y - h, h * 2, h * 2); ctx.restore();
+      ctx.save(); ctx.globalAlpha = a; ctx.shadowColor = "rgba(255,140,20,0.95)"; ctx.shadowBlur = 16 + 6 * flick * 10;   // burning: an orange glow
+      ctx.drawImage(img, x - w / 2, n.y - h / 2, w, h);
+      ctx.shadowBlur = 0; ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.35 + flick; ctx.drawImage(img, x - w / 2, n.y - h / 2, w, h); ctx.restore();
+    }
+    return;
+  }
+  if (!letterFont()) return;
   ctx.save(); ctx.font = '34px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const n of inscriptions) {
     const x = n.x - camX; if (x < -60 || x > W + 60) continue;

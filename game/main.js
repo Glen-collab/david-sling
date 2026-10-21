@@ -1685,7 +1685,7 @@ if (LEVEL_NAME === "test") {
   // the battlements: up the steps, clay jars along the top
   rock(50, 15, 2, 2); wall(52, 12, 10, 5); setPiece("jar", 54, 11); setPiece("jar", 57, 11); setPiece("jar", 60, 11);
   rock(62, 15, 2, 2);
-  rock(68, 13, 3, 4); inscription(67, 14, "he"); setPiece("target", 67, 14);   // the target hides a letter scratched on the wall
+  rock(68, 13, 3, 4); inscription(68, 14, "he"); setPiece("target", 68, 14);   // the target hides a letter scratched on the block's face
   critter("guarddog", 74);
   campfire(80);
   rock(85, 14, 3, 3); critter("goat", 86, 13);                 // up on the woodpile
@@ -1724,7 +1724,7 @@ if (LEVEL_NAME === "test") {
   setPiece("awning", 26, 12, { w: 3 }); deco("town_grain_baskets", 27, 16, 0.18);
   setPiece("awning", 32, 10, { w: 3 }); questItem("string", 33, 5);   // bounce high off the third awning for it
   critter("hen", 30);
-  rock(36, 14, 2, 3); house(38, 5, 12); inscription(38, 15, "waw");                 // a doorpost with an old letter cut into it
+  rock(36, 14, 2, 3); house(38, 5, 12); inscription(36, 15, "waw");                 // an old letter cut into the rock by the house (Glen: easy to reach from the street)
   house(44, 5, 10); house(50, 4, 12); special(51, 7);
   critter("dove", 56); critter("hen", 58);
   campfire(62);
