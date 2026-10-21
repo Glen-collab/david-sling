@@ -3,7 +3,7 @@
 //   7-1 Saul's Armor: David starts in the king's armor (17:38). In it he can only walk slowly (clank, clank), make a
 //       tiny hop and land with a thud: no sling, no roll, no double jump (main.js asks ARMORED()). Every few seconds of
 //       walking the helmet slips down over his eyes and the top of the screen goes dark. The armor's 3 grey hearts are
-//       hit first. Stand still and press Select to take it off: "I cannot go in these" (17:39), and Saul nods.
+//       hit first. Stand still and press Select to take it off: "I can't go with these" (17:39), and Saul nods.
 //       It stays off for the rest of the stage (a respawn doesn't put it back on).
 //   setPiece("saul7", c)  King Saul beside his tent (Glen's saul_armor poses), watching David try the armor.
 // Glen's clips (2026-10-20): david_armor_idle / walk / hop / slip / off (world7/david_armor). The off clip ends with the
@@ -20,6 +20,8 @@ const W7 = {
   CLANK_EVERY: 0.5,      // seconds between clanks while he walks
   STUCK_T: 1.4,          // seconds pushing against something before the "take it off" reminder
   SAUL_SIZE: 1.0,
+  LAMB_SIZE: 1.5,        // the opening scene (w7intro): the lamb in Saul's spare helmet
+  LAMB_HELM: [1, -43, 15], // the helmet on its head: x, y from its feet and radius, in lamb_walk's own px
 };
 
 const armor = { on: LEVEL_STAGE === "7-1", removing: 0, hearts: W7.ARMOR_HEARTS, walkT: 0, nextSlip: 4, slipT: 0, clankT: 0, stuckT: 0,
@@ -71,7 +73,7 @@ function armorDone() {
   armor.on = false; armor.removing = 0; armor.offT = 0.001;
   armor.pile = { x: d.x, y: d.y, facing: d.facing, drawn: !SPR.david_armor_off };
   if (!SPR.david_armor_off) { armor.pile.x -= d.facing * 34; clank(0.35, 0.9); setTimeout(() => thud(0.35), 420); }
-  sayLine("David", "I cannot go in these, because I am not used to them. (1 Samuel 17:39)");
+  sayLine("David", "I can't go with these; for I haven't tested them. (1 Samuel 17:39)");
 }
 const armorSpeed = () => (armor.removing > 0 || armor.slipT > 0 ? 0 : W7.ARMOR_SPEED);   // (he stops to fix the helmet)
 // a hit while he's in it: the armor takes it (a clank, a small shove) until its grey hearts are gone
@@ -1055,4 +1057,84 @@ function drawWorld7(camX) {
   drawMemSheep(camX);
   drawStones73(camX);
   drawWorld74(camX);
+}
+
+// ---------------------------------------------------------------------------
+// The opening of World 7 (DESIGN 5g "Opening scene"), before 7-1 the first time (or ?w7intro, ?w7intro=3 from that beat):
+// Saul's tent, straight on from the end of World 6. The king's armor is brought out (the pile from Glen's david_armor_off
+// clip, laid out), Saul dresses David in it himself (17:38), the helmet slides down over his eyes, the lamb finds Saul's
+// spare helmet, David tries to walk (17:39, clank, clank). The title card. 7-1 then starts with him in it.
+// ---------------------------------------------------------------------------
+const w7intro = {
+  active: false,
+  beats: [
+    { who: "", text: "In the king's tent, Saul's servants brought out his own armor: his tunic, his coat of mail, his bronze helmet, and his sword.", saul: 0, pile: true },
+    { who: "King Saul", text: "If you're going out there, you're not going in a shepherd's tunic. You'll wear mine.", saul: 5, pile: true },
+    { who: "", text: "Saul dressed David with his clothing. He put a helmet of brass on his head, and he clad him with a coat of mail. (1 Samuel 17:38)", saul: 0, armor: "idle", flash: true },
+    { who: "", text: "From his shoulders and upward Saul was taller than any of the people (1 Samuel 9:2). On David, the helmet slid straight down over his eyes.", saul: 3, armor: "slip" },
+    { who: "", text: "Behind them, the lamb found the king's spare helmet, put its head in it, and wandered off with it on.", saul: 4, armor: "idle", lamb: true },
+    { who: "", text: "David strapped his sword on his clothing, and he tried to move; for he had not tested it. (1 Samuel 17:39)", saul: 2, armor: "walk" },
+    { card: true, saul: 2, armor: "idle" },
+  ],
+  start() { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, fade: 0, out: 0, clankT: 0 }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt; this.fade = Math.min(1, this.t / 1.2);
+    const B = this.beats[this.i];
+    if (B.armor === "walk" && this.bt < 4) { this.clankT -= dt; if (this.clankT <= 0) { this.clankT = W7.CLANK_EVERY; clank(0.3, 0.9 + Math.random() * 0.2); } }
+    if (this.out > 0) { this.out += dt; if (this.out > 1.2) this.finish(); return; }
+    if (B.card && this.bt > 3.2) { this.out = 0.001; return; }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < this.beats.length - 1) { this.i++; this.bt = 0; if (this.beats[this.i].flash) clank(0.35, 1.1); }
+      else this.out = 0.001;
+    }
+  },
+  finish() {
+    this.active = false;
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w7intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  },
+  draw() {
+    const B = this.beats[this.i], now = performance.now() / 1000, fy = H - 6, z = 1.9;   // close to the camera, as in the World 6 ending
+    if (TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
+    else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
+    for (const [k, fx] of [[2, 0.82], [3, 0.94]]) drawSprite("commander_tent", k, W * fx, fy - 10, -1, z * 0.92);
+    drawSprite(SPR.saul_armor ? "saul_armor" : "saul", SPR.saul_armor ? B.saul : 0, W * 0.64, fy, -1, z);
+    if (B.lamb) {   // the lamb, in Saul's spare helmet, bumping along the back of the tent
+      const lx = W * (0.98 - 0.5 * Math.min(1, this.bt / 6)), ly = fy - 8, sc = SCALE * z * W7.LAMB_SIZE, [hx, hy, hr] = W7.LAMB_HELM;
+      drawSprite("lamb_walk", frameOf("lamb_walk", now), lx, ly, -1, z * W7.LAMB_SIZE);
+      drawHelmet(lx - hx * sc, ly + hy * sc + Math.sin(now * 9) * 2, hr * sc, -1);
+    }
+    let dx = W * 0.24;
+    if (B.pile) {
+      drawIntroPile(W * 0.30, fy, z);   // laid out on the rug between them
+      drawSprite("david_idle", frameOf("david_idle", now), W * 0.2, fy, 1, z);
+    } else if (B.armor === "walk") {
+      const go = Math.min(1, this.bt / 4); dx = W * (0.24 + 0.14 * go);
+      drawSprite(go < 1 ? "david_armor_walk" : "david_armor_idle", frameOf(go < 1 ? "david_armor_walk" : "david_armor_idle", now), dx, fy, 1, z);
+    } else if (B.armor === "slip") {
+      const n = SPR.david_armor_slip ? SPR.david_armor_slip.frames : 1;
+      drawSprite("david_armor_slip", Math.min(n - 1, W7.SLIP_FROM + Math.floor(this.bt * 1000 / 150)), dx, fy, 1, z);
+    } else drawSprite("david_armor_idle", frameOf("david_armor_idle", now), dx, fy, 1, z);
+    if (B.flash) { const f = Math.max(0, 1 - this.bt / 0.7); ctx.fillStyle = `rgba(255,236,190,${f})`; ctx.fillRect(0, 0, W, H); }
+    ctx.textAlign = "center";
+    if (B.card) {
+      const f = Math.min(1, this.bt / 0.8); ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = f; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 7", W / 2, H / 2 - 20);
+      ctx.fillStyle = "#fff6e2"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("The Giant's Shadow", W / 2, H / 2 + 30); ctx.globalAlpha = 1;
+    } else drawStoryBox(B.who, B.text, "A: next", true);
+    ctx.textAlign = "left";
+    const a = Math.min(this.fade, 1 - Math.min(1, this.out / 1.2));
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};
+function drawIntroPile(x, y, z) {   // the armor laid out: the last frame of Glen's off clip, cut off where David stood
+  const s = SPR.david_armor_off;
+  if (!s) { const keep = armor.pile; armor.pile = { x, y, facing: 1, drawn: true }; drawArmorPile(0); armor.pile = keep; return; }
+  const sc = SCALE * z * (TUNE.SPRITE_SIZE.david_armor_off || 1), edge = 39 * sc;
+  ctx.save(); ctx.beginPath(); ctx.rect(x + edge, y - s.h * sc, s.w * sc, s.h * sc + 4); ctx.clip();
+  drawSprite("david_armor_off", s.frames - 1, x, y, 1, z); ctx.restore();
+}
+if (LEVEL_STAGE === "7-1" && !STORY_HASH) {
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w7intro; } catch (e) {}
+  if (!seen || new URLSearchParams(location.search).has("w7intro")) w7intro.start();
+  const at = Number(new URLSearchParams(location.search).get("w7intro")) || 0; if (at && w7intro.active) Object.assign(w7intro, { i: at, t: 2, fade: 1 });
 }

@@ -3989,7 +3989,7 @@ function updateMusic(dt) {
   if (!audioUnlocked) return;
   // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
   const cutScene = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
-    "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
+    "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
   // and in cut scenes (Glen) it sinks lower still, faint under the story
   const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
@@ -4219,6 +4219,9 @@ function frame(now) {
   }
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w7intro !== "undefined" && w7intro.active) {   // the opening of World 7, Saul's tent (world7.js)
+    pollInput(); w7intro.update(real); w7intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w6intro !== "undefined" && w6intro.active) {   // the opening of World 6, the camp of fear (world6.js)
     pollInput(); w6intro.update(real); w6intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

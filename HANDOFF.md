@@ -169,14 +169,20 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   David starts in Saul's armor (17:38): `W7.ARMOR_SPEED` walk, no running, `W7.ARMOR_HOP` hop, no sling, roll or
   double jump (main.js asks `ARMORED()`), clanks and thuds (made in code, no sound files), the helmet slipping over
   his eyes every few seconds (`drawWorld7Over`), 3 grey armor hearts hit first. Select standing still takes it off
-  ("I cannot go in these", 17:39), Saul (saul_armor poses) looks surprised, then nods; the armor stays on the ground.
+  ("I can't go with these; for I haven't tested them", 17:39, WEB), Saul (saul_armor poses) looks surprised, then nods; the armor stays on the ground.
   The course stops him at the wall at col 45 (a real jump). Then 6-1's camp pieces (world6.js now runs in World 7
   too): 5 frightened soldiers, The One on Saul's tent roof. Stand-ins: 6-1's backgrounds, World 6's map painting for
   the World 7 map (map.js). Armored David is Glen's clips (david-sling-art/world7/david_armor):
   `david_armor_idle/walk/hop/slip/off`, cut with 50 px headroom for Glen to paint the helmet tops back in (the frames
   where the video cut it off are listed in each .json as helmet_cut_frames); the pile is the off clip's last frame. Art requests: ART_PROMPTS.md "World 7". Journal pages
-  for World 7 are in journal.js (JOURNAL_TEXT.md's draft). Not built yet: the opening scene (Saul dresses him), Tobi's
+  for World 7 are in journal.js (JOURNAL_TEXT.md's draft). Not built yet (at the time): the opening scene (Saul dresses him), Tobi's
   and Shammah's stops, 7-2 to 7-4 and the shield-bearer.
+- **The World 7 opening scene is built (2026-10-21):** `w7intro` (world7.js), before 7-1 the first time (progress.w7intro;
+  `?w7intro` replays it, `?w7intro=3` starts at that beat). Saul's tent (TENT_BG, as in the World 6 ending): the armor laid out
+  (the last frame of david_armor_off, clipped), Saul's line, 17:38 with a flash into david_armor_idle, 1 Samuel 9:2 and the
+  helmet sliding down (david_armor_slip from W7.SLIP_FROM), the lamb in Saul's spare helmet (DESIGN's co-op moment, shown
+  to everyone; W7.LAMB_SIZE / LAMB_HELM), 17:39a with David clanking a few steps, the title card. 7-1's take-off line is
+  now WEB: "I can't go with these; for I haven't tested them."
 - **7-2 Remember the Hills is built (2026-10-20):** the walk down the slope (Glen's w7_2 layers), the giant's taunts
   (17:8-10, setPiece "taunt") between five memory sections (setPiece "memory": the old world's own background layers
   under a gold shimmer + warm wash + "David remembers..."; the ground set stays 7-2's): 1-3 rocky pastures (crumbles,
@@ -207,8 +213,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   (goliath_yell, facing left) watches, says 17:43 and 17:44 in Glen's Hebrew, laughs. Tier 2 after a fall: Shammah's
   counsel, longer tell and tilt, +1 heart. No sheepfold: clear74() saves the stage and starts w7ending (the shield in
   the dust, the gifts screen "Everything you need, you already have.", 17:40, "To be continued in World 8"), then the
-  Journal. Glen's shield-bearer sheets (sb_push / sb_drop / sb_run, W7.SB_SPR; clips in david-sling-art/world7/shield_bearer); lift = the push sheet raised, peek = sb_drop's first frames; the flat shield after he runs waits for Glen's sb_shield_flat. Not built: the World 7 opening scene (Saul dresses
-  David), Gera's sling range.
+  Journal. Glen's shield-bearer sheets (sb_push / sb_drop / sb_run, W7.SB_SPR; clips in david-sling-art/world7/shield_bearer); lift = the push sheet raised, peek = sb_drop's first frames; the flat shield after he runs waits for Glen's sb_shield_flat. Not built: Gera's sling range.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,
