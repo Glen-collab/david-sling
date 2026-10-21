@@ -542,7 +542,11 @@ const NAME_CROSS = {   // the carving: the letters as they're written (right to 
   2: { word: ["yod", "he", "waw", "he"], say: "Four letters, older than anyone remembers: Yod, He, Waw, He. And remember: our fathers read from the right.", done: "" },
 };
 const NAME_NAMES = { dalet: "Dalet", waw: "Waw", he: "He", yod: "Yod" };
-const nameStones = setPieces.filter(p => p.kind === "namestone").map(p => ({ c: p.c, r: p.r, cross: p.cross, k: p.k, letter: p.letter, right: !!p.right, state: "whole", t: 0, cracked: false }));
+// (Glen) a letter David hasn't found (Worlds 4 and 5) isn't carved on any stone: those stones are blank, and blank stones
+// give way, so without it there's no way across. Go back and find it, and it's there on the stones.
+const namesFound = typeof lettersFound === "function" ? lettersFound() : [];
+const nameStones = setPieces.filter(p => p.kind === "namestone").map(p => ({ c: p.c, r: p.r, cross: p.cross, k: p.k, letter: p.letter, right: !!p.right, state: "whole", t: 0, cracked: false,
+                                                                             blank: ["dalet", "waw", "he", "yod"].includes(p.letter) && !namesFound.includes(p.letter) }));
 const nameClues = setPieces.filter(p => p.kind === "nameclue").map(p => ({ x: p.x, y: p.y, cross: p.cross, told: false }));
 const nameRun = { lock: null, fall: null, done: {}, saidRight: false };
 let ohWaitDone = false;
@@ -575,11 +579,12 @@ function updateNameStones(dt) {
         lamb.x = d.x - 50; lamb.y = d.y; trail.length = 0;
         sayLine("David", "Oh wait. Our fathers read from the right. Start at the end: He, Waw, He, Yod.");
       } else {          // it gives way: down he goes with the pieces
-        if (L.order) L.s.state = "whole";   // (the right letter stays, for when he comes back in order)
+        if (L.order || L.blank) L.s.state = "whole";   // (the right letter stays, for when he comes back in order; a blank one stays blank)
         else { L.s.state = "gone"; L.s.t = 0; setNamePlat(L.s, false); }
         sfx("fall_pit", undefined, 0.7);
         d.lives--; d.hearts = 0; d.deadT = W7.NAME_SINK; nameRun.fall = { vy: 120 };
-        toast(L.order ? "Out of order! The letters have to be stepped one by one." : d.lives > 0 ? `The stone gave way! Wrong letter. (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "The stone gave way! Out of lives: back to the start of the stage.");
+        if (L.blank) blankNote(L.s.letter);
+        else toast(L.order ? "Out of order! The letters have to be stepped one by one." : d.lives > 0 ? `The stone gave way! Wrong letter. (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "The stone gave way! Out of lives: back to the start of the stage.");
       }
     }
     return;
@@ -599,7 +604,7 @@ function updateNameStones(dt) {
   if (!s) return;
   const before = nameStones.find(q => q.cross === s.cross && q.k === s.k - 1 && q.right);
   const order = s.right && before && before.state !== "lit";   // the right letter, but out of order: it won't hold either
-  if (s.right && !order) {
+  if (s.right && !order && !s.blank) {
     s.state = "lit"; s.t = 0; chime(2 + s.k * 2); sfx("stone_hit", s.c * T, 0.35, 1.4);
     for (let k = 0; k < 14; k++) bits.push({ x: (s.c + W7.NAME_W / 2) * T, y: nameTop(s), vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 360, life: 0.6, color: "#ffe9a0" });
     if (s.cross === 2 && s.k === 0 && !ohWaitDone && !nameRun.saidRight) { nameRun.saidRight = true; ohWaitDone = true; sayLine("David", "From the right, like the Steward said. He first."); }
@@ -614,8 +619,13 @@ function updateNameStones(dt) {
   }
   // a wrong letter: the jump locks, it cracks
   s.state = "crack"; s.t = 0; sfx("stone_hit", s.c * T, 0.6, 0.6);
-  nameRun.lock = { s, t: 0, ohWait: s.cross === 2 && s.k === 0 && !ohWaitDone, order };
+  nameRun.lock = { s, t: 0, ohWait: s.cross === 2 && s.k === 0 && !ohWaitDone && !s.blank, order: order && !s.blank, blank: s.right && s.blank };
   d.vx = 0; d.jumpBuf = 0; setState("slip");
+}
+function blankNote(letter) {   // he stepped where a letter should be, and it isn't carved: say which one, and where it might be
+  const L = typeof LETTER_PAGE !== "undefined" ? LETTER_PAGE.find(q => q.k === letter) : null;
+  toast(david.lives > 0 ? `Nothing carved on that stone, and it gave way. (${david.lives} ${david.lives === 1 ? "life" : "lives"} left)` : "Nothing carved on that stone. Out of lives: back to the start of the stage.");
+  if (!nameRun.blankSaid) { nameRun.blankSaid = true; setTimeout(() => sayLine("David", `The ${NAME_NAMES[letter]} should be there, and it isn't. I never found it. ` + (L ? `Maybe it's still ${L.where} ` : "") + "I'll have to go back for it. (From the map: Worlds 4 and 5.)"), 1500); }
 }
 function resetNameStones() {
   for (const s of nameStones) { s.state = "whole"; s.t = 0; setNamePlat(s, true); }
@@ -646,7 +656,7 @@ function clueText(cross) {
   const missing = C.word.some(l => !found.includes(l));
   if (!missing) return C.say;
   const names = C.word.map(l => found.includes(l) ? NAME_NAMES[l] : "( ? )").join(", ");
-  return `Letters carved deep in the rock, some worn away: ${names}.` + (cross === 2 ? " And under them: \"our fathers read from the right.\"" : "");
+  return `Letters carved deep in the rock, some worn away: ${names}.` + (cross === 2 ? " And under them: \"our fathers read from the right.\"" : "") + " Some of the stones ahead are blank. Without those letters, I won't get across.";
 }
 function updateNameClues() {
   const q = nameClueNear(); if (!q || q.told || david.deadT > 0) return;
@@ -662,7 +672,7 @@ function drawNameStones(camX) {
     else if (s.cracked) drawSprite("name_stone_crumble", 1, cx, top + 95 * sc, 1, sc / SCALE);
     else drawItem("name_stone_plain", cx, top + 95 * sc, sc);
     // the letter on its face: every letter glows the same, so only reading tells them apart
-    const L = ITEM["name_letter_" + s.letter]; if (!L || !L.naturalWidth) continue;
+    const L = ITEM["name_letter_" + s.letter]; if (!L || !L.naturalWidth || s.blank) continue;   // a letter he never found: a blank face
     const lh = 38, ls = lh / 140, a = s.state === "lit" ? 1 : 0.8;
     if (s.state === "lit") { ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(cx, top + 26, 2, cx, top + 26, 40); g.addColorStop(0, "rgba(255,230,140,0.55)"); g.addColorStop(1, "rgba(255,210,100,0)"); ctx.fillStyle = g; ctx.fillRect(cx - 40, top - 14, 80, 80); ctx.restore(); }
     drawItem("name_letter_" + s.letter, cx, top + 10 + lh + 6, ls, a);

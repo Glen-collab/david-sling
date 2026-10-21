@@ -194,6 +194,11 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   ladder), 1-4 the night of the lion (STAGE_INFO.night switched on inside it: night music and tint). Lost things: a
   remembered sheep in each (setPiece "memsheep": reach it, a line, it fades into sparkles). The One on the lion's rocks.
   Backgrounds for 7-3 (w7_3) and 7-4 (w7_4, far layer raised so the giant's shadow shows) are in, stages not built.
+- **7-3 missing letters (Glen, 2026-10-21):** a Stones-of-the-Name letter David never found (Dalet, Waw, He, Yod; Worlds
+  4-5, progress.letters, read when the stage loads) isn't carved on any stone: those stones are blank (`s.blank`) and give
+  way like a wrong one (a life; the blank stone stays). The first time, David says which letter and where it might be
+  (journal.js LETTER_PAGE.where) and to go back from the map. Find it and it's on the stones next time. The decoys
+  (Bet, Gimel, Kaf, Mem, Shin, Lamed) always show; the Yod decoy on the Name crossing (the "Oh wait" trap) only once Yod is found.
 - **7-3 Five Smooth Stones is built (2026-10-21):** the streambed (w7_3). Shammah's three lines at the first fire. Stones
   lying in the streambed (setPiece "pickstone", world7.js) shine faintly when David is near; Down lifts one for a
   close-up drawn in code (the game waits): A keeps it, B puts it back. Only "smooth"/"egg" stones go in the bag; jagged,
