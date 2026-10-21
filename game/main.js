@@ -1425,7 +1425,7 @@ if (LEVEL_NAME === "test") {
   deco("reed_pool", 15, 16, 0.24);
   pick(13, "jagged"); pick(18, "smooth"); pick(22, "cracked", "scorpion");
   rock(25, 15, 3, 2);
-  pick(30, "egg"); pick(35, "flat");
+  pick(30, "smooth"); pick(35, "flat");
   critter("hedgehog", 33); critter("scorpion", 39); critter("scorpion", 42);
   snake("viper", 46);
   rock(49, 14, 3, 3); special(50, 11);
@@ -1443,7 +1443,7 @@ if (LEVEL_NAME === "test") {
   pick(93, "smooth"); snake("whip", 97); pick(100, "jagged", "scorpion");
   setPiece("pool", 103, GR, { w: 6, stream: true, say: "Splash! Hop the stepping stone." }); stepStone(105);
   ground(109, 129);
-  pick(112, "egg"); critter("hedgehog", 115); critter("scorpion", 118); pick(121, "lumpy");
+  pick(112, "egg"); critter("hedgehog", 115); critter("scorpion", 118); pick(121, "pitted");
   campfire(123);
   setPiece("nameclue", 124, GR - 1, { cross: 2 });
   causeway(126, 4);
@@ -1457,7 +1457,7 @@ if (LEVEL_NAME === "test") {
   plat(142, 6, 3); lostSheep("lamb", 143, 5, "one");          // The One, up over the pool: a double jump off the Waw
   causeway(158, 4); special(159, 14);                          // the stone of remembrance, at the far side
   ground(158, 231);
-  pick(166, "smooth"); pick(171, "flat");
+  pick(166, "smooth"); pick(171, "smooth");
   critter("hedgehog", 175); critter("scorpion", 178);
   snake("viper", 183); pick(187, "jagged", "scorpion");
   rock(190, 15, 3, 2); deco("reed_pool", 192, 16, 0.22);

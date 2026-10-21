@@ -384,7 +384,7 @@ function drawMemoryOver() {   // the wash, the vignette, the shimmer and the tit
 // 7-3 Five Smooth Stones (DESIGN 7-3): the streambed in the middle of the valley. Choosing stones is the gameplay.
 //   setPiece("pickstone", c, GR - 1, { look, under })  a stone lying in the streambed. It shines faintly when David is
 //       near; Down beside it lifts it for a close-up (the game waits): A keeps it, B puts it back. Only smooth, round
-//       ones go in the bag (look "smooth"/"egg"); jagged, flat, cracked or lopsided ones wobble in flight. under:
+//       ones go in the bag (look "smooth", Glen: only the round ball); the egg-long, long, jagged, cracked, pitted or lopsided ones are rejects (PICK_IMG: his pictures for the close-up). under:
 //       "scorpion" or "viper" comes out from under it (the last Shepherd's Judgment: look before you throw). Five smooth
 //       stones are the lost things, and the gate won't open without them.
 //   The Stones of the Name (DESIGN "The Stones of the Name"): two crossings on carved stepping stones, a low stone and
@@ -405,12 +405,15 @@ Object.assign(W7, {
 });
 const PICK_LOOKS = {
   smooth:  { keep: true,  say: "Smooth and round, and just the right weight. This one will fly true." },
-  egg:     { keep: true,  say: "Worn smooth by the water, round as an egg. A good one." },
+  egg:     { keep: false, say: "Smooth, but long as an egg. It would turn over in the air." },
   jagged:  { keep: false, say: "Jagged edges. It would tumble and wobble in the air." },
-  flat:    { keep: false, say: "Too flat. It would sail off sideways, like a leaf." },
+  flat:    { keep: false, say: "Too long and thin. It would tumble end over end." },
+  pitted:  { keep: false, say: "Full of holes, and light as bread. The wind would carry it off." },
   cracked: { keep: false, say: "There's a crack right through it. It could split apart in the sling." },
   lumpy:   { keep: false, say: "Lopsided: heavier on one side. It would pull off to the left." },
 };
+const PICK_IMG = { smooth: ["pick_round"], egg: ["pick_oval"], jagged: ["pick_jagged_grey", "pick_jagged_red"], cracked: ["pick_cracked"],
+                   lumpy: ["pick_lumpy"], pitted: ["pick_pitted"], flat: ["pick_long"] };   // Glen's stones, for the close-up in his hand
 const pickStones = setPieces.filter(p => p.kind === "pickstone").map(p => ({ x: p.x, y: p.y, c: p.c, look: p.look, under: p.under || null, state: "lie", t: Math.random() * 6 }));
 const closeup = { open: false, s: null, t: 0, crawl: false };
 const bagCount = () => pickStones.filter(s => s.state === "kept").length;
@@ -528,7 +531,10 @@ function drawCloseup() {   // over everything: the stone in his hand, big
   const cx = W / 2, cy = H / 2 - 50, R = 150 * (0.85 + 0.15 * k);
   const g = ctx.createRadialGradient(cx, cy, 20, cx, cy, R * 1.6); g.addColorStop(0, `rgba(255,236,190,${0.35 * k})`); g.addColorStop(1, "rgba(255,220,160,0)");
   ctx.fillStyle = g; ctx.fillRect(cx - R * 2, cy - R * 2, R * 4, R * 4);
-  ctx.globalAlpha = k; drawStoneShape(cx, cy, R * 0.62, s.look, s.c);
+  ctx.globalAlpha = k;
+  const imgs = PICK_IMG[s.look], img = imgs && ITEM[imgs[s.c % imgs.length]];
+  if (img && img.naturalWidth) { const f = R * 1.55 / Math.max(img.naturalWidth, img.naturalHeight); ctx.drawImage(img, cx - img.naturalWidth * f / 2, cy - img.naturalHeight * f / 2, img.naturalWidth * f, img.naturalHeight * f); }
+  else drawStoneShape(cx, cy, R * 0.62, s.look, s.c);
   ctx.textAlign = "center"; ctx.font = "italic 26px Georgia, serif"; ctx.fillStyle = "#ffe9b8";
   ctx.fillText(L.say, cx, cy + R * 0.8 + 20);
   if (closeup.crawl && s.under) { ctx.font = "bold 22px sans-serif"; ctx.fillStyle = "#ffb08a"; ctx.fillText("Something moved underneath it...", cx, cy - R * 0.85); }
