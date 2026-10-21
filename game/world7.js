@@ -648,7 +648,7 @@ function nameNote() {
 function nameClueNear() { const d = david; return nameClues.find(q => Math.abs(q.x - d.x) < 90 && Math.abs(q.y - d.y) < 60) || null; }
 function w7Select() {   // main.js: Select at the carving opens the Journal at the old letters
   const q = nameClueNear(); if (!q || typeof Journal === "undefined" || !Journal.openNote || typeof lettersSpread !== "function") return false;
-  david.vx = 0; hushLoops(); Journal.openNote(lettersSpread(lettersFound()));
+  david.vx = 0; nameVision.start(q.cross, false);   // the still of Glen's clip, with the letters (Select again: the Journal)
   return true;
 }
 function clueText(cross) {
@@ -660,7 +660,9 @@ function clueText(cross) {
 }
 function updateNameClues() {
   const q = nameClueNear(); if (!q || q.told || david.deadT > 0) return;
-  q.told = true; sayLine("", clueText(q.cross) + " (Select: open your Journal at the old letters.)");
+  q.told = true;
+  if (q.cross === 1 && !nameVisionSeen && !NAME_CLIP.missing) { nameVision.start(1, true); return; }   // the first time: Glen's clip
+  sayLine("", clueText(q.cross) + " (Select: look at the carving again.)");
 }
 function drawNameStones(camX) {
   const sc = W7.NAME_W * T / 222;
@@ -694,7 +696,7 @@ function drawNameClues(camX) {
     }
     if (nameClueNear() === q && !Journal.active) {
       ctx.font = "bold 16px sans-serif"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
-      const t = keyText("Select: open your Journal"); ctx.strokeText(t, x, q.y - 128); ctx.fillText(t, x, q.y - 128);
+      const t = keyText("Select: read the carving"); ctx.strokeText(t, x, q.y - 128); ctx.fillText(t, x, q.y - 128);
     }
     ctx.restore();
   }
@@ -1185,5 +1187,68 @@ const w7off = {
     ctx.textAlign = "center"; drawStoryBox(B.who, B.text, last ? (this.t * 1000 / SPR.saul_off.ms >= n ? "A: continue" : "") : "A: next", true); ctx.textAlign = "left";
     const a = Math.min(1, this.t / 0.5, 1 - this.out / 0.8);
     ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};
+
+// 7-3, the Stones of the Name: Glen's clip (name_stones.mp4: David walks to a path of carved stones over a chasm and
+// kneels to read them). It plays once, the first time he reaches the first carving (progress.nameVision). After that,
+// Select at either carving shows its last frame as a still: the carving's letters, the clue, and Select for the Journal.
+const NAME_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/name_stones.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+NAME_CLIP.onerror = () => { NAME_CLIP.missing = true; };
+const NAME_STILL = Object.assign(new Image(), { src: "../assets/video/name_stones_last.jpg?v=" + (window.BUILD || 0) });
+let nameVisionSeen = false;
+try { nameVisionSeen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").nameVision; } catch (e) {}
+const nameVision = {
+  active: false,
+  start(cross, full) {
+    full = full && !NAME_CLIP.missing;
+    Object.assign(this, { active: true, cross, full, t: 0, still: full ? -1 : 0, out: 0 });
+    david.vx = 0; dialog.t = 0;
+    if (full) { NAME_CLIP.currentTime = 0; NAME_CLIP.play().catch(() => { this.still = 0; }); }
+    if (full && !nameVisionSeen) {
+      nameVisionSeen = true;
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.nameVision = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    }
+  },
+  update(dt) {
+    this.t += dt;
+    if (this.out > 0) { this.out += dt; if (this.out > 0.5) { this.active = false; NAME_CLIP.pause(); if (this.then) { const f = this.then; this.then = null; f(); } } return; }
+    if (this.still < 0) {   // the clip: A skips to its end
+      if (NAME_CLIP.ended || this.t > 12 || (this.t > 0.8 && (pressed("a") || pressed("start")))) { this.still = 0; NAME_CLIP.pause(); chime(5); }
+      return;
+    }
+    this.still += dt;
+    if (this.still < 0.5) return;
+    if (pressed("a") || pressed("b") || pressed("start")) this.out = 0.001;
+    else if (pressed("select") || pressed("y")) {   // straight to the Journal's old letters
+      this.out = 0.001;
+      this.then = () => { if (typeof Journal !== "undefined" && Journal.openNote && typeof lettersSpread === "function") { hushLoops(); Journal.openNote(lettersSpread(lettersFound())); } };
+    }
+  },
+  draw() {
+    const cover = (img, w, h) => { const s = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * s) / 2, (H - h * s) / 2, w * s, h * s); };
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+    if (this.still < 0) { if (NAME_CLIP.videoWidth && NAME_CLIP.readyState >= 2) cover(NAME_CLIP, NAME_CLIP.videoWidth, NAME_CLIP.videoHeight); }
+    else if (NAME_STILL.naturalWidth) cover(NAME_STILL, NAME_STILL.naturalWidth, NAME_STILL.naturalHeight);
+    if (this.still >= 0) {
+      const a = this.full ? Math.min(1, this.still / 0.6) : 1;
+      ctx.save(); ctx.globalAlpha = a;
+      // the carving's letters, big, as they're written (right to left); a letter he hasn't found is worn away
+      const found = lettersFound(), word = NAME_CROSS[this.cross].word, n = word.length, gap = 92, cx = W * 0.5, cy = H - 120;
+      ctx.fillStyle = "rgba(20,12,6,0.72)"; ctx.beginPath(); ctx.roundRect(cx - (n * gap) / 2 - 40, cy - 70, n * gap + 80, 128, 18); ctx.fill();
+      ctx.strokeStyle = "rgba(255,214,120,0.5)"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.font = '72px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      for (let i = 0; i < n; i++) {
+        const l = word[i], lx = cx + ((n - 1) / 2 - i) * gap;
+        if (found.includes(l)) { ctx.fillStyle = "#ffe8a8"; ctx.shadowColor = "rgba(255,200,90,0.8)"; ctx.shadowBlur = 16; ctx.fillText(NAME_LETTERS[l], lx, cy - 8); ctx.shadowBlur = 0; }
+        else { ctx.fillStyle = "rgba(160,140,120,0.35)"; ctx.beginPath(); ctx.ellipse(lx, cy - 8, 20, 28, 0.3, 0, Math.PI * 2); ctx.fill(); }
+        ctx.font = "16px sans-serif"; ctx.fillStyle = "#e9dcc4"; ctx.fillText(found.includes(l) ? NAME_NAMES[l] : "?", lx, cy + 42); ctx.font = '72px "Segoe UI Historic"';
+      }
+      ctx.textBaseline = "alphabetic";
+      ctx.font = "italic 15px Georgia, serif"; ctx.fillStyle = "rgba(255,240,210,0.8)"; ctx.fillText("read from the right  ←", cx, cy - 80);
+      ctx.restore();
+      ctx.textAlign = "center"; drawStoryBox("", clueText(this.cross) + " Step only on these letters, in order.", keyText("A: back to the stones    Select: open your Journal"), true); ctx.textAlign = "left";
+    } else if (this.t > 1) caption("A: skip", 0.6, true);
+    const f = Math.min(1, this.t / 0.5, 1 - this.out / 0.5); ctx.fillStyle = `rgba(0,0,0,${1 - f})`; ctx.fillRect(0, 0, W, H);
   },
 };
