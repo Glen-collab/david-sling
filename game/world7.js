@@ -399,6 +399,8 @@ Object.assign(W7, {
   PICK_REACH: 58,        // px: close enough to lift a stone
   PICK_SHINE: 190,       // px: stones start to shine faintly
   BAG: 5,                // smooth stones he needs (1 Samuel 17:40)
+  NAME_LETTER: [0.5, 0.62],   // a Name stone's letter: its height x the stone's, and where its middle sits (x the stone's height, from the top)
+  CLUE_ARC: [62, 70, 21, 21],   // the carving on the boulder: its top (px above the boulder's foot), the curve's radius, the space between letters, letter size
   PICK_GROUND: 40,       // px, the biggest side of a stone lying in the streambed (Glen's pictures)
   NAME_LOCK: 0.8,        // seconds stuck on a wrong stone while it cracks (no jumping off it)
   NAME_SINK: 1.5,        // seconds of falling in with the pieces, before the campfire
@@ -562,9 +564,13 @@ const NAME_CROSS = {   // the carving: the letters as they're written (right to 
 const NAME_NAMES = { dalet: "Dalet", waw: "Waw", he: "He", yod: "Yod" };
 // (Glen) a letter David hasn't found (Worlds 4 and 5) isn't carved on any stone: those stones are blank, and blank stones
 // give way, so without it there's no way across. Go back and find it, and it's there on the stones.
-const namesFound = typeof lettersFound === "function" ? lettersFound() : [];
+let namesFound = null;   // read on first use, once journal.js (lettersFound) has loaded: at this file's load it hasn't, and every stone came out blank
 const nameStones = setPieces.filter(p => p.kind === "namestone").map(p => ({ c: p.c, r: p.r, cross: p.cross, k: p.k, letter: p.letter, right: !!p.right, state: "whole", t: 0, cracked: false,
-                                                                             blank: ["dalet", "waw", "he", "yod"].includes(p.letter) && !namesFound.includes(p.letter) }));
+                                                                             get blank() {
+                                                                               if (!namesFound) namesFound = typeof lettersFound === "function" ? lettersFound() : [];
+                                                                               return ["dalet", "waw", "he", "yod"].includes(this.letter) && !namesFound.includes(this.letter);
+                                                                             } }));
+for (const s of nameStones) for (let c = s.c; c < s.c + W7.NAME_W; c++) specialPlat.add(c + "," + s.r);   // the stone is the picture: no rock ledge drawn over it (and its letter)
 const nameClues = setPieces.filter(p => p.kind === "nameclue").map(p => ({ x: p.x, y: p.y, cross: p.cross, told: false }));
 const nameRun = { lock: null, fall: null, done: {}, saidRight: false };
 let ohWaitDone = false;
@@ -693,9 +699,11 @@ function drawNameStones(camX) {
     else drawItem("name_stone_plain", cx, top + 95 * sc, sc);
     // the letter on its face: every letter glows the same, so only reading tells them apart
     const L = ITEM["name_letter_" + s.letter]; if (!L || !L.naturalWidth || s.blank) continue;   // a letter he never found: a blank face
-    const lh = 38, ls = lh / 140, a = s.state === "lit" ? 1 : 0.8;
+    const fh = 95 * sc, lh = fh * W7.NAME_LETTER[0], ls = lh / 140, a = 1, ly = top + fh * W7.NAME_LETTER[1] + lh / 2;   // on the stone's front face, never hanging off it (Glen)
     if (s.state === "lit") { ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(cx, top + 26, 2, cx, top + 26, 40); g.addColorStop(0, "rgba(255,230,140,0.55)"); g.addColorStop(1, "rgba(255,210,100,0)"); ctx.fillStyle = g; ctx.fillRect(cx - 40, top - 14, 80, 80); ctx.restore(); }
-    drawItem("name_letter_" + s.letter, cx, top + 10 + lh + 6, ls, a);
+    ctx.save(); ctx.shadowColor = "rgba(255,140,20,0.9)"; ctx.shadowBlur = 12;   // burning gold, like the old letters in Worlds 4-5
+    drawItem("name_letter_" + s.letter, cx, ly, ls, a);
+    ctx.shadowBlur = 0; ctx.globalCompositeOperation = "lighter"; drawItem("name_letter_" + s.letter, cx, ly, ls, 0.3); ctx.restore();
   }
 }
 function drawNameClues(camX) {
@@ -703,14 +711,17 @@ function drawNameClues(camX) {
   for (const q of nameClues) {
     const x = q.x - camX; if (x < -150 || x > W + 150) continue;
     drawItem("boulder_grey", x, q.y + 8, 0.34);
-    const word = NAME_CROSS[q.cross].word, n = word.length, gap = 30;
-    ctx.save(); ctx.font = '30px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    for (let i = 0; i < n; i++) {   // written right to left: the first letter on the right
-      const l = word[i], lx = x + ((n - 1) / 2 - i) * gap, ly = q.y - 70;
+    const word = NAME_CROSS[q.cross].word, n = word.length, R = W7.CLUE_ARC[1], step = W7.CLUE_ARC[2] / R;
+    ctx.save(); ctx.font = W7.CLUE_ARC[3] + 'px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (let i = 0; i < n; i++) {   // written right to left (the first letter on the right), cut along the curve of the boulder (Glen)
+      const l = word[i], ang = ((n - 1) / 2 - i) * step, ox = x, oy = q.y - W7.CLUE_ARC[0] + R;
+      ctx.save(); ctx.translate(ox + Math.sin(ang) * R, oy - Math.cos(ang) * R); ctx.rotate(ang);
+      const lx = 0, ly = 0;
       if (found.includes(l)) {
         ctx.fillStyle = "rgba(255,250,235,0.55)"; ctx.fillText(NAME_LETTERS[l], lx, ly + 2);
         ctx.fillStyle = "rgba(38,32,28,0.95)"; ctx.fillText(NAME_LETTERS[l], lx, ly);
-      } else { ctx.fillStyle = "rgba(60,52,44,0.25)"; ctx.beginPath(); ctx.ellipse(lx, ly, 9, 12, 0.3, 0, Math.PI * 2); ctx.fill(); }   // worn away
+      } else { ctx.fillStyle = "rgba(60,52,44,0.25)"; ctx.beginPath(); ctx.ellipse(lx, ly, 6, 9, 0.3, 0, Math.PI * 2); ctx.fill(); }   // worn away
+      ctx.restore();
     }
     if (nameClueNear() === q && !Journal.active) {
       ctx.font = "bold 16px sans-serif"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
