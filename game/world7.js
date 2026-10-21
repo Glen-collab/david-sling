@@ -400,7 +400,8 @@ Object.assign(W7, {
   PICK_SHINE: 190,       // px: stones start to shine faintly
   BAG: 5,                // smooth stones he needs (1 Samuel 17:40)
   NAME_LETTER: [0.5, 0.62],   // a Name stone's letter: its height x the stone's, and where its middle sits (x the stone's height, from the top)
-  CLUE_ARC: [62, 70, 21, 21],   // the carving on the boulder: its top (px above the boulder's foot), the curve's radius, the space between letters, letter size
+  RIDDLE: [0.36, 44, 1.2],     // 7-3, the riddle over the bridge: its height (fraction of the screen), letter size, seconds per line to fade in
+  CLUE_ARC: [62, 70, 6, 13],   // the scratches on the boulder: their top (px above the boulder's foot), the curve's radius, how many, the space between them
   PICK_GROUND: 40,       // px, the biggest side of a stone lying in the streambed (Glen's pictures)
   NAME_LOCK: 0.8,        // seconds stuck on a wrong stone while it cracks (no jumping off it)
   NAME_SINK: 1.5,        // seconds of falling in with the pieces, before the campfire
@@ -557,9 +558,13 @@ if (pickStones.length) {
 
 // --- the Stones of the Name
 const NAME_LETTERS = { aleph: "\u{10900}", bet: "\u{10901}", gimel: "\u{10902}", dalet: "\u{10903}", he: "\u{10904}", waw: "\u{10905}", yod: "\u{10909}", kaf: "\u{1090A}", lamed: "\u{1090B}", mem: "\u{1090C}", shin: "\u{10914}" };
-const NAME_CROSS = {   // the carving: the letters as they're written (right to left), and how the clue says them
-  1: { word: ["dalet", "waw", "dalet"], say: "Three letters, carved deep: Dalet, Waw, Dalet. The letters of a name.", done: "Dalet, Waw, Dalet. My own name, carved in the rock!" },
-  2: { word: ["yod", "he", "waw", "he"], say: "Four letters, older than anyone remembers: Yod, He, Waw, He. And remember: our fathers read from the right.", done: "" },
+const NAME_CROSS = {   // (Glen) no letters on the boulder: reaching it, the riddle comes up over the bridge (like "Only the penitent man shall pass"), and the answer's in the Journal
+  1: { word: ["dalet", "waw", "dalet"], riddle: ["Only the Beloved", "crosses sure-footed."],
+       think: "The Beloved...? I've heard that somewhere. I wrote it in my Journal.",
+       done: "Dalet, Waw, Dalet. David: beloved. My own name!" },
+  2: { word: ["yod", "he", "waw", "he"], riddle: ["Walk in the Name of the LORD,", "as the fathers wrote it."],
+       think: "The Name of the LORD. The old letters are in my Journal.",
+       done: "" },
 };
 const NAME_NAMES = { dalet: "Dalet", waw: "Waw", he: "He", yod: "Yod" };
 // (Glen) a letter David hasn't found (Worlds 4 and 5) isn't carved on any stone: those stones are blank, and blank stones
@@ -631,7 +636,7 @@ function updateNameStones(dt) {
   if (s.right && !order && !s.blank) {
     s.state = "lit"; s.t = 0; chime(2 + s.k * 2); sfx("stone_hit", s.c * T, 0.35, 1.4);
     for (let k = 0; k < 14; k++) bits.push({ x: (s.c + W7.NAME_W / 2) * T, y: nameTop(s), vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 360, life: 0.6, color: "#ffe9a0" });
-    if (s.cross === 2 && s.k === 0 && !ohWaitDone && !nameRun.saidRight) { nameRun.saidRight = true; ohWaitDone = true; sayLine("David", "From the right, like the Steward said. He first."); }
+    if (s.cross === 2 && s.k === 0 && !ohWaitDone && !nameRun.saidRight) { nameRun.saidRight = true; ohWaitDone = true; sayLine("David", "From the right, as the fathers wrote it. He first."); }
     const all = nameStones.filter(q => q.cross === s.cross && q.right);
     if (all.every(q => q.state === "lit") && !nameRun.done[s.cross]) {
       nameRun.done[s.cross] = true;
@@ -672,21 +677,14 @@ function nameNote() {
 function nameClueNear() { const d = david; return nameClues.find(q => Math.abs(q.x - d.x) < 90 && Math.abs(q.y - d.y) < 60) || null; }
 function w7Select() {   // main.js: Select at the carving opens the Journal at the old letters
   const q = nameClueNear(); if (!q || typeof Journal === "undefined" || !Journal.openNote || typeof lettersSpread !== "function") return false;
-  david.vx = 0; nameVision.start(q.cross, false);   // the still of Glen's clip, with the letters (Select again: the Journal)
+  david.vx = 0; nameVision.start(q.cross, false);   // the still of Glen's clip, with the riddle (Select again: the Journal)
   return true;
 }
-function clueText(cross) {
-  const found = typeof lettersFound === "function" ? lettersFound() : [], C = NAME_CROSS[cross];
-  const missing = C.word.some(l => !found.includes(l));
-  if (!missing) return C.say;
-  const names = C.word.map(l => found.includes(l) ? NAME_NAMES[l] : "( ? )").join(", ");
-  return `Letters carved deep in the rock, some worn away: ${names}.` + (cross === 2 ? " And under them: \"our fathers read from the right.\"" : "") + " Some of the stones ahead are blank. Without those letters, I won't get across.";
-}
-function updateNameClues() {
+function nameRiddleAt() { return nameRun.riddle || 0; }   // journal.js: the last riddle he saw (the answer is only in the Journal)
+function updateNameClues() {   // reaching the boulder: the bridge, and the riddle (the first time at the first one, Glen's clip first)
   const q = nameClueNear(); if (!q || q.told || david.deadT > 0) return;
   q.told = true;
-  if (q.cross === 1 && !nameVisionSeen && !NAME_CLIP.missing) { nameVision.start(1, true); return; }   // the first time: Glen's clip
-  sayLine("", clueText(q.cross) + " (Select: look at the carving again.)");
+  nameVision.start(q.cross, q.cross === 1 && !nameVisionSeen);
 }
 function drawNameStones(camX) {
   const sc = W7.NAME_W * T / 222;
@@ -711,21 +709,22 @@ function drawNameClues(camX) {
   for (const q of nameClues) {
     const x = q.x - camX; if (x < -150 || x > W + 150) continue;
     drawItem("boulder_grey", x, q.y + 8, 0.34);
-    const word = NAME_CROSS[q.cross].word, n = word.length, R = W7.CLUE_ARC[1], step = W7.CLUE_ARC[2] / R;
-    ctx.save(); ctx.font = W7.CLUE_ARC[3] + 'px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    for (let i = 0; i < n; i++) {   // written right to left (the first letter on the right), cut along the curve of the boulder (Glen)
-      const l = word[i], ang = ((n - 1) / 2 - i) * step, ox = x, oy = q.y - W7.CLUE_ARC[0] + R;
-      ctx.save(); ctx.translate(ox + Math.sin(ang) * R, oy - Math.cos(ang) * R); ctx.rotate(ang);
-      const lx = 0, ly = 0;
-      if (found.includes(l)) {
-        ctx.fillStyle = "rgba(255,250,235,0.55)"; ctx.fillText(NAME_LETTERS[l], lx, ly + 2);
-        ctx.fillStyle = "rgba(38,32,28,0.95)"; ctx.fillText(NAME_LETTERS[l], lx, ly);
-      } else { ctx.fillStyle = "rgba(60,52,44,0.25)"; ctx.beginPath(); ctx.ellipse(lx, ly, 6, 9, 0.3, 0, Math.PI * 2); ctx.fill(); }   // worn away
+    const n = W7.CLUE_ARC[2], R = W7.CLUE_ARC[1], step = W7.CLUE_ARC[3] / R, oy = q.y - W7.CLUE_ARC[0] + R;
+    ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = 2.4;
+    for (let i = 0; i < n; i++) {   // (Glen) worn scratches along the curve of the boulder, like writing too old to read
+      const ang = ((n - 1) / 2 - i) * step, h = k => { const v = Math.sin((i + 1) * 12.9898 + k * 78.233 + q.cross * 3.1) * 43758.5; return v - Math.floor(v); };
+      ctx.save(); ctx.translate(x + Math.sin(ang) * R, oy - Math.cos(ang) * R); ctx.rotate(ang);
+      const pts = []; for (let k = 0; k < 4; k++) pts.push([(h(k) - 0.5) * 9, (k / 3 - 0.5) * 12 + (h(k + 9) - 0.5) * 3]);
+      for (const [dy, col] of [[1.5, "rgba(255,250,235,0.45)"], [0, "rgba(30,24,20,0.95)"]]) {
+        ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1] + dy); for (const [px, py] of pts.slice(1)) ctx.lineTo(px, py + dy); ctx.stroke();
+        if (h(20) > 0.45) { ctx.beginPath(); ctx.moveTo(-4, (h(21) - 0.5) * 8 + dy); ctx.lineTo(4, (h(22) - 0.5) * 8 + dy); ctx.stroke(); }
+      }
       ctx.restore();
     }
+    ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
     if (nameClueNear() === q && !Journal.active) {
       ctx.font = "bold 16px sans-serif"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
-      const t = keyText("Select: read the carving"); ctx.strokeText(t, x, q.y - 128); ctx.fillText(t, x, q.y - 128);
+      const t = keyText("Select: the riddle again"); ctx.strokeText(t, x, q.y - 128); ctx.fillText(t, x, q.y - 128);
     }
     ctx.restore();
   }
@@ -1241,6 +1240,7 @@ const nameVision = {
   start(cross, full) {
     full = full && !NAME_CLIP.missing;
     Object.assign(this, { active: true, cross, full, t: 0, still: full ? -1 : 0, out: 0 });
+    nameRun.riddle = cross;   // the Journal, opened any way in 7-3, has this riddle on the letters page
     david.vx = 0; dialog.t = 0;
     if (full) { NAME_CLIP.currentTime = 0; NAME_CLIP.play().catch(() => { this.still = 0; }); }
     if (full && !nameVisionSeen) {
@@ -1252,15 +1252,16 @@ const nameVision = {
     this.t += dt;
     if (this.out > 0) { this.out += dt; if (this.out > 0.5) { this.active = false; NAME_CLIP.pause(); if (this.then) { const f = this.then; this.then = null; f(); } } return; }
     if (this.still < 0) {   // the clip: A skips to its end
-      if (NAME_CLIP.ended || this.t > 12 || (this.t > 0.8 && (pressed("a") || pressed("start")))) { this.still = 0; NAME_CLIP.pause(); chime(5); }
+      if (NAME_CLIP.ended || this.t > 12 || (this.t > 0.8 && (pressed("a") || pressed("start")))) { this.still = 0; NAME_CLIP.pause(); }
       return;
     }
+    if (this.still === 0) chime(5);   // the riddle starts to come up
     this.still += dt;
     if (this.still < 0.5) return;
     if (pressed("a") || pressed("b") || pressed("start")) this.out = 0.001;
     else if (pressed("select") || pressed("y")) {   // straight to the Journal's old letters
       this.out = 0.001;
-      this.then = () => { if (typeof Journal !== "undefined" && Journal.openNote && typeof lettersSpread === "function") { hushLoops(); Journal.openNote(lettersSpread(lettersFound())); } };
+      this.then = () => { if (typeof Journal !== "undefined" && Journal.openNote && typeof lettersSpread === "function") { hushLoops(); Journal.openNote(lettersSpread(lettersFound(), this.cross)); } };
     }
   },
   draw() {
@@ -1271,21 +1272,20 @@ const nameVision = {
     if (this.still >= 0) {
       const a = this.full ? Math.min(1, this.still / 0.6) : 1;
       ctx.save(); ctx.globalAlpha = a;
-      // the carving's letters, big, as they're written (right to left); a letter he hasn't found is worn away
-      const found = lettersFound(), word = NAME_CROSS[this.cross].word, n = word.length, gap = 92, cx = W * 0.5, cy = H - 120;
-      ctx.fillStyle = "rgba(20,12,6,0.72)"; ctx.beginPath(); ctx.roundRect(cx - (n * gap) / 2 - 40, cy - 70, n * gap + 80, 128, 18); ctx.fill();
-      ctx.strokeStyle = "rgba(255,214,120,0.5)"; ctx.lineWidth = 2; ctx.stroke();
-      ctx.font = '72px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      for (let i = 0; i < n; i++) {
-        const l = word[i], lx = cx + ((n - 1) / 2 - i) * gap;
-        if (found.includes(l)) { ctx.fillStyle = "#ffe8a8"; ctx.shadowColor = "rgba(255,200,90,0.8)"; ctx.shadowBlur = 16; ctx.fillText(NAME_LETTERS[l], lx, cy - 8); ctx.shadowBlur = 0; }
-        else { ctx.fillStyle = "rgba(160,140,120,0.35)"; ctx.beginPath(); ctx.ellipse(lx, cy - 8, 20, 28, 0.3, 0, Math.PI * 2); ctx.fill(); }
-        ctx.font = "16px sans-serif"; ctx.fillStyle = "#e9dcc4"; ctx.fillText(found.includes(l) ? NAME_NAMES[l] : "?", lx, cy + 42); ctx.font = '72px "Segoe UI Historic"';
-      }
-      ctx.textBaseline = "alphabetic";
-      ctx.font = "italic 15px Georgia, serif"; ctx.fillStyle = "rgba(255,240,210,0.8)"; ctx.fillText("read from the right  ←", cx, cy - 80);
+      // (Glen) the riddle comes up over the bridge, line by line, like a carving catching the light
+      const C = NAME_CROSS[this.cross], [fy, fs, per] = W7.RIDDLE;
+      ctx.restore(); ctx.save();
+      const band = ctx.createLinearGradient(0, H * fy - fs * 2.2, 0, H * fy + fs * 2.4);
+      band.addColorStop(0, "rgba(10,6,2,0)"); band.addColorStop(0.5, `rgba(10,6,2,${0.62 * a})`); band.addColorStop(1, "rgba(10,6,2,0)");
+      ctx.fillStyle = band; ctx.fillRect(0, H * fy - fs * 2.2, W, fs * 4.6);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `italic ${fs}px Georgia, serif`;
+      C.riddle.forEach((line, i) => {
+        const f = Math.max(0, Math.min(1, (this.still - 0.3 - i * per) / per)), ly = H * fy + (i - (C.riddle.length - 1) / 2) * fs * 1.3;
+        ctx.globalAlpha = f; ctx.shadowColor = "rgba(255,150,30,0.9)"; ctx.shadowBlur = 18 * f; ctx.fillStyle = "#ffe3a0"; ctx.fillText(line, W / 2, ly + (1 - f) * 6);
+        ctx.shadowBlur = 0; ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.25 * f; ctx.fillText(line, W / 2, ly + (1 - f) * 6); ctx.globalCompositeOperation = "source-over";
+      });
       ctx.restore();
-      ctx.textAlign = "center"; drawStoryBox("", clueText(this.cross) + " Step only on these letters, in order.", keyText("A: back to the stones    Select: open your Journal"), true); ctx.textAlign = "left";
+      if (this.still > 0.3 + C.riddle.length * per) { ctx.textAlign = "center"; drawStoryBox("David", C.think, keyText("A: back to the stones    Select: open your Journal"), false); ctx.textAlign = "left"; }
     } else if (this.t > 1) caption("A: skip", 0.6, true);
     const f = Math.min(1, this.t / 0.5, 1 - this.out / 0.5); ctx.fillStyle = `rgba(0,0,0,${1 - f})`; ctx.fillRect(0, 0, W, H);
   },

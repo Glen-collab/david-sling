@@ -537,7 +537,7 @@ const Journal = {
     if (opts.read && learned > 0) { this.P = Object.assign({}, this.P, { throw: throwSpread(learned) }); this.pages.push({ spread: "throw", step: 5 }); }
     // and the old letters he's found (DESIGN 7-3, the Stones of the Name): copied down, with the ones still out there
     const lf = lettersFound();
-    if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf) }); this.pages.push({ spread: "letters", step: 5 }); }
+    if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf, typeof nameRiddleAt === "function" ? nameRiddleAt() : 0) }); this.pages.push({ spread: "letters", step: 5 }); }
     // and the Field Guide card he wrote down watching the giant in 6-2 (world6.js goliathNote)
     let gc = false; try { gc = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").goliathCard; } catch (e) {}
     if (opts.read && gc && typeof goliathNote === "function") { this.P = Object.assign({}, this.P, { goliath: goliathNote() }); this.pages.push({ spread: "goliath", step: 5 }); }
@@ -884,7 +884,7 @@ const LETTER_PAGE = [
   { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks.", thought: "Two Dalets with a Waw between them spell a shepherd boy's name. Mine!" },
 ];
 function lettersFound() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}").letters || []; } catch (e) { return []; } }
-function lettersSpread(found) {
+function lettersSpread(found, cross) {   // cross: opened from the riddle at a crossing in 7-3 (world7.js); the riddle goes on the right page
   const left = [{ at: 5, size: "entry", segs: [{ text: "Old letters, carved in the rock here and there. I copied them down:", at: 5 }] }];
   for (const L of LETTER_PAGE) left.push(found.includes(L.k)
     ? { at: 5, size: "small", segs: [{ text: L.ch, at: 5, glyph: true }, { text: `${L.name}: ${L.pic}`, at: 5 }] }
@@ -893,6 +893,14 @@ function lettersSpread(found) {
   const right = [{ at: 5, size: "entry", segs: [{ text: all ? "I have them all now." : "There are more out there. I'll keep looking.", at: 5 }] }];
   if (dwd) right.push({ at: 5, size: "small", segs: [{ text: "Dalet, Waw, Dalet: my own name.", at: 5 }] });
   right.push({ at: 5, size: "small", segs: [{ text: "Someday these letters will matter. I'll keep them close.", at: 5 }] });
+  if (cross === 1) return { left, right: [
+    { at: 5, size: "entry", segs: [{ text: "\"Only the Beloved crosses sure-footed.\"", at: 5 }] },
+    { at: 5, size: "small", segs: [{ text: "Beloved. Abba always said that's what my name means. David.", at: 5 }] },
+    { at: 5, size: "small", segs: [{ text: dwd ? "Dalet, Waw, Dalet: my own name, in the old letters." : "My name in the old letters... I haven't found them all yet.", at: 5 }] }] };
+  if (cross === 2) return { left, right: [
+    { at: 5, size: "entry", segs: [{ text: "\"Walk in the Name of the LORD, as the fathers wrote it.\"", at: 5 }] },
+    { at: 5, size: "small", segs: [{ text: "The Name God told Moses at the burning bush. In the old letters: Yod, He, Waw, He.", at: 5 }] },
+    { at: 5, size: "small", segs: [{ text: all ? "I have every one of them." : "I'm still missing some of them.", at: 5 }] }] };
   return { left, right };
 }
 // the note David writes when he finds an old letter (world4.js updateInscriptions): the letter, big, and what it pictured
