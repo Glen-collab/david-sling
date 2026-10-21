@@ -323,7 +323,7 @@ W4.LETTER_H = 60;   // px tall, Glen's gold letters (name_letter_*) where the ol
 const letterFont = () => { try { return document.fonts.check('40px "Segoe UI Historic"'); } catch (e) { return true; } };
 function updateInscriptions(dt) {
   for (const n of inscriptions) {
-    const near = Math.abs(david.x - n.x) < 1.6 * T && Math.abs(david.y - n.y) < 3 * T && Math.abs(david.vx) < 20 && david.onGround && david.deadT <= 0;
+    const near = Math.abs(david.x - n.x) < 2.3 * T && Math.abs(david.y - n.y) < 3 * T && Math.abs(david.vx) < 20 && david.onGround && david.deadT <= 0;
     n.still = near ? n.still + dt : 0;
     if (n.still > 0.7 && !n.read) {
       n.read = true; if (typeof chime === "function") chime(3);
