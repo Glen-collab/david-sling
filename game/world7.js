@@ -21,7 +21,9 @@ const W7 = {
   STUCK_T: 1.4,          // seconds pushing against something before the "take it off" reminder
   SAUL_SIZE: 1.0,
   LAMB_SIZE: 1.5,        // the opening scene (w7intro): the lamb in Saul's spare helmet
-  LAMB_HELM: [1, -43, 15], // the helmet on its head: x, y from its feet and radius, in lamb_walk's own px
+  LAMB_HELM: [1, -43, 15],
+  PAIR_SAUL: 40,         // saul_dress / saul_off (Glen's two-person tent clips): Saul's feet, sheet px right of the anchor,
+  PAIR_DAVID: 105,       //   and David's, left of it // the helmet on its head: x, y from its feet and radius, in lamb_walk's own px
 };
 
 const armor = { on: LEVEL_STAGE === "7-1", removing: 0, hearts: W7.ARMOR_HEARTS, walkT: 0, nextSlip: 4, slipT: 0, clankT: 0, stuckT: 0,
@@ -64,16 +66,17 @@ function armorOff() {
   if (!armor.on) return false;
   if (armor.removing > 0) return true;
   armor.slipT = 0; d.vx = 0; setState("idle");
+  if (SPR.saul_off) { w7off.start(); return true; }   // Glen's clip with Saul: a cut to the tent (w7off), then back here
   if (!SPR.david_armor_off) { armorDone(); return true; }
   armor.removing = 0.001;   // Glen's clip: the helmet, the coat, the shin guards, one by one (updateArmor)
   return true;
 }
-function armorDone() {
+function armorDone(said = false) {
   const d = david;
   armor.on = false; armor.removing = 0; armor.offT = 0.001;
   armor.pile = { x: d.x, y: d.y, facing: d.facing, drawn: !SPR.david_armor_off };
   if (!SPR.david_armor_off) { armor.pile.x -= d.facing * 34; clank(0.35, 0.9); setTimeout(() => thud(0.35), 420); }
-  sayLine("David", "I can't go with these; for I haven't tested them. (1 Samuel 17:39)");
+  if (!said) sayLine("David", "I can't go with these; for I haven't tested them. (1 Samuel 17:39)");
 }
 const armorSpeed = () => (armor.removing > 0 || armor.slipT > 0 ? 0 : W7.ARMOR_SPEED);   // (he stops to fix the helmet)
 // a hit while he's in it: the armor takes it (a clank, a small shove) until its grey hearts are gone
@@ -1070,7 +1073,7 @@ const w7intro = {
   beats: [
     { who: "", text: "In the king's tent, Saul's servants brought out his own armor: his tunic, his coat of mail, his bronze helmet, and his sword.", saul: 0, pile: true },
     { who: "King Saul", text: "If you're going out there, you're not going in a shepherd's tunic. You'll wear mine.", saul: 5, pile: true },
-    { who: "", text: "Saul dressed David with his clothing. He put a helmet of brass on his head, and he clad him with a coat of mail. (1 Samuel 17:38)", saul: 0, armor: "idle", flash: true },
+    { who: "", text: "Saul dressed David with his clothing. He put a helmet of brass on his head, and he clad him with a coat of mail. (1 Samuel 17:38)", dress: true, flash: true },
     { who: "", text: "From his shoulders and upward Saul was taller than any of the people (1 Samuel 9:2). On David, the helmet slid straight down over his eyes.", saul: 3, armor: "slip" },
     { who: "", text: "Behind them, the lamb found the king's spare helmet, put its head in it, and wandered off with it on.", saul: 4, armor: "idle", lamb: true },
     { who: "", text: "David strapped his sword on his clothing, and he tried to move; for he had not tested it. (1 Samuel 17:39)", saul: 2, armor: "walk" },
@@ -1097,19 +1100,22 @@ const w7intro = {
     if (TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
     else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
     for (const [k, fx] of [[2, 0.82], [3, 0.94]]) drawSprite("commander_tent", k, W * fx, fy - 10, -1, z * 0.92);
-    drawSprite(SPR.saul_armor ? "saul_armor" : "saul", SPR.saul_armor ? B.saul : 0, W * 0.64, fy, -1, z);
+    const pair = B.dress && SPR.saul_dress;   // Glen's clip of Saul putting the helmet on him: the two of them in one sheet
+    if (pair) drawSprite("saul_dress", Math.min(SPR.saul_dress.frames - 1, Math.floor(this.bt * 1000 / SPR.saul_dress.ms)), tentPairX(z), fy, 1, z);
+    else drawSprite(SPR.saul_armor ? "saul_armor" : "saul", SPR.saul_armor ? B.saul || 0 : 0, W * 0.64, fy, -1, z);
     if (B.lamb) {   // the lamb, in Saul's spare helmet, bumping along the back of the tent
       const lx = W * (0.98 - 0.5 * Math.min(1, this.bt / 6)), ly = fy - 8, sc = SCALE * z * W7.LAMB_SIZE, [hx, hy, hr] = W7.LAMB_HELM;
       drawSprite("lamb_walk", frameOf("lamb_walk", now), lx, ly, -1, z * W7.LAMB_SIZE);
       drawHelmet(lx - hx * sc, ly + hy * sc + Math.sin(now * 9) * 2, hr * sc, -1);
     }
-    let dx = W * 0.24;
-    if (B.pile) {
+    let dx = SPR.saul_dress ? tentPairX(z) - W7.PAIR_DAVID * SCALE * z : W * 0.24;   // where the clip leaves him, beside Saul
+    if (pair) {}
+    else if (B.pile) {
       drawIntroPile(W * 0.30, fy, z);   // laid out on the rug between them
       drawSprite("david_idle", frameOf("david_idle", now), W * 0.2, fy, 1, z);
     } else if (B.armor === "walk") {
-      const go = Math.min(1, this.bt / 4); dx = W * (0.24 + 0.14 * go);
-      drawSprite(go < 1 ? "david_armor_walk" : "david_armor_idle", frameOf(go < 1 ? "david_armor_walk" : "david_armor_idle", now), dx, fy, 1, z);
+      const go = Math.min(1, this.bt / 4), back = SPR.saul_dress ? -1 : 1; dx += back * W * 0.16 * go;   // a few clanking steps (away from Saul)
+      drawSprite(go < 1 ? "david_armor_walk" : "david_armor_idle", frameOf(go < 1 ? "david_armor_walk" : "david_armor_idle", now), dx, fy, go < 1 ? back : 1, z);
     } else if (B.armor === "slip") {
       const n = SPR.david_armor_slip ? SPR.david_armor_slip.frames : 1;
       drawSprite("david_armor_slip", Math.min(n - 1, W7.SLIP_FROM + Math.floor(this.bt * 1000 / 150)), dx, fy, 1, z);
@@ -1126,6 +1132,7 @@ const w7intro = {
     ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
   },
 };
+const tentPairX = z => W * 0.64 - W7.PAIR_SAUL * SCALE * z;   // Glen's two-person clips: Saul's feet where his own sprite stands
 function drawIntroPile(x, y, z) {   // the armor laid out: the last frame of Glen's off clip, cut off where David stood
   const s = SPR.david_armor_off;
   if (!s) { const keep = armor.pile; armor.pile = { x, y, facing: 1, drawn: true }; drawArmorPile(0); armor.pile = keep; return; }
@@ -1138,3 +1145,35 @@ if (LEVEL_STAGE === "7-1" && !STORY_HASH) {
   if (!seen || new URLSearchParams(location.search).has("w7intro")) w7intro.start();
   const at = Number(new URLSearchParams(location.search).get("w7intro")) || 0; if (at && w7intro.active) Object.assign(w7intro, { i: at, t: 2, fade: 1 });
 }
+
+// 7-1, taking it off (17:39): a cut to Saul's tent, the two of them in Glen's clip (David's arms out, the helmet off, the
+// coat off, Saul smiling), then straight back to the stage, the armor in a pile where he stood.
+const w7off = {
+  active: false,
+  beats: [
+    { who: "David", text: "I can't go with these; for I haven't tested them. (1 Samuel 17:39)" },
+    { who: "", text: "Then David took them off. The king watched him, and nodded." },
+  ],
+  start() { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, out: 0, clanks: 0 }); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt;
+    const f = Math.floor(this.t * 1000 / SPR.saul_off.ms);
+    if (this.clanks < 3 && f >= [11, 15, 18][this.clanks]) { this.clanks++; clank(0.3, 0.85 + this.clanks * 0.05); if (this.clanks === 1) thud(0.25); }   // the helmet, the coat coming down
+    if (this.out > 0) { this.out += dt; if (this.out > 0.8) { this.active = false; armorDone(true); armor.offT = 1.3; } return; }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < this.beats.length - 1) { this.i++; this.bt = 0; }
+      else if (f >= SPR.saul_off.frames) this.out = 0.001;
+    }
+  },
+  draw() {
+    const now = performance.now() / 1000, fy = H - 6, z = 1.9, n = SPR.saul_off.frames;
+    if (TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
+    else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
+    for (const [k, fx] of [[0, 0.82], [1, 0.94]]) drawSprite("commander_tent", k, W * fx, fy - 10, -1, z * 0.92);
+    drawSprite("saul_off", Math.min(n - 1, Math.floor(this.t * 1000 / SPR.saul_off.ms)), tentPairX(z), fy, 1, z);
+    const B = this.beats[this.i], last = this.i === this.beats.length - 1;
+    ctx.textAlign = "center"; drawStoryBox(B.who, B.text, last ? (this.t * 1000 / SPR.saul_off.ms >= n ? "A: continue" : "") : "A: next", true); ctx.textAlign = "left";
+    const a = Math.min(1, this.t / 0.5, 1 - this.out / 0.8);
+    ctx.fillStyle = `rgba(0,0,0,${1 - a})`; ctx.fillRect(0, 0, W, H);
+  },
+};

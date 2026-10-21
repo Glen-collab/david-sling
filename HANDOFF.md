@@ -183,6 +183,10 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   helmet sliding down (david_armor_slip from W7.SLIP_FROM), the lamb in Saul's spare helmet (DESIGN's co-op moment, shown
   to everyone; W7.LAMB_SIZE / LAMB_HELM), 17:39a with David clanking a few steps, the title card. 7-1's take-off line is
   now WEB: "I can't go with these; for I haven't tested them."
+  Glen's two-person tent clips (david-sling-art/world7/saul_tent, white key, mirrored): `saul_dress` plays on the 17:38 beat
+  (Saul putting the helmet on him); `saul_off` is the 7-1 take-off: Select in the armor cuts to the tent (`w7off`: 17:39,
+  "Then David took them off. The king watched him, and nodded."), then back to the stage with the pile where he stood
+  (so david_armor_off is now only the pile's last frame, and the fallback). Both pair sheets line up by W7.PAIR_SAUL/PAIR_DAVID.
 - **7-2 Remember the Hills is built (2026-10-20):** the walk down the slope (Glen's w7_2 layers), the giant's taunts
   (17:8-10, setPiece "taunt") between five memory sections (setPiece "memory": the old world's own background layers
   under a gold shimmer + warm wash + "David remembers..."; the ground set stays 7-2's): 1-3 rocky pastures (crumbles,

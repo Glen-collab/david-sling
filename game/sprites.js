@@ -3228,6 +3228,18 @@ window.SPRITE_DATA = {
   "ay": 315,
   "align": "feet"
  },
+ "saul_dress": {
+  "src": "../assets/sprites/saul_dress.png",
+  "frames": 24,
+  "w": 303,
+  "h": 307,
+  "ms": 252,
+  "loop": false,
+  "pingpong": false,
+  "ax": 160,
+  "ay": 305,
+  "align": "feet"
+ },
  "saul_joy": {
   "src": "../assets/sprites/saul_joy.png",
   "frames": 6,
@@ -3238,6 +3250,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 121,
   "ay": 333,
+  "align": "feet"
+ },
+ "saul_off": {
+  "src": "../assets/sprites/saul_off.png",
+  "frames": 24,
+  "w": 415,
+  "h": 319,
+  "ms": 252,
+  "loop": false,
+  "pingpong": false,
+  "ax": 235,
+  "ay": 317,
   "align": "feet"
  },
  "saul_sad": {
