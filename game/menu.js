@@ -1,5 +1,5 @@
 // The title screen, the pause menu and Settings.
-//   Title (first thing each time the game is opened): Continue / New game / Settings
+//   Title (first thing each time the game is opened): Continue / New game / Scenes (Glen's clips, once reached) / Settings
 //   Pause (Start in a stage, on a map or in the courtyard): Resume / Settings / Back to the map (or Title screen)
 //   Settings: which controller (with a picture of its buttons), set up a controller, music and sound volume
 // Settings are saved in localStorage "davidSettings" (SETTINGS in main.js). Up/Down choose, Left/Right change,
@@ -9,6 +9,11 @@ const MENU_TITLE_BG = "../assets/backgrounds/title.jpg";   // Glen's painting: D
 const CONTROLLERS = ["keyboard", "nes", "snes"];
 const CONTROLLER_NAMES = { keyboard: "Keyboard", nes: "NES controller", snes: "SNES controller" };
 
+// Scenes (title screen): Glen's film clips, to watch again (or show someone) once they've been reached in the game
+const FILM_CLIPS = [
+  { label: "The Anointing", world: "World 3", src: "../assets/video/anointing_closeup.mp4", seen: p => !!(p["3-A"] || {}).cleared },
+  { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
+];
 function hasSave() { const p = loadProgress(); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
 
 const Menu = {
@@ -45,8 +50,14 @@ const Menu = {
     if (this.screen === "title") return [
       { label: "Continue", off: !hasSave(), act: () => this.leaveTitle(() => WorldMap.open(loadProgress().view || "journey")) },
       { label: "New game", act: () => hasSave() ? this.go("confirm") : this.newGame() },
+      { label: "Scenes", off: !FILM_CLIPS.some(c => c.seen(loadProgress())), act: () => this.go("scenes") },
       { label: "Settings", act: () => this.go("settings") },
     ];
+    if (this.screen === "scenes") {
+      const p = loadProgress();
+      return [...FILM_CLIPS.map(c => c.seen(p) ? { label: c.label, value: c.world, act: () => this.playScene(c) } : { label: "Not reached yet", value: c.world, off: true }),
+              { label: "Back", act: () => this.go("title") }];
+    }
     if (this.screen === "pause") return [
       { label: "Resume", act: () => this.close() },
       { label: "Settings", act: () => this.go("settings") },
@@ -72,6 +83,12 @@ const Menu = {
     ];
     return [{ label: "Back", act: () => this.go("settings") }];   // controls
   },
+  playScene(c) {   // full screen, start to finish; A, B or Start stops it
+    if (!this.clip) this.clip = Object.assign(document.createElement("video"), { muted: true, playsInline: true, preload: "auto" });
+    this.clip.src = c.src + "?v=" + (window.BUILD || 0); this.clip.currentTime = 0; this.clip.play().catch(() => {});
+    themeMusic.pause(); this.playing = c; this.playT = 0;
+  },
+  stopScene() { if (this.clip) this.clip.pause(); this.playing = null; },
   newGame() {
     for (const k of ["davidProgress", "davidStones", "davidGateTops"]) try { localStorage.removeItem(k); } catch (e) {}
     this.leaveTitle(() => WorldMap.open("journey"));
@@ -79,6 +96,11 @@ const Menu = {
   update(dt) {
     this.t += dt;
     if (setup.active) return;
+    if (this.playing) {
+      this.playT += dt;
+      if ((this.playT > 0.4 && (pressed("a") || pressed("b") || pressed("start"))) || (this.clip.ended && this.playT > 1.5)) this.stopScene();
+      return;
+    }
     const it = this.items();
     const move = d => { let i = this.sel; do { i = (i + d + it.length) % it.length; } while (it[i].off && i !== this.sel); this.sel = i; this.msg = null; chime(1); };
     if (pressed("down")) move(1);
@@ -92,7 +114,7 @@ const Menu = {
     }
     if (pressed("b")) {
       if (this.screen === "controls") this.go("settings");
-      else if (this.screen === "settings" || this.screen === "confirm") this.go(this.home);
+      else if (this.screen === "settings" || this.screen === "confirm" || this.screen === "scenes") this.go(this.home);
       else if (this.screen === "pause") this.close();
     }
   },
@@ -100,6 +122,13 @@ const Menu = {
   draw() {
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+    if (this.playing) {
+      const v = this.clip;
+      if (v.videoWidth && v.readyState >= 2) { const s = Math.min(W / v.videoWidth, H / v.videoHeight); ctx.drawImage(v, (W - v.videoWidth * s) / 2, (H - v.videoHeight * s) / 2, v.videoWidth * s, v.videoHeight * s); }
+      const a = Math.max(0, 1 - Math.max(0, this.playT - 2.5));   // the name and the hint, then out of the way
+      if (a > 0) { ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.font = "italic 24px Georgia, serif"; ctx.fillStyle = "#fff4d6"; ctx.fillText(this.playing.label, W / 2, H - 40); ctx.font = "15px sans-serif"; ctx.fillText(keyText("A: stop"), W / 2, H - 16); ctx.globalAlpha = 1; }
+      ctx.restore(); return;
+    }
     if (this.snap) { ctx.drawImage(this.snap, 0, 0); ctx.fillStyle = "rgba(10,6,2,0.62)"; ctx.fillRect(0, 0, W, H); }
     else if (this.bg && this.bg.naturalWidth) {
       // a very slow push in, like a film opening
@@ -120,7 +149,7 @@ const Menu = {
       ctx.font = "italic bold 36px Georgia, serif"; ctx.lineWidth = 7; ctx.strokeText("The Shepherd's Sling", W / 2, 202);
       ctx.fillStyle = "#fff4d6"; ctx.fillText("The Shepherd's Sling", W / 2, 202);
     } else {
-      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : "Settings", W / 2, 150);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : this.screen === "scenes" ? "Scenes" : "Settings", W / 2, 150);
     }
     if (this.screen === "confirm") {
       ctx.fillStyle = "#fff"; ctx.font = "22px sans-serif";
@@ -128,14 +157,14 @@ const Menu = {
     }
     // the list
     const it = this.items(), rowH = 54, top = this.screen === "confirm" ? 380 : title ? 330 : 220;
-    const bw = this.screen === "settings" ? 620 : 420;
+    const bw = this.screen === "settings" || this.screen === "scenes" ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {
       const y = top + i * rowH, on = i === this.sel;
       if (on) { ctx.fillStyle = "rgba(255,210,110,0.18)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 12, y - 30, bw - 24, 44, 10); ctx.fill(); }
       ctx.fillStyle = m.off ? "rgba(255,255,255,0.3)" : on ? "#ffe08a" : "#f3ead8";
       ctx.font = `${on ? "bold " : ""}26px sans-serif`;
-      const twoCol = this.screen === "settings";
+      const twoCol = this.screen === "settings" || this.screen === "scenes";
       ctx.textAlign = twoCol ? "left" : "center";
       ctx.fillText((on ? "▸ " : "") + m.label, twoCol ? W / 2 - bw / 2 + 36 : W / 2, y);
       if (m.value) { ctx.textAlign = "right"; ctx.font = "22px sans-serif"; ctx.fillText(m.value, W / 2 + bw / 2 - 30, y); }
