@@ -3837,7 +3837,8 @@ const SFX_FILES = ["ending_jingle_levels", "stage_clear", "sheep_baa_1", "sheep_
   "hyena_1", "hyena_2", "hyena_3",   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2
   "horses",   // the chariot horses whinnying (5-4)
   "phil_shout", "phil_shout_2", "phil_shout_3", "phil_hedad", "phil_hedad_2", "phil_nusu", "phil_nusu_1", "phil_roar",
-  "goliath_tenu_li_ish", "goliath_tenu_li_ish_2", "goliath_cheirafti", "goliath_cheirafti_2", "goliath_halo_anochi", "goliath_halo_anochi_2",   // Goliath's Hebrew (Glen, pitched down)   // Glen's voice as the Philistines (tools/crowd.py)
+  "goliath_tenu_li_ish", "goliath_tenu_li_ish_2", "goliath_cheirafti", "goliath_cheirafti_2", "goliath_halo_anochi", "goliath_halo_anochi_2",
+  "goliath_lamah", "goliath_avadim", "goliath_bru_lachem", "goliath_im_yuchal", "goliath_maarchot", "goliath_nilachamah", "goliath_hakelev", "goliath_lecha_elai",   // Goliath's Hebrew (Glen, pitched down)   // Glen's voice as the Philistines (tools/crowd.py)
   "arrow_single", "arrow_with_stick-to-target", "arrow_volley_1", "arrow_volley_2", "taunting_yells", "war_horn"];   // Glen's World 6 sounds (2026-10-19)
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};

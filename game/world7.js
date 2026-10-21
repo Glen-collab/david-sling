@@ -271,6 +271,13 @@ const TAUNTS = [   // 1 Samuel 17:8-10 (WEB), the giant's voice across the valle
   "\"If he is able to fight with me and kill me, then will we be your servants.\" (1 Samuel 17:9)",
   "\"I defy the ranks of Israel today! Give me a man, that we may fight together!\" (1 Samuel 17:10)",
 ];
+const TAUNT_CLIPS = [["lamah", "avadim"], ["bru_lachem"], ["im_yuchal"], ["maarchot", "nilachamah"]];   // Glen's Hebrew, line by line with TAUNTS
+const GOLIATH_LEN = { lamah: 6.9, avadim: 10.0, bru_lachem: 6.6, im_yuchal: 12.6, maarchot: 9.7, nilachamah: 6.8, hakelev: 8.9, lecha_elai: 15.6 };   // seconds (0.8 of echo tail each)
+function goliathChain(names, vol) {   // one line after another, the next starting under the last one's echo
+  let t = 0;
+  for (const n of names) { setTimeout(() => sfx("goliath_" + n, undefined, vol), t * 1000); t += (GOLIATH_LEN[n] || 4) - 0.9; }
+  return t;
+}
 const memZoneAt = x => memZones.find(z => x >= z.c0 * T && x < (z.c1 + 1) * T) || null;
 const dayNight7 = !!STAGE_INFO.night;
 if (memZones.length) {   // the background follows the memory David is in
@@ -302,7 +309,7 @@ function updateMemories(dt) {
   }
   for (const tn of taunts) if (!tn.done && d.x > tn.x) {
     tn.done = true;
-    sfx(["goliath_halo_anochi", "goliath_tenu_li_ish", "goliath_cheirafti", "goliath_halo_anochi_2"][tn.n % 4], undefined, 0.55);
+    goliathChain(TAUNT_CLIPS[tn.n % TAUNT_CLIPS.length], 0.55);   // the very words of the caption
     toast("Across the valley, the giant: " + TAUNTS[tn.n % TAUNTS.length]);
   }
 }
