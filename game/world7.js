@@ -731,6 +731,8 @@ Object.assign(W7, {
   SB_HITS: 3,            // back hits (phase 1), edge hits (phase 2)
   SHIELD_W: 74, SHIELD_H: 168,
   GOLIATH_SIZE: 1.55,
+  SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
+  SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
 });
 const sbPiece = setPieces.find(p => p.kind === "shieldbearer") || null;
@@ -776,7 +778,7 @@ function updateShieldBearer(dt) {
     if (w.t > W7.SB_WAVE_T) { sb.waves.splice(i, 1); continue; }
     if (d.onGround && Math.abs(d.x - w.x) < 26 && Math.abs(d.y - GR * T) < 8) { sbHurt(w.x - w.dir * 40); sb.waves.splice(i, 1); }
   }
-  const toD = Math.sign(d.x - sb.x) || sb.dir, front = sb.x + sb.dir * 34;
+  const toD = Math.sign(d.x - sb.x) || sb.dir, front = sb.x + sb.dir * W7.SB_FRONT;
   // the shield is a wall in front of him (on the ground): David can't walk through it
   const shieldUp = sb.state !== "peek";
   if (shieldUp && d.y > GR * T - W7.SHIELD_H + 10 && Math.abs(d.x - front) < 28 && toD === sb.dir && d.state !== "roll") {
@@ -824,7 +826,7 @@ function updateShieldBearer(dt) {
 }
 function stoneHitsShield(s) {
   if (!sb || !sb.on || sb.beaten) return false;
-  const front = sb.x + sb.dir * 34, top = GR * T - W7.SHIELD_H - sb.lift * 50;
+  const front = sb.x + sb.dir * W7.SB_FRONT, top = GR * T - W7.SHIELD_H - sb.lift * 50;
   const fromBehind = Math.sign(s.vx) === sb.dir;   // flying the way he faces: it's coming at his back
   const body = Math.abs(s.x - sb.x) < 34 && s.y > sb.y - 230 && s.y < sb.y;
   if (sb.phase === 1 && fromBehind && body) {
@@ -862,14 +864,14 @@ function stoneHitsShield(s) {
   return true;
 }
 function shieldFalls() {
-  sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 40;
-  sfx("final_stone", sb.x, 0.8); setTimeout(() => { thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2; sfx("stone_hit", sb.x, 0.9, 0.5); }, 450);
+  sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 5;   // (where it lies in the last frame of sb_drop)
+  sfx("final_stone", sb.x, 0.8); setTimeout(() => { thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2; sfx("stone_hit", sb.x, 0.9, 0.5); }, 600);
 }
 function updateShieldFall(dt) {
   sb.t += dt;
   if (sb.state === "fall" && sb.t > 1.6) { sbSetState("stare"); }
   else if (sb.state === "stare" && sb.t > 1.4) { sbSetState("back"); sb.laugh = 4; sfx("taunting_yells", undefined, 0.7, 0.6); toast("He stares at his shield in the dust, looks back at the giant, and backs away. The giant laughs at him."); }
-  else if (sb.state === "back") { if (sb.x < sb.gx - 3 * T) sb.x += 60 * dt; if (sb.t > 4.5 && !sb.cleared) { sb.cleared = true; clear74(); } }
+  else if (sb.state === "back") { if (SPR.sb_run) sb.x += 330 * dt; else if (sb.x < sb.gx - 3 * T) sb.x += 60 * dt; if (sb.t > 4.5 && !sb.cleared) { sb.cleared = true; clear74(); } }
 }
 function clear74() {   // the end of 7-4: no sheepfold out here. Straight to the end of World 7, then the Journal.
   hushLoops(true); sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9);
@@ -904,17 +906,36 @@ function drawShieldBearer(camX) {
     drawSprite("goliath_yell", yell ? frameOf("goliath_yell", now) : 0, gx, GR * T, -1, W7.GOLIATH_SIZE);
   }
   const x = sb.x - camX; if (x < -200 || x > W + 200) return;
-  if (sb.beaten && sb.shieldX !== undefined) {   // the shield, falling flat in the dust
-    const sx = sb.shieldX - camX, f = sb.state === "fall" ? Math.min(1, sb.t / 0.45) : 1;
-    if (f < 1) drawDoorShield(sx, GR * T, sb.dir, 0, -f * 4.13, 0);
-    else drawFallenShield(sx, sb.dir);
+  const fl = sb.flash > 0 ? "brightness(2)" : "";
+  if (SPR.sb_push) {   // Glen's shield-bearer (world7/shield_bearer): pushing behind the shield, the shield dropped, running
+    const k = W7.SB_SPR, warn = sb.state === "lift" && (tobiWarned() || w7Counsel2);
+    if (sb.beaten && sb.state === "back") {   // the shield stays where it fell (Glen's flat shield when it comes)
+      const sx = sb.shieldX - camX;
+      if (ITEM.sb_shield_flat && ITEM.sb_shield_flat.naturalWidth) { const w = 182, sc = w / ITEM.sb_shield_flat.naturalWidth; ctx.save(); ctx.translate(sx + sb.dir * w / 2, 0); ctx.scale(-sb.dir, 1); drawItem("sb_shield_flat", 0, GR * T + 2, sc); ctx.restore(); }
+      else drawFallenShield(sx, sb.dir);
+    }
+    if (sb.state === "fall" || sb.state === "stare") drawSprite("sb_drop", frameOf("sb_drop", sb.state === "fall" ? sb.t : 9), x, sb.y, sb.dir, k, 1, fl);
+    else if (sb.state === "back") drawSprite("sb_run", frameOf("sb_run", sb.t), x, sb.y, 1, k, Math.max(0, 1 - Math.max(0, sb.t - 2.5) / 1.5));   // he runs, back to his own lines
+    else if (sb.state === "peek") drawSprite("sb_drop", Math.min(2, Math.floor(sb.t / 0.08)), x, sb.y, sb.dir, k, 1, fl);   // the shield tips: he looks over it
+    else if (sb.state === "knock") drawSprite("sb_drop", sb.t < 0.5 ? 3 : 1, x, sb.y, sb.dir, k, 1, fl);
+    else {
+      const sp = sb.state === "charge" ? 2.2 : sb.state === "walk" || sb.state === "ready" ? 0.8 : 0.25;
+      ctx.save(); ctx.translate(x, sb.y - sb.lift * 46); ctx.rotate(-sb.dir * sb.lift * 0.06);
+      drawSprite("sb_push", frameOf("sb_push", now * sp), 0, 0, sb.dir, k, 1, fl + (warn ? ` drop-shadow(0 0 ${6 + 5 * Math.sin(now * 20)}px rgba(255,220,120,0.95))` : ""));   // tier 1: the bronze rim flashes as he lifts
+      ctx.restore();
+    }
+  } else {
+    if (sb.beaten && sb.shieldX !== undefined) {   // the shield, falling flat in the dust
+      const sx = sb.shieldX - camX, f = sb.state === "fall" ? Math.min(1, sb.t / 0.45) : 1;
+      if (f < 1) drawDoorShield(sx, GR * T, sb.dir, 0, -f * 4.13, 0);
+      else drawFallenShield(sx, sb.dir);
+    }
+    const charging = sb.state === "charge", walking = sb.state === "walk" || sb.state === "back";
+    const nm = charging ? "phil_charge" : "phil_run", fr = walking ? frameOf("phil_run", now * 0.5) : charging ? frameOf("phil_charge", now) : 0;
+    const face = sb.state === "back" ? -1 : sb.dir;   // backing away: still facing David
+    drawSprite(nm, fr, x, sb.y, face, W7.SB_SIZE, 1, fl || "brightness(0.9)");
+    if (!sb.beaten) drawDoorShield(x + sb.dir * W7.SB_FRONT, sb.y + 2, sb.dir, sb.lift, sb.tilt, sb.state === "lift" && (tobiWarned() || w7Counsel2));
   }
-  const fl = sb.flash > 0 ? "brightness(2)" : "brightness(0.9)";
-  const charging = sb.state === "charge", walking = sb.state === "walk" || sb.state === "back";
-  const nm = charging ? "phil_charge" : "phil_run", fr = walking ? frameOf("phil_run", now * 0.5) : charging ? frameOf("phil_charge", now) : 0;
-  const face = sb.state === "back" ? -1 : sb.dir;   // backing away: still facing David
-  drawSprite(nm, fr, x, sb.y, face, W7.SB_SIZE, 1, fl);
-  if (!sb.beaten) drawDoorShield(x + sb.dir * 34, sb.y + 2, sb.dir, sb.lift, sb.tilt, sb.state === "lift" && (tobiWarned() || w7Counsel2));
   // the shockwaves: dust racing along the ground
   for (const w of sb.waves) {
     const wx = w.x - camX, a = 1 - w.t / W7.SB_WAVE_T;

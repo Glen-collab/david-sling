@@ -207,7 +207,7 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   (goliath_yell, facing left) watches, says 17:43 and 17:44 in Glen's Hebrew, laughs. Tier 2 after a fall: Shammah's
   counsel, longer tell and tilt, +1 heart. No sheepfold: clear74() saves the stage and starts w7ending (the shield in
   the dust, the gifts screen "Everything you need, you already have.", 17:40, "To be continued in World 8"), then the
-  Journal. Stand-in art for the shield-bearer: ART_PROMPTS.md. Not built: the World 7 opening scene (Saul dresses
+  Journal. Glen's shield-bearer sheets (sb_push / sb_drop / sb_run, W7.SB_SPR; clips in david-sling-art/world7/shield_bearer); lift = the push sheet raised, peek = sb_drop's first frames; the flat shield after he runs waits for Glen's sb_shield_flat. Not built: the World 7 opening scene (Saul dresses
   David), Gera's sling range.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,

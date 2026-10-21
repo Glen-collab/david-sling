@@ -1134,3 +1134,7 @@ camera still, the same man in every clip):
   the shield tipped back; (5) the shield knocked out of his hands, falling flat in the dust; he stares at it, looks back
   over his shoulder, and backs away.
 - (Separately, if you want: the shield on its own, lying flat on the ground, transparent background.)
+- **Done (2026-10-21):** Glen's two clips are in: `sb_push` (walking/charging behind the shield), `sb_drop` (the
+  shield tips and falls flat; he stands and stares), `sb_run` (running away). Still wanted from Glen: the shield alone,
+  lying flat, from the end of clip b (Photoshop), saved as `assets/items/sb_shield_flat.png` (transparent, its left end
+  where it fell nearest him): it shows where he dropped it after he runs. Until then it's a plain bronze bar.
