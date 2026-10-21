@@ -1133,7 +1133,7 @@ function drawCover(camX) {   // Glen's leaning rock (6-2) and undercut bank (6-3
   }
 }
 function drawStreamFront(camX) {   // in front of David and the carriers: the water over their feet, the near bank
-  if (WORLD !== 6) return;
+  if (WORLD !== 6 && WORLD !== 7) return;
   for (const sp of streamSpots()) {
     const x = sp.x0 - camX; if (x > W || x + sp.w < 0) continue;
     const s = streamScale(sp), wv = streamPiece("stream_water", sp.w, s), nr = streamPiece("stream_near", sp.w, s), top = streamTop(sp);

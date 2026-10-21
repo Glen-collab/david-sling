@@ -356,6 +356,7 @@ const STAGE_INFO = {
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
   "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
+  "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
   "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
   "5-3": { cols: 248, bg: "w5_3", ter: "w5m", night: true, nightSky: true, name: "The Lookouts' Ridge" },   // Glen's ridge over the two camps
@@ -1376,6 +1377,65 @@ if (LEVEL_NAME === "test") {
   critter("hedgehog", 204);
   shelter(207, 4); special(208, 11);
   sheepfold(222);
+} else if (LEVEL_NAME === "7-3") {
+  // ---- 7-3 Five Smooth Stones (1 Samuel 17:40): the streambed in the middle of the valley. Choosing stones is the
+  //      gameplay: setPiece("pickstone") stones shine faintly when David is near; Down lifts one for a close-up, A keeps
+  //      it (only smooth, round ones), B puts it back. Some have a scorpion or a viper under them. Five smooth stones are
+  //      the lost things, and the gate needs all five. The Stones of the Name (world7.js): two crossings on carved
+  //      stepping stones, a low one and a high one at each step, only the right letters hold (a wrong one is a life):
+  //      Dalet-Waw-Dalet over the spikes, then the Name, read from the right, over the deepest pool. The One: on a ledge
+  //      above the deepest pool, a double jump off the right path. ----
+  const pick = (c, look, under) => setPiece("pickstone", c, GR - 1, { look, under });
+  const causeway = (c, w) => { block(c, 15, w, 2, 6); setPiece("causeway", c, 15, { w }); };   // Glen's sandstone blocks (world7.js)
+  const nameStone = (c, r, cross, k, letter, right) => { plat(c, r, 3); setPiece("namestone", c, r, { cross, k, letter, right }); };
+  ground(0, 65);
+  campfire(1);
+  talk(5, "Shammah", "You want me to come with you to the stream?");
+  talk(6, "Shammah", "...No. I know. You have to go on your own.");
+  talk(7, "Shammah", "The bag I gave you: five stones. Pick good ones. Lift each one and look at it close.");
+  deco("reed_pool", 15, 16, 0.24);
+  pick(13, "jagged"); pick(18, "smooth"); pick(22, "cracked", "scorpion");
+  rock(25, 15, 3, 2);
+  pick(30, "egg"); pick(35, "flat");
+  critter("hedgehog", 33); critter("scorpion", 39); critter("scorpion", 42);
+  snake("viper", 46);
+  rock(49, 14, 3, 3); special(50, 11);
+  pick(54, "lumpy", "viper");
+  deco("reed_pool", 56, 16, 0.2);
+  campfire(58);
+  setPiece("nameclue", 60, GR - 1, { cross: 1 });
+  causeway(62, 4);
+  // crossing 1, over the spikes in the dry part of the streambed: Dalet, Waw, Dalet (David's own name)
+  setPiece("spikes", 66, GR, { w: 21 });
+  nameStone(68, 12, 1, 0, "dalet", true); nameStone(68, 17, 1, 0, "bet", false);
+  nameStone(75, 12, 1, 1, "gimel", false); nameStone(75, 17, 1, 1, "waw", true);
+  nameStone(82, 12, 1, 2, "dalet", true); nameStone(82, 17, 1, 2, "kaf", false);
+  causeway(87, 4); ground(87, 102);
+  pick(93, "smooth"); snake("whip", 97); pick(100, "jagged", "scorpion");
+  setPiece("pool", 103, GR, { w: 6, stream: true, say: "Splash! Hop the stepping stone." }); stepStone(105);
+  ground(109, 129);
+  pick(112, "egg"); critter("hedgehog", 115); critter("scorpion", 118); pick(121, "lumpy");
+  campfire(123);
+  setPiece("nameclue", 124, GR - 1, { cross: 2 });
+  causeway(126, 4);
+  // crossing 2, the deepest pool: the Name. Walking left to right = read from the right: He, Waw, He, Yod (the low stones
+  // stand up out of the water, row 16)
+  setPiece("pool", 130, GR, { w: 28, stream: true, say: "Splash! Into the deepest pool." });
+  nameStone(132, 12, 2, 0, "yod", false); nameStone(132, 16, 2, 0, "he", true);    // Yod first, like English: "Oh wait..."
+  nameStone(139, 12, 2, 1, "waw", true);  nameStone(139, 16, 2, 1, "mem", false);
+  nameStone(146, 12, 2, 2, "shin", false); nameStone(146, 16, 2, 2, "he", true);
+  nameStone(153, 10, 2, 3, "yod", true);  nameStone(153, 16, 2, 3, "lamed", false);   // the last one: a long double jump up
+  plat(142, 6, 3); lostSheep("lamb", 143, 5, "one");          // The One, up over the pool: a double jump off the Waw
+  causeway(158, 4); special(159, 14);                          // the stone of remembrance, at the far side
+  ground(158, 231);
+  pick(166, "smooth"); pick(171, "flat");
+  critter("hedgehog", 175); critter("scorpion", 178);
+  snake("viper", 183); pick(187, "jagged", "scorpion");
+  rock(190, 15, 3, 2); deco("reed_pool", 192, 16, 0.22);
+  pick(195, "cracked"); pick(199, "smooth");
+  campfire(202);
+  talk(206, "", "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the shepherd's bag. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)");
+  sheepfold(212);
 } else if (LEVEL_NAME === "7-2") {
   // ---- 7-2 Remember the Hills: the walk down from the camp toward the stream, both armies watching, the giant's
   //      shouting echoing across the valley (17:8-10). Every so often the air shimmers and David is back on a stretch of
@@ -1875,17 +1935,17 @@ function updateDavid(dt) {
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
-               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout" || (ARMORED() && armor.removing > 0);
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout" || (ARMORED() && armor.removing > 0) || (typeof w7Busy === "function" && w7Busy());   // 7-3: stuck on a wrong stone
 
   // --- harp (Select): kneel and play while standing still
-  if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30 && !(ARMORED() && armorOff())) {   // in Saul's armor, Select takes it off (world7.js)
+  if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30 && !(ARMORED() && armorOff()) && !(typeof w7Select === "function" && w7Select())) {   // in Saul's armor, Select takes it off (world7.js)
     if (d.harp) { d.harp = false; setState("standup"); } else if (!(typeof harpBroken === "function" && harpBroken())) { d.harp = true; setState("kneel"); }   // (4-3: a broken string)
   }
   // Up, any direction, A or B: put the harp away and stand up
   if (d.harp && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }
 
   // --- pick up / put down the lamb (Down, standing still, next to it)
-  if (pressed("down") && d.onGround && !busy && !d.harp && d.throwT < 0 && Math.abs(d.vx) < 40) {   // (not mid-throw: Down while charging is a crouch)
+  if (pressed("down") && d.onGround && !busy && !d.harp && d.throwT < 0 && Math.abs(d.vx) < 40 && !(typeof w7Down === "function" && !d.carrying && w7Down())) {   // (7-3: Down beside a stone looks at it)   // (not mid-throw: Down while charging is a crouch)
     if (d.carrying) { setState("putdown"); }
     else if (!lamb.stolen && Math.abs(lamb.x - d.x) < 95 && Math.abs(lamb.y - d.y) < 70) { setState("pickup"); d.vx = 0; lamb.carried = true; d.facing = Math.sign(lamb.x - d.x) || d.facing; }
   }
@@ -3279,7 +3339,7 @@ function updateFinish(dt) {
       if (finish.blocked <= 0) toast("The ox is still loose! Drive it off before you bring the flock in.");
       finish.blocked = 3; return;
     }
-    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null) || (typeof chariotBlocking === "function" ? chariotBlocking() : null) || (typeof towerBlocking === "function" ? towerBlocking() : null);   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
+    const gb = (typeof giftsBlocking === "function" ? giftsBlocking() : null) || (typeof questBlocking === "function" ? questBlocking() : null) || (typeof saulBlocking === "function" ? saulBlocking() : null) || (typeof tobiBlocking === "function" ? tobiBlocking() : null) || (typeof chariotBlocking === "function" ? chariotBlocking() : null) || (typeof towerBlocking === "function" ? towerBlocking() : null) || (typeof stonesBlocking === "function" ? stonesBlocking() : null);   // 7-3 five smooth stones   // 4-1 the king's gifts, 4-3 the harp's string (world4.js)
     if (gb) {
       d.x = px - 6 - BODY_W / 2; d.vx = Math.min(0, d.vx);
       if (finish.blocked <= 0) toast(gb);
@@ -4166,6 +4226,7 @@ function frame(now) {
   if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, bossMusic]) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
   else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
+  else if (typeof w7Hold === "function" && w7Hold(real)) { hushLoops(true); }   // 7-3: looking at a stone (world7.js)
   else if (dialogHeld()) { hushLoops(true); if (pressed("a") || pressed("b")) { dialog.hold = false; dialog.t = Math.min(dialog.t, 0.25); } }   // someone's talking: the stage waits until A (or B), so every line can be read
   else if (!setup.active) { if (david.deadT <= 0) updateDavid(dt); updateLamb(dt); updateStones(dt); updateWorld(dt); }
   const [camLo, camHi] = camLimits();   // the stage, or the cave David is in (world1.js)

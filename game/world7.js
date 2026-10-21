@@ -228,7 +228,7 @@ function drawSaul7(camX) {
 
 // 7-1: the helmet over his eyes. The top of the screen goes dark down to the bronze rim, for a moment.
 function drawWorld7Over() {
-  if (WORLD === 7) drawMemoryOver();
+  if (WORLD === 7) { drawMemoryOver(); drawCloseup(); }
   if (!inArmor() || armor.slipT <= 0) return;
   const p = 1 - armor.slipT / W7.SLIP_T, k = Math.max(0, Math.min(1, (p - 0.2) / 0.1, (1 - p) / 0.12)), edge = H * (0.18 + 0.5 * k);
   ctx.save();
@@ -366,13 +366,347 @@ function drawMemoryOver() {   // the wash, the vignette, the shimmer and the tit
   }
 }
 
+// ---------------------------------------------------------------------------
+// 7-3 Five Smooth Stones (DESIGN 7-3): the streambed in the middle of the valley. Choosing stones is the gameplay.
+//   setPiece("pickstone", c, GR - 1, { look, under })  a stone lying in the streambed. It shines faintly when David is
+//       near; Down beside it lifts it for a close-up (the game waits): A keeps it, B puts it back. Only smooth, round
+//       ones go in the bag (look "smooth"/"egg"); jagged, flat, cracked or lopsided ones wobble in flight. under:
+//       "scorpion" or "viper" comes out from under it (the last Shepherd's Judgment: look before you throw). Five smooth
+//       stones are the lost things, and the gate won't open without them.
+//   The Stones of the Name (DESIGN "The Stones of the Name"): two crossings on carved stepping stones, a low stone and
+//   a high stone at each step. Only the right letters hold; a wrong one locks the jump, cracks and drops David in:
+//   a life. nameStone(c, r, cross, k, letter, right) in main.js; setPiece("nameclue", c, GR - 1, { cross }) is the
+//   carving on the boulder before each crossing (only the letters David has found are legible). Standing at it,
+//   Select opens the Journal at the old letters.
+//   Crossing 1 (over the spikes): Dalet-Waw-Dalet, David's own name. Crossing 2 (the deepest pool): the Name,
+//   Yod-He-Waw-He, read from the right, so stepped He, Waw, He, Yod. The first time he steps on Yod first: "Oh wait."
+// ---------------------------------------------------------------------------
+Object.assign(W7, {
+  PICK_REACH: 58,        // px: close enough to lift a stone
+  PICK_SHINE: 190,       // px: stones start to shine faintly
+  BAG: 5,                // smooth stones he needs (1 Samuel 17:40)
+  NAME_LOCK: 0.8,        // seconds stuck on a wrong stone while it cracks (no jumping off it)
+  NAME_SINK: 1.5,        // seconds of falling in with the pieces, before the campfire
+  NAME_W: 3,             // columns wide, each carved stone
+});
+const PICK_LOOKS = {
+  smooth:  { keep: true,  say: "Smooth and round, and just the right weight. This one will fly true." },
+  egg:     { keep: true,  say: "Worn smooth by the water, round as an egg. A good one." },
+  jagged:  { keep: false, say: "Jagged edges. It would tumble and wobble in the air." },
+  flat:    { keep: false, say: "Too flat. It would sail off sideways, like a leaf." },
+  cracked: { keep: false, say: "There's a crack right through it. It could split apart in the sling." },
+  lumpy:   { keep: false, say: "Lopsided: heavier on one side. It would pull off to the left." },
+};
+const pickStones = setPieces.filter(p => p.kind === "pickstone").map(p => ({ x: p.x, y: p.y, c: p.c, look: p.look, under: p.under || null, state: "lie", t: Math.random() * 6 }));
+const closeup = { open: false, s: null, t: 0, crawl: false };
+const bagCount = () => pickStones.filter(s => s.state === "kept").length;
+function w7Down() {   // main.js: Down beside a stone lifts it for a look (instead of picking up the lamb)
+  if (!pickStones.length || closeup.open) return false;
+  const d = david, s = pickStones.find(q => q.state === "lie" && Math.abs(q.x - d.x) < W7.PICK_REACH && Math.abs(q.y - d.y) < 40);
+  if (!s) return false;
+  Object.assign(closeup, { open: true, s, t: 0, crawl: !!s.under });
+  d.vx = 0; d.facing = Math.sign(s.x - d.x) || d.facing; sfx("stone_hit", s.x, 0.25, 1.6);
+  return true;
+}
+function w7Hold(real) {   // main.js frame: while he's looking at a stone the stage waits; A keeps it, B (or Down) puts it back
+  if (!closeup.open) return false;
+  closeup.t += real;
+  if (closeup.t < 0.3) return true;
+  if (pressed("a")) keepStone(); else if (pressed("b") || pressed("down") || pressed("select")) putBack();
+  return true;
+}
+function keepStone() {
+  const s = closeup.s, L = PICK_LOOKS[s.look];
+  if (!L.keep) { putBack(); sayLine("David", "No. It would wobble. Only smooth, round ones go in the bag."); return; }
+  if (bagCount() >= W7.BAG) { putBack(); toast("The bag already has five smooth stones. That's enough."); return; }
+  closeup.open = false; s.state = "kept"; s.t = 0;
+  const n = bagCount(); chime(n + 2); sfx("stone_hit", s.x, 0.3, 1.9);
+  for (let k = 0; k < 10; k++) bits.push({ x: s.x, y: s.y - 10, vx: (Math.random() - 0.5) * 260, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
+  if (n < W7.BAG) toast(`A smooth stone, into the shepherd's bag. (${n} of ${W7.BAG})`);
+  else setTimeout(() => {   // the fifth: David writes it down
+    david.vx = 0; hushLoops();
+    if (typeof Journal !== "undefined" && Journal.openNote) Journal.openNote(fiveNote(), () => toast("Archaeologists have found many shaped sling stones in Israel from Bible times, some about the size of a tennis ball."));
+    else toast("Five smooth stones. He chose five smooth stones out of the brook. (1 Samuel 17:40)");
+  }, 600);
+}
+function putBack() {
+  const s = closeup.s; closeup.open = false;
+  if (!s.under) return;
+  const c = Math.floor(s.x / T) + (david.x < s.x ? 1 : -1);   // it runs out the far side, away from David
+  if (s.under === "viper") snake("viper", c); else critter(s.under, c);
+  toast(s.under === "viper" ? "A viper was coiled under that one! Back away from it." : "A scorpion was under it! Look before you lift. Or before you throw.");
+  s.under = null;
+}
+function fiveNote() {
+  return {
+    left: [{ at: 5, size: "entry", segs: [{ text: "Five smooth stones from the stream, in the bag Shammah gave me.", at: 5 }] },
+           { at: 5, size: "small", segs: [{ text: "The round, smooth ones fly true. The rough ones wobble, and the flat ones sail off sideways.", at: 5 }] },
+           { at: 5, size: "small", segs: [{ text: "He chose for himself five smooth stones out of the brook, and put them in the shepherd's bag. (1 Samuel 17:40)", at: 5 }] }],
+    right: [{ at: 5, size: "entry", segs: [{ text: "Why five?", at: 5 }] },
+            { at: 5, size: "small", segs: [{ text: "The Bible doesn't say. Some think he took extra, in case he missed. Others point out that Goliath had relatives in Gath who were giants too (2 Samuel 21:22).", at: 5 }] },
+            { at: 5, size: "small", segs: [{ text: "Either way, he needed only one.", at: 5 }] }],
+  };
+}
+// a stone, drawn: the close-up (big) and lying in the streambed (small). seed keeps each one's own shape.
+function stoneShape(look, seed) {
+  let h = seed * 9301 + 49297; const rnd = () => ((h = (h * 9301 + 49297) % 233280) / 233280);
+  const pts = [], n = look === "jagged" ? 9 : 24;
+  for (let k = 0; k < n; k++) {
+    const a = k / n * Math.PI * 2;
+    let rx = 1, ry = 0.82;
+    if (look === "egg") { rx = 1.12; ry = 0.74; }
+    if (look === "flat") { rx = 1.2; ry = 0.34; }
+    let r = 1;
+    if (look === "jagged") r = 0.62 + rnd() * 0.5;
+    if (look === "lumpy") r = 1 + 0.22 * Math.sin(a * 2 + seed) + 0.12 * Math.sin(a * 3 + seed * 2);
+    if (look === "cracked") r = 1 + (rnd() - 0.5) * 0.06;
+    if (look === "smooth" || look === "egg") r = 1 + (rnd() - 0.5) * 0.025;
+    pts.push([Math.cos(a) * rx * r, Math.sin(a) * ry * r]);
+  }
+  return pts;
+}
+function drawStoneShape(x, y, R, look, seed) {
+  const pts = stoneShape(look, seed);
+  ctx.save(); ctx.translate(x, y);
+  ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px * R, py * R) : ctx.moveTo(px * R, py * R)); ctx.closePath();
+  const smooth = look === "smooth" || look === "egg";
+  const g = ctx.createRadialGradient(-R * 0.35, -R * 0.35, R * 0.1, 0, 0, R * 1.2);
+  g.addColorStop(0, smooth ? "#efe6d2" : "#cfc2a8"); g.addColorStop(0.55, look === "egg" ? "#bba27c" : "#a89c86"); g.addColorStop(1, "#5e5446");
+  ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = Math.max(1, R * 0.03); ctx.strokeStyle = "rgba(40,32,24,0.6)"; ctx.stroke();
+  if (look === "jagged") {   // flat-cut faces
+    ctx.save(); ctx.clip();
+    for (let k = 0; k < pts.length; k += 2) { ctx.fillStyle = k % 4 ? "rgba(0,0,0,0.14)" : "rgba(255,255,255,0.1)"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(pts[k][0] * R, pts[k][1] * R); ctx.lineTo(pts[(k + 1) % pts.length][0] * R, pts[(k + 1) % pts.length][1] * R); ctx.fill(); }
+    ctx.restore();
+  }
+  if (look === "cracked") { ctx.strokeStyle = "rgba(30,22,16,0.85)"; ctx.lineWidth = Math.max(1, R * 0.05); ctx.beginPath(); ctx.moveTo(-R * 0.7, -R * 0.5); ctx.lineTo(-R * 0.2, -R * 0.1); ctx.lineTo(-R * 0.35, R * 0.2); ctx.lineTo(R * 0.25, R * 0.45); ctx.lineTo(R * 0.4, R * 0.75); ctx.stroke(); }
+  if (look === "flat") { ctx.fillStyle = "rgba(0,0,0,0.18)"; ctx.fillRect(-R * 1.2, R * 0.05, R * 2.4, R * 0.3); }
+  if (smooth) {   // a polished gleam
+    ctx.fillStyle = "rgba(255,255,250,0.55)"; ctx.beginPath(); ctx.ellipse(-R * 0.38, -R * 0.36, R * 0.26, R * 0.13, -0.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawPickStones(camX) {
+  const d = david;
+  for (const s of pickStones) {
+    if (s.state === "kept") continue;
+    const x = s.x - camX; if (x < -60 || x > W + 60) continue;
+    if (closeup.open && closeup.s === s) continue;   // it's in his hand
+    const near = Math.max(0, 1 - Math.abs(s.x - d.x) / W7.PICK_SHINE) * (Math.abs(s.y - d.y) < 120 ? 1 : 0);
+    if (near > 0) {   // a faint shine when he's near
+      ctx.save(); ctx.globalCompositeOperation = "lighter";
+      const a = near * (0.35 + 0.15 * Math.sin(performance.now() / 300 + s.c));
+      const g = ctx.createRadialGradient(x, s.y - 8, 2, x, s.y - 8, 34); g.addColorStop(0, `rgba(255,236,170,${a})`); g.addColorStop(1, "rgba(255,220,140,0)");
+      ctx.fillStyle = g; ctx.fillRect(x - 36, s.y - 44, 72, 72); ctx.restore();
+    }
+    drawStoneShape(x, s.y - 8, 11, s.look === "egg" || s.look === "smooth" ? "smooth" : s.look === "flat" ? "smooth" : s.look, s.c);   // (in the streambed they all look much the same: you have to pick them up)
+    if (near > 0.75 && Math.abs(s.x - d.x) < W7.PICK_REACH && Math.abs(s.y - d.y) < 40) {
+      ctx.save(); ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
+      const t = keyText("Down: look at it"); ctx.strokeText(t, x, s.y - 40); ctx.fillText(t, x, s.y - 40); ctx.restore();
+    }
+  }
+}
+function drawCloseup() {   // over everything: the stone in his hand, big
+  if (!closeup.open) return;
+  const s = closeup.s, L = PICK_LOOKS[s.look], k = Math.min(1, closeup.t / 0.25);
+  ctx.save();
+  ctx.fillStyle = `rgba(10,8,6,${0.55 * k})`; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2 - 50, R = 150 * (0.85 + 0.15 * k);
+  const g = ctx.createRadialGradient(cx, cy, 20, cx, cy, R * 1.6); g.addColorStop(0, `rgba(255,236,190,${0.35 * k})`); g.addColorStop(1, "rgba(255,220,160,0)");
+  ctx.fillStyle = g; ctx.fillRect(cx - R * 2, cy - R * 2, R * 4, R * 4);
+  ctx.globalAlpha = k; drawStoneShape(cx, cy, R * 0.62, s.look, s.c);
+  ctx.textAlign = "center"; ctx.font = "italic 26px Georgia, serif"; ctx.fillStyle = "#ffe9b8";
+  ctx.fillText(L.say, cx, cy + R * 0.8 + 20);
+  if (closeup.crawl && s.under) { ctx.font = "bold 22px sans-serif"; ctx.fillStyle = "#ffb08a"; ctx.fillText("Something moved underneath it...", cx, cy - R * 0.85); }
+  ctx.font = "bold 20px sans-serif"; ctx.fillStyle = "#fff";
+  ctx.fillText(keyText(`A: keep it      B: put it back      (${bagCount()} of ${W7.BAG} in the bag)`), cx, cy + R * 0.8 + 62);
+  ctx.restore();
+}
+function stonesBlocking() {   // main.js finish: not without five smooth stones
+  if (!pickStones.length || bagCount() >= W7.BAG) return null;
+  return `Not yet: ${bagCount()} of ${W7.BAG} smooth stones. Go back and look closer: Down beside a stone lifts it.`;
+}
+if (pickStones.length) {
+  lostThingsTally = function () { return { found: bagCount(), total: W7.BAG, things: "smooth stones", icon: "stone" }; };
+}
+
+// --- the Stones of the Name
+const NAME_LETTERS = { aleph: "\u{10900}", bet: "\u{10901}", gimel: "\u{10902}", dalet: "\u{10903}", he: "\u{10904}", waw: "\u{10905}", yod: "\u{10909}", kaf: "\u{1090A}", lamed: "\u{1090B}", mem: "\u{1090C}", shin: "\u{10914}" };
+const NAME_CROSS = {   // the carving: the letters as they're written (right to left), and how the clue says them
+  1: { word: ["dalet", "waw", "dalet"], say: "Three letters, carved deep: Dalet, Waw, Dalet. The letters of a name.", done: "Dalet, Waw, Dalet. My own name, carved in the rock!" },
+  2: { word: ["yod", "he", "waw", "he"], say: "Four letters, older than anyone remembers: Yod, He, Waw, He. And remember: our fathers read from the right.", done: "" },
+};
+const NAME_NAMES = { dalet: "Dalet", waw: "Waw", he: "He", yod: "Yod" };
+const nameStones = setPieces.filter(p => p.kind === "namestone").map(p => ({ c: p.c, r: p.r, cross: p.cross, k: p.k, letter: p.letter, right: !!p.right, state: "whole", t: 0, cracked: false }));
+const nameClues = setPieces.filter(p => p.kind === "nameclue").map(p => ({ x: p.x, y: p.y, cross: p.cross, told: false }));
+const nameRun = { lock: null, fall: null, done: {}, saidRight: false };
+let ohWaitDone = false;
+try { ohWaitDone = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").nameOhWait; } catch (e) {}
+const w7Busy = () => !!nameRun.lock;   // main.js: on a wrong stone, no jumping off it
+const nameTop = s => s.r * T;
+function setNamePlat(s, on) { for (let c = s.c; c < s.c + W7.NAME_W; c++) oneway[s.r][c] = on; }
+function crossBank(cross) {   // where the near-miss puts him back: the near end of that crossing's causeway
+  const first = nameStones.filter(s => s.cross === cross).reduce((a, s) => Math.min(a, s.c), 1e9);
+  return { x: (first - 3.5) * T, y: 15 * T };
+}
+function updateNameStones(dt) {
+  if (!nameStones.length) return;
+  const d = david;
+  for (const s of nameStones) s.t += dt;
+  // he's falling in with the pieces (a life)
+  if (nameRun.fall) {
+    if (d.deadT > 0) { nameRun.fall.vy = Math.min(1200, nameRun.fall.vy + TUNE.GRAVITY * dt); d.y += nameRun.fall.vy * dt; d.state = "jump"; }
+    else nameRun.fall = null;
+    return;
+  }
+  if (nameRun.lock) {
+    const L = nameRun.lock; L.t += dt; d.vx = 0;
+    if (L.t >= W7.NAME_LOCK) {
+      nameRun.lock = null;
+      if (L.ohWait) {   // the scripted near-miss: he scrambles back to the bank
+        L.s.state = "whole"; L.s.cracked = true; ohWaitDone = true;
+        try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.nameOhWait = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+        const b = crossBank(L.s.cross); d.x = b.x; d.y = b.y; d.vy = 0; d.facing = 1; setState("idle");
+        lamb.x = d.x - 50; lamb.y = d.y; trail.length = 0;
+        sayLine("David", "Oh wait. Our fathers read from the right. Start at the end: He, Waw, He, Yod.");
+      } else {          // it gives way: down he goes with the pieces
+        if (L.order) L.s.state = "whole";   // (the right letter stays, for when he comes back in order)
+        else { L.s.state = "gone"; L.s.t = 0; setNamePlat(L.s, false); }
+        sfx("fall_pit", undefined, 0.7);
+        d.lives--; d.hearts = 0; d.deadT = W7.NAME_SINK; nameRun.fall = { vy: 120 };
+        toast(L.order ? "Out of order! The letters have to be stepped one by one." : d.lives > 0 ? `The stone gave way! Wrong letter. (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "The stone gave way! Out of lives: back to the start of the stage.");
+      }
+    }
+    return;
+  }
+  if (!d.onGround || d.deadT > 0) return;
+  // jumped clean past a letter onto the far bank: the Name has to be stepped out, every letter in order
+  for (const cr of [1, 2]) {
+    const st = nameStones.filter(q => q.cross === cr); if (!st.length || nameRun.done[cr]) continue;
+    const far = Math.max(...st.map(q => q.c)) + W7.NAME_W;
+    if (d.x > far * T && d.x < (far + 6) * T && d.y <= 15 * T + 2) {
+      const b = crossBank(cr); d.x = b.x; d.y = b.y; d.vx = d.vy = 0; d.facing = 1; setState("idle"); lamb.x = d.x - 50; lamb.y = d.y; trail.length = 0;
+      sayLine("David", "I jumped past a letter. The stones have to be stepped one by one, every letter, in order.");
+      return;
+    }
+  }
+  const s = nameStones.find(q => q.state === "whole" && Math.abs(d.y - nameTop(q)) < 3 && d.x > q.c * T - 4 && d.x < (q.c + W7.NAME_W) * T + 4);
+  if (!s) return;
+  const before = nameStones.find(q => q.cross === s.cross && q.k === s.k - 1 && q.right);
+  const order = s.right && before && before.state !== "lit";   // the right letter, but out of order: it won't hold either
+  if (s.right && !order) {
+    s.state = "lit"; s.t = 0; chime(2 + s.k * 2); sfx("stone_hit", s.c * T, 0.35, 1.4);
+    for (let k = 0; k < 14; k++) bits.push({ x: (s.c + W7.NAME_W / 2) * T, y: nameTop(s), vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 360, life: 0.6, color: "#ffe9a0" });
+    if (s.cross === 2 && s.k === 0 && !ohWaitDone && !nameRun.saidRight) { nameRun.saidRight = true; ohWaitDone = true; sayLine("David", "From the right, like the Steward said. He first."); }
+    const all = nameStones.filter(q => q.cross === s.cross && q.right);
+    if (all.every(q => q.state === "lit") && !nameRun.done[s.cross]) {
+      nameRun.done[s.cross] = true;
+      setTimeout(() => { chime(7); setTimeout(() => chime(9), 160); setTimeout(() => chime(12), 320); }, 300);
+      if (s.cross === 1) setTimeout(() => sayLine("David", NAME_CROSS[1].done), 700);
+      else setTimeout(() => { d.vx = 0; hushLoops(); if (typeof Journal !== "undefined" && Journal.openNote) Journal.openNote(nameNote()); }, 1400);
+    }
+    return;
+  }
+  // a wrong letter: the jump locks, it cracks
+  s.state = "crack"; s.t = 0; sfx("stone_hit", s.c * T, 0.6, 0.6);
+  nameRun.lock = { s, t: 0, ohWait: s.cross === 2 && s.k === 0 && !ohWaitDone, order };
+  d.vx = 0; d.jumpBuf = 0; setState("slip");
+}
+function resetNameStones() {
+  for (const s of nameStones) { s.state = "whole"; s.t = 0; setNamePlat(s, true); }
+  nameRun.done = {}; nameRun.lock = null; nameRun.fall = null;
+}
+if (nameStones.length) {   // out of lives: the stones are back as they were
+  const respawn7 = respawn;
+  respawn = function () { const out = david.lives <= 0; nameRun.lock = null; nameRun.fall = null; respawn7(); if (out) resetNameStones(); };
+}
+function nameNote() {
+  return {
+    left: [{ at: 5, size: "entry", segs: [{ text: "I crossed the deep pool on the Name.", at: 5 }] },
+           { at: 5, size: "glyph", segs: [{ text: NAME_LETTERS.he + NAME_LETTERS.waw + NAME_LETTERS.he + NAME_LETTERS.yod, at: 5, glyph: true }] },
+           { at: 5, size: "entry", segs: [{ text: "Yod, He, Waw, He, written from the right. I nearly started at the wrong end.", at: 5 }] }],
+    right: [{ at: 5, size: "entry", segs: [{ text: "The name God told Moses at the burning bush (Exodus 3:15).", at: 5 }] },
+            { at: 5, size: "small", segs: [{ text: "When an English Bible prints \"the LORD\" in small capitals, these four letters are what stands behind it.", at: 5 }] },
+            { at: 5, size: "small", segs: [{ text: "\"Some trust in chariots, and some in horses, but we trust the name of the LORD our God.\" (Psalm 20:7)", at: 5 }] }],
+  };
+}
+function nameClueNear() { const d = david; return nameClues.find(q => Math.abs(q.x - d.x) < 90 && Math.abs(q.y - d.y) < 60) || null; }
+function w7Select() {   // main.js: Select at the carving opens the Journal at the old letters
+  const q = nameClueNear(); if (!q || typeof Journal === "undefined" || !Journal.openNote || typeof lettersSpread !== "function") return false;
+  david.vx = 0; hushLoops(); Journal.openNote(lettersSpread(lettersFound()));
+  return true;
+}
+function clueText(cross) {
+  const found = typeof lettersFound === "function" ? lettersFound() : [], C = NAME_CROSS[cross];
+  const missing = C.word.some(l => !found.includes(l));
+  if (!missing) return C.say;
+  const names = C.word.map(l => found.includes(l) ? NAME_NAMES[l] : "( ? )").join(", ");
+  return `Letters carved deep in the rock, some worn away: ${names}.` + (cross === 2 ? " And under them: \"our fathers read from the right.\"" : "");
+}
+function updateNameClues() {
+  const q = nameClueNear(); if (!q || q.told || david.deadT > 0) return;
+  q.told = true; sayLine("", clueText(q.cross) + " (Select: open your Journal at the old letters.)");
+}
+function drawNameStones(camX) {
+  const sc = W7.NAME_W * T / 222;
+  for (const s of nameStones) {
+    const cx = (s.c + W7.NAME_W / 2) * T - camX, top = nameTop(s); if (cx < -120 || cx > W + 120) continue;
+    if (s.state === "gone") { if (s.t < 0.6) drawSprite("name_stone_crumble", Math.min(4, 3 + Math.floor(s.t / 0.3)), cx, top + 95 * sc, 1, sc / SCALE); continue; }
+    if (s.state === "crack") drawSprite("name_stone_crumble", Math.min(2, Math.floor(s.t / W7.NAME_LOCK * 3)), cx, top + 95 * sc, 1, sc / SCALE);
+    else if (s.state === "lit") { const g = W7.NAME_W * T / 207; drawItem("name_stone_glow", cx, top + 95 * sc, g); }
+    else if (s.cracked) drawSprite("name_stone_crumble", 1, cx, top + 95 * sc, 1, sc / SCALE);
+    else drawItem("name_stone_plain", cx, top + 95 * sc, sc);
+    // the letter on its face: every letter glows the same, so only reading tells them apart
+    const L = ITEM["name_letter_" + s.letter]; if (!L || !L.naturalWidth) continue;
+    const lh = 38, ls = lh / 140, a = s.state === "lit" ? 1 : 0.8;
+    if (s.state === "lit") { ctx.save(); ctx.globalCompositeOperation = "lighter"; const g = ctx.createRadialGradient(cx, top + 26, 2, cx, top + 26, 40); g.addColorStop(0, "rgba(255,230,140,0.55)"); g.addColorStop(1, "rgba(255,210,100,0)"); ctx.fillStyle = g; ctx.fillRect(cx - 40, top - 14, 80, 80); ctx.restore(); }
+    drawItem("name_letter_" + s.letter, cx, top + 10 + lh + 6, ls, a);
+  }
+}
+function drawNameClues(camX) {
+  const found = typeof lettersFound === "function" ? lettersFound() : [];
+  for (const q of nameClues) {
+    const x = q.x - camX; if (x < -150 || x > W + 150) continue;
+    drawItem("boulder_grey", x, q.y + 8, 0.34);
+    const word = NAME_CROSS[q.cross].word, n = word.length, gap = 30;
+    ctx.save(); ctx.font = '30px "Segoe UI Historic"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (let i = 0; i < n; i++) {   // written right to left: the first letter on the right
+      const l = word[i], lx = x + ((n - 1) / 2 - i) * gap, ly = q.y - 70;
+      if (found.includes(l)) {
+        ctx.fillStyle = "rgba(255,250,235,0.55)"; ctx.fillText(NAME_LETTERS[l], lx, ly + 2);
+        ctx.fillStyle = "rgba(38,32,28,0.95)"; ctx.fillText(NAME_LETTERS[l], lx, ly);
+      } else { ctx.fillStyle = "rgba(60,52,44,0.25)"; ctx.beginPath(); ctx.ellipse(lx, ly, 9, 12, 0.3, 0, Math.PI * 2); ctx.fill(); }   // worn away
+    }
+    if (nameClueNear() === q && !Journal.active) {
+      ctx.font = "bold 16px sans-serif"; ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.fillStyle = "#fff6d8";
+      const t = keyText("Select: open your Journal"); ctx.strokeText(t, x, q.y - 128); ctx.fillText(t, x, q.y - 128);
+    }
+    ctx.restore();
+  }
+}
+// the causeways at each end of a crossing: Glen's sandstone bridge blocks over solid tiles that aren't drawn (material 6)
+const causeways = setPieces.filter(p => p.kind === "causeway");
+function drawCauseways(camX) {
+  for (const p of causeways) {
+    const x0 = p.c * T - camX, w = p.w * T; if (x0 > W + 50 || x0 + w < -50) continue;
+    const img = ITEM.bridge_l_b; if (!img || !img.naturalWidth) continue;
+    ctx.drawImage(img, x0 - 4, p.r * T - 6, w + 8, (GR - p.r) * T + 14);
+  }
+}
+function updateStones73(dt) { updateNameStones(dt); updateNameClues(); for (const s of pickStones) s.t += dt; }
+function drawStones73(camX) {
+  if (typeof drawSpikePits === "function" && setPieces.some(p => p.kind === "spikes")) drawSpikePits(camX);
+  drawCauseways(camX); drawNameClues(camX); drawNameStones(camX); drawPickStones(camX);
+}
+
 function updateWorld7(dt) {
   if (WORLD !== 7) return;
-  updateArmor(dt); updateMemories(dt);
+  updateArmor(dt); updateMemories(dt); updateStones73(dt);
 }
 function drawWorld7(camX) {
   if (WORLD !== 7) return;
   drawSaul7(camX);
   drawArmorPile(camX);
   drawMemSheep(camX);
+  drawStones73(camX);
 }
