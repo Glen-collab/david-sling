@@ -3896,7 +3896,7 @@ function drawBugs(camX) {
   for (const b of bees) if (b.alpha > 0) drawSprite("bee_fly", frameOf("bee_fly", b.t * 2), b.x - camX, b.y, b.facing, 1, b.alpha);
   for (const h of hornets) if (h.alpha > 0) {
     const nm = h.kind === "raven" ? "raven_fly" : "hornet_fly";
-    drawSprite(nm, frameOf(nm, h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.facing, 1, h.alpha);
+    drawSprite(nm, frameOf(nm, h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.kind === "raven" ? -h.facing : h.facing, 1, h.alpha);   // (raven_fly is drawn facing left, the hornet right)
   }
 }
 

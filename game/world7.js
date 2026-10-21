@@ -256,7 +256,7 @@ function drawWorld7Over() {
 Object.assign(W7, {
   SHIMMER_T: 0.9,        // seconds of the gold shimmer crossing into or out of a memory (the switch is at its brightest)
   MEM_WASH: "rgba(255,196,120,0.22)",   // the memory's warm wash (soft-light), over a gold vignette
-  TITLE_T: 3.2,          // seconds "David remembers..." stays up
+  TITLE_T: 6.5,          // seconds "David remembers..." stays up (Glen: long enough to read without going back)
   MEMSHEEP_REACH: 60,    // px
 });
 const memZones = setPieces.filter(p => p.kind === "memory").map(p => ({ c0: p.c, c1: p.to, bg: p.bg, name: p.name, night: !!p.night }));
