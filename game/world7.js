@@ -22,6 +22,7 @@ const W7 = {
   SAUL_SIZE: 1.0,
   LAMB_SIZE: 1.5,        // the opening scene (w7intro): the lamb in Saul's spare helmet
   LAMB_HELM: [1, -43, 15],
+  LAMB_HELM_IMG: [50, 62, 3.2],   // Glen's david_helmet on the lamb: the point of the image (px) that sits on LAMB_HELM, and its width x the helmet radius
   PAIR_SAUL: 40,         // saul_dress / saul_off (Glen's two-person tent clips): Saul's feet, sheet px right of the anchor,
   PAIR_DAVID: 105,       //   and David's, left of it // the helmet on its head: x, y from its feet and radius, in lamb_walk's own px
 };
@@ -1123,7 +1124,11 @@ const w7intro = {
     if (B.lamb) {   // the lamb, in Saul's spare helmet, bumping along the back of the tent
       const lx = W * (0.98 - 0.5 * Math.min(1, this.bt / 6)), ly = fy - 8, sc = SCALE * z * W7.LAMB_SIZE, [hx, hy, hr] = W7.LAMB_HELM;
       drawSprite("lamb_walk", frameOf("lamb_walk", now), lx, ly, -1, z * W7.LAMB_SIZE);
-      drawHelmet(lx - hx * sc, ly + hy * sc + Math.sin(now * 9) * 2, hr * sc, -1);
+      const hpx = lx - hx * sc, hpy = ly + hy * sc + Math.sin(now * 9) * 2, img = ITEM.david_helmet;
+      if (img && img.naturalWidth) {   // Glen's helmet (assets/items/david_helmet.png, drawn facing right): flipped to the way the lamb walks
+        const [ox, oy, w] = W7.LAMB_HELM_IMG, k = w * hr * sc / img.naturalWidth;
+        ctx.save(); ctx.translate(hpx, hpy); ctx.scale(-1, 1); ctx.drawImage(img, -ox * k, -oy * k, img.naturalWidth * k, img.naturalHeight * k); ctx.restore();
+      } else drawHelmet(hpx, hpy, hr * sc, -1);
     }
     let dx = SPR.saul_dress ? tentPairX(z) - W7.PAIR_DAVID * SCALE * z : W * 0.24;   // where the clip leaves him, beside Saul
     if (pair) {}
