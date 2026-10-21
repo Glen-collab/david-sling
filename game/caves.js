@@ -21,6 +21,7 @@ const darkCanvas = document.createElement("canvas"); darkCanvas.width = W; darkC
 function camLimits() {
   if (!cave.room && typeof chariotCam === "function") { const c = chariotCam(); if (c) return c; }   // 5-4: the chariot fight (world5.js)
   if (!cave.room && typeof towerCam === "function") { const c = towerCam(); if (c) return c; }       // 6-4: the watchtower fight (world6.js)
+  if (!cave.room && typeof shieldCam === "function") { const c = shieldCam(); if (c) return c; }      // 7-4: the shield-bearer (world7.js)
   if (!cave.room) return [0, MAIN_COLS * T - W];
   const a = cave.room.c0 * T - 2 * T, b = (cave.room.c0 + cave.room.w) * T + 2 * T - W;
   return a > b ? [(a + b) / 2, (a + b) / 2] : [a, b];

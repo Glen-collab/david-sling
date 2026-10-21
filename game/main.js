@@ -356,6 +356,7 @@ const STAGE_INFO = {
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
   "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
+  "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },   // the open valley floor: no music
   "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
   "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
@@ -1377,6 +1378,34 @@ if (LEVEL_NAME === "test") {
   critter("hedgehog", 204);
   shelter(207, 4); special(208, 11);
   sheepfold(222);
+} else if (LEVEL_NAME === "7-4") {
+  // ---- 7-4 The Giant's Shadow (1 Samuel 17:41): a short, quiet, tense walk out across the open valley floor toward
+  //      the Philistine line. No music (STAGE_INFO.quiet): a slow drum, the wind, the armies on the hills, the giant's
+  //      footsteps getting louder, his shadow darkening the screen from the right (world7.js). The danger is the land:
+  //      dry cracks, loose rocks, vipers; vultures overhead. Eliab far up the Israelite slope, arms crossed. The One:
+  //      behind the last boulder before the open ground. BOSS: the Shield-Bearer (world7.js), arena from col 160,
+  //      Goliath behind him. No sheepfold out here: the shield falls and it's straight on to the end of World 7. ----
+  const crack = (c, w) => setPiece("spikes", c, GR, { w });   // a dry crack in the valley floor
+  ground(0, 21); campfire(1);
+  talk(4, "Tobi", "David! I ran down after you. Listen: that shield-bearer walks in front of him everywhere. The shield's as big as a door.");
+  talk(6, "Tobi", "Heavy, though. Every time he slams it down, he has to heave it up again. Watch the bronze rim: when it flashes, he's lifting. That's your moment to get round him.");
+  crack(22, 3); ground(25, 46);
+  setPiece("vultures", 30);
+  snake("viper", 37);
+  rock(42, 15, 3, 2); special(43, 13);
+  crack(47, 5); crumble(48, 14, 3); ground(52, 79);           // loose rocks over the crack
+  setPiece("vultures", 60); snake("viper", 66);
+  rock(71, 15, 2, 2); rock(73, 13, 3, 4);
+  crack(80, 4); ground(84, 115);
+  talk(90, "", "Far up the Israelite slope, apart from the others, one man stands with his arms crossed. Eliab. He doesn't call out.");
+  setPiece("eliab7", 90, 7);                                     // up on the hillside, small: far off
+  snake("viper", 102); setPiece("vultures", 108);
+  crack(116, 6); crumble(117, 14, 2); crumble(120, 13, 2); ground(122, 197);
+  campfire(126); snake("viper", 133);
+  rock(140, 11, 4, 6);                                           // the last boulder before the open ground
+  fakeRock(144, 13, 3, 4); lostSheep("lamb", 145, 16, "one");    // The One, tucked in behind it
+  campfire(152);
+  setPiece("shieldbearer", 160);                                 // the arena: 35 columns, Goliath at its far end
 } else if (LEVEL_NAME === "7-3") {
   // ---- 7-3 Five Smooth Stones (1 Samuel 17:40): the streambed in the middle of the valley. Choosing stones is the
   //      gameplay: setPiece("pickstone") stones shine faintly when David is near; Down lifts one for a close-up, A keeps
@@ -2322,7 +2351,8 @@ function updateStones(dt) {
     if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;
-    if (s.life > 0 && typeof stoneHitsWorld6 === "function" && stoneHitsWorld6(s)) s.life = 0;   // world6.js: the watchtower, the skirmishers   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsWorld6 === "function" && stoneHitsWorld6(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsWorld7 === "function" && stoneHitsWorld7(s)) s.life = 0;   // world7.js: the shield-bearer   // world6.js: the watchtower, the skirmishers   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -3959,12 +3989,12 @@ function updateMusic(dt) {
   if (!audioUnlocked) return;
   // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
   const cutScene = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
-    "eliabScene", "goliathWatch", "w6intro", "w6ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
+    "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
   // and in cut scenes (Glen) it sinks lower still, faint under the story
   const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   const darkOn = !musicFight && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
-  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
+  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
   nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
 }
@@ -3972,7 +4002,7 @@ function updateSound(dt) {
   if (!audioUnlocked) return;
   loadSfx();
   const inArena = lion && david.x > arenaX - TUNE.BOSS_MUSIC_LEAD * T && david.x < MAIN_COLS * T;
-  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight()) || (typeof chariotFight === "function" && chariotFight()) || (typeof towerFight === "function" && towerFight());
+  const fight = (lion && (lion.awake || inArena) && lion.state !== "defeated" && david.deadT <= 0) || (typeof bearFight === "function" && bearFight()) || (typeof oxFight === "function" && oxFight()) || (typeof chariotFight === "function" && chariotFight()) || (typeof towerFight === "function" && towerFight()) || (typeof shieldFight === "function" && shieldFight());
   if (fight && !bossIntroPlayed) { bossIntroPlayed = true; sfx("boss_intro", undefined, 0.8); bossMusic.currentTime = 0; }   // uh oh
   if (lion && !lion.awake && !inArena) bossIntroPlayed = false;
   if (!fight && typeof bear !== "undefined" && bear.on && bear.state === "pen") bossIntroPlayed = false;
@@ -4198,6 +4228,9 @@ function frame(now) {
   }
   if (typeof eliabScene !== "undefined" && eliabScene.active) {   // 6-1: Eliab hears David (world6.js)
     pollInput(); eliabScene.update(real); eliabScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w7ending !== "undefined" && w7ending.active) {   // the end of World 7 (world7.js) has the screen
+    pollInput(); w7ending.update(real); w7ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w6ending !== "undefined" && w6ending.active) {   // the end of World 6 (world6.js) has the screen
     pollInput(); w6ending.update(real); w6ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

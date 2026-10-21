@@ -228,7 +228,7 @@ function drawSaul7(camX) {
 
 // 7-1: the helmet over his eyes. The top of the screen goes dark down to the bronze rim, for a moment.
 function drawWorld7Over() {
-  if (WORLD === 7) { drawMemoryOver(); drawCloseup(); }
+  if (WORLD === 7) { drawShadow74(); drawMemoryOver(); drawCloseup(); }
   if (!inArmor() || armor.slipT <= 0) return;
   const p = 1 - armor.slipT / W7.SLIP_T, k = Math.max(0, Math.min(1, (p - 0.2) / 0.1, (1 - p) / 0.12)), edge = H * (0.18 + 0.5 * k);
   ctx.save();
@@ -699,9 +699,333 @@ function drawStones73(camX) {
   drawCauseways(camX); drawNameClues(camX); drawNameStones(camX); drawPickStones(camX);
 }
 
+// ---------------------------------------------------------------------------
+// 7-4 The Giant's Shadow (DESIGN 7-4): out across the open valley floor toward the Philistine line. No music
+// (STAGE_INFO.quiet): a slow drum, the wind, the armies on the hills, the giant's footsteps getting louder. The screen
+// darkens from the right as his shadow grows. setPiece("eliab7", c, r) Eliab far up the Israelite slope, arms crossed.
+// BOSS: the Shield-Bearer (17:41), setPiece("shieldbearer", c): the arena is 35 columns from c (one screen). Goliath
+// stands behind him the whole fight and never steps in. Nobody is killed: the shield falls, the man backs away.
+//   Phase 1, the wall: he walks forward behind a shield as big as a door; stones bounce off it. He lifts it to slam it
+//     down (tier-1 counsel, Tobi: the bronze rim flashes) and the slam sends a shockwave along the ground: be in the
+//     air. While he heaves it up again he can't turn: get over him and hit his back. 3 hits.
+//   Phase 2, the shove: he charges, shield first. Roll under its edge, or be up high. Then he peeks over the top and
+//     the shield tips: a stone to its top edge knocks it sideways. 3 times.
+//   Phase 3: he peeks and it tips again: one charged stone to the edge knocks it out of his hands.
+//   Tier 2 (after a fall; Shammah from the slope): the slam tell and the tilt last longer, +1 heart.
+// Stand-in art: Glen's Philistine (phil_run / phil_charge) drawn bigger, with the door-sized shield drawn in code
+// (ART_PROMPTS.md "the shield-bearer"). Goliath: goliath_yell, facing left.
+// ---------------------------------------------------------------------------
+Object.assign(W7, {
+  SB_SIZE: 2.0,          // the shield-bearer, x a Philistine's size: a huge man
+  SB_WALK: 46,           // px/s, behind the shield
+  SB_EVERY: 2.6,         // seconds walking between slams
+  SB_TELL: 0.9,          // seconds lifting the shield before the slam (tier 2: SB_TELL2)
+  SB_TELL2: 1.4,
+  SB_RECOVER: 2.2,       // seconds heaving it back up after a slam (he can't turn: the window to get behind him)
+  SB_TURN: 0.7,          // seconds to turn round once David's behind him
+  SB_WAVE: 560,          // px/s, the shockwave along the ground
+  SB_WAVE_T: 1.0,
+  SB_CHARGE: 340,        // px/s, the shove
+  SB_PEEK: 1.3,          // seconds peeking over the top, the shield tipped (tier 2: SB_PEEK2); phase 3 x1.5
+  SB_PEEK2: 2.0,
+  SB_HITS: 3,            // back hits (phase 1), edge hits (phase 2)
+  SHIELD_W: 74, SHIELD_H: 168,
+  GOLIATH_SIZE: 1.55,
+  DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
+});
+const sbPiece = setPieces.find(p => p.kind === "shieldbearer") || null;
+const sb = sbPiece ? { a0: sbPiece.c * T, a1: (sbPiece.c + 35) * T, on: false, beaten: false } : null;
+let w7Counsel2 = false;
+function resetShieldBearer() {
+  Object.assign(sb, { on: false, phase: 1, state: "walk", t: 0, x: sb.a1 - 9 * T, y: GR * T, dir: -1, hits: 0, tips: 0, waves: [], flash: 0, lift: 0, tilt: 0, behindT: 0, sinceSlam: 0, gx: sb.a1 - 3 * T, laugh: 0 });
+}
+if (sb) resetShieldBearer();
+const shieldFight = () => !!(sb && sb.on && !sb.beaten && david.deadT <= 0);
+function shieldCam() { return sb && (sb.on || sb.beaten) ? [sb.a0, sb.a0] : null; }   // caves.js camLimits: the camera holds on the arena
+function shieldBlocking() { return sb && !sb.beaten ? "The shield-bearer stands in the way." : null; }
+const sbTell = () => w7Counsel2 ? W7.SB_TELL2 : W7.SB_TELL;
+const sbPeek = () => (w7Counsel2 ? W7.SB_PEEK2 : W7.SB_PEEK) * (sb.phase === 3 ? 1.5 : 1);
+const tobiWarned = () => talks.some(k => k.done && k.who === "Tobi");
+function sbSay(line, clip) { sayLine("Goliath", line); if (clip) goliathChain([clip], 0.75); }
+function startShieldBearer() {
+  sb.on = true; sb.t = 0; sb.state = "walk";
+  sfx("war_horn", undefined, 0.5, 0.8);
+  sbSay("Am I a dog, that you come to me with sticks? (1 Samuel 17:43)", "hakelev");
+  setTimeout(() => toast("His shield-bearer comes on ahead of him, behind a shield as big as a door. Stones just bounce off it."), 600);
+}
+function sbHurt(fromX) { if (david.inv <= 0 && david.deadT <= 0) hurtDavid(fromX); }
+function sbSetState(s) { sb.state = s; sb.t = 0; }
+function updateShieldBearer(dt) {
+  if (!sb) return;
+  const d = david;
+  if (!sb.on && !sb.beaten && d.x > sb.a0 + 3 * T && d.deadT <= 0) startShieldBearer();
+  if (!sb.on) return;
+  if (d.deadT > 0 && !sb.beaten) {   // David fell: the fight resets; Shammah's counsel from the slope
+    resetShieldBearer();
+    if (!w7Counsel2) { w7Counsel2 = true; setTimeout(() => {
+      sayLine("Shammah", "Come here. Tell me what happened. ... Count when he lifts that shield: you've got longer than you think. And when he peeks over the top, it tips. Hit the edge.");
+      david.hearts += 1; }, 2200); }
+    return;
+  }
+  if (sb.beaten) { updateShieldFall(dt); return; }
+  if (!sb.beaten) d.x = Math.max(sb.a0 + 20, Math.min(sb.a1 - 20, d.x));
+  sb.t += dt; sb.flash = Math.max(0, sb.flash - dt); sb.laugh = Math.max(0, sb.laugh - dt);
+  // the shockwaves
+  for (let i = sb.waves.length - 1; i >= 0; i--) {
+    const w = sb.waves[i]; w.t += dt; w.x += w.dir * W7.SB_WAVE * dt;
+    if (w.t > W7.SB_WAVE_T) { sb.waves.splice(i, 1); continue; }
+    if (d.onGround && Math.abs(d.x - w.x) < 26 && Math.abs(d.y - GR * T) < 8) { sbHurt(w.x - w.dir * 40); sb.waves.splice(i, 1); }
+  }
+  const toD = Math.sign(d.x - sb.x) || sb.dir, front = sb.x + sb.dir * 34;
+  // the shield is a wall in front of him (on the ground): David can't walk through it
+  const shieldUp = sb.state !== "peek";
+  if (shieldUp && d.y > GR * T - W7.SHIELD_H + 10 && Math.abs(d.x - front) < 28 && toD === sb.dir && d.state !== "roll") {
+    d.x = front + sb.dir * 28; d.vx = 0;
+  }
+  if (sb.phase === 1) {
+    if (sb.state === "walk") {
+      // he turns to face David (slowly) if David gets round behind him
+      if (toD !== sb.dir) { sb.behindT += dt; if (sb.behindT > W7.SB_TURN) { sb.dir = toD; sb.behindT = 0; } } else sb.behindT = 0;
+      if (Math.abs(d.x - sb.x) > 3 * T) sb.x += sb.dir * W7.SB_WALK * dt;
+      sb.x = Math.max(sb.a0 + 3 * T, Math.min(sb.a1 - 5 * T, sb.x));
+      sb.sinceSlam += dt;
+      if (sb.sinceSlam > W7.SB_EVERY && toD === sb.dir) { sbSetState("lift"); sb.sinceSlam = 0; }
+    } else if (sb.state === "lift") {
+      sb.lift = Math.min(1, sb.t / sbTell());
+      if (sb.t >= sbTell()) { sbSetState("slam"); }
+    } else if (sb.state === "slam") {
+      sb.lift = Math.max(0, 1 - sb.t / 0.12);
+      if (sb.t >= 0.12 && !sb.slammed) {
+        sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1;
+        sb.waves.push({ x: front, dir: -1, t: 0 }, { x: front, dir: 1, t: 0 });
+      }
+      if (sb.t > 0.3) { sb.slammed = false; sbSetState("recover"); }
+    } else if (sb.state === "recover") {   // heaving it back up: he can't turn now
+      sb.lift = 0.15 * Math.sin(Math.min(1, sb.t / W7.SB_RECOVER) * Math.PI);
+      if (sb.t >= W7.SB_RECOVER) sbSetState("walk");
+    }
+  } else {
+    if (sb.state === "ready") {   // turns to face David, a breath, then the charge
+      sb.dir = toD;
+      if (sb.t > 0.9) { sbSetState("charge"); sb.chargeTo = Math.max(sb.a0 + 2 * T, Math.min(sb.a1 - 4 * T, d.x + sb.dir * 3 * T)); sfxOne(["phil_hedad", "phil_hedad_2"], sb.x, 0.6); }
+    } else if (sb.state === "charge") {
+      sb.x += sb.dir * W7.SB_CHARGE * dt;
+      const over = d.y < GR * T - W7.SHIELD_H - 10;   // up high: over the top of it
+      if (Math.abs(d.x - front) < 30 && !over && d.state !== "roll") { sbHurt(sb.x); d.vx = sb.dir * 420; }
+      if ((sb.dir > 0 ? sb.x >= sb.chargeTo : sb.x <= sb.chargeTo) || sb.x <= sb.a0 + 2 * T || sb.x >= sb.a1 - 4 * T) { sbSetState("peek"); sb.dir = Math.sign(d.x - sb.x) || sb.dir; }
+    } else if (sb.state === "peek") {   // he looks over the top for David: the shield tips
+      sb.tilt = Math.min(1, sb.t / 0.25);
+      if (sb.t > sbPeek()) { sb.tilt = 0; sbSetState("ready"); }
+    } else if (sb.state === "knock") {   // knocked sideways: it wobbles back
+      sb.tilt = Math.max(0, 1 - sb.t / 0.8) * 1.6;
+      if (sb.t > 1.0) { sb.tilt = 0; sbSetState("ready"); }
+    }
+  }
+}
+function stoneHitsShield(s) {
+  if (!sb || !sb.on || sb.beaten) return false;
+  const front = sb.x + sb.dir * 34, top = GR * T - W7.SHIELD_H - sb.lift * 50;
+  const fromBehind = Math.sign(s.vx) === sb.dir;   // flying the way he faces: it's coming at his back
+  const body = Math.abs(s.x - sb.x) < 34 && s.y > sb.y - 230 && s.y < sb.y;
+  if (sb.phase === 1 && fromBehind && body) {
+    sb.hits++; sb.flash = 0.3; stoneHit(s); sfx("lion_hit", sb.x, 0.45, 1.3);
+    if (sb.hits === 1) toast("Right in the back! He can't turn while he heaves that shield up.");
+    if (sb.hits >= W7.SB_HITS) {
+      sb.phase = 2; sbSetState("ready"); sb.hits = 0; sb.lift = 0; sb.waves = [];
+      sb.laugh = 2.5; sfx("taunting_yells", undefined, 0.55, 0.7);
+      setTimeout(() => toast("He drops the shield low and charges, shield first! Roll under its edge, or get up high."), 400);
+    }
+    return true;
+  }
+  // the shield
+  const onShield = Math.abs(s.x - front) < W7.SHIELD_W / 2 + 10 && s.y > top - 10 && s.y < GR * T;
+  if (!onShield) return false;
+  const edge = s.y < top + 34;   // its top edge, tipped back while he peeks
+  if (sb.state === "peek" && edge) {
+    if (sb.phase === 2) {
+      sb.tips++; sbSetState("knock"); sfx("stone_hit", sb.x, 0.7, 0.8); stoneHit(s);
+      if (sb.tips === 1) toast("The edge! The shield swings and he staggers.");
+      if (sb.tips >= W7.SB_HITS) {
+        sb.phase = 3; sb.tips = 0;
+        sbSay("Come to me, and I will give your flesh to the birds of the sky, and to the animals of the field. (1 Samuel 17:44)", "lecha_elai");
+        setTimeout(() => toast("The shield's loose in his grip now. When it tips, one charged stone to its edge!"), 900);
+      }
+      return true;
+    }
+    if (sb.phase === 3) {
+      if (s.charged || s.power) { stoneHit(s); shieldFalls(); return true; }
+      if (!W7.tapTold) { W7.tapTold = true; toast("It rocks, but he holds on. Hold B: a charged stone!"); }
+    }
+  }
+  stoneHit(s, 0.5); sfx("stone_hit", s.x, 0.35, 1.5);   // just bounces off the bronze
+  if (!W7.bounceTold && sb.phase === 1) { W7.bounceTold = true; toast("It just bounces off the shield. Get round behind him!"); }
+  return true;
+}
+function shieldFalls() {
+  sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 40;
+  sfx("final_stone", sb.x, 0.8); setTimeout(() => { thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2; sfx("stone_hit", sb.x, 0.9, 0.5); }, 450);
+}
+function updateShieldFall(dt) {
+  sb.t += dt;
+  if (sb.state === "fall" && sb.t > 1.6) { sbSetState("stare"); }
+  else if (sb.state === "stare" && sb.t > 1.4) { sbSetState("back"); sb.laugh = 4; sfx("taunting_yells", undefined, 0.7, 0.6); toast("He stares at his shield in the dust, looks back at the giant, and backs away. The giant laughs at him."); }
+  else if (sb.state === "back") { if (sb.x < sb.gx - 3 * T) sb.x += 60 * dt; if (sb.t > 4.5 && !sb.cleared) { sb.cleared = true; clear74(); } }
+}
+function clear74() {   // the end of 7-4: no sheepfold out here. Straight to the end of World 7, then the Journal.
+  hushLoops(true); sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9);
+  const one = line.some(sh => sh.one);
+  saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
+  stageCleared(LEVEL_STAGE, { sheep: foundCount(), total: lostCount(), one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
+  setTimeout(() => w7ending.start(() => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() })), 2500);
+}
+function drawDoorShield(x, y, dir, lift, tilt, flash, alpha = 1) {   // a shield as big as a door: bronze, studded, a rim that flashes on the tell
+  const w = W7.SHIELD_W, h = W7.SHIELD_H;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.translate(x, y - lift * 50); ctx.rotate(-dir * tilt * 0.38);   // tips back toward him (its top edge away from David)
+  const g = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+  g.addColorStop(0, "#6e4a1e"); g.addColorStop(0.45, "#b8873e"); g.addColorStop(0.6, "#d6a858"); g.addColorStop(1, "#7a5222");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-w / 2, -h, w, h, 12); ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = flash ? `rgba(255,236,140,${0.6 + 0.4 * Math.sin(performance.now() / 50)})` : "#4a3010"; ctx.stroke();
+  ctx.fillStyle = "rgba(60,36,10,0.55)"; for (let r = 0; r < 4; r++) for (const c of [-1, 1]) { ctx.beginPath(); ctx.arc(c * w * 0.3, -h * (0.15 + r * 0.23), 3.5, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = "rgba(255,240,200,0.25)"; ctx.fillRect(-w * 0.08, -h + 10, w * 0.12, h - 20);
+  ctx.restore();
+}
+function drawFallenShield(sx, dir) {
+  ctx.save(); ctx.fillStyle = "#9a7038"; ctx.strokeStyle = "#4a3010"; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect(dir > 0 ? sx : sx - W7.SHIELD_H, GR * T - 14, W7.SHIELD_H, 16, 6); ctx.fill(); ctx.stroke(); ctx.restore();
+}
+function drawShieldBearer(camX) {
+  if (!sb) return;
+  const now = performance.now() / 1000;
+  // Goliath, behind him the whole fight (and through the walk out, waiting)
+  const gx = sb.gx - camX;
+  if (gx > -300 && gx < W + 300 && SPR.goliath_yell) {
+    const yell = sb.laugh > 0 || (dialog.t > 0 && dialog.who === "Goliath");
+    drawSprite("goliath_yell", yell ? frameOf("goliath_yell", now) : 0, gx, GR * T, -1, W7.GOLIATH_SIZE);
+  }
+  const x = sb.x - camX; if (x < -200 || x > W + 200) return;
+  if (sb.beaten && sb.shieldX !== undefined) {   // the shield, falling flat in the dust
+    const sx = sb.shieldX - camX, f = sb.state === "fall" ? Math.min(1, sb.t / 0.45) : 1;
+    if (f < 1) drawDoorShield(sx, GR * T, sb.dir, 0, -f * 4.13, 0);
+    else drawFallenShield(sx, sb.dir);
+  }
+  const fl = sb.flash > 0 ? "brightness(2)" : "brightness(0.9)";
+  const charging = sb.state === "charge", walking = sb.state === "walk" || sb.state === "back";
+  const nm = charging ? "phil_charge" : "phil_run", fr = walking ? frameOf("phil_run", now * 0.5) : charging ? frameOf("phil_charge", now) : 0;
+  const face = sb.state === "back" ? -1 : sb.dir;   // backing away: still facing David
+  drawSprite(nm, fr, x, sb.y, face, W7.SB_SIZE, 1, fl);
+  if (!sb.beaten) drawDoorShield(x + sb.dir * 34, sb.y + 2, sb.dir, sb.lift, sb.tilt, sb.state === "lift" && (tobiWarned() || w7Counsel2));
+  // the shockwaves: dust racing along the ground
+  for (const w of sb.waves) {
+    const wx = w.x - camX, a = 1 - w.t / W7.SB_WAVE_T;
+    ctx.save(); ctx.fillStyle = `rgba(200,170,120,${0.7 * a})`;
+    for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.ellipse(wx - w.dir * k * 10, GR * T - 6 - k * 3, 16 - k * 2, 9 - k, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+}
+// Eliab, far up the Israelite slope, apart from the others, arms crossed (Luke 15:28)
+const eliab7 = setPieces.find(p => p.kind === "eliab7") || null;
+function drawEliab7(camX) {
+  if (!eliab7 || !SPR.eliab_arms_crossed) return;
+  const x = eliab7.x - camX; if (x < -100 || x > W + 100) return;
+  drawSprite("eliab_arms_crossed", 0, x, eliab7.y, 1, 0.4, 0.85, "saturate(0.7) brightness(0.9) blur(0.4px)");
+}
+// the walk out: a slow drum, the giant's footsteps louder as he comes, the shadow from the right
+const quiet74 = { drumT: 0, stepT: 0 };
+function drum(vol = 0.35) {
+  try {
+    chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const ac = chimeCtx, t0 = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(95, t0); o.frequency.exponentialRampToValueAtTime(48, t0 + 0.3);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, vol * sfxMul()), t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+    o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + 0.65);
+  } catch (e) {}
+}
+const shadowK = () => sb ? Math.max(0, Math.min(1, david.x / sb.a0)) : 0;
+function updateQuiet74(dt) {
+  if (!STAGE_INFO.quiet || !audioUnlocked || finish.active || (sb && sb.beaten)) return;
+  quiet74.drumT -= dt; quiet74.stepT -= dt;
+  if (quiet74.drumT <= 0) { quiet74.drumT = W7.DRUM_EVERY; drum(0.3); setTimeout(() => drum(0.18), 260); }
+  if (quiet74.stepT <= 0) { quiet74.stepT = 2.3 - shadowK() * 0.9; thud(0.12 + shadowK() * 0.5); }   // his footsteps, louder as he comes
+}
+function drawShadow74() {   // after the world, before the HUD: his shadow grows across the ground from the right
+  if (!STAGE_INFO.quiet) return;
+  const k = shadowK() * (sb && sb.beaten ? 0.6 : 1); if (k <= 0) return;
+  const g = ctx.createLinearGradient(W * (1 - 0.8 * k), 0, W, 0);
+  g.addColorStop(0, "rgba(20,12,30,0)"); g.addColorStop(1, `rgba(20,12,30,${0.55 * k})`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+function updateWorld74(dt) { if (sb || STAGE_INFO.quiet) { updateShieldBearer(dt); updateQuiet74(dt); if (typeof updateVultures === "function") updateVultures(dt); } }
+function drawWorld74(camX) { if (sb || STAGE_INFO.quiet) { if (typeof drawVultures === "function") drawVultures(camX); drawEliab7(camX); drawShieldBearer(camX); } }
+function stoneHitsWorld7(s) { return WORLD === 7 && stoneHitsShield(s); }
+
+// ---------------------------------------------------------------------------
+// The end of World 7 (DESIGN "End of World 7 — everything you need"): the shield in the dust, the valley quiet, David
+// and the giant facing each other; the gifts screen; 1 Samuel 17:40.
+// ---------------------------------------------------------------------------
+const W7_GIFTS = [
+  ["The sling (Jesse's old sling)", "Jesse, his father", "1"],
+  ["The leather sling pouch", "The leatherworker of Tekoa", "2"],
+  ["The shepherd's staff", "Hanan", "3"],
+  ["The King's Favor", "King Saul", "4"],
+  ["The scout's cloak", "Tobi", "5"],
+  ["The shepherd's bag", "Shammah", "6"],
+  ["Five smooth stones", "the stream", "7"],
+  ["(and the moves)", "Hanan, Shammah, Gera, Tobi", "1-5"],
+];
+const w7ending = {
+  active: false,
+  beats: [
+    { text: "The shield lay in the dust. The valley went quiet. For the first time, David and the giant faced each other across the open ground." },
+    { card: true },
+    { text: "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the shepherd's bag which he had, even in his wallet. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)" },
+    { text: "To be continued in World 8: David and Goliath." },
+  ],
+  start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, out: 0 }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt;
+    if (this.out > 0) { this.out += dt; if (this.out > 1.2) { this.active = false; const cb = this.done; this.done = null; cb && cb(); } return; }
+    if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) { if (this.i < this.beats.length - 1) { this.i++; this.bt = 0; } else this.out = 0.001; }
+  },
+  draw() {
+    const B = this.beats[this.i], now = performance.now() / 1000;
+    drawBackground(sb ? sb.a0 : 0);
+    ctx.fillStyle = "rgba(30,18,10,0.35)"; ctx.fillRect(0, 0, W, H);
+    const y = GR * T;
+    ctx.fillStyle = "rgba(70,52,34,0.9)"; ctx.fillRect(0, y, W, H - y);
+    drawSprite("david_idle", frameOf("david_idle", now), W * 0.22, y, 1);
+    if (SPR.goliath_yell) drawSprite("goliath_yell", 0, W * 0.8, y, -1, W7.GOLIATH_SIZE);
+    drawFallenShield(W * 0.5, 1);
+    if (B.card) {
+      const pw = 900, ph = 470, px = (W - pw) / 2, py = 60;
+      ctx.save(); ctx.fillStyle = "rgba(244,230,200,0.96)"; ctx.strokeStyle = "#6b4a24"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 14); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#3a2612"; ctx.textAlign = "center"; ctx.font = "bold 30px Georgia, serif"; ctx.fillText("Everything David carries", W / 2, py + 50);
+      ctx.font = "20px Georgia, serif"; ctx.textAlign = "left";
+      W7_GIFTS.forEach(([g, who, w], k) => {
+        const ry = py + 100 + k * 40;
+        ctx.fillStyle = "#3a2612"; ctx.fillText(g, px + 40, ry); ctx.fillStyle = "#6b4a24"; ctx.fillText(who, px + 380, ry); ctx.textAlign = "right"; ctx.fillText("World " + w, px + pw - 40, ry); ctx.textAlign = "left";
+      });
+      ctx.textAlign = "center"; ctx.font = "italic bold 26px Georgia, serif"; ctx.fillStyle = "#7a3a10"; ctx.fillText("Everything you need, you already have.", W / 2, py + ph - 26);
+      ctx.restore();
+    } else {
+      ctx.save(); ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.beginPath(); ctx.roundRect(120, 80, W - 240, 170, 14); ctx.fill();
+      ctx.fillStyle = "#ffe9b8"; ctx.font = "italic 26px Georgia, serif"; ctx.textAlign = "center";
+      const words = B.text.split(" "), lines = []; let ln = "";
+      for (const w of words) { const tst = ln ? ln + " " + w : w; if (ctx.measureText(tst).width > W - 300) { lines.push(ln); ln = w; } else ln = tst; }
+      lines.push(ln);
+      lines.forEach((l, k) => ctx.fillText(l, W / 2, 80 + 85 - (lines.length - 1) * 17 + k * 34));
+      ctx.restore();
+    }
+    ctx.save(); ctx.font = "bold 16px sans-serif"; ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.textAlign = "right"; ctx.fillText(keyText("A: next"), W - 30, H - 24); ctx.restore();
+    if (this.t < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - this.t})`; ctx.fillRect(0, 0, W, H); }
+    if (this.out > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, this.out / 1.2)})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+
 function updateWorld7(dt) {
   if (WORLD !== 7) return;
-  updateArmor(dt); updateMemories(dt); updateStones73(dt);
+  updateArmor(dt); updateMemories(dt); updateStones73(dt); updateWorld74(dt);
 }
 function drawWorld7(camX) {
   if (WORLD !== 7) return;
@@ -709,4 +1033,5 @@ function drawWorld7(camX) {
   drawArmorPile(camX);
   drawMemSheep(camX);
   drawStones73(camX);
+  drawWorld74(camX);
 }

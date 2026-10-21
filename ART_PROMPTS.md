@@ -1122,3 +1122,15 @@ magenta (#FF00FF).`
 Israelite camp in the late afternoon, his open Journal in his hands (both pages blank), his shepherd's bag and
 staff beside him, and a few smooth stones on the rock. Below, the valley floor in long gold light and the dry
 streambed; on the far slope the Philistine line, tiny. Pixar-style 3D, warm.` Save as `world7\w7_reading.jpg`.
+
+## World 7 — 7-4 the Shield-Bearer (2026-10-21)
+Built with a stand-in: Glen's charging Philistine drawn twice as big, with a door-sized bronze shield drawn in code in
+front of him. What would make it right (Grok clips: start from a picture, side view facing LEFT, plain green screen,
+camera still, the same man in every clip):
+- **The man:** a huge Philistine soldier, broad and heavy, bronze scale shirt, feathered Philistine headdress, no
+  spear, carrying a tall rectangular bronze shield as big as a door (taller than his shoulders), held in front of him.
+- **Clips:** (1) walking forward slowly behind the shield, heavy steps; (2) lifting the shield high with both arms and
+  slamming its bottom edge down into the ground; (3) charging, shoulder to the shield; (4) peeking over the top edge,
+  the shield tipped back; (5) the shield knocked out of his hands, falling flat in the dust; he stares at it, looks back
+  over his shoulder, and backs away.
+- (Separately, if you want: the shield on its own, lying flat on the ground, transparent background.)

@@ -197,6 +197,18 @@ If a chat session closes, start here. Last updated 2026-10-11 (end of a long ses
   time he steps on Yod first: "Oh wait..." (progress.nameOhWait). The boulder before each crossing shows only the
   letters he's found; Select there opens the Journal's old letters. Crossing the Name opens a Journal note (the LORD in
   small capitals, Psalm 20:7). The One on a ledge over the pool, a double jump up from the Waw.
+- **7-4 The Giant's Shadow and the end of World 7 are built (2026-10-21):** STAGE_INFO.quiet (no day music): a slow
+  drum and the giant's footsteps made in code, louder as he comes; the screen darkens from the right. Tobi's warning at
+  the first fire (tier 1: the shield rim flashes on the tell). Dry cracks (setPiece "spikes"), loose rocks, vipers,
+  World 5's vultures; Eliab small on the far hillside, arms crossed (setPiece "eliab7"). The One behind the last boulder
+  (fake rock). **The Shield-Bearer** (world7.js, setPiece "shieldbearer", arena 35 cols, camera held by shieldCam):
+  phase 1 slam + shockwave, back hits while he heaves the shield up (3); phase 2 shield-first charges (roll under or
+  get high), stone to the top edge while he peeks (3); phase 3 one charged stone to the edge while it tips. Goliath
+  (goliath_yell, facing left) watches, says 17:43 and 17:44 in Glen's Hebrew, laughs. Tier 2 after a fall: Shammah's
+  counsel, longer tell and tilt, +1 heart. No sheepfold: clear74() saves the stage and starts w7ending (the shield in
+  the dust, the gifts screen "Everything you need, you already have.", 17:40, "To be continued in World 8"), then the
+  Journal. Stand-in art for the shield-bearer: ART_PROMPTS.md. Not built: the World 7 opening scene (Saul dresses
+  David), Gera's sling range.
 - **The End of World 6 is built** (2026-10-18; world6.js `w6ending`, after 6-4's finish; `?w6end=N` to test).
   Glen's art: `saul_tent.jpg` (backgrounds), `saul_armor` (6 poses: listening, "you are not able", leaning in,
   surprised, thinking, smiling/nodding; also for World 7's armor scene), `commander_tent` (old/young, arms folded,
