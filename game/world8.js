@@ -3,7 +3,7 @@
 // for its end: Glen's clips cut into one movie scene, like an old action film (tools/make_giant_fall.py ->
 // assets/video/giant_fall.mp4). The sling winds up, the stone flies in slow motion, the hit is shown three times
 // (two takes over David's shoulder, then the close-up of the face, the helmet cracking), then he falls. The clip is
-// muted; the sounds below are timed to it. Then its last frame stays, with the verses.
+// muted; the sounds and the music below are timed to it. Then its last frame stays, with the verses.
 // To watch it on its own: index.html#giantfall.
 // ---------------------------------------------------------------------------
 const W8 = {
@@ -20,6 +20,12 @@ const W8 = {
     [22.45, "thunder", 1, 0.4, 2.2], [22.45, "stone_hit", 1, 0.3],      // he hits the ground
   ],
   FALL_THUDS: [6.3, 10.05, 14.04, 22.45],   // the low thump of the impacts (thud)
+  // (Glen) the music: assets/sounds/giant_fall_music.mp3 when he adds it (until then the boss loop, slowed and deeper,
+  // FALL_MUSIC_RATE). Its loudness through the scene, [seconds into the clip, volume]: full through the wind-up and the
+  // stone's flight, silent on the hit, low under the replays, up again as he staggers, cut dead when he lands.
+  FALL_MUSIC_ENV: [[0, 0.9], [6.2, 0.9], [6.35, 0], [8.7, 0], [9.2, 0.4], [17.8, 0.4], [18.2, 1], [22.4, 1], [22.5, 0]],
+  FALL_MUSIC_VOL: 1.1,  // times the boss music volume (TUNE.BOSS_MUSIC_VOLUME)
+  FALL_MUSIC_RATE: 0.75,
   FALL_HORN: 1.5,       // after the clip ends: Israel's horn (17:52, "the men of Israel and of Judah arose, and shouted")
   FALL_VERSES: [
     "David put his hand in his bag, took a stone, and slung it, and struck the Philistine in his forehead. (1 Samuel 17:49)",
@@ -32,6 +38,17 @@ const FALL_CLIP = Object.assign(document.createElement("video"), { src: "../asse
 FALL_CLIP.onerror = () => { FALL_CLIP.missing = true; };
 const FALL_STILL = Object.assign(new Image(), { src: "../assets/video/giant_fall_last.jpg?v=" + (window.BUILD || 0) });
 
+const FALL_MUSIC = Object.assign(new Audio(`../assets/sounds/giant_fall_music.mp3?v=${window.BUILD || 0}`), { preload: "auto" });
+FALL_MUSIC.onerror = () => {   // (until Glen's own track: the boss loop, slowed and deeper)
+  if (FALL_MUSIC.fallback) return; FALL_MUSIC.fallback = true;
+  FALL_MUSIC.src = `../assets/sounds/boss_loop.mp3?v=${window.BUILD || 0}`; FALL_MUSIC.loop = true;
+};
+function fallMusicVol(vt) {
+  const E = W8.FALL_MUSIC_ENV; let v = E[E.length - 1][1];
+  for (let i = 1; i < E.length; i++) if (vt < E[i][0]) { const [t0, v0] = E[i - 1], [t1, v1] = E[i]; v = v0 + (v1 - v0) * (vt - t0) / (t1 - t0); break; }
+  return Math.max(0, Math.min(1, v * TUNE.BOSS_MUSIC_VOLUME * W8.FALL_MUSIC_VOL));
+}
+
 const giantFall = {
   active: false,
   start(then) {
@@ -43,19 +60,24 @@ const giantFall = {
     this.state = "clip"; this.t = 0; this.cue = 0;
     if (FALL_CLIP.missing) { this.state = "still"; return; }
     FALL_CLIP.currentTime = 0; FALL_CLIP.play().catch(() => { this.state = "still"; });
+    FALL_MUSIC.currentTime = 0; FALL_MUSIC.volume = fallMusicVol(0);
+    if (FALL_MUSIC.fallback) { FALL_MUSIC.playbackRate = W8.FALL_MUSIC_RATE; FALL_MUSIC.preservesPitch = false; }
+    FALL_MUSIC.play().catch(() => {});
   },
   update(dt) {
     this.t += dt; this.shake = Math.max(0, this.shake - dt * 2.5);
-    if (this.out > 0) { this.out += dt; if (this.out > 0.8) { this.active = false; FALL_CLIP.pause(); if (this.then) this.then(); } return; }
+    if (this.out > 0) { this.out += dt; if (this.out > 0.8) { this.active = false; FALL_CLIP.pause(); FALL_MUSIC.pause(); if (this.then) this.then(); } return; }
     if (this.state === "wait") { if (pressed("a") || pressed("start")) this.play(); return; }   // a tap first, so the sounds can play
     if (this.state === "clip") {
       const vt = FALL_CLIP.currentTime;
+      if (FALL_MUSIC.fallback) { FALL_MUSIC.playbackRate = W8.FALL_MUSIC_RATE; FALL_MUSIC.preservesPitch = false; }
+      FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > 22.5) FALL_MUSIC.pause();
       while (this.cue < W8.FALL_CUES.length && W8.FALL_CUES[this.cue][0] <= vt) {
         const [, name, vol, rate, shake] = W8.FALL_CUES[this.cue++];
         sfx(name, undefined, vol, rate); if (shake) this.shake = Math.max(this.shake, shake);
         if (W8.FALL_THUDS.includes(W8.FALL_CUES[this.cue - 1][0]) && typeof thud === "function") thud(1);
       }
-      if (FALL_CLIP.ended || this.t > 40 || (this.t > 1 && pressed("start"))) { this.state = "still"; this.t = 0; FALL_CLIP.pause(); }
+      if (FALL_CLIP.ended || this.t > 40 || (this.t > 1 && pressed("start"))) { this.state = "still"; this.t = 0; FALL_CLIP.pause(); FALL_MUSIC.pause(); }
       return;
     }
     if (!this.horn && this.t > W8.FALL_HORN) { this.horn = true; sfx("war_horn", undefined, 0.8); }

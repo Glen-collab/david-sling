@@ -50,7 +50,7 @@ const JOURNAL_PAGES = {
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         // The One: a line that changes once you've gone back for every lamb in this world
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [
         { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }] },
@@ -81,7 +81,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "A bear came for the flock tonight. The LORD who helped me with the lion helped me again.", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [   // the finished lines so far: World 1's, then World 2's under it
         { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
@@ -117,7 +117,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "The prophet Samuel came to Bethlehem. All my brothers stood before him, and the LORD said no to each one. Then they sent for me.", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [   // the finished lines so far: Worlds 1, 2 and 3
         { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
@@ -152,7 +152,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "The king was troubled tonight. I played for him, and the shadows left him for a while.", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [   // the song so far: verse 1 (Worlds 1-3), and the start of verse 2
         { at: 5, size: "psalm", segs: [{ text: "The Lord is my shepherd,", at: 5 }, { text: "\n" }, { text: "I have everything I need.", at: 5 }, { text: "\n" },
@@ -188,7 +188,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "Father sent me with bread and cheese for my brothers. At the camp I heard the giant for the first time, and everyone ran.", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [   // the song's second verse, as far as he's written it
         { at: 5, size: "psalm", segs: [{ text: "You lead me down the right road;", at: 5 }, { text: "\n" }, { text: "when the shadows gather, You remain the same.", at: 5 }, { text: "\n" },
@@ -223,7 +223,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "I told King Saul about the lion and the bear. He said, \"Go! The LORD will be with you.\"", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [   // the chorus, as far as he's written it
         { at: 5, size: "psalm", segs: [{ text: "Through the darkest valley,", at: 5 }, { text: "\n" }, { text: "You will lead me safely home.", at: 5 }, { text: "\n" },
@@ -255,7 +255,7 @@ const JOURNAL_PAGES = {
           segs: [{ text: "The king put his armor on me. I couldn't even walk in it. I took it off, and chose five smooth stones from the stream.", at: 5 }] },
         { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
         { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
-        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every one of them is home. Not one was left behind.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
       ],
       right: [
         { at: 5, size: "psalm", segs: [{ text: "You set a table before me,", at: 5 }, { text: "\n" }, { text: "even while my enemies stand near,", at: 5 }, { text: "\n" },

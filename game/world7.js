@@ -904,7 +904,7 @@ function stoneHitsShield(s) {
   const edge = peekHit;
   if (sb.state === "peek" && edge) {
     if (sb.phase === 2) {
-      sb.tips++; sbSetState("knock"); sfx("stone_hit", sb.x, 0.7, 0.8); stoneHit(s);
+      sb.tips++; sbSetState("knock"); sb.flash = 0.35; sbSparks(s.x, s.y, 16, true); sfx("stone_hit", sb.x, 1, 0.6); sfx("stone_hit", sb.x, 0.6, 1.7); stoneHit(s);   // (Glen) flash, sparks and a clang: he couldn't tell he'd hit it
       if (sb.tips === 1) toast("The edge! The shield swings and he staggers.");
       if (sb.tips >= W7.SB_HITS) {
         sb.phase = 3; sb.tips = 0;
@@ -915,12 +915,36 @@ function stoneHitsShield(s) {
     }
     if (sb.phase === 3) {
       if (s.charged || s.power) { stoneHit(s); shieldFalls(); return true; }
+      sb.flash = 0.15; sbSparks(s.x, s.y, 9, true); sfx("stone_hit", sb.x, 0.8, 0.8);   // it rocks: a hit, but not enough
       if (!W7.tapTold) { W7.tapTold = true; toast("It rocks, but he holds on. Hold B: a charged stone!"); }
+      return true;
     }
   }
-  stoneHit(s, 0.5); sfx("stone_hit", s.x, 0.35, 1.5);   // just bounces off the bronze
+  stoneHit(s, 0.5); sfx("stone_hit", s.x, 0.35, 1.5); sbSparks(s.x, s.y, 5, false);   // just bounces off the bronze (a few grey chips: it touched, but did nothing)
   if (!W7.bounceTold && sb.phase === 1) { W7.bounceTold = true; toast("It just bounces off the shield. Get round behind him!"); }
   return true;
+}
+const sbSparkList = [];   // sparks off the shield where a stone strikes it (born, x, y, vx, vy, gold)
+function sbSparks(x, y, n, gold) {
+  const t0 = performance.now() / 1000;
+  if (gold) sbSparkList.push([t0, x, y, 0, 0, 2]);   // the burst of light where it struck
+  for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.6, v = 180 + Math.random() * 320; sbSparkList.push([t0, x, y, Math.cos(a) * v, Math.sin(a) * v, gold]); }
+}
+function drawSbSparks(camX) {
+  const now = performance.now() / 1000;
+  for (let i = sbSparkList.length - 1; i >= 0; i--) {
+    const [t0, x, y, vx, vy, gold] = sbSparkList[i], t = now - t0, life = gold ? 0.5 : 0.3;
+    if (t > life) { sbSparkList.splice(i, 1); continue; }
+    if (gold === 2) {   // the burst: a hot white-gold star, gone in a quarter second
+      const a = Math.max(0, 1 - t / 0.25), r = 26 + 60 * t / 0.25; if (a <= 0) continue;
+      const g = ctx.createRadialGradient(x - camX, y, 0, x - camX, y, r);
+      g.addColorStop(0, `rgba(255,255,240,${a})`); g.addColorStop(0.3, `rgba(255,220,120,${0.8 * a})`); g.addColorStop(1, "rgba(255,160,40,0)");
+      ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = g; ctx.fillRect(x - camX - r, y - r, 2 * r, 2 * r); ctx.restore(); continue;
+    }
+    const px = x + vx * t - camX, py = y + vy * t + 900 * t * t, a = 1 - t / life;
+    ctx.save(); ctx.globalCompositeOperation = gold ? "lighter" : "source-over"; ctx.strokeStyle = gold ? `rgba(255,${200 + 40 * a | 0},110,${a})` : `rgba(200,195,185,${a})`;
+    ctx.lineWidth = gold ? 4 : 3; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - vx * 0.03, py - (vy + 1800 * t) * 0.03); ctx.stroke(); ctx.restore();
+  }
 }
 function shieldFalls() {
   sb.beaten = true; sbSetState("fall"); sb.tilt = 0; sb.waves = []; sb.shieldX = sb.x + sb.dir * 5; sb.dropX = sb.x; sb.dropY = sb.y;   // (where it lies in the last frame of sb_drop)
@@ -1074,7 +1098,7 @@ function drawShadow74() {   // after the world, before the HUD: his shadow grows
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 function updateWorld74(dt) { if (sb || STAGE_INFO.quiet) { updateShieldBearer(dt); updateQuiet74(dt); if (typeof updateVultures === "function") updateVultures(dt); } }
-function drawWorld74(camX) { if (sb || STAGE_INFO.quiet) { if (typeof drawVultures === "function") drawVultures(camX); drawEliab7(camX); drawShieldBearer(camX); } }
+function drawWorld74(camX) { if (sb || STAGE_INFO.quiet) { if (typeof drawVultures === "function") drawVultures(camX); drawEliab7(camX); drawShieldBearer(camX); drawSbSparks(camX); } }
 function stoneHitsWorld7(s) { return WORLD === 7 && stoneHitsShield(s); }
 
 // ---------------------------------------------------------------------------
