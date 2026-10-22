@@ -408,6 +408,30 @@ window.SPRITE_DATA = {
   "ay": 291,
   "align": "feet"
  },
+ "captain_idle": {
+  "src": "../assets/sprites/captain_idle.png",
+  "frames": 12,
+  "w": 128,
+  "h": 277,
+  "ms": 111,
+  "loop": true,
+  "pingpong": false,
+  "ax": 70,
+  "ay": 275,
+  "align": "feet"
+ },
+ "captain_talk": {
+  "src": "../assets/sprites/captain_talk.png",
+  "frames": 12,
+  "w": 179,
+  "h": 276,
+  "ms": 300,
+  "loop": true,
+  "pingpong": false,
+  "ax": 69,
+  "ay": 273,
+  "align": "feet"
+ },
  "carrier_duck": {
   "src": "../assets/sprites/carrier_duck.png",
   "frames": 8,

@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 179,
+  "frame_h": 276,
+  "ms_per_frame": 300,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 69,
+  "anchor_y": 273,
+  "source": "captain_clip.mp4",
+  "video_frames": [
+    56,
+    63,
+    71,
+    78,
+    85,
+    92,
+    100,
+    107,
+    114,
+    121,
+    129,
+    136
+  ]
+}

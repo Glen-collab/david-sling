@@ -1450,9 +1450,11 @@ if (LEVEL_NAME === "test") {
   ground(0, 213);
   rock(9, 14, 6, 3); lostSheep("lamb", 11, 13, "one");            // the first hill, and the last lamb in the game
   talk(22, "The shepherd girl", "You came back! My goat missed you. ...So did I.");
+  if (SPR.gleaner_idle) talk(32, "The old gleaner", "I always leave a little at the edge of the field for whoever needs it. Tonight it's for you. Eat something.");   // (once Glen's sheet is in)
   talk(42, "The boy from Tekoa", "My father says you're the bravest shepherd in all Judah!");
   talk(44, "His father", "He's right, you know. Go on home. They're waiting for you.");
   talk(64, "The Steward", "The king will send for you soon. But tonight, go home.");
+  if (SPR.captain_idle) talk(74, "The water captain", "My men drank clean water today because a shepherd boy went first. They won't forget it. Neither will I.");   // (once Glen's sheet is in)
   talk(84, "Gera", "One stone! I told them all you'd only need one.");
   talk(104, "Tobi", "I ran ahead to tell your father. He already knew. He said, \"He's coming home.\"");
   talk(124, "Abinadab", "Little brother. ... It was never about the armor, was it?");

@@ -499,8 +499,8 @@ function drawGoliath8Over() {   // the meter (17:48), the five stones, the callo
 }
 
 // ---- hooks (main.js calls these) ----
-function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGoliath8(dt); updateRout8(dt); updateEliab8(dt); if (typeof updateVultures === "function") updateVultures(dt); }
-function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawRout8Back(camX); drawWords8(camX); drawGoliath8(camX); drawEliab8(camX); }
+function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGoliath8(dt); updateCrowd8(dt); updateRout8(dt); updateEliab8(dt); if (typeof updateVultures === "function") updateVultures(dt); }
+function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawCrowd8(camX); drawRout8Back(camX); drawWords8(camX); drawGoliath8(camX); drawEliab8(camX); }
 function drawWorld8Over() { if (WORLD !== 8) return; drawWords8Over(); drawGoliath8Over(); }
 function stoneHitsWorld8(s) { return WORLD === 8 && stoneHitsGoliath8(s); }
 
@@ -806,3 +806,83 @@ const credits8 = {
   },
 };
 if (location.hash === "#credits") addEventListener("load", () => credits8.start(() => backToMap()));   // (testing: the credits by themselves; after the map script, for the score)
+
+// ---------------------------------------------------------------------------
+// The crowd on the Israelite slope (DESIGN 3c, 5h): everyone you met stands behind David in 8-1 and 8-2, a little
+// further back (smaller, higher up the ground), facing the giant. Met = the stage where you met them is cleared; the
+// soldiers you lifted in World 6 (courage6) stand in the back row; Eliab is always there, at the edge. At "The battle
+// is the LORD's." they cheer; in the fight, whoever calls out a warning (g8Call) steps up and talks.
+// W8.CROWD lists them: [name, stage you met them in (null = always), idle sprites (first one that exists), talk sprite].
+// The old gleaner and the water captain join by themselves once their sheets are in (gleaner_idle, captain_idle).
+// ---------------------------------------------------------------------------
+Object.assign(W8, {
+  CROWD: [
+    ["Eliab", null, ["eliab_war_idle", "eliab_arms_crossed"], "eliab_war_idle"],
+    ["Shammah", "7-3", ["shammah_idle"], "shammah_talk"],
+    ["Abinadab", "6-1", ["abinadab_war_idle", "abinadab_idle"], "abinadab_war_talk"],
+    ["The water captain", "6-3", ["captain_idle"], "captain_talk"],
+    ["Tobi", "5-1", ["tobi_talk"], "tobi_talk"],
+    ["The Steward", "4-3", ["steward"], "steward"],
+    ["Gera", "4-2", ["gera"], "gera"],
+    ["The old gleaner", "3-1", ["gleaner_idle"], "gleaner_talk"],
+    ["His father", "2-2", ["father_idle"], "father_talk"],
+    ["The boy from Tekoa", "2-2", ["boy_idle"], "boy_talk"],
+    ["The shepherd girl", "1-3", ["girl_talk"], "girl_talk"],
+    ["Hanan", "1-1", ["hanan_idle"], "hanan_talk"],
+  ],
+  CROWD_SIZE: 0.78,      // the front row, next to David (they're a few steps up the slope)
+  CROWD_LIFT: 34,        // px above the ground line (further back)
+  CROWD_BACK_SIZE: 0.64, // the back row: the soldiers you lifted
+  CROWD_BACK_LIFT: 64,
+  CROWD_SOLDIERS: 10,    // at most this many lifted soldiers drawn
+  CROWD_GAP: 1.05,       // tiles between people in the front row
+});
+function crowd8List() {   // who's on the slope today
+  const p = loadProgress(), pick = names => names.find(n => SPR[n]);
+  const front = W8.CROWD.filter(([, st, idle]) => (!st || (p[st] && p[st].cleared)) && pick(idle)).map(([who, , idle, talkNm]) => ({ who, idle: pick(idle), talk: SPR[talkNm] ? talkNm : pick(idle) }));
+  const n = Math.min(W8.CROWD_SOLDIERS, typeof courage6 === "function" ? courage6() : 0);
+  return { front, soldiers: n, lifted: typeof courage6 === "function" ? courage6() : 0 };
+}
+let crowd8 = null;   // made on the first frame (loadProgress is in map.js, which loads after this file)
+function crowd8Spot() {   // the right-hand end of the front row (x, world px): just behind where David stands
+  if (words8) return words8.x - 1.6 * T;
+  if (g8) return g8.a0 + (1.2 + Math.max(0, crowd8.front.length - 1) * W8.CROWD_GAP) * T;   // the left end of the arena
+  return 0;
+}
+function updateCrowd8(dt) {
+  if (!crowd8 && (LEVEL_STAGE === "8-1" || LEVEL_STAGE === "8-2")) crowd8 = Object.assign(crowd8List(), { cheer: 0, told: false });
+  if (!crowd8) return;
+  if (crowd8.cheer > 0) crowd8.cheer = Math.max(0, crowd8.cheer - dt);
+  if (words8 && words8.state === "roar" && words8.t < 0.7 && words8.t + dt >= 0.6) crowd8.cheer = 5;   // with the roar from the slope
+  if (g8 && g8.won && !crowd8.wonCheer) { crowd8.wonCheer = true; crowd8.cheer = 6; }
+  if (!crowd8.told && words8 && crowd8.front.length > 1 && david.x > crowd8Spot() - (crowd8.front.length * W8.CROWD_GAP + 2) * T) {
+    crowd8.told = true;
+    const named = crowd8.front.filter(c => c.who !== "Eliab").length;
+    if (named) toast(`Up on the slope: everyone you met${crowd8.lifted ? `, and ${crowd8.lifted} soldiers you lifted` : ""}. They'll call out to you in the fight.`);
+  }
+}
+function drawCrowd8(camX) {
+  if (!crowd8 || (g8 && g8.won)) return;
+  const now = performance.now() / 1000, x1 = crowd8Spot(), gap = W8.CROWD_GAP * T, n = crowd8.front.length;
+  const x0 = x1 - (n - 1) * gap, cheer = crowd8.cheer > 0;
+  const hop = (i, k) => cheer ? Math.max(0, Math.sin(now * 9 + i * 1.7)) * 16 * k * Math.min(1, crowd8.cheer) : 0;
+  // the back row: the soldiers you lifted, spread across behind the people
+  for (let i = 0; i < crowd8.soldiers; i++) {
+    const x = x0 - gap * 0.5 + (i + 0.5) * ((x1 - x0 + gap) / crowd8.soldiers) - camX; if (x < -120 || x > W + 120) continue;
+    const nm = SPR.soldier_talk ? "soldier_talk" : null; if (!nm) break;
+    drawSprite(nm, cheer ? frameOf(nm, now + i) : 0, x, GR * T - W8.CROWD_BACK_LIFT - hop(i, 0.7), 1, W8.CROWD_BACK_SIZE * (0.94 + (i % 3) * 0.04), 1, "brightness(0.8) saturate(0.85)");
+  }
+  // the front row: the people you met, Eliab at the far end on his own
+  crowd8.front.forEach((c, i) => {
+    let x = x0 + i * gap - camX; if (c.who === "Eliab") x -= gap * 0.8;
+    if (x < -150 || x > W + 150) return;
+    const calling = g8 && g8.callout && g8.callout.who === c.who, talking = calling || (cheer && c.who !== "Eliab");
+    const nm = talking ? c.talk : c.idle, lift = W8.CROWD_LIFT + (calling ? 10 : 0) + (c.who === "Eliab" ? 0 : hop(i, 1));
+    drawSprite(nm, talking ? frameOf(nm, now + i * 0.3) : 0, x, GR * T - lift, 1, W8.CROWD_SIZE, 1, calling ? "" : "brightness(0.9)");
+    if (calling) {   // a small name over the one calling, so you can see who it was
+      ctx.save(); ctx.textAlign = "center"; ctx.font = "bold 14px sans-serif"; ctx.fillStyle = "rgba(28,18,8,0.7)";
+      const tw = ctx.measureText(c.who).width + 14; ctx.beginPath(); ctx.roundRect(x - tw / 2, GR * T - lift - 168, tw, 22, 8); ctx.fill();
+      ctx.fillStyle = "#ffd98a"; ctx.fillText(c.who, x, GR * T - lift - 152); ctx.restore(); ctx.textAlign = "left";
+    }
+  });
+}
