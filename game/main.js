@@ -4071,13 +4071,13 @@ const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoin
   "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene", "w8ending", "credits8"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 // (Glen) a film before a world's opening scene, like the start of a movie: preFilm.start(opts, then) plays it full screen
-// with place words over it (opts.words: [from s, to s, big, small]) and a sound under it (opts.loop: [sound, volume at
-// the start, at the end]); A skips; then() starts the scene the game plays (w4intro...). Worlds 4-7 (world4.js...).
+// with place words over it (opts.words: [from s, to s, big, small]), a sound under it (opts.loop: [sound, volume at
+// the start, at the end]) and sounds on it (opts.cues: [s, sound, volume]); A skips; then() starts the scene the game plays (w4intro...). Worlds 4-7 (world4.js...).
 const preFilm = {
   active: false,
   start(opts, then) {
     const clip = Object.assign(document.createElement("video"), { src: opts.src + "?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
-    Object.assign(this, { active: true, opts, then, clip, t: 0, out: 0, playing: false, snd: opts.loop ? loopAudio(opts.loop[0], false) : null });
+    Object.assign(this, { active: true, opts, then, clip, t: 0, out: 0, playing: false, cue: 0, snd: opts.loop ? loopAudio(opts.loop[0], false) : null });
     clip.onerror = () => this.end();
     hushLoops(); dialog.t = 0;   // (it starts playing on the first frame drawn: the sprites may still be loading)
   },
@@ -4089,6 +4089,8 @@ const preFilm = {
       if (this.snd.paused) this.snd.play().catch(() => {});
       const [, v0, v1] = this.opts.loop; this.snd.volume = Math.max(0, (v0 + (v1 - v0) * k) * Math.min(1, this.t / 0.6) * (1 - Math.min(1, this.out / 0.5)));
     }
+    const cues = this.opts.cues || [];
+    while (this.cue < cues.length && cues[this.cue][0] <= c.currentTime) { const [, nm, v] = cues[this.cue++]; if (!this.out) sfx(nm, undefined, v); }
     if (this.out > 0) { this.out += dt; if (this.out > 0.5) this.end(); return; }
     if (c.ended || this.t > 30 || (this.t > 1 && (pressed("a") || pressed("b") || pressed("start")))) this.out = 0.001;
   },
@@ -4103,9 +4105,12 @@ const preFilm = {
     if (c.videoWidth && c.readyState >= 2) { const k = Math.max(W / c.videoWidth, H / c.videoHeight); ctx.drawImage(c, (W - c.videoWidth * k) / 2, (H - c.videoHeight * k) / 2, c.videoWidth * k, c.videoHeight * k); }
     for (const [a0, a1, big, small] of this.opts.words || []) {   // the place, low on the screen, like a film
       const ct = c.currentTime, a = Math.max(0, Math.min(1, (ct - a0) / 0.8, (a1 - ct) / 0.8)); if (a <= 0) continue;
-      ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12; ctx.fillStyle = "#fff3d6";
+      ctx.save(); ctx.globalAlpha = a;
+      const band = ctx.createLinearGradient(0, H - 190, 0, H); band.addColorStop(0, "rgba(0,0,0,0)"); band.addColorStop(1, "rgba(0,0,0,0.55)");   // a soft dark band, so the words read over anything
+      ctx.fillStyle = band; ctx.fillRect(0, H - 190, W, 190);
+      ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12; ctx.fillStyle = "#fff3d6";
       ctx.font = "italic 40px Georgia, serif"; ctx.fillText(big, W / 2, H - (small ? 120 : 96));
-      if (small) { ctx.font = "italic 24px Georgia, serif"; ctx.fillText(small, W / 2, H - 82); }
+      if (small) { let fs = 24; do ctx.font = `italic ${fs--}px Georgia, serif`; while (ctx.measureText(small).width > W - 80 && fs > 14); ctx.fillText(small, W / 2, H - 82); }   // (a verse: made to fit)
       ctx.restore();
     }
     if (this.t > 1.5) caption("A: skip", 0.6, true);

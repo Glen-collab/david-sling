@@ -1144,7 +1144,9 @@ const w5intro = {
 };
 if (LEVEL_STAGE === "5-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w5intro; } catch (e) {}
-  if (!seen || new URLSearchParams(location.search).has("w5intro")) w5intro.start();
+  if (!seen || new URLSearchParams(location.search).has("w5intro"))   // (Glen) his film first: the giant at dawn over the Valley of Elah, 17:16
+    preFilm.start({ src: "../assets/video/w5_film.mp4", words: [[0.8, 4.2, "The Valley of Elah"], [5.2, 9.9, "Forty days", "“The Philistine came near morning and evening, and presented himself forty days.” (1 Samuel 17:16)"]],
+      loop: ["ambience_hills", 0.35, 0.35], cues: [[3.2, "goliath_tenu_li_ish", 0.8], [3.9, "phil_roar", 0.25], [7.4, "goliath_tenu_li_ish_2", 0.45]] }, () => w5intro.start());
 }
 
 // ---------------------------------------------------------------------------
