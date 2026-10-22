@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 122,
+  "frame_h": 252,
+  "ms_per_frame": 153,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 79,
+  "anchor_y": 251,
+  "source": "gleaner_idle_clip.mp4",
+  "video_frames": [
+    24,
+    28,
+    31,
+    35,
+    39,
+    42,
+    46,
+    50,
+    53,
+    57,
+    61,
+    64
+  ]
+}

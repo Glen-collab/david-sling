@@ -1800,6 +1800,30 @@ window.SPRITE_DATA = {
   "ay": 167,
   "align": "feet"
  },
+ "gleaner_idle": {
+  "src": "../assets/sprites/gleaner_idle.png",
+  "frames": 12,
+  "w": 122,
+  "h": 252,
+  "ms": 153,
+  "loop": true,
+  "pingpong": false,
+  "ax": 79,
+  "ay": 251,
+  "align": "feet"
+ },
+ "gleaner_talk": {
+  "src": "../assets/sprites/gleaner_talk.png",
+  "frames": 12,
+  "w": 159,
+  "h": 257,
+  "ms": 300,
+  "loop": true,
+  "pingpong": false,
+  "ax": 83,
+  "ay": 254,
+  "align": "feet"
+ },
  "goat_run": {
   "src": "../assets/sprites/goat_run.png",
   "frames": 6,
