@@ -1416,3 +1416,76 @@ if (new URLSearchParams(location.search).has("w2end")) setTimeout(() => {
   ending.start(() => location.reload());
   if (at) Object.assign(ending, { step: at, boyX: 680, pouch: at > 4 ? { t: 9 } : null, gave: at > 4, fade: 1, t: 2 });
 }, 300);
+
+// ---------------------------------------------------------------------------
+// The opening of World 2 (DESIGN "World 2 — Opening scene"), the first time 2-1 is played (or ?w2intro): Glen's clip
+// (assets/video/w2_opening.mp4, from david-sling-art/world2/opening/wilderness_walk.mp4): Hanan, David and the flock
+// walking east into the wilderness at dawn, the camera rising over it. Summer's words over it, Hanan's line over its
+// last frame, the title card, then 2-1.
+// ---------------------------------------------------------------------------
+const W2_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w2_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+W2_CLIP.onerror = () => { W2_CLIP.missing = true; };
+const W2_STILL = Object.assign(new Image(), { src: "../assets/video/w2_opening_last.jpg?v=" + (window.BUILD || 0) });
+const W2_OPEN = {
+  WORDS: [1.2, 6.0],     // seconds of the video "Summer..." is up (while they walk past, before the camera rises)
+  BAAS: [2.2, 5.1, 8.3], // seconds a sheep calls
+  AMBIENCE: 0.45,        // the hills under it
+};
+const w2intro = {
+  active: false,
+  // steps: 0 the video, 1 Hanan over its last frame, 2 the title card
+  start() {
+    Object.assign(this, { active: true, t: 0, step: W2_CLIP.missing ? 1 : 0, stepT: 0, out: 0, baa: 0 });
+    hushLoops(); dialog.t = 0;
+    this.amb = loopAudio("ambience_hills");
+    if (!W2_CLIP.missing) { W2_CLIP.currentTime = 0; W2_CLIP.play().catch(() => { this.step = 1; }); }
+  },
+  update(dt) {
+    this.t += dt; this.stepT += dt;
+    if (audioUnlocked) {   // (sound comes on with the first click)
+      const amb = this.step < 2 ? W2_OPEN.AMBIENCE : 0;
+      if (this.amb.paused && amb > 0) this.amb.play().catch(() => {});
+      const av = this.amb.volume; this.amb.volume = av + Math.sign(amb - av) * Math.min(Math.abs(amb - av), dt * 0.5);
+      if (this.step === 0) while (this.baa < W2_OPEN.BAAS.length && W2_CLIP.currentTime >= W2_OPEN.BAAS[this.baa]) { this.baa++; sfx(this.baa === 2 ? "flock_baa" : "sheep_baa_" + (1 + this.baa), undefined, 0.45); }
+    }
+    if (this.out > 0) { this.out += dt; if (this.out > 0.8) this.finish(); return; }
+    const A = this.stepT > 0.6 && (pressed("a") || pressed("b") || pressed("start"));
+    if (this.step === 0) {   // the video: A skips to its end
+      if (W2_CLIP.ended || this.stepT > 16 || (A && this.stepT > 1)) { W2_CLIP.pause(); this.next(); }
+      return;
+    }
+    if (this.step === 2) { if (this.stepT > 3.6 || A) this.out = 0.001; return; }
+    if (A) this.next();
+  },
+  next() { this.step++; this.stepT = 0; },
+  finish() {
+    this.active = false; W2_CLIP.pause(); this.amb.pause();
+    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w2intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  },
+  draw() {
+    const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+    if (this.step === 0) {
+      if (W2_CLIP.videoWidth && W2_CLIP.readyState >= 2) cover(W2_CLIP, W2_CLIP.videoWidth, W2_CLIP.videoHeight);
+      const ct = W2_CLIP.currentTime, [a0, a1] = W2_OPEN.WORDS, a = Math.max(0, Math.min(1, (ct - a0) / 0.8, (a1 - ct) / 0.8));
+      if (a > 0) {   // the season, low over the walk
+        ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
+        ctx.fillStyle = "#fff3d6"; ctx.font = "italic 40px Georgia, serif"; ctx.fillText("Summer", W / 2, H - 120);
+        ctx.font = "italic 24px Georgia, serif"; ctx.fillText("The grass around Bethlehem has dried up", W / 2, H - 82); ctx.restore();
+      }
+      if (this.stepT > 1.5) caption("A: skip", 0.6, true);
+    } else if (W2_STILL.naturalWidth) cover(W2_STILL, W2_STILL.naturalWidth, W2_STILL.naturalHeight);
+    if (this.step === 1) { ctx.textAlign = "center"; drawStoryBox("Hanan", "The flock goes where the grass is. So do we.", "A: next"); ctx.textAlign = "left"; }
+    if (this.step === 2) {   // the title card, over the wilderness
+      const f = Math.min(1, this.stepT / 0.8); ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.globalAlpha = f; ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 2", W / 2, H / 2 - 20);
+      ctx.fillStyle = "#fff6e2"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("The Wilderness", W / 2, H / 2 + 30); ctx.restore();
+    }
+    const f = Math.min(1, this.step === 0 ? this.t / 0.6 : 1, 1 - this.out / 0.8);
+    if (f < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - f})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+if (LEVEL_STAGE === "2-1" && location.hash === "#2-1") {
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w2intro; } catch (e) {}
+  if (!seen || new URLSearchParams(location.search).has("w2intro")) w2intro.start();
+}
