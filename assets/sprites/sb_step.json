@@ -1,12 +1,12 @@
 {
   "frames": 6,
   "frame_w": 198,
-  "frame_h": 247,
+  "frame_h": 300,
   "ms_per_frame": 229,
   "loop": false,
   "align": "feet",
   "anchor_x": 114,
-  "anchor_y": 245,
+  "anchor_y": 273,
   "source": "clip_jump_step.mp4",
   "video_frames": [
     65,

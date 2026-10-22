@@ -3364,12 +3364,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/sb_step.png",
   "frames": 6,
   "w": 198,
-  "h": 247,
+  "h": 300,
   "ms": 229,
   "loop": false,
   "pingpong": false,
   "ax": 114,
-  "ay": 245,
+  "ay": 273,
   "align": "feet"
  },
  "scorpion_walk": {
