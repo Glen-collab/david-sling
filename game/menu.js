@@ -13,6 +13,7 @@ const CONTROLLER_NAMES = { keyboard: "Keyboard", nes: "NES controller", snes: "S
 const FILM_CLIPS = [
   { label: "Bethlehem at Dawn", world: "World 1", src: "../assets/video/w1_opening.mp4", seen: p => !!p.w1intro },   // the World 1 opening (world1.js w1intro)
   { label: "Into the Wilderness", world: "World 2", src: "../assets/video/w2_opening.mp4", seen: p => !!p.w2intro },   // the World 2 opening (world2.js w2intro)
+  { label: "The Prophet Comes", world: "World 3", src: "../assets/video/w3_opening.mp4", seen: p => !!p.w3intro },   // the World 3 opening (world3.js w3intro)
   { label: "The Anointing", world: "World 3", src: "../assets/video/anointing_closeup.mp4", seen: p => !!(p["3-A"] || {}).cleared },
   { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
   { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
