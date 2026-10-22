@@ -784,7 +784,8 @@ Object.assign(W7, {
   GIANT_STEP: 0.65,      // seconds between his footfalls (a thud and a shake each)
   GIANT_STOP: 8,         // tiles from David where he stops and yells
   GIANT_MUSIC_VOL: 1.1,  // his music (Glen's horns, assets/sounds/goliath_theme.mp3), x the boss music volume
-  GIANT_MUSIC_AT: 0.2,   // seconds after the bearer turns away that Goliath's horns come in
+  GIANT_MUSIC_AT: 0,     // seconds after the bearer turns away that Goliath's war horns come in
+  GIANT_STEP_VOL: 0.7,   // his footfalls (stone_hit slowed way down: deep and crunchy)
   GIANT_MUSIC_END: 0.5,  // his music under the end of World 7 (a share of GIANT_MUSIC_VOL)
   DRONE_NOTES: [[55, "sawtooth", 0.5], [58.27, "sawtooth", 0.4], [27.5, "sine", 0.9], [110, "triangle", 0.12]],   // Hz, wave, loudness: A, B-flat (the half step that grinds), the A below, a faint A above
   DRONE_CUTOFF: 260,     // the low-pass over the drone (Hz): lower is darker and more muffled; it breathes slowly around this
@@ -964,8 +965,8 @@ function updateShieldFall(dt) {
 }
 // (Glen) the bearer gone, Goliath himself walks in: the music turns ("oh crap"), the ground shakes with every step,
 // and he yells as he comes (his lips move in Glen's walk clip). The fight is World 8; this is the cliffhanger.
-const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { preload: "auto" });   // (Glen's horns, 2026-10-22: once, not looped)
-giantMusic.onended = () => { if (giantMusic.want) giantDrone.start(); };   // when his horns die away, the drone holds the dread under the rest
+const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // (Glen's war horns, 2026-10-22: 3 minutes, looped; the "uh oh")
+giantMusic.onended = () => { if (giantMusic.want) giantDrone.start(); };   // (if it ever stops, the drone holds the dread)
 giantMusic.onerror = () => { giantMusic.fallback = true; if (giantMusic.want) giantDrone.start(); };   // no track of Glen's yet: the drone
 // (Glen: the slowed boss music was too uplifting under his words; he wants the gravity of it.) Until Glen's own track:
 // a low dark drone made here, two deep notes a half step apart rubbing against each other, a sub-bass under them,
@@ -1013,7 +1014,9 @@ function updateGiantIn(dt) {
   const stopAt = d.x + W7.GIANT_STOP * T;
   if (sb.giantX > stopAt) {
     sb.giantX = Math.max(stopAt, sb.giantX - W7.GIANT_WALK * dt);
-    sb.stepT -= dt; if (sb.stepT <= 0) { sb.stepT = W7.GIANT_STEP; thud(0.8); if (typeof w2Shake !== "undefined") w2Shake.v = 0.7; }
+    sb.stepT -= dt; if (sb.stepT <= 0) {   // each step: the low thump (code), and a real heavy footfall for speakers with no bass (Glen heard only a "tink")
+      sb.stepT = W7.GIANT_STEP; thud(0.8); sfx("stone_hit", sb.giantX, W7.GIANT_STEP_VOL, 0.32 + Math.random() * 0.04); if (typeof w2Shake !== "undefined") w2Shake.v = 0.7;
+    }
   } else sb.yellT += dt;
   if ((sb.yellT > 2.5 || sb.t > 14) && !sb.cleared) { sb.cleared = true; clear74(); }
 }

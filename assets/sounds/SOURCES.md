@@ -63,7 +63,8 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | Game file | Original download | Used for | Source / licence |
 |---|---|---|---|
 | vulture | vulture.mp3 | the vultures: as they flap up, and now and then while they circle | ? |
-| goliath_theme | dramatic-evil-theme-orchestra-suspense-horns-fear-film-phantom-humanoide9000.mp3 | 7-4, Goliath walks in after the shield-bearer | Pixabay? (humanoide9000) |
+| goliath_theme | 3-war-horns.mp3 (leveled to -16 LUFS) | 7-4, Goliath walks in after the shield-bearer (looped) | ? |
+| (not used now) | dramatic-evil-theme-orchestra-suspense-horns-fear-film-phantom-humanoide9000.mp3 | was goliath_theme for a day; kept in originals | Pixabay? (humanoide9000) |
 | giant_fall_music | evil-theme.mp3 | World 8, Goliath's fall (the slow-motion scene) | ? |
 
 ## Glen's stage themes (Oct 22; originals in Desktop\david-sling-art\sounds\originals)
