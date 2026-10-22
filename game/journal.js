@@ -16,6 +16,7 @@ const JTUNE = {
   INK: "rgba(40,24,12,0.92)", INK_REF: "rgba(92,62,36,0.85)",
   SIZE_ENTRY: 46, SIZE_REF: 32, SIZE_PSALM: 42, SIZE_SMALL: 36,
   MUSIC_VOLUME: 0.55,
+  SONG_VOLUME: 0.9,      // the end of the game: Glen's whole song over the last page, and the credits
   PEN_VOLUME: 0.5,
 };
 
@@ -485,6 +486,9 @@ function penScratch(dur, loud = 1) {
   } catch (e) {}
 }
 const journalMusic = new Audio(`../assets/audio/harp_loop.mp3?v=${window.BUILD || 0}`); journalMusic.loop = true; journalMusic._music = true; journalMusic.volume = 0;
+// (Glen, 2026-10-22) the end of the game: the Journal open at the last page, and his whole song plays, words and all; it
+// carries on into the credits (credits8, world8.js)
+const journalSong = new Audio(`../assets/audio/the_shepherd_leads_me_full.mp3?v=${window.BUILD || 0}`); journalSong._music = true; journalSong.volume = 0;
 
 // ----------------------------------------------------------------------------
 // The Journal screen
@@ -598,12 +602,13 @@ const Journal = {
     this.view = 0; this.viewWant = 0; this.turn = null;
     if (this.rip) this.view = this.viewWant = 1;   // leaned in close, to see it
     this.active = true;
-    if (typeof audioUnlocked !== "undefined" && audioUnlocked) { journalMusic.currentTime = 0; journalMusic.play().catch(() => {}); }
+    this.song = !!opts.song; this.music = this.song ? journalSong : journalMusic;   // opts.song: the end of the game
+    if (typeof audioUnlocked !== "undefined" && audioUnlocked) { this.music.currentTime = 0; this.music.play().catch(() => {}); }
   },
   // a quick note in the middle of a stage (Glen, 2026-10-18): David copies an old letter he's just found, with what it
   // pictured. Leaned in on the book (Glen's own looking-down-at-the-book scene, SCENES.note, when it comes); A closes it
   openNote(spread, onClose) {
-    Object.assign(this, { P: { note: spread }, world: WORLD, onClose: onClose || null, preview: false, stones: 0, rip: null, read: false, note: true,
+    Object.assign(this, { P: { note: spread }, world: WORLD, onClose: onClose || null, preview: false, stones: 0, rip: null, read: false, note: true, song: false, music: journalMusic,
       pages: [{ spread: "note", step: 5 }] });
     journalFlags = {};
     this.layoutAll();
@@ -655,10 +660,11 @@ const Journal = {
   update(dt) {
     if (JOURNAL_SIM && caveatReady && !this.simDone) { this.simDone = true; for (let i = 0; i < JOURNAL_SIM * 30; i++) this.update(1 / 30); this.frozen = JOURNAL_FREEZE; }
     if (this.frozen) return;   // &jfreeze: stop there (testing)   // ?jt=8: jump 8 seconds ahead (testing)
-    journalMusic.volume = Math.max(0, Math.min(JTUNE.MUSIC_VOLUME, journalMusic.volume + (this.closing ? -dt * 0.8 : dt * 0.6)));
+    const M = this.music || journalMusic, top = this.song ? JTUNE.SONG_VOLUME : JTUNE.MUSIC_VOLUME;
+    M.volume = Math.max(0, Math.min(top, M.volume + (this.closing && !this.song ? -dt * 0.8 : dt * 0.6)));   // (the song doesn't fade when he closes the book: it plays on into the credits)
     if (this.closing) {
       this.fade -= dt * 1.5;
-      if (this.fade <= 0) { this.active = false; journalMusic.pause(); const cb = this.onClose; this.onClose = null; cb && cb(); }
+      if (this.fade <= 0) { this.active = false; if (!this.song) M.pause(); const cb = this.onClose; this.onClose = null; cb && cb(); }
       return;
     }
     this.fade = Math.min(1, this.fade + dt * 1.5); this.time += dt;

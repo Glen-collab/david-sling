@@ -499,8 +499,8 @@ function drawGoliath8Over() {   // the meter (17:48), the five stones, the callo
 }
 
 // ---- hooks (main.js calls these) ----
-function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGoliath8(dt); if (typeof updateVultures === "function") updateVultures(dt); }
-function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawWords8(camX); drawGoliath8(camX); }
+function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGoliath8(dt); updateRout8(dt); updateEliab8(dt); if (typeof updateVultures === "function") updateVultures(dt); }
+function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawRout8Back(camX); drawWords8(camX); drawGoliath8(camX); drawEliab8(camX); }
 function drawWorld8Over() { if (WORLD !== 8) return; drawWords8Over(); drawGoliath8Over(); }
 function stoneHitsWorld8(s) { return WORLD === 8 && stoneHitsGoliath8(s); }
 
@@ -573,3 +573,236 @@ const abnerScene = {
   },
 };
 if (location.hash === "#abner") abnerScene.start(() => backToMap());   // (testing: the scene by itself)
+
+// ===========================================================================
+// 8-3 The Rout (1 Samuel 17:51-52; DESIGN 5h): the Philistines run, and Israel chases them. Joyful and fast, and it
+// runs itself (autoRun8: main.js's held("right")): you only jump the dropped shields, rocks and piles of gear. No
+// fighting, nothing that hurts. Philistines flee ahead of you (phil_run), Israel's soldiers run with you (soldier_run).
+//   setPiece("rout8end", c)  past column c: the end of the chase, and back to the map.
+// 8-4 Home (DESIGN 5h): the hills of Bethlehem at sunset, everyone you met along the path, Eliab a little behind,
+// Hanan at the fold; after the gate, w8ending (Hanan's last words, the flashback, "The battle is the LORD's"),
+// then the Journal.
+// ===========================================================================
+Object.assign(W8, {
+  ROUT_RUNNERS: 7,       // Philistines fleeing ahead (they run a little slower than David: he gains on them)
+  ROUT_ISRAEL: 6,        // Israel's soldiers running with him
+  ROUT_PHIL_SPEED: 0.82, // times David's run
+  ELIAB_FROM: 120,       // 8-4: from this column Eliab walks behind David, a few steps back
+  ELIAB_GAP: 4.5,        // tiles behind him
+  HOME_BEATS: [
+    { who: "Hanan", text: "I heard." },
+    { who: "", text: "David looked back toward the hills, and remembered the night of the lion, and the lamb he carried home.", flash: true },
+    { who: "Hanan", text: "The lion was bigger than you. The giant was bigger than you. They always will be. Remember who stood with you." },
+    { card: true },
+  ],
+});
+const autoRun8 = () => LEVEL_STAGE === "8-3" && !(rout8 && rout8.done) && david.deadT <= 0;   // main.js: held("right")
+const rout8End = setPieces.find(p => p.kind === "rout8end");
+const rout8 = LEVEL_STAGE === "8-3" ? { done: false, phil: [], isr: [], t: 0 } : null;
+if (rout8) {
+  for (let i = 0; i < W8.ROUT_RUNNERS; i++) rout8.phil.push({ x: (14 + i * 6) * T, ph: Math.random() * 3, s: 0.85 + Math.random() * 0.2 });
+  for (let i = 0; i < W8.ROUT_ISRAEL; i++) rout8.isr.push({ dx: -260 + i * 90 + Math.random() * 40, ph: Math.random() * 3, s: 0.8 + Math.random() * 0.15 });
+}
+function updateRout8(dt) {
+  if (!rout8) return;
+  rout8.t += dt;
+  const run = TUNE.RUN_SPEED;
+  for (const p of rout8.phil) {   // fleeing ahead; once he's passed one by, it comes back in further ahead
+    p.x += run * W8.ROUT_PHIL_SPEED * p.s * dt;
+    if (p.x < camX - 200) p.x = camX + W + 120 + Math.random() * 400;
+  }
+  for (const s of rout8.isr) s.dx += (Math.sin(rout8.t * 0.7 + s.ph) * 30 - (s.dx - (-260 + rout8.isr.indexOf(s) * 90))) * dt * 0.5;   // they keep pace, drifting a little
+  if (rout8End && !rout8.done && david.x > rout8End.x) {
+    rout8.done = true; david.vx = 0;
+    sayLine("", "The men of Israel chased them as far as Gai and to the gates of Ekron. Then they came back, singing. (1 Samuel 17:52)");
+    sfx("war_horn", undefined, 0.8);
+    rout8.endT = 0;
+  }
+  if (rout8.done && rout8.endT !== undefined && !dialog.hold) { rout8.endT += dt; if (rout8.endT > 0.6 && !rout8.left) { rout8.left = true; clear8(); setTimeout(() => backToMap(), 700); } }
+}
+function drawRout8Back(camX) {   // behind David: the fleeing Philistines, smaller (further off), and Israel's soldiers with him
+  if (!rout8) return;
+  const now = performance.now() / 1000;
+  if (SPR.phil_run) for (const p of rout8.phil) { const x = p.x - camX; if (x > -150 && x < W + 150) drawSprite("phil_run", frameOf("phil_run", now * 1.3 + p.ph), x, GR * T - 26, 1, W8.ROUT_PHIL_SIZE, 0.85, "brightness(0.85)"); }
+  if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = david.x + s.dx - camX; if (x > -150 && x < W + 150) drawSprite("soldier_run", frameOf("soldier_run", now * 1.2 + s.ph), x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
+}
+Object.assign(W8, { ROUT_PHIL_SIZE: 0.8, ROUT_ISR_SIZE: 1.0 });
+
+// ---- 8-4: Eliab, a little behind ----
+const eliab8 = LEVEL_STAGE === "8-4" ? { on: false, x: 0, walking: false } : null;
+function updateEliab8(dt) {
+  if (!eliab8) return;
+  if (!eliab8.on) { if (david.x > W8.ELIAB_FROM * T) { eliab8.on = true; eliab8.x = david.x - (W8.ELIAB_GAP + 6) * T; } return; }
+  const want = david.x - W8.ELIAB_GAP * T, gap = want - eliab8.x;
+  eliab8.walking = Math.abs(gap) > 10;
+  if (eliab8.walking) eliab8.x += Math.sign(gap) * Math.min(Math.abs(gap), TUNE.WALK_SPEED * 0.85 * dt);
+}
+function drawEliab8(camX) {
+  if (!eliab8 || !eliab8.on) return;
+  const x = eliab8.x - camX, now = performance.now() / 1000; if (x < -150 || x > W + 150) return;
+  if (eliab8.walking && SPR.eliab_walk) drawSprite("eliab_walk", frameOf("eliab_walk", now), x, GR * T, 1);
+  else if (SPR.eliab_arms_crossed) drawSprite("eliab_arms_crossed", frameOf("eliab_arms_crossed", now), x, GR * T, 1);
+}
+
+// ---- after the fold at 8-4: Hanan's last words ----
+const w8ending = {
+  active: false,
+  start(then) { Object.assign(this, { active: true, then, t: 0, i: 0, bt: 0, out: 0 }); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt;
+    if (this.out > 0) { this.out += dt; if (this.out > 1.4) { this.active = false; if (this.then) { const f = this.then; this.then = null; f(); } } return; }
+    const B = W8.HOME_BEATS[this.i];
+    if (B.card && this.bt > 5) { this.out = 0.001; return; }
+    if (this.bt > (B.card ? 2 : 0.6) && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < W8.HOME_BEATS.length - 1) { this.i++; this.bt = 0; } else this.out = 0.001;
+    }
+  },
+  draw() {
+    const B = W8.HOME_BEATS[this.i], now = performance.now() / 1000;
+    const cover = img => { if (!img || !img.naturalWidth) return false; const s = Math.max(W / img.naturalWidth, H / img.naturalHeight); ctx.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s); return true; };
+    const strip = img => { if (img && img.naturalWidth) { const h = img.naturalHeight * W / img.naturalWidth; ctx.drawImage(img, 0, H - h, W, h); } };   // once, the full width, along the bottom (no seams)
+    ctx.fillStyle = "#1a1008"; ctx.fillRect(0, 0, W, H);
+    if (B.flash) {   // the flashback: the moonlit rocks of World 1, and the lamb
+      const f = Math.min(1, this.bt / 1.2);
+      cover(BG.w1_4 && BG.w1_4.far); strip(BG.w1_4 && BG.w1_4.near);
+      ctx.fillStyle = "rgba(20,30,60,0.35)"; ctx.fillRect(0, 0, W, H);
+      if (SPR.lamb_walk) drawSprite("lamb_walk", frameOf("lamb_walk", now), W * 0.5, H - 80, 1, 1.6);
+      const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.85); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,0.75)");
+      ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = `rgba(255,255,255,${0.6 * (1 - f)})`; ctx.fillRect(0, 0, W, H);
+    } else if (!B.card) {   // the fold at sunset: Hanan at the gate, David with him
+      cover(BG.w8_4 && BG.w8_4.far); strip(BG.w8_4 && BG.w8_4.mid); strip(BG.w8_4 && BG.w8_4.near);
+      const z = 1.5, fy = H - 40, talking = B.who === "Hanan";
+      drawSprite(talking && SPR.hanan_talk ? "hanan_talk" : "hanan_idle", frameOf(talking && SPR.hanan_talk ? "hanan_talk" : "hanan_idle", now), W * 0.6, fy, -1, z * (TUNE.SPRITE_SIZE.hanan_idle || 1));
+      drawSprite("david_idle", frameOf("david_idle", now), W * 0.42, fy, 1, z);
+    }
+    if (B.card) {   // the last words
+      const f = Math.min(1, this.bt / 1.5);
+      ctx.save(); ctx.textAlign = "center"; ctx.globalAlpha = f;
+      ctx.fillStyle = "#ffe3a0"; ctx.font = "italic bold 58px Georgia, serif"; ctx.shadowColor = "rgba(255,170,40,0.8)"; ctx.shadowBlur = 24;
+      ctx.fillText("The battle is the LORD's.", W / 2, H / 2 - 6);
+      ctx.shadowBlur = 0; ctx.font = "italic 20px Georgia, serif"; ctx.fillStyle = "rgba(255,240,215,0.85)"; ctx.fillText("1 Samuel 17:47", W / 2, H / 2 + 42);
+      ctx.restore();
+    } else {
+      ctx.save(); ctx.textAlign = "center"; drawStoryBox(B.who, B.text, this.bt > 0.6 ? keyText("A: next") : "", true); ctx.restore(); ctx.textAlign = "left";
+    }
+    const f = this.out > 0 ? Math.min(1, this.out / 1.4) : Math.max(0, 1 - this.t / 1.0);
+    if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+
+// ---------------------------------------------------------------------------
+// The end of the game (Glen, 2026-10-22): after the last Journal page (his whole song playing over it, journal.js
+// journalSong), the credits roll over the hills of Bethlehem while the song plays on, then the final score; and if every
+// one of The One was found (32), the secret ending (DESIGN 5h): a thousand years later, shepherds on the same hills.
+// W8.CREDITS is the list: [size, text]; "" is a gap. (Glen: fill in or change any line.)
+// To watch it alone: index.html#credits
+// ---------------------------------------------------------------------------
+Object.assign(W8, {
+  CREDITS: [
+    ["title", "David: The Shepherd's Sling"], ["", ""],
+    ["head", "A game by"], ["name", "Glen"], ["", ""],
+    ["head", "Story, art direction, and the voices of Goliath and the Philistines"], ["name", "Glen"], ["", ""],
+    ["head", "\"The Shepherd Leads Me\""], ["small", "a song inspired by Psalm 23"], ["name", "Glen"], ["", ""],
+    ["head", "Characters and scenes"], ["small", "made by Glen with AI image and video tools, then cut, painted and put together by hand"], ["", ""],
+    ["head", "Code"], ["name", "Claude (Anthropic), with Glen"], ["", ""],
+    ["head", "Sounds and music"], ["small", "from Pixabay and other sound libraries (see assets/sounds/SOURCES.md)"], ["", ""],
+    ["head", "Scripture"], ["small", "Scripture quotations are from the World English Bible (public domain)."], ["", ""],
+    ["head", "Thanks"], ["small", "to every family who plays it together"], ["", ""], ["", ""],
+    ["score", ""], ["", ""], ["", ""],
+    ["title", "Thank you for playing."], ["", ""],
+    ["verse", "The battle is the LORD's."], ["small", "1 Samuel 17:47"],
+  ],
+  CREDITS_SPEED: 42,     // px a second the credits roll (hold A: three times as fast)
+  SECRET: [              // all 32 of The One: Luke 2:8-11 (WEB), on the hills of World 1 at night
+    { text: "About a thousand years later." },
+    { text: "There were shepherds in the same country staying in the field, and keeping watch by night over their flock. (Luke 2:8)" },
+    { text: "Behold, an angel of the Lord stood by them, and the glory of the Lord shone around them, and they were terrified. (Luke 2:9)", glory: true },
+    { text: "The angel said to them, \"Don't be afraid, for behold, I bring you good news of great joy which will be to all the people.\" (Luke 2:10)", glory: true },
+    { text: "\"For there is born to you today, in David's city, a Savior, who is Christ the Lord.\" (Luke 2:11)", glory: true, last: true },
+  ],
+});
+function endScore() {   // sheep saved, The One found (of 32), stones of remembrance (of 96)
+  const p = loadProgress(); let sheep = 0, total = 0, ones = 0;
+  for (const k in p) if (/^\d-\d$/.test(k) && p[k] && p[k].cleared) { sheep += p[k].sheep || 0; total += p[k].total || 0; if (p[k].one) ones++; }
+  const stones = typeof stonesFound === "function" ? [1, 2, 3, 4, 5, 6, 7, 8].reduce((n, w) => n + stonesFound(w), 0) : 0;
+  return { sheep, total, ones, stones };
+}
+const credits8 = {
+  active: false,
+  start(then) {
+    Object.assign(this, { active: true, then, t: 0, y: H + 20, out: 0, secret: -1, st: 0, score: endScore() });
+    if (typeof journalSong !== "undefined" && journalSong.paused && audioUnlocked) { journalSong.volume = 0.9 * (typeof musicMul === "function" ? 1 : 1); journalSong.play().catch(() => {}); }
+  },
+  height() { return W8.CREDITS.reduce((h, [k]) => h + ({ title: 70, head: 34, name: 44, small: 30, verse: 64, score: 120 }[k] || 26), 0); },
+  update(dt) {
+    this.t += dt;
+    if (this.out > 0) {
+      this.out += dt;
+      if (typeof journalSong !== "undefined") journalSong.volume = Math.max(0, journalSong.volume - dt * 0.4);
+      if (this.out > 2.2) { this.active = false; if (typeof journalSong !== "undefined") journalSong.pause(); if (this.then) { const f = this.then; this.then = null; f(); } }
+      return;
+    }
+    if (this.secret >= 0) {   // the secret ending
+      this.st += dt;
+      if (this.st > 1.2 && (pressed("a") || pressed("start"))) { if (this.secret < W8.SECRET.length - 1) { this.secret++; this.st = 0; } else this.out = 0.001; }
+      return;
+    }
+    const end = -this.height() + H * 0.42, fast = held("a") ? 3 : 1;
+    this.y = Math.max(end, this.y - W8.CREDITS_SPEED * fast * dt);
+    if (pressed("start")) this.y = end;
+    if (this.y <= end && this.t > 3 && pressed("a")) {
+      if (this.score.ones >= 32) { this.secret = 0; this.st = 0; }
+      else this.out = 0.001;
+    }
+  },
+  draw() {
+    const now = performance.now() / 1000;
+    const cover = img => { if (!img || !img.naturalWidth) return; const s = Math.max(W / img.naturalWidth, H / img.naturalHeight); ctx.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s); };
+    ctx.fillStyle = "#120b05"; ctx.fillRect(0, 0, W, H);
+    if (this.secret >= 0) {   // the hills of World 1 at night: a fire, the flock; then the glory of the Lord
+      const B = W8.SECRET[this.secret];
+      if (this.secret > 0) {
+        cover(BG.w1_4 && BG.w1_4.far);
+        if (BG.w1_4 && BG.w1_4.near && BG.w1_4.near.naturalWidth) { const n = BG.w1_4.near, h = n.naturalHeight * W / n.naturalWidth; ctx.drawImage(n, 0, H - h, W, h); }
+        if (SPR.sheep_graze) for (let i = 0; i < 5; i++) drawSprite(i % 2 ? "sheep_stand" : "sheep_graze", frameOf(i % 2 ? "sheep_stand" : "sheep_graze", now + i), W * (0.55 + i * 0.07), H - 60, i % 2 ? 1 : -1, 0.9);
+        if (B.glory) {   // light fills the sky
+          const g = ctx.createRadialGradient(W / 2, 0, 20, W / 2, 0, H * 1.2), k = Math.min(1, this.st / 1.5);
+          g.addColorStop(0, `rgba(255,250,220,${0.95 * k})`); g.addColorStop(0.5, `rgba(255,230,160,${0.5 * k})`); g.addColorStop(1, "rgba(255,220,140,0)");
+          ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
+        }
+      }
+      ctx.save(); ctx.textAlign = "center";
+      if (this.secret === 0) { ctx.globalAlpha = Math.min(1, this.st / 1.2); ctx.fillStyle = "#e9dcc4"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText(B.text, W / 2, H / 2); }
+      else drawStoryBox("", B.text, this.st > 1.2 ? keyText("A: next") : "", true);
+      ctx.restore(); ctx.textAlign = "left";
+    } else {
+      cover(BG.w8_4 && BG.w8_4.far);
+      ctx.fillStyle = "rgba(15,8,3,0.62)"; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.textAlign = "center"; let y = this.y;
+      for (const [k, text] of W8.CREDITS) {
+        const h = { title: 70, head: 34, name: 44, small: 30, verse: 64, score: 120 }[k] || 26;
+        if (y > -140 && y < H + 140) {
+          if (k === "title") { ctx.font = "bold 46px Georgia, serif"; ctx.fillStyle = "#ffe08a"; ctx.fillText(text, W / 2, y); }
+          else if (k === "head") { ctx.font = "16px sans-serif"; ctx.fillStyle = "rgba(255,230,190,0.75)"; ctx.fillText(text.toUpperCase(), W / 2, y); }
+          else if (k === "name") { ctx.font = "italic 30px Georgia, serif"; ctx.fillStyle = "#fff4dc"; ctx.fillText(text, W / 2, y); }
+          else if (k === "small") { ctx.font = "italic 20px Georgia, serif"; ctx.fillStyle = "#efe2c8"; ctx.fillText(text, W / 2, y); }
+          else if (k === "verse") { ctx.font = "italic bold 44px Georgia, serif"; ctx.fillStyle = "#ffe3a0"; ctx.shadowColor = "rgba(255,170,40,0.8)"; ctx.shadowBlur = 18; ctx.fillText(text, W / 2, y); ctx.shadowBlur = 0; }
+          else if (k === "score") {
+            const S = this.score; ctx.font = "16px sans-serif"; ctx.fillStyle = "rgba(255,230,190,0.75)"; ctx.fillText("YOUR JOURNEY", W / 2, y);
+            ctx.font = "22px Georgia, serif"; ctx.fillStyle = "#fff4dc";
+            ctx.fillText(`Sheep brought home: ${S.sheep}${S.total ? ` of ${S.total}` : ""}`, W / 2, y + 34);
+            ctx.fillText(`The One found: ${S.ones} of 32`, W / 2, y + 64);
+            ctx.fillText(`Stones of remembrance: ${S.stones} of 96`, W / 2, y + 94);
+          }
+        }
+        y += h;
+      }
+      ctx.restore(); ctx.textAlign = "left";
+      if (this.y <= -this.height() + H * 0.42 && this.t > 3) { ctx.save(); ctx.textAlign = "right"; ctx.font = "15px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.7)"; ctx.fillText(keyText("A: continue"), W - 16, H - 14); ctx.restore(); ctx.textAlign = "left"; }
+    }
+    const f = this.out > 0 ? Math.min(1, this.out / 2.2) : Math.max(0, 1 - this.t / 1.5);
+    if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+if (location.hash === "#credits") addEventListener("load", () => credits8.start(() => backToMap()));   // (testing: the credits by themselves; after the map script, for the score)

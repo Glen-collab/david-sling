@@ -246,7 +246,7 @@ function pollInput() {
   }
   input.now = s;
 }
-const held = b => !!input.now[b];
+const held = b => !!input.now[b] || (b === "right" && typeof autoRun8 === "function" && autoRun8());   // (8-3 runs itself, world8.js)
 const pressed = b => !!input.now[b] && !input.prev[b];
 const released = b => !input.now[b] && !!input.prev[b];
 
@@ -359,6 +359,8 @@ const STAGE_INFO = {
   "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
   "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },
   "8-1": { cols: 72, bg: "w8_1", ter: "w2s", quiet: true, name: "The Valley" },   // World 8 (world8.js): the open valley floor again, no music: the words before the fight
+  "8-3": { cols: 236, bg: "w8_3", ter: "w2s", name: "The Rout" },        // the Philistines run (auto-running: world8.js)
+  "8-4": { cols: 214, bg: "w8_4", name: "Home" },                        // the hills of Bethlehem at sunset; the full song
   "8-2": { cols: 40, bg: "w8_1", ter: "w2s", quiet: true, name: "Goliath" },      // the duel (his own music: Glen's war horns)   // the open valley floor: no music
   "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
   "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
@@ -1425,6 +1427,39 @@ if (LEVEL_NAME === "test") {
   // ---- 8-2 Goliath (1 Samuel 17:48-49): the duel. The arena is the whole stage (setPiece "goliath8", world8.js). ----
   ground(0, 39);
   setPiece("goliath8", 2);
+} else if (LEVEL_NAME === "8-3") {
+  // ---- 8-3 The Rout (1 Samuel 17:51-52): the Philistines run and Israel chases them. It runs itself; jump what they
+  //      dropped. Nothing hurts. The One: a lamb caught up in it, in the middle of the abandoned Philistine camp. ----
+  ground(0, 235);
+  talk(2, "", "When the Philistines saw that their champion was dead, they fled. (1 Samuel 17:51)");
+  talk(5, "Tobi", "Come on, David! Run with us! Jump whatever they've dropped!");
+  const pile = (c, h, w = 2) => rock(c, GR - h, w, h);   // dropped shields and gear, piled up
+  pile(16, 1); pile(28, 2); oliveArc(27, 13, 5); pile(40, 1); pile(46, 1);
+  pile(58, 2); special(59, 13); pile(70, 3); oliveArc(69, 11, 5);
+  talk(80, "", "The men of Israel and of Judah arose and shouted, and pursued the Philistines. (1 Samuel 17:52)");
+  pile(90, 1); pile(96, 2); pile(104, 1, 3); pile(112, 3);
+  lostSheep("lamb", 124, 16, "one");                               // The One, in the middle of the abandoned camp
+  pile(134, 2); special(135, 13); pile(144, 1); pile(150, 1); pile(158, 3); oliveArc(157, 11, 5);
+  talk(168, "", "Blessed be the LORD, my rock, who trains my hands to war, and my fingers to battle. (Psalm 144:1, by David)");
+  pile(178, 2); pile(186, 1, 3); pile(194, 3); special(195, 11); pile(204, 2); pile(212, 1);
+  setPiece("rout8end", 224);
+} else if (LEVEL_NAME === "8-4") {
+  // ---- 8-4 Home (DESIGN 5h): the quietest stage in the game. No enemies, no danger. The hills of Bethlehem at sunset,
+  //      the full song (vocals). Everyone you met along the path, one line each; Eliab walks behind and says nothing.
+  //      The One: the last lamb, at the top of the first hill. Hanan at the fold; then his last words (w8ending). ----
+  ground(0, 213);
+  rock(9, 14, 6, 3); lostSheep("lamb", 11, 13, "one");            // the first hill, and the last lamb in the game
+  talk(22, "The shepherd girl", "You came back! My goat missed you. ...So did I.");
+  talk(42, "The boy from Tekoa", "My father says you're the bravest shepherd in all Judah!");
+  talk(44, "His father", "He's right, you know. Go on home. They're waiting for you.");
+  talk(64, "The Steward", "The king will send for you soon. But tonight, go home.");
+  talk(84, "Gera", "One stone! I told them all you'd only need one.");
+  talk(104, "Tobi", "I ran ahead to tell your father. He already knew. He said, \"He's coming home.\"");
+  talk(124, "Abinadab", "Little brother. ... It was never about the armor, was it?");
+  talk(144, "Shammah", "Five stones, and you're bringing four of them home. Keep them close.");
+  talk(160, "", "Eliab walks the path home a little behind the others. He doesn't say anything.");
+  talk(176, "Jesse", "My son. My youngest. Welcome home.");
+  sheepfold(196);
 } else if (LEVEL_NAME === "7-3") {
   // ---- 7-3 Five Smooth Stones (1 Samuel 17:40): the streambed in the middle of the valley. Choosing stones is the
   //      gameplay: setPiece("pickstone") stones shine faintly when David is near; Down lifts one for a close-up, A keeps
@@ -3447,17 +3482,20 @@ function updateFinish(dt) {
   const allIn = finish.flock.every(s => s.state === "in");
   if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; if (finish.flock.length > 1) sfx("flock_baa", undefined, 0.7); }
   if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
-  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; hushLoops(true); finish.jingle = sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
+  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; hushLoops(true); finish.jingle = LEVEL_STAGE === "8-4" ? null : sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
     stageCleared(LEVEL_STAGE, { sheep: finish.found, total: finish.total, one: finish.one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
-    const journal = () => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
+    const journal = () => LEVEL_STAGE === "8-4" && typeof credits8 !== "undefined"   // the end of the game: the song over the last page, then the credits (world8.js)
+      ? Journal.open({ world: WORLD, stage: STAGE_NUM, song: true, onClose: () => credits8.start(() => backToMap()) })
+      : Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() });   // (no pages for a world yet: straight back to the map)
     if (LEVEL_STAGE === "2-4" && typeof ending !== "undefined") ending.start(journal);   // the end of World 2 first (world2.js)
     else if (LEVEL_STAGE === "3-4" && typeof w3ending !== "undefined") w3ending.start(journal);   // the end of World 3 (world3.js)
     else if (LEVEL_STAGE === "4-4" && typeof w4ending !== "undefined") w4ending.start(journal);
     else if (LEVEL_STAGE === "5-4" && typeof w5ending !== "undefined") w5ending.start(journal);
-    else if (LEVEL_STAGE === "6-4" && typeof w6ending !== "undefined") w6ending.start(journal);   // the end of World 6: Saul's tent (world6.js)   // the end of World 5 (world5.js)   // the end of World 4 (world4.js)
+    else if (LEVEL_STAGE === "6-4" && typeof w6ending !== "undefined") w6ending.start(journal);
+    else if (LEVEL_STAGE === "8-4" && typeof w8ending !== "undefined") w8ending.start(journal);   // home: Hanan's last words (world8.js)   // the end of World 6: Saul's tent (world6.js)   // the end of World 5 (world5.js)   // the end of World 4 (world4.js)
     else journal();
   }
   if (finish.phase === "open" || finish.phase === "close") for (const s of finish.flock) {
@@ -4005,8 +4043,11 @@ const STAGE_THEMES = {
   "6-1": "theme_search", "6-2": "theme_search", "6-3": "theme_search",   // the camp of fear: uneasy, A minor
   "6-4": "theme_wraith",    // the Tower's Shadow: the densest and loudest
   "7-1": "theme_capital", "7-2": "theme_capital", "7-3": "theme_capital",   // World 7 (Glen's pick); 7-4 stays quiet
+  "8-3": "music_day_w1",   // the rout: the bounciest harp, at full speed
+  "8-4": "music_day_w1",   // home: 1-1's music, slowed (DESIGN 5h); the song with the words waits for the last Journal page
 };
 const stageTheme = STAGE_THEMES[LEVEL_STAGE] ? loopAudio(STAGE_THEMES[LEVEL_STAGE]) : null;
+if (stageTheme && LEVEL_STAGE === "8-4") { stageTheme.playbackRate = 0.8; stageTheme.preservesPitch = false; }   // home: the first stage's tune, slower
 let stageThemeVol = 0;
 let dayVol = 0;
 let nightVol = 0, caveVol = 0, musicDuck = 1;
@@ -4024,7 +4065,7 @@ let musicFight = false;
 // a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
 // feet carry on under the 7-3 riddle)
 const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
-  "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene"];
+  "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene", "w8ending", "credits8"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 function updateMusic(dt) {
   if (!audioUnlocked) return;
@@ -4038,7 +4079,7 @@ function updateMusic(dt) {
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
-  const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? (["land", "open", "close"].includes(finish.phase) ? 0.5 : 0) : 1) * musicDuck : 0;   // (Glen) at the gate it sinks to half; under the stage-clear jingle it goes out altogether
+  const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? (["land", "open", "close"].includes(finish.phase) || LEVEL_STAGE === "8-4" ? 0.5 : 0) : 1) * musicDuck : 0;   // (Glen) at the gate it sinks to half; under the stage-clear jingle it goes out altogether
   if (stageTheme) stageThemeVol = fadeLoop(stageTheme, stageThemeVol, !cave.room ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.THEME_MUSIC_VOLUME : 0, dt, 0.4);
   dayVol = fadeLoop(dayMusic, dayVol, !stageTheme && !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
@@ -4277,6 +4318,12 @@ function frame(now) {
   }
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof credits8 !== "undefined" && credits8.active) {   // the credits (world8.js)
+    pollInput(); credits8.update(real); credits8.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w8ending !== "undefined" && w8ending.active) {   // the end of the game's last stage: Hanan at the fold (world8.js)
+    pollInput(); w8ending.update(real); w8ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof abnerScene !== "undefined" && abnerScene.active) {   // World 8: Saul & Abner, "Whose son is this young man?" (world8.js)
     pollInput(); abnerScene.update(real); abnerScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
