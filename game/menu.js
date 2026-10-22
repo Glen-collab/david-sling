@@ -99,7 +99,14 @@ const Menu = {
       FALL_MUSIC.play().catch(() => {});
     }
   },
-  stopScene() { if (this.clip) this.clip.pause(); if (this.playing && this.playing.fall && typeof FALL_MUSIC !== "undefined") FALL_MUSIC.pause(); this.playing = null; },
+  stopScene() {
+    if (this.clip) this.clip.pause();
+    if (this.playing && this.playing.fall) {   // (Glen) its music, and the slowed thunder still ringing after the clip ends
+      if (typeof FALL_MUSIC !== "undefined") FALL_MUSIC.pause();
+      for (const a of sfxAll) if (!a.paused) a.pause();
+    }
+    this.playing = null;
+  },
   newGame() {
     for (const k of ["davidProgress", "davidStones", "davidGateTops"]) try { localStorage.removeItem(k); } catch (e) {}
     this.leaveTitle(() => WorldMap.open("journey"));
