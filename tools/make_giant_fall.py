@@ -21,15 +21,19 @@ CLIP = {
     "windup": os.path.join(ART, "world8", "windup_goliath.mp4"),   # = throw_hit_fall from 5.17 s, 3.98 s later
     "hit": os.path.join(ART, "world8", "throw_hit_fall.mp4"),
     "take2": os.path.join(ART, "world8", "throw_take2.mp4"),
-    "face": os.path.join(ART, "world7", "goliath", "goliath_face_hit.mp4"),   # the smooth stone is painted on (below)
+    "face": os.path.join(ART, "world7", "goliath", "goliath_face_hit_forehead.mp4"),   # (Glen, 2026-10-22) the stone in the forehead
+    # (his first close-up, goliath_face_hit.mp4, hit the side of the helmet with a jagged rock: PAINT_STONE painted a smooth one on)
 }
 FPS = 24
+FACE_GREEN = "0x38fc25"   # the close-up's green screen
+PAINT_STONE = False       # paint the smooth stone over the close-up's rock (patch_face_stone.py: only for his first close-up)
 FLASH = 0.25   # the white flash between the replays (seconds)
 CUTS = [   # (name, clip, start, end, speed, flash after)
     ("windup",  "windup", 0.0, 5.03, 1.0, False),   # the whirl and the throw (let go at about 4.9 s)
     ("slowhit", "windup", 5.03, 6.38, 0.25, True),   # the stone in, slow: it strikes at about 5.78 s in the clip
     ("replay2", "take2",  3.95, 4.9, 0.3, True),     # the other take: strikes at about 4.3 s
-    ("replay3", "face",   2.0, 3.9, 0.35, True),     # the close-up: the stone, the helmet cracks
+    ("replay3", "face",   1.6, 2.917, 0.3, True),    # the close-up: the stone in, it strikes the forehead (2.83 s) and the
+                                                     # helmet cracks; cut before it bursts (2.92), so it matches the fall
     ("stagger", "hit",    2.2, 3.4, 1.0,  False),
     ("fall",    "hit",    3.4, 5.4, 0.5,  False),    # down, slow
     ("down",    "hit",    5.4, 6.0, 1.0,  False),
@@ -54,10 +58,10 @@ def cut(tmp, i, name, clip, a, b, speed):
         run(["ffmpeg", "-v", "error", "-i", CLIP[clip], "-vf", f"trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS}{slow}{tempo},fps={FPS}",
              os.path.join(frames, "%04d.png")])
         stone = patch_face_stone.stone_image()
-        for k, f in enumerate(sorted(os.listdir(frames))):
+        for k, f in enumerate(sorted(os.listdir(frames)) if PAINT_STONE else []):
             src = (a + k * speed / FPS) * FPS   # this slowed frame's place in his clip (in his frames)
             fp = os.path.join(frames, f); patch_face_stone.paint(Image.open(fp).convert("RGB"), src, stone, grow=1.15).save(fp)
-        fg = "[0:v]chromakey=0x46f03c:0.16:0.06,despill=type=green,scale=1300:1300[fg]"
+        fg = f"[0:v]chromakey={FACE_GREEN}:0.16:0.06,despill=type=green,scale=1300:1300[fg]"
         fil = f"{bg};{fg};[bg][fg]overlay=-10:-120:shortest=1,format=yuv420p[v]"
         run(["ffmpeg", "-v", "error", "-y", "-framerate", str(FPS), "-i", os.path.join(frames, "%04d.png"), "-i", CLIP["take2"],
              "-filter_complex", fil, "-map", "[v]", "-an", "-c:v", "libx264", "-crf", "16", "-r", str(FPS), out])

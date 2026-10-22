@@ -14,16 +14,16 @@ const W8 = {
     [8.09, "thunder", 0.9, 0.5, 1.4],
     [10.69, "sling_throw_quick", 0.8, 0.5],                               // the replay
     [11.84, "stone_hit", 1, 0.45, 1.1], [11.84, "thunder_2", 0.7, 0.6],
-    [14.32, "final_stone", 1, 0.5],                                     // the close-up: its impact (0.8 s) at half speed lands at 15.92
-    [15.92, "thunder_3", 0.9, 0.45, 1.6],
-    [19.89, "phil_roar", 0.35, 0.7],                                     // the Philistines see him stagger
-    [24.24, "thunder", 1, 0.4, 2.2], [24.24, "stone_hit", 1, 0.3],      // he hits the ground
+    [16.76, "final_stone", 1, 0.5],                                     // the close-up (Glen's forehead take): its impact (0.8 s) at half speed lands at 18.36
+    [18.36, "thunder_3", 0.9, 0.45, 1.6],
+    [18.89, "phil_roar", 0.35, 0.7],                                     // the Philistines see him stagger
+    [23.24, "thunder", 1, 0.4, 2.2], [23.24, "stone_hit", 1, 0.3],      // he hits the ground
   ],
-  FALL_THUDS: [8.09, 11.84, 15.92, 24.24],   // the low thump of the impacts (thud)
+  FALL_THUDS: [8.09, 11.84, 18.36, 23.24],   // the low thump of the impacts (thud)
   // (Glen) the music: assets/sounds/giant_fall_music.mp3 when he adds it (until then the boss loop, slowed and deeper,
   // FALL_MUSIC_RATE). Its loudness through the scene, [seconds into the clip, volume]: full through the wind-up and the
   // stone's flight, silent on the hit, low under the replays, up again as he staggers, cut dead when he lands.
-  FALL_MUSIC_ENV: [[0, 0.9], [7.99, 0.9], [8.14, 0], [10.49, 0], [10.99, 0.4], [19.59, 0.4], [19.99, 1], [24.19, 1], [24.29, 0]],
+  FALL_MUSIC_ENV: [[0, 0.9], [7.99, 0.9], [8.14, 0], [10.49, 0], [10.99, 0.4], [18.59, 0.4], [18.99, 1], [23.19, 1], [23.29, 0]],
   FALL_MUSIC_VOL: 1.1,  // times the boss music volume (TUNE.BOSS_MUSIC_VOLUME)
   FALL_MUSIC_RATE: 0.75,
   FALL_HORN: 1.5,       // after the clip ends: Israel's horn (17:52, "the men of Israel and of Judah arose, and shouted")
