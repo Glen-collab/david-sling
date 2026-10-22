@@ -779,6 +779,7 @@ Object.assign(W7, {
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
+  SB_VOICE: 0.8,         // his battle cry's pitch and speed (1 = the other Philistines; lower = deeper and slower)
   SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
 });
@@ -856,7 +857,7 @@ function updateShieldBearer(dt) {
   } else {
     if (sb.state === "ready") {   // turns to face David, a breath, then the charge
       sb.dir = toD;
-      if (sb.t > 0.9) { sbSetState("charge"); sb.chargeTo = Math.max(sb.a0 + 2 * T, Math.min(sb.a1 - 4 * T, d.x + sb.dir * 3 * T)); sfxOne(["phil_hedad", "phil_hedad_2"], sb.x, 0.6); }
+      if (sb.t > 0.9) { sbSetState("charge"); sb.chargeTo = Math.max(sb.a0 + 2 * T, Math.min(sb.a1 - 4 * T, d.x + sb.dir * 3 * T)); sfx(Math.random() < 0.5 ? "phil_hedad" : "phil_hedad_2", sb.x, 0.7, W7.SB_VOICE * (0.97 + Math.random() * 0.06)); }   // "Hedad!", deeper than the other Philistines (Glen)
     } else if (sb.state === "charge") {
       sb.x += sb.dir * W7.SB_CHARGE * dt;
       const over = d.y < GR * T - W7.SHIELD_H - 10;   // up high: over the top of it
