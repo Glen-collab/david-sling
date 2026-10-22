@@ -1836,6 +1836,18 @@ window.SPRITE_DATA = {
   "ay": 433,
   "align": "feet"
  },
+ "goliath_walk": {
+  "src": "../assets/sprites/goliath_walk.png",
+  "frames": 12,
+  "w": 176,
+  "h": 247,
+  "ms": 108,
+  "loop": true,
+  "pingpong": false,
+  "ax": 94,
+  "ay": 245,
+  "align": "feet"
+ },
  "goliath_yell": {
   "src": "../assets/sprites/goliath_yell.png",
   "frames": 16,

@@ -780,11 +780,17 @@ Object.assign(W7, {
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
   ELIAB_AT: 0.33,        // 7-4: where Eliab stands on the far hills, as a fraction of the screen, when David reaches his line
+  GIANT_WALK: 70,        // px/s: Goliath walking in after the bearer runs (the end of 7-4)
+  GIANT_STEP: 0.65,      // seconds between his footfalls (a thud and a shake each)
+  GIANT_STOP: 8,         // tiles from David where he stops and yells
+  GIANT_MUSIC_VOL: 1.1,  // his music (assets/sounds/goliath_theme.mp3 when Glen adds it), x the boss music volume
+  GIANT_MUSIC_RATE: 0.82,   // until then: the boss loop, slowed this much (deeper, heavier)
   SB_CHARGE_SIZE: 1.08,  // Glen's sb_charge sheet next to sb_push (1 = same scale)
   SB_VOICE: 0.8,         // his battle cry's pitch and speed (1 = the other Philistines; lower = deeper and slower)
   SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
 });
+Object.assign(TUNE.SPRITE_SIZE, { goliath_walk: 1.69 });   // Glen's walk sheet, as tall as goliath_yell (body 235 px vs 398 in the sheets)
 const sbPiece = setPieces.find(p => p.kind === "shieldbearer") || null;
 const sb = sbPiece ? { a0: sbPiece.c * T, a1: (sbPiece.c + 35) * T, on: false, beaten: false } : null;
 let w7Counsel2 = false;
@@ -902,7 +908,7 @@ function stoneHitsShield(s) {
       if (sb.tips === 1) toast("The edge! The shield swings and he staggers.");
       if (sb.tips >= W7.SB_HITS) {
         sb.phase = 3; sb.tips = 0;
-        sbSay("Come to me, and I will give your flesh to the birds of the sky, and to the animals of the field. (1 Samuel 17:44)", "lecha_elai");
+        sbSay("I defy the ranks of Israel today! (1 Samuel 17:10)", "cheirafti");
         setTimeout(() => toast("The shield's loose in his grip now. When it tips, one charged stone to its edge!"), 900);
       }
       return true;
@@ -924,9 +930,37 @@ function updateShieldFall(dt) {
   sb.t += dt;
   if (sb.state === "fall" && sb.t > 1.6) { sbSetState("stare"); }
   else if (sb.state === "stare" && sb.t > 1.4) { sbSetState("back"); sb.laugh = 4; sfx("taunting_yells", undefined, 0.7, 0.6); toast("He stares at his shield in the dust, looks back at the giant, and backs away. The giant laughs at him."); }
-  else if (sb.state === "back") { if (SPR.sb_run) sb.x += 330 * dt; else if (sb.x < sb.gx - 3 * T) sb.x += 60 * dt; if (sb.t > 4.5 && !sb.cleared) { sb.cleared = true; clear74(); } }
+  else if (sb.state === "back") { if (SPR.sb_run) sb.x += 330 * dt; else if (sb.x < sb.gx - 3 * T) sb.x += 60 * dt; if (sb.t > 4.5) giantIn(); }
+  else if (sb.state === "giant") updateGiantIn(dt);
+}
+// (Glen) the bearer gone, Goliath himself walks in: the music turns ("oh crap"), the ground shakes with every step,
+// and he yells as he comes (his lips move in Glen's walk clip). The fight is World 8; this is the cliffhanger.
+const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });
+giantMusic.onerror = () => {   // (until Glen's own track: the boss loop, slowed and deeper)
+  if (giantMusic.fallback) return; giantMusic.fallback = true;
+  giantMusic.src = `../assets/sounds/boss_loop.mp3?v=${window.BUILD || 0}`; giantMusic.playbackRate = W7.GIANT_MUSIC_RATE; giantMusic.preservesPitch = false;
+  if (giantMusic.want) giantMusic.play().catch(() => {});
+};
+function giantIn() {
+  sbSetState("giant"); sb.giantX = sb.gx; sb.stepT = 0.4; sb.yellT = 0; sb.holdX = david.x;
+  if (bossMusic && !bossMusic.paused) bossMusic.pause();
+  sfx("boss_intro", undefined, 1, 0.75); thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2;   // the sting, low
+  giantMusic.want = true; giantMusic.currentTime = 0; giantMusic.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * W7.GIANT_MUSIC_VOL);
+  if (giantMusic.fallback) { giantMusic.playbackRate = W7.GIANT_MUSIC_RATE; giantMusic.preservesPitch = false; }
+  setTimeout(() => { if (sb.state === "giant") giantMusic.play().catch(() => {}); }, 1200);
+  setTimeout(() => { if (sb.state === "giant") sbSay("Come to me, and I will give your flesh to the birds of the sky, and to the animals of the field. (1 Samuel 17:44)", "lecha_elai"); }, 1500);
+}
+function updateGiantIn(dt) {
+  const d = david; d.x = sb.holdX; d.vx = 0;   // David stands his ground and watches him come
+  const stopAt = d.x + W7.GIANT_STOP * T;
+  if (sb.giantX > stopAt) {
+    sb.giantX = Math.max(stopAt, sb.giantX - W7.GIANT_WALK * dt);
+    sb.stepT -= dt; if (sb.stepT <= 0) { sb.stepT = W7.GIANT_STEP; thud(0.8); if (typeof w2Shake !== "undefined") w2Shake.v = 0.7; }
+  } else sb.yellT += dt;
+  if ((sb.yellT > 2.5 || sb.t > 14) && !sb.cleared) { sb.cleared = true; clear74(); }
 }
 function clear74() {   // the end of 7-4: no sheepfold out here. Straight to the end of World 7, then the Journal.
+  giantMusic.want = false; giantMusic.pause();
   hushLoops(true); sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9);
   const one = line.some(sh => sh.one);
   saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
@@ -956,7 +990,8 @@ function drawShieldBearer(camX) {
   const gx = sb.gx - camX;
   if (gx > -300 && gx < W + 300 && SPR.goliath_yell) {
     const yell = sb.laugh > 0 || (dialog.t > 0 && dialog.who === "Goliath");
-    drawSprite("goliath_yell", yell ? frameOf("goliath_yell", now) : 0, gx, GR * T, -1, W7.GOLIATH_SIZE);
+    if (sb.state === "giant" && SPR.goliath_walk && sb.giantX > david.x + W7.GIANT_STOP * T) drawSprite("goliath_walk", frameOf("goliath_walk", sb.t), sb.giantX - camX, GR * T, -1, W7.GOLIATH_SIZE);   // Glen's walk: coming for David
+    else drawSprite("goliath_yell", yell || sb.state === "giant" ? frameOf("goliath_yell", now) : 0, (sb.state === "giant" ? sb.giantX : sb.gx) - camX, GR * T, -1, W7.GOLIATH_SIZE);
   }
   const x = sb.x - camX; if (x < -200 || x > W + 200) return;
   const fl = sb.flash > 0 ? "brightness(2)" : "";

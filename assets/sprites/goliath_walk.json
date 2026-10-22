@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 176,
+  "frame_h": 247,
+  "ms_per_frame": 108,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 94,
+  "anchor_y": 245,
+  "source": "goliath_walk.mp4",
+  "video_frames": [
+    82,
+    85,
+    87,
+    90,
+    92,
+    95,
+    98,
+    100,
+    103,
+    105,
+    108,
+    110
+  ]
+}
