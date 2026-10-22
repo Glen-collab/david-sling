@@ -777,6 +777,7 @@ Object.assign(W7, {
   SHIELD_W: 74, SHIELD_H: 168,
   GOLIATH_SIZE: 1.55,
   SB_LEAP: 0.5,          // (Glen's sb_jump) seconds in the air on a slam; the shockwave goes out as he lands
+  SB_DUST: 3.5,          // tiles either side of his shield the slam's dust cloud reaches: on the ground in it, two hearts (anywhere else, one)
   SB_QUAKE_SLIDE: 160,   // how far his slip slides David (px/s): the slam reaches him anywhere on the ground (sbQuake)
   SB_LEAP_H: 70,         // how high he leaps (px)
   SB_JUMP_SIZE: 1,       // sb_jump / sb_step against sb_push (1 = the same)
@@ -830,6 +831,7 @@ function sbSetState(s) { sb.state = s; sb.t = 0; }
 function sbQuake() {
   const d = david; if (!(d.onGround || d.state === "roll") || d.inv > 0 || d.deadT > 0) return;
   hurtDavid(sb.x); if (d.deadT > 0) return;
+  if (Math.abs(d.x - (sb.x + sb.dir * W7.SB_FRONT)) < W7.SB_DUST * T) { d.inv = 0; hurtDavid(sb.x); if (d.deadT > 0) return; }   // (Glen) caught in the dust cloud: two hearts
   d.vy = 0; d.onGround = true; d.vx = Math.sign(d.x - sb.x || 1) * W7.SB_QUAKE_SLIDE; setState("slip");
   if (!W7.quakeTold) { W7.quakeTold = true; setTimeout(() => toast("The ground shakes when he lands! Be in the air when he comes down."), 600); }
 }
@@ -874,7 +876,7 @@ function updateShieldBearer(dt) {
       const leap = SPR.sb_jump ? W7.SB_LEAP : 0.12;
       sb.lift = SPR.sb_jump ? (sb.t < leap ? 1 : 0) : Math.max(0, 1 - sb.t / 0.12);
       if (sb.t >= leap && !sb.slammed) {
-        sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1; sbQuake();
+        sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1; sb.dustT = performance.now() / 1000; sbQuake();
         sb.waves.push({ x: front, dir: -1, t: 0 }, { x: front, dir: 1, t: 0 });
       }
       if (sb.t > (SPR.sb_jump ? W7.SB_LEAP + 0.18 : 0.3)) { sb.slammed = false; sbSetState("recover"); }
@@ -1112,6 +1114,19 @@ function drawShieldBearer(camX) {
     const face = sb.state === "back" ? -1 : sb.dir;   // backing away: still facing David
     drawSprite(nm, fr, x, sb.y, face, W7.SB_SIZE, 1, fl || "brightness(0.9)");
     if (!sb.beaten) drawDoorShield(x + sb.dir * W7.SB_FRONT, sb.y + 2, sb.dir, sb.lift, sb.tilt, sb.state === "lift" && (tobiWarned() || w7Counsel2));
+  }
+  // the dust cloud of the slam (W7.SB_DUST either side of the shield): inside it, the slam costs two hearts
+  const dust = sb.dustT ? now - sb.dustT : 9;
+  if (dust < 0.9) {
+    const cx = sb.x + sb.dir * W7.SB_FRONT - camX, R = W7.SB_DUST * T, a = 1 - dust / 0.9;
+    ctx.save();
+    for (let k = 0; k < 14; k++) {
+      const u = (k / 13) * 2 - 1, px = cx + u * R * (0.6 + 0.4 * Math.min(1, dust / 0.25)), r = (52 - Math.abs(u) * 18) * (0.75 + dust * 0.8);
+      const py = GR * T - r * 0.45 - dust * 34 * (1 - Math.abs(u)) - (k % 3) * 9, al = 0.85 * a * (1 - Math.abs(u) * 0.3), sh = k % 2 ? 0 : 18;   // soft puffs, a little lighter and darker in turn
+      const g = ctx.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, `rgba(${216 + sh / 2},${182 + sh / 2},${132 + sh / 2},${al})`); g.addColorStop(0.6, `rgba(${196 - sh},${160 - sh},${112 - sh},${al * 0.6})`); g.addColorStop(1, "rgba(180,145,100,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(px, py, r, r * 0.65, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
   }
   // the shockwaves: dust racing along the ground
   for (const w of sb.waves) {
