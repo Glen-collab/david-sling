@@ -647,9 +647,10 @@ const w1intro = {
     Object.assign(this, { active: true, t: 0, step: W1_CLIP.missing ? 1 : 0, stepT: 0, out: 0, sang: false });
     hushLoops(); dialog.t = 0;
     this.amb = loopAudio("ambience_hills");
-    if (!W1_CLIP.missing) { W1_CLIP.currentTime = 0; W1_CLIP.play().catch(() => { this.step = 1; }); }
+    this.playing = !!W1_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
+    if (!this.playing) { this.playing = true; W1_CLIP.currentTime = 0; W1_CLIP.play().catch(() => { this.step = 1; }); }
     this.t += dt; this.stepT += dt;
     if (audioUnlocked) {   // (sound comes on with the first click: the hills, then the song on the hillside)
       const amb = this.step < 3 ? W1_OPEN.AMBIENCE : this.step === 3 ? W1_OPEN.AMBIENCE * 0.4 : 0;

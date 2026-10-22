@@ -790,7 +790,8 @@ const w4intro = {
 };
 if (LEVEL_STAGE === "4-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w4intro; } catch (e) {}
-  if (!seen || new URLSearchParams(location.search).has("w4intro")) w4intro.start();
+  if (!seen || new URLSearchParams(location.search).has("w4intro"))   // (Glen) his film first: the messenger riding for Bethlehem
+    preFilm.start({ src: "../assets/video/w4_film.mp4", words: [[1.0, 5.2, "The road from Gibeah"], [6.6, 9.8, "Bethlehem"]], loop: ["horse-gallop", 0.7, 0.25] }, () => w4intro.start());
 }
 
 // ---------------------------------------------------------------------------

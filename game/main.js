@@ -4067,9 +4067,52 @@ function fadeLoop(a, cur, want, dt, speed) {
 let musicFight = false;
 // a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
 // feet carry on under the 7-3 riddle)
-const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w1intro", "w2intro", "w3intro", "w4intro", "w4ending", "w5intro", "w5ending",
+const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "preFilm", "w1intro", "w2intro", "w3intro", "w4intro", "w4ending", "w5intro", "w5ending",
   "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene", "w8ending", "credits8"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
+// (Glen) a film before a world's opening scene, like the start of a movie: preFilm.start(opts, then) plays it full screen
+// with place words over it (opts.words: [from s, to s, big, small]) and a sound under it (opts.loop: [sound, volume at
+// the start, at the end]); A skips; then() starts the scene the game plays (w4intro...). Worlds 4-7 (world4.js...).
+const preFilm = {
+  active: false,
+  start(opts, then) {
+    const clip = Object.assign(document.createElement("video"), { src: opts.src + "?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+    Object.assign(this, { active: true, opts, then, clip, t: 0, out: 0, playing: false, snd: opts.loop ? loopAudio(opts.loop[0], false) : null });
+    clip.onerror = () => this.end();
+    hushLoops(); dialog.t = 0;   // (it starts playing on the first frame drawn: the sprites may still be loading)
+  },
+  update(dt) {
+    if (!this.playing) { this.playing = true; this.clip.play().catch(() => this.end()); }
+    this.t += dt;
+    const c = this.clip, k = c.duration ? Math.min(1, c.currentTime / c.duration) : 0;
+    if (this.snd && audioUnlocked) {
+      if (this.snd.paused) this.snd.play().catch(() => {});
+      const [, v0, v1] = this.opts.loop; this.snd.volume = Math.max(0, (v0 + (v1 - v0) * k) * Math.min(1, this.t / 0.6) * (1 - Math.min(1, this.out / 0.5)));
+    }
+    if (this.out > 0) { this.out += dt; if (this.out > 0.5) this.end(); return; }
+    if (c.ended || this.t > 30 || (this.t > 1 && (pressed("a") || pressed("b") || pressed("start")))) this.out = 0.001;
+  },
+  end() {
+    if (!this.active) return;
+    this.active = false; this.clip.pause(); if (this.snd) this.snd.pause();
+    const f = this.then; this.then = null; if (f) f();   // the scene starts in the same frame, so there's no gap
+  },
+  draw() {
+    const c = this.clip;
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+    if (c.videoWidth && c.readyState >= 2) { const k = Math.max(W / c.videoWidth, H / c.videoHeight); ctx.drawImage(c, (W - c.videoWidth * k) / 2, (H - c.videoHeight * k) / 2, c.videoWidth * k, c.videoHeight * k); }
+    for (const [a0, a1, big, small] of this.opts.words || []) {   // the place, low on the screen, like a film
+      const ct = c.currentTime, a = Math.max(0, Math.min(1, (ct - a0) / 0.8, (a1 - ct) / 0.8)); if (a <= 0) continue;
+      ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12; ctx.fillStyle = "#fff3d6";
+      ctx.font = "italic 40px Georgia, serif"; ctx.fillText(big, W / 2, H - (small ? 120 : 96));
+      if (small) { ctx.font = "italic 24px Georgia, serif"; ctx.fillText(small, W / 2, H - 82); }
+      ctx.restore();
+    }
+    if (this.t > 1.5) caption("A: skip", 0.6, true);
+    const f = Math.min(1, this.t / 0.6, 1 - this.out / 0.5);
+    if (f < 1) { ctx.fillStyle = `rgba(0,0,0,${1 - f})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
 function updateMusic(dt) {
   if (!audioUnlocked) return;
   // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
@@ -4078,7 +4121,7 @@ function updateMusic(dt) {
   if (typeof G8_MUSIC !== "undefined" && G8_MUSIC.held && goliathFight()) { G8_MUSIC.held = false; G8_MUSIC.play().catch(() => {}); }
   if (typeof giantDrone !== "undefined" && giantDrone.held) { giantDrone.held = false; giantDrone.to(giantDrone.k || 1, 1); }
   // and in cut scenes (Glen) it sinks lower still, faint under the story
-  const words = dialog.t > 0, want = (typeof w1intro !== "undefined" && w1intro.active) || (typeof w2intro !== "undefined" && w2intro.active) || (typeof w3intro !== "undefined" && w3intro.active) ? 0 : cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
+  const words = dialog.t > 0, want = preFilm.active || (typeof w1intro !== "undefined" && w1intro.active) || (typeof w2intro !== "undefined" && w2intro.active) || (typeof w3intro !== "undefined" && w3intro.active) ? 0 : cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
@@ -4364,6 +4407,9 @@ function frame(now) {
   }
   if (typeof w5intro !== "undefined" && w5intro.active) {   // the opening of World 5, at Jesse's house (world5.js)
     pollInput(); w5intro.update(real); w5intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (preFilm.active) {   // a world's film, before its opening scene
+    pollInput(); preFilm.update(real); preFilm.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w1intro !== "undefined" && w1intro.active) {   // the opening of World 1: Bethlehem, breakfast, the hillside (world1.js)
     pollInput(); w1intro.update(real); w1intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
