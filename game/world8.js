@@ -8,22 +8,22 @@
 // ---------------------------------------------------------------------------
 const W8 = {
   FALL_CUES: [   // [seconds into giant_fall.mp4, sound, volume, rate (under 1 is slower and deeper), shake]
-    [0.0, "sling_charge", 0.8, 0.9], [1.6, "sling_charge", 0.8, 1.0],   // the sling whirling
-    [3.1, "sling_throw", 1, 0.8],                                       // let go
-    [3.46, "final_stone_goliath", 1, 0.6],                              // slow: its impact is at 1.7 s, so it lands with the stone (6.3)
-    [6.3, "thunder", 0.9, 0.5, 1.4],
-    [8.9, "sling_throw_quick", 0.8, 0.5],                               // the replay
-    [10.05, "stone_hit", 1, 0.45, 1.1], [10.05, "thunder_2", 0.7, 0.6],
-    [12.44, "final_stone", 1, 0.5],                                     // the close-up: its impact (0.8 s) at half speed lands at 14.04
-    [14.04, "thunder_3", 0.9, 0.45, 1.6],
-    [18.1, "phil_roar", 0.35, 0.7],                                     // the Philistines see him stagger
-    [22.45, "thunder", 1, 0.4, 2.2], [22.45, "stone_hit", 1, 0.3],      // he hits the ground
+    [0.0, "sling_charge", 0.8, 0.9], [1.6, "sling_charge", 0.8, 1.0], [3.2, "sling_charge", 0.8, 1.05],   // the sling whirling (Glen's longer wind-up)
+    [4.95, "sling_throw", 1, 0.8],                                      // let go
+    [5.25, "final_stone_goliath", 1, 0.6],                              // slow: its impact is at 1.7 s, so it lands with the stone (8.09)
+    [8.09, "thunder", 0.9, 0.5, 1.4],
+    [10.69, "sling_throw_quick", 0.8, 0.5],                               // the replay
+    [11.84, "stone_hit", 1, 0.45, 1.1], [11.84, "thunder_2", 0.7, 0.6],
+    [14.32, "final_stone", 1, 0.5],                                     // the close-up: its impact (0.8 s) at half speed lands at 15.92
+    [15.92, "thunder_3", 0.9, 0.45, 1.6],
+    [19.89, "phil_roar", 0.35, 0.7],                                     // the Philistines see him stagger
+    [24.24, "thunder", 1, 0.4, 2.2], [24.24, "stone_hit", 1, 0.3],      // he hits the ground
   ],
-  FALL_THUDS: [6.3, 10.05, 14.04, 22.45],   // the low thump of the impacts (thud)
+  FALL_THUDS: [8.09, 11.84, 15.92, 24.24],   // the low thump of the impacts (thud)
   // (Glen) the music: assets/sounds/giant_fall_music.mp3 when he adds it (until then the boss loop, slowed and deeper,
   // FALL_MUSIC_RATE). Its loudness through the scene, [seconds into the clip, volume]: full through the wind-up and the
   // stone's flight, silent on the hit, low under the replays, up again as he staggers, cut dead when he lands.
-  FALL_MUSIC_ENV: [[0, 0.9], [6.2, 0.9], [6.35, 0], [8.7, 0], [9.2, 0.4], [17.8, 0.4], [18.2, 1], [22.4, 1], [22.5, 0]],
+  FALL_MUSIC_ENV: [[0, 0.9], [7.99, 0.9], [8.14, 0], [10.49, 0], [10.99, 0.4], [19.59, 0.4], [19.99, 1], [24.19, 1], [24.29, 0]],
   FALL_MUSIC_VOL: 1.1,  // times the boss music volume (TUNE.BOSS_MUSIC_VOLUME)
   FALL_MUSIC_RATE: 0.75,
   FALL_HORN: 1.5,       // after the clip ends: Israel's horn (17:52, "the men of Israel and of Judah arose, and shouted")
@@ -71,7 +71,7 @@ const giantFall = {
     if (this.state === "clip") {
       const vt = FALL_CLIP.currentTime;
       if (FALL_MUSIC.fallback) { FALL_MUSIC.playbackRate = W8.FALL_MUSIC_RATE; FALL_MUSIC.preservesPitch = false; }
-      FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > 22.5) FALL_MUSIC.pause();
+      FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > W8.FALL_MUSIC_ENV[W8.FALL_MUSIC_ENV.length - 1][0]) FALL_MUSIC.pause();
       while (this.cue < W8.FALL_CUES.length && W8.FALL_CUES[this.cue][0] <= vt) {
         const [, name, vol, rate, shake] = W8.FALL_CUES[this.cue++];
         sfx(name, undefined, vol, rate); if (shake) this.shake = Math.max(this.shake, shake);

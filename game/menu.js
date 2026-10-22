@@ -118,7 +118,7 @@ const Menu = {
       this.playT += dt;
       if (this.playing.fall && typeof W8 !== "undefined") {   // the sounds on the giant's fall, at their times in the clip
         const vt = this.clip.currentTime;
-        FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > 22.5) FALL_MUSIC.pause();
+        FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > W8.FALL_MUSIC_ENV[W8.FALL_MUSIC_ENV.length - 1][0]) FALL_MUSIC.pause();
         while (this.cue < W8.FALL_CUES.length && W8.FALL_CUES[this.cue][0] <= vt) { const [, name, vol, rate] = W8.FALL_CUES[this.cue++]; sfx(name, undefined, vol, rate); }
       }
       if ((this.playT > 0.4 && (pressed("a") || pressed("b") || pressed("start"))) || (this.clip.ended && this.playT > 1.5)) this.stopScene();

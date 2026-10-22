@@ -5,7 +5,9 @@ shoulder, then the close-up of the face), then he falls. The game plays it muted
 
   python tools/make_giant_fall.py            -> assets/video/giant_fall.mp4 and giant_fall_last.jpg
 
-Clips: david-sling-art/world8 (windup, throw_hit_fall, throw_take2) and david-sling-art/world7/goliath/goliath_face_hit.
+Clips: david-sling-art/world8 (windup_goliath: Glen's wind-up run smoothly into the throw, 2026-10-22; throw_hit_fall;
+throw_take2) and david-sling-art/world7/goliath/goliath_face_hit_smooth (his close-up with the smooth stone painted
+in by tools/patch_face_stone.py).
 Each cut: (clip, start s, end s, speed). Speed under 1 is slow motion (frames made in between, so it stays smooth).
 """
 import os, subprocess, sys, tempfile, shutil
@@ -13,17 +15,16 @@ import os, subprocess, sys, tempfile, shutil
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(os.path.dirname(ROOT), "david-sling-art")
 CLIP = {
-    "windup": os.path.join(ART, "world8", "windup.mp4"),
+    "windup": os.path.join(ART, "world8", "windup_goliath.mp4"),   # = throw_hit_fall from 5.17 s, 3.98 s later
     "hit": os.path.join(ART, "world8", "throw_hit_fall.mp4"),
     "take2": os.path.join(ART, "world8", "throw_take2.mp4"),
-    "face": os.path.join(ART, "world7", "goliath", "goliath_face_hit.mp4"),
+    "face": os.path.join(ART, "world7", "goliath", "goliath_face_hit_smooth.mp4"),
 }
 FPS = 24
 FLASH = 0.25   # the white flash between the replays (seconds)
 CUTS = [   # (name, clip, start, end, speed, flash after)
-    ("windup",  "windup", 0.0, 2.6, 1.0,  False),
-    ("throw",   "hit",    0.4, 1.05, 1.0, False),
-    ("slowhit", "hit",    1.05, 2.4, 0.25, True),    # the stone in, slow: it strikes at about 1.8 s in the clip
+    ("windup",  "windup", 0.0, 5.03, 1.0, False),   # the whirl and the throw (let go at about 4.9 s)
+    ("slowhit", "windup", 5.03, 6.38, 0.25, True),   # the stone in, slow: it strikes at about 5.78 s in the clip
     ("replay2", "take2",  3.95, 4.9, 0.3, True),     # the other take: strikes at about 4.3 s
     ("replay3", "face",   2.0, 3.9, 0.35, True),     # the close-up: the stone, the helmet cracks
     ("stagger", "hit",    2.2, 3.4, 1.0,  False),
@@ -43,9 +44,10 @@ def cut(tmp, i, name, clip, a, b, speed):
     tempo = f",setpts=PTS/{speed}" if speed != 1 else ""
     if clip == "face":   # Glen's green-screen close-up, over the camp behind him, blurred and pushed in
         bg = f"[1:v]trim=0.1:0.2,setpts=PTS-STARTPTS,crop=200:112:1080:30,scale=1280:720,boxblur=18:2,eq=brightness=-0.06,loop=-1:1:0,fps={FPS}[bg]"
+        # (Glen) wider than the screen, so the clip's own edges (his shoulders run off them) are never seen
         fg = (f"[0:v]trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS}{slow}{tempo},fps={FPS},"
-              "chromakey=0x46f03c:0.16:0.06,despill=type=green,scale=1060:1060[fg]")
-        fil = f"{bg};{fg};[bg][fg]overlay=230:-40:shortest=1,format=yuv420p[v]"
+              "chromakey=0x46f03c:0.16:0.06,despill=type=green,scale=1300:1300[fg]")
+        fil = f"{bg};{fg};[bg][fg]overlay=-10:-120:shortest=1,format=yuv420p[v]"
         run(["ffmpeg", "-v", "error", "-y", "-i", CLIP[clip], "-i", CLIP["take2"], "-filter_complex", fil, "-map", "[v]",
              "-an", "-c:v", "libx264", "-crf", "16", "-r", str(FPS), out])
     else:
