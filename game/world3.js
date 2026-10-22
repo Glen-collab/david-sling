@@ -1438,47 +1438,57 @@ if (LEVEL_STAGE === "3-2" && SPR.dog_run) for (const k of critters) if (k.kind =
 
 // ---------------------------------------------------------------------------
 // The opening of World 3 (DESIGN "World 3 — Opening scene"), the first time 3-1 is played (or ?w3intro): Glen's clips
-// as one video (assets/video/w3_opening.mp4, tools/make_w3_opening.py). The elders at the gate tremble as Samuel comes
-// up the road with the heifer (1 Samuel 16:4); the video stops on him at the gate for his answer (16:5, the sacrifice:
-// so 3-1 is the day before it); then Eliab in the courtyard, smoothing his hair. His line, the title card, 3-1.
+// as one video (assets/video/w3_opening.mp4, tools/make_w3_opening.py), stopped where words go. A boy runs up the
+// street with the news; the elders at the gate tremble as Samuel comes up the road with the heifer (1 Samuel 16:4); it
+// stops on him at the gate for his answer (16:5, the sacrifice: so 3-1 is the day before it); then Eliab in the
+// courtyard, smoothing his hair. His line, the title card, 3-1.
 // ---------------------------------------------------------------------------
 const W3_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w3_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
 W3_CLIP.onerror = () => { W3_CLIP.missing = true; };
 const W3_STILL = Object.assign(new Image(), { src: "../assets/video/w3_opening_last.jpg?v=" + (window.BUILD || 0) });
-const W3_OPEN = {
-  PLACE: [0.8, 4.2],     // seconds "Bethlehem, at evening" is up
-  VERSE: 3.4,            // 16:4 comes up over the elders from here...
-  STOP: 8.0,             // ...and the video stops here, Samuel at the gate, for his answer (Eliab comes in at 8.8)
+const W3_OPEN = {   // seconds into the video (make_w3_opening.py prints where each clip starts: the boy 0, the elders 6, Eliab 14.8)
+  PLACE: [0.8, 4.2],     // "Bethlehem, at evening" over the boy running
+  BOY: 5.9,              // stops on the boy for his shout
+  VERSE: 9.4,            // 16:4 comes up over the elders from here...
+  SAMUEL: 14.0,          // ...and it stops on Samuel at the gate for his answer
   AMBIENCE: 0.35,
 };
 const w3intro = {
   active: false,
-  // steps: 0 the elders (16:4 over them), 1 stopped on Samuel (16:5), 2 Eliab, 3 his line over the last frame, 4 the title card
+  // steps: 0 the boy runs, 1 his shout, 2 the elders (16:4), 3 Samuel (16:5), 4 Eliab, 5 his line over the last frame, 6 the title card
+  STOPS: { 0: "BOY", 2: "SAMUEL" },
+  LINES: {
+    1: ["A boy in the street", "The prophet Samuel is coming! He's on the road to Bethlehem!"],
+    3: ["Samuel", "“Peaceably; I have come to sacrifice to the LORD. Sanctify yourselves, and come with me to the sacrifice.” (1 Samuel 16:5)"],
+    5: ["Eliab", "A prophet, here? Then he's come for someone important."],
+  },
   start() {
-    Object.assign(this, { active: true, t: 0, step: W3_CLIP.missing ? 3 : 0, stepT: 0, out: 0 });
+    Object.assign(this, { active: true, t: 0, step: W3_CLIP.missing ? 5 : 0, stepT: 0, out: 0 });
     hushLoops(); dialog.t = 0;
     this.amb = loopAudio("ambience_hills");
-    if (!W3_CLIP.missing) { W3_CLIP.currentTime = 0; W3_CLIP.play().catch(() => { this.step = 3; }); }
+    if (!W3_CLIP.missing) { W3_CLIP.currentTime = 0; W3_CLIP.play().catch(() => { this.step = 5; }); }
   },
   update(dt) {
     this.t += dt; this.stepT += dt;
     if (audioUnlocked) {
-      const amb = this.step < 4 ? W3_OPEN.AMBIENCE : 0;
+      const amb = this.step < 6 ? W3_OPEN.AMBIENCE : 0;
       if (this.amb.paused && amb > 0) this.amb.play().catch(() => {});
       const av = this.amb.volume; this.amb.volume = av + Math.sign(amb - av) * Math.min(Math.abs(amb - av), dt * 0.5);
     }
     if (this.out > 0) { this.out += dt; if (this.out > 0.8) this.finish(); return; }
     const A = this.stepT > 0.6 && (pressed("a") || pressed("b") || pressed("start"));
-    if (this.step === 0) {   // the elders: stops on Samuel (A goes straight there)
-      if (W3_CLIP.currentTime >= W3_OPEN.STOP || this.stepT > 12 || (A && this.stepT > 1)) { W3_CLIP.pause(); if (W3_CLIP.currentTime < W3_OPEN.STOP) W3_CLIP.currentTime = W3_OPEN.STOP; this.next(); }
+    const stop = this.STOPS[this.step];
+    if (stop) {   // playing up to a stop (A goes straight there)
+      const at = W3_OPEN[stop];
+      if (W3_CLIP.currentTime >= at || this.stepT > 12 || (A && this.stepT > 1)) { W3_CLIP.pause(); if (W3_CLIP.currentTime < at) W3_CLIP.currentTime = at; this.next(); }
       return;
     }
-    if (this.step === 1) { if (A) { W3_CLIP.play().catch(() => {}); this.next(); } return; }
-    if (this.step === 2) {   // Eliab: A skips to the end
+    if (this.step === 1 || this.step === 3) { if (A) { W3_CLIP.play().catch(() => {}); this.next(); } return; }
+    if (this.step === 4) {   // Eliab: A skips to the end
       if (W3_CLIP.ended || this.stepT > 14 || (A && this.stepT > 1)) { W3_CLIP.pause(); this.next(); }
       return;
     }
-    if (this.step === 4) { if (this.stepT > 3.6 || A) this.out = 0.001; return; }
+    if (this.step === 6) { if (this.stepT > 3.6 || A) this.out = 0.001; return; }
     if (A) this.next();
   },
   next() { this.step++; this.stepT = 0; },
@@ -1489,7 +1499,7 @@ const w3intro = {
   draw() {
     const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
-    if (this.step <= 2) { if (W3_CLIP.videoWidth && W3_CLIP.readyState >= 2) cover(W3_CLIP, W3_CLIP.videoWidth, W3_CLIP.videoHeight); }
+    if (this.step <= 4) { if (W3_CLIP.videoWidth && W3_CLIP.readyState >= 2) cover(W3_CLIP, W3_CLIP.videoWidth, W3_CLIP.videoHeight); }
     else if (W3_STILL.naturalWidth) cover(W3_STILL, W3_STILL.naturalWidth, W3_STILL.naturalHeight);
     const ct = W3_CLIP.currentTime;
     if (this.step === 0) {
@@ -1498,15 +1508,15 @@ const w3intro = {
         ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
         ctx.fillStyle = "#fff3d6"; ctx.font = "italic 36px Georgia, serif"; ctx.fillText("Bethlehem, at evening", W / 2, 60); ctx.restore();
       }
+      if (this.stepT > 1.5) caption("A: skip", 0.6, true);
     }
     ctx.textAlign = "center";
-    if (this.step === 0 && ct >= W3_OPEN.VERSE)
+    if (this.step === 2 && ct >= W3_OPEN.VERSE)
       drawStoryBox("", "Samuel did that which the LORD spoke, and came to Bethlehem. The elders of the city came to meet him trembling, and said, “Do you come peaceably?” (1 Samuel 16:4)", this.stepT > 1.5 ? "A: next" : "");
-    if (this.step === 1)
-      drawStoryBox("Samuel", "“Peaceably; I have come to sacrifice to the LORD. Sanctify yourselves, and come with me to the sacrifice.” (1 Samuel 16:5)", "A: next");
-    if (this.step === 3) drawStoryBox("Eliab", "A prophet, here? Then he's come for someone important.", "A: next");
+    const L = this.LINES[this.step];
+    if (L) drawStoryBox(L[0], L[1], "A: next");
     ctx.textAlign = "left";
-    if (this.step === 4) {   // the title card, over Eliab
+    if (this.step === 6) {   // the title card, over Eliab
       const f = Math.min(1, this.stepT / 0.8); ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
       ctx.save(); ctx.globalAlpha = f; ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 3", W / 2, H / 2 - 20);
       ctx.fillStyle = "#fff6e2"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("The Anointing", W / 2, H / 2 + 30); ctx.restore();

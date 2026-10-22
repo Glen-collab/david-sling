@@ -1,21 +1,22 @@
 """The opening of World 3: Glen's clips cut into one video (world3.js w3intro plays it, muted, and stops it where
-the words go). The elders at Bethlehem's gate trembling as Samuel comes up the road with the heifer (1 Samuel 16:4),
-then Eliab in Jesse's courtyard, smoothing his hair, sure the prophet has come for him.
+the words go). A boy runs up Bethlehem's street with the news and points to the gate; the elders there tremble as
+Samuel comes up the road with the heifer (1 Samuel 16:4); then Eliab in Jesse's courtyard, smoothing his hair, sure the
+prophet has come for him.
 
   python tools/make_w3_opening.py      -> assets/video/w3_opening.mp4 and w3_opening_last.jpg
 
-Clips: david-sling-art/world3/opening. CLIPS is the order, with the seconds of each used; a clip that isn't there yet
-is left out (the boy running in with the news, news_run.mp4, goes first once Glen makes it). The cut times it prints
-go in world3.js W3_OPEN.
+Clips: david-sling-art/world3/opening. CLIPS is the order, with the seconds of each used (and how
+long its last frame holds, so the next clip fades in after it, not over it); a clip that isn't there yet is left out.
+The cut times it prints go in world3.js W3_OPEN.
 """
 import os, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(os.path.dirname(ROOT), "david-sling-art", "world3", "opening")
-CLIPS = [   # (file, start s, end s)
-    ("news_run.mp4", 0.0, 10.0),      # (not made yet) the boy running up the street with the news
-    ("elders_gate.mp4", 0.0, 9.6),    # the elders at the gate, Samuel and the heifer on the road
-    ("eliab_preens.mp4", 0.0, 10.0),  # Eliab hears it
+CLIPS = [   # (file, start s, end s, hold s)
+    ("news_run.mp4", 0.0, 6.0, 0.8),  # the boy running up the street with the news, pointing to the gate
+    ("elders_gate.mp4", 0.0, 9.6, 0),  # the elders at the gate, Samuel and the heifer on the road
+    ("eliab_preens.mp4", 0.0, 10.0, 0), # Eliab hears it
 ]
 FPS = 24
 XFADE = 0.8
@@ -29,13 +30,14 @@ def run(args):
 def main():
     clips = [c for c in CLIPS if os.path.exists(os.path.join(ART, c[0]))]
     args, fil, t, starts = [], [], 0.0, []
-    for i, (f, a, b) in enumerate(clips):
+    for i, (f, a, b, hold) in enumerate(clips):
         args += ["-i", os.path.join(ART, f)]
-        fil.append(f"[{i}:v]trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS},scale=1280:720,format=yuv420p" + (",fade=in:st=0:d=1.0" if i == 0 else "") + f"[c{i}]")
-    last = "c0"; starts.append((clips[0][0], 0.0)); t = clips[0][2] - clips[0][1]
+        fil.append(f"[{i}:v]trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS},scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,format=yuv420p"
+                   + (f",tpad=stop_mode=clone:stop_duration={hold}" if hold else "") + (",fade=in:st=0:d=1.0" if i == 0 else "") + f"[c{i}]")
+    last = "c0"; starts.append((clips[0][0], 0.0)); t = clips[0][2] - clips[0][1] + clips[0][3]
     for i in range(1, len(clips)):
         off = t - XFADE; fil.append(f"[{last}][c{i}]xfade=transition=fade:duration={XFADE}:offset={off:.3f}[x{i}]")
-        last = f"x{i}"; starts.append((clips[i][0], off)); t = off + clips[i][2] - clips[i][1]
+        last = f"x{i}"; starts.append((clips[i][0], off)); t = off + clips[i][2] - clips[i][1] + clips[i][3]
     out = os.path.join(ROOT, "assets", "video", "w3_opening.mp4")
     run(["ffmpeg", "-v", "error", "-y", *args, "-filter_complex", ";".join(fil), "-map", f"[{last}]", "-an", "-c:v", "libx264",
          "-crf", "20", "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out])
