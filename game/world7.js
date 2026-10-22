@@ -784,7 +784,11 @@ Object.assign(W7, {
   GIANT_STEP: 0.65,      // seconds between his footfalls (a thud and a shake each)
   GIANT_STOP: 8,         // tiles from David where he stops and yells
   GIANT_MUSIC_VOL: 1.1,  // his music (assets/sounds/goliath_theme.mp3 when Glen adds it), x the boss music volume
-  GIANT_MUSIC_RATE: 0.82,   // until then: the boss loop, slowed this much (deeper, heavier)
+  GIANT_MUSIC_END: 0.5,  // his music under the end of World 7 (a share of GIANT_MUSIC_VOL)
+  DRONE_NOTES: [[55, "sawtooth", 0.5], [58.27, "sawtooth", 0.4], [27.5, "sine", 0.9], [110, "triangle", 0.12]],   // Hz, wave, loudness: A, B-flat (the half step that grinds), the A below, a faint A above
+  DRONE_CUTOFF: 260,     // the low-pass over the drone (Hz): lower is darker and more muffled; it breathes slowly around this
+  DRONE_VOL: 0.22,       // the drone's loudness (times the Music setting)
+  DRONE_SWELL: 3,        // seconds it takes to swell in
   SB_CHARGE_SIZE: 1.08,  // Glen's sb_charge sheet next to sb_push (1 = same scale)
   SB_VOICE: 0.8,         // his battle cry's pitch and speed (1 = the other Philistines; lower = deeper and slower)
   SB_FRONT: 48,          // px from his feet to the shield's face
@@ -960,18 +964,45 @@ function updateShieldFall(dt) {
 // (Glen) the bearer gone, Goliath himself walks in: the music turns ("oh crap"), the ground shakes with every step,
 // and he yells as he comes (his lips move in Glen's walk clip). The fight is World 8; this is the cliffhanger.
 const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });
-giantMusic.onerror = () => {   // (until Glen's own track: the boss loop, slowed and deeper)
-  if (giantMusic.fallback) return; giantMusic.fallback = true;
-  giantMusic.src = `../assets/sounds/boss_loop.mp3?v=${window.BUILD || 0}`; giantMusic.playbackRate = W7.GIANT_MUSIC_RATE; giantMusic.preservesPitch = false;
-  if (giantMusic.want) giantMusic.play().catch(() => {});
+giantMusic.onerror = () => { giantMusic.fallback = true; if (giantMusic.want) giantDrone.start(); };   // no track of Glen's yet: the drone
+// (Glen: the slowed boss music was too uplifting under his words; he wants the gravity of it.) Until Glen's own track:
+// a low dark drone made here, two deep notes a half step apart rubbing against each other, a sub-bass under them,
+// all through a slow-breathing low-pass filter. It swells in, and fades out when the Journal opens.
+const giantDrone = {
+  nodes: null,
+  start() {
+    if (this.nodes || !audioUnlocked) return;
+    try {
+      chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const ac = chimeCtx, t0 = ac.currentTime, out = ac.createGain(), lp = ac.createBiquadFilter(), lfo = ac.createOscillator(), lfoG = ac.createGain();
+      lp.type = "lowpass"; lp.frequency.value = W7.DRONE_CUTOFF; lp.Q.value = 4;
+      lfo.frequency.value = 0.09; lfoG.gain.value = W7.DRONE_CUTOFF * 0.45; lfo.connect(lfoG).connect(lp.frequency);
+      out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(this.level(1), t0 + W7.DRONE_SWELL);
+      lp.connect(out).connect(ac.destination);
+      const oscs = [lfo];
+      for (const [f, type, v] of W7.DRONE_NOTES) {
+        const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = v;
+        o.connect(g).connect(lp); oscs.push(o);
+      }
+      for (const o of oscs) o.start(t0);
+      this.nodes = { out, oscs };
+    } catch (e) {}
+  },
+  level(k) { return Math.max(0.0002, W7.DRONE_VOL * k * musicMul()); },
+  to(k, secs = 2) { if (!this.nodes) return; const ac = chimeCtx, g = this.nodes.out.gain; g.cancelScheduledValues(ac.currentTime); g.setValueAtTime(g.value, ac.currentTime); g.exponentialRampToValueAtTime(this.level(k), ac.currentTime + secs); },
+  stop(secs = 2) {
+    if (!this.nodes) return; const n = this.nodes; this.nodes = null; const ac = chimeCtx, g = n.out.gain;
+    g.cancelScheduledValues(ac.currentTime); g.setValueAtTime(g.value, ac.currentTime); g.exponentialRampToValueAtTime(0.0001, ac.currentTime + secs);
+    for (const o of n.oscs) o.stop(ac.currentTime + secs + 0.1);
+  },
 };
 function giantIn() {
   sbSetState("giant"); sb.giantX = sb.gx; sb.stepT = 0.4; sb.yellT = 0; sb.holdX = david.x;
   if (bossMusic && !bossMusic.paused) bossMusic.pause();
   sfx("boss_intro", undefined, 1, 0.75); thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2;   // the sting, low
   giantMusic.want = true; giantMusic.currentTime = 0; giantMusic.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * W7.GIANT_MUSIC_VOL);
-  if (giantMusic.fallback) { giantMusic.playbackRate = W7.GIANT_MUSIC_RATE; giantMusic.preservesPitch = false; }
-  setTimeout(() => { if (sb.state === "giant") giantMusic.play().catch(() => {}); }, 1200);
+  if (giantMusic.fallback) giantDrone.start();   // (the drone swells in under the sting)
+  else setTimeout(() => { if (sb.state === "giant") giantMusic.play().catch(() => {}); }, 1200);
   setTimeout(() => { if (sb.state === "giant") sbSay("Come to me, and I will give your flesh to the birds of the sky, and to the animals of the field. (1 Samuel 17:44)", "lecha_elai"); }, 1500);
 }
 function updateGiantIn(dt) {
@@ -984,12 +1015,12 @@ function updateGiantIn(dt) {
   if ((sb.yellT > 2.5 || sb.t > 14) && !sb.cleared) { sb.cleared = true; clear74(); }
 }
 function clear74() {   // the end of 7-4: no sheepfold out here. Straight to the end of World 7, then the Journal.
-  giantMusic.want = false; giantMusic.pause();
-  hushLoops(true); sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9);
+  // (Glen) no cheerful jingle here: the giant has just spoken. His music carries on, lower, into the end of the world
+  hushLoops(true); giantMusic.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * W7.GIANT_MUSIC_VOL * W7.GIANT_MUSIC_END); giantDrone.to(W7.GIANT_MUSIC_END, 3);
   const one = line.some(sh => sh.one);
   saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
   stageCleared(LEVEL_STAGE, { sheep: foundCount(), total: lostCount(), one, stones: specials.filter(o => o.taken).length, olives: david.olives, lampOil: david.lampOil, gathered: david.gathered });
-  setTimeout(() => w7ending.start(() => Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() })), 2500);
+  setTimeout(() => w7ending.start(() => { giantMusic.want = false; giantMusic.pause(); giantDrone.stop(2.5); Journal.open({ world: WORLD, stage: STAGE_NUM, onClose: () => backToMap() }); }), 2500);
 }
 function drawDoorShield(x, y, dir, lift, tilt, flash, alpha = 1) {   // a shield as big as a door: bronze, studded, a rim that flashes on the tell
   const w = W7.SHIELD_W, h = W7.SHIELD_H;

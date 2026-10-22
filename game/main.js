@@ -3996,7 +3996,9 @@ function updateMusic(dt) {
   // and in cut scenes (Glen) it sinks lower still, faint under the story
   const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
-  const darkOn = !musicFight && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
+  // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
+  const grave = typeof sb !== "undefined" && sb && sb.beaten;
+  const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
   dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
   nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
