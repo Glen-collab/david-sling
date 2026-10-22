@@ -121,17 +121,18 @@ const MAP_WORLDS = {
       { id: "7-4", label: "The Giant's Shadow", x: 1690, y: 740, trail: [[1350, 650], [1520, 700]] },
     ],
   },
-  // World 8: until Glen paints its own map, the World 7 painting, its stops out on the open, cracked valley floor
-  // (DESIGN 5h: the smallest map in the game; Goliath at 8-2, then the rout west, and home).
+  // World 8: Glen's painting (2048 x 1152): Saul's blue tent and the crown top-left, the steps down to the cracked valley
+  // floor, the ring of stones with Goliath's shield and spear in the middle, the abandoned Philistine camp on the right
+  // with the dust of the fleeing army, and the road winding all the way round to the sheepfold and Bethlehem bottom-left.
   8: {
-    name: "David and Goliath", src: "../assets/maps/world7_map.jpg",
+    name: "David and Goliath", src: "../assets/maps/world8_map.jpg",
     david: { far: 0.5, near: 0.9, y0: 150, y1: 1050 },
     stops: [
-      { id: "home", label: "Saul's tent", x: 184, y: 250 },
-      { id: "8-1", label: "The Valley", x: 1500, y: 860, trail: [[600, 760], [1100, 900], [1320, 900]] },
-      { id: "8-2", label: "Goliath", x: 1780, y: 700, trail: [[1640, 800]] },
-      { id: "8-3", label: "The Rout", x: 1840, y: 380, trail: [[1830, 560]] },
-      { id: "8-4", label: "Home", x: 420, y: 980, trail: [[1500, 1040], [900, 1060]] },
+      { id: "home", label: "Saul's tent", x: 300, y: 235 },
+      { id: "8-1", label: "The Valley", x: 690, y: 470, trail: [[450, 300], [580, 380]] },
+      { id: "8-2", label: "Goliath", x: 990, y: 625, trail: [[820, 540]] },
+      { id: "8-3", label: "The Rout", x: 1640, y: 430, trail: [[1200, 560], [1420, 500]] },
+      { id: "8-4", label: "Home", x: 470, y: 960, trail: [[1850, 640], [1880, 900], [1500, 1020], [1000, 1010], [700, 930]] },
     ],
   },
   // The journey map (Castlevania-style): Glen's painting of the whole road from Bethlehem to the Valley of Elah,

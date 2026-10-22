@@ -262,6 +262,38 @@ const JOURNAL_PAGES = {
           { text: "and You replace my fear.", at: 5 }] },
       ],
     },
+  },  // World 8: JOURNAL_TEXT.md (2026-10-22). No scratch-outs now: he writes straight through, because he's sure
+  8: {
+    name: "David and Goliath",
+    stages: ["The Valley", "Goliath", "The Rout", "Home"],
+    draft: {
+      left: [
+        ...E(1, "I told him: you come with sword and spear, but I come in the name of the LORD. The battle is the LORD's.", "1 Samuel 17:45–47"),
+        ...E(2, "Do not be terrified. The LORD your God goes with you, to fight for you and to save you.", "Deuteronomy 20:3–4"),
+        ...E(3, "The LORD is my strength and my song.", "Exodus 15:2"),   // the word he crossed out in 1-1, in its right place at last
+        ...E(4, "Ruth came to Bethlehem with nothing. Her son was Obed, Obed's son was Jesse, and Jesse's son is me.", "Ruth 4:17"),
+      ],
+      right: [   // the rest of the song, nothing crossed out
+        { at: 1, size: "psalm", segs: [
+          { text: "You fill my cup with goodness,", at: 1 }, { text: "\n" }, { text: "more than I could ever hold.", at: 1 }, { text: "\n" },
+          { text: "Your mercy keeps on following me,", at: 2 }, { text: "\n" }, { text: "and Your love will never grow old.", at: 2 }, { text: "\n" },
+          { text: "I will not be afraid,", at: 3 }, { text: "\n" }, { text: "for Your presence is my strength.", at: 3 },
+        ] },
+      ],
+    },
+    end: {
+      left: [
+        { at: 5, size: "entry", note: "1 Samuel 17:49–58",
+          segs: [{ text: "The giant fell, and not by sword or spear. When the king asked whose son I was, I said: \"I am the son of your servant Jesse the Bethlehemite.\"", at: 5 }] },
+        { at: 5, size: "small", stones: true, segs: [{ text: "Stones of remembrance: {stones} of 12", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "missingOne", segs: [{ text: "There's still a lamb out there. I can hear it at night. I won't stop until I bring it home.", at: 5 }] },
+        { at: 5, size: "small", onlyIf: "allOnes", segs: [{ text: "Every lost lamb is home. Not one was left behind.", at: 5 }] },
+      ],
+      right: [   // the outro (SONG.md), the first and last of it
+        { at: 5, size: "psalm", segs: [{ text: "Surely Your goodness will find me,", at: 5 }, { text: "\n" }, { text: "all the days that I am here.", at: 5 }, { text: "\n" },
+          { text: "My Shepherd, Lord and Savior,", at: 5 }, { text: "\n" }, { text: "I will dwell with You forever.", at: 5 }] },
+      ],
+    },
   },
 };
 
@@ -494,6 +526,11 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
        right: { top: [[552, 590], [630, 567], [697, 544]], bot: [[640, 790], [710, 772], [770, 747]] },
        thumbs: [[[526, 760], [530, 751], [540, 749], [547, 755], [550, 770], [552, 792], [525, 795]],
                 [[731, 657], [735, 651], [745, 649], [755, 654], [765, 665], [762, 672], [745, 670], [735, 666]]] },
+  // Glen's World 8 scene (2026-10-22): home, on the sheepfold wall above Bethlehem at sunset, the flock in the fold, the
+  // lamb asleep at his feet, the bag of stones beside him. Out of doors: no lamp. (Cropped to 3:2 from his 16:9; pages marked by hand)
+  8: { src: "../assets/journal/w8_reading.jpg", y: -40,
+       left:  { top: [[663, 467], [724, 463], [787, 471]], bot: [[757, 623], [820, 622], [882, 622]] },
+       right: { top: [[788, 471], [850, 451], [911, 436]], bot: [[882, 622], [907, 613], [932, 603]] } },
   // the letter note (Glen, 2026-10-18): David standing, looking down at the open book, the ground at his feet (his cut-out
   // over his ground pictures, put together in david-sling-art/journal_note). No lamp: it's out of doors (or the hall's own)
   note_road: { src: "../assets/journal/note_road.jpg", y: 0,

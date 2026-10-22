@@ -36,8 +36,11 @@ SETS = {"w1": ("image (5).jpg", "image (6).jpg", "image (7).jpg"),
         "w7_1": ("7-1 far.png", "7-1 mid.png", "7-1 near.png"),
         "w7_2": ("7-2 far.png", "7-2 mid.png", "7-2 near.png"),
         "w7_3": ("7-3 far.png", "7-3 mid.png", "7-3 near.png"),
-        "w7_4": ("7-4 far.png", "7-4 mid.png", "7-4 near.png")}   # 7-4 The Giant's Shadow (the open valley floor, dusk)   # 7-3 Five Smooth Stones (the streambed at sunset)   # 7-2 Remember the Hills (the walk down: terraces, the armies on both ridges)   # 7-1 Saul's Armor (late afternoon, the top of the camp)   # 6-2 No-Man's Land, 6-3 The Water Carriers (the streambed), 6-4 The Tower's Shadow (late afternoon)   # 6-1 The Camp of Fear (morning, the Philistine camp across the valley)   # 5-4 Down to Elah (dawn, the two camps)   # 5-3 The Lookouts' Ridge (night, the two camps below)   # 5-2 The Mountain Trail (night, full moon)   # 5-1 The Supply Road (hot afternoon, smoke far off)   # 4-4 The King's Hall (night)   # 4-3 The Broken String (Gibeah's market, late afternoon)   # 4-2 The Training Yard (Gibeah's fortress)   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
-MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1", "w7_2", "w7_3", "w7_4"}
+        "w7_4": ("7-4 far.png", "7-4 mid.png", "7-4 near.png"),
+        "w8_1": ("8-1 far.png", "8-1 mid.png", "7-4 near.png"),   # 8-1 The Valley and 8-2 Goliath (bright morning, both armies watching; 7-4's ground in front)
+        "w8_3": ("8-3 far.png", "8-3 mid.png", "8-3 near.png"),
+        "w8_4": ("8-4 far.png", "8-4 mid.png", "8-4 near.png")}   # 8-4 Home (Bethlehem at golden sunset: the terraces, the fold, the flowered path)   # 8-3 The Rout (noon: the dust of the fleeing army, the abandoned Philistine camp)   # 7-4 The Giant's Shadow (the open valley floor, dusk)   # 7-3 Five Smooth Stones (the streambed at sunset)   # 7-2 Remember the Hills (the walk down: terraces, the armies on both ridges)   # 7-1 Saul's Armor (late afternoon, the top of the camp)   # 6-2 No-Man's Land, 6-3 The Water Carriers (the streambed), 6-4 The Tower's Shadow (late afternoon)   # 6-1 The Camp of Fear (morning, the Philistine camp across the valley)   # 5-4 Down to Elah (dawn, the two camps)   # 5-3 The Lookouts' Ridge (night, the two camps below)   # 5-2 The Mountain Trail (night, full moon)   # 5-1 The Supply Road (hot afternoon, smoke far off)   # 4-4 The King's Hall (night)   # 4-3 The Broken String (Gibeah's market, late afternoon)   # 4-2 The Training Yard (Gibeah's fortress)   # 4-1 The Road to Gibeah (morning, vineyards, Jebus far off)
+MIRRORED = {"w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1", "w7_2", "w7_3", "w7_4", "w8_1", "w8_3", "w8_4"}
 # usage: python make_backgrounds.py [set ...]   (no names = all sets)
 
 def key_green(img):
@@ -70,7 +73,7 @@ def key_magenta(img, strict=False):
     return out
 
 NO_PINK = {"w2_3", "w2s"}   # sets with nothing pink in them, so any pink tinge is cleaned off (2-2's oleanders are pink: not in here)
-MAGENTA_SETS = {"w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1", "w7_2", "w7_3", "w7_4"}   # magenta, though the picture's corners aren't (4-4's mid layer has stone in its top corners)
+MAGENTA_SETS = {"w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1", "w7_2", "w7_3", "w7_4", "w8_1", "w8_3", "w8_4"}   # magenta, though the picture's corners aren't (4-4's mid layer has stone in its top corners)
 def key_backdrop(img, name=""):   # green or magenta, whichever the corners are
     if name in MAGENTA_SETS: return key_magenta(img)
     c = np.asarray(img.convert("RGB"))[2:12, 2:12].reshape(-1, 3).mean(0)
