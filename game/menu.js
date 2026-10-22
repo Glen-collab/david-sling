@@ -10,13 +10,13 @@ const CONTROLLERS = ["keyboard", "nes", "snes"];
 const CONTROLLER_NAMES = { keyboard: "Keyboard", nes: "NES controller", snes: "SNES controller" };
 
 // Scenes (title screen): Glen's film clips, to watch again (or show someone) once they've been reached in the game
+// intro: a world's whole opening (its film, words and scene, as the game plays it): picking one loads its stage with only
+// the opening (?w4intro&scene), and when it ends the page comes back here (main.js SCENE_ONLY). src: a film on its own.
 const FILM_CLIPS = [
-  { label: "Bethlehem at Dawn", world: "World 1", src: "../assets/video/w1_opening.mp4", seen: p => !!p.w1intro },   // the World 1 opening (world1.js w1intro)
-  { label: "Into the Wilderness", world: "World 2", src: "../assets/video/w2_opening.mp4", seen: p => !!p.w2intro },   // the World 2 opening (world2.js w2intro)
-  { label: "The Prophet Comes", world: "World 3", src: "../assets/video/w3_opening.mp4", seen: p => !!p.w3intro },   // the World 3 opening (world3.js w3intro)
+  { label: "Bethlehem at Dawn", world: "World 1", intro: "w1intro", stage: "1-1", seen: p => !!p.w1intro },
+  { label: "Into the Wilderness", world: "World 2", intro: "w2intro", stage: "2-1", seen: p => !!p.w2intro },
+  { label: "The Prophet Comes", world: "World 3", intro: "w3intro", stage: "3-1", seen: p => !!p.w3intro },
   { label: "The Anointing", world: "World 3", src: "../assets/video/anointing_closeup.mp4", seen: p => !!(p["3-A"] || {}).cleared },
-  // (Glen) the openings of Worlds 4-7 are played by the game itself, not films: picking one loads its stage with only the
-  // opening (?w4intro&scene), and when it ends the page comes back here (main.js SCENE_ONLY)
   { label: "The King Sends for David", world: "World 4", intro: "w4intro", stage: "4-1", seen: p => !!p.w4intro },
   { label: "Forty Days", world: "World 5", intro: "w5intro", stage: "5-1", seen: p => !!p.w5intro },
   { label: "The Army in Fear", world: "World 6", intro: "w6intro", stage: "6-1", seen: p => !!p.w6intro },
