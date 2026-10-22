@@ -779,6 +779,7 @@ Object.assign(W7, {
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
+  SB_CHARGE_SIZE: 1.08,  // Glen's sb_charge sheet next to sb_push (1 = same scale)
   SB_VOICE: 0.8,         // his battle cry's pitch and speed (1 = the other Philistines; lower = deeper and slower)
   SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
@@ -973,6 +974,7 @@ function drawShieldBearer(camX) {
     else if (sb.state === "back") drawSprite("sb_run", frameOf("sb_run", sb.t), x, sb.y, 1, k, Math.max(0, 1 - Math.max(0, sb.t - 2.5) / 1.5));   // he runs, back to his own lines
     else if (sb.state === "peek") drawSprite("sb_drop", Math.min(2, Math.floor(sb.t / 0.08)), x, sb.y, sb.dir, k, 1, fl);   // the shield tips: he looks over it
     else if (sb.state === "knock") drawSprite("sb_drop", sb.t < 0.5 ? 3 : 1, x, sb.y, sb.dir, k, 1, fl);
+    else if (sb.state === "charge" && SPR.sb_charge) drawSprite("sb_charge", frameOf("sb_charge", sb.t), x, sb.y, sb.dir, k * W7.SB_CHARGE_SIZE, 1, fl);   // Glen's charge: running, shield first
     else {
       const sp = sb.state === "charge" ? 2.2 : sb.state === "walk" || sb.state === "ready" ? 0.8 : 0.25;
       ctx.save(); ctx.translate(x, sb.y - sb.lift * 46); ctx.rotate(-sb.dir * sb.lift * 0.06);

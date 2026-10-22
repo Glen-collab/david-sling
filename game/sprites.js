@@ -3288,6 +3288,18 @@ window.SPRITE_DATA = {
   "ay": 333,
   "align": "feet"
  },
+ "sb_charge": {
+  "src": "../assets/sprites/sb_charge.png",
+  "frames": 12,
+  "w": 237,
+  "h": 249,
+  "ms": 49,
+  "loop": true,
+  "pingpong": false,
+  "ax": 159,
+  "ay": 247,
+  "align": "feet"
+ },
  "sb_drop": {
   "src": "../assets/sprites/sb_drop.png",
   "frames": 16,

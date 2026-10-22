@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 237,
+  "frame_h": 249,
+  "ms_per_frame": 49,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 159,
+  "anchor_y": 247,
+  "source": "clip_charge.mp4",
+  "video_frames": [
+    111,
+    112,
+    113,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    123,
+    124
+  ]
+}
