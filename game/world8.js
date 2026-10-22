@@ -114,7 +114,8 @@ if (location.hash === "#giantfall") giantFall.start(() => backToMap());   // (te
 // came from Glen on 2026-10-22: goliath_thrust (the spear lowered, then the lunge), goliath_slam (the spear lifted, turned
 // and driven down), goliath_sweep (the sword across) and goliath_chop (the sword overhead and down), clips in
 // david-sling-art/world8/goliath. The javelin is still his goliath_spear sheet (frames 5-9 wind up, 10 throws, 11-19
-// point), and roaring at the sky is goliath_yell until that clip comes.
+// point). goliath_roar (head back, roaring at the sky: the opening) and goliath_point (yelling, pointing: his taunts)
+// came after, from one clip.
 //   setPiece("words8", c)    8-1: past column c, Goliath (standing W8.WORDS_GX tiles on) taunts (17:43-44), and David
 //                            answers line by line, one A press each (17:45-47); the last line earns the throw's last
 //                            piece (A, faith: DESIGN 4c), then it's straight on to 8-2.
@@ -205,6 +206,10 @@ function drawWords8(camX) {
   const w = words8; if (!w || !SPR.goliath_yell) return;
   const x = w.gx - camX; if (x < -300 || x > W + 300) return;
   const yell = w.state === "taunt" || w.state === "taunt2" || (dialog.t > 0 && dialog.who === "Goliath");
+  if (SPR.goliath_point) {   // (Glen's yell-and-point clip) he lifts his arm and points at David as he shouts; then keeps shouting
+    const f = !yell ? 0 : w.t < 1.4 ? Math.min(7, Math.floor(w.t / 0.18)) : 5 + Math.floor(performance.now() / 160) % 3;
+    drawSprite("goliath_point", f, x, GR * T, -1, W8.SIZE * W8.CLIP_SIZE); return;
+  }
   drawSprite("goliath_yell", yell ? frameOf("goliath_yell", performance.now() / 1000) : 0, x, GR * T, -1, W8.SIZE);
 }
 function drawWords8Over() {   // David's answer, big across the valley, line by line
@@ -439,17 +444,23 @@ function drawGoliath8(camX) {
       ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = gl; ctx.fillRect(gx - r * 2, gy - r * 2, r * 4, r * 4); ctx.restore();
     }
   } else {
-    const yelling = ["reset", "roar", "open", "miss"].includes(g8.state);
-    drawSprite("goliath_yell", yelling ? frameOf("goliath_yell", now) : 0, x, GR * T, -1, W8.SIZE, 1, fl);
+    const yelling = ["reset", "roar", "open", "miss"].includes(g8.state), C = W8.SIZE * W8.CLIP_SIZE;
+    if ((g8.state === "roar" || g8.state === "open") && SPR.goliath_roar)   // (Glen) his head thrown back, roaring at the sky: the forehead open
+      drawSprite("goliath_roar", g8.state === "roar" && g8.t < 0.6 ? Math.floor(g8.t / 0.2) : 3 + Math.floor(now * 4) % 5, x, GR * T, -1, C, 1, fl);
+    else if (g8.state === "miss" && SPR.goliath_point)   // he points at David and laughs
+      drawSprite("goliath_point", g8.t < 1.0 ? Math.min(7, Math.floor(g8.t / 0.12)) : 5 + Math.floor(now * 6) % 3, x, GR * T, -1, C, 1, fl);
+    else drawSprite("goliath_yell", yelling ? frameOf("goliath_yell", now) : 0, x, GR * T, -1, W8.SIZE, 1, fl);
   }
   if (g8.state === "roar" || g8.state === "open") {   // his forehead, open under the helmet's edge
     const hx = x + W8.BROW[0], hy = GR * T - W8.BROW[1], r = 14 + 6 * Math.sin(now * 6);
     const gl = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 2.4); gl.addColorStop(0, "rgba(255,240,180,0.85)"); gl.addColorStop(1, "rgba(255,200,80,0)");
     ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = gl; ctx.fillRect(hx - r * 3, hy - r * 3, r * 6, r * 6); ctx.restore();
+    ctx.save(); ctx.strokeStyle = `rgba(255,214,90,${0.6 + 0.4 * Math.sin(now * 8)})`; ctx.lineWidth = 3; ctx.shadowColor = "rgba(255,200,60,0.9)"; ctx.shadowBlur = 12;   // a target ring, so it can't be missed
+    ctx.beginPath(); ctx.arc(hx, hy, 16 + 4 * Math.sin(now * 8), 0, Math.PI * 2); ctx.stroke(); ctx.restore();
   }
   if (typeof drawSbSparks === "function") drawSbSparks(camX);
 }
-Object.assign(W8, { GLINT: { thrust: [-150, 150], slam: [-40, 330] }, BROW: [-10, 245] });   // px from his feet: the spear-head's glint, his forehead (fit to the art)
+Object.assign(W8, { GLINT: { thrust: [-150, 150], slam: [-40, 330] }, BROW: [-2, 242] });   // px from his feet: the spear-head's glint, his forehead (fit to the art)
 function drawGoliath8Over() {   // the meter (17:48), the five stones, the callouts, and the throw
   if (!g8 || !g8.on || g8.won) return;
   ctx.save(); ctx.textAlign = "center";

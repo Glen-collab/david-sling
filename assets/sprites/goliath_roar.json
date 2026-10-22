@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 235,
+  "frame_h": 286,
+  "ms_per_frame": 286,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 84,
+  "anchor_y": 284,
+  "source": "clip_roar_point.mp4",
+  "video_frames": [
+    6,
+    14,
+    21,
+    29,
+    37,
+    45,
+    52,
+    60
+  ]
+}

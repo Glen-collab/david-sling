@@ -1824,6 +1824,30 @@ window.SPRITE_DATA = {
   "ay": 343,
   "align": "feet"
  },
+ "goliath_point": {
+  "src": "../assets/sprites/goliath_point.png",
+  "frames": 8,
+  "w": 269,
+  "h": 284,
+  "ms": 214,
+  "loop": false,
+  "pingpong": false,
+  "ax": 131,
+  "ay": 282,
+  "align": "feet"
+ },
+ "goliath_roar": {
+  "src": "../assets/sprites/goliath_roar.png",
+  "frames": 8,
+  "w": 235,
+  "h": 286,
+  "ms": 286,
+  "loop": false,
+  "pingpong": false,
+  "ax": 84,
+  "ay": 284,
+  "align": "feet"
+ },
  "goliath_silhouette": {
   "src": "../assets/sprites/goliath_silhouette.png",
   "frames": 4,
