@@ -15,6 +15,12 @@ const FILM_CLIPS = [
   { label: "Into the Wilderness", world: "World 2", src: "../assets/video/w2_opening.mp4", seen: p => !!p.w2intro },   // the World 2 opening (world2.js w2intro)
   { label: "The Prophet Comes", world: "World 3", src: "../assets/video/w3_opening.mp4", seen: p => !!p.w3intro },   // the World 3 opening (world3.js w3intro)
   { label: "The Anointing", world: "World 3", src: "../assets/video/anointing_closeup.mp4", seen: p => !!(p["3-A"] || {}).cleared },
+  // (Glen) the openings of Worlds 4-7 are played by the game itself, not films: picking one loads its stage with only the
+  // opening (?w4intro&scene), and when it ends the page comes back here (main.js SCENE_ONLY)
+  { label: "The King Sends for David", world: "World 4", intro: "w4intro", stage: "4-1", seen: p => !!p.w4intro },
+  { label: "Forty Days", world: "World 5", intro: "w5intro", stage: "5-1", seen: p => !!p.w5intro },
+  { label: "The Army in Fear", world: "World 6", intro: "w6intro", stage: "6-1", seen: p => !!p.w6intro },
+  { label: "Saul's Armor", world: "World 7", intro: "w7intro", stage: "7-1", seen: p => !!p.w7intro },
   { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
   { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
 ];
@@ -28,6 +34,8 @@ const Menu = {
   // first thing when the game opens: the title once per sitting (a stage cleared reloads the page, and that goes straight to the map)
   boot() {
     let seen = false; try { seen = sessionStorage.getItem("davidTitleSeen"); } catch (e) {}
+    let back = false; try { back = sessionStorage.getItem("davidScenesBack"); sessionStorage.removeItem("davidScenesBack"); } catch (e) {}
+    if (back) { this.open("title"); this.go("scenes"); return; }   // back from an opening played from Scenes
     if (seen) WorldMap.open(loadProgress().view || "journey"); else this.open("title");
   },
   open(screen, fromStage = false) {
@@ -62,7 +70,9 @@ const Menu = {
     ];
     if (this.screen === "scenes") {
       const p = loadProgress();
-      return [...FILM_CLIPS.map(c => sceneOpen(c, p) ? { label: c.label, value: c.world, act: () => this.playScene(c) } : { label: "Not reached yet", value: c.world, off: true }),
+      return [...FILM_CLIPS.map(c => !sceneOpen(c, p) ? { label: "Not reached yet", value: c.world, off: true }
+                                 : c.intro && this.fromStage ? { label: c.label, value: "from the title", off: true }   // (it would leave the stage)
+                                 : { label: c.label, value: c.world, act: () => this.playScene(c) }),
               { label: "Back", act: () => this.go(this.home) }];   // (to the title, or back to Paused)
     }
     if (this.screen === "pause") return [
@@ -92,6 +102,7 @@ const Menu = {
     return [{ label: "Back", act: () => this.go("settings") }];   // controls
   },
   playScene(c) {   // full screen, start to finish; A, B or Start stops it
+    if (c.intro) { try { sessionStorage.setItem("davidScenesBack", "1"); } catch (e) {} location.href = `index.html?${c.intro}&scene#${c.stage}`; return; }
     if (!this.clip) this.clip = Object.assign(document.createElement("video"), { muted: true, playsInline: true, preload: "auto" });
     this.clip.src = c.src + "?v=" + (window.BUILD || 0); this.clip.currentTime = 0; this.clip.play().catch(() => {});
     themeMusic.pause(); this.playing = c; this.playT = 0; this.cue = 0;
@@ -181,14 +192,14 @@ const Menu = {
       ctx.fillText("Start a new game? Your saved game (stages, sheep, olives, skills) will be erased.", W / 2, 320);
     }
     // the list
-    const it = this.items(), rowH = 54, top = this.screen === "confirm" ? 380 : title ? 330 : 220;
+    const sc = this.screen === "scenes", it = this.items(), rowH = sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : sc ? 200 : 220;
     const bw = this.screen === "settings" || this.screen === "scenes" ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {
       const y = top + i * rowH, on = i === this.sel;
-      if (on) { ctx.fillStyle = "rgba(255,210,110,0.18)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 12, y - 30, bw - 24, 44, 10); ctx.fill(); }
+      if (on) { ctx.fillStyle = "rgba(255,210,110,0.18)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 12, y - (sc ? 28 : 30), bw - 24, sc ? 38 : 44, 10); ctx.fill(); }
       ctx.fillStyle = m.off ? "rgba(255,255,255,0.3)" : on ? "#ffe08a" : "#f3ead8";
-      ctx.font = `${on ? "bold " : ""}26px sans-serif`;
+      ctx.font = `${on ? "bold " : ""}${sc ? 23 : 26}px sans-serif`;
       const twoCol = this.screen === "settings" || this.screen === "scenes";
       ctx.textAlign = twoCol ? "left" : "center";
       ctx.fillText((on ? "▸ " : "") + m.label, twoCol ? W / 2 - bw / 2 + 36 : W / 2, y);

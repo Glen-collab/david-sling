@@ -332,6 +332,7 @@ const LEVEL_NAME = location.hash === "#test" ? "test" : STAGE_HASH || "1-1";
 // the game opens on the World 1 map; a stage in the address ("#1-2") goes straight into it (key 1 = 1-1)
 function backToMap() { history.replaceState(null, "", location.pathname + location.search); location.reload(); }
 const LEVEL_STAGE = LEVEL_NAME === "test" ? "1-1" : LEVEL_NAME;   // which stage this is (for the Journal, the map and the saved stones)
+const SCENE_ONLY = new URLSearchParams(location.search).has("scene");   // (menu.js Scenes) only this stage's opening, then back to Scenes
 const STAGE_NUM = +LEVEL_STAGE.split("-")[1];
 // per stage: how long it is, which background, night or day
 const STAGE_INFO = {
@@ -4310,6 +4311,7 @@ function frame(now) {
     requestAnimationFrame(frame); return;
   }
   updateMusic(real);   // the stage music: low under words, silent in cut scenes (Glen)
+  if (SCENE_ONLY && !cutSceneUp()) { location.href = "index.html"; return; }   // the opening is over: back to Scenes
   if (cutSceneUp()) {   // no running feet, birds or fight music under a cut scene (the rain stays: it's the weather; and some scenes play David's harp)
     for (const a of [stepsRun, ambience, bossMusic]) if (!a.paused) a.pause();
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }
