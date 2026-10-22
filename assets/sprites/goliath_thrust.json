@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 415,
+  "frame_h": 287,
+  "ms_per_frame": 193,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 172,
+  "anchor_y": 285,
+  "source": "clip_thrust.mp4",
+  "video_frames": [
+    30,
+    35,
+    40,
+    45,
+    51,
+    56,
+    61,
+    66
+  ]
+}

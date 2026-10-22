@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 211,
+  "frame_h": 286,
+  "ms_per_frame": 255,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 90,
+  "anchor_y": 284,
+  "source": "clip_slam.mp4",
+  "video_frames": [
+    24,
+    31,
+    38,
+    45,
+    51,
+    58,
+    65,
+    72
+  ]
+}

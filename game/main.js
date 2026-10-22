@@ -357,7 +357,9 @@ const STAGE_INFO = {
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
   "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
-  "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },   // the open valley floor: no music
+  "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },
+  "8-1": { cols: 72, bg: "w7_4", ter: "w2s", quiet: true, name: "The Valley" },   // World 8 (world8.js): the open valley floor again, no music: the words before the fight
+  "8-2": { cols: 40, bg: "w7_4", ter: "w2s", quiet: true, name: "Goliath" },      // the duel (his own music: Glen's war horns)   // the open valley floor: no music
   "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
   "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
@@ -1409,6 +1411,20 @@ if (LEVEL_NAME === "test") {
   fakeRock(144, 13, 3, 4); lostSheep("lamb", 145, 16, "one");    // The One, tucked in behind it
   campfire(152);
   setPiece("shieldbearer", 160);                                 // the arena: 35 columns, Goliath at its far end
+} else if (LEVEL_NAME === "8-1") {
+  // ---- 8-1 The Valley (1 Samuel 17:42-47): the last stretch of open ground to where the duel will be. No campfires,
+  //      no helpers (DESIGN 5h). The One: a lamb that wandered out of the Israelite camp onto the valley floor. Past
+  //      column 44 Goliath taunts, and David answers him line by line (setPiece "words8", world8.js). ----
+  ground(0, 71);
+  talk(3, "", "Both armies stand on the hills, watching. Nobody makes a sound. Ahead, on the open ground, the giant is waiting.");
+  setPiece("vultures", 16);
+  lostSheep("lamb", 26, 16, "one");   // The One: out on the valley floor
+  rock(33, 15, 2, 2);
+  setPiece("words8", 44);
+} else if (LEVEL_NAME === "8-2") {
+  // ---- 8-2 Goliath (1 Samuel 17:48-49): the duel. The arena is the whole stage (setPiece "goliath8", world8.js). ----
+  ground(0, 39);
+  setPiece("goliath8", 2);
 } else if (LEVEL_NAME === "7-3") {
   // ---- 7-3 Five Smooth Stones (1 Samuel 17:40): the streambed in the middle of the valley. Choosing stones is the
   //      gameplay: setPiece("pickstone") stones shine faintly when David is near; Down lifts one for a close-up, A keeps
@@ -1967,7 +1983,7 @@ function updateDavid(dt) {
   if (d.carryHop > 0) d.carryHop -= dt;
   const dir = (held("right") ? 1 : 0) - (held("left") ? 1 : 0);
   const busy = d.state === "roll" || d.state === "getup" || d.state === "pickup" || d.state === "putdown" || d.state === "standup" ||
-               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout" || (ARMORED() && armor.removing > 0) || (typeof w7Busy === "function" && w7Busy());   // 7-3: stuck on a wrong stone
+               (d.state === "slip" && d.t < TUNE.SLIP_LOCK) || d.state === "climb" || d.state === "topout" || (ARMORED() && armor.removing > 0) || (typeof w7Busy === "function" && w7Busy()) || (typeof w8Busy === "function" && w8Busy());   // 7-3: stuck on a wrong stone
 
   // --- harp (Select): kneel and play while standing still
   if ((pressed("select") || pressed("y")) && d.onGround && !d.carrying && !busy && Math.abs(d.vx) < 30 && !(ARMORED() && armorOff()) && !(typeof w7Select === "function" && w7Select())) {   // in Saul's armor, Select takes it off (world7.js)
@@ -2355,7 +2371,8 @@ function updateStones(dt) {
     if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld6 === "function" && stoneHitsWorld6(s)) s.life = 0;
-    if (s.life > 0 && typeof stoneHitsWorld7 === "function" && stoneHitsWorld7(s)) s.life = 0;   // world7.js: the shield-bearer   // world6.js: the watchtower, the skirmishers   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
+    if (s.life > 0 && typeof stoneHitsWorld7 === "function" && stoneHitsWorld7(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsWorld8 === "function" && stoneHitsWorld8(s)) s.life = 0;   // world8.js: Goliath's bronze, the javelin   // world7.js: the shield-bearer   // world6.js: the watchtower, the skirmishers   // world5.js: the leopard (5-2), the lookouts' torches (5-3)   // world4.js: 4-2's targets and jars       // world3.js (3-4)
     if (s.life > 0 && !s.power && stoneHitsTree(s)) { s.life = 0; stoneHit(s); }
     if (s.life > 0 && !finalBlow.on) watchForFinalStone(s);
     if (s.life > 0 && !finalBlow.on && typeof bear !== "undefined" && bear.on) watchBearFinal(s);
@@ -4014,6 +4031,7 @@ function updateMusic(dt) {
   // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
   const cutScene = cutSceneUp();
   if (typeof giantMusic !== "undefined" && giantMusic.want && giantMusic.paused && !giantMusic.fallback && giantMusic.held) { giantMusic.held = false; giantMusic.play().catch(() => {}); }   // back from a pause
+  if (typeof G8_MUSIC !== "undefined" && G8_MUSIC.held && goliathFight()) { G8_MUSIC.held = false; G8_MUSIC.play().catch(() => {}); }
   if (typeof giantDrone !== "undefined" && giantDrone.held) { giantDrone.held = false; giantDrone.to(giantDrone.k || 1, 1); }
   // and in cut scenes (Glen) it sinks lower still, faint under the story
   const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
@@ -4056,6 +4074,7 @@ function updateSound(dt) {
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
 function hushGiant() {   // (world7.js) held, not stopped: updateMusic starts them again
   if (typeof giantMusic !== "undefined" && giantMusic.want && !giantMusic.paused) { giantMusic.pause(); giantMusic.held = true; }
+  if (typeof G8_MUSIC !== "undefined" && !G8_MUSIC.paused) { G8_MUSIC.pause(); G8_MUSIC.held = true; }   // (world8.js, the duel)
   if (typeof giantDrone !== "undefined" && giantDrone.nodes && !giantDrone.held) { giantDrone.held = true; const k = giantDrone.k; giantDrone.to(0.001, 0.15); giantDrone.k = k; }
 }
 function hushLoops(keepRain = false) {
@@ -4093,7 +4112,8 @@ function updateWorld(dt) {
   if (typeof updateWorld3 === "function") updateWorld3(dt);
   if (typeof updateWorld4 === "function") updateWorld4(dt);
   if (typeof updateWorld6 === "function") updateWorld6(dt);
-  if (typeof updateWorld7 === "function") updateWorld7(dt);   // world7.js: Saul's armor   // world6.js: the frightened soldiers, the tents, Eliab
+  if (typeof updateWorld7 === "function") updateWorld7(dt);
+  if (typeof updateWorld8 === "function") updateWorld8(dt);   // world8.js: the words, the duel   // world7.js: Saul's armor   // world6.js: the frightened soldiers, the tents, Eliab
   if (typeof updateWorld5 === "function") updateWorld5(dt);   // world5.js: the provisions, raiders, the fleeing father   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
@@ -4329,6 +4349,7 @@ function frame(now) {
   if (typeof drawWorld4 === "function") drawWorld4(camX);
   if (typeof drawWorld6 === "function") drawWorld6(camX);   // world6.js
   if (typeof drawWorld7 === "function") drawWorld7(camX);   // world7.js
+  if (typeof drawWorld8 === "function") drawWorld8(camX);   // world8.js
   if (typeof drawWorld5 === "function") drawWorld5(camX);   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
@@ -4355,6 +4376,7 @@ function frame(now) {
   drawNight(camX);
   if (typeof drawLeopardEyes === "function") { drawLeopardEyes(camX); drawLookoutLight(camX); }   // world5.js: eyes in the branches (5-2), torchlight and signal fires (5-3)
   if (typeof drawStorm === "function") drawStorm(camX);
+  if (typeof drawWorld8Over === "function") drawWorld8Over();   // world8.js: David's answer, the duel's meter and the throw
   if (typeof drawWorld7Over === "function") drawWorld7Over();   // 7-1: the helmet slips down over his eyes (world7.js)   // 3-4: rain, the dark, lightning (world3.js)
   drawCaveDarkness(camX);
   drawFinalBlow();

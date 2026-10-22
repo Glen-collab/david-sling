@@ -1776,6 +1776,18 @@ window.SPRITE_DATA = {
   "ay": 162,
   "align": "feet"
  },
+ "goliath_chop": {
+  "src": "../assets/sprites/goliath_chop.png",
+  "frames": 8,
+  "w": 473,
+  "h": 294,
+  "ms": 203,
+  "loop": false,
+  "pingpong": false,
+  "ax": 198,
+  "ay": 291,
+  "align": "feet"
+ },
  "goliath_face_hit": {
   "src": "../assets/sprites/goliath_face_hit.png",
   "frames": 24,
@@ -1824,6 +1836,18 @@ window.SPRITE_DATA = {
   "ay": 343,
   "align": "feet"
  },
+ "goliath_slam": {
+  "src": "../assets/sprites/goliath_slam.png",
+  "frames": 8,
+  "w": 211,
+  "h": 286,
+  "ms": 255,
+  "loop": false,
+  "pingpong": false,
+  "ax": 90,
+  "ay": 284,
+  "align": "feet"
+ },
  "goliath_spear": {
   "src": "../assets/sprites/goliath_spear.png",
   "frames": 20,
@@ -1834,6 +1858,30 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 219,
   "ay": 433,
+  "align": "feet"
+ },
+ "goliath_sweep": {
+  "src": "../assets/sprites/goliath_sweep.png",
+  "frames": 8,
+  "w": 339,
+  "h": 285,
+  "ms": 193,
+  "loop": false,
+  "pingpong": false,
+  "ax": 154,
+  "ay": 283,
+  "align": "feet"
+ },
+ "goliath_thrust": {
+  "src": "../assets/sprites/goliath_thrust.png",
+  "frames": 8,
+  "w": 415,
+  "h": 287,
+  "ms": 193,
+  "loop": false,
+  "pingpong": false,
+  "ax": 172,
+  "ay": 285,
   "align": "feet"
  },
  "goliath_walk": {

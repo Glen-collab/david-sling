@@ -1,0 +1,21 @@
+{
+  "frames": 8,
+  "frame_w": 473,
+  "frame_h": 294,
+  "ms_per_frame": 203,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 198,
+  "anchor_y": 291,
+  "source": "clip_chop.mp4",
+  "video_frames": [
+    100,
+    105,
+    111,
+    116,
+    122,
+    127,
+    133,
+    138
+  ]
+}
