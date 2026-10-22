@@ -776,6 +776,11 @@ Object.assign(W7, {
   SB_HITS: 3,            // back hits (phase 1), edge hits (phase 2)
   SHIELD_W: 74, SHIELD_H: 168,
   GOLIATH_SIZE: 1.55,
+  SB_LEAP: 0.5,          // (Glen's sb_jump) seconds in the air on a slam; the shockwave goes out as he lands
+  SB_LEAP_H: 70,         // how high he leaps (px)
+  SB_JUMP_SIZE: 1,       // sb_jump / sb_step against sb_push (1 = the same)
+  SB_STEP_SIZE: 1,
+  SB_STEP_T: 1.1,        // seconds for one of his steps while he walks
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
@@ -850,20 +855,21 @@ function updateShieldBearer(dt) {
     if (sb.state === "walk") {
       // he turns to face David (slowly) if David gets round behind him
       if (toD !== sb.dir) { sb.behindT += dt; if (sb.behindT > W7.SB_TURN) { sb.dir = toD; sb.behindT = 0; } } else sb.behindT = 0;
-      if (Math.abs(d.x - sb.x) > 3 * T) sb.x += sb.dir * W7.SB_WALK * dt;
+      if (Math.abs(d.x - sb.x) > 3 * T) { sb.x += sb.dir * W7.SB_WALK * dt; sb.stepT = (sb.stepT || 0) + dt; }   // (stepT: Glen's step, sb_step, plays as he walks)
       sb.x = Math.max(sb.a0 + 3 * T, Math.min(sb.a1 - 5 * T, sb.x));
       sb.sinceSlam += dt;
       if (sb.sinceSlam > W7.SB_EVERY && toD === sb.dir) { sbSetState("lift"); sb.sinceSlam = 0; }
     } else if (sb.state === "lift") {
       sb.lift = Math.min(1, sb.t / sbTell());
       if (sb.t >= sbTell()) { sbSetState("slam"); }
-    } else if (sb.state === "slam") {
-      sb.lift = Math.max(0, 1 - sb.t / 0.12);
-      if (sb.t >= 0.12 && !sb.slammed) {
+    } else if (sb.state === "slam") {   // (Glen's jump, sb_jump) he leaps with it and comes down: the shockwave on landing
+      const leap = SPR.sb_jump ? W7.SB_LEAP : 0.12;
+      sb.lift = SPR.sb_jump ? (sb.t < leap ? 1 : 0) : Math.max(0, 1 - sb.t / 0.12);
+      if (sb.t >= leap && !sb.slammed) {
         sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1;
         sb.waves.push({ x: front, dir: -1, t: 0 }, { x: front, dir: 1, t: 0 });
       }
-      if (sb.t > 0.3) { sb.slammed = false; sbSetState("recover"); }
+      if (sb.t > (SPR.sb_jump ? W7.SB_LEAP + 0.18 : 0.3)) { sb.slammed = false; sbSetState("recover"); }
     } else if (sb.state === "recover") {   // heaving it back up: he can't turn now
       sb.lift = 0.15 * Math.sin(Math.min(1, sb.t / W7.SB_RECOVER) * Math.PI);
       if (sb.t >= W7.SB_RECOVER) sbSetState("walk");
@@ -1071,6 +1077,15 @@ function drawShieldBearer(camX) {
     else if (sb.state === "back") drawSprite("sb_run", frameOf("sb_run", sb.t), x, sb.y, 1, k, Math.max(0, 1 - Math.max(0, sb.t - 2.5) / 1.5));   // he runs, back to his own lines
     else if (sb.state === "peek") drawSprite("sb_drop", Math.min(2, Math.floor(sb.t / 0.08)), x, sb.y, sb.dir, k, 1, fl);   // the shield tips: he looks over it
     else if (sb.state === "knock") drawSprite("sb_drop", sb.t < 0.5 ? 3 : 1, x, sb.y, sb.dir, k, 1, fl);
+    else if (sb.phase === 1 && SPR.sb_jump && (sb.state === "lift" || sb.state === "slam" || sb.state === "recover")) {   // (Glen) crouch (the rim flashes), leap, land, rise
+      const f = sb.state === "lift" ? (sb.t < 0.12 ? 0 : 1) : sb.state === "slam" ? (sb.t < W7.SB_LEAP * 0.5 ? 2 : sb.t < W7.SB_LEAP ? 3 : 4) : (sb.t < 0.35 ? 4 : 5);
+      const up = sb.state === "slam" ? Math.sin(Math.PI * Math.min(1, sb.t / W7.SB_LEAP)) * W7.SB_LEAP_H : 0;
+      drawSprite("sb_jump", f, x, sb.y - up, sb.dir, k * W7.SB_JUMP_SIZE, 1, fl + (warn ? ` drop-shadow(0 0 ${6 + 5 * Math.sin(now * 20)}px rgba(255,220,120,0.95))` : ""));
+    }
+    else if (SPR.sb_step && (sb.state === "ready" || (sb.phase === 1 && sb.state === "walk"))) {   // (Glen's step) walking behind the shield; the step in before each charge
+      const f = sb.state === "ready" ? Math.min(5, Math.floor(sb.t / 0.9 * 6)) : Math.floor(((sb.stepT || 0) % W7.SB_STEP_T) / W7.SB_STEP_T * 6);
+      drawSprite("sb_step", f, x, sb.y, sb.dir, k * W7.SB_STEP_SIZE, 1, fl);
+    }
     else if (sb.state === "charge" && SPR.sb_charge) drawSprite("sb_charge", frameOf("sb_charge", sb.t), x, sb.y, sb.dir, k * W7.SB_CHARGE_SIZE, 1, fl);   // Glen's charge: running, shield first
     else {
       const sp = sb.state === "charge" ? 2.2 : sb.state === "walk" || sb.state === "ready" ? 0.8 : 0.25;
