@@ -34,7 +34,10 @@ function sayLine(who, say) { Object.assign(dialog, { who, say, t: Math.max(W1.DI
 const dialogHeld = () => dialog.hold && dialog.t > 0 && dialog.say === dialog.heldSay;   // (a story scene writing its own lines into the box isn't held)
 function updateTalks(dt) {
   dialog.t = Math.max(0, dialog.t - dt);
-  for (const k of talks) if (!k.done && david.x > k.x && david.x < MAIN_COLS * T && david.deadT <= 0) { k.done = true; sayLine(k.who, k.say); learnSkill(k.teach); }
+  // (Glen) one person's lines close together (4 tiles, like drawCampfirePeople's one spot) come one after another as
+  // A closes each: he keeps talking where he stands, no walking up for the next line
+  const chained = (k, i) => { const p = talks[i - 1]; return p && p.done && p.who && p.who === k.who && k.x - p.x <= 4 * T && !dialog.hold; };   // (the moment A lets the last line go: the words just change)
+  talks.forEach((k, i) => { if (!k.done && (david.x > k.x || chained(k, i)) && david.x < MAIN_COLS * T && david.deadT <= 0 && !(dialog.t > 0 && dialog.hold)) { k.done = true; sayLine(k.who, k.say); learnSkill(k.teach); } });
 }
 function drawDialog() {
   if (dialog.t <= 0) return;

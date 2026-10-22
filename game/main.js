@@ -4020,7 +4020,7 @@ function updateMusic(dt) {
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
-  const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
+  const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? (["land", "open", "close"].includes(finish.phase) ? 0.5 : 0) : 1) * musicDuck : 0;   // (Glen) at the gate it sinks to half; under the stage-clear jingle it goes out altogether
   if (stageTheme) stageThemeVol = fadeLoop(stageTheme, stageThemeVol, !cave.room ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.THEME_MUSIC_VOLUME : 0, dt, 0.4);
   dayVol = fadeLoop(dayMusic, dayVol, !stageTheme && !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
