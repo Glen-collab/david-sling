@@ -1392,11 +1392,11 @@ if (LEVEL_NAME === "test") {
   // (Glen) the main act: the cracks are wide now, a full running jump or the scout's leap, and the long ones only
   // with loose rocks to land on, which give way under him
   crack(22, 10); ground(32, 46);
-  setPiece("vultures", 30);
+  setPiece("vultures", 34);   // on the ground between the cracks, not over them
   snake("viper", 37);
   rock(42, 15, 3, 2); special(43, 13);
   crack(47, 16); crumble(51, 14, 2); crumble(57, 13, 2); ground(63, 79);   // loose rocks over the crack
-  setPiece("vultures", 60); snake("viper", 66);
+  setPiece("vultures", 77); snake("viper", 66);
   rock(71, 15, 2, 2); rock(73, 13, 3, 4);
   crack(80, 14); crumble(85, 14, 2); crumble(89, 13, 2); ground(94, 115);
   talk(96, "", "Far up the Israelite slope, apart from the others, one man stands with his arms crossed. Eliab. He doesn't call out.");
