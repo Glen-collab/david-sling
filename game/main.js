@@ -4004,11 +4004,17 @@ function fadeLoop(a, cur, want, dt, speed) {
 // the stage music (day / night / cave), every frame the stage or one of its scenes has the screen (frame() calls it,
 // so it also runs under a held talk box and in the cut scenes, which skip updateSound)
 let musicFight = false;
+// a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
+// feet carry on under the 7-3 riddle)
+const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
+  "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall"];
+function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 function updateMusic(dt) {
   if (!audioUnlocked) return;
   // (Glen) words up in play: the music sinks low under them and comes back after, instead of cutting out
-  const cutScene = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
-    "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry"].some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } });
+  const cutScene = cutSceneUp();
+  if (typeof giantMusic !== "undefined" && giantMusic.want && giantMusic.paused && !giantMusic.fallback && giantMusic.held) { giantMusic.held = false; giantMusic.play().catch(() => {}); }   // back from a pause
+  if (typeof giantDrone !== "undefined" && giantDrone.held) { giantDrone.held = false; giantDrone.to(giantDrone.k || 1, 1); }
   // and in cut scenes (Glen) it sinks lower still, faint under the story
   const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
@@ -4048,6 +4054,10 @@ function updateSound(dt) {
 }
 // everything quiet: The One's card and the pause menu stop the footsteps, the hills, the lion music and the harp.
 // They pick up again on their own when play goes on (fadeLoop restarts a loop that should be heard).
+function hushGiant() {   // (world7.js) held, not stopped: updateMusic starts them again
+  if (typeof giantMusic !== "undefined" && giantMusic.want && !giantMusic.paused) { giantMusic.pause(); giantMusic.held = true; }
+  if (typeof giantDrone !== "undefined" && giantDrone.nodes && !giantDrone.held) { giantDrone.held = true; const k = giantDrone.k; giantDrone.to(0.001, 0.15); giantDrone.k = k; }
+}
 function hushLoops(keepRain = false) {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();   // (the stage music isn't stopped here: updateMusic lowers it)
   if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)
@@ -4221,8 +4231,9 @@ function frame(now) {
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)
-    for (const a of [dayMusic, nightMusic, caveMusic, stageTheme, ambience, bossMusic, finish.jingle]) if (a && !a.paused) a.pause();   // (and the stage-clear jingle, if he turned the page before it ended)   // nor the stage music or the birds (they fade back in after)
-    dayVol = nightVol = caveVol = ambVol = bossVol = 0;
+    for (const a of [dayMusic, nightMusic, caveMusic, stageTheme, ambience, bossMusic, stepsRun, finish.jingle]) if (a && !a.paused) a.pause();
+    hushGiant();   // 7-4: Goliath's war horns and the drone hold too (they pick up again after)   // (and the stage-clear jingle, if he turned the page before it ended)   // nor the stage music or the birds (they fade back in after)
+    dayVol = nightVol = caveVol = ambVol = bossVol = stageThemeVol = runVol = 0;
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
     // Start on a map or in the courtyard: the pause menu (settings)
@@ -4236,6 +4247,11 @@ function frame(now) {
     requestAnimationFrame(frame); return;
   }
   updateMusic(real);   // the stage music: low under words, silent in cut scenes (Glen)
+  if (cutSceneUp()) {   // no running feet, birds or fight music under a cut scene (the rain stays: it's the weather; and some scenes play David's harp)
+    for (const a of [stepsRun, ambience, bossMusic]) if (!a.paused) a.pause();
+    if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }
+    runVol = ambVol = bossVol = 0;
+  }
   if (typeof afterAnoint !== "undefined" && afterAnoint.active) {   // back at the Anointing stop afterward (world3.js)
     pollInput(); afterAnoint.update(real); afterAnoint.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
