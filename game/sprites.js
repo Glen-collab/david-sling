@@ -3324,6 +3324,18 @@ window.SPRITE_DATA = {
   "ay": 264,
   "align": "feet"
  },
+ "sb_jump": {
+  "src": "../assets/sprites/sb_jump.png",
+  "frames": 6,
+  "w": 159,
+  "h": 307,
+  "ms": 333,
+  "loop": false,
+  "pingpong": false,
+  "ax": 79,
+  "ay": 305,
+  "align": "ground"
+ },
  "sb_push": {
   "src": "../assets/sprites/sb_push.png",
   "frames": 12,
@@ -3346,6 +3358,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 140,
   "ay": 256,
+  "align": "feet"
+ },
+ "sb_step": {
+  "src": "../assets/sprites/sb_step.png",
+  "frames": 6,
+  "w": 198,
+  "h": 247,
+  "ms": 229,
+  "loop": false,
+  "pingpong": false,
+  "ax": 114,
+  "ay": 245,
   "align": "feet"
  },
  "scorpion_walk": {
