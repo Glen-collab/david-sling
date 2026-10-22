@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 214,
+  "frame_h": 210,
+  "ms_per_frame": 80,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 163,
+  "anchor_y": 207,
+  "source": "donkey2_trot.mp4",
+  "video_frames": [
+    36,
+    38,
+    40,
+    42,
+    44,
+    46,
+    48,
+    49,
+    51,
+    53,
+    55,
+    57
+  ]
+}

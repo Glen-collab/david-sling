@@ -1296,6 +1296,42 @@ window.SPRITE_DATA = {
   "ay": 102,
   "align": "feet"
  },
+ "donkey2_gallop": {
+  "src": "../assets/sprites/donkey2_gallop.png",
+  "frames": 10,
+  "w": 210,
+  "h": 205,
+  "ms": 104,
+  "loop": true,
+  "pingpong": false,
+  "ax": 163,
+  "ay": 202,
+  "align": "feet"
+ },
+ "donkey2_stand": {
+  "src": "../assets/sprites/donkey2_stand.png",
+  "frames": 12,
+  "w": 176,
+  "h": 209,
+  "ms": 153,
+  "loop": true,
+  "pingpong": false,
+  "ax": 128,
+  "ay": 206,
+  "align": "feet"
+ },
+ "donkey2_trot": {
+  "src": "../assets/sprites/donkey2_trot.png",
+  "frames": 12,
+  "w": 214,
+  "h": 210,
+  "ms": 80,
+  "loop": true,
+  "pingpong": false,
+  "ax": 163,
+  "ay": 207,
+  "align": "feet"
+ },
  "donkey_bare_walk": {
   "src": "../assets/sprites/donkey_bare_walk.png",
   "frames": 5,
@@ -4312,12 +4348,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/villager_scarfwoman_run.png",
   "frames": 10,
   "w": 161,
-  "h": 264,
+  "h": 265,
   "ms": 79,
   "loop": true,
   "pingpong": false,
-  "ax": 96,
-  "ay": 262,
+  "ax": 95,
+  "ay": 264,
   "align": "feet"
  },
  "villager_staffman_run": {

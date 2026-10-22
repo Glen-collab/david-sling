@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 210,
+  "frame_h": 205,
+  "ms_per_frame": 104,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 163,
+  "anchor_y": 202,
+  "source": "donkey2_stand_gallop.mp4",
+  "video_frames": [
+    76,
+    78,
+    81,
+    83,
+    86,
+    88,
+    91,
+    93,
+    96,
+    98
+  ]
+}

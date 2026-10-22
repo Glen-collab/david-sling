@@ -797,13 +797,19 @@ function updatePackDonkey(k, dx, sameLevel, dt) {
   if (Math.abs(dx) > 22 * T && david.onGround) { k.x = david.x - (david.facing || 1) * want; k.y = david.y; k.vy = 0; if (!standable(k.x, k.y)) k.x = david.x; }
   if (Math.abs(dx) > want) {
     k.facing = Math.sign(dx); k.moving = true;
-    const moved = runCritter(k, 190 + Math.min(260, Math.abs(dx) - want), dt);
+    const sp = 190 + Math.min(260, Math.abs(dx) - want); k.fast = sp > W5.DONKEY2_GALLOP;   // (Glen's second donkey gallops to catch up)
+    const moved = runCritter(k, sp, dt);
     if (!moved && k.onGround && groundAhead(k, k.facing)) k.vy = -hopFor(k, k.facing);
   } else { k.moving = false; fall(); }
 }
 function stoneHitsPackDonkey(k, s) { if (!W5.donkeyStoned) { W5.donkeyStoned = true; toast("Easy! That's one of our own pack donkeys."); } return false; }
+// (Glen, 2026-10-22) for variety, every other pack donkey is his second donkey: stands, trots after David, gallops to catch up
+Object.assign(W5, { DONKEY2_SIZE: 1.15, DONKEY2_GALLOP: 300 });
+for (const n of ["donkey2_stand", "donkey2_trot", "donkey2_gallop"]) TUNE.SPRITE_SIZE[n] = W5.DONKEY2_SIZE;
 function drawPackDonkey(k, x) {
-  const nm = !k.found ? "donkey_graze" : k.moving || k.state === "leap" ? "donkey_walk" : "donkey_idle";
+  const two = SPR.donkey2_trot && packDonkeys().indexOf(k) % 2 === 1, moving = k.found && (k.moving || k.state === "leap");
+  const nm = two ? (moving ? (k.fast || k.state === "leap" ? "donkey2_gallop" : "donkey2_trot") : "donkey2_stand")
+                 : !k.found ? "donkey_graze" : moving ? "donkey_walk" : "donkey_idle";
   drawSprite(nm, frameOf(nm, k.t), x, k.y, k.facing, 1, k.alpha);
   if (!k.found) goldGlow(x, k.y, k.t);
 }
