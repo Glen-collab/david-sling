@@ -778,6 +778,7 @@ Object.assign(W7, {
   GOLIATH_SIZE: 1.55,
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
+  SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
   SB_FRONT: 48,          // px from his feet to the shield's face
   DRUM_EVERY: 1.7,       // seconds between the slow drum's beats on the walk out
 });
@@ -881,14 +882,17 @@ function stoneHitsShield(s) {
     if (sb.hits >= W7.SB_HITS) {
       sb.phase = 2; sbSetState("ready"); sb.hits = 0; sb.lift = 0; sb.waves = [];
       sb.laugh = 2.5; sfx("taunting_yells", undefined, 0.55, 0.7);
-      setTimeout(() => toast("He drops the shield low and charges, shield first! Roll under its edge, or get up high."), 400);
+      setTimeout(() => toast("He charges, shield first! Roll under its edge, or get up high. When he stops to peek over the top, throw high at the top edge (Up + B, or jump and throw)."), 400);
     }
     return true;
   }
   // the shield
-  const onShield = Math.abs(s.x - front) < W7.SHIELD_W / 2 + 10 && s.y > top - 10 && s.y < GR * T;
+  // tipped back while he peeks, its top edge is the target: anything thrown high (Up + B, or from a jump) catches it,
+  // even skimming over the top (Glen couldn't hit the old thin strip: a flat throw passes under it, and Up + B only hit it from one distance)
+  const peekHit = sb.state === "peek" && Math.abs(s.x - front) < W7.SHIELD_W / 2 + 14 && s.y > top - W7.SB_EDGE[0] && s.y < GR * T - W7.SB_EDGE[1];
+  const onShield = peekHit || (Math.abs(s.x - front) < W7.SHIELD_W / 2 + 10 && s.y > top - 10 && s.y < GR * T);
   if (!onShield) return false;
-  const edge = s.y < top + 34;   // its top edge, tipped back while he peeks
+  const edge = peekHit;
   if (sb.state === "peek" && edge) {
     if (sb.phase === 2) {
       sb.tips++; sbSetState("knock"); sfx("stone_hit", sb.x, 0.7, 0.8); stoneHit(s);
