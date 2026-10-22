@@ -777,6 +777,7 @@ Object.assign(W7, {
   SHIELD_W: 74, SHIELD_H: 168,
   GOLIATH_SIZE: 1.55,
   SB_LEAP: 0.5,          // (Glen's sb_jump) seconds in the air on a slam; the shockwave goes out as he lands
+  SB_QUAKE_SLIDE: 160,   // how far his slip slides David (px/s): the slam reaches him anywhere on the ground (sbQuake)
   SB_LEAP_H: 70,         // how high he leaps (px)
   SB_JUMP_SIZE: 1,       // sb_jump / sb_step against sb_push (1 = the same)
   SB_STEP_SIZE: 1,
@@ -824,6 +825,14 @@ function startShieldBearer() {
 }
 function sbHurt(fromX) { if (david.inv <= 0 && david.deadT <= 0) hurtDavid(fromX); }
 function sbSetState(s) { sb.state = s; sb.t = 0; }
+// (Glen) the slam shakes the whole valley floor: anywhere in the arena, on the ground or rolling, David's feet go out
+// from under him (david_slip, as on 3-4's mud) and it costs a heart. In the air he's safe. (The dust waves are just the look of it.)
+function sbQuake() {
+  const d = david; if (!(d.onGround || d.state === "roll") || d.inv > 0 || d.deadT > 0) return;
+  hurtDavid(sb.x); if (d.deadT > 0) return;
+  d.vy = 0; d.onGround = true; d.vx = Math.sign(d.x - sb.x || 1) * W7.SB_QUAKE_SLIDE; setState("slip");
+  if (!W7.quakeTold) { W7.quakeTold = true; setTimeout(() => toast("The ground shakes when he lands! Be in the air when he comes down."), 600); }
+}
 function updateShieldBearer(dt) {
   if (!sb) return;
   const d = david;
@@ -843,7 +852,6 @@ function updateShieldBearer(dt) {
   for (let i = sb.waves.length - 1; i >= 0; i--) {
     const w = sb.waves[i]; w.t += dt; w.x += w.dir * W7.SB_WAVE * dt;
     if (w.t > W7.SB_WAVE_T) { sb.waves.splice(i, 1); continue; }
-    if (d.onGround && Math.abs(d.x - w.x) < 26 && Math.abs(d.y - GR * T) < 8) { sbHurt(w.x - w.dir * 40); sb.waves.splice(i, 1); }
   }
   const toD = Math.sign(d.x - sb.x) || sb.dir, front = sb.x + sb.dir * W7.SB_FRONT;
   // the shield is a wall in front of him (on the ground): David can't walk through it
@@ -866,7 +874,7 @@ function updateShieldBearer(dt) {
       const leap = SPR.sb_jump ? W7.SB_LEAP : 0.12;
       sb.lift = SPR.sb_jump ? (sb.t < leap ? 1 : 0) : Math.max(0, 1 - sb.t / 0.12);
       if (sb.t >= leap && !sb.slammed) {
-        sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1;
+        sb.slammed = true; thud(0.9); if (typeof w2Shake !== "undefined") w2Shake.v = 1; sbQuake();
         sb.waves.push({ x: front, dir: -1, t: 0 }, { x: front, dir: 1, t: 0 });
       }
       if (sb.t > (SPR.sb_jump ? W7.SB_LEAP + 0.18 : 0.3)) { sb.slammed = false; sbSetState("recover"); }
