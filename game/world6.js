@@ -1204,7 +1204,9 @@ const w6intro = {
 };
 if (LEVEL_STAGE === "6-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w6intro; } catch (e) {}
-  if (!seen || new URLSearchParams(location.search).has("w6intro")) w6intro.start();
+  if (!seen || new URLSearchParams(location.search).has("w6intro"))   // (Glen) his film first: the frightened camp at night, 17:11
+    preFilm.start({ src: "../assets/video/w6_film.mp4", words: [[0.8, 4.2, "The camp of Israel"], [5.0, 9.9, "Afraid", "“When Saul and all Israel heard those words of the Philistine, they were dismayed and greatly afraid.” (1 Samuel 17:11)"]],
+      loop: ["music_night", 0.4, 0.3], cues: [[3.0, "taunting_yells", 0.18], [6.8, "phil_roar", 0.12]] }, () => w6intro.start());
 }
 
 // ---------------------------------------------------------------------------
