@@ -136,7 +136,9 @@ function drawCampfirePeople(camX) {
   const ppl = talks.ppl || (talks.ppl = {}), dt = Math.min(0.05, now - (talks.pplT ?? now)); talks.pplT = now;
   for (const who in ART) {
     const mine = talks.filter(k => k.who === who); if (!mine.length || !SPR[ART[who][0]]) continue;
-    const spot = (mine.find(k => !k.done) || mine[mine.length - 1]).x + 2 * T;
+    // lines a few tiles apart are one stop: he stays put and says them all there (Glen: he blipped a tile ahead between lines)
+    let at = mine.indexOf(mine.find(k => !k.done) || mine[mine.length - 1]); while (at > 0 && mine[at].x - mine[at - 1].x <= 4 * T) at--;
+    const spot = mine[at].x + 2 * T;
     const p = ppl[who] || (ppl[who] = { x: spot, t: 0 });
     const talking = dialog.t > 0 && dialog.who === who, walkNm = who.toLowerCase() + "_walk";
     const gap = spot - p.x, walking = !talking && Math.abs(gap) > 4 && SPR[walkNm];
