@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 235,
+  "frame_h": 271,
+  "ms_per_frame": 330,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 105,
+  "anchor_y": 267,
+  "source": "clip_talk.mp4",
+  "video_frames": [
+    1,
+    10,
+    18,
+    27,
+    36,
+    44,
+    53,
+    61,
+    70,
+    79,
+    87,
+    96
+  ]
+}

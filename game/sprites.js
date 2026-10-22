@@ -72,6 +72,42 @@ window.SPRITE_DATA = {
   "ay": 256,
   "align": "feet"
  },
+ "abner_present": {
+  "src": "../assets/sprites/abner_present.png",
+  "frames": 10,
+  "w": 271,
+  "h": 281,
+  "ms": 388,
+  "loop": false,
+  "pingpong": false,
+  "ax": 126,
+  "ay": 277,
+  "align": "feet"
+ },
+ "abner_talk": {
+  "src": "../assets/sprites/abner_talk.png",
+  "frames": 12,
+  "w": 235,
+  "h": 271,
+  "ms": 330,
+  "loop": true,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 267,
+  "align": "feet"
+ },
+ "abner_walk": {
+  "src": "../assets/sprites/abner_walk.png",
+  "frames": 12,
+  "w": 258,
+  "h": 266,
+  "ms": 184,
+  "loop": true,
+  "pingpong": false,
+  "ax": 160,
+  "ay": 264,
+  "align": "feet"
+ },
  "baggage_keeper": {
   "src": "../assets/sprites/baggage_keeper.png",
   "frames": 4,

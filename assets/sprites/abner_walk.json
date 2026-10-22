@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 258,
+  "frame_h": 266,
+  "ms_per_frame": 184,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 160,
+  "anchor_y": 264,
+  "source": "clip_walk.mp4",
+  "video_frames": [
+    84,
+    88,
+    93,
+    97,
+    102,
+    106,
+    110,
+    115,
+    119,
+    124,
+    128,
+    133
+  ]
+}
