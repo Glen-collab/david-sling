@@ -25,6 +25,7 @@ const W5 = {
   RAIDER_SIZE: 1.2,      // a grown man: taller than David
   VULTURE_SIZE: 0.45,    // circling high up
   VULTURE_GROUND: 0.6,   // pecking by the road
+  VULTURE_CRY: [6, 7],   // seconds between their cries while circling: at least this, plus up to this
   VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
   VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
   VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8 },
@@ -149,16 +150,21 @@ function drawRaider(k, x) {
 // Vultures (scenery: they follow armies). setPiece("vultures", c): three pecking at something by the road (Glen's
 // vulture_stand); when David comes close they flap up (vulture_fly) and circle high overhead from then on.
 // ---------------------------------------------------------------------------
-const vultures = setPieces.filter(p => p.kind === "vultures").map(p => ({ x: p.x, up: false, t: 0,
+const vultures = setPieces.filter(p => p.kind === "vultures").map(p => ({ x: p.x, up: false, t: 0, cryT: 0,
   birds: [0, 1, 2].map(k => ({ dx: (k - 1) * 70, ph: k * 2.1, lift: 0 })) }));
 function updateVultures(dt) {
   for (const v of vultures) {
     v.t += dt;
     if (!v.up && Math.abs(david.x - v.x) < W5.VULTURE_SPOOK * T && david.deadT <= 0) {
-      v.up = true; v.t = 0;
+      v.up = true; v.t = 0; v.cryT = W5.VULTURE_CRY[0] + Math.random() * W5.VULTURE_CRY[1];
+      sfx("vulture", v.x, 0.9, 0.95 + Math.random() * 0.1);   // (Glen's vulture) they shriek as they go up
       if (!W5.vultureTold) { W5.vultureTold = true; toast("Vultures. They follow armies, waiting. The Philistines can't be far."); }
     }
     if (v.up) for (const b of v.birds) b.lift = Math.min(1, b.lift + dt * (0.35 + b.ph * 0.05));
+    if (v.up && (v.cryT -= dt) <= 0) {   // and now and then from up in their circle (quieter: they're high, and it carries only so far)
+      v.cryT = W5.VULTURE_CRY[0] + Math.random() * W5.VULTURE_CRY[1];
+      sfx("vulture", v.x, 0.45, 0.85 + Math.random() * 0.25);
+    }
   }
 }
 function drawVultures(camX) {

@@ -783,7 +783,8 @@ Object.assign(W7, {
   GIANT_WALK: 70,        // px/s: Goliath walking in after the bearer runs (the end of 7-4)
   GIANT_STEP: 0.65,      // seconds between his footfalls (a thud and a shake each)
   GIANT_STOP: 8,         // tiles from David where he stops and yells
-  GIANT_MUSIC_VOL: 1.1,  // his music (assets/sounds/goliath_theme.mp3 when Glen adds it), x the boss music volume
+  GIANT_MUSIC_VOL: 1.1,  // his music (Glen's horns, assets/sounds/goliath_theme.mp3), x the boss music volume
+  GIANT_MUSIC_AT: 0.2,   // seconds after the bearer turns away that Goliath's horns come in
   GIANT_MUSIC_END: 0.5,  // his music under the end of World 7 (a share of GIANT_MUSIC_VOL)
   DRONE_NOTES: [[55, "sawtooth", 0.5], [58.27, "sawtooth", 0.4], [27.5, "sine", 0.9], [110, "triangle", 0.12]],   // Hz, wave, loudness: A, B-flat (the half step that grinds), the A below, a faint A above
   DRONE_CUTOFF: 260,     // the low-pass over the drone (Hz): lower is darker and more muffled; it breathes slowly around this
@@ -963,7 +964,8 @@ function updateShieldFall(dt) {
 }
 // (Glen) the bearer gone, Goliath himself walks in: the music turns ("oh crap"), the ground shakes with every step,
 // and he yells as he comes (his lips move in Glen's walk clip). The fight is World 8; this is the cliffhanger.
-const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });
+const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { preload: "auto" });   // (Glen's horns, 2026-10-22: once, not looped)
+giantMusic.onended = () => { if (giantMusic.want) giantDrone.start(); };   // when his horns die away, the drone holds the dread under the rest
 giantMusic.onerror = () => { giantMusic.fallback = true; if (giantMusic.want) giantDrone.start(); };   // no track of Glen's yet: the drone
 // (Glen: the slowed boss music was too uplifting under his words; he wants the gravity of it.) Until Glen's own track:
 // a low dark drone made here, two deep notes a half step apart rubbing against each other, a sub-bass under them,
@@ -977,7 +979,7 @@ const giantDrone = {
       const ac = chimeCtx, t0 = ac.currentTime, out = ac.createGain(), lp = ac.createBiquadFilter(), lfo = ac.createOscillator(), lfoG = ac.createGain();
       lp.type = "lowpass"; lp.frequency.value = W7.DRONE_CUTOFF; lp.Q.value = 4;
       lfo.frequency.value = 0.09; lfoG.gain.value = W7.DRONE_CUTOFF * 0.45; lfo.connect(lfoG).connect(lp.frequency);
-      out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(this.level(1), t0 + W7.DRONE_SWELL);
+      out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(this.level(this.k || 1), t0 + W7.DRONE_SWELL);
       lp.connect(out).connect(ac.destination);
       const oscs = [lfo];
       for (const [f, type, v] of W7.DRONE_NOTES) {
@@ -989,7 +991,7 @@ const giantDrone = {
     } catch (e) {}
   },
   level(k) { return Math.max(0.0002, W7.DRONE_VOL * k * musicMul()); },
-  to(k, secs = 2) { if (!this.nodes) return; const ac = chimeCtx, g = this.nodes.out.gain; g.cancelScheduledValues(ac.currentTime); g.setValueAtTime(g.value, ac.currentTime); g.exponentialRampToValueAtTime(this.level(k), ac.currentTime + secs); },
+  to(k, secs = 2) { this.k = k; if (!this.nodes) return; const ac = chimeCtx, g = this.nodes.out.gain; g.cancelScheduledValues(ac.currentTime); g.setValueAtTime(g.value, ac.currentTime); g.exponentialRampToValueAtTime(this.level(k), ac.currentTime + secs); },
   stop(secs = 2) {
     if (!this.nodes) return; const n = this.nodes; this.nodes = null; const ac = chimeCtx, g = n.out.gain;
     g.cancelScheduledValues(ac.currentTime); g.setValueAtTime(g.value, ac.currentTime); g.exponentialRampToValueAtTime(0.0001, ac.currentTime + secs);
@@ -999,10 +1001,11 @@ const giantDrone = {
 function giantIn() {
   sbSetState("giant"); sb.giantX = sb.gx; sb.stepT = 0.4; sb.yellT = 0; sb.holdX = david.x;
   if (bossMusic && !bossMusic.paused) bossMusic.pause();
-  sfx("boss_intro", undefined, 1, 0.75); thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2;   // the sting, low
-  giantMusic.want = true; giantMusic.currentTime = 0; giantMusic.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * W7.GIANT_MUSIC_VOL);
+  if (giantMusic.fallback) sfx("boss_intro", undefined, 1, 0.75);   // the sting, low (Glen's horns, when they're there, are their own sting)
+  thud(1); if (typeof w2Shake !== "undefined") w2Shake.v = 1.2;
+  giantMusic.want = true; giantMusic.currentTime = 0; giantDrone.k = 1; giantMusic.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * W7.GIANT_MUSIC_VOL);
   if (giantMusic.fallback) giantDrone.start();   // (the drone swells in under the sting)
-  else setTimeout(() => { if (sb.state === "giant") giantMusic.play().catch(() => {}); }, 1200);
+  else setTimeout(() => { if (sb.state === "giant") giantMusic.play().catch(() => {}); }, W7.GIANT_MUSIC_AT * 1000);
   setTimeout(() => { if (sb.state === "giant") sbSay("Come to me, and I will give your flesh to the birds of the sky, and to the animals of the field. (1 Samuel 17:44)", "lecha_elai"); }, 1500);
 }
 function updateGiantIn(dt) {

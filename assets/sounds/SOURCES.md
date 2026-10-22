@@ -57,3 +57,11 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | paper_rip | paper-rip.mp3 (Glen), slowed to 0.82x (lower, heavier) | the rip-out cutaway: David tearing the page | ? |
 | horses | horses.mp3 (Glen, 2026-10-18) | the chariot horses whinnying: when the chariot appears and when it crashes (5-4) | ? |
 | horse-gallop | horse-gallop.mp3 (Glen, 2026-10-18), looped | the chariot galloping (5-4), louder near the middle of the screen; follows the free horses after the crash | ? |
+
+## Glen's Oct 22 downloads (from his Downloads folder)
+
+| Game file | Original download | Used for | Source / licence |
+|---|---|---|---|
+| vulture | vulture.mp3 | the vultures: as they flap up, and now and then while they circle | ? |
+| goliath_theme | dramatic-evil-theme-orchestra-suspense-horns-fear-film-phantom-humanoide9000.mp3 | 7-4, Goliath walks in after the shield-bearer | Pixabay? (humanoide9000) |
+| giant_fall_music | evil-theme.mp3 | World 8, Goliath's fall (the slow-motion scene) | ? |
