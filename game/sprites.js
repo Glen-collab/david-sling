@@ -1308,6 +1308,18 @@ window.SPRITE_DATA = {
   "ay": 202,
   "align": "feet"
  },
+ "donkey2_graze": {
+  "src": "../assets/sprites/donkey2_graze.png",
+  "frames": 36,
+  "w": 317,
+  "h": 210,
+  "ms": 168,
+  "loop": true,
+  "pingpong": false,
+  "ax": 165,
+  "ay": 207,
+  "align": "feet"
+ },
  "donkey2_stand": {
   "src": "../assets/sprites/donkey2_stand.png",
   "frames": 12,
