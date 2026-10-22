@@ -4066,7 +4066,7 @@ function fadeLoop(a, cur, want, dt, speed) {
 let musicFight = false;
 // a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
 // feet carry on under the 7-3 riddle)
-const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
+const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w1intro", "w4intro", "w4ending", "w5intro", "w5ending",
   "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene", "w8ending", "credits8"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 function updateMusic(dt) {
@@ -4077,7 +4077,7 @@ function updateMusic(dt) {
   if (typeof G8_MUSIC !== "undefined" && G8_MUSIC.held && goliathFight()) { G8_MUSIC.held = false; G8_MUSIC.play().catch(() => {}); }
   if (typeof giantDrone !== "undefined" && giantDrone.held) { giantDrone.held = false; giantDrone.to(giantDrone.k || 1, 1); }
   // and in cut scenes (Glen) it sinks lower still, faint under the story
-  const words = dialog.t > 0, want = cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
+  const words = dialog.t > 0, want = typeof w1intro !== "undefined" && w1intro.active ? 0 : cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
@@ -4362,6 +4362,9 @@ function frame(now) {
   }
   if (typeof w5intro !== "undefined" && w5intro.active) {   // the opening of World 5, at Jesse's house (world5.js)
     pollInput(); w5intro.update(real); w5intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w1intro !== "undefined" && w1intro.active) {   // the opening of World 1: Bethlehem, breakfast, the hillside (world1.js)
+    pollInput(); w1intro.update(real); w1intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w4intro !== "undefined" && w4intro.active) {   // the opening of World 4, at Jesse's door (world4.js)
     pollInput(); w4intro.update(real); w4intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
