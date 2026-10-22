@@ -1337,7 +1337,9 @@ function drawIntroPile(x, y, z) {   // the armor laid out: the last frame of Gle
 }
 if (LEVEL_STAGE === "7-1" && !STORY_HASH) {
   let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w7intro; } catch (e) {}
-  if (!seen || new URLSearchParams(location.search).has("w7intro")) w7intro.start();
+  if (!seen || new URLSearchParams(location.search).has("w7intro"))   // (Glen) his film first: David led to the king's tent, 17:31
+    preFilm.start({ src: "../assets/video/w7_film.mp4", words: [[0.8, 4.2, "The king's tent"], [5.0, 9.9, "Sent for", "“When the words were heard which David spoke, they rehearsed them before Saul; and he sent for him.” (1 Samuel 17:31)"]],
+      loop: ["ambience_hills", 0.3, 0.2] }, () => w7intro.start());
   const at = Number(new URLSearchParams(location.search).get("w7intro")) || 0; if (at && w7intro.active) Object.assign(w7intro, { i: at, t: 2, fade: 1 });
 }
 
