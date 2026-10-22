@@ -1,6 +1,6 @@
 // The title screen, the pause menu and Settings.
 //   Title (first thing each time the game is opened): Continue / New game / Scenes (Glen's clips, once reached) / Settings
-//   Pause (Start in a stage, on a map or in the courtyard): Resume / Settings / Back to the map (or Title screen)
+//   Pause (Start in a stage, on a map or in the courtyard): Resume / Settings / Scenes (once one is seen) / Back to the map (or Title screen)
 //   Settings: which controller (with a picture of its buttons), set up a controller, music and sound volume
 // Settings are saved in localStorage "davidSettings" (SETTINGS in main.js). Up/Down choose, Left/Right change,
 // A or Start picks, B goes back.
@@ -56,11 +56,12 @@ const Menu = {
     if (this.screen === "scenes") {
       const p = loadProgress();
       return [...FILM_CLIPS.map(c => c.seen(p) ? { label: c.label, value: c.world, act: () => this.playScene(c) } : { label: "Not reached yet", value: c.world, off: true }),
-              { label: "Back", act: () => this.go("title") }];
+              { label: "Back", act: () => this.go(this.home) }];   // (to the title, or back to Paused)
     }
     if (this.screen === "pause") return [
       { label: "Resume", act: () => this.close() },
       { label: "Settings", act: () => this.go("settings") },
+      ...(FILM_CLIPS.some(c => c.seen(loadProgress())) ? [{ label: "Scenes", act: () => this.go("scenes") }] : []),   // (Glen) watch a scene again without leaving the stage
       ...(this.under === "stage" ? [{ label: "Start the stage again", act: () => startStage(LEVEL_NAME) }] : []),   // stuck somewhere? start over (sheep and olives from this try are lost)
       this.under === "stage" ? { label: "Back to the map", act: () => backToMap() }
                              : { label: "Title screen", act: () => { this.under = null; this.open("title"); } },
