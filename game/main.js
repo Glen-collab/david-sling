@@ -1520,7 +1520,7 @@ if (LEVEL_NAME === "test") {
   rock(190, 15, 3, 2); deco("reed_pool", 192, 16, 0.22);
   pick(195, "cracked"); pick(199, "smooth");
   campfire(202);
-  talk(206, "", "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the shepherd's bag. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)");
+  talk(206, "", "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the pouch of his shepherd's bag which he had. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)");
   sheepfold(212);
 } else if (LEVEL_NAME === "7-2") {
   // ---- 7-2 Remember the Hills: the walk down from the camp toward the stream, both armies watching, the giant's
@@ -4067,7 +4067,7 @@ function fadeLoop(a, cur, want, dt, speed) {
 let musicFight = false;
 // a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
 // feet carry on under the 7-3 riddle)
-const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "preFilm", "w1intro", "w2intro", "w3intro", "w4intro", "w4ending", "w5intro", "w5ending",
+const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "preFilm", "w1intro", "w2intro", "w3intro", "w8intro", "w4intro", "w4ending", "w5intro", "w5ending",
   "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene", "w8ending", "credits8"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 // (Glen) a film before a world's opening scene, like the start of a movie: preFilm.start(opts, then) plays it full screen
@@ -4415,6 +4415,9 @@ function frame(now) {
   }
   if (preFilm.active) {   // a world's film, before its opening scene
     pollInput(); preFilm.update(real); preFilm.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof w8intro !== "undefined" && w8intro.active) {   // World 8's title card, after its film (world8.js)
+    pollInput(); w8intro.update(real); w8intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof w1intro !== "undefined" && w1intro.active) {   // the opening of World 1: Bethlehem, breakfast, the hillside (world1.js)
     pollInput(); w1intro.update(real); w1intro.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

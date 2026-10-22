@@ -447,7 +447,7 @@ function keepStone() {
   else setTimeout(() => {   // the fifth: David writes it down
     david.vx = 0; hushLoops();
     if (typeof Journal !== "undefined" && Journal.openNote) Journal.openNote(fiveNote(), () => toast("Archaeologists have found many shaped sling stones in Israel from Bible times, some about the size of a tennis ball."));
-    else toast("Five smooth stones. He chose five smooth stones out of the brook. (1 Samuel 17:40)");
+    else toast("Five smooth stones. He “chose for himself five smooth stones out of the brook.” (1 Samuel 17:40)");
   }, 600);
 }
 function putBack() {
@@ -462,7 +462,7 @@ function fiveNote() {
   return {
     left: [{ at: 5, size: "entry", segs: [{ text: "Five smooth stones from the stream, in the bag Shammah gave me.", at: 5 }] },
            { at: 5, size: "small", segs: [{ text: "The round, smooth ones fly true. The rough ones wobble, and the flat ones sail off sideways.", at: 5 }] },
-           { at: 5, size: "small", segs: [{ text: "He chose for himself five smooth stones out of the brook, and put them in the shepherd's bag. (1 Samuel 17:40)", at: 5 }] }],
+           { at: 5, size: "small", segs: [{ text: "...chose for himself five smooth stones out of the brook, and put them in the pouch of his shepherd's bag which he had. (1 Samuel 17:40)", at: 5 }] }],   // (a no-break space: the reference stays on one line)
     right: [{ at: 5, size: "entry", segs: [{ text: "Why five?", at: 5 }] },
             { at: 5, size: "small", segs: [{ text: "The Bible doesn't say. Some think he took extra, in case he missed. Others point out that Goliath had relatives in Gath who were giants too (2 Samuel 21:22).", at: 5 }] },
             { at: 5, size: "small", segs: [{ text: "Either way, he needed only one.", at: 5 }] }],
@@ -1195,7 +1195,7 @@ const w7ending = {
   beats: [
     { text: "The shield lay in the dust. The valley went quiet. For the first time, David and the giant faced each other across the open ground." },
     { card: true },
-    { text: "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the shepherd's bag which he had, even in his wallet. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)" },
+    { text: "He took his staff in his hand, and chose for himself five smooth stones out of the brook, and put them in the pouch of his shepherd's bag which he had. His sling was in his hand; and he came near to the Philistine. (1 Samuel 17:40)" },
     { text: "To be continued in World 8: David and Goliath." },
   ],
   start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, out: 0 }); hushLoops(); dialog.t = 0; },

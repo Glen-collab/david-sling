@@ -887,3 +887,34 @@ function drawCrowd8(camX) {
     }
   });
 }
+
+// ---------------------------------------------------------------------------
+// The opening of World 8 (Glen, 2026-10-22), the first time 8-1 is played (or ?w8intro): his film of David walking
+// down into the valley alone between the two armies (assets/video/w8_film.mp4, 1 Samuel 17:40), then the title card,
+// then 8-1 as it was.
+// ---------------------------------------------------------------------------
+const w8intro = {
+  active: false,
+  start() { Object.assign(this, { active: true, t: 0 }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt;
+    if (this.t > 4.2 || (this.t > 0.8 && (pressed("a") || pressed("b") || pressed("start")))) {
+      this.active = false;
+      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w8intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    }
+  },
+  draw() {   // the title card, over the valley the stage starts in
+    const keep = bgWorld; bgWorld = "w8_1"; drawBackground(0); bgWorld = keep; drawFlatGround(0);
+    const f = Math.min(1, this.t / 0.8), o = Math.min(1, Math.max(0, (4.2 - this.t) / 0.6));
+    ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
+    ctx.save(); ctx.globalAlpha = f * o; ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 8", W / 2, H / 2 - 20);
+    ctx.fillStyle = "#fff6e2"; ctx.font = "italic 34px Georgia, serif"; ctx.fillText("David and Goliath", W / 2, H / 2 + 30); ctx.restore();
+    if (this.t < 0.4) { ctx.fillStyle = `rgba(0,0,0,${1 - this.t / 0.4})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+if (LEVEL_STAGE === "8-1" && location.hash === "#8-1") {
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w8intro; } catch (e) {}
+  if (!seen || new URLSearchParams(location.search).has("w8intro"))   // his film first: the walk into the valley, 17:40
+    preFilm.start({ src: "../assets/video/w8_film.mp4", words: [[0.8, 4.2, "The Valley of Elah"], [5.0, 9.9, "", "“His sling was in his hand; and he came near to the Philistine.” (1 Samuel 17:40)"]],
+      loop: ["ambience_hills", 0.45, 0.3], cues: [[6.5, "taunting_yells", 0.12]] }, () => w8intro.start());
+}

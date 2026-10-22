@@ -22,6 +22,7 @@ const FILM_CLIPS = [
   { label: "The Army in Fear", world: "World 6", intro: "w6intro", stage: "6-1", seen: p => !!p.w6intro },
   { label: "Saul's Armor", world: "World 7", intro: "w7intro", stage: "7-1", seen: p => !!p.w7intro },
   { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
+  { label: "Into the Valley", world: "World 8", intro: "w8intro", stage: "8-1", seen: p => !!p.w8intro },
   { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
 ];
 // (Glen, 2026-10-22) every scene open while he adds and checks them; set false before release, so each one unlocks when it's reached
