@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 189,
+  "frame_h": 262,
+  "ms_per_frame": 67,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 114,
+  "anchor_y": 261,
+  "source": "capman_run.mp4",
+  "video_frames": [
+    60,
+    62,
+    63,
+    65,
+    66,
+    68,
+    69,
+    71,
+    72,
+    74
+  ]
+}

@@ -4188,6 +4188,18 @@ window.SPRITE_DATA = {
   "ay": 279,
   "align": "feet"
  },
+ "villager_basketgirl_run": {
+  "src": "../assets/sprites/villager_basketgirl_run.png",
+  "frames": 10,
+  "w": 176,
+  "h": 264,
+  "ms": 67,
+  "loop": true,
+  "pingpong": false,
+  "ax": 103,
+  "ay": 263,
+  "align": "feet"
+ },
  "villager_boy_run": {
   "src": "../assets/sprites/villager_boy_run.png",
   "frames": 5,
@@ -4234,6 +4246,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 78,
   "ay": 349,
+  "align": "feet"
+ },
+ "villager_capman_run": {
+  "src": "../assets/sprites/villager_capman_run.png",
+  "frames": 10,
+  "w": 189,
+  "h": 262,
+  "ms": 67,
+  "loop": true,
+  "pingpong": false,
+  "ax": 114,
+  "ay": 261,
   "align": "feet"
  },
  "villager_girl_run": {
@@ -4284,6 +4308,18 @@ window.SPRITE_DATA = {
   "ay": 349,
   "align": "feet"
  },
+ "villager_scarfwoman_run": {
+  "src": "../assets/sprites/villager_scarfwoman_run.png",
+  "frames": 10,
+  "w": 161,
+  "h": 264,
+  "ms": 79,
+  "loop": true,
+  "pingpong": false,
+  "ax": 96,
+  "ay": 262,
+  "align": "feet"
+ },
  "villager_staffman_run": {
   "src": "../assets/sprites/villager_staffman_run.png",
   "frames": 4,
@@ -4330,6 +4366,18 @@ window.SPRITE_DATA = {
   "pingpong": false,
   "ax": 58,
   "ay": 348,
+  "align": "feet"
+ },
+ "villager_wrapman_run": {
+  "src": "../assets/sprites/villager_wrapman_run.png",
+  "frames": 10,
+  "w": 161,
+  "h": 264,
+  "ms": 67,
+  "loop": true,
+  "pingpong": false,
+  "ax": 103,
+  "ay": 263,
   "align": "feet"
  },
  "vineyard_keeper": {

@@ -28,7 +28,7 @@ const W5 = {
   VULTURE_CRY: [6, 7],   // seconds between their cries while circling: at least this, plus up to this
   VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
   VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
-  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8 },
+  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12 },
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
 // what David is carrying: full at the start of 5-1, then whatever made it through the stage before
@@ -192,7 +192,20 @@ function drawVultures(camX) {
 // Families running from the Philistines, back toward Bethlehem (Glen's villager_*_run). setPiece("fleeing", c): when
 // David gets near, a family comes running down the road from ahead and past him. They're no danger, and pass by.
 // ---------------------------------------------------------------------------
-const FAMILIES = [["man", "woman", "boy"], ["staffman", "girl"], ["woman", "braidgirl"], ["man", "boy"]];
+// (Glen, 2026-10-22: four more villagers so the same faces don't keep coming by) each group is 2-3 people, every face
+// used once before any comes round again; a child always runs with a grown-up.
+const VILLAGERS_BIG = ["man", "woman", "staffman", "capman", "wrapman", "scarfwoman", "basketgirl"], VILLAGERS_KID = ["boy", "girl", "braidgirl"];
+const FAMILIES = (() => {
+  const big = VILLAGERS_BIG.filter(w => SPR["villager_" + w + "_run"]), kid = VILLAGERS_KID.filter(w => SPR["villager_" + w + "_run"]);
+  const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  let B = shuf(big), K = shuf(kid); const out = [];
+  for (let g = 0; g < 8; g++) {
+    if (B.length < 2) B = B.concat(shuf(big)); if (!K.length) K = shuf(kid);
+    const grp = [B.shift()]; if (g % 2 === 0) grp.push(B.shift()); grp.push(g % 3 === 2 ? B.shift() : K.shift());
+    out.push(grp.filter(Boolean));
+  }
+  return out;
+})();
 const fleeGroups = setPieces.filter(p => p.kind === "fleeing").map((p, i) => ({ x: p.x, go: false, who: FAMILIES[i % FAMILIES.length], people: [] }));
 const surfaceY = x => { const c = Math.floor(x / T); for (let r = 0; r < ROWS; r++) if (isSolid(c, r)) return r * T; return GR * T; };
 function updateFleeing(dt) {

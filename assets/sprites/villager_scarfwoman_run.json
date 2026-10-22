@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 161,
+  "frame_h": 265,
+  "ms_per_frame": 79,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 95,
+  "anchor_y": 264,
+  "source": "scarfwoman_run.mp4",
+  "video_frames": [
+    60,
+    62,
+    64,
+    66,
+    68,
+    69,
+    71,
+    73,
+    75,
+    77
+  ]
+}

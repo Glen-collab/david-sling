@@ -1,0 +1,23 @@
+{
+  "frames": 10,
+  "frame_w": 161,
+  "frame_h": 264,
+  "ms_per_frame": 67,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 103,
+  "anchor_y": 263,
+  "source": "wrapman_run.mp4",
+  "video_frames": [
+    60,
+    62,
+    63,
+    65,
+    66,
+    68,
+    69,
+    71,
+    72,
+    74
+  ]
+}
