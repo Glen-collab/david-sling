@@ -11,8 +11,10 @@ const CONTROLLER_NAMES = { keyboard: "Keyboard", nes: "NES controller", snes: "S
 
 // Scenes (title screen): Glen's film clips, to watch again (or show someone) once they've been reached in the game
 const FILM_CLIPS = [
+  { label: "Bethlehem at Dawn", world: "World 1", src: "../assets/video/w1_opening.mp4", seen: p => !!p.w1intro },   // the World 1 opening (world1.js w1intro)
   { label: "The Anointing", world: "World 3", src: "../assets/video/anointing_closeup.mp4", seen: p => !!(p["3-A"] || {}).cleared },
   { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
+  { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
 ];
 function hasSave() { const p = loadProgress(); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
 
@@ -87,9 +89,14 @@ const Menu = {
   playScene(c) {   // full screen, start to finish; A, B or Start stops it
     if (!this.clip) this.clip = Object.assign(document.createElement("video"), { muted: true, playsInline: true, preload: "auto" });
     this.clip.src = c.src + "?v=" + (window.BUILD || 0); this.clip.currentTime = 0; this.clip.play().catch(() => {});
-    themeMusic.pause(); this.playing = c; this.playT = 0;
+    themeMusic.pause(); this.playing = c; this.playT = 0; this.cue = 0;
+    if (c.fall && typeof FALL_MUSIC !== "undefined") {   // the giant's fall: the clip is silent, so its music comes in with it
+      FALL_MUSIC.currentTime = 0; FALL_MUSIC.volume = fallMusicVol(0);
+      if (FALL_MUSIC.fallback) { FALL_MUSIC.playbackRate = W8.FALL_MUSIC_RATE; FALL_MUSIC.preservesPitch = false; }
+      FALL_MUSIC.play().catch(() => {});
+    }
   },
-  stopScene() { if (this.clip) this.clip.pause(); this.playing = null; },
+  stopScene() { if (this.clip) this.clip.pause(); if (this.playing && this.playing.fall && typeof FALL_MUSIC !== "undefined") FALL_MUSIC.pause(); this.playing = null; },
   newGame() {
     for (const k of ["davidProgress", "davidStones", "davidGateTops"]) try { localStorage.removeItem(k); } catch (e) {}
     this.leaveTitle(() => WorldMap.open("journey"));
@@ -99,6 +106,11 @@ const Menu = {
     if (setup.active) return;
     if (this.playing) {
       this.playT += dt;
+      if (this.playing.fall && typeof W8 !== "undefined") {   // the sounds on the giant's fall, at their times in the clip
+        const vt = this.clip.currentTime;
+        FALL_MUSIC.volume = fallMusicVol(vt); if (FALL_MUSIC.volume === 0 && vt > 22.5) FALL_MUSIC.pause();
+        while (this.cue < W8.FALL_CUES.length && W8.FALL_CUES[this.cue][0] <= vt) { const [, name, vol, rate] = W8.FALL_CUES[this.cue++]; sfx(name, undefined, vol, rate); }
+      }
       if ((this.playT > 0.4 && (pressed("a") || pressed("b") || pressed("start"))) || (this.clip.ended && this.playT > 1.5)) this.stopScene();
       return;
     }
