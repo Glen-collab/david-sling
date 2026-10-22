@@ -14,6 +14,9 @@
 // The opening scene (w5intro): Jesse and the three empty places, the provisions, Hanan keeps the flock (17:20).
 
 const W5 = {
+  SPIKE_H: 100,          // (Glen's dark rock spikes, spike_rock) their height in a pit (px); tiled across it, every other one mirrored
+  SPIKE_GLOW: 0.6,       // the dusty light at the bottom of a pit, behind the spikes (0 = none)
+  SPIKE_SINK: 10,        // how far below the bottom of the screen their feet go (px): lower shows less of them
   LOAVES: 10, CHEESES: 10,
   DROP_LIFE: 7,          // seconds a dropped loaf or cheese lies there before it's gone (it blinks for the last 2)
   RAIDER_SEE: 11,        // tiles: he comes for David when David's this close
@@ -494,14 +497,27 @@ lostThingsTally = function () {
   return lostThings4();
 };
 
-// --- Glen's spiked crevice, drawn over a pit
+// --- Glen's spiked crevice, drawn over a pit. (Glen, 2026-10-22) his dark rock spikes (spike_rock, cut from his
+// green-screen picture) in every pit; the old blue crevice (spike_pit) is kept for somewhere like a palace later.
 const spikePits = setPieces.filter(p => p.kind === "spikes");
 function drawSpikePits(camX) {
-  const img = ITEM.spike_pit; if (!img || !img.naturalWidth) return;
-  const W0 = img.naturalWidth, H0 = img.naturalHeight, sx0 = W0 * 0.39, sx1 = W0 * 0.61, sy0 = H0 * 0.55;   // the spikes between its two cliffs
+  const rock = ITEM.spike_rock && ITEM.spike_rock.naturalWidth ? ITEM.spike_rock : null, img = ITEM.spike_pit;
+  if (!rock && (!img || !img.naturalWidth)) return;
   for (const p of spikePits) {
     const x0 = p.c * T - camX, w = p.w * T; if (x0 > W || x0 + w < 0) continue;
     const y0 = GR * T + 0.6 * T, h = H - y0 + 40;
+    if (rock) {   // tiled, not stretched: as many as fit, each mirrored from the last so the joins match
+      const th = W5.SPIKE_H, n = Math.max(1, Math.round(w / (th * rock.naturalWidth / rock.naturalHeight))), tw = (w + 12) / n, ty = H + W5.SPIKE_SINK - th;
+      const glow = ctx.createLinearGradient(0, ty + th * 0.25, 0, H);   // dust down there catching the light, so the dark spikes stand out against it
+      glow.addColorStop(0, "rgba(120,82,50,0)"); glow.addColorStop(1, `rgba(120,82,50,${W5.SPIKE_GLOW})`);
+      ctx.fillStyle = glow; ctx.fillRect(x0, ty + th * 0.25, w, H - ty);
+      for (let i = 0; i < n; i++) {
+        ctx.save(); ctx.translate(x0 - 6 + i * tw + (i % 2 ? tw : 0), ty); ctx.scale(i % 2 ? -1 : 1, 1);
+        ctx.drawImage(rock, 0, 0, tw + 1, th); ctx.restore();
+      }
+      continue;
+    }
+    const W0 = img.naturalWidth, H0 = img.naturalHeight, sx0 = W0 * 0.39, sx1 = W0 * 0.61, sy0 = H0 * 0.55;   // the spikes between its two cliffs
     ctx.drawImage(img, sx0, sy0, sx1 - sx0, H0 - sy0, x0 - 6, y0, w + 12, h);
   }
 }
