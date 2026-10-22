@@ -27,6 +27,7 @@ CLIP = {
 FPS = 24
 FACE_GREEN = "0x38fc25"   # the close-up's green screen
 PAINT_STONE = False       # paint the smooth stone over the close-up's rock (patch_face_stone.py: only for his first close-up)
+HOLD_END = 1.5    # (Glen) seconds the last frame stays, the dust hanging, so it doesn't cut off as he hits the ground
 FLASH = 0.25   # the white flash between the replays (seconds)
 CUTS = [   # (name, clip, start, end, speed, flash after)
     ("windup",  "windup", 0.0, 5.03, 1.0, False),   # the whirl and the throw (let go at about 4.9 s)
@@ -36,7 +37,7 @@ CUTS = [   # (name, clip, start, end, speed, flash after)
                                                      # helmet cracks; cut before it bursts (2.92), so it matches the fall
     ("stagger", "hit",    2.2, 3.4, 1.0,  False),
     ("fall",    "hit",    3.4, 5.4, 0.5,  False),    # down, slow
-    ("down",    "hit",    5.4, 6.0, 1.0,  False),
+    ("down",    "hit",    5.4, 6.05, 0.5, False),    # (Glen) the impact and the dust, slow, to the clip's last frame
 ]
 
 
@@ -66,7 +67,8 @@ def cut(tmp, i, name, clip, a, b, speed):
         run(["ffmpeg", "-v", "error", "-y", "-framerate", str(FPS), "-i", os.path.join(frames, "%04d.png"), "-i", CLIP["take2"],
              "-filter_complex", fil, "-map", "[v]", "-an", "-c:v", "libx264", "-crf", "16", "-r", str(FPS), out])
     else:
-        fil = f"trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS}{slow}{tempo},fps={FPS},scale=1280:720,format=yuv420p"
+        hold = f",tpad=stop_mode=clone:stop_duration={HOLD_END}" if name == CUTS[-1][0] else ""
+        fil = f"trim={a}:{b},setpts=PTS-STARTPTS,fps={FPS}{slow}{tempo},fps={FPS}{hold},scale=1280:720,format=yuv420p"
         run(["ffmpeg", "-v", "error", "-y", "-i", CLIP[clip], "-vf", fil, "-an", "-c:v", "libx264", "-crf", "16", "-r", str(FPS), out])
     return out
 

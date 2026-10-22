@@ -18,8 +18,9 @@ const W8 = {
     [18.36, "thunder_3", 0.9, 0.45, 1.6],
     [18.89, "phil_roar", 0.35, 0.7],                                     // the Philistines see him stagger
     [23.24, "thunder", 1, 0.4, 2.2], [23.24, "stone_hit", 1, 0.3],      // he hits the ground
+    [24.3, "stone_hit", 0.7, 0.35, 0.8],                                 // (Glen) and over onto his back, the dust going up; the clip holds on it
   ],
-  FALL_THUDS: [8.09, 11.84, 18.36, 23.24],   // the low thump of the impacts (thud)
+  FALL_THUDS: [8.09, 11.84, 18.36, 23.24, 24.3],   // the low thump of the impacts (thud)
   // (Glen) the music: assets/sounds/giant_fall_music.mp3 when he adds it (until then the boss loop, slowed and deeper,
   // FALL_MUSIC_RATE). Its loudness through the scene, [seconds into the clip, volume]: full through the wind-up and the
   // stone's flight, silent on the hit, low under the replays, up again as he staggers, cut dead when he lands.
