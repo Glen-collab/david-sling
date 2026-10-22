@@ -16,7 +16,9 @@ YARD = os.path.join(ROOT, "assets", "backgrounds", "courtyard_w1.jpg")
 FPS = 24
 TOWN_END = 9.0     # seconds of the flyover used
 XFADE = 0.8        # the cross-fade from the town to the table
-TABLE_Y = -110     # the table shot fills the width (1280 x 854), its bottom (the bench and their feet) cut off by the frame
+TABLE_Y = -80      # the table shot fills the width (1280 x 854), its bottom (the bench and their feet) cut off by the frame
+YARD_CROP = (748, 421, 120, 491)   # w, h, x, y of the courtyard behind them: close in, so its ground meets the table
+                                   # (Glen: with the whole courtyard the ground was far below and the table looked to float)
 GREEN = "0x00fe00"
 
 
@@ -29,7 +31,7 @@ def main():
     out = os.path.join(ROOT, "assets", "video", "w1_opening.mp4")
     fil = (
         f"[0:v]trim=0:{TOWN_END},setpts=PTS-STARTPTS,fps={FPS},scale=1280:720,fade=in:st=0:d=1.2,format=yuv420p[town];"
-        f"[2:v]crop=1621:912:0:0,scale=1280:720,boxblur=5:1,eq=brightness=-0.03,fps={FPS},format=yuv420p[yard];"
+        f"[2:v]crop={":".join(map(str, YARD_CROP))},scale=1280:720,boxblur=5:1,eq=brightness=-0.03,fps={FPS},format=yuv420p[yard];"
         f"[1:v]setpts=PTS-STARTPTS,fps={FPS},scale=1280:854:flags=lanczos,chromakey={GREEN}:0.2:0.06,despill=type=green[fg];"
         f"[yard][fg]overlay=0:{TABLE_Y}:shortest=1,format=yuv420p[table];"
         f"[town][table]xfade=transition=fade:duration={XFADE}:offset={TOWN_END - XFADE},format=yuv420p[v]"
