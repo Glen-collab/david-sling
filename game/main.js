@@ -1389,19 +1389,21 @@ if (LEVEL_NAME === "test") {
   ground(0, 21); campfire(1);
   talk(4, "Tobi", "David! I ran down after you. Listen: that shield-bearer walks in front of him everywhere. The shield's as big as a door.");
   talk(6, "Tobi", "Heavy, though. Every time he slams it down, he has to heave it up again. Watch the bronze rim: when it flashes, he's lifting. That's your moment to get round him.");
-  crack(22, 3); ground(25, 46);
+  // (Glen) the main act: the cracks are wide now, a full running jump or the scout's leap, and the long ones only
+  // with loose rocks to land on, which give way under him
+  crack(22, 10); ground(32, 46);
   setPiece("vultures", 30);
   snake("viper", 37);
   rock(42, 15, 3, 2); special(43, 13);
-  crack(47, 5); crumble(48, 14, 3); ground(52, 79);           // loose rocks over the crack
+  crack(47, 16); crumble(51, 14, 2); crumble(57, 13, 2); ground(63, 79);   // loose rocks over the crack
   setPiece("vultures", 60); snake("viper", 66);
   rock(71, 15, 2, 2); rock(73, 13, 3, 4);
-  crack(80, 4); ground(84, 115);
-  talk(90, "", "Far up the Israelite slope, apart from the others, one man stands with his arms crossed. Eliab. He doesn't call out.");
-  setPiece("eliab7", 90, 7);                                     // up on the hillside, small: far off
+  crack(80, 14); crumble(85, 14, 2); crumble(89, 13, 2); ground(94, 115);
+  talk(96, "", "Far up the Israelite slope, apart from the others, one man stands with his arms crossed. Eliab. He doesn't call out.");
+  setPiece("eliab7", 96, 7);                                     // up on the hillside, small: far off (painted into the far hills, world7.js)
   snake("viper", 102); setPiece("vultures", 108);
-  crack(116, 6); crumble(117, 14, 2); crumble(120, 13, 2); ground(122, 197);
-  campfire(126); snake("viper", 133);
+  crack(116, 20); crumble(120, 14, 2); crumble(125, 13, 2); crumble(130, 14, 2); ground(136, 197);
+  campfire(137); snake("viper", 149);
   rock(140, 11, 4, 6);                                           // the last boulder before the open ground
   fakeRock(144, 13, 3, 4); lostSheep("lamb", 145, 16, "one");    // The One, tucked in behind it
   campfire(152);

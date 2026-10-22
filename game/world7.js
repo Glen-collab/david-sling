@@ -779,6 +779,7 @@ Object.assign(W7, {
   SB_SPR: 1.9,           // Glen's shield-bearer sheets (sb_push / sb_drop / sb_run), x David's scale
   SB_SHIELD_AT: [164, 266, 0.94],   // sb_shield (the dropped shield, alone): its bottom-centre in sb_drop's frame px, and its size there
   SB_EDGE: [70, 86],     // while he peeks, a stone counts on the shield's edge from this far above its top down to this high off the ground (px)
+  ELIAB_AT: 0.33,        // 7-4: where Eliab stands on the far hills, as a fraction of the screen, when David reaches his line
   SB_CHARGE_SIZE: 1.08,  // Glen's sb_charge sheet next to sb_push (1 = same scale)
   SB_VOICE: 0.8,         // his battle cry's pitch and speed (1 = the other Philistines; lower = deeper and slower)
   SB_FRONT: 48,          // px from his feet to the shield's face
@@ -1005,8 +1006,12 @@ function drawShieldBearer(camX) {
 const eliab7 = setPieces.find(p => p.kind === "eliab7") || null;
 function drawEliab7(camX) {
   if (!eliab7 || !SPR.eliab_arms_crossed) return;
-  const x = eliab7.x - camX; if (x < -100 || x > W + 100) return;
-  drawSprite("eliab_arms_crossed", 0, x, eliab7.y, 1, 0.4, 0.85, "saturate(0.7) brightness(0.9) blur(0.4px)");
+  // (Glen) part of the far hills, not the ground: he moves with the far painting (TUNE.BG_FAR_SPEED), so he stands
+  // still on the slope; where he stands is set for when David reaches his line (W7.ELIAB_AT: x on screen then).
+  // He fades in as David comes near the line and stays there after.
+  const c0 = eliab7.x - W * W7.ELIAB_AT, x = W * W7.ELIAB_AT - (camX - c0) * TUNE.BG_FAR_SPEED;
+  const a = Math.max(0, Math.min(1, (david.x - (eliab7.x - 22 * T)) / (8 * T))); if (a <= 0) return;
+  drawSprite("eliab_arms_crossed", 0, x, eliab7.y, 1, 0.4, 0.85 * a, "saturate(0.7) brightness(0.9) blur(0.4px)");
 }
 // the walk out: a slow drum, the giant's footsteps louder as he comes, the shadow from the right
 const quiet74 = { drumT: 0, stepT: 0 };
