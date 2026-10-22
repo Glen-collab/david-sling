@@ -1138,3 +1138,111 @@ camera still, the same man in every clip):
   shield tips and falls flat; he stands and stares), `sb_run` (running away). Still wanted from Glen: the shield alone,
   lying flat, from the end of clip b (Photoshop), saved as `assets/items/sb_shield_flat.png` (transparent, its left end
   where it fell nearest him): it shows where he dropped it after he runs. Until then it's a plain bronze bar.
+
+## World 8 — David and Goliath: map, Journal scene and backgrounds (2026-10-22)
+Built so far: 8-1 The Valley and 8-2 Goliath (both on 7-4's valley-floor layers), the slow-motion fall, and Saul &
+Abner (in the World 6/7 tent). Still to make: 8-3 The Rout and 8-4 Home. Paste the style block first, as always
+(and the map lines for the map, the background Format lines for each layer). **Save in** `david-sling-art\world8\`.
+
+### World 8 map (one message, ready to paste; add the map lines)
+```
+World 8: the Valley of Elah on the day of the battle, and the long road home. The smallest, simplest map of the
+journey. The path, in order:
+1. Top-left, on the Israelite hill: the king's big tent with a banner (the start).
+2. A short path down onto the open valley floor, flat dry ground with cracks (first level dot).
+3. In the middle of the valley, between the two armies: a wide ring of scattered stones on bare ground, a large
+   bronze round shield and a long spear lying flat in the dust beside it, a dark scorch of trampled earth (second
+   level dot: the place of the duel).
+4. The right side: the Philistine camp on the far hill, tents knocked over, banners fallen, dropped shields and
+   spears scattered down the slope, a road running away west into the hills with clouds of dust on it (third
+   level dot).
+5. Back on the Israelite hill, beside the king's tent: a small gold crown marker (a landmark spot).
+6. Along the bottom, a long winding dotted road running all the way back east, out of the valley and through
+   dry hills, to the bottom-left corner: soft green-gold hills, olive trees, a small stone sheepfold with a wooden
+   gate, and the little hilltop town of Bethlehem behind it (fourth level dot: home).
+Mood: bright and open, the danger gone; the valley in clear late-morning light, the far corner with home glowing
+gold, as if at sunset.
+```
+Four plain level dots (8-1 to 8-4) plus Saul's tent and the crown. **Save as** `david-sling-art\world 8 map.png`.
+
+### The World 8 Journal scene (one message)
+The last Journal scene of the game, so it's home again, not the battlefield:
+```
+Over David's shoulder, the same framing as the other Journal scenes: David sitting on the low stone wall of his
+family's sheepfold on the hills above Bethlehem at golden sunset, his open Journal in his hands (both pages blank),
+his shepherd's staff leaning on the wall beside him, his leather sling hanging from his belt, and his small
+shepherd's bag with a few smooth stones spilling from it. In front of him the flock is settling down for the night
+inside the fold, and one small white lamb is curled up against his feet. Below, the terraced hills fall away gold
+and rose, olive trees with long shadows, the little town of Bethlehem on its hill with lamplight starting in the
+windows. Peaceful, warm, the quiet after a long journey. Pixar-style 3D.
+```
+Save as `world8\w8_reading.jpg`.
+
+### 8-3 The Rout (the Philistines run; bright noon, joyful): backgrounds
+Same Format lines as before (very wide, about 3072 x 1024, seamless left/right edges, no characters).
+**Far:**
+```
+World 8, bright clear noon in the Valley of Elah after the battle. A wide blue sky with big white clouds. Along the
+bottom half: the far hills to the west, and on them long clouds of dust rising from a road where a huge army is
+running away into the distance (no people visible, only the dust). The sun high and bright, the whole scene full of
+light and space. Joyful, open, like a great weight has lifted.
+```
+**Middle:**
+```
+World 8 middle distance: the Philistine army camp, abandoned in a hurry. Big striped tents knocked crooked or
+fallen flat, tent poles leaning, dark red and blue banners fallen in the dust, a cooking fire still smoking, a
+broken chariot wheel, piles of dropped round shields and spears, an overturned water jar. Bright noon light,
+softer and a little hazy compared with the foreground. EVERYTHING above the hills is solid flat bright magenta
+(#FF00FF), no sky, no clouds.
+```
+**Near:**
+```
+World 8 foreground strip, the bottom quarter only: trampled dusty ground churned up by thousands of running feet,
+a dropped bronze helmet with a feather crest, a round shield lying face down, a broken spear, scattered sandals,
+tufts of dry grass bent flat, full colour and sharp in bright noon light. EVERYTHING above it is solid flat bright
+magenta (#FF00FF).
+```
+**Save as** `8-3 far.png`, `8-3 mid.png`, `8-3 near.png`.
+
+### 8-4 Home (the hills of Bethlehem at golden sunset): backgrounds
+The same hills as 1-1, at the end of the day, so the player recognises them. Same Format lines.
+**Far:**
+```
+World 8, the hills of Bethlehem at golden sunset, the end of a long journey. A huge glowing sky, gold low down
+fading to rose and soft purple above, a few long pink clouds, the sun just touching the far hills. Along the bottom
+half: soft rounded limestone hills layer behind layer, the farthest ones pale lavender, a few dark olive trees on
+the ridges, the small hilltop town of Bethlehem far off with tiny lit windows. Peaceful, warm, full of home.
+```
+**Middle:**
+```
+World 8 middle distance: the terraced hillsides around Bethlehem in sunset light, low dry-stone walls holding up
+the terraces, olive trees and a fig tree with long shadows, a flock of sheep grazing far off on one slope, a stone
+sheepfold with a wooden gate on a rise, a thin line of smoke from a house chimney. Warm gold and rose light, softer
+compared with the foreground. EVERYTHING above the hills is solid flat bright magenta (#FF00FF), no sky.
+```
+**Near:**
+```
+World 8 foreground strip, the bottom quarter only: a well-worn shepherd's path through short golden grass, small
+wildflowers (red anemones and yellow daisies), smooth limestone rocks, the end of a low dry-stone wall, all lit
+from the side by the setting sun. EVERYTHING above it is solid flat bright magenta (#FF00FF).
+```
+**Save as** `8-4 far.png`, `8-4 mid.png`, `8-4 near.png`.
+
+### Optional: 8-1 The Valley (its own look; it uses 7-4's layers for now)
+Only if you want the duel's day to look different from 7-4's late-afternoon walk. Same Format lines.
+**Far:**
+```
+World 8, the Valley of Elah in bright morning light on the day of the battle. A clear pale sky. Along the bottom
+half: the two hillsides facing each other across the valley, on the right the Philistine army in long rows of tiny
+bronze shields and spear points under their banners, on the left the Israelite army crowded along their slope,
+tiny figures with simple round shields; the open valley floor between them, empty. Tense, still, everyone watching.
+```
+**Middle:**
+```
+World 8 middle distance: the near edge of the valley floor, flat dry ground with long cracks, scattered pale stones
+and low thornbushes, a few dry tamarisk trees, and in the distance the dry streambed with its smooth white stones.
+Bright morning light, softer compared with the foreground. EVERYTHING above the ground is solid flat bright magenta
+(#FF00FF), no sky.
+```
+**Near:** reuse 7-4's near strip (the same ground).
+**Save as** `8-1 far.png`, `8-1 mid.png`.
