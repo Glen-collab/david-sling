@@ -1,24 +1,23 @@
 """The opening of World 1: Glen's two clips cut into one video (world1.js w1intro plays it, muted, under the game's music).
-Bethlehem at dawn (the flyover), then breakfast at Jesse's table, keyed over his courtyard painting: David grabs some
-bread and is gone out of the shot. The breakfast clip's floor is green at the start and dirt later, so the shot is framed
-tight, cut below the tabletop, and the floor never shows.
+Bethlehem at dawn (the flyover), then breakfast at Jesse's table (Glen's second take, the brothers young), keyed over his
+courtyard painting, full width: David grabs some bread and is gone out of the shot, and the camera pushes in on them.
 
   python tools/make_w1_opening.py      -> assets/video/w1_opening.mp4 and w1_opening_last.jpg
 
-Clips: david-sling-art/world1/opening (bethlehem_dawn.mp4, breakfast.mp4).
+Clips: david-sling-art/world1/opening (bethlehem_dawn.mp4, breakfast2.mp4; breakfast.mp4 was the first take).
 """
 import os, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(os.path.dirname(ROOT), "david-sling-art", "world1", "opening")
 TOWN = os.path.join(ART, "bethlehem_dawn.mp4")
-TABLE = os.path.join(ART, "breakfast.mp4")
+TABLE = os.path.join(ART, "breakfast2.mp4")
 YARD = os.path.join(ROOT, "assets", "backgrounds", "courtyard_w1.jpg")
 FPS = 24
 TOWN_END = 9.0     # seconds of the flyover used
 XFADE = 0.8        # the cross-fade from the town to the table
-TABLE_CROP = (720, 525, 0, 100)   # w, h, x, y of the breakfast clip kept: the people and the tabletop, not the floor
-GREEN = "0x04fa0d"
+TABLE_Y = -110     # the table shot fills the width (1280 x 854), its bottom (the bench and their feet) cut off by the frame
+GREEN = "0x00fe00"
 
 
 def run(args):
@@ -28,13 +27,11 @@ def run(args):
 
 def main():
     out = os.path.join(ROOT, "assets", "video", "w1_opening.mp4")
-    cw, ch, cx, cy = TABLE_CROP
-    sw = round(720 * cw / ch / 2) * 2   # the table shot, scaled to the full height of the frame
     fil = (
         f"[0:v]trim=0:{TOWN_END},setpts=PTS-STARTPTS,fps={FPS},scale=1280:720,fade=in:st=0:d=1.2,format=yuv420p[town];"
         f"[2:v]crop=1621:912:0:0,scale=1280:720,boxblur=5:1,eq=brightness=-0.03,fps={FPS},format=yuv420p[yard];"
-        f"[1:v]setpts=PTS-STARTPTS,fps={FPS},crop={cw}:{ch}:{cx}:{cy},scale={sw}:720,chromakey={GREEN}:0.18:0.06,despill=type=green[fg];"
-        f"[yard][fg]overlay=0:0:shortest=1,format=yuv420p[table];"
+        f"[1:v]setpts=PTS-STARTPTS,fps={FPS},scale=1280:854:flags=lanczos,chromakey={GREEN}:0.2:0.06,despill=type=green[fg];"
+        f"[yard][fg]overlay=0:{TABLE_Y}:shortest=1,format=yuv420p[table];"
         f"[town][table]xfade=transition=fade:duration={XFADE}:offset={TOWN_END - XFADE},format=yuv420p[v]"
     )
     run(["ffmpeg", "-v", "error", "-y", "-i", TOWN, "-i", TABLE, "-loop", "1", "-framerate", str(FPS), "-i", YARD,
