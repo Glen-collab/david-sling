@@ -3990,7 +3990,7 @@ const STAGE_THEMES = {
   "7-1": "theme_capital", "7-2": "theme_capital", "7-3": "theme_capital",   // World 7 (Glen's pick); 7-4 stays quiet
 };
 const stageTheme = STAGE_THEMES[LEVEL_STAGE] ? loopAudio(STAGE_THEMES[LEVEL_STAGE]) : null;
-let themeVol = 0;
+let stageThemeVol = 0;
 let dayVol = 0;
 let nightVol = 0, caveVol = 0, musicDuck = 1;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
@@ -4015,7 +4015,7 @@ function updateMusic(dt) {
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
   const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
-  if (stageTheme) themeVol = fadeLoop(stageTheme, themeVol, !cave.room ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.THEME_MUSIC_VOLUME : 0, dt, 0.4);
+  if (stageTheme) stageThemeVol = fadeLoop(stageTheme, stageThemeVol, !cave.room ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.THEME_MUSIC_VOLUME : 0, dt, 0.4);
   dayVol = fadeLoop(dayMusic, dayVol, !stageTheme && !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
   nightVol = fadeLoop(nightMusic, nightVol, !stageTheme && !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
