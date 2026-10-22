@@ -3629,6 +3629,7 @@ function drawFinishBanner() {
   else if (ic === "donkey") drawSprite("donkey_idle", 0, ix, 276, 1, 0.45);
   else if (ic === "soldier") drawSprite("soldier_run", 0, ix, 280, 1, 0.22);
   else if (ic === "lamp") drawItem("hall_lamp_lit", ix, 274, 0.17);
+  else if (ic === "stone") drawItem("pick_round", ix, 272, 34 / 320);   // 7-3: Glen's smooth stone
   else if (finish.things) drawItem("gift_honey", ix, 270, 0.26); else hudIcon("sheep", ix, 234, 38);
   ctx.fillText(finish.one ? "The One: found!" : "The One: still out there...", W / 2, 296);
   ctx.fillText(olive, W / 2, 330);
