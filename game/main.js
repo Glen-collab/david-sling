@@ -4024,7 +4024,7 @@ let musicFight = false;
 // a cut scene has the screen (the game underneath stands still, and so must its sounds: Glen heard David's running
 // feet carry on under the 7-3 riddle)
 const CUT_SCENES = ["passScene", "oneMoment", "ending", "anointing", "afterAnoint", "w3ending", "w4intro", "w4ending", "w5intro", "w5ending",
-  "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall"];
+  "eliabScene", "goliathWatch", "w6intro", "w6ending", "w7intro", "w7off", "nameVision", "w7ending", "codeEntry", "giantFall", "abnerScene"];
 function cutSceneUp() { return CUT_SCENES.some(n => { try { const o = eval(n); return o && o.active; } catch (e) { return false; } }); }
 function updateMusic(dt) {
   if (!audioUnlocked) return;
@@ -4277,6 +4277,9 @@ function frame(now) {
   }
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
+  if (typeof abnerScene !== "undefined" && abnerScene.active) {   // World 8: Saul & Abner, "Whose son is this young man?" (world8.js)
+    pollInput(); abnerScene.update(real); abnerScene.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
   if (typeof giantFall !== "undefined" && giantFall.active) {   // World 8: Goliath falls, Glen's slow-motion scene (world8.js)
     pollInput(); giantFall.update(real); giantFall.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;

@@ -381,7 +381,7 @@ function updateGoliath8(dt) {
       else if (c.t <= 0) { c.result = "miss"; g8Set("miss"); sfx("sling_throw", d.x, 0.8); }
     }
   } else if (g8.state === "thrown") {   // the stone: then the slow-motion scene (giantFall), then the map
-    if (g8.t > 0.7) { g8.won = true; giantFall.start(() => { clear8(); backToMap(); }); }
+    if (g8.t > 0.7) { g8.won = true; giantFall.start(() => abnerScene.start(() => { clear8(); backToMap(); })); }   // the fall, then Saul's tent (17:55-58)
   } else if (g8.state === "miss") {   // the stone flies wide: he laughs, and comes on again; one of the five is gone
     if (!g8.missed) {
       g8.missed = true; g8.smooth = Math.max(1, g8.smooth - 1);
@@ -503,3 +503,73 @@ function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGol
 function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawWords8(camX); drawGoliath8(camX); }
 function drawWorld8Over() { if (WORLD !== 8) return; drawWords8Over(); drawGoliath8Over(); }
 function stoneHitsWorld8(s) { return WORLD === 8 && stoneHitsGoliath8(s); }
+
+// ---------------------------------------------------------------------------
+// After the duel: Saul & Abner, "Whose son is this young man?" (1 Samuel 17:55-58; DESIGN 5h). In Saul's tent (the
+// World 7 tent). Saul asks Abner; Abner doesn't know; Saul sends him; Abner brings David in (17:57, kid-clean: the
+// rest of that verse is left to the Journal reference) and presents him to the king; David answers with who he's
+// always been. Glen's Abner: abner_talk, abner_walk, abner_present (david-sling-art/world8/abner).
+// To watch it on its own: index.html#abner.
+// ---------------------------------------------------------------------------
+Object.assign(W8, {
+  ABNER_SIZE: 1.18,      // Abner against David (a grown commander; David is a youth)
+  TENT_Z: 1.9,           // how close the camera is (as in the World 7 tent scene)
+  FETCH: [2.2, 3.0, 6.2],   // 17:57: Abner gone off right by, back in from the right at, both stopped before Saul by (seconds)
+  SAUL_AT: 0.24, ABNER_AT: 0.58, DAVID_AT: 0.47, ABNER_BACK: 0.70,   // where they stand (fractions of the screen width)
+  ABNER_BEATS: [
+    { who: "", text: "When Saul saw David go out against the Philistine, he said to Abner, the captain of the army," },
+    { who: "King Saul", text: "\"Abner, whose son is this youth?\" (1 Samuel 17:55)", saul: true },
+    { who: "Abner", text: "\"As your soul lives, O king, I can't tell.\" (1 Samuel 17:55)", abner: true },
+    { who: "King Saul", text: "\"Inquire whose son the young man is!\" (1 Samuel 17:56)", saul: true },
+    { who: "", text: "As David returned from the battle, Abner took him and brought him before Saul. (1 Samuel 17:57)", fetch: true },
+    { who: "King Saul", text: "\"Whose son are you, you young man?\" (1 Samuel 17:58)", saul: true, david: true },
+    { who: "David", text: "\"I am the son of your servant Jesse the Bethlehemite.\" (1 Samuel 17:58)", david: true },
+  ],
+});
+const abnerScene = {
+  active: false,
+  start(then) { Object.assign(this, { active: true, then, t: 0, i: 0, bt: 0, out: 0 }); hushLoops(); dialog.t = 0; },
+  update(dt) {
+    this.t += dt; this.bt += dt;
+    if (this.out > 0) { this.out += dt; if (this.out > 1.2) { this.active = false; if (this.then) { const f = this.then; this.then = null; f(); } } return; }
+    const B = W8.ABNER_BEATS[this.i], ready = B.fetch ? this.bt > W8.FETCH[2] + 0.4 : this.bt > 0.6;
+    if (B.fetch && this.bt > 0.05 && !this.walked) { this.walked = true; }
+    if (ready && (pressed("a") || pressed("b") || pressed("start"))) {
+      if (this.i < W8.ABNER_BEATS.length - 1) { this.i++; this.bt = 0; if (W8.ABNER_BEATS[this.i].fetch) this.walked = false; }
+      else this.out = 0.001;
+    }
+  },
+  draw() {
+    const B = W8.ABNER_BEATS[this.i], now = performance.now() / 1000, fy = H - 6, z = W8.TENT_Z, za = z * W8.ABNER_SIZE;
+    if (typeof TENT_BG !== "undefined" && TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
+    else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
+    // Saul, on the left, facing them
+    drawSprite(SPR.saul_armor ? "saul_armor" : "saul", B.saul && SPR.saul_armor ? 5 : 0, W * W8.SAUL_AT, fy, 1, z);
+    // Abner and David: before 17:57 Abner stands before the king; in 17:57 he goes out and brings David in; after, both stand there
+    const after = this.i > W8.ABNER_BEATS.findIndex(b => b.fetch), fetching = B.fetch, [gone, back, there] = W8.FETCH;
+    if (fetching) {
+      const t = this.bt;
+      if (t < gone) {   // he turns and goes out to find him
+        const p = t / gone; drawSprite("abner_walk", frameOf("abner_walk", now), W * (W8.ABNER_AT + (1.12 - W8.ABNER_AT) * p), fy, 1, za);
+      } else if (t >= back) {   // back in, David walking ahead of him
+        const p = Math.min(1, (t - back) / (there - back)), walking = p < 1;
+        const dx = W * (1.18 + (W8.DAVID_AT - 1.18) * p), ax = W * (1.34 + (W8.ABNER_BACK - 1.34) * p);
+        drawSprite(walking ? "david_walk" : "david_idle", frameOf(walking ? "david_walk" : "david_idle", now), dx, fy, -1, z);
+        if (walking) drawSprite("abner_walk", frameOf("abner_walk", now), ax, fy, -1, za);
+        else drawSprite("abner_present", Math.min(SPR.abner_present.frames - 1, Math.floor((t - there) / 0.26)), ax, fy, -1, za);   // and presents him to the king
+      }
+    } else if (after) {
+      drawSprite("david_idle", frameOf("david_idle", now), W * W8.DAVID_AT, fy, -1, z);
+      drawSprite("abner_present", SPR.abner_present.frames - 1, W * W8.ABNER_BACK, fy, -1, za);
+    } else {
+      drawSprite(B.abner ? "abner_talk" : "abner_present", B.abner ? frameOf("abner_talk", now) : 0, W * W8.ABNER_AT, fy, -1, za);
+    }
+    const a = Math.min(1, this.t / 1.0);
+    ctx.save(); ctx.globalAlpha = a; ctx.textAlign = "center";
+    drawStoryBox(B.who, B.text, (B.fetch ? this.bt > W8.FETCH[2] + 0.4 : this.bt > 0.6) ? keyText("A: next") : "", true);
+    ctx.restore(); ctx.textAlign = "left";
+    const f = this.out > 0 ? Math.min(1, this.out / 1.2) : Math.max(0, 1 - this.t / 0.8);
+    if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  },
+};
+if (location.hash === "#abner") abnerScene.start(() => backToMap());   // (testing: the scene by itself)
