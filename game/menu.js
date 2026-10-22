@@ -16,6 +16,9 @@ const FILM_CLIPS = [
   { label: "The Stones of the Name", world: "World 7", src: "../assets/video/name_stones.mp4", seen: p => !!p.nameVision },
   { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
 ];
+// (Glen, 2026-10-22) every scene open while he adds and checks them; set false before release, so each one unlocks when it's reached
+const SCENES_ALL_OPEN = true;
+const sceneOpen = (c, p) => SCENES_ALL_OPEN || c.seen(p);
 function hasSave() { const p = loadProgress(); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
 
 const Menu = {
@@ -52,18 +55,18 @@ const Menu = {
     if (this.screen === "title") return [
       { label: "Continue", off: !hasSave(), act: () => this.leaveTitle(() => WorldMap.open(loadProgress().view || "journey")) },
       { label: "New game", act: () => hasSave() ? this.go("confirm") : this.newGame() },
-      { label: "Scenes", off: !FILM_CLIPS.some(c => c.seen(loadProgress())), act: () => this.go("scenes") },
+      { label: "Scenes", off: !FILM_CLIPS.some(c => sceneOpen(c, loadProgress())), act: () => this.go("scenes") },
       { label: "Settings", act: () => this.go("settings") },
     ];
     if (this.screen === "scenes") {
       const p = loadProgress();
-      return [...FILM_CLIPS.map(c => c.seen(p) ? { label: c.label, value: c.world, act: () => this.playScene(c) } : { label: "Not reached yet", value: c.world, off: true }),
+      return [...FILM_CLIPS.map(c => sceneOpen(c, p) ? { label: c.label, value: c.world, act: () => this.playScene(c) } : { label: "Not reached yet", value: c.world, off: true }),
               { label: "Back", act: () => this.go(this.home) }];   // (to the title, or back to Paused)
     }
     if (this.screen === "pause") return [
       { label: "Resume", act: () => this.close() },
       { label: "Settings", act: () => this.go("settings") },
-      ...(FILM_CLIPS.some(c => c.seen(loadProgress())) ? [{ label: "Scenes", act: () => this.go("scenes") }] : []),   // (Glen) watch a scene again without leaving the stage
+      ...(FILM_CLIPS.some(c => sceneOpen(c, loadProgress())) ? [{ label: "Scenes", act: () => this.go("scenes") }] : []),   // (Glen) watch a scene again without leaving the stage
       ...(this.under === "stage" ? [{ label: "Start the stage again", act: () => startStage(LEVEL_NAME) }] : []),   // stuck somewhere? start over (sheep and olives from this try are lost)
       this.under === "stage" ? { label: "Back to the map", act: () => backToMap() }
                              : { label: "Title screen", act: () => { this.under = null; this.open("title"); } },
