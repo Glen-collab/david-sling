@@ -65,3 +65,17 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | vulture | vulture.mp3 | the vultures: as they flap up, and now and then while they circle | ? |
 | goliath_theme | dramatic-evil-theme-orchestra-suspense-horns-fear-film-phantom-humanoide9000.mp3 | 7-4, Goliath walks in after the shield-bearer | Pixabay? (humanoide9000) |
 | giant_fall_music | evil-theme.mp3 | World 8, Goliath's fall (the slow-motion scene) | ? |
+
+## Glen's stage themes (Oct 22; originals in Desktop\david-sling-art\sounds\originals)
+Silence trimmed off both ends and leveled to -17 LUFS (the harps' loudness). Which stage: STAGE_THEMES in main.js.
+
+| Game file | Original download | Stage | Source / licence |
+|---|---|---|---|
+| theme_capital | 26-capital-evil-theme.mp3 | World 7 (7-1 to 7-3) | ? |
+| theme_arete | 4-arete-evil-theme-game.mp3 | 5-4 | ? |
+| theme_dream | 240-dream-evil-theme.mp3 | 5-2 | ? |
+| theme_explore | 220-explore-evil-theme.mp3 | 5-1 | ? |
+| theme_wraith | 170-wraith-evil-theme.mp3 | 6-4 | ? |
+| theme_search | 260-search-evil-theme.mp3 | 6-1 to 6-3 | ? |
+| theme_wishes | 248-wishes-evil-theme.mp3 | 4-4 | ? |
+| theme_sleuth | 250-sleuth-evil-theme.mp3 | 5-3 | ? |

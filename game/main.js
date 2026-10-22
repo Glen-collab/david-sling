@@ -69,6 +69,7 @@ const TUNE = {
   STEPS_VOLUME: 0.5,      // David's running footsteps
   AMBIENCE_VOLUME: 0.35,  // birds in the hills
   DAY_MUSIC_VOLUME: 0.3,  // Glen's day themes (Cascading Harp, Harp's Dance), under the birds
+  THEME_MUSIC_VOLUME: 0.35, // Glen's orchestral themes on the dramatic stages (STAGE_THEMES), all leveled to the harps' loudness
   DARK_MUSIC_VOLUME: 0.4, // Glen's darker themes (Harp of Shadows): night stages and caves, like Mario's underground music
   MUSIC_DUCK: 0.25,       // the music under a talk box in play: this much of its volume
   MUSIC_SCENE: 0.1,       // ... and under a cut scene
@@ -3976,6 +3977,20 @@ const DARK_STAGES = ["2-4", "3-4", "4-4"];   // (3-4: the storm)
 // the day themes: the fun early worlds get Glen's bouncy ones (1: 8-bit Harp Jump, 2: Harps' Bounce), then
 // Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out)
 const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
+// (Glen, 2026-10-22) his darker orchestral themes for the dramatic stages, in place of the harp, day or night (caves
+// keep the cave music). Matched by their tempo and feel (tools: librosa): one a stage, World 7 all on Capital.
+const STAGE_THEMES = {
+  "4-4": "theme_wishes",    // the King's Hall at night: slow (89 bpm), soft, A minor; Saul and the dark spirit
+  "5-1": "theme_explore",   // the Supply Road: the busiest, a long journey (2 min), D minor
+  "5-2": "theme_dream",     // the Mountain Trail by moonlight: the darkest and smoothest, E minor
+  "5-3": "theme_sleuth",    // the Lookouts' Ridge: creeping past the torches, E minor
+  "5-4": "theme_arete",     // Down to Elah: it builds, quiet to big (the widest swings of them all); the chariots
+  "6-1": "theme_search", "6-2": "theme_search", "6-3": "theme_search",   // the camp of fear: uneasy, A minor
+  "6-4": "theme_wraith",    // the Tower's Shadow: the densest and loudest
+  "7-1": "theme_capital", "7-2": "theme_capital", "7-3": "theme_capital",   // World 7 (Glen's pick); 7-4 stays quiet
+};
+const stageTheme = STAGE_THEMES[LEVEL_STAGE] ? loopAudio(STAGE_THEMES[LEVEL_STAGE]) : null;
+let themeVol = 0;
 let dayVol = 0;
 let nightVol = 0, caveVol = 0, musicDuck = 1;
 let ambVol = 0, bossVol = 0, bossIntroPlayed = false, runVol = 0, rainVol = 0;
@@ -4000,9 +4015,10 @@ function updateMusic(dt) {
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;
   const darkOn = !musicFight && !grave && !(david.state === "harp") ? TUNE.DARK_MUSIC_VOLUME * (finish.active ? 0.5 : 1) * musicDuck : 0;
-  dayVol = fadeLoop(dayMusic, dayVol, !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
+  if (stageTheme) themeVol = fadeLoop(stageTheme, themeVol, !cave.room ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.THEME_MUSIC_VOLUME : 0, dt, 0.4);
+  dayVol = fadeLoop(dayMusic, dayVol, !stageTheme && !cave.room && !STAGE_INFO.night && !STAGE_INFO.quiet && !DARK_STAGES.includes(LEVEL_STAGE) ? darkOn / TUNE.DARK_MUSIC_VOLUME * TUNE.DAY_MUSIC_VOLUME : 0, dt, 0.4);
   caveVol = fadeLoop(caveMusic, caveVol, cave.room ? darkOn : 0, dt, 0.4);
-  nightVol = fadeLoop(nightMusic, nightVol, !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
+  nightVol = fadeLoop(nightMusic, nightVol, !stageTheme && !cave.room && (STAGE_INFO.night || DARK_STAGES.includes(LEVEL_STAGE)) ? darkOn : 0, dt, 0.4);
 }
 function updateSound(dt) {
   if (!audioUnlocked) return;
@@ -4205,7 +4221,7 @@ function frame(now) {
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)
-    for (const a of [dayMusic, nightMusic, caveMusic, ambience, bossMusic, finish.jingle]) if (a && !a.paused) a.pause();   // (and the stage-clear jingle, if he turned the page before it ended)   // nor the stage music or the birds (they fade back in after)
+    for (const a of [dayMusic, nightMusic, caveMusic, stageTheme, ambience, bossMusic, finish.jingle]) if (a && !a.paused) a.pause();   // (and the stage-clear jingle, if he turned the page before it ended)   // nor the stage music or the birds (they fade back in after)
     dayVol = nightVol = caveVol = ambVol = bossVol = 0;
     pollInput();
     if (setup.active) { input.now = {}; input.prev = {}; }   // the setup screen gets the buttons, not the map
@@ -4274,7 +4290,7 @@ function frame(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
-  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, bossMusic]) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
+  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, stageTheme, bossMusic].filter(Boolean)) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
   else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
   else if (typeof w7Hold === "function" && w7Hold(real)) { hushLoops(true); }   // 7-3: looking at a stone (world7.js)
