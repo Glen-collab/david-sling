@@ -4223,6 +4223,9 @@ function frame(now) {
   if (typeof anointing !== "undefined" && anointing.active) {   // the Anointing scene (world3.js) has the screen
     pollInput(); anointing.update(real); anointing.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
+  if (typeof giantFall !== "undefined" && giantFall.active) {   // World 8: Goliath falls, Glen's slow-motion scene (world8.js)
+    pollInput(); giantFall.update(real); giantFall.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
+  }
   if (typeof nameVision !== "undefined" && nameVision.active) {   // 7-3: the Stones of the Name, Glen's clip / its still (world7.js)
     pollInput(); nameVision.update(real); nameVision.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
