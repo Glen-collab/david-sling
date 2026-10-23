@@ -1,5 +1,8 @@
 // The title screen, the pause menu and Settings.
-//   Title (first thing each time the game is opened): Continue / New game / Scenes (Glen's clips, once reached) / Settings
+//   Title (first thing each time the game is opened): Continue (the game last played) / Choose a game / Scenes (Glen's clips,
+//   once reached) / Shepherd's Trial / Settings
+//   Choose a game: three saved games, each with a name (main.js SLOT). An empty one asks for a name (letters picked with the
+//   D-pad, like Super Mario World) and how hard, then starts. "Erase a game" empties one.
 //   Pause (Start in a stage, on a map or in the courtyard): Resume / Settings / Scenes (once one is seen) / Back to the map (or Title screen)
 //   Settings: which controller (with a picture of its buttons), set up a controller, music and sound volume
 // Settings are saved in localStorage "davidSettings" (SETTINGS in main.js). Up/Down choose, Left/Right change,
@@ -32,7 +35,21 @@ const SCENES_ALL_OPEN = true;
 const trialOpen = p => SCENES_ALL_OPEN || !!(p["8-2"] || {}).cleared;
 const trialBossOpen = (b, p) => SCENES_ALL_OPEN || !!(p[b.stage] || {}).cleared;
 const sceneOpen = (c, p) => SCENES_ALL_OPEN || c.seen(p);
-function hasSave() { const p = loadProgress(); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
+function slotProgress(n) { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress", n)) || "{}"); } catch (e) { return {}; } }
+function hasSave(n = SLOT) { const p = slotProgress(n); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
+const slotTaken = n => hasSave(n) || !!slotNames()[n];
+const slotName = n => slotNames()[n] || `Game ${n}`;
+function slotSummary(n) {   // for the Choose a game list: where they are, how far, the sheep, how hard
+  const p = slotProgress(n), done = BUILT_STAGES.filter(id => (p[id] || {}).cleared);
+  let d = null; try { d = localStorage.getItem(slotKey("davidDifficulty", n)); } catch (e) {}
+  const diff = (DIFFICULTY[d] || DIFFICULTY.medium).name;
+  if (!done.length) return `Just starting  ·  ${diff}`;
+  const top = Math.max(...done.map(id => +id[0])), w = (p[top + "-4"] || {}).cleared ? Math.min(8, top + 1) : top;
+  const sheep = done.reduce((s, id) => s + (p[id].sheep || 0), 0);
+  return `${(p["8-2"] || {}).cleared ? "The giant is down" : "World " + w}  ·  ${done.length}/32 stages  ·  ${sheep} sheep  ·  ${diff}`;
+}
+const NAME_MAX = 10;
+const NAME_GRID = [[..."ABCDEFGHI"], [..."JKLMNOPQR"], [..."STUVWXYZ", " "], ["back", "done"]];   // the letters on the name screen
 
 const Menu = {
   active: false,
@@ -59,7 +76,10 @@ const Menu = {
     }
     this.home = screen; this.go(screen);
   },
-  go(screen) { this.screen = screen; this.sel = 0; const it = this.items(); while (it[this.sel] && it[this.sel].off) this.sel++; },
+  go(screen) {
+    this.screen = screen; this.sel = screen === "files" ? SLOT - 1 : screen === "newdiff" ? 1 : 0;   // (the game being played; Medium)
+    const it = this.items(); while (it[this.sel] && it[this.sel].off) this.sel++;
+  },
   close() {
     this.active = false;
     if (this.under === "map") WorldMap.active = true;
@@ -70,12 +90,25 @@ const Menu = {
   items() {
     const S = SETTINGS;
     if (this.screen === "title") return [
-      { label: "Continue", off: !hasSave(), act: () => this.leaveTitle(() => WorldMap.open(loadProgress().view || "journey")) },
-      { label: "New game", act: () => hasSave() ? this.go("confirm") : this.newGame() },
+      { label: hasSave() ? `Continue: ${slotName(SLOT)}` : "Continue", off: !hasSave(), act: () => this.pickFile(SLOT) },
+      { label: [1, 2, 3].some(slotTaken) ? "Choose a game" : "New game", act: () => this.go("files") },
       { label: "Scenes", off: !FILM_CLIPS.some(c => sceneOpen(c, loadProgress())), act: () => this.go("scenes") },
       ...(trialOpen(loadProgress()) ? [{ label: "Shepherd's Trial", act: () => this.go("trial") }] : []),
       { label: "Settings", act: () => this.go("settings") },
     ];
+    if (this.screen === "files" || this.screen === "erase") {   // the three saved games
+      const er = this.screen === "erase", any = [1, 2, 3].some(slotTaken);
+      return [...[1, 2, 3].map(n => { const t = slotTaken(n);
+                return { label: `${n}   ${t ? slotName(n) : "Empty"}`, value: t ? slotSummary(n) : er ? "" : "New game", off: er && !t,
+                         act: er ? () => { this.eraseN = n; this.go("confirm"); } : t ? () => this.pickFile(n) : () => this.startName(n, "new") }; }),
+              ...(!er && any ? [{ label: "Erase a game", act: () => this.go("erase") }] : []),
+              { label: "Back", act: () => this.go(er ? "files" : "title") }];
+    }
+    if (this.screen === "newdiff") {   // a new game: how hard (it can be changed later in Settings)
+      const desc = { easy: "more hearts and lives, slower bosses", medium: "the game as it was made", hard: "two hearts a hit, tougher bosses" };
+      return [...Object.keys(DIFFICULTY).map(k => ({ label: DIFFICULTY[k].name, value: desc[k], act: () => this.startFile(this.nameFor, k) })),
+              { label: "Back", act: () => this.go("name") }];
+    }
     if (this.screen === "trial") {   // every boss again, no counsel, best times (on this difficulty)
       const p = loadProgress(), best = trialBest(), k = S.difficulty in DIFFICULTY ? S.difficulty : "medium";
       return [...TRIAL_BOSSES.map(b => !trialBossOpen(b, p) ? { label: "Not beaten yet", value: "World " + b.stage[0], off: true }
@@ -113,9 +146,9 @@ const Menu = {
         { label: "Back", act: () => this.go(this.home) },
       ];
     }
-    if (this.screen === "confirm") return [
-      { label: "No, keep my game", act: () => this.go("title") },
-      { label: "Yes, start over", act: () => this.newGame() },
+    if (this.screen === "confirm") return [   // erase a game
+      { label: "No, keep it", act: () => this.go("files") },
+      { label: "Yes, erase it", act: () => this.eraseFile(this.eraseN) },
     ];
     return [{ label: "Back", act: () => this.go("settings") }];   // controls
   },
@@ -145,9 +178,76 @@ const Menu = {
     }
     this.playing = null;
   },
-  newGame() {
-    for (const k of ["davidProgress", "davidStones", "davidGateTops"]) try { localStorage.removeItem(k); } catch (e) {}
-    this.leaveTitle(() => WorldMap.open("journey"));
+  // ---- the three saved games ----
+  pickFile(n) {   // play a saved game (one saved before games had names asks for one first)
+    if (!slotNames()[n]) { this.startName(n, "play"); return; }
+    if (n === SLOT) { this.leaveTitle(() => WorldMap.open(loadProgress().view || "journey")); return; }
+    this.switchTo(n);
+  },
+  switchTo(n) {   // every game's numbers are read when the page loads, so another game is a fresh page (straight to its map)
+    try { localStorage.setItem("davidSlot", n); sessionStorage.setItem("davidTitleSeen", "1"); } catch (e) {}
+    this.active = false; location.href = "index.html";
+  },
+  startFile(n, diff) {   // a new game in an empty file: its name, how hard, and off to the journey map
+    for (const k of SLOT_KEYS) try { localStorage.removeItem(slotKey(k, n)); } catch (e) {}
+    setSlotName(n, this.name);
+    try { localStorage.setItem(slotKey("davidDifficulty", n), diff); } catch (e) {}
+    this.switchTo(n);
+  },
+  eraseFile(n) {
+    const who = slotName(n);
+    for (const k of SLOT_KEYS) try { localStorage.removeItem(slotKey(k, n)); } catch (e) {}
+    setSlotName(n, null);
+    this.go("files"); this.msg = `${who}'s game is erased.`;
+  },
+  startName(n, then) { this.nameFor = n; this.nameThen = then; this.name = ""; this.gx = 0; this.gy = 0; this.go("name"); },
+  nameDone() {
+    this.name = this.name.trim();
+    if (!this.name) { this.msg = "Pick at least one letter."; return; }
+    if (this.nameThen === "play") { setSlotName(this.nameFor, this.name); this.pickFile(this.nameFor); }
+    else this.go("newdiff");
+  },
+  nameUpdate() {   // the D-pad picks a letter, A adds it, B takes one back, Start is done
+    const G = NAME_GRID, row = () => G[this.gy];
+    const lr = d => { this.gx = (this.gx + d + row().length) % row().length; chime(1); };
+    const ud = d => {
+      const fx = (this.gx + 0.5) / row().length;   // keep to the same side of the grid
+      this.gy = (this.gy + d + G.length) % G.length; this.gx = Math.min(row().length - 1, Math.floor(fx * row().length)); chime(1);
+    };
+    if (pressed("left")) lr(-1);
+    if (pressed("right")) lr(1);
+    if (pressed("up")) ud(-1);
+    if (pressed("down")) ud(1);
+    const back = () => { if (this.name) { this.name = this.name.slice(0, -1); chime(2); } else this.go("files"); };
+    if (pressed("start")) { chime(4); this.nameDone(); return; }
+    if (pressed("b")) { back(); return; }
+    if (pressed("a")) {
+      const c = row()[this.gx]; this.msg = null;
+      if (c === "back") { back(); return; }
+      if (c === "done") { chime(4); this.nameDone(); return; }
+      if (this.name.length >= NAME_MAX) { this.msg = `${NAME_MAX} letters at most.`; return; }
+      if (c === " " && (!this.name || this.name.endsWith(" "))) return;   // (no space first, or two together)
+      this.name += !this.name || this.name.endsWith(" ") ? c : c.toLowerCase(); chime(4);   // Glen, not GLEN
+    }
+  },
+  drawName() {
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText("What's your name?", W / 2, 130);
+    ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText(`Game ${this.nameFor}`, W / 2, 162);
+    ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 330, 186, 660, 80, 14); ctx.fill();
+    ctx.fillStyle = "#fff6e2"; ctx.font = "bold 48px Georgia, serif";
+    const nw = ctx.measureText(this.name).width; ctx.fillText(this.name, W / 2, 244);
+    if (this.name.length < NAME_MAX && Math.floor(this.t * 2) % 2 === 0) { ctx.fillStyle = "#ffd166"; ctx.fillRect(W / 2 + nw / 2 + 4, 250, 28, 4); }
+    const cell = 72, gx0 = W / 2 - 4 * cell, gy0 = 340;
+    ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 360, gy0 - 56, 720, 4 * cell + 34, 16); ctx.fill();
+    NAME_GRID.forEach((r, y) => r.forEach((c, x) => {
+      const on = y === this.gy && x === this.gx, wide = r.length === 2;
+      const cx = wide ? W / 2 + (x ? 140 : -140) : gx0 + x * cell, cy = gy0 + y * cell, bw = wide ? 240 : 60;
+      if (on) { ctx.fillStyle = "rgba(255,210,110,0.25)"; ctx.beginPath(); ctx.roundRect(cx - bw / 2, cy - 40, bw, 54, 10); ctx.fill(); }
+      ctx.fillStyle = on ? "#ffe08a" : "#f3ead8"; ctx.font = `${on ? "bold " : ""}${wide || c === " " ? 23 : 32}px sans-serif`;
+      ctx.fillText(c === "back" ? "◀ Take one back" : c === "done" ? "Done ✓" : c === " " ? "space" : c, cx, cy);
+    }));
+    if (this.msg) { ctx.fillStyle = "#ffd166"; ctx.font = "17px sans-serif"; ctx.fillText(this.msg, W / 2, gy0 + 4 * cell + 8); }
   },
   update(dt) {
     this.t += dt;
@@ -162,6 +262,7 @@ const Menu = {
       if ((this.playT > 0.4 && (pressed("a") || pressed("b") || pressed("start"))) || (this.clip.ended && this.playT > 1.5)) this.stopScene();
       return;
     }
+    if (this.screen === "name") { this.nameUpdate(); return; }
     const it = this.items();
     const move = d => { let i = this.sel; do { i = (i + d + it.length) % it.length; } while (it[i].off && i !== this.sel); this.sel = i; this.msg = null; chime(1); };
     if (pressed("down")) move(1);
@@ -175,7 +276,9 @@ const Menu = {
     }
     if (pressed("b")) {
       if (this.screen === "controls") this.go("settings");
-      else if (this.screen === "settings" || this.screen === "confirm" || this.screen === "scenes" || this.screen === "trial") this.go(this.home);
+      else if (this.screen === "confirm" || this.screen === "erase") this.go("files");
+      else if (this.screen === "newdiff") this.go("name");
+      else if (this.screen === "settings" || this.screen === "files" || this.screen === "scenes" || this.screen === "trial") this.go(this.home);
       else if (this.screen === "pause") this.close();
     }
   },
@@ -201,6 +304,7 @@ const Menu = {
     }
     ctx.textAlign = "center";
     if (this.screen === "controls") { this.drawControls(); ctx.restore(); return; }
+    if (this.screen === "name") { this.drawName(); this.drawHint(); ctx.restore(); return; }
     const title = this.screen === "title" || (this.screen === "confirm");
     if (title) {
       // gold letters with a dark outline and a soft glow, so they read against the bright sunset sky
@@ -210,16 +314,18 @@ const Menu = {
       ctx.font = "italic bold 36px Georgia, serif"; ctx.lineWidth = 7; ctx.strokeText("The Shepherd's Sling", W / 2, 202);
       ctx.fillStyle = "#fff4d6"; ctx.fillText("The Shepherd's Sling", W / 2, 202);
     } else {
-      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : this.screen === "scenes" ? "Scenes" : this.screen === "trial" ? "The Shepherd's Trial" : "Settings", W / 2, 150);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : this.screen === "scenes" ? "Scenes" : this.screen === "trial" ? "The Shepherd's Trial"
+                 : this.screen === "files" ? "Choose a game" : this.screen === "erase" ? "Erase which game?" : this.screen === "newdiff" ? `How hard, ${this.name}?` : "Settings", W / 2, 150);
+      if (this.screen === "newdiff") { ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("You can change it later in Settings.", W / 2, 182); }
       if (this.screen === "trial") { ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Every fight again. No counsel, no help. How fast can you do it?", W / 2, 182); }
     }
     if (this.screen === "confirm") {
       ctx.fillStyle = "#fff"; ctx.font = "22px sans-serif";
-      ctx.fillText("Start a new game? Your saved game (stages, sheep, olives, skills) will be erased.", W / 2, 320);
+      ctx.fillText(`Erase ${slotName(this.eraseN)}'s game? Stages, sheep, olives, skills and Trial times will all be gone.`, W / 2, 320);
     }
     // the list
-    const sc = this.screen === "scenes" || this.screen === "trial", it = this.items(), rowH = this.screen === "trial" ? 40 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : sc ? 200 : 220;
-    const bw = this.screen === "settings" || sc ? 620 : 420;
+    const sc = ["scenes", "trial", "files", "erase", "newdiff"].includes(this.screen), it = this.items(), rowH = this.screen === "trial" ? 40 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : ["files", "erase", "newdiff"].includes(this.screen) ? 250 : sc ? 200 : 220;
+    const bw = this.screen === "files" || this.screen === "erase" ? 820 : this.screen === "settings" || sc ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {
       const y = top + i * rowH, on = i === this.sel;
@@ -248,13 +354,17 @@ const Menu = {
     }
     if (this.msg) { ctx.fillStyle = "#ffd166"; ctx.fillText(this.msg, W / 2, y); }
     if (!audioUnlocked && this.screen === "title") { ctx.fillStyle = "#ffe08a"; ctx.fillText("Click the game once to turn on sound", W / 2, H - 56); }
-    ctx.fillStyle = "rgba(10,6,2,0.9)"; ctx.fillRect(0, H - 46, W, 46);
+    this.drawHint();
+    ctx.restore();
+  },
+  drawHint() {
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(10,6,2,0.9)"; ctx.fillRect(0, H - 46, W, 46);
     ctx.fillStyle = "rgba(255,240,215,0.8)"; ctx.font = "15px sans-serif";
     ctx.fillText(this.hint(), W / 2, H - 18);
-    ctx.restore();
   },
   hint() {
     const k = SETTINGS.controller === "keyboard";
+    if (this.screen === "name") return k ? "Arrows: choose a letter    Z: add it    X: take one back    Enter: done" : "D-pad: choose a letter    A: add it    B: take one back    Start: done";
     return k ? "Arrows: choose    Left / Right: change    Z or Enter: OK    X: back" : "D-pad: choose    Left / Right: change    A: OK    B: back";
   },
   // a picture of the chosen controller and what each button does

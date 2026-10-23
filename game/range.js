@@ -35,7 +35,7 @@ const RANGE_LINES = {   // Claude's drafts (Glen to change)
   goldAgain: "Gold again. You don't need me anymore, shepherd.",
 };
 const rng = { on: LEVEL_NAME === "range", phase: "hello", t: 0, score: 0, hits: 0, targets: [], spawnT: 0, lastHit: -9, floats: [], round: 0 };
-const rangeProg = () => { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } };
+const rangeProg = () => { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) { return {}; } };
 const rangeLate = () => rng.phase === "play" && rng.t > RANGE.TIME - 20;
 function geraSay(text) { sayLine("Gera", text); rng.quiet = 0; }   // (and the round waits until he's done)
 function rangeStart() {   // a new round: the count-in
@@ -109,7 +109,7 @@ function rangeEnd() {
   const firstGold = s >= RANGE.GOLD && !p.rangeGold;
   p.rangeBest = Math.max(rng.prevBest, s); p.olives = (p.olives || 0) + rng.olives; david.olives += rng.olives;
   if (firstGold) p.rangeGold = true;
-  try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  try { localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   rng.mark = s >= RANGE.GOLD ? "gold" : s >= RANGE.SILVER ? "silver" : s >= RANGE.BRONZE ? "bronze" : "low";
   chime(7); setTimeout(() => chime(11), 200);
   if (firstGold) sfx("extra_life");

@@ -350,7 +350,7 @@ const WRAP_INDENT = { ref: 16, psalm: 34 };   // a wrapped line of the song is i
 let journalFlags = {};
 function onesFlags(world) {
   try {
-    const p = JSON.parse(localStorage.getItem("davidProgress") || "{}");
+    const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}");
     const all = [1, 2, 3, 4].every(k => p[`${world}-${k}`] && p[`${world}-${k}`].one);
     return { allOnes: all, missingOne: !all };
   } catch (e) { return { missingOne: true }; }
@@ -561,7 +561,7 @@ const ease = f => f * f * (3 - 2 * f);
 // read later has everything he wrote (Glen, 2026-10-22): the giant's Field Guide card (6-2, world6.js goliathNote), the
 // Name (7-3, world7.js nameNote), the five smooth stones (7-3, fiveNote) and Gera's verse (his range's gold, range.js). The old letters are their own page at the back.
 function journalNotes(w) {
-  let p = {}; try { p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) {}
+  let p = {}; try { p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) {}
   const out = [], add = f => { if (typeof f === "function") out.push({ spread: "note", step: 5, w, P: { note: f() }, old: true }); };
   if (w === 6 && p.goliathCard) add(typeof goliathNote !== "undefined" && goliathNote);
   if (w === 7 && p["7-3"] && p["7-3"].cleared) { add(typeof nameNote !== "undefined" && nameNote); add(typeof fiveNote !== "undefined" && fiveNote); }
@@ -580,7 +580,7 @@ const Journal = {
     this.pages = [{ spread: "draft", step: Math.min(4, opts.stage) }];
     this.rip = null;
     if (P.rip && !opts.read && opts.stage === P.rip.at && !opts.preview) {
-      let seen = false; try { seen = !!(JSON.parse(localStorage.getItem("davidProgress") || "{}").ripped || {})[opts.world]; } catch (e) {}
+      let seen = false; try { seen = !!(JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").ripped || {})[opts.world]; } catch (e) {}
       if (!seen) this.pages[0].ripNow = true;
     }
     if (opts.stage >= 4 && !opts.noEnd) this.pages.push({ spread: "end", step: 5 });
@@ -596,7 +596,7 @@ const Journal = {
     // the whole journey (Glen, 2026-10-20): the worlds before this one, already written, in front, so Left pages back through them
     const mine = this.pages.length, earlier = [];
     if (!opts.preview) {
-      let prog = {}; try { prog = JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) {}
+      let prog = {}; try { prog = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) {}
       for (let w = 1; w < opts.world; w++) {
         const PW = JOURNAL_PAGES[w]; if (!PW) continue;
         const last = [4, 3, 2, 1].find(k => prog[`${w}-${k}`] && prog[`${w}-${k}`].cleared); if (!last) continue;
@@ -733,7 +733,7 @@ const Journal = {
     }
   },
   ripDone() {
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.ripped = p.ripped || {}; p.ripped[this.world] = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.ripped = p.ripped || {}; p.ripped[this.world] = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     this.page().t = 0; this.page().nextAct = 0; this.phase = "write";
   },
   drawRipFire() {   // David by the fire at night, tearing the page out and throwing it in: World 3 in 3-2's far pasture, World 6 in the army camp (6-1)
@@ -896,10 +896,10 @@ function sfxPageTurn() { penScratch(0.35, 2.5); }
 
 // special stones found in each stage are saved by stage ("1-1": 3, ...); the world's spread shows the total
 function stonesFound(world) {
-  try { const s = JSON.parse(localStorage.getItem("davidStones") || "{}"); return [1, 2, 3, 4].reduce((n, k) => n + Math.min(3, s[`${world}-${k}`] || 0), 0); } catch (e) { return 0; }   // 3 a stage (2-3 once had 4)
+  try { const s = JSON.parse(localStorage.getItem(slotKey("davidStones")) || "{}"); return [1, 2, 3, 4].reduce((n, k) => n + Math.min(3, s[`${world}-${k}`] || 0), 0); } catch (e) { return 0; }   // 3 a stage (2-3 once had 4)
 }
 function saveStones(stage, n) {
-  try { const s = JSON.parse(localStorage.getItem("davidStones") || "{}"); s[stage] = Math.max(s[stage] || 0, n); localStorage.setItem("davidStones", JSON.stringify(s)); } catch (e) {}
+  try { const s = JSON.parse(localStorage.getItem(slotKey("davidStones")) || "{}"); s[stage] = Math.max(s[stage] || 0, n); localStorage.setItem(slotKey("davidStones"), JSON.stringify(s)); } catch (e) {}
 }
 
 // "?journal=3" in the address opens the Journal preview at that page (5 = the world's end)
@@ -938,7 +938,7 @@ const LETTER_PAGE = [
   { k: "waw",   ch: "\u{10905}", name: "Waw",   pic: "a tent peg. It means \"and\".", where: "in Gibeah's market, by a house.", thought: "A peg holds a tent together. So the word waw means \"and\": it joins things." },
   { k: "dalet", ch: "\u{10903}", name: "Dalet", pic: "a door.",                       where: "on the supply road, by the rocks.", thought: "Two Dalets with a Waw between them spell a shepherd boy's name. Mine!" },
 ];
-function lettersFound() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}").letters || []; } catch (e) { return []; } }
+function lettersFound() { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").letters || []; } catch (e) { return []; } }
 function lettersSpread(found, cross) {   // cross: opened from the riddle at a crossing in 7-3 (world7.js); the riddle goes on the right page
   const left = [{ at: 5, size: "entry", segs: [{ text: "Old letters, carved in the rock here and there. I copied them down:", at: 5 }] }];
   for (const L of LETTER_PAGE) left.push(found.includes(L.k)

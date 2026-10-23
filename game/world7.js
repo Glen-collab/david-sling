@@ -579,7 +579,7 @@ for (const s of nameStones) for (let c = s.c; c < s.c + W7.NAME_W; c++) specialP
 const nameClues = setPieces.filter(p => p.kind === "nameclue").map(p => ({ x: p.x, y: p.y, cross: p.cross, told: false }));
 const nameRun = { lock: null, fall: null, done: {}, saidRight: false };
 let ohWaitDone = false;
-try { ohWaitDone = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").nameOhWait; } catch (e) {}
+try { ohWaitDone = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").nameOhWait; } catch (e) {}
 const w7Busy = () => !!nameRun.lock;   // main.js: on a wrong stone, no jumping off it
 const nameTop = s => s.r * T;
 function setNamePlat(s, on) { for (let c = s.c; c < s.c + W7.NAME_W; c++) oneway[s.r][c] = on; }
@@ -603,7 +603,7 @@ function updateNameStones(dt) {
       nameRun.lock = null;
       if (L.ohWait) {   // the scripted near-miss: he scrambles back to the bank
         L.s.state = "whole"; L.s.cracked = true; ohWaitDone = true;
-        try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.nameOhWait = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+        try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.nameOhWait = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
         const b = crossBank(L.s.cross); d.x = b.x; d.y = b.y; d.vy = 0; d.facing = 1; setState("idle");
         lamb.x = d.x - 50; lamb.y = d.y; trail.length = 0;
         sayLine("David", "Oh wait. Our fathers read from the right. Start at the end: He, Waw, He, Yod.");
@@ -1284,7 +1284,7 @@ const w7intro = {
   },
   finish() {
     this.active = false;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w7intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w7intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const B = this.beats[this.i], now = performance.now() / 1000, fy = H - 6, z = 1.9;   // close to the camera, as in the World 6 ending
@@ -1336,7 +1336,7 @@ function drawIntroPile(x, y, z) {   // the armor laid out: the last frame of Gle
   drawSprite("david_armor_off", s.frames - 1, x, y, 1, z); ctx.restore();
 }
 if (LEVEL_STAGE === "7-1" && !STORY_HASH) {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w7intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w7intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w7intro"))   // (Glen) his film first: David led to the king's tent, 17:31
     preFilm.start({ src: "../assets/video/w7_film.mp4", words: [[0.8, 4.2, "The king's tent"], [5.0, 9.9, "Sent for", "“When the words were heard which David spoke, they rehearsed them before Saul; and he sent for him.” (1 Samuel 17:31)"]],
       loop: ["ambience_hills", 0.3, 0.2] }, () => w7intro.start());
@@ -1382,7 +1382,7 @@ const NAME_CLIP = Object.assign(document.createElement("video"), { src: "../asse
 NAME_CLIP.onerror = () => { NAME_CLIP.missing = true; };
 const NAME_STILL = Object.assign(new Image(), { src: "../assets/video/name_stones_last.jpg?v=" + (window.BUILD || 0) });
 let nameVisionSeen = false;
-try { nameVisionSeen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").nameVision; } catch (e) {}
+try { nameVisionSeen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").nameVision; } catch (e) {}
 const nameVision = {
   active: false,
   start(cross, full) {
@@ -1393,7 +1393,7 @@ const nameVision = {
     if (full) { NAME_CLIP.currentTime = 0; NAME_CLIP.play().catch(() => { this.still = 0; }); }
     if (full && !nameVisionSeen) {
       nameVisionSeen = true;
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.nameVision = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.nameVision = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     }
   },
   update(dt) {

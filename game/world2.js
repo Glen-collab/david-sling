@@ -1268,7 +1268,7 @@ function lambDrift(dt) {   // called from updateLamb (main.js): true = the lamb 
 // ---------------------------------------------------------------------------
 const SLING_POUCH_CHARGE = 0.8;   // charge time x this, once David has the pouch
 Object.assign(TUNE.SPRITE_SIZE, { father_walk: 1.25, father_talk: 1.25, father_idle: 1.25, father_give: 1.25 });   // a grown man, taller than David
-try { if (JSON.parse(localStorage.getItem("davidProgress") || "{}").slingPouch) TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } catch (e) {}
+try { if (JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").slingPouch) TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } catch (e) {}
 const ending = {
   active: false, t: 0, step: 0, stepT: 0, done: null, boyX: W + 60, hananX: W + 80, pouch: null, fade: 0,
   lines: [
@@ -1298,7 +1298,7 @@ const ending = {
         if (this.pouch) this.pouch.t += dt;
         if (this.pouch && this.pouch.t > 1.2 && !this.gave) {
           this.gave = true; sfx("extra_life", undefined, 0.7); dialog.t = 0;   // it lands in David's lap: the father's words give way to the gift
-          try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); if (!p.slingPouch) { p.slingPouch = true; TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+          try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); if (!p.slingPouch) { p.slingPouch = true; TUNE.CHARGE_TIME *= SLING_POUCH_CHARGE; } localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
         }
         if (this.pouch && this.pouch.t > 2.6 && A) { dialog.t = 0; this.next(); }
         break;
@@ -1461,7 +1461,7 @@ const w2intro = {
   next() { this.step++; this.stepT = 0; },
   finish() {
     this.active = false; W2_CLIP.pause(); this.amb.pause();
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w2intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w2intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
@@ -1487,6 +1487,6 @@ const w2intro = {
   },
 };
 if (LEVEL_STAGE === "2-1" && location.hash === "#2-1") {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w2intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w2intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w2intro")) w2intro.start();
 }

@@ -34,7 +34,7 @@ const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
 // what David is carrying: full at the start of 5-1, then whatever made it through the stage before
 const prov = { bread: W5.LOAVES, cheese: W5.CHEESES, drops: [] };
 if (WORLD === 5 && LEVEL_STAGE !== "5-1") {
-  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}").prov; if (p) Object.assign(prov, { bread: p.bread, cheese: p.cheese }); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").prov; if (p) Object.assign(prov, { bread: p.bread, cheese: p.cheese }); } catch (e) {}
 }
 const provCount = () => prov.bread + prov.cheese;
 function loseProvision(x, y, why) {   // knocked loose: it bounces off and lies on the ground for a few seconds
@@ -237,7 +237,7 @@ function updateFather() {
   const all = finish.total && finish.found === finish.total;
   sayLine("The fleeing father", all ? "You brought them all back? Every one! God bless you, boy. Listen: there's a cave up on the mountain trail. I saw a soldier hiding in it, one of ours. He looked half dead with fear. Maybe you can help him."
                                     : "You found some of them. Thank you, boy. Listen: there's a cave up on the mountain trail. I saw a soldier hiding in it, one of ours. Maybe you can help him.");
-  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.tobiSecret = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.tobiSecret = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
 }
 // Glen's father_flee (faces right): 0 catching his breath, 1 talking, 2 pointing back down the road, 3 a tear, shaking
 // his head, 4 hands together (thankful), 5 waving goodbye. At the fold his wife and the children wait with him.
@@ -425,7 +425,7 @@ function updateTobi(k, dx, sameLevel, dt) {
     fall(); k.facing = Math.sign(dx) || -1;
     if (!k.seen && Math.abs(dx) < 9 * T && david.deadT <= 0) {
       k.seen = true;
-      let secret = false; try { secret = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").tobiSecret; } catch (e) {}
+      let secret = false; try { secret = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").tobiSecret; } catch (e) {}
       tobiSay([["Tobi", "Who's there?! ... You're not a Philistine. You're just a boy."],
                ["Tobi", "I'm a scout. I'm supposed to be fast. I heard him, the giant, shouting across the valley, and I just... ran. I've been hiding here two days."],
                ["", secret ? "The soldier the fleeing father saw. He's shaking. Light the fire, and play the harp for him (Select)." : "He's shaking with cold and fear. Light the fire, and play the harp for him (Select)."]]);
@@ -738,7 +738,7 @@ function updateWorld53(dt) {
   updateLookouts(dt); updateCairns(dt);
   if (!W5.warnSaved && talks.some(k => k.done && k.who === "Tobi" && k.say.includes("chariot"))) {   // tier-1 counsel for the chariot (5-4)
     W5.warnSaved = true;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.chariotWarn = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.chariotWarn = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   }
   if (LEVEL_STAGE === "5-3" && finish.active && finish.phase === "clear" && !W5.notSeenGiven) {
     W5.notSeenGiven = true;
@@ -889,7 +889,7 @@ function updateChariot(dt) {
   }
   updateArrows(dt);
 }
-const chariotWarned = () => { if (TRIAL) return false; try { return !!JSON.parse(localStorage.getItem("davidProgress") || "{}").chariotWarn; } catch (e) { return false; } };
+const chariotWarned = () => { if (TRIAL) return false; try { return !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").chariotWarn; } catch (e) { return false; } };
 function updateArcher(dt, P) {
   const ch = chariot; ch.at += dt;
   const tell = W5.counsel2 ? W5.CH_TELL2 : W5.CH_TELL, onScreen = ch.x > ch.a0 - 100 && ch.x < ch.a1 + 100;
@@ -1083,8 +1083,8 @@ function updateWorld5(dt) {
   updateProvisions(dt); updateFather(); updateVultures(dt); updateFleeing(dt); updateWorld52(dt);
   if (finish.active && finish.phase === "clear" && !W5.provSaved) {   // what's left goes on to the next stage, and to the camp at the end
     W5.provSaved = true;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.prov = { bread: prov.bread, cheese: prov.cheese };
-      localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.prov = { bread: prov.bread, cheese: prov.cheese };
+      localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   }
 }
 function drawWorld5(camX) {
@@ -1115,7 +1115,7 @@ const w5intro = {
   },
   finish() {
     this.active = false;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w5intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w5intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const y = GR * T, s = this.SIZE, now = performance.now() / 1000, keep = bgWorld;
@@ -1143,7 +1143,7 @@ const w5intro = {
   },
 };
 if (LEVEL_STAGE === "5-1" && !STORY_HASH) {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w5intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w5intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w5intro"))   // (Glen) his film first: the giant at dawn over the Valley of Elah, 17:16
     preFilm.start({ src: "../assets/video/w5_film.mp4", words: [[0.8, 4.2, "The Valley of Elah"], [5.2, 9.9, "Forty days", "“The Philistine came near morning and evening, and presented himself forty days.” (1 Samuel 17:16)"]],
       loop: ["ambience_hills", 0.35, 0.35], cues: [[3.2, "goliath_tenu_li_ish", 0.8], [3.9, "phil_roar", 0.25], [7.4, "goliath_tenu_li_ish_2", 0.45]] }, () => w5intro.start());
@@ -1176,7 +1176,7 @@ const w5ending = {
   ],
   start(done) { Object.assign(this, { active: true, t: 0, i: 0, bt: 0, done, fade: 0, out: 0, davidX: -80, gave: false }); hushLoops(); dialog.t = 0; },
   provText() {
-    let p = { bread: W5.LOAVES, cheese: W5.CHEESES }; try { p = JSON.parse(localStorage.getItem("davidProgress") || "{}").prov || p; } catch (e) {}
+    let p = { bread: W5.LOAVES, cheese: W5.CHEESES }; try { p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").prov || p; } catch (e) {}
     const all = p.bread >= W5.LOAVES && p.cheese >= W5.CHEESES;
     return `David left his baggage in the hand of the keeper of the baggage (1 Samuel 17:22): the parched grain, ${all ? "and every one of the ten loaves and ten cheeses" : `${p.bread} of the ten loaves and ${p.cheese} of the ten cheeses`}. The cheeses were for the captain of their thousand.`;
   },
@@ -1188,7 +1188,7 @@ const w5ending = {
     this.shake = Math.max(0, (this.shake || 0) - dt);
     if (B && B.card && this.bt < 0.05 && !this.gave) {
       this.gave = true; sfx("extra_life", undefined, 0.7);
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.cloak = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.cloak = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     }
     if (this.out > 0) {
       this.out += dt;

@@ -824,12 +824,12 @@ const AFTER_ANOINT = [
     "Seven of us stood in that line, and the prophet chose you. I still can't believe it. Well done, David.",
     "Now go on. The sheep won't feed themselves."] },
 ];
-const savedProgress = () => { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } };   // (map.js loads after this file)
+const savedProgress = () => { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) { return {}; } };   // (map.js loads after this file)
 const afterAnoint = {
   active: false, t: 0, line: 0, lineT: 0, who: null, SIZE: 1.7, ENTER: 1.4,
   start() {
     const p = savedProgress(), n = p.afterAnoint || 0; p.afterAnoint = n + 1;
-    try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     Object.assign(this, { active: true, t: 0, line: 0, lineT: 0, who: AFTER_ANOINT[n % AFTER_ANOINT.length] }); dialog.t = 0;
   },
   update(dt) {
@@ -1292,7 +1292,7 @@ const w3ending = {
       case 6:                                                                                   // David takes it, and lifts it up
         if (this.stepT > this.HANDOVER + this.RAISE * 0.5 && !this.gave) {
           this.gave = true; sfx("extra_life", undefined, 0.7);
-          try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.staff = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+          try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.staff = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
         }
         if (this.gave && this.stepT > this.HANDOVER + this.RAISE && A) { this.davidX = this.DAVID_X; this.next(); }
         break;
@@ -1495,7 +1495,7 @@ const w3intro = {
   next() { this.step++; this.stepT = 0; },
   finish() {
     this.active = false; W3_CLIP.pause(); this.amb.pause();
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w3intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w3intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
@@ -1527,6 +1527,6 @@ const w3intro = {
   },
 };
 if (LEVEL_STAGE === "3-1" && location.hash === "#3-1") {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w3intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w3intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w3intro")) w3intro.start();
 }

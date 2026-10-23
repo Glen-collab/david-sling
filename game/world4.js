@@ -328,8 +328,8 @@ function updateInscriptions(dt) {
     if (n.still > 0.7 && !n.read) {
       n.read = true; if (typeof chime === "function") chime(3);
       let isNew = false;
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.letters = p.letters || [];
-        if (!p.letters.includes(n.letter)) { isNew = true; p.letters.push(n.letter); localStorage.setItem("davidProgress", JSON.stringify(p)); } } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.letters = p.letters || [];
+        if (!p.letters.includes(n.letter)) { isNew = true; p.letters.push(n.letter); localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } } catch (e) {}
       // a new one: he sits and copies it into his Journal, with what it pictured (Glen, 2026-10-18)
       const note = isNew && typeof letterNote === "function" && caveatReady ? letterNote(n.letter, OLD_LETTERS[n.letter].clue) : null;
       if (note) { david.vx = 0; hushLoops(); Journal.openNote(note); }
@@ -749,7 +749,7 @@ const w4intro = {
   next() { this.step++; this.stepT = 0; },
   finish() {
     this.active = false;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w4intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w4intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const y = GR * T, s = this.SIZE, now = performance.now() / 1000, keep = bgWorld;
@@ -789,7 +789,7 @@ const w4intro = {
   },
 };
 if (LEVEL_STAGE === "4-1" && !STORY_HASH) {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w4intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w4intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w4intro"))   // (Glen) his film first: the messenger riding for Bethlehem
     preFilm.start({ src: "../assets/video/w4_film.mp4", words: [[1.0, 5.2, "The road from Gibeah"], [6.6, 9.8, "Bethlehem"]], loop: ["horse-gallop", 0.7, 0.25] }, () => w4intro.start());
 }
@@ -830,7 +830,7 @@ const w4ending = {
     if (B && B.walk) this.davidX = Math.min(W * 0.4, this.davidX + TUNE.WALK_SPEED * 0.7 * dt);
     if (B && B.card && this.bt < 0.05 && !this.gave) {
       this.gave = true; sfx("extra_life", undefined, 0.7);
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.favor = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.favor = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     }
     if (this.out > 0) {
       this.out += dt;
@@ -862,7 +862,7 @@ const w4ending = {
       drawTownGround(y);   // Bethlehem's own dusty ground (the w2s set 3-1 uses), not the palace stone this stage loaded
       if (SPR.hanan_idle_nostaff) drawSprite("hanan_idle_nostaff", frameOf("hanan_idle_nostaff", now), W * 0.62, y, -1);   // (his staff is David's now)
       const walking = B.walk && this.davidX < W * 0.4;
-      const dx = B.walk ? this.davidX : W * 0.4, nm = typeof SPR.david_walk_staff !== "undefined" && (JSON.parse(localStorage.getItem("davidProgress") || "{}").staff) ? "david_walk_staff" : "david_walk";
+      const dx = B.walk ? this.davidX : W * 0.4, nm = typeof SPR.david_walk_staff !== "undefined" && (JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").staff) ? "david_walk_staff" : "david_walk";
       drawSprite(walking ? nm : "david_idle", frameOf(walking ? nm : "david_idle", now), dx, y, 1);
     }
     if (B.card) {   // the gift

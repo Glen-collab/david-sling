@@ -18,7 +18,7 @@ const TRIAL_BOSSES = [   // at: the column David starts on (the last fire before
 const TRIAL_TUNE = {
   AFTER: 2.2,      // seconds after the boss goes down before the result (the last stone lands, he falls)
 };
-function trialBest() { try { return JSON.parse(localStorage.getItem("davidTrial") || "{}"); } catch (e) { return {}; } }
+function trialBest() { try { return JSON.parse(localStorage.getItem(slotKey("davidTrial")) || "{}"); } catch (e) { return {}; } }
 const trialTime = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
 const trial = { t: 0, beatenT: 0, done: false, sel: 0 };
 const TRIAL_BOSS = TRIAL ? TRIAL_BOSSES.find(b => b.stage === LEVEL_STAGE) : null;
@@ -50,7 +50,7 @@ function trialResult() {
   trial.time = time;
   const all = trialBest(), mine = all[LEVEL_STAGE] || {}, k = SETTINGS.difficulty in DIFFICULTY ? SETTINGS.difficulty : "medium";
   trial.prev = mine[k]; trial.best = !(mine[k] <= time);
-  if (trial.best) { mine[k] = Math.round(time * 10) / 10; all[LEVEL_STAGE] = mine; try { localStorage.setItem("davidTrial", JSON.stringify(all)); } catch (e) {} }
+  if (trial.best) { mine[k] = Math.round(time * 10) / 10; all[LEVEL_STAGE] = mine; try { localStorage.setItem(slotKey("davidTrial"), JSON.stringify(all)); } catch (e) {} }
   // quiet: the fight's music, the giant's horns, the loops
   hushLoops(); hushGiant();
   for (const a of [dayMusic, nightMusic, caveMusic, stageTheme, ambience, bossMusic, stepsRun]) if (a && !a.paused) a.pause();

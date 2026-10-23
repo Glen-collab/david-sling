@@ -158,8 +158,8 @@ const MAP_WORLDS = {
 const BUILT_WORLDS = [1, 2, 3, 4, 5, 6, 7, 8];   // worlds you can go into from the journey map so far
 const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4", "6-1", "6-2", "6-3", "6-4", "7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4"];   // stages that exist so far (the rest say "coming soon")
 
-function loadProgress() { try { return JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) { return {}; } }
-function saveProgress(p) { try { localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {} }
+function loadProgress() { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) { return {}; } }
+function saveProgress(p) { try { localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {} }
 // called when a stage is cleared: remember it, and that the map should open the next stretch of trail
 function stageCleared(id, info) {
   const p = loadProgress();

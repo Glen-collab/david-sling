@@ -194,7 +194,7 @@ function updateWords8(dt) {
     }
   } else if (w.state === "roar" && w.t > 2.4 && !w.told) {
     w.told = true;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.throwFaith = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.throwFaith = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     toast("The last piece of the throw: A. Faith. \"The battle is the LORD's.\"");
   } else if (w.state === "roar" && w.t > 6.5) {
     w.state = "done";
@@ -299,7 +299,7 @@ function g8CloseIn() {   // David got in close (17:48): he staggers back, and th
 }
 function g8Code() {   // the throw, as far as you know it (DESIGN 4c), and A (faith) from 8-1
   const learned = typeof throwLearned === "function" ? throwLearned() : 0, n = THROW_PIECE_LEN.slice(0, Math.min(7, learned)).reduce((a, b) => a + b, 0);
-  let faith = false; try { faith = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").throwFaith; } catch (e) {}
+  let faith = false; try { faith = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").throwFaith; } catch (e) {}
   const code = THROW_CODE.slice(0, n).concat(faith ? ["a"] : []);
   return code.length ? code : ["a"];
 }
@@ -900,7 +900,7 @@ const w8intro = {
     this.t += dt;
     if (this.t > 4.2 || (this.t > 0.8 && (pressed("a") || pressed("b") || pressed("start")))) {
       this.active = false;
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w8intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w8intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     }
   },
   draw() {   // the title card, over the valley the stage starts in
@@ -913,7 +913,7 @@ const w8intro = {
   },
 };
 if (LEVEL_STAGE === "8-1" && location.hash === "#8-1") {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w8intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w8intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w8intro"))   // his film first: the walk into the valley, 17:40
     preFilm.start({ src: "../assets/video/w8_film.mp4", words: [[0.8, 4.2, "The Valley of Elah"], [5.0, 9.9, "", "“His sling was in his hand; and he came near to the Philistine.” (1 Samuel 17:40)"]],
       loop: ["ambience_hills", 0.45, 0.3], cues: [[6.5, "taunting_yells", 0.12]] }, () => w8intro.start());

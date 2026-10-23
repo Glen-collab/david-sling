@@ -375,7 +375,7 @@ const goliathWatch = {
       this.out += dt;
       if (this.out > 0.8) {
         this.active = false; this.done = true; W6.boomT = 0;
-        try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.goliathCard = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+        try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.goliathCard = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
         if (typeof Journal !== "undefined" && Journal.openNote) Journal.openNote(goliathNote());   // David writes it down
       }
       return;
@@ -534,7 +534,7 @@ function updateCarriers(dt) {
   for (const b of brothers6) if (!b.told && Math.abs(d.x - b.x) < 3 * T) {
     b.told = true;
     sayLine("Abinadab", "Going for the tower, are you? Those towers are top-heavy. Knock the pins out of the front wheels and it'll lean. Lean it far enough and it goes over.");
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.towerCounsel = Math.max(1, p.towerCounsel || 0); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.towerCounsel = Math.max(1, p.towerCounsel || 0); localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   }
   // Shammah, once he's filled his jar at the first pool
   const sham = carriers.find(c => c.who === "Shammah");
@@ -544,7 +544,7 @@ function updateCarriers(dt) {
     water6.reached = true;
     const n = carriers.filter(c => c.state === "follow" && c.jar === "full").length, m = carriers.filter(c => c.state === "follow").length;
     toast(n === m && m ? `Every jar full: ${n} jars of water reach the camp!` : `${n} of ${m} jars of water reach the camp.`);
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.water6 = Math.max(n, p.water6 || 0); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.water6 = Math.max(n, p.water6 || 0); localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   }
 }
 function drawCarriers(camX) {
@@ -650,10 +650,10 @@ function drawFills(camX) {   // behind David: the far bank and the water
 // --- Courage (DESIGN 5f): every frightened soldier lifted anywhere in World 6 is saved (progress.lift6[stage]); in the
 // watchtower fight they throw stones from the Israelite slope to draw the archers' fire. More courage, more cover.
 function saveLift6() {
-  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.lift6 = p.lift6 || {};
-    p.lift6[LEVEL_STAGE] = Math.max(p.lift6[LEVEL_STAGE] || 0, fearful.filter(s => s.state !== "hide").length); localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.lift6 = p.lift6 || {};
+    p.lift6[LEVEL_STAGE] = Math.max(p.lift6[LEVEL_STAGE] || 0, fearful.filter(s => s.state !== "hide").length); localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
 }
-function courage6() { try { const l = JSON.parse(localStorage.getItem("davidProgress") || "{}").lift6 || {}; return Object.values(l).reduce((a, b) => a + b, 0); } catch (e) { return 0; } }
+function courage6() { try { const l = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").lift6 || {}; return Object.values(l).reduce((a, b) => a + b, 0); } catch (e) { return 0; } }
 
 // --- Philistine skirmishers (6-4, and out of the tower in its fight). setPiece("skirmisher", c): he waits behind his
 // shield; when David comes near he charges. Three stones (or one charged) and he drops his shield and runs
@@ -796,7 +796,7 @@ function towerFight() { return !!(tw && !tw.beaten && david.deadT <= 0 && (tw.on
 function towerCam() { return tw && tw.on && !tw.beaten ? [tw.a0, tw.a0] : null; }
 function towerBlocking() { return tw && !tw.beaten ? "The watchtower! Its archers cover the whole valley. Deal with it first." : null; }
 const twPinHP = () => W6.counsel2 ? W6.TW_PIN_HP2 : W6.TW_PIN_HP;
-const twCounsel = () => { if (TRIAL) return false; try { return (JSON.parse(localStorage.getItem("davidProgress") || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
+const twCounsel = () => { if (TRIAL) return false; try { return (JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
 const twWheel = () => ({ x: tw.x0 + twPic(270, 0)[0], y: GR * T - 38, r: 38 });   // the front hub
 const twBeam = () => ({ x0: tw.x0 + tw.w * 0.45, x1: tw.x0 + tw.w + 30, y0: W6.TW_ROOF * T - 130, y1: W6.TW_ROOF * T });   // the frame over the roof
 function startTower() {
@@ -1176,7 +1176,7 @@ const w6intro = {
   },
   finish() {
     this.active = false;
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w6intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w6intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const y = GR * T, now = performance.now() / 1000, keep = bgWorld;
@@ -1203,7 +1203,7 @@ const w6intro = {
   },
 };
 if (LEVEL_STAGE === "6-1" && !STORY_HASH) {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w6intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w6intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w6intro"))   // (Glen) his film first: the frightened camp at night, 17:11
     preFilm.start({ src: "../assets/video/w6_film.mp4", words: [[0.8, 4.2, "The camp of Israel"], [5.0, 9.9, "Afraid", "“When Saul and all Israel heard those words of the Philistine, they were dismayed and greatly afraid.” (1 Samuel 17:11)"]],
       loop: ["music_night", 0.4, 0.3], cues: [[3.0, "taunting_yells", 0.18], [6.8, "phil_roar", 0.12]] }, () => w6intro.start());
@@ -1242,7 +1242,7 @@ const w6ending = {
     const B = this.beats[this.i];
     if (B.card && !this.gave) {
       this.gave = true; sfx("extra_life", undefined, 0.7);
-      try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.bag = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+      try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.bag = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
     }
     if (this.out > 0) { this.out += dt; if (this.out > 1.2) { this.active = false; const cb = this.done; this.done = null; cb && cb(); } return; }
     if (this.bt > 0.6 && (pressed("a") || pressed("b") || pressed("start"))) {

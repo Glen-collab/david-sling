@@ -158,8 +158,23 @@ for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
 // ============================================================================
 // Input: keyboard + gamepad (with a button-setup screen for NES controllers)
 // ============================================================================
+// Three saved games (Glen 2026-10-23, like Super Mario World): each has its own name, stages, sheep, olives, stones, gate
+// tops, Trial times and difficulty. Game 1 keeps the old keys (the game saved before there were three is Game 1); games 2
+// and 3 add "@2" / "@3". The one being played is localStorage "davidSlot" (choosing another reloads the page); the names
+// are in "davidNames". The controller and the volumes are shared by all three.
+const SLOTS = 3;
+const SLOT = (() => { try { return Math.min(SLOTS, Math.max(1, Math.floor(+localStorage.getItem("davidSlot") || 1))); } catch (e) { return 1; } })();
+const slotKey = (k, n = SLOT) => n === 1 ? k : `${k}@${n}`;
+const SLOT_KEYS = ["davidProgress", "davidStones", "davidGateTops", "davidTrial", "davidDifficulty"];
+function slotNames() { try { return JSON.parse(localStorage.getItem("davidNames")) || {}; } catch (e) { return {}; } }
+function setSlotName(n, name) { const all = slotNames(); if (name) all[n] = name; else delete all[n]; try { localStorage.setItem("davidNames", JSON.stringify(all)); } catch (e) {} }
 // Settings (menu.js): which controller's pictures to show, and the music / sound volumes (0-10).
 const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10, difficulty: "medium" }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
+{   // the difficulty belongs to the game being played (Game 1 takes the one chosen before there were three)
+  let d = null; try { d = localStorage.getItem(slotKey("davidDifficulty")); } catch (e) {}
+  SETTINGS.difficulty = d || (SLOT === 1 ? SETTINGS.difficulty : "medium");
+  if (!d) try { localStorage.setItem(slotKey("davidDifficulty"), SETTINGS.difficulty); } catch (e) {}
+}
 // Difficulty (Settings, Glen 2026-10-22). Medium is the game as tuned. Easy: more hearts and lives, bosses warn longer and
 // stay open longer, and take fewer hits. Hard: every hit costs two hearts, fewer lives, a shorter blink after a hit,
 // quicker warnings, shorter openings, and bosses take more hits. Counsel still helps on top of any of them.
@@ -191,7 +206,7 @@ function applyDifficulty() {
   if (typeof bear !== "undefined" && bear.on && bear.hp !== undefined) bear.hp = W2.BEAR_HP;
   if (typeof leopards !== "undefined") for (const L of leopards) L.hp = W5.LEOPARD_HP;
 }
-function saveSettings() { try { localStorage.setItem("davidSettings", JSON.stringify(SETTINGS)); } catch (e) {} applyVolumes(); }
+function saveSettings() { try { localStorage.setItem("davidSettings", JSON.stringify(SETTINGS)); localStorage.setItem(slotKey("davidDifficulty"), SETTINGS.difficulty); } catch (e) {} applyVolumes(); }
 const sfxMul = () => SETTINGS.sfx / 10, musicMul = () => SETTINGS.music / 10;
 // Every <audio> keeps working with its own 0-1 volume; the setting scales what you actually hear.
 // Music elements are marked with ._music (the harp, ambience, boss music, map and Journal music); the rest are sounds.
@@ -524,7 +539,7 @@ const SKILL_NAMES = { aimUp: "Aim up: hold Up as you throw", harpCall: "The harp
   quick: "Quick release: tap B twice, quick, for two stones",
   leap: "The scout's leap: press A again in the air to jump again" };   // leap: Tobi, 5-2   // quick: Gera, 4-2
 const skills = new Set();
-try { for (const k of JSON.parse(localStorage.getItem("davidProgress") || "{}").skills || []) skills.add(k); } catch (e) {}
+try { for (const k of JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").skills || []) skills.add(k); } catch (e) {}
 const ALL_SKILLS = LEVEL_NAME === "test" || new URLSearchParams(location.search).has("allskills");
 // Every stage after the one that teaches a skill has it, even if that talk was missed (or the save lost it)
 const SKILL_STAGE = { aimUp: "1-1", harpCall: "1-2", roll: "1-3", charge: "2-1", quick: "4-2", leap: "5-2" };
@@ -533,7 +548,7 @@ const hasSkill = k => ALL_SKILLS || skills.has(k) || (SKILL_STAGE[k] && stageNum
 function learnSkill(k) {
   if (!k || skills.has(k)) return;
   skills.add(k);
-  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.skills = [...skills]; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.skills = [...skills]; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   setTimeout(() => { toast("New skill: " + SKILL_NAMES[k]); if (typeof chime === "function") { chime(4); setTimeout(() => chime(7), 150); } }, 2500);
 }
 // ground animals: "fox" (goes for your lamb), "jackal" (steals it and runs), "ram" (charges; roll under it)
@@ -2819,12 +2834,12 @@ david.maxHearts = TUNE.HEARTS + DIFF.hearts; david.hearts = david.maxHearts; dav
 david.lives = DIFF.lives; david.olives = 0; david.lampOil = 0; david.gathered = 0;   // gathered: every olive picked up this stage (for the tithe, home.js)
 // olives, lamp oil and a fig cake bought at the market carry over from the home base (map.js progress)
 try {
-  const pr = JSON.parse(localStorage.getItem("davidProgress") || "{}");
+  const pr = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}");
   david.olives = pr.olives || 0; david.lampOil = pr.lampOil || 0;
   if (pr.staff) { david.maxHearts++; david.hearts++; }   // Hanan's staff (End of World 3): one more heart, for good
   if (pr.cloak) { david.maxHearts++; david.hearts++; }   // Tobi's scout cloak (End of World 5)
   if (pr.figCake > 0 && LEVEL_NAME !== "test" && LEVEL_NAME !== "range" && !TRIAL) {   // eaten now: one extra heart for this stage
-    david.maxHearts++; david.hearts++; pr.figCake--; localStorage.setItem("davidProgress", JSON.stringify(pr));
+    david.maxHearts++; david.hearts++; pr.figCake--; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(pr));
     setTimeout(() => toast("You ate the fig cake: an extra heart for this stage."), 1500);
   }
 } catch (e) {}
@@ -3427,8 +3442,8 @@ const finish = { active: false, phase: "", t: 0, gateOpen: 0, bonus: 0, count: 0
 const postX = () => fold.postC * T + T / 2;
 // top catches carry over from stage to stage (kept in the browser until the game has a real save)
 let gateTops = 0;
-try { gateTops = +localStorage.getItem("davidGateTops") || 0; } catch (e) {}
-function saveGateTops() { try { localStorage.setItem("davidGateTops", gateTops); } catch (e) {} }
+try { gateTops = +localStorage.getItem(slotKey("davidGateTops")) || 0; } catch (e) {}
+function saveGateTops() { try { localStorage.setItem(slotKey("davidGateTops"), gateTops); } catch (e) {} }
 function gateOlive() {   // the golden olive on the gatepost: f = 0 at the bottom (head height) up to 1 at the top
   const k = (performance.now() / 1000 / TUNE.GATE_OLIVE_TRIP) % 2, f = k < 1 ? k : 2 - k;
   return { x: postX(), y: goalCordY(f), f };

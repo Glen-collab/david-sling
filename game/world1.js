@@ -160,7 +160,7 @@ const THROW_CODE = ["up", "up", "down", "down", "left", "right", "left", "right"
 const THROW_PIECE_LEN = [1, 1, 1, 1, 2, 2, 1, 1];   // how many buttons each world's piece adds
 const ARROWS = { up: "↑", down: "↓", left: "←", right: "→", a: "A", b: "B" };
 function throwLearned() {   // how many pieces Jesse has given you (= worlds beaten)
-  try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); return Math.min(p.throwGiven || 0, [1, 2, 3, 4, 5, 6, 7, 8].filter(w => p[`${w}-4`] && p[`${w}-4`].cleared).length); } catch (e) { return 0; }
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); return Math.min(p.throwGiven || 0, [1, 2, 3, 4, 5, 6, 7, 8].filter(w => p[`${w}-4`] && p[`${w}-4`].cleared).length); } catch (e) { return 0; }
 }
 const codeEntry = { active: false, wall: null, code: [], got: 0, t: 0, result: null };
 function nearCodeWall() {
@@ -677,7 +677,7 @@ const w1intro = {
   finish() {
     this.active = false; W1_CLIP.pause(); this.amb.pause();
     if (typeof journalSong !== "undefined") journalSong.pause();
-    try { const p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); p.w1intro = true; localStorage.setItem("davidProgress", JSON.stringify(p)); } catch (e) {}
+    try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w1intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
     const now = performance.now() / 1000, y = GR * T;
@@ -716,6 +716,6 @@ const w1intro = {
   },
 };
 if (LEVEL_STAGE === "1-1" && location.hash === "#1-1") {
-  let seen = false; try { seen = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").w1intro; } catch (e) {}
+  let seen = false; try { seen = !!JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").w1intro; } catch (e) {}
   if (!seen || new URLSearchParams(location.search).has("w1intro")) w1intro.start();
 }
