@@ -148,6 +148,8 @@ Object.assign(W8, {
   WAVE: 620,             // px/s, the spear slam's shockwave along the ground (be in the air)
   JAV_T: 1.15,           // seconds the javelin is in the air
   JAV_R: 46,             // px from where it lands that it hurts
+  SPEAR_SHEET_LEN: 450,  // the thrown spear's length, in goliath_spear sheet pixels (so it matches the one he holds)
+  SPEAR_SINK: 22,        // px of the tip buried in the ground once it lands
   RECOVER: 0.9,          // seconds after an attack before he moves again
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
@@ -413,9 +415,22 @@ function drawGoliath8(camX) {
   if (j) {
     const jp = j.down ? { x: j.tx, y: GR * T - 30 } : g8JavPos(j), p = j.down ? 1 : Math.min(1, j.t / W8.JAV_T);
     if (!j.down) { ctx.fillStyle = `rgba(0,0,0,${0.15 + 0.35 * p})`; ctx.beginPath(); ctx.ellipse(j.tx - camX, GR * T - 2, 16 + 26 * p, 5 + 3 * p, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.save(); ctx.translate(jp.x - camX, jp.y); ctx.rotate(j.down ? -2.0 : jp.a);
-    ctx.strokeStyle = "#5a3a1c"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-60, 0); ctx.lineTo(60, 0); ctx.stroke();
-    ctx.fillStyle = "#9aa3ad"; ctx.beginPath(); ctx.moveTo(60, -6); ctx.lineTo(84, 0); ctx.lineTo(60, 6); ctx.fill(); ctx.restore();
+    const img = ITEM.spear_goliath;
+    if (img && img.naturalWidth) {   // Glen's spear (assets/items/spear_goliath.png: drawn on a slant, tip at the top right)
+      const L = W8.SPEAR_SHEET_LEN * SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // as long as the one in his hand
+      const ia = Math.atan2(-img.naturalHeight, img.naturalWidth), k = L / Math.hypot(img.naturalWidth, img.naturalHeight);
+      let a = jp.a, cx = jp.x, cy = jp.y;
+      if (j.down) {   // stuck in the ground where it landed, tip first, at the angle it came down
+        a = g8JavPos({ ...j, t: W8.JAV_T }).a;
+        cx = j.tx - Math.cos(a) * (L / 2 - W8.SPEAR_SINK); cy = GR * T - Math.sin(a) * (L / 2 - W8.SPEAR_SINK);
+      }
+      ctx.save(); ctx.translate(cx - camX, cy); ctx.rotate(a - ia);
+      ctx.drawImage(img, -img.naturalWidth * k / 2, -img.naturalHeight * k / 2, img.naturalWidth * k, img.naturalHeight * k); ctx.restore();
+    } else {   // (until the picture loads)
+      ctx.save(); ctx.translate(jp.x - camX, jp.y); ctx.rotate(j.down ? -2.0 : jp.a);
+      ctx.strokeStyle = "#5a3a1c"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-60, 0); ctx.lineTo(60, 0); ctx.stroke();
+      ctx.fillStyle = "#9aa3ad"; ctx.beginPath(); ctx.moveTo(60, -6); ctx.lineTo(84, 0); ctx.lineTo(60, 6); ctx.fill(); ctx.restore();
+    }
   }
   for (const w of g8.waves) {   // the slam's shockwave: dust racing along the ground toward David
     const wx = w.x - camX; ctx.save();
