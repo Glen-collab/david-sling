@@ -5,7 +5,8 @@
 // The way out glows with daylight: press Up there to come back out where he went in.
 
 const CAVE = {
-  LAMP: 270, LAMP_DIM: 150,      // light radius with oil in the flask, and with none (never total darkness)
+  LAMP: 270, LAMP_DIM: 105,      // light radius with oil in the flask, and with none (never total darkness; Glen, 2026-10-23:
+                                 // the long caves are a real tax on the olives, so running dry has to hurt: was 150)
   OIL_EVERY: 4,                  // seconds of lamplight per olive
   DARK: 0.93,                    // how dark the cave is outside the lamplight
   TURN: 0.88, WALK_IN: 0.6,      // going in: turning his back, then walking into the dark
@@ -44,8 +45,8 @@ function caveDavid(d, dt) {
       const door = doors.find(o => Math.abs(d.x - o.x) < 48 && Math.abs(d.y - o.y) < 40);
       if (!door) return false;
       cave.trans = { dir: "in", door, x0: d.x, t: 0 };
-    } else if (Math.abs(d.x - cave.room.exitX) < 60) {
-      cave.trans = { dir: "out", t: 0 };
+    } else if (Math.abs(d.x - cave.room.exitX) < 60 || (cave.room.backX && Math.abs(d.x - cave.room.backX) < 60)) {
+      cave.trans = { dir: "out", t: 0 };   // (the way in, or the crack of daylight at the back: both come out at the mouth)
     } else return false;
     d.vx = 0; d.charging = false; setState("cave");
     return true;
@@ -104,6 +105,8 @@ function updateCave(dt) {
     if (cave.oilT >= CAVE.OIL_EVERY) { cave.oilT = 0; if (david.lampOil > 0) david.lampOil--; else if (david.olives > 0) david.olives--; }   // bought lamp oil burns first
   }
   const want = david.olives > 0 || david.lampOil > 0 ? CAVE.LAMP : CAVE.LAMP_DIM;
+  if (cave.room && cave.lit && want === CAVE.LAMP_DIM && !cave.dryTold) { cave.dryTold = true; toast("The lamp is out of oil! It's down to a glimmer. Find olives, or find the way out."); }
+  if (want === CAVE.LAMP) cave.dryTold = false;
   cave.R += (want - cave.R) * Math.min(1, dt * 1.5);
   // bats: hang until David passes under, then flutter off up and away
   for (const b of caveBats) {
@@ -205,6 +208,14 @@ function drawCaveBackdrop(camX) {
   const lg = ctx.createRadialGradient(ex, GR * T - 60, 10, ex, GR * T - 60, 220);
   lg.addColorStop(0, "rgba(255,236,190,0.95)"); lg.addColorStop(0.35, "rgba(255,210,140,0.45)"); lg.addColorStop(1, "rgba(255,200,120,0)");
   ctx.fillStyle = lg; ctx.fillRect(ex - 240, GR * T - 300, 480, 320);
+  if (cave.room.backX) {   // and a narrow crack of daylight at the back (a long cave's second way out)
+    const bx = cave.room.backX - camX;
+    const bg = ctx.createRadialGradient(bx, GR * T - 70, 6, bx, GR * T - 70, 170);
+    bg.addColorStop(0, "rgba(255,236,190,0.9)"); bg.addColorStop(0.3, "rgba(255,210,140,0.4)"); bg.addColorStop(1, "rgba(255,200,120,0)");
+    ctx.fillStyle = bg; ctx.fillRect(bx - 190, GR * T - 260, 380, 280);
+    ctx.fillStyle = "rgba(255,240,205,0.85)"; ctx.beginPath();   // the crack itself, tall and thin
+    ctx.moveTo(bx - 4, GR * T); ctx.lineTo(bx - 10, GR * T - 90); ctx.lineTo(bx - 3, GR * T - 170); ctx.lineTo(bx + 6, GR * T - 95); ctx.lineTo(bx + 12, GR * T); ctx.closePath(); ctx.fill();
+  }
 }
 function drawCaveDoors(camX) {   // outside: a little "Up" sign over a cave mouth when David is near it
   const d = david;
@@ -216,6 +227,7 @@ function drawCaveDoors(camX) {   // outside: a little "Up" sign over a cave mout
       else drawSprite("bat_fly", frameOf("bat_fly", b.t), b.x - camX, b.y, b.facing, 1.5, b.alpha);
     }
     if (Math.abs(d.x - cave.room.exitX) < 140 && d.state !== "cave") upHint(cave.room.exitX - camX, GR * T - 150);
+    if (cave.room.backX && Math.abs(d.x - cave.room.backX) < 140 && d.state !== "cave") upHint(cave.room.backX - camX, GR * T - 150);
   }
 }
 function upHint(x, y) {
@@ -238,6 +250,7 @@ function drawCaveDarkness(camX) {
     const hole = (x, y, r) => { const rg = g.createRadialGradient(x, y, r * 0.1, x, y, r); rg.addColorStop(0, "rgba(0,0,0,1)"); rg.addColorStop(0.55, "rgba(0,0,0,0.85)"); rg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); };
     hole(lx, ly, R);
     hole(cave.room.exitX - camX, GR * T - 70, 200);
+    if (cave.room.backX) hole(cave.room.backX - camX, GR * T - 70, 170);   // the crack of daylight at the back
     ctx.drawImage(darkCanvas, 0, 0);
     // the lamp's warm light
     ctx.save(); ctx.globalCompositeOperation = "lighter";

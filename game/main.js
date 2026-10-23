@@ -433,7 +433,7 @@ const WORLD = +LEVEL_STAGE.split("-")[0];
 const T = TUNE.TILE;
 const ROWS = 20, GR = 17;
 const MAIN_COLS = STAGE_INFO.cols;          // the stage itself...
-const COLS = MAIN_COLS + 120;               // ...and, past its end, space for its caves (separate rooms you go into)
+const COLS = MAIN_COLS + 200;               // ...and, past its end, space for its caves (separate rooms you go into)
 const solid = [...Array(ROWS)].map(() => Array(COLS).fill(0));     // 0 empty, 1 earth, 2 stone, 3 wall, 4 boulder, 5 fake rock (walk through it)
 const oneway = [...Array(ROWS)].map(() => Array(COLS).fill(false));
 const gourds = [], labels = [], decor = [], pickups = [], snakes = [], fires = [];
@@ -490,10 +490,10 @@ const caveDark = (c, r, w, h) => darkZones.push({ c, r, w, h });
 // Press Up at the mouth to go in; Up at the daylight inside to come back out.
 const rooms = [], doors = [], caveBats = [];
 let roomNext = MAIN_COLS + 6;
-const caveRoom = w => {   // returns the room; build its insides with c0 + offsets. Floor is row 17, ceiling rows 0-2.
-  const c0 = roomNext; roomNext += w + 8;
+const caveRoom = (w, opts = {}) => {   // returns the room; build its insides with c0 + offsets. Floor is row 17, ceiling rows 0-2.
+  const c0 = roomNext; roomNext += w + 8;   // opts.back: a crack of daylight at the back is a second way out (to the same mouth)
   rock(c0 - 3, 0, 3, ROWS); rock(c0 + w, 0, 3, ROWS); rock(c0, 0, w, 3); block(c0, GR, w, ROWS - GR, 2);
-  const room = { c0, w, exitX: (c0 + 2) * T };
+  const room = { c0, w, exitX: (c0 + 2) * T, backX: opts.back ? (c0 + w - 2) * T : null };
   rooms.push(room); return room;
 };
 // where the opening is in each cave picture (fraction of its width from the left), and the picture's width in pixels
@@ -507,6 +507,7 @@ const caveDoor = (name, c, size, room) => {
 const caveFeatures = [];
 const hangRock = (c, r, w, h) => { block(c, r, w, h, 6); caveFeatures.push({ kind: "hang", c, r, w, h }); };    // stalactites
 const slabRock = (c, r, w, h) => { block(c, r, w, h, 6); caveFeatures.push({ kind: "slabs", c, r, w, h }); };   // stacked cave ledges
+const pitFloor = (c, w) => { for (let k = c; k < c + w; k++) for (let r = GR; r < ROWS; r++) solid[r][k] = 0; };   // a drop in a cave's floor
 const bat = (c, r = 3) => caveBats.push({ x: c * T + T / 2, y: r * T + 16, hx: c * T + T / 2, hy: r * T + 16, state: "hang", t: Math.random() * 2, vx: 0, vy: 0, alpha: 1, facing: 1 });
 const plat = (c, r, w) => { for (let x = c; x < c + w; x++) oneway[r][x] = true; };
 // crumbling ledges: shake when you land on them, then drop away (and come back a few seconds later)
@@ -694,17 +695,28 @@ if (LEVEL_NAME === "test") {
   ground(103, 170);
   campfire(106, GR - 1, "The neighbor", "That's my ram you've got with yours. Most boys would keep him. If you find your neighbor's sheep, you bring it home.");
   // a cave in the hillside: The One is somewhere at the back of it (press Up at the mouth)
+  // (Glen, 2026-10-23: "super small and short"; the first cave a little longer.) Past the old back wall now: a drop
+  // with a crumbling ledge over it, scorpions in the dark, a climb, and The One at the very back. A crack of daylight
+  // at the back lets you out (no walking all the way back), but the lamp burns olives the whole way.
   {
-    const R = caveRoom(46), c = R.c0;
+    const R = caveRoom(82, { back: true }), c = R.c0;
     caveDoor("cave_1", 121, 0.5, R);
     oliveRow(c + 5, 16, 6);                                     // olives: oil for the lamp
     bat(c + 9); bat(c + 17); bat(c + 26); bat(c + 34);
     hangRock(c + 11, 3, 2, 2); hangRock(c + 24, 3, 3, 3); hangRock(c + 36, 3, 2, 2);   // stalactites hang down from the ceiling
     slabRock(c + 14, 15, 3, 2); slabRock(c + 20, 13, 4, 4); plat(c + 27, 11, 4); oliveRow(c + 27, 10, 4);
     special(c + 29, 6);                                         // above the ledge: flip
-    slabRock(c + 38, 12, 6, 5);
-    lostSheep("lamb", c + 41, 11, "one");                       // The One, at the very back
+    slabRock(c + 35, 15, 2, 2); slabRock(c + 38, 12, 6, 5);   // (a step up: the big rock is in the way now, not the end)
     food("figs", c + 33, 16);
+    // deeper in: a drop in the floor, a crumbling ledge halfway over (keep moving)
+    pitFloor(c + 46, 5); crumble(c + 47, 15, 2); oliveArc(c + 45, 12, 6); bat(c + 48);
+    critter("scorpion", c + 55, GR - 1, 3);                   // scorpions on the cave floor
+    hangRock(c + 52, 3, 3, 4); hangRock(c + 63, 3, 2, 3);
+    slabRock(c + 58, 14, 3, 3); plat(c + 62, 11, 3); oliveRow(c + 62, 10, 3); bat(c + 60);
+    slabRock(c + 66, 13, 3, 4);
+    critter("scorpion", c + 71, GR - 1, 2); bat(c + 70);
+    slabRock(c + 70, 15, 2, 2); slabRock(c + 73, 12, 5, 5);
+    lostSheep("lamb", c + 75, 11, "one");                       // The One, at the very back
   }
   oliveRow(110, 16, 6);
   critter("fox", 140); critter("fox", 152);
@@ -750,18 +762,38 @@ if (LEVEL_NAME === "test") {
   raven(156, 6);
   ground(161, 205);
   // a tall cave in the limestone: a bigger cave with a drop inside, and The One at the back
+  // (Glen, 2026-10-23: the second cave "way longer or harder", a real tax on the olives.) Three times as long: past
+  // the old back, a chasm crossed on crumbling ledges, a low tunnel to roll through, a climb with a poison gourd on
+  // the top ledge (sling it), another drop, a viper and scorpions, and The One high at the back by a crack of daylight.
   {
-    const R = caveRoom(52), c = R.c0;
+    const R = caveRoom(150, { back: true }), c = R.c0;
     caveDoor("cave_2", 167, 0.42, R);
     oliveRow(c + 4, 16, 5); bat(c + 8); bat(c + 15); bat(c + 22); bat(c + 31); bat(c + 40);
     hangRock(c + 10, 3, 2, 3); hangRock(c + 30, 3, 3, 2);
     slabRock(c + 10, 14, 3, 3);
-    for (let k = c + 16; k <= c + 21; k++) for (let r = GR; r < ROWS; r++) solid[r][k] = 0;   // a drop in the cave floor...
+    pitFloor(c + 16, 6);                                        // a drop in the cave floor...
     crumble(c + 17, 15, 2); oliveArc(c + 15, 14, 7);           // ...with a crumbling ledge over it
     slabRock(c + 25, 12, 4, 5); plat(c + 31, 9, 4); food("bread", c + 32, 8);
     special(c + 33, 4);
     slabRock(c + 38, 13, 3, 4); slabRock(c + 43, 10, 9, 7);
-    lostSheep("lamb", c + 48, 9, "one");                        // The One, up at the back
+    // the chasm: off the high rock onto three crumbling ledges, one after another
+    pitFloor(c + 52, 15);
+    crumble(c + 55, 14, 2); crumble(c + 59, 12, 2); crumble(c + 63, 14, 2); oliveArc(c + 56, 10, 9);
+    bat(c + 58); bat(c + 64);
+    slabRock(c + 67, 13, 4, 4);
+    // the low tunnel: only rolling gets under it (Shammah's trick, earlier in this stage)
+    critter("scorpion", c + 72, GR - 1, 2);
+    hangRock(c + 75, 3, 10, 12); oliveRow(c + 76, 16, 8);
+    // a climb, a wild gourd waiting on the top ledge (sling it before you land), and a crumbling way down
+    slabRock(c + 88, 14, 3, 3); slabRock(c + 92, 11, 3, 6); plat(c + 97, 8, 3); oliveRow(c + 97, 7, 3);
+    slabRock(c + 101, 11, 4, 6); gourd(c + 103, 10); bat(c + 95); bat(c + 104);
+    pitFloor(c + 106, 7); crumble(c + 108, 14, 2); crumble(c + 111, 15, 1);
+    snake("viper", c + 117);
+    critter("scorpion", c + 122, GR - 1, 3); hangRock(c + 119, 3, 2, 3); hangRock(c + 129, 3, 3, 2); bat(c + 120);
+    food("cheese", c + 126, 16); oliveRow(c + 124, 16, 4);
+    critter("scorpion", c + 131, GR - 1, 2); bat(c + 134);
+    slabRock(c + 133, 14, 3, 3); slabRock(c + 137, 11, 6, 6);
+    lostSheep("lamb", c + 140, 10, "one");                      // The One, up at the back
   }
   critter("ram", 182, GR - 1, 14);                            // another ram, on open ground
   lostSheep("sheep", 190, 16, "thorns");
@@ -1941,6 +1973,12 @@ if (LEVEL_NAME === "test") {
 // ledges you'd land on (sling them first: 2 Kings 4:39-40) and poison berries on the ground, in every outdoor stage, not
 // just World 1. Placed by rule, the same every time: one gourd in each stretch of the stage, on a ledge or rock top at
 // least POISON.WIDE tiles wide with room above (a stretch with no ledge gets one on the ground in the way), never near a campfire, a talk, a lost sheep, food or a set piece.
+const GRAIN = {   // the lamb's barley (updatePickups)
+  PER: 3,          // tufts in each of the POISON.STAGES
+  HEAL: 0.5,       // half a heart (they share David's)
+  TEXT: "Your lamb found some barley to nibble: +½ heart.",
+  told: false,
+};
 const POISON = {
   STAGES: ["1-2", "1-3", "2-1", "2-2", "2-3", "3-2", "3-3", "4-1", "5-1", "5-2", "5-3", "6-2", "6-3", "7-2", "7-3"],
   GOURDS: 4,       // gourds on ledges in each of those stages
@@ -1974,6 +2012,8 @@ if (POISON.STAGES.includes(LEVEL_NAME)) {
   };
   spread(ledges, POISON.GOURDS, p => gourd(p.c, p.r - 1), groundGourd);
   spread(floor, POISON.BERRIES, c => food("poison_berries", c, GR - 1));
+  // (Glen, 2026-10-23) barley for the lamb: a few tufts on the ground, hers alone (David walks past; she nibbles it)
+  spread(floor, GRAIN.PER, c => pickups.push({ name: "barley", lamb: true, x: c * T + T / 2, y: GR * T, t: Math.random() * 6, taken: false }));
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -2534,22 +2574,22 @@ function lambLost(why) {   // (two players) a heart for David, and the lamb back
   toast(why + " That costs a heart.");
   hurtDavid(david.x, why, true);
 }
-function lambStomp() {   // her hooves come down on a scorpion, a rat or a snake: squashed, and she hops up after
+function lambStomp() {   // her hooves come down on a scorpion or a rat: squashed, and she hops up after
   const feetX = lamb.x, feetY = lamb.y, hw = LAMB_P2.W / 2;
   const fake = { x: feetX, y: feetY - 10, vx: lamb.facing, vy: 0, life: 1, power: false };   // the stone code does the rest
   let hit = false;
-  for (const k of critters) {
-    if (k.gone || (k.kind !== "scorpion" && k.kind !== "rat")) continue;
+  for (const k of critters) {   // (Glen: only the small ones. Scorpions and rats; hens, though she shouldn't)
+    if (k.gone || (k.kind !== "scorpion" && k.kind !== "rat" && k.kind !== "hen")) continue;
     const b = critterBox(k);
     if (feetX + hw < b.x0 || feetX - hw > b.x1 || feetY < b.y0 - 12 || feetY > b.y1 + 6) continue;
+    if (k.kind === "hen") {   // a neighbor's hen: a squawk, feathers, and off she runs. The lamb bounces off.
+      k.facing = Math.sign(k.x - lamb.x) || 1; setCrit(k, "run"); sfx("stone_hit", k.x, 0.25, 1.6);
+      for (let n = 0; n < 12; n++) bits.push({ x: k.x, y: k.y - 20, vx: (Math.random() - 0.5) * 320, vy: -Math.random() * 300, life: 0.7, color: "#fff8ee" });
+      if (!lambP2.henTold) { lambP2.henTold = true; toast("Squawk! That's a neighbor's hen, little lamb. Leave her be."); }
+      lamb.vy = -LAMB_P2.BOUNCE * 0.8; lamb.onGround = false; return;
+    }
     if (k.kind === "scorpion") stoneHitsScorpion(k, fake); else stoneHitsRat(k, fake);
     hit = k.y; break;
-  }
-  if (!hit) for (const sn of snakes) {
-    if (sn.gone || sn.kind === "whip") continue;
-    if (Math.abs(feetX - snakeMid(sn)) > 40 + hw || feetY < sn.y - 60 || feetY > sn.y + 6) continue;
-    sn.gone = true; sn.vx = lamb.facing * 220; sn.vy = -480; stoneHit(fake, 0.5); toast("The lamb stomped the snake!");
-    hit = sn.y; break;
   }
   if (hit === false) return;
   lamb.y = hit; lamb.vy = 0; lamb.stompT = LAMB_P2.STOMP_T;   // down on it, where it was (the hop up comes when the squash is done: updateLambP2)
@@ -3071,23 +3111,35 @@ function fall(o, dt) {   // simple fall-and-land for dropped things
   if (o.vy > 0 && (isSolid(c, r) || isOneway(c, r))) { o.y = r * T; o.falling = false; o.vy = 0; o.vx = 0; }
   if (o.y > ROWS * T + 200) o.taken = true;
 }
+// (Glen, 2026-10-23) player 2's lamb picks things up too: olives, food, and poison by accident (it costs David a heart:
+// they share them). The barley (p.lamb) is hers alone: David walks past it, any lamb nibbles it, even one just following.
+const lambLoose = () => !lamb.carried && !lamb.stolen && david.deadT <= 0;
+const lambTouches = (x, y, rx) => lambLoose() && Math.abs(x - lamb.x) < rx && y > lamb.y - 56 && y < lamb.y + 12;
 function updatePickups(dt) {
   for (const p of pickups) {
     if (p.taken) continue;
     fall(p, dt);
     p.t += dt;
-    if (Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10) {
+    const byDavid = !p.lamb && Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10;
+    const byLamb = (p.lamb || lambP2.on) && lambTouches(p.x, p.y, 34);
+    if (p.lamb && !byLamb && !GRAIN.told && Math.abs(p.x - david.x) < 40 && Math.abs(p.y - david.y) < 60) { GRAIN.told = true; toast("That barley's for your lamb. Let her walk over it."); }
+    if (byDavid || byLamb) {
       p.taken = true;
-      const v = FOOD[p.name] ?? 1;
-      toast((v < 0 ? "" : "+ ") + (FOOD_TEXT[p.name] || p.name));
-      if (v < 0) hurtDavid(p.x, FOOD_TEXT[p.name]); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }   // (after the message: a poison that costs a life keeps its verse in the new one)
+      const v = p.lamb ? GRAIN.HEAL : FOOD[p.name] ?? 1;
+      const said = p.lamb ? GRAIN.TEXT : (byLamb && !byDavid ? (v < 0 ? "Oh no, the lamb ate it! " : "The lamb found it: ") : "") + (FOOD_TEXT[p.name] || p.name);
+      toast((v < 0 || p.lamb ? "" : "+ ") + said);
+      if (v < 0) hurtDavid(p.x, said, byLamb && !byDavid); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }   // (after the message: a poison that costs a life keeps its verse in the new one)
       for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });
     }
   }
 }
 function updateGourds() {   // walking into a gourd picks it up, like food, and it's poison (2 Kings 4:39-40). Sling them instead.
-  for (const g of gourds) if (g.alive && !g.hanging && Math.abs(g.x - david.x) < 34 && david.y > g.y - 50 && david.y - david.h < g.y && david.deadT <= 0 && david.inv <= 0) {
-    g.alive = false; toast(FOOD_TEXT.wild_gourds); hurtDavid(g.x, FOOD_TEXT.wild_gourds);   // (if it costs a life, the verse stays in that message)
+  for (const g of gourds) if (g.alive && !g.hanging && david.deadT <= 0 && david.inv <= 0) {
+    const byDavid = Math.abs(g.x - david.x) < 34 && david.y > g.y - 50 && david.y - david.h < g.y;
+    const byLamb = lambP2.on && lambTouches(g.x, g.y, 30);   // player 2's lamb can blunder into one too
+    if (!byDavid && !byLamb) continue;
+    const said = (byLamb && !byDavid ? "Oh no, the lamb ate it! " : "") + FOOD_TEXT.wild_gourds;
+    g.alive = false; toast(said); hurtDavid(g.x, said, byLamb && !byDavid);   // (if it costs a life, the verse stays in that message)
     for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: "#7a2" });
   }
 }
@@ -4054,7 +4106,7 @@ function updateOlives(dt) {
   for (const o of olives) {
     if (o.taken) continue;
     fall(o, dt); o.t += dt;
-    if (Math.abs(o.x - david.x) < 24 && o.y > david.y - david.h - 10 && o.y < david.y + 6) {
+    if ((Math.abs(o.x - david.x) < 24 && o.y > david.y - david.h - 10 && o.y < david.y + 6) || (lambP2.on && lambTouches(o.x, o.y, 26))) {   // (player 2's lamb gathers them too)
       o.taken = true;
       if (o.kind === "golden") { david.lives++; sfx("extra_life"); toast("A golden olive! A whole flask of oil: +1 life"); }
       else {

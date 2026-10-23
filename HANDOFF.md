@@ -519,3 +519,13 @@ the harp phrase at 3-2's campfire.
   the scorpion out), then he painted it onto his still.
   Glen's still is her standing pose everywhere David's lamb stands: stages, the world maps (map.js drawLambTok), Jesse's
   courtyard (home.js), the lamb the lion carries off (drawTakenLamb); on the map and at home she looks at us too.
+- **The lamb gathers; bigger caves (2026-10-23):** player 2's lamb picks up olives, food (heals David: they share
+  hearts) and poison by accident (gourds, berries: a heart, no knock-back, "Oh no, the lamb ate it!"); lambTouches()
+  in updatePickups / updateGourds / updateOlives. GRAIN (main.js): 3 tufts of barley per POISON.STAGES stage, the
+  lamb's alone (p.lamb: David walks past, any lamb nibbles it, +½ heart). Her stomp: scorpions and rats only; a hen
+  gets a fright and runs (a neighbor's: "Leave her be"); no snakes, nothing bigger. The caves: 1-2's 46 -> 82 wide
+  (a drop with a crumbling ledge, scorpions, a climb; The One at the back), 1-3's 52 -> 150 (a chasm on three
+  crumbling ledges, a low tunnel to roll under, a climb with a wild gourd on top, another drop, a viper, scorpions).
+  caveRoom(w, { back: true }) gives a crack of daylight at the back (room.backX) as a second way out to the same
+  mouth; pitFloor(c, w) drops a cave floor. COLS = MAIN_COLS + 200 for the room space. The lamp without oil is
+  smaller now (CAVE.LAMP_DIM 105, was 150) and says so once: the long caves are a real tax on the olives.
