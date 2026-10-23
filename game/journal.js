@@ -557,6 +557,17 @@ function clipPage(src, dst, side) {
 }
 const ease = f => f * f * (3 - 2 * f);
 
+// the notes he wrote in the middle of a stage (Journal.openNote), kept in the book with that world's pages so the Journal
+// read later has everything he wrote (Glen, 2026-10-22): the giant's Field Guide card (6-2, world6.js goliathNote), the
+// Name (7-3, world7.js nameNote) and the five smooth stones (7-3, fiveNote). The old letters are their own page at the back.
+function journalNotes(w) {
+  let p = {}; try { p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) {}
+  const out = [], add = f => { if (typeof f === "function") out.push({ spread: "note", step: 5, w, P: { note: f() }, old: true }); };
+  if (w === 6 && p.goliathCard) add(typeof goliathNote !== "undefined" && goliathNote);
+  if (w === 7 && p["7-3"] && p["7-3"].cleared) { add(typeof nameNote !== "undefined" && nameNote); add(typeof fiveNote !== "undefined" && fiveNote); }
+  return out;
+}
+
 const Journal = {
   active: false, preview: false, previewStep: 1,
   open(opts) {
@@ -579,9 +590,8 @@ const Journal = {
     // and the old letters he's found (DESIGN 7-3, the Stones of the Name): copied down, with the ones still out there
     const lf = lettersFound();
     if (opts.read && lf.length) { this.P = Object.assign({}, this.P, { letters: lettersSpread(lf, typeof nameRiddleAt === "function" ? nameRiddleAt() : 0) }); this.pages.push({ spread: "letters", step: 5 }); }
-    // and the Field Guide card he wrote down watching the giant in 6-2 (world6.js goliathNote)
-    let gc = false; try { gc = !!JSON.parse(localStorage.getItem("davidProgress") || "{}").goliathCard; } catch (e) {}
-    if (opts.read && gc && typeof goliathNote === "function") { this.P = Object.assign({}, this.P, { goliath: goliathNote() }); this.pages.push({ spread: "goliath", step: 5 }); }
+    // and the notes he wrote in the middle of a stage, after that world's own pages (journalNotes)
+    if (opts.read) { const at = opts.stage >= 4 && !opts.noEnd ? 2 : 1; this.pages.splice(at, 0, ...journalNotes(opts.world)); }
     // the whole journey (Glen, 2026-10-20): the worlds before this one, already written, in front, so Left pages back through them
     const mine = this.pages.length, earlier = [];
     if (!opts.preview) {
@@ -591,6 +601,7 @@ const Journal = {
         const last = [4, 3, 2, 1].find(k => prog[`${w}-${k}`] && prog[`${w}-${k}`].cleared); if (!last) continue;
         earlier.push({ spread: "draft", step: last, w, P: PW, old: true });
         if (last >= 4) earlier.push({ spread: "end", step: 5, w, P: PW, old: true });
+        earlier.push(...journalNotes(w));
       }
       this.pages = earlier.concat(this.pages);
     }
