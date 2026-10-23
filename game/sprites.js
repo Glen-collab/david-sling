@@ -3412,12 +3412,12 @@ window.SPRITE_DATA = {
   "src": "../assets/sprites/raven_fly.png",
   "frames": 8,
   "w": 134,
-  "h": 90,
+  "h": 180,
   "ms": 83,
   "loop": true,
   "pingpong": false,
   "ax": 66,
-  "ay": 46,
+  "ay": 90,
   "align": "center"
  },
  "raven_fly2": {

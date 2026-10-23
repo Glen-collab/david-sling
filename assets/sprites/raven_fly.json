@@ -1,11 +1,11 @@
 {
   "frames": 8,
   "frame_w": 134,
-  "frame_h": 90,
+  "frame_h": 180,
   "ms_per_frame": 83,
   "loop": true,
   "align": "center",
   "anchor_x": 66,
-  "anchor_y": 46,
-  "source": "raven_fly_strip.png (tools/green_strip.py: keyed, lined up on the body, mirrored)"
+  "anchor_y": 90,
+  "source": "raven_fly_strip.png (green_strip.py, mirrored; Glen set each pose's height in a taller frame so the head stays level)"
 }
