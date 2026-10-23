@@ -25,8 +25,12 @@ const FILM_CLIPS = [
   { label: "Into the Valley", world: "World 8", intro: "w8intro", stage: "8-1", seen: p => !!p.w8intro },
   { label: "The Giant Falls", world: "World 8", src: "../assets/video/giant_fall.mp4", seen: p => !!(p["8-2"] || {}).cleared, fall: true },   // fall: its sounds and music, as in the game (world8.js W8.FALL_CUES)
 ];
-// (Glen, 2026-10-22) every scene open while he adds and checks them; set false before release, so each one unlocks when it's reached
+// (Glen, 2026-10-22) every scene open while he adds and checks them; set false before release, so each one unlocks when it's reached.
+// It also opens the Shepherd's Trial (every boss) and Gera's sling range for testing.
 const SCENES_ALL_OPEN = true;
+// the Shepherd's Trial (trial.js): once the game is beaten; each boss once its stage is cleared
+const trialOpen = p => SCENES_ALL_OPEN || !!(p["8-2"] || {}).cleared;
+const trialBossOpen = (b, p) => SCENES_ALL_OPEN || !!(p[b.stage] || {}).cleared;
 const sceneOpen = (c, p) => SCENES_ALL_OPEN || c.seen(p);
 function hasSave() { const p = loadProgress(); return Object.keys(p).some(k => /^\d-\d$/.test(k)) || !!p.skills || !!p.olives; }
 
@@ -37,6 +41,8 @@ const Menu = {
     let seen = false; try { seen = sessionStorage.getItem("davidTitleSeen"); } catch (e) {}
     let back = false; try { back = sessionStorage.getItem("davidScenesBack"); sessionStorage.removeItem("davidScenesBack"); } catch (e) {}
     if (back) { this.open("title"); this.go("scenes"); return; }   // back from an opening played from Scenes
+    let tback = false; try { tback = sessionStorage.getItem("davidTrialBack"); sessionStorage.removeItem("davidTrialBack"); } catch (e) {}
+    if (tback) { this.open("title"); this.go("trial"); return; }   // back from a boss in the Shepherd's Trial
     if (seen) WorldMap.open(loadProgress().view || "journey"); else this.open("title");
   },
   open(screen, fromStage = false) {
@@ -67,8 +73,17 @@ const Menu = {
       { label: "Continue", off: !hasSave(), act: () => this.leaveTitle(() => WorldMap.open(loadProgress().view || "journey")) },
       { label: "New game", act: () => hasSave() ? this.go("confirm") : this.newGame() },
       { label: "Scenes", off: !FILM_CLIPS.some(c => sceneOpen(c, loadProgress())), act: () => this.go("scenes") },
+      ...(trialOpen(loadProgress()) ? [{ label: "Shepherd's Trial", act: () => this.go("trial") }] : []),
       { label: "Settings", act: () => this.go("settings") },
     ];
+    if (this.screen === "trial") {   // every boss again, no counsel, best times (on this difficulty)
+      const p = loadProgress(), best = trialBest(), k = S.difficulty in DIFFICULTY ? S.difficulty : "medium";
+      return [...TRIAL_BOSSES.map(b => !trialBossOpen(b, p) ? { label: "Not beaten yet", value: "World " + b.stage[0], off: true }
+                                   : { label: b.name, value: (best[b.stage] || {})[k] ? "best " + trialTime(best[b.stage][k]) : "World " + b.stage[0],
+                                       act: () => { location.href = `index.html?trial&at=${b.at}#${b.stage}`; } }),
+              { label: "Difficulty", value: "◀  " + DIFFICULTY[k].name + "  ▶", lr: d => this.setDifficulty(d), act: () => this.setDifficulty(1) },
+              { label: "Back", act: () => this.go(this.home) }];
+    }
     if (this.screen === "scenes") {
       const p = loadProgress();
       return [...FILM_CLIPS.map(c => !sceneOpen(c, p) ? { label: "Not reached yet", value: c.world, off: true }
@@ -81,7 +96,8 @@ const Menu = {
       { label: "Settings", act: () => this.go("settings") },
       ...(FILM_CLIPS.some(c => sceneOpen(c, loadProgress())) ? [{ label: "Scenes", act: () => this.go("scenes") }] : []),   // (Glen) watch a scene again without leaving the stage
       ...(this.under === "stage" ? [{ label: "Start the stage again", act: () => startStage(LEVEL_NAME) }] : []),   // stuck somewhere? start over (sheep and olives from this try are lost)
-      this.under === "stage" ? { label: "Back to the map", act: () => backToMap() }
+      this.under === "stage" && TRIAL ? { label: "Leave the Trial", act: () => { try { sessionStorage.setItem("davidTrialBack", "1"); } catch (e) {} location.href = "index.html"; } }
+      : this.under === "stage" ? { label: "Back to the map", act: () => backToMap() }
                              : { label: "Title screen", act: () => { this.under = null; this.open("title"); } },
     ];
     if (this.screen === "settings") {
@@ -91,6 +107,7 @@ const Menu = {
         { label: "Controller", value: "◀  " + CONTROLLER_NAMES[S.controller] + "  ▶", lr: cyc, act: () => this.go("controls") },
         { label: "Show the buttons", act: () => this.go("controls") },
         { label: "Set up a controller", act: () => { if (readPad()) startSetup(); else this.msg = "Press a button on the controller first, so the browser can see it."; } },
+        { label: "Difficulty", value: "◀  " + DIFFICULTY[S.difficulty in DIFFICULTY ? S.difficulty : "medium"].name + "  ▶", lr: d => this.setDifficulty(d), act: () => this.setDifficulty(1) },
         { label: "Music", bar: S.music, lr: d => vol("music", d) },
         { label: "Sounds", bar: S.sfx, lr: d => vol("sfx", d) },
         { label: "Back", act: () => this.go(this.home) },
@@ -101,6 +118,13 @@ const Menu = {
       { label: "Yes, start over", act: () => this.newGame() },
     ];
     return [{ label: "Back", act: () => this.go("settings") }];   // controls
+  },
+  setDifficulty(d) {   // Easy / Medium / Hard (main.js DIFFICULTY); it takes hold at the next stage
+    const ks = Object.keys(DIFFICULTY), i = Math.max(0, ks.indexOf(SETTINGS.difficulty));
+    SETTINGS.difficulty = ks[(i + d + ks.length) % ks.length]; saveSettings();
+    this.msg = { easy: "Easy: more hearts and lives, and the bosses give you longer to read them.", medium: "Medium: the game as it was made to be played.",
+                 hard: "Hard: every hit costs two hearts, fewer lives, and the bosses are quicker and tougher." }[SETTINGS.difficulty]
+      + (this.under === "stage" ? " (From the next stage.)" : "");
   },
   playScene(c) {   // full screen, start to finish; A, B or Start stops it
     if (c.intro) { try { sessionStorage.setItem("davidScenesBack", "1"); } catch (e) {} location.href = `index.html?${c.intro}&scene#${c.stage}`; return; }
@@ -151,7 +175,7 @@ const Menu = {
     }
     if (pressed("b")) {
       if (this.screen === "controls") this.go("settings");
-      else if (this.screen === "settings" || this.screen === "confirm" || this.screen === "scenes") this.go(this.home);
+      else if (this.screen === "settings" || this.screen === "confirm" || this.screen === "scenes" || this.screen === "trial") this.go(this.home);
       else if (this.screen === "pause") this.close();
     }
   },
@@ -186,22 +210,23 @@ const Menu = {
       ctx.font = "italic bold 36px Georgia, serif"; ctx.lineWidth = 7; ctx.strokeText("The Shepherd's Sling", W / 2, 202);
       ctx.fillStyle = "#fff4d6"; ctx.fillText("The Shepherd's Sling", W / 2, 202);
     } else {
-      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : this.screen === "scenes" ? "Scenes" : "Settings", W / 2, 150);
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText(this.screen === "pause" ? "Paused" : this.screen === "scenes" ? "Scenes" : this.screen === "trial" ? "The Shepherd's Trial" : "Settings", W / 2, 150);
+      if (this.screen === "trial") { ctx.fillStyle = "#e9dcc4"; ctx.font = "18px sans-serif"; ctx.fillText("Every fight again. No counsel, no help. How fast can you do it?", W / 2, 182); }
     }
     if (this.screen === "confirm") {
       ctx.fillStyle = "#fff"; ctx.font = "22px sans-serif";
       ctx.fillText("Start a new game? Your saved game (stages, sheep, olives, skills) will be erased.", W / 2, 320);
     }
     // the list
-    const sc = this.screen === "scenes", it = this.items(), rowH = sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : sc ? 200 : 220;
-    const bw = this.screen === "settings" || this.screen === "scenes" ? 620 : 420;
+    const sc = this.screen === "scenes" || this.screen === "trial", it = this.items(), rowH = this.screen === "trial" ? 40 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : sc ? 200 : 220;
+    const bw = this.screen === "settings" || sc ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {
       const y = top + i * rowH, on = i === this.sel;
       if (on) { ctx.fillStyle = "rgba(255,210,110,0.18)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 12, y - (sc ? 28 : 30), bw - 24, sc ? 38 : 44, 10); ctx.fill(); }
       ctx.fillStyle = m.off ? "rgba(255,255,255,0.3)" : on ? "#ffe08a" : "#f3ead8";
       ctx.font = `${on ? "bold " : ""}${sc ? 23 : 26}px sans-serif`;
-      const twoCol = this.screen === "settings" || this.screen === "scenes";
+      const twoCol = this.screen === "settings" || sc;
       ctx.textAlign = twoCol ? "left" : "center";
       ctx.fillText((on ? "▸ " : "") + m.label, twoCol ? W / 2 - bw / 2 + 36 : W / 2, y);
       if (m.value) { ctx.textAlign = "right"; ctx.font = "22px sans-serif"; ctx.fillText(m.value, W / 2 + bw / 2 - 30, y); }
@@ -307,3 +332,6 @@ const Menu = {
     key(cx + 150, cy - 30, 50, "↑"); key(cx + 95, cy + 20, 50, "←"); key(cx + 150, cy + 20, 50, "↓"); key(cx + 205, cy + 20, 50, "→");
   },
 };
+
+// the chosen difficulty scales every boss once all the worlds' tables exist (main.js applyDifficulty)
+applyDifficulty();

@@ -796,7 +796,7 @@ function towerFight() { return !!(tw && !tw.beaten && david.deadT <= 0 && (tw.on
 function towerCam() { return tw && tw.on && !tw.beaten ? [tw.a0, tw.a0] : null; }
 function towerBlocking() { return tw && !tw.beaten ? "The watchtower! Its archers cover the whole valley. Deal with it first." : null; }
 const twPinHP = () => W6.counsel2 ? W6.TW_PIN_HP2 : W6.TW_PIN_HP;
-const twCounsel = () => { try { return (JSON.parse(localStorage.getItem("davidProgress") || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
+const twCounsel = () => { if (TRIAL) return false; try { return (JSON.parse(localStorage.getItem("davidProgress") || "{}").towerCounsel || 0) >= 1; } catch (e) { return false; } };
 const twWheel = () => ({ x: tw.x0 + twPic(270, 0)[0], y: GR * T - 38, r: 38 });   // the front hub
 const twBeam = () => ({ x0: tw.x0 + tw.w * 0.45, x1: tw.x0 + tw.w + 30, y0: W6.TW_ROOF * T - 130, y1: W6.TW_ROOF * T });   // the frame over the roof
 function startTower() {
@@ -818,7 +818,7 @@ function updateTower(dt) {
   if (!tw.on) return;
   if (d.deadT > 0 && !tw.beaten) {   // David fell: the fight resets; back at the fire, Abinadab's second counsel
     tw.on = false; tw.state = "wait"; tw.arrows = []; tw.slung = []; tw.cover = []; tw.lean = tw.leanTo = 0; setRoof(false);
-    if (!W6.counsel2) { W6.counsel2 = true; setTimeout(() => {
+    if (!W6.counsel2 && !TRIAL) { W6.counsel2 = true; setTimeout(() => {   // (none in the Shepherd's Trial)
       sayLine("Abinadab", "Sit down. Tell me what happened. ... Those shutters: count to two after the creak, then throw. And that front wheel's rotten; two good stones will have the pins out. Here, have some of my bread first.");
       d.hearts += 1; }, 2200); }
     return;

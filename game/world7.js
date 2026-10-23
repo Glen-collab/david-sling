@@ -816,7 +816,7 @@ function shieldCam() { return sb && (sb.on || sb.beaten) ? [sb.a0, sb.a0] : null
 function shieldBlocking() { return sb && !sb.beaten ? "The shield-bearer stands in the way." : null; }
 const sbTell = () => w7Counsel2 ? W7.SB_TELL2 : W7.SB_TELL;
 const sbPeek = () => (w7Counsel2 ? W7.SB_PEEK2 : W7.SB_PEEK) * (sb.phase === 3 ? 1.5 : 1);
-const tobiWarned = () => talks.some(k => k.done && k.who === "Tobi");
+const tobiWarned = () => !TRIAL && talks.some(k => k.done && k.who === "Tobi");
 function sbSay(line, clip) { sayLine("Goliath", line); if (clip) goliathChain([clip], 0.75); }
 function startShieldBearer() {
   sb.on = true; sb.t = 0; sb.state = "walk";
@@ -842,7 +842,7 @@ function updateShieldBearer(dt) {
   if (!sb.on) return;
   if (d.deadT > 0 && !sb.beaten) {   // David fell: the fight resets; Shammah's counsel from the slope
     resetShieldBearer();
-    if (!w7Counsel2) { w7Counsel2 = true; setTimeout(() => {
+    if (!w7Counsel2 && !TRIAL) { w7Counsel2 = true; setTimeout(() => {   // (none in the Shepherd's Trial)
       sayLine("Shammah", "Come here. Tell me what happened. ... Count when he lifts that shield: you've got longer than you think. And when he peeks over the top, it tips. Hit the edge.");
       david.hearts += 1; }, 2200); }
     return;

@@ -848,7 +848,7 @@ function updateChariot(dt) {
   if (!ch.on) { ch.t += dt; updateArrows(dt); return; }
   if (d.deadT > 0 && !ch.beaten) {   // David fell: the chariot rides off; back to the fire, and Tobi's counsel
     ch.on = false; ch.arrows = [];
-    if (!W5.counsel2) { W5.counsel2 = true; setTimeout(() => {   // tier-2 counsel: a longer tell, a weaker wheel, +1 heart
+    if (!W5.counsel2 && !TRIAL) { W5.counsel2 = true; setTimeout(() => {   // tier-2 counsel (none in the Shepherd's Trial): a longer tell, a weaker wheel, +1 heart
       sayLine("Tobi", "Sit down. Tell me what happened. ... Watch the archer's bow: when it glints, he's about to draw. And that old wheel's weaker than it looks: jump the horses, turn, and even a quick stone will crack it.");
       d.hearts += 1; }, 2200); }
     return;
@@ -889,7 +889,7 @@ function updateChariot(dt) {
   }
   updateArrows(dt);
 }
-const chariotWarned = () => { try { return !!JSON.parse(localStorage.getItem("davidProgress") || "{}").chariotWarn; } catch (e) { return false; } };
+const chariotWarned = () => { if (TRIAL) return false; try { return !!JSON.parse(localStorage.getItem("davidProgress") || "{}").chariotWarn; } catch (e) { return false; } };
 function updateArcher(dt, P) {
   const ch = chariot; ch.at += dt;
   const tell = W5.counsel2 ? W5.CH_TELL2 : W5.CH_TELL, onScreen = ch.x > ch.a0 - 100 && ch.x < ch.a1 + 100;

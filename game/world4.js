@@ -659,7 +659,7 @@ function saulSendsOut() {
   sayLine("King Saul", "Leave me! Get out, all of you!"); saul.outT = 2.5;
   setTimeout(() => {
     Object.assign(d, { x: checkpoint.x, y: checkpoint.y, vx: 0, vy: 0 }); setState("idle"); camX = Math.max(0, d.x - W / 2);
-    if (!W4.counsel2) { W4.counsel2 = true; HARP_DUEL.saul.window = 0.32;
+    if (!W4.counsel2 && !TRIAL) { W4.counsel2 = true; HARP_DUEL.saul.window = 0.32 * DIFF.open;   // (none in the Shepherd's Trial)
       sayLine("The Steward", "Sit down. Tell me what happened. ... It's not your fault, boy. Go back. Slower this time: let each note come to you."); }
     else toast("Back by the servants' fire. Go back to him when you're ready.");
   }, 1600);

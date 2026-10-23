@@ -120,6 +120,9 @@ const MAP_WORLDS = {
       { id: "7-3", label: "Five Smooth Stones", x: 1180, y: 600, trail: [[800, 790], [1000, 690]] },
       { id: "7-4", label: "The Giant's Shadow", x: 1690, y: 740, trail: [[1350, 650], [1520, 700]] },
     ],
+    // a side stop, off the trail (Down from 7-3): Gera's sling range at the carved target by the stream (range.js). It's
+    // on the map once 7-3 is cleared, and opens when every lost thing in 7-1, 7-2 and 7-3 is found (DESIGN)
+    sides: [{ id: "range", label: "Gera's Sling Range", x: 1090, y: 735, from: "7-3", need: ["7-1", "7-2", "7-3"] }],
   },
   // World 8: Glen's painting (2048 x 1152): Saul's blue tent and the crown top-left, the steps down to the cracked valley
   // floor, the ring of stones with Goliath's shield and spear in the middle, the abandoned Philistine camp on the right
@@ -217,6 +220,10 @@ const WorldMap = {
     const nx = M.stops[this.openTo];
     if (nx && nx.story && !this.isCleared(nx) && this.cur === this.openTo - 1) { this.target = this.openTo; this.autoStory = true; }
     this.lambD = this.d; this.lambFacing = 1;
+    // a side stop (off the trail): back from it (prog.side), David's standing there
+    this.sideOf = null; this.sideF = this.sideWant = 0;
+    const back = (M.sides || []).find(sd => sd.id === this.prog.side && M.stops[this.cur] && M.stops[this.cur].id === sd.from && this.sideSeen(sd));
+    if (back) { this.sideOf = back; this.sideF = this.sideWant = 1; }
     this.stones = M.journey ? 0 : stonesFound(world);
     if (typeof audioUnlocked !== "undefined" && audioUnlocked) mapAmbience.play().catch(() => {});
   },
@@ -228,6 +235,12 @@ const WorldMap = {
     return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, dx: b.x - a.x, dy: b.y - a.y };
   },
   stopD(i) { return this.dist[this.stopAt[i]]; },
+  // side stops (MAP_WORLDS[n].sides): on the map once the stop they hang off is cleared; open when their stages' lost
+  // things are all found (or everything's open for testing, menu.js SCENES_ALL_OPEN)
+  sideSeen(sd) { return SCENES_ALL_OPEN || !!(this.prog[sd.from] && this.prog[sd.from].cleared); },
+  sideOpen(sd) { return SCENES_ALL_OPEN || sd.need.every(id => { const q = this.prog[id]; return q && q.cleared && q.total > 0 && q.sheep >= q.total; }); },
+  sideLeft(sd) { return sd.need.reduce((n, id) => { const q = this.prog[id] || {}; return n + (q.cleared ? Math.max(0, (q.total || 0) - (q.sheep || 0)) : 1); }, 0); },
+  setSide(sd) { if (sd) this.prog.side = sd.id; else delete this.prog.side; saveProgress(this.prog); },
   isCleared(st) {   // a stage, or on the journey map a whole world (its boss stage)
     const id = st.world ? `${st.world}-4` : st.id;
     return !!(this.prog[id] && this.prog[id].cleared);
@@ -243,6 +256,29 @@ const WorldMap = {
     }
     this.fade = Math.min(1, this.fade + dt * 2);
     if (this.reveal < 1) { this.reveal = Math.min(1, this.reveal + dt / MTUNE.REVEAL_TIME); return; }
+    // a side stop: walking out to it and back (a straight line off the stop it hangs from)
+    if (this.sideOf) {
+      const sd = this.sideOf, from = this.M.stops[this.cur], len = Math.hypot(sd.x - from.x, sd.y - from.y) || 1;
+      if (this.sideF !== this.sideWant) {
+        const dir = Math.sign(this.sideWant - this.sideF);
+        this.sideF = Math.max(0, Math.min(1, this.sideF + dir * MTUNE.WALK_SPEED * dt / len));
+        this.dirX = (sd.x - from.x) * dir; this.dirY = (sd.y - from.y) * dir; if (Math.abs(this.dirX) > 4) this.facing = Math.sign(this.dirX);
+        this.walkT += dt;
+        if (this.sideF === this.sideWant) { this.walkT = 0; chime(3); this.setSide(this.sideF === 1 ? sd : null); if (this.sideF === 0) this.sideOf = null; }
+        return;
+      }
+      if (this.sideF === 1) {   // standing at it
+        if (pressed("select")) { this.readJournal(); return; }
+        if (pressed("a") || pressed("start")) {
+          if (this.sideOpen(sd)) this.leaving = () => startStage(sd.id);
+          else toast(`Gera's range opens when every lost thing in 7-1, 7-2 and 7-3 is found. (${this.sideLeft(sd)} still out there)`);
+          return;
+        }
+        const press = ["up", "down", "left", "right"].find(k => pressed(k));
+        if (press || pressed("b")) this.sideWant = 0;   // any way back: to the trail
+        return;
+      }
+    }
     // walking: toward the target stop along the trail
     const want = this.stopD(this.target), step = MTUNE.WALK_SPEED * dt * (this.M.journey && this.prog.favor ? 3.5 : 1);   // the King's Favor (End of World 4): quick on the Journey map
     const moving = Math.abs(want - this.d) > 0.5;
@@ -275,6 +311,11 @@ const WorldMap = {
         const st = this.M.stops[i], dx = st.x - here.x, dy = st.y - here.y, len = Math.hypot(dx, dy) || 1;
         const dot = (dx * v[0] + dy * v[1]) / len;
         if (dot > bestDot) { bestDot = dot; best = i; }
+      }
+      for (const sd of this.M.sides || []) {   // a side stop off this one, that way?
+        if (sd.from !== here.id || !this.sideSeen(sd)) continue;
+        const dx = sd.x - here.x, dy = sd.y - here.y, dot = (dx * v[0] + dy * v[1]) / (Math.hypot(dx, dy) || 1);
+        if (dot > bestDot) { this.sideOf = sd; this.sideWant = 1; return; }
       }
       if (best === null && press === "right" && this.cur < this.openTo) best = this.cur + 1;
       if (best === null && press === "left" && this.cur > 0) best = this.cur - 1;
@@ -359,10 +400,27 @@ const WorldMap = {
         this.marker(x, y, r, done ? "#e8d9b8" : flash ? "#ffd84a" : "#f7b733", done ? "#3d6b2a" : "#6b3a10", num);
       if (done && !M.journey) hudIcon(this.prog[st.id].one ? "sheep_one" : "sheep", x + r * 0.55, y - r * 2.1, r * 1.5);   // a sheep: home safe
     });
+    // side stops: a short dotted path off their stop, and a target marker
+    for (const sd of M.sides || []) {
+      const fi = M.stops.findIndex(q => q.id === sd.from); if (fi < 0 || fi > this.openTo || !this.sideSeen(sd)) continue;
+      const a = M.stops[fi], len = Math.hypot(sd.x - a.x, sd.y - a.y);
+      for (let d = MTUNE.DOT_GAP / 2; d < len - 14; d += MTUNE.DOT_GAP) {
+        const f = d / len, [x, y] = P(a.x + (sd.x - a.x) * f, a.y + (sd.y - a.y) * f), r = 2.6 * s * 1.6;
+        ctx.fillStyle = "rgba(60,35,15,0.55)"; ctx.beginPath(); ctx.arc(x + 1, y + 1.5, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#fff4d6"; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      const [x, y] = P(sd.x, sd.y), r = 15 * (0.7 + 0.5 * (sd.y / img.naturalHeight)), open = this.sideOpen(sd);
+      if (open) { const g = ctx.createRadialGradient(x, y, 2, x, y, r * 2.4); g.addColorStop(0, `rgba(255,220,120,${0.35 + 0.2 * Math.sin(this.t * 4)})`); g.addColorStop(1, "rgba(255,220,120,0)"); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2); ctx.fill(); }
+      this.marker(x, y, r, open ? "#f7b733" : "#cbbfa8", open ? "#6b3a10" : "#6b6050", "◎");
+    }
     // stones of remembrance: all 12 found = a little cairn by the fold
     if (M.cairn && this.stones >= 12) { const [cx, cy] = P(M.cairn.x, M.cairn.y); drawItem("map_cairn", cx, cy + 6, 0.12); }
     // David (and his lamb), smaller toward the back of the painting
-    const dp = this.at(this.d), lp = this.at(this.lambD);
+    let dp = this.at(this.d), lp = this.at(this.lambD);
+    if (this.sideOf && this.sideF > 0) {   // out on a side path
+      const a = M.stops[this.cur], sd = this.sideOf, at = f => ({ x: a.x + (sd.x - a.x) * f, y: a.y + (sd.y - a.y) * f });
+      dp = at(this.sideF); lp = at(Math.max(0, this.sideF - 44 / (Math.hypot(sd.x - a.x, sd.y - a.y) || 1)));
+    }
     const DV = M.david || { far: MTUNE.DAVID_FAR, near: MTUNE.DAVID_NEAR, y0: 330, y1: 730 };
     const size = y => DV.far + (DV.near - DV.far) * Math.max(0, Math.min(1, (y - DV.y0) / (DV.y1 - DV.y0)));
     const moving = this.walkT > 0, away = moving && this.dirY < -Math.abs(this.dirX) * 0.6;   // walking up into the picture: his back to us
@@ -410,6 +468,13 @@ const WorldMap = {
     const w = 560, x = (W - w) / 2, y = H - 92;
     ctx.fillStyle = "rgba(25,14,6,0.76)"; ctx.beginPath(); ctx.roundRect(x, y, w, 78, 14); ctx.fill();
     ctx.textAlign = "center";
+    if (this.sideOf && this.sideF === 1) {   // at a side stop
+      const sd = this.sideOf, open = this.sideOpen(sd), best = this.prog.rangeBest;
+      ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(sd.label, W / 2, y + 32);
+      ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
+      ctx.fillText(open ? `A: a round with Gera${best ? `  ·  best ${best}${this.prog.rangeGold ? "  ·  Gold ✓" : ""}` : ""}    (any arrow: back)` : `Opens when every lost thing in 7-1, 7-2 and 7-3 is found (${this.sideLeft(sd)} still out there)`, W / 2, y + 58);
+      return;
+    }
     if (st.id === "home") {
       ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(st.label === "Jesse's house" ? "Home: Jesse's house" : st.label, W / 2, y + 32);   // (World 6: the camp; World 7: Saul's tent)
       ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText(st.label === "Jesse's house" ? "A: go into the courtyard    Right: walk out to the hills" : "A: home to Jesse's courtyard    Right: set out", W / 2, y + 60);

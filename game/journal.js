@@ -559,12 +559,13 @@ const ease = f => f * f * (3 - 2 * f);
 
 // the notes he wrote in the middle of a stage (Journal.openNote), kept in the book with that world's pages so the Journal
 // read later has everything he wrote (Glen, 2026-10-22): the giant's Field Guide card (6-2, world6.js goliathNote), the
-// Name (7-3, world7.js nameNote) and the five smooth stones (7-3, fiveNote). The old letters are their own page at the back.
+// Name (7-3, world7.js nameNote), the five smooth stones (7-3, fiveNote) and Gera's verse (his range's gold, range.js). The old letters are their own page at the back.
 function journalNotes(w) {
   let p = {}; try { p = JSON.parse(localStorage.getItem("davidProgress") || "{}"); } catch (e) {}
   const out = [], add = f => { if (typeof f === "function") out.push({ spread: "note", step: 5, w, P: { note: f() }, old: true }); };
   if (w === 6 && p.goliathCard) add(typeof goliathNote !== "undefined" && goliathNote);
   if (w === 7 && p["7-3"] && p["7-3"].cleared) { add(typeof nameNote !== "undefined" && nameNote); add(typeof fiveNote !== "undefined" && fiveNote); }
+  if (w === 7 && p.rangeGold) add(typeof rangeNote !== "undefined" && rangeNote);   // Gera's verse, from his range (range.js)
   return out;
 }
 

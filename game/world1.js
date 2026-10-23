@@ -12,6 +12,8 @@ document.write('<script src="world5.js?v=' + (window.BUILD || 0) + '"><\/script>
 document.write('<script src="world6.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Valley of Elah: the frightened soldiers, the tents, Eliab
 document.write('<script src="world7.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Giant's Shadow: Saul's armor
 document.write('<script src="world8.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Valley of Elah: Goliath (so far, his fall: Glen's slow-motion scene)
+document.write('<script src="trial.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the Shepherd's Trial: every boss again (post-game)
+document.write('<script src="range.js?v=' + (window.BUILD || 0) + '"><\/script>');   // Gera's sling range (off the World 7 map)
 document.write('<script src="harp_songs.js?v=' + (window.BUILD || 0) + '"><\/script>');   // the harp-duel charts (tools/make_harp_chart.py)
 
 const W1 = {

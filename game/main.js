@@ -159,7 +159,38 @@ for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
 // Input: keyboard + gamepad (with a button-setup screen for NES controllers)
 // ============================================================================
 // Settings (menu.js): which controller's pictures to show, and the music / sound volumes (0-10).
-const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10 }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
+const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10, difficulty: "medium" }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
+// Difficulty (Settings, Glen 2026-10-22). Medium is the game as tuned. Easy: more hearts and lives, bosses warn longer and
+// stay open longer, and take fewer hits. Hard: every hit costs two hearts, fewer lives, a shorter blink after a hit,
+// quicker warnings, shorter openings, and bosses take more hits. Counsel still helps on top of any of them.
+//   hearts: extra hearts  lives: lives a stage  hit: hearts a hit costs  inv: x the blink after a hit
+//   tell: x a boss's warning  open: x the time a boss stays open to a hit  hp: x a boss's hits to beat (rounded, at least 1)
+const DIFFICULTY = {
+  easy:   { name: "Easy",   hearts: 2, lives: 7, hit: 1, inv: 1.4, tell: 1.35, open: 1.35, hp: 0.7 },
+  medium: { name: "Medium", hearts: 0, lives: 5, hit: 1, inv: 1,   tell: 1,    open: 1,    hp: 1 },
+  hard:   { name: "Hard",   hearts: 0, lives: 3, hit: 2, inv: 0.75, tell: 0.75, open: 0.75, hp: 1.35 },
+};
+const DIFF = DIFFICULTY[SETTINGS.difficulty] || DIFFICULTY.medium;
+// scale every boss's numbers once, when the game loads (menu.js calls this after every world's table exists); a change of
+// difficulty takes hold at the next stage (every stage is a fresh page)
+function applyDifficulty() {
+  const D = DIFF, set = (o, k, f) => { if (o && typeof o[k] === "number") o[k] = f(o[k]); };
+  const tell = (o, ...ks) => ks.forEach(k => set(o, k, v => v * D.tell));
+  const open = (o, ...ks) => ks.forEach(k => set(o, k, v => v * D.open));
+  const hp = (o, ...ks) => ks.forEach(k => set(o, k, v => Math.max(1, Math.round(v * D.hp))));
+  tell(TUNE, "LION_TELL"); open(TUNE, "LION_DAZED"); hp(TUNE, "LION_HP");
+  if (typeof W2 !== "undefined") { tell(W2, "BEAR_TELL"); open(W2, "BEAR_DAZED"); hp(W2, "BEAR_HP"); }
+  if (typeof W3 !== "undefined") { tell(W3, "OX_TELL"); open(W3, "OX_STUCK"); hp(W3, "OX_HITS"); }
+  if (typeof HARP_DUEL !== "undefined") for (const k in HARP_DUEL) open(HARP_DUEL[k], "window");   // how far off a note can be
+  if (typeof W5 !== "undefined") { tell(W5, "CH_TELL", "CH_TELL2"); hp(W5, "CH_ARCHER_HP", "CH_WHEEL_HP", "LEOPARD_HP"); }
+  if (typeof W6 !== "undefined") { tell(W6, "TW_TELL"); open(W6, "TW_OPEN", "TW_OPEN2"); hp(W6, "TW_WIN_HITS", "TW_PIN_HP", "TW_PIN_HP2", "TW_BEAM_HP"); }
+  if (typeof W7 !== "undefined") { tell(W7, "SB_TELL", "SB_TELL2"); open(W7, "SB_PEEK", "SB_PEEK2"); hp(W7, "SB_HITS"); }
+  if (typeof W8 !== "undefined") { if (W8.TELL) tell(W8.TELL, ...Object.keys(W8.TELL)); open(W8, "CODE_TIME"); hp(W8, "CLOSES"); }
+  // (the ones already set up from the old numbers when their world's file loaded)
+  if (lion && lion.hp !== undefined) lion.hp = TUNE.LION_HP;
+  if (typeof bear !== "undefined" && bear.on && bear.hp !== undefined) bear.hp = W2.BEAR_HP;
+  if (typeof leopards !== "undefined") for (const L of leopards) L.hp = W5.LEOPARD_HP;
+}
 function saveSettings() { try { localStorage.setItem("davidSettings", JSON.stringify(SETTINGS)); } catch (e) {} applyVolumes(); }
 const sfxMul = () => SETTINGS.sfx / 10, musicMul = () => SETTINGS.music / 10;
 // Every <audio> keeps working with its own 0-1 volume; the setting scales what you actually hear.
@@ -328,11 +359,12 @@ function keyText(s) {
 // ============================================================================
 const STORY_HASH = location.hash === "#3-A" ? "3-A" : null;   // a story stop from the map (the Anointing): 3-3's ground, then the scene
 const STAGE_HASH = (location.hash.match(/^#(\d-\d)$/) || [])[1] || (STORY_HASH && "3-3");
-const LEVEL_NAME = location.hash === "#test" ? "test" : STAGE_HASH || "1-1";
+const LEVEL_NAME = location.hash === "#test" ? "test" : location.hash === "#range" ? "range" : STAGE_HASH || "1-1";   // #range: Gera's sling range (range.js), off the World 7 map
 // the game opens on the World 1 map; a stage in the address ("#1-2") goes straight into it (key 1 = 1-1)
 function backToMap() { history.replaceState(null, "", location.pathname + location.search); location.reload(); }
-const LEVEL_STAGE = LEVEL_NAME === "test" ? "1-1" : LEVEL_NAME;   // which stage this is (for the Journal, the map and the saved stones)
-const SCENE_ONLY = new URLSearchParams(location.search).has("scene");   // (menu.js Scenes) only this stage's opening, then back to Scenes
+const LEVEL_STAGE = LEVEL_NAME === "test" ? "1-1" : LEVEL_NAME === "range" ? "7-R" : LEVEL_NAME;   // which stage this is (for the Journal, the map and the saved stones)
+const SCENE_ONLY = new URLSearchParams(location.search).has("scene");
+const TRIAL = new URLSearchParams(location.search).has("trial");   // the Shepherd's Trial (trial.js): this stage's boss only, no counsel, timed   // (menu.js Scenes) only this stage's opening, then back to Scenes
 const STAGE_NUM = +LEVEL_STAGE.split("-")[1];
 // per stage: how long it is, which background, night or day
 const STAGE_INFO = {
@@ -358,6 +390,7 @@ const STAGE_INFO = {
   "6-3": { cols: 240, bg: "w6_3", ter: "w2s", name: "The Water Carriers" },
   "6-4": { cols: 230, bg: "w6_4", ter: "w2s", name: "The Tower's Shadow" },
   "7-1": { cols: 232, bg: "w7_1", ter: "w2s", name: "Saul's Armor" },
+  range: { cols: 36, bg: "w7_3", ter: "w2s", name: "Gera's Sling Range" },   // by the carved target at the stream (range.js)
   "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },
   "8-1": { cols: 72, bg: "w8_1", ter: "w2s", quiet: true, name: "The Valley" },   // World 8 (world8.js): the open valley floor again, no music: the words before the fight
   "8-3": { cols: 236, bg: "w8_3", ter: "w2s", name: "The Rout" },        // the Philistines run (auto-running: world8.js)
@@ -1871,6 +1904,9 @@ if (LEVEL_NAME === "test") {
   setPiece("oxtree", 286); rock(288, 15, 2, 2);
   setPiece("ox", 270, GR - 1);
   sheepfold(299);
+} else if (LEVEL_NAME === "range") {
+  // ---- Gera's sling range (range.js): one screen by the stream, a rock to stand on; the targets come and go ----
+  ground(0, 35); rock(9, 15, 3, 2); wall(30, 13, 5, 4);   // a rock to throw from; a low wall at the far end for the jars
 }
 
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
@@ -2407,6 +2443,7 @@ function updateStones(dt) {
     if (s.life > 0 && typeof stoneHitsBear === "function" && stoneHitsBear(s)) s.life = 0;   // world2.js (2-4)
     if (s.life > 0 && typeof stoneHitsOx === "function" && stoneHitsOx(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld4 === "function" && stoneHitsWorld4(s)) s.life = 0;
+    if (s.life > 0 && typeof stoneHitsRange === "function" && stoneHitsRange(s)) s.life = 0;   // range.js
     if (s.life > 0 && typeof stoneHitsWorld5 === "function" && stoneHitsWorld5(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld6 === "function" && stoneHitsWorld6(s)) s.life = 0;
     if (s.life > 0 && typeof stoneHitsWorld7 === "function" && stoneHitsWorld7(s)) s.life = 0;
@@ -2701,6 +2738,8 @@ function drawHUD() {
   } else drawHelp();
   drawDialog();
   drawCodeEntry(); if (typeof drawHarpDuel === "function") drawHarpDuel();
+  if (typeof drawRangeOver === "function") drawRangeOver();   // range.js: the clock and the score
+  if (TRIAL && typeof drawTrialClock === "function") drawTrialClock();   // trial.js
   drawToastAndSetup();
 }
 function drawHelp() {
@@ -2776,15 +2815,15 @@ const FOOD_TEXT = {
 };
 
 // hearts
-david.maxHearts = TUNE.HEARTS; david.hearts = TUNE.HEARTS; david.inv = 0; david.deadT = 0; david.specialStones = 0;
-david.lives = TUNE.LIVES; david.olives = 0; david.lampOil = 0; david.gathered = 0;   // gathered: every olive picked up this stage (for the tithe, home.js)
+david.maxHearts = TUNE.HEARTS + DIFF.hearts; david.hearts = david.maxHearts; david.inv = 0; david.deadT = 0; david.specialStones = 0;
+david.lives = DIFF.lives; david.olives = 0; david.lampOil = 0; david.gathered = 0;   // gathered: every olive picked up this stage (for the tithe, home.js)
 // olives, lamp oil and a fig cake bought at the market carry over from the home base (map.js progress)
 try {
   const pr = JSON.parse(localStorage.getItem("davidProgress") || "{}");
   david.olives = pr.olives || 0; david.lampOil = pr.lampOil || 0;
   if (pr.staff) { david.maxHearts++; david.hearts++; }   // Hanan's staff (End of World 3): one more heart, for good
   if (pr.cloak) { david.maxHearts++; david.hearts++; }   // Tobi's scout cloak (End of World 5)
-  if (pr.figCake > 0 && LEVEL_NAME !== "test") {   // eaten now: one extra heart for this stage
+  if (pr.figCake > 0 && LEVEL_NAME !== "test" && LEVEL_NAME !== "range" && !TRIAL) {   // eaten now: one extra heart for this stage
     david.maxHearts++; david.hearts++; pr.figCake--; localStorage.setItem("davidProgress", JSON.stringify(pr));
     setTimeout(() => toast("You ate the fig cake: an extra heart for this stage."), 1500);
   }
@@ -2795,7 +2834,7 @@ function hurtDavid(fromX) {
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
   if (ARMORED() && armorHit(fromX)) return;   // the armor's grey hearts go first (world7.js)
-  d.hearts--; d.inv = TUNE.HURT_INVINCIBLE;
+  d.hearts -= DIFF.hit; d.inv = TUNE.HURT_INVINCIBLE * DIFF.inv;   // (Hard: a hit costs two hearts)
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
   if (d.state !== "carry") setState("jump");
@@ -2813,7 +2852,7 @@ function pitFall() {
 }
 function restartStage() {   // out of lives: back to the start of THIS stage; special stones you found are kept
   const d = david;
-  d.lives = TUNE.LIVES; checkpoint = { ...spawn };
+  d.lives = DIFF.lives; checkpoint = { ...spawn };
   for (const s of snakes) Object.assign(s, { gone: false, alpha: 1, x: s.home, state: "idle", t: 0 });
   for (let i = pickups.length - 1; i >= 0; i--) { if (pickups[i].dropped) pickups.splice(i, 1); else pickups[i].taken = false; }
   for (let i = olives.length - 1; i >= 0; i--) { if (!olives[i].placed) olives.splice(i, 1); else olives[i].taken = false; }
@@ -2953,7 +2992,7 @@ function updateFires(dt) {
     const passed = david.x > f.x + 70 && david.x < f.x + 8 * T && david.deadT <= 0 && !cave.room;   // jumped over it or ran past: it still counts
     if ((near || passed) && !f.lit) {
       f.lit = true; checkpoint = { x: f.x - 30, y: f.y };
-      if (f.who) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
+      if (f.who && f.say) sayLine(f.who, f.say); else toast("Campfire: checkpoint. Play the harp here (Select) to rest.");
       if (typeof fireLit === "function") fireLit(f);   // world3.js: 3-2's scenes back in town
       learnSkill(f.teach);
     }
@@ -4206,6 +4245,7 @@ function updateWorld(dt) {
   if (typeof updateWorld6 === "function") updateWorld6(dt);
   if (typeof updateWorld7 === "function") updateWorld7(dt);
   if (typeof updateWorld8 === "function") updateWorld8(dt);   // world8.js: the words, the duel   // world7.js: Saul's armor   // world6.js: the frightened soldiers, the tents, Eliab
+  if (typeof updateRange === "function") updateRange(dt);   // range.js: Gera's sling range
   if (typeof updateWorld5 === "function") updateWorld5(dt);   // world5.js: the provisions, raiders, the fleeing father   // world4.js: gifts on the road, the vineyard keeper   // the crows in the barley, the rats in the granary (world3.js)
 }
 
@@ -4358,6 +4398,7 @@ function frame(now) {
     drawToastAndSetup();
     requestAnimationFrame(frame); return;
   }
+  if (TRIAL && typeof trialFrame === "function" && trialFrame(real)) { requestAnimationFrame(frame); return; }   // the Trial: the clock, and the result once the boss is beaten (trial.js)
   updateMusic(real);   // the stage music: low under words, silent in cut scenes (Glen)
   if (SCENE_ONLY && !cutSceneUp()) { location.href = "index.html"; return; }   // the opening is over: back to Scenes
   if (cutSceneUp()) {   // no running feet, birds or fight music under a cut scene (the rain stays: it's the weather; and some scenes play David's harp)
@@ -4467,7 +4508,8 @@ function frame(now) {
   if (typeof drawWorld6 === "function") drawWorld6(camX);   // world6.js
   if (typeof drawWorld7 === "function") drawWorld7(camX);   // world7.js
   if (typeof drawWorld8 === "function") drawWorld8(camX);   // world8.js
-  if (typeof drawWorld5 === "function") drawWorld5(camX);   // world3.js: houses, ladders, barley, granary
+  if (typeof drawWorld5 === "function") drawWorld5(camX);
+  if (typeof drawRange === "function") drawRange(camX);   // range.js   // world3.js: houses, ladders, barley, granary
   drawFold(camX);
   drawFires(camX); if (typeof drawCampfirePeople === "function") drawCampfirePeople(camX);   // world2.js
   drawPickups(camX);

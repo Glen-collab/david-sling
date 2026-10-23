@@ -257,7 +257,7 @@ function g8Call(who, line) { if (g8.phase >= 2 && g8Met(who)) g8.callout = { who
 function stonesSavedAll() { return typeof stonesFound === "function" ? [1, 2, 3, 4, 5, 6, 7].reduce((n, w) => n + stonesFound(w), 0) : 0; }
 function startG8() {
   g8.on = true; g8.t = 0;
-  if (!g8.bonus) {   // the stones of remembrance you saved: more hearts, and longer to make the throw (DESIGN 3f)
+  if (!g8.bonus && !TRIAL) {   // the stones of remembrance you saved (not in the Shepherd's Trial): more hearts, and longer to make the throw (DESIGN 3f)
     g8.bonus = true; const n = stonesSavedAll(), h = Math.floor(n / W8.HEART_STONES);
     if (h > 0) { david.maxHearts += h; david.hearts += h; }
     setTimeout(() => toast(`${n} stone${n === 1 ? "" : "s"} of remembrance${h ? `: +${h} heart${h === 1 ? "" : "s"}` : ""}, and a steadier hand for the throw.`), 2600);
@@ -315,7 +315,7 @@ function updateGoliath8(dt) {
   if (!g8.on || g8.won) { if (g8.won && g8.state === "thrown") g8.t += dt; return; }
   if (d.deadT > 0) {   // David fell: the fight resets (the phase reached stays); Shammah's counsel from the slope
     resetG8(); G8_MUSIC.pause();
-    if (!g8.counsel) { g8.counsel = true; setTimeout(() => sayLine("Shammah", "Come here. Tell me what happened. ... Watch him: every blow, he shows you first. You've got longer than you think. And when he roars at the sky, there's your opening."), 1600); }
+    if (!g8.counsel && !TRIAL) { g8.counsel = true; setTimeout(() => sayLine("Shammah", "Come here. Tell me what happened. ... Watch him: every blow, he shows you first. You've got longer than you think. And when he roars at the sky, there's your opening."), 1600); }
     return;
   }
   g8.t += dt; g8.flash = Math.max(0, g8.flash - dt);
@@ -382,7 +382,7 @@ function updateGoliath8(dt) {
       else if (c.t <= 0) { c.result = "miss"; g8Set("miss"); sfx("sling_throw", d.x, 0.8); }
     }
   } else if (g8.state === "thrown") {   // the stone: then the slow-motion scene (giantFall), then the map
-    if (g8.t > 0.7) { g8.won = true; giantFall.start(() => abnerScene.start(() => { clear8(); backToMap(); })); }   // the fall, then Saul's tent (17:55-58)
+    if (g8.t > 0.7 && !TRIAL) { g8.won = true; giantFall.start(() => abnerScene.start(() => { clear8(); backToMap(); })); }   // the fall, then Saul's tent (17:55-58)
   } else if (g8.state === "miss") {   // the stone flies wide: he laughs, and comes on again; one of the five is gone
     if (!g8.missed) {
       g8.missed = true; g8.smooth = Math.max(1, g8.smooth - 1);
