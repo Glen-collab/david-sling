@@ -481,3 +481,6 @@ the harp phrase at 3-2's campfire.
   his song on the hillside), take 2 as the World 1 stage music (music_w1_hills, dayMusic). Suno songs end in a fade-out,
   so stage loops go through tools/make_music_loop.py (cut on a beat before the ending, the tail crossfaded over the
   start: no gap). Loudness already matches the harps (about -16 LUFS). 8-3 and 8-4 still play the old 8-bit Harp Jump.
+  World 2: "Beyond the Rocks" (MP3s: Glen's WAVs were too big to send): take 1 under the whole opening (music_w2_opening,
+  W2_OPEN.FILM_MUSIC), take 2 the stage loop (music_w2_rocks; cut at 178 s, before its ending). Harps' Bounce
+  (music_day_w2) is no longer played. Pick a loop's --end where the song is still full, not in its fade.

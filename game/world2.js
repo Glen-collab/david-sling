@@ -1429,7 +1429,8 @@ const W2_STILL = Object.assign(new Image(), { src: "../assets/video/w2_opening_l
 const W2_OPEN = {
   WORDS: [1.2, 6.0],     // seconds of the video "Summer..." is up (while they walk past, before the camera rises)
   BAAS: [2.2, 5.1, 8.3], // seconds a sheep calls
-  AMBIENCE: 0.45,        // the hills under it
+  AMBIENCE: 0.3,         // the hills under it
+  FILM_MUSIC: 0.6,       // Glen's "Beyond the Rocks" (take 1, music_w2_opening) under the whole opening, out into 2-1
 };
 const w2intro = {
   active: false,
@@ -1437,7 +1438,7 @@ const w2intro = {
   start() {
     Object.assign(this, { active: true, t: 0, step: W2_CLIP.missing ? 1 : 0, stepT: 0, out: 0, baa: 0 });
     hushLoops(); dialog.t = 0;
-    this.amb = loopAudio("ambience_hills");
+    this.amb = loopAudio("ambience_hills"); this.film = loopAudio("music_w2_opening");
     this.playing = !!W2_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
@@ -1447,6 +1448,8 @@ const w2intro = {
       const amb = this.step < 2 ? W2_OPEN.AMBIENCE : 0;
       if (this.amb.paused && amb > 0) this.amb.play().catch(() => {});
       const av = this.amb.volume; this.amb.volume = av + Math.sign(amb - av) * Math.min(Math.abs(amb - av), dt * 0.5);
+      if (this.film.paused && !this.out) this.film.play().catch(() => {});   // in from the start, down with the fade into 2-1
+      this.film.volume = W2_OPEN.FILM_MUSIC * Math.min(1, this.t / 1.5) * (1 - Math.min(1, this.out / 0.8));
       if (this.step === 0) while (this.baa < W2_OPEN.BAAS.length && W2_CLIP.currentTime >= W2_OPEN.BAAS[this.baa]) { this.baa++; sfx(this.baa === 2 ? "flock_baa" : "sheep_baa_" + (1 + this.baa), undefined, 0.45); }
     }
     if (this.out > 0) { this.out += dt; if (this.out > 0.8) this.finish(); return; }
@@ -1460,7 +1463,7 @@ const w2intro = {
   },
   next() { this.step++; this.stepT = 0; },
   finish() {
-    this.active = false; W2_CLIP.pause(); this.amb.pause();
+    this.active = false; W2_CLIP.pause(); this.amb.pause(); this.film.pause();
     try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w2intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {

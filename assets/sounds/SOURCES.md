@@ -82,3 +82,5 @@ Silence trimmed off both ends and leveled to -17 LUFS (the harps' loudness). Whi
 | theme_sleuth | 250-sleuth-evil-theme.mp3 | 5-3 | ? |
 | music_w1_hills | Glen's Suno song "Morning on the Hills" (take 2), david-sling-art/music; gapless loop by tools/make_music_loop.py | World 1 stages | Glen's (Suno) |
 | music_w1_opening | "Morning on the Hills" (take 1), as it is | the World 1 opening film | Glen's (Suno) |
+| music_w2_rocks | Glen's Suno song "Beyond the Rocks" (take 2, MP3), david-sling-art/music; gapless loop, cut at 178 s | World 2 stages | Glen's (Suno) |
+| music_w2_opening | "Beyond the Rocks" (take 1), as it is | the World 2 opening | Glen's (Suno) |
