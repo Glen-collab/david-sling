@@ -1926,6 +1926,45 @@ if (LEVEL_NAME === "test") {
   ground(0, 35); rock(9, 15, 3, 2); wall(30, 13, 5, 4);   // a rock to throw from; a low wall at the far end for the jars
 }
 
+// Poison out in the wild (Glen, 2026-10-23: "so I can get hurt more often by doing dumb stuff"): wild gourds sitting on
+// ledges you'd land on (sling them first: 2 Kings 4:39-40) and poison berries on the ground, in every outdoor stage, not
+// just World 1. Placed by rule, the same every time: one gourd in each stretch of the stage, on a ledge or rock top at
+// least POISON.WIDE tiles wide with room above (a stretch with no ledge gets one on the ground in the way), never near a campfire, a talk, a lost sheep, food or a set piece.
+const POISON = {
+  STAGES: ["1-2", "1-3", "2-1", "2-2", "2-3", "3-2", "3-3", "4-1", "5-1", "5-2", "5-3", "6-2", "6-3", "7-2", "7-3"],
+  GOURDS: 4,       // gourds on ledges in each of those stages
+  BERRIES: 2,      // poison berries on the ground
+  CLEAR: 4,        // tiles kept clear around campfires, talks, sheep, food and set pieces
+  WIDE: 3,         // a ledge must be at least this many tiles wide to get a gourd
+};
+if (POISON.STAGES.includes(LEVEL_NAME)) {
+  let seed = [...LEVEL_NAME].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7);
+  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const busy = new Set(), mark = x => { const c = Math.floor(x / T); for (let k = -POISON.CLEAR; k <= POISON.CLEAR; k++) busy.add(c + k); };
+  for (const o of [...fires, ...talks, ...setPieces, ...lost.map(l => ({ x: l.hx })), ...pickups, ...gourds, ...specials]) mark(o.x);
+  const top = (c, r) => (solid[r][c] === 1 || solid[r][c] === 2 || solid[r][c] === 3 || oneway[r][c]) && [1, 2, 3].every(k => r - k < 0 || (!solid[r - k][c] && !oneway[r - k][c]));
+  const ledges = [], floor = [];
+  for (let c = 10; c < MAIN_COLS - 12; c++) {
+    if (busy.has(c)) continue;
+    for (let r = 5; r < GR; r++) if (top(c, r) && top(c - 1, r) && top(c + 1, r) && (POISON.WIDE < 4 || top(c + 2, r))) { ledges.push({ c, r }); break; }
+    if (top(c, GR) && top(c - 1, GR) && top(c + 1, GR)) floor.push(c);
+  }
+  const spread = (list, n, put, fallback) => {   // one in each stretch of the stage
+    for (let i = 0; i < n; i++) {
+      const lo = 10 + (MAIN_COLS - 22) * i / n, hi = 10 + (MAIN_COLS - 22) * (i + 1) / n;
+      const here = list.filter(p => { const c = p.c ?? p; return c >= lo && c < hi && !busy.has(c); });
+      if (!here.length) { if (fallback) fallback(lo, hi); continue; }
+      const p = here[Math.floor(rnd() * here.length)], c = p.c ?? p; put(p); mark(c * T);
+    }
+  };
+  const groundGourd = (lo, hi) => {   // a stretch with no ledge: the gourd sits in the way on the ground (jump it, or sling it)
+    const here = floor.filter(c => c >= lo && c < hi && !busy.has(c)); if (!here.length) return;
+    const c = here[Math.floor(rnd() * here.length)]; gourd(c, GR - 1); mark(c * T);
+  };
+  spread(ledges, POISON.GOURDS, p => gourd(p.c, p.r - 1), groundGourd);
+  spread(floor, POISON.BERRIES, c => food("poison_berries", c, GR - 1));
+}
+
 // "?at=160" in the address starts David at column 160 (handy for checking a spot in a level)
 const AT = Number(new URLSearchParams(location.search).get("at")) || 3;
 const spawn = { x: AT * T, y: GR * T }, lambSpawn = { x: (AT + 2) * T, y: GR * T };
@@ -2826,7 +2865,8 @@ const FOOD = {   // heal amount; negative = poison
 };
 const FOOD_TEXT = {
   bread: "Bread", cheese: "Sheep's cheese", grapes: "Grapes", figs: "Figs", dates: "Dates", honey: "Honey: his eyes brightened (1 Samuel 14:27)",
-  fig_cake: "Fig cake (1 Samuel 25:18)", poison_berries: "Poison berries!", wild_gourds: "Wild gourds: death in the pot! (2 Kings 4:39-40)",
+  fig_cake: "Fig cake (1 Samuel 25:18)", poison_berries: "Poison berries! \"Their grapes are poison grapes. Their clusters are bitter.\" (Deuteronomy 32:32)",
+  wild_gourds: "Wild gourds! \"Man of God, there is death in the pot!\" (2 Kings 4:40)",
   lentils: "Lentils", raisins: "Raisins", olives: "Olives", roasted_grain: "Roasted grain",
   pomegranate: "Pomegranate: the spies brought them back from the promised land (Numbers 13:23)",
   barley: "Barley: Ruth gleaned it in these very fields of Bethlehem (Ruth 2)",
@@ -2848,7 +2888,7 @@ try {
 } catch (e) {}
 // the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
 const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep" || david.state === "cave";
-function hurtDavid(fromX) {
+function hurtDavid(fromX, why = "") {   // why: what hurt him (the poison's verse), kept in the message if it costs a life
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
   if (ARMORED() && armorHit(fromX)) return;   // the armor's grey hearts go first (world7.js)
@@ -2856,7 +2896,8 @@ function hurtDavid(fromX) {
   d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
   d.harp = false; d.charging = false; d.throwT = -1;
   if (d.state !== "carry") setState("jump");
-  if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; toast(d.lives > 0 ? `Ouch! Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage."); }
+  if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; const tail = d.lives > 0 ? `Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage.";
+                       toast(why ? `${why} ${tail}` : d.lives > 0 ? `Ouch! ${tail}` : tail); }
 }
 // a pit costs a heart and puts him back on the last solid ground he stood on (it's never back to the start)
 function pitFall() {
@@ -2915,15 +2956,15 @@ function updatePickups(dt) {
     if (Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10) {
       p.taken = true;
       const v = FOOD[p.name] ?? 1;
-      if (v < 0) hurtDavid(p.x); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }
       toast((v < 0 ? "" : "+ ") + (FOOD_TEXT[p.name] || p.name));
+      if (v < 0) hurtDavid(p.x, FOOD_TEXT[p.name]); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }   // (after the message: a poison that costs a life keeps its verse in the new one)
       for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });
     }
   }
 }
 function updateGourds() {   // walking into a gourd picks it up, like food, and it's poison (2 Kings 4:39-40). Sling them instead.
   for (const g of gourds) if (g.alive && !g.hanging && Math.abs(g.x - david.x) < 34 && david.y > g.y - 50 && david.y - david.h < g.y && david.deadT <= 0 && david.inv <= 0) {
-    g.alive = false; toast(FOOD_TEXT.wild_gourds); hurtDavid(g.x);   // (a hurt that ends a life puts its own message up)
+    g.alive = false; toast(FOOD_TEXT.wild_gourds); hurtDavid(g.x, FOOD_TEXT.wild_gourds);   // (if it costs a life, the verse stays in that message)
     for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: "#7a2" });
   }
 }
