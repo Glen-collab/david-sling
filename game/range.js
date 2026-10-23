@@ -12,6 +12,7 @@ const RANGE = {
   TIME: 60,                 // seconds a round
   COUNT: 3,                 // the count-in
   BRONZE: 15, SILVER: 30, GOLD: 45,   // scores for each mark (GOLD: Gera's verse, the first time)
+  GOURD_SIZE: 0.3,          // the hanging gourds' size (World 1's are 0.32)
   OLIVE_PER: 5,             // an olive for every this many points
   BONUS_GAP: 0.6,           // seconds between two hits for the quick-release bonus
   SPAWN: [1.2, 0.7],        // seconds between new targets: at the start, and in the last 20 seconds
@@ -22,7 +23,7 @@ const RANGE = {
     rope:  { pts: 2, r: 24, life: 6.0, w: 3 },
     swing: { pts: 2, r: 24, life: 6.0, w: 2 },
     jar:   { pts: 1, r: 26, life: 7.0, w: 2 },
-    small: { pts: 3, r: 14, life: 3.5, w: 1.5 },
+    small: { pts: 3, r: 20, life: 3.5, w: 1.5 },   // (World 1's wild gourds, hanging on a vine)
   },
 };
 const RANGE_LINES = {   // Claude's drafts (Glen to change)
@@ -122,7 +123,7 @@ function stoneHitsRange(s) {   // main.js stone loop
     const K = RANGE.KINDS[g.kind], p = rangePos(g);
     if (Math.hypot(s.x - p.x, s.y - p.y) > K.r + 6) continue;
     g.hit = true; g.hitT = rng.t; g.hx = p.x; g.hy = p.y; stoneHit(s, 0.5);
-    for (let k = 0; k < (g.kind === "jar" ? 16 : 10); k++) bits.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 420, life: 0.8, color: g.kind === "jar" ? (k % 2 ? "#b8693a" : "#8a4a26") : g.kind === "small" ? (k % 2 ? "#c8c040" : "#7a8a2a") : (k % 2 ? "#c0392b" : "#e8d3a8") });
+    for (let k = 0; k < (g.kind === "jar" ? 16 : 10); k++) bits.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 420, vy: -Math.random() * 420, life: 0.8, color: g.kind === "jar" ? (k % 2 ? "#b8693a" : "#8a4a26") : g.kind === "small" ? (k % 2 ? "#d9a441" : "#7a8a2a") : (k % 2 ? "#c0392b" : "#e8d3a8") });
     let pts = K.pts, txt = `+${K.pts}`;
     if (rng.t - rng.lastHit < RANGE.BONUS_GAP) { pts += 1; txt += "  Release, reload! +1"; }
     rng.lastHit = rng.t; rng.score += pts; rng.hits++;
@@ -149,15 +150,16 @@ function drawRange(camX) {
     ctx.save();
     if (!g.hit && g.kind === "rope") { ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, p.y - K.r); ctx.stroke(); }
     if (!g.hit && g.kind === "swing") { ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(g.x - camX, g.y); ctx.lineTo(x, p.y - K.r); ctx.stroke(); ctx.fillStyle = "#5a3e22"; ctx.fillRect(g.x - camX - 30, g.y - 6, 60, 8); }
-    if (!g.hit && g.kind === "small") { ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, p.y - K.r); ctx.stroke(); }
+    if (!g.hit && g.kind === "small") { ctx.strokeStyle = "#4e7a2a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, p.y - K.r); ctx.stroke(); }
     if (g.kind === "jar") { ctx.globalAlpha = g.hit ? Math.max(0, 1 - (rng.t - g.hitT)) : 1; drawItem("gift_oil", x, p.y + 30, 0.36 * pop); ctx.restore(); continue; }
     if (!g.hit && g.kind === "post") { ctx.fillStyle = "#6b4a2a"; ctx.fillRect(x - 4, p.y, 8, GR * T - p.y); }
     ctx.translate(x, p.y); ctx.scale(pop, pop);
     if (g.hit) { ctx.rotate((rng.t - g.hitT) * 6); ctx.globalAlpha = Math.max(0, 1 - (rng.t - g.hitT)); }
     const R = K.r;
-    if (g.kind === "small") {   // a little gourd on a string: worth the most
-      ctx.fillStyle = "#b8b040"; ctx.beginPath(); ctx.ellipse(0, 2, R, R * 1.1, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "#5a5a1a"; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = "#6a8a2a"; ctx.fillRect(-2, -R - 6, 4, 8);
+    if (g.kind === "small" && ITEM.wild_gourds && ITEM.wild_gourds.naturalWidth) {   // World 1's hanging gourds: worth the most
+      drawItem("wild_gourds", 0, ITEM.wild_gourds.naturalHeight * RANGE.GOURD_SIZE / 2, RANGE.GOURD_SIZE);
+    } else if (g.kind === "small") {   // (until the picture loads)
+      ctx.fillStyle = "#d9a441"; ctx.beginPath(); ctx.ellipse(0, 0, R, R * 1.2, 0, 0, Math.PI * 2); ctx.fill();
     } else {   // straw and wood, painted rings (like Gera's yard at Gibeah)
       ctx.fillStyle = "#c9a56a"; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = "#6b4a2a"; ctx.lineWidth = 3; ctx.stroke();
