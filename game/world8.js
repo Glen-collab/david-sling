@@ -146,6 +146,8 @@ Object.assign(W8, {
   THRUST_Y: 70,          // the spear passes this high (px off the ground): jump higher, or roll under it
   SWEEP_Y: 60,           // the sweep: be higher than this
   WAVE: 620,             // px/s, the spear slam's shockwave along the ground (be in the air)
+  SLAM_SHAKE: 1.7,       // how hard the camera shakes when the spear goes into the ground (the bear's slam is about 1)
+  SLAM_POINT: -18,       // px from his feet to where the spear point goes in (the dust)
   JAV_T: 1.15,           // seconds the javelin is in the air
   JAV_R: 46,             // px from where it lands that it hurts
   SPEAR_SHEET_LEN: 450,  // the thrown spear's length, in goliath_spear sheet pixels (so it matches the one he holds)
@@ -345,7 +347,11 @@ function updateGoliath8(dt) {
   } else if (g8.state === "tell") {
     if (g8.t >= g8Tell(g8.atk)) {
       g8Set("hit");
-      if (g8.atk === "slam") { thud(1); shake8(1.1); g8.waves.push({ x: g8Front() - 10, t: 0 }); sfx("stone_hit", g8.x, 0.9, 0.4); }
+      if (g8.atk === "slam") {   // (Glen) the spear driven point-first into the ground: a thunderous boom, the ground shakes
+        thud(1); shake8(W8.SLAM_SHAKE); g8.waves.push({ x: g8Front() - 10, t: 0 }); sfx("stone_hit", g8.x, 1, 0.35); sfx("thunder_3", g8.x, 0.8, 0.7);
+        const px = g8.x + W8.SLAM_POINT;   // dust and grit thrown up where the point went in
+        for (let k = 0; k < 26; k++) bits.push({ x: px + (Math.random() - 0.5) * 40, y: GR * T - 4, vx: (Math.random() - 0.5) * 520, vy: -120 - Math.random() * 520, life: 0.7 + Math.random() * 0.4, color: k % 3 ? "#cdb084" : "#8a6a44" });
+      }
       if (g8.atk === "javelin") { g8.jav = { x0: g8.x - 20, y0: GR * T - 300, tx: d.x, t: 0 }; sfx("arrow_single", g8.x, 0.9, 0.6); g8Call("Gera", "Release, reload! Knock it aside!"); }
       if (g8.atk === "thrust" || g8.atk === "sweep" || g8.atk === "chop") sfx("sling_throw_quick", g8.x, 0.8, 0.45);   // the whoosh of it, deep
     }
@@ -447,7 +453,9 @@ function drawGoliath8(camX) {
     const SHEET = { thrust: "goliath_thrust", slam: "goliath_slam", sweep: "goliath_sweep", chop: "goliath_chop" }[a];
     const TELLF = { thrust: 6, slam: 7, sweep: 5, chop: 5 };   // the sheet's frames that are the tell; the rest are the blow
     if (SHEET && SPR[SHEET]) {
-      const n = SPR[SHEET].frames, tf = TELLF[a], f = g8.state === "tell" ? Math.min(tf - 1, Math.floor(tellP * tf)) : hit ? Math.min(n - 1, tf + Math.floor(g8.t / 0.35 * (n - tf))) : n - 1;
+      const n = SPR[SHEET].frames, tf = TELLF[a];
+      let f = g8.state === "tell" ? Math.min(tf - 1, Math.floor(tellP * tf)) : hit ? Math.min(n - 1, tf + Math.floor(g8.t / 0.35 * (n - tf))) : n - 1;
+      if (a === "slam") f = g8.state === "tell" ? 1 + Math.min(n - 2, Math.floor(tellP * (n - 1))) : 0;   // (Glen) lifted up through the sheet, then slammed down: frame 0, the point in the ground
       drawSprite(SHEET, f, x, GR * T, -1, W8.SIZE * W8.CLIP_SIZE, 1, fl);
     }
     else if (a === "thrust") { if (hit) { ctx.save(); ctx.translate(-36, 0); spear(7); ctx.restore(); } else spear(rec ? 6 : 5 + Math.min(2, Math.floor(tellP * 2.99))); }
@@ -476,7 +484,7 @@ function drawGoliath8(camX) {
   }
   if (typeof drawSbSparks === "function") drawSbSparks(camX);
 }
-Object.assign(W8, { GLINT: { thrust: [-150, 150], slam: [-40, 330] }, BROW: [-2, 242] });   // px from his feet: the spear-head's glint, his forehead (fit to the art)
+Object.assign(W8, { GLINT: { thrust: [-150, 150], slam: [42, 119] }, BROW: [-2, 242] });   // px from his feet: the spear-head's glint, his forehead (fit to the art)
 function drawGoliath8Over() {   // the meter (17:48), the five stones, the callouts, and the throw
   if (!g8 || !g8.on || g8.won) return;
   ctx.save(); ctx.textAlign = "center";
