@@ -3411,13 +3411,25 @@ window.SPRITE_DATA = {
  "raven_fly": {
   "src": "../assets/sprites/raven_fly.png",
   "frames": 8,
-  "w": 84,
-  "h": 74,
+  "w": 134,
+  "h": 90,
   "ms": 83,
   "loop": true,
   "pingpong": false,
-  "ax": 42,
-  "ay": 38,
+  "ax": 66,
+  "ay": 46,
+  "align": "center"
+ },
+ "raven_fly2": {
+  "src": "../assets/sprites/raven_fly2.png",
+  "frames": 8,
+  "w": 99,
+  "h": 83,
+  "ms": 83,
+  "loop": true,
+  "pingpong": false,
+  "ax": 50,
+  "ay": 42,
   "align": "center"
  },
  "raven_peck": {

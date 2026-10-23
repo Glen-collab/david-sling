@@ -533,3 +533,8 @@ the harp phrase at 3-2's campfire.
   shows over David; Up has them say it again, all of their lines in a row, A for each (world1.js talkAgainNear /
   updateTalkAgain / drawTalkHint, TALK_AGAIN.NEAR tiles). Not in caves or by a cave mouth. The lamb's barley is
   drawn at half size (drawPickups).
+- **New raven (2026-10-23):** raven_fly is Glen's new strip (david-sling-art/raven/raven_fly_strip.png; the old sheet is
+  raven_fly_old.png there), cut by tools/green_strip.py: each pose is its own shape (outlines may overlap), keyed,
+  lined up on the body (eroded mask's middle) so it holds still while the wings beat, mirrored to face left like the
+  old one (the code flips it), pose 9 dropped (the same as 1, for a clean loop). raven_fly2 = his second strip, the
+  same way, waiting for him to clean a doubled wing (raven_fly2_TO_CLEAN.png); not used yet.
