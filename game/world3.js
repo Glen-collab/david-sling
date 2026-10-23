@@ -1464,12 +1464,13 @@ const w3intro = {
     5: ["Eliab", "A prophet, here? Then he's come for someone important."],
   },
   start() {
-    Object.assign(this, { active: true, t: 0, step: W3_CLIP.missing ? 5 : 0, stepT: 0, out: 0 });
+    Object.assign(this, { active: true, t: 0, step: W3_CLIP.missing ? 5 : 0, stepT: 0, out: 0, gateDone: false, gateT: 0 });
     hushLoops(); dialog.t = 0;
     this.amb = loopAudio("ambience_hills"); this.film = loopAudio("music_w3_opening");
     this.playing = !!W3_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
+    if (soundGate(this, dt)) return;   // (sound on first, so the music starts with the film)
     if (!this.playing) { this.playing = true; W3_CLIP.currentTime = 0; W3_CLIP.play().catch(() => { this.step = 5; }); }
     this.t += dt; this.stepT += dt;
     if (audioUnlocked) {
@@ -1501,6 +1502,7 @@ const w3intro = {
     try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w3intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
+    if (drawSoundGate(this)) return;
     const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
     if (this.step <= 4) { if (W3_CLIP.videoWidth && W3_CLIP.readyState >= 2) cover(W3_CLIP, W3_CLIP.videoWidth, W3_CLIP.videoHeight); }

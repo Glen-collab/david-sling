@@ -4075,6 +4075,28 @@ function unlockAudio() {
 }
 addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlockAudio);
 unlockAudio();   // when the browser already allows sound (the "Play David" launcher), it's on from the start
+// (Glen, 2026-10-23) an opening waits for sound. Each stage is a new page, and a new page can't play any sound until a
+// key or a tap, so his opening music came in late, on the A at the end of the film. While the sound is still off, an
+// opening (soundGate(this, dt) at the top of its update, drawSoundGate(this) of its draw) holds on black with "Press A
+// to begin": the press turns the sound on, and the film and its music start together. When the browser already
+// allows sound, nothing shows. (A controller's A can't turn sound on, browsers don't count it: it goes on without.)
+const GATE_WAIT = 0.4;   // seconds on black first, for the browser to say if sound is already allowed
+function soundGate(o, dt) {
+  if (o.gateDone) return false;
+  o.gateT = (o.gateT || 0) + dt;
+  if (audioUnlocked || (o.gateT > GATE_WAIT && (pressed("a") || pressed("b") || pressed("start")))) { o.gateDone = true; return false; }
+  return true;
+}
+function drawSoundGate(o) {
+  if (o.gateDone) return false;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+  if ((o.gateT || 0) > GATE_WAIT) {
+    const a = Math.min(1, (o.gateT - GATE_WAIT) / 0.5) * (0.75 + 0.25 * Math.sin(performance.now() / 300));
+    ctx.save(); ctx.textAlign = "center"; ctx.globalAlpha = a; ctx.fillStyle = "#fff3d6"; ctx.font = "italic 30px Georgia, serif";
+    ctx.fillText("Press A to begin", W / 2, H / 2); ctx.restore();
+  }
+  return true;
+}
 // ---------------------------------------------------------------------------
 // Sound effects (Web Audio, so many can overlap) and the looping ambience / boss music.
 // Files are in assets/sounds. Sounds far from the middle of the screen play quieter.
@@ -4132,10 +4154,11 @@ const nightMusic = loopAudio("music_night"), caveMusic = loopAudio("music_cave")
 const DARK_STAGES = ["2-4", "3-4", "4-4"];   // (3-4: the storm)
 // the day themes: World 1 has Glen's "Morning on the Hills" (2026-10-23, his cinematic Suno song, take 2, made a gapless
 // loop by tools/make_music_loop.py; take 1 plays under the World 1 opening film), World 2 his "Beyond the Rocks" (take 2;
-// take 1 under the World 2 opening), World 3 his "Dusty March" (take 2; take 1 under the World 3 opening), then
+// take 1 under the World 2 opening), World 3 his "Dusty March" (take 2; take 1 under the World 3 opening), World 4
+// "The Shadow in the Gold" (4-1 to 4-3), then
 // Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out).
 // (8-bit Harp Jump, World 1's old tune, still plays in 8-3 and 8-4: STAGE_THEMES.)
-const dayMusic = loopAudio({ 1: "music_w1_hills", 2: "music_w2_rocks", 3: "music_w3_march", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
+const dayMusic = loopAudio({ 1: "music_w1_hills", 2: "music_w2_rocks", 3: "music_w3_march", 4: "music_w4_gold", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
 // (Glen, 2026-10-22) his darker orchestral themes for the dramatic stages, in place of the harp, day or night (caves
 // keep the cave music). Matched by their tempo and feel (tools: librosa): one a stage, World 7 all on Capital.
 const STAGE_THEMES = {
@@ -4144,13 +4167,24 @@ const STAGE_THEMES = {
   "5-2": "theme_dream",     // the Mountain Trail by moonlight: the darkest and smoothest, E minor
   "5-3": "theme_sleuth",    // the Lookouts' Ridge: creeping past the torches, E minor
   "5-4": "theme_arete",     // Down to Elah: it builds, quiet to big (the widest swings of them all); the chariots
-  "6-1": "theme_search", "6-2": "theme_search", "6-3": "theme_search",   // the camp of fear: uneasy, A minor
+  "6-1": "music_w6_shout", "6-2": "music_w6_shout", "6-3": "music_w6_shout",   // the camp of fear: Glen's "The Giant's Shout"
+                            // (take 2, 2026-10-23; it took the place of theme_search)
   "6-4": "theme_wraith",    // the Tower's Shadow: the densest and loudest
   "7-1": "theme_capital", "7-2": "theme_capital", "7-3": "theme_capital",   // World 7 (Glen's pick); 7-4 stays quiet
   "8-3": "music_day_w1",   // the rout: the bounciest harp, at full speed
   "8-4": "music_day_w1",   // home: 1-1's music, slowed (DESIGN 5h); the song with the words waits for the last Journal page
 };
 const stageTheme = STAGE_THEMES[LEVEL_STAGE] ? loopAudio(STAGE_THEMES[LEVEL_STAGE]) : null;
+// (Glen, 2026-10-23) his songs under a world's opening, from its film (preFilm) through the scene after it (wNintro),
+// out into the stage. Worlds 1-3 have no film: their scenes play theirs (W1_OPEN.FILM_MUSIC...).
+const OPENING_MUSIC = { 4: ["music_w4_opening", 0.55], 6: ["music_w6_opening", 0.55] };   // [song, volume]
+const openingMusic = OPENING_MUSIC[WORLD] ? loopAudio(OPENING_MUSIC[WORLD][0]) : null;
+let openingVol = 0;
+function openingUp() {
+  if (!openingMusic) return false;
+  if (preFilm.active) return true;
+  try { const o = eval("w" + WORLD + "intro"); return !!(o && o.active); } catch (e) { return false; }
+}
 if (stageTheme && LEVEL_STAGE === "8-4") { stageTheme.playbackRate = 0.8; stageTheme.preservesPitch = false; }   // home: the first stage's tune, slower
 let stageThemeVol = 0;
 let dayVol = 0;
@@ -4178,11 +4212,12 @@ const preFilm = {
   active: false,
   start(opts, then) {
     const clip = Object.assign(document.createElement("video"), { src: opts.src + "?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
-    Object.assign(this, { active: true, opts, then, clip, t: 0, out: 0, playing: false, cue: 0, snd: opts.loop ? loopAudio(opts.loop[0], false) : null });
+    Object.assign(this, { active: true, opts, then, clip, t: 0, out: 0, playing: false, cue: 0, snd: opts.loop ? loopAudio(opts.loop[0], false) : null, gateDone: false, gateT: 0 });
     clip.onerror = () => this.end();
     hushLoops(); dialog.t = 0;   // (it starts playing on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
+    if (soundGate(this, dt)) return;   // (sound on first)
     if (!this.playing) { this.playing = true; this.clip.play().catch(() => this.end()); }
     this.t += dt;
     const c = this.clip, k = c.duration ? Math.min(1, c.currentTime / c.duration) : 0;
@@ -4201,6 +4236,7 @@ const preFilm = {
     const f = this.then; this.then = null; if (f) f();   // the scene starts in the same frame, so there's no gap
   },
   draw() {
+    if (drawSoundGate(this)) return;
     const c = this.clip;
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
     if (c.videoWidth && c.readyState >= 2) { const k = Math.max(W / c.videoWidth, H / c.videoHeight); ctx.drawImage(c, (W - c.videoWidth * k) / 2, (H - c.videoHeight * k) / 2, c.videoWidth * k, c.videoHeight * k); }
@@ -4227,7 +4263,9 @@ function updateMusic(dt) {
   if (typeof G8_MUSIC !== "undefined" && G8_MUSIC.held && goliathFight()) { G8_MUSIC.held = false; G8_MUSIC.play().catch(() => {}); }
   if (typeof giantDrone !== "undefined" && giantDrone.held) { giantDrone.held = false; giantDrone.to(giantDrone.k || 1, 1); }
   // and in cut scenes (Glen) it sinks lower still, faint under the story
-  const words = dialog.t > 0, want = preFilm.active || (typeof w1intro !== "undefined" && w1intro.active) || (typeof w2intro !== "undefined" && w2intro.active) || (typeof w3intro !== "undefined" && w3intro.active) ? 0 : cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
+  const opening = openingUp();
+  if (openingMusic) openingVol = fadeLoop(openingMusic, openingVol, opening ? OPENING_MUSIC[WORLD][1] : 0, dt, opening ? 0.6 : 0.7);
+  const words = dialog.t > 0, want = preFilm.active || opening || (typeof w1intro !== "undefined" && w1intro.active) || (typeof w2intro !== "undefined" && w2intro.active) || (typeof w3intro !== "undefined" && w3intro.active) ? 0 : cutScene ? TUNE.MUSIC_SCENE : words ? TUNE.MUSIC_DUCK : 1;
   musicDuck += (want - musicDuck) * Math.min(1, dt * (want < musicDuck ? 3 : 1.2));
   // (Glen) 7-4, once the shield-bearer is beaten: Goliath walks in and speaks. No harp themes from here to the end, only his music
   const grave = typeof sb !== "undefined" && sb && sb.beaten;

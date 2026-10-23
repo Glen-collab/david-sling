@@ -86,3 +86,8 @@ Silence trimmed off both ends and leveled to -17 LUFS (the harps' loudness). Whi
 | music_w2_opening | "Beyond the Rocks" (take 1), as it is | the World 2 opening | Glen's (Suno) |
 | music_w3_march | Glen's Suno song "Dusty March" (take 2, MP3); gapless loop, cut at 174 s, 8 s crossfade (it builds) | World 3 stages | Glen's (Suno) |
 | music_w3_opening | "Dusty March" (take 1), as it is | the World 3 opening | Glen's (Suno) |
+| music_w4_gold | Glen's Suno song "The Shadow in the Gold" (one take); gapless loop, cut at 158 s | 4-1 to 4-3 | Glen's (Suno) |
+| music_w4_opening | "The Shadow in the Gold", as it is | the World 4 film and opening | Glen's (Suno) |
+| music_w6_shout | "The Giant's Shout" (take 2); gapless loop, cut at 160 s | 6-1 to 6-3 (was theme_search) | Glen's (Suno) |
+| music_w6_opening | "The Giant's Shout" (take 1), as it is | the World 6 film and opening | Glen's (Suno) |
+| music_8_stone | "The One Stone"; gapless loop, cut at 160 s | 8-2, the fight (was goliath_theme, which stays in 7-4) | Glen's (Suno) |

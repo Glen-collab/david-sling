@@ -638,23 +638,30 @@ const W1_OPEN = {
                          // gives way to his song on the hillside
   SIZE: 1.7,             // the people on the hillside (a closer shot than in play)
   SHEEP: 1.35,           // and the flock
+  // (Glen, 2026-10-23) the two lines at the table come up on their own, in the video, when the lips move: Eliab's
+  // mouth opens at 10.4 s (David has just run out), Jesse answers after; his line stays over the last frame, then the hillside
+  ELIAB_AT: 10.4,        // seconds into the video
+  JESSE_AT: 12.7,
+  JESSE_HOLD: 3.2,       // seconds Jesse's line is up before the hillside comes (A goes on sooner)
 };
 const w1intro = {
   active: false,
-  // steps: 0 the video, 1-2 the table (its last frame), 3 the hillside, 4 the title card
+  // steps: 0 the video (Eliab's and Jesse's lines come up in it, W1_OPEN.ELIAB_AT...), 2 Jesse's line over its last
+  // frame, 3 the hillside, 4 the title card. (Step 1 isn't used any more: the lines were A-to-go-on over the still.)
   lines: [null,
     ["Eliab", "Where's he off to so early?"],
     ["Jesse", "Where he always goes. Out to the sheep."],
     ["", "“There remains yet the youngest. Behold, he is keeping the sheep.” (1 Samuel 16:11)"],
     null],
   start() {
-    Object.assign(this, { active: true, t: 0, step: W1_CLIP.missing ? 1 : 0, stepT: 0, out: 0, sang: false });
+    Object.assign(this, { active: true, t: 0, step: W1_CLIP.missing ? 2 : 0, stepT: 0, out: 0, sang: false, jesseT: null, gateDone: false, gateT: 0 });
     hushLoops(); dialog.t = 0;
     this.amb = loopAudio("ambience_hills"); this.film = loopAudio("music_w1_opening");
     this.playing = !!W1_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
-    if (!this.playing) { this.playing = true; W1_CLIP.currentTime = 0; W1_CLIP.play().catch(() => { this.step = 1; }); }
+    if (soundGate(this, dt)) return;   // (sound on first, so the music starts with the film)
+    if (!this.playing) { this.playing = true; W1_CLIP.currentTime = 0; W1_CLIP.play().catch(() => { this.step = 2; }); }
     this.t += dt; this.stepT += dt;
     if (audioUnlocked) {   // (sound comes on with the first click: the hills, then the song on the hillside)
       const amb = this.step < 3 ? W1_OPEN.AMBIENCE : this.step === 3 ? W1_OPEN.AMBIENCE * 0.4 : 0;
@@ -673,9 +680,11 @@ const w1intro = {
     if (this.out > 0) { this.out += dt; if (this.out > 0.8) this.finish(); return; }
     const A = this.stepT > 0.6 && (pressed("a") || pressed("b") || pressed("start"));
     if (this.step === 0) {   // the video: A skips to its end
-      if (W1_CLIP.ended || this.stepT > 20 || (A && this.stepT > 1)) { W1_CLIP.pause(); this.next(); }
+      if (this.jesseT === null && W1_CLIP.currentTime >= W1_OPEN.JESSE_AT) this.jesseT = this.t;
+      if (W1_CLIP.ended || this.stepT > 20 || (A && this.stepT > 1)) { W1_CLIP.pause(); this.step = 2; this.stepT = 0; if (this.jesseT === null) this.jesseT = this.t; }
       return;
     }
+    if (this.step === 2) { if (this.t - this.jesseT > W1_OPEN.JESSE_HOLD || A) this.next(); return; }   // Jesse's line, then on by itself
     if (this.step === 4) { if (this.stepT > 3.6 || A) this.out = 0.001; return; }
     if (A) this.next();
   },
@@ -686,6 +695,7 @@ const w1intro = {
     try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w1intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {
+    if (drawSoundGate(this)) return;
     const now = performance.now() / 1000, y = GR * T;
     const cover = (img, w, h) => { const k = Math.max(W / w, H / h); ctx.drawImage(img, (W - w * k) / 2, (H - h * k) / 2, w * k, h * k); };
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
@@ -697,7 +707,9 @@ const w1intro = {
         ctx.fillStyle = "#fff3d6"; ctx.font = "italic 40px Georgia, serif"; ctx.fillText("Bethlehem", W / 2, H - 120);
         ctx.font = "italic 24px Georgia, serif"; ctx.fillText("A small town in the hills of Judah", W / 2, H - 82); ctx.restore();
       }
-      if (this.stepT > 1.5) caption("A: skip", 0.6, true);
+      const ln = ct >= W1_OPEN.JESSE_AT ? this.lines[2] : ct >= W1_OPEN.ELIAB_AT ? this.lines[1] : null;   // as their lips move
+      if (ln) { ctx.textAlign = "center"; drawStoryBox(ln[0], ln[1], ""); ctx.textAlign = "left"; }
+      else if (this.stepT > 1.5) caption("A: skip", 0.6, true);
     } else if (this.step <= 2) {
       if (W1_STILL.naturalWidth) cover(W1_STILL, W1_STILL.naturalWidth, W1_STILL.naturalHeight);
     } else {   // the hillside: David playing to the flock, Hanan on his rock
@@ -710,7 +722,7 @@ const w1intro = {
       ctx.textAlign = "center"; ctx.fillStyle = "rgba(60,36,14,0.85)"; ctx.font = "italic 22px Georgia, serif"; ctx.fillText("The hills of Bethlehem", W / 2, 50); ctx.textAlign = "left";
     }
     const L = this.lines[this.step];
-    if (L) { ctx.textAlign = "center"; drawStoryBox(L[0], L[1], "A: next", this.step === 3); ctx.textAlign = "left"; }
+    if (L && this.step > 0) { ctx.textAlign = "center"; drawStoryBox(L[0], L[1], this.step === 2 ? "" : "A: next", this.step === 3); ctx.textAlign = "left"; }
     if (this.step === 4) {   // the title card, over the hillside
       const f = Math.min(1, this.stepT / 0.8); ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
       ctx.save(); ctx.globalAlpha = f; ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 1", W / 2, H / 2 - 20);

@@ -487,3 +487,12 @@ the harp phrase at 3-2's campfire.
   World 3: "Dusty March": take 1 under the opening (music_w3_opening, W3_OPEN.FILM_MUSIC), take 2 the stage loop
   (music_w3_march, --end 174 --xfade 8: the song builds from quiet to loud, so the longer crossfade eases it back down).
   3-4 (the storm) keeps the night music.
+  World 4: "The Shadow in the Gold" (one take) for 4-1 to 4-3 and, from the start, under the World 4 film and opening.
+  World 6: "The Giant's Shout": take 1 under the film and opening (in place of the night music there), take 2 for 6-1
+  to 6-3 (in place of theme_search; 6-4 keeps theme_wraith). OPENING_MUSIC in main.js plays a world's song from its
+  film (preFilm) through its opening scene (wNintro). 8-2's fight: "The One Stone" (G8_MUSIC; the war horns stay in 7-4).
+- **Openings wait for sound (2026-10-23):** a stage is a new page and can't play sound before a key or a tap, so the
+  music came in on the A at the end of the film. soundGate/drawSoundGate (main.js) hold an opening (w1-3intro, preFilm)
+  on black with "Press A to begin" until sound is on; on the Pi (sound allowed) it never shows.
+- **World 1 opening:** Eliab's and Jesse's lines come up by themselves in the video as their lips move
+  (W1_OPEN.ELIAB_AT 10.4 s, JESSE_AT 12.7 s), Jesse's stays over the last frame (JESSE_HOLD), then the hillside.

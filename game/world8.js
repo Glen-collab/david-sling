@@ -245,7 +245,7 @@ const g8Piece = setPieces.find(p => p.kind === "goliath8");
 const g8 = g8Piece ? { a0: g8Piece.c * T, a1: (g8Piece.c + 35) * T, counsel: false, smooth: 5, phase: 1 } : null;
 const goliathFight = () => !!(g8 && g8.on && !g8.won);
 function w8Cam() { return g8 && (g8.on || g8.won) ? [g8.a0, g8.a0] : null; }
-const G8_MUSIC = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // Glen's war horns
+const G8_MUSIC = Object.assign(new Audio(`../assets/sounds/music_8_stone.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // Glen's "The One Stone" (2026-10-23; his war horns, goliath_theme, before it: they stay in 7-4)
 function resetG8() {
   Object.assign(g8, { on: false, won: false, state: "walk", t: 0, x: g8.a1 - 6 * T, closes: 0, atk: null, waves: [], jav: null,
                       combo: 0, nextAt: 1.4, callout: null, code: null, flash: 0, walkT: 0, needClose: 0, armed: true });
