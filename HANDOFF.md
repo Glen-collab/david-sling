@@ -512,3 +512,9 @@ the harp phrase at 3-2's campfire.
   her jump everywhere, player 2 or following David (drawLamb: 2-7 by how fast she goes up or down, 8-11 the squash
   and a quick landing), at LAMB_P2.STOMP_SCALE 0.4 to match lamb_run (drawn at 0.75). Re-run align_feet after any
   change to lamb_stomp.
+- **The lamb waiting patiently (2026-10-23):** lamb_look = the head turn from Glen's clip (frames 22-36: facing us ->
+  turned to the side), the scorpion beside her taken out by tools/keep_largest.py (keeps the biggest shape in each
+  frame). drawLamb/lambLookFrame: standing still WAIT_LOOK s, she turns to look at us (the sheet back to front), holds
+  LOOK_HOLD, turns back; again every LOOK_EVERY s (LAMB_P2 in main.js). Her stop pose is still lamb_run frame 2 (side
+  on), so the first frame of the turn pops: Glen is adding his still (david-sling-art/lamb/lamb_still.jpg) to the
+  sheet (lamb_look_TO_ADD_STILL.png there) as her stop pose; then the stop pose should come from that sheet.
