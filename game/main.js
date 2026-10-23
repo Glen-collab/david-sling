@@ -408,7 +408,7 @@ const STAGE_INFO = {
   range: { cols: 36, bg: "w7_3", ter: "w2s", name: "Gera's Sling Range" },   // by the carved target at the stream (range.js)
   "7-4": { cols: 198, bg: "w7_4", ter: "w2s", quiet: true, name: "The Giant's Shadow" },
   "8-1": { cols: 72, bg: "w8_1", ter: "w2s", quiet: true, name: "The Valley" },   // World 8 (world8.js): the open valley floor again, no music: the words before the fight
-  "8-3": { cols: 236, bg: "w8_3", ter: "w2s", name: "The Rout" },        // the Philistines run (auto-running: world8.js)
+  "8-3": { cols: 600, bg: "w8_3", ter: "w2s", name: "The Rout" },        // the Philistines run (auto-running: world8.js)
   "8-4": { cols: 214, bg: "w8_4", name: "Home" },                        // the hills of Bethlehem at sunset; the full song
   "8-2": { cols: 40, bg: "w8_1", ter: "w2s", quiet: true, name: "Goliath" },      // the duel (his own music: Glen's war horns)   // the open valley floor: no music
   "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
@@ -1479,9 +1479,11 @@ if (LEVEL_NAME === "test") {
 } else if (LEVEL_NAME === "8-3") {
   // ---- 8-3 The Rout (1 Samuel 17:51-52): the Philistines run and Israel chases them. It runs itself; jump what they
   //      dropped. Nothing hurts. The One: a lamb caught up in it, in the middle of the abandoned Philistine camp. ----
-  ground(0, 235);
+  //      (Glen, 2026-10-23) longer, and a collecting challenge: the spoils (world8.js: the food they dropped, the lambs
+  //      they stole, and from column 230 their camp, where the way splits and you can't take everything).
+  ground(0, 599);
   talk(2, "", "When the Philistines saw that their champion was dead, they fled. (1 Samuel 17:51)");
-  talk(5, "Tobi", "Come on, David! Run with us! Jump whatever they've dropped!");
+  talk(5, "Tobi", "Come on, David! Run with us! You can't stop now, just jump (A). Grab the food they've dropped, and save any lambs they stole!");
   const pile = (c, h, w = 2) => rock(c, GR - h, w, h);   // dropped shields and gear, piled up
   pile(16, 1); pile(28, 2); oliveArc(27, 13, 5); pile(40, 1); pile(46, 1);
   pile(58, 2); special(59, 13); pile(70, 3); oliveArc(69, 11, 5);
@@ -1491,7 +1493,7 @@ if (LEVEL_NAME === "test") {
   pile(134, 2); special(135, 13); pile(144, 1); pile(150, 1); pile(158, 3); oliveArc(157, 11, 5);
   talk(168, "", "Blessed be the LORD, my rock, who trains my hands to war, and my fingers to battle. (Psalm 144:1, by David)");
   pile(178, 2); pile(186, 1, 3); pile(194, 3); special(195, 11); pile(204, 2); pile(212, 1);
-  setPiece("rout8end", 224);
+  setPiece("rout8end", 588);   // (the camp, its piles and the spoils: world8.js)
 } else if (LEVEL_NAME === "8-4") {
   // ---- 8-4 Home (DESIGN 5h): the quietest stage in the game. No enemies, no danger. The hills of Bethlehem at sunset,
   //      the full song (vocals). Everyone you met along the path, one line each; Eliab walks behind and says nothing.
@@ -2754,6 +2756,7 @@ function drawHUD() {
   drawDialog();
   drawCodeEntry(); if (typeof drawHarpDuel === "function") drawHarpDuel();
   if (typeof drawRangeOver === "function") drawRangeOver();   // range.js: the clock and the score
+  if (typeof drawRout8Over === "function") drawRout8Over();   // world8.js: 8-3's spoils, and the tally at the end
   if (TRIAL && typeof drawTrialClock === "function") drawTrialClock();   // trial.js
   drawToastAndSetup();
 }

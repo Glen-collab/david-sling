@@ -604,9 +604,108 @@ if (rout8) {
   for (let i = 0; i < W8.ROUT_RUNNERS; i++) rout8.phil.push({ x: (14 + i * 6) * T, ph: Math.random() * 3, s: 0.85 + Math.random() * 0.2 });
   for (let i = 0; i < W8.ROUT_ISRAEL; i++) rout8.isr.push({ dx: -260 + i * 90 + Math.random() * 40, ph: Math.random() * 3, s: 0.8 + Math.random() * 0.15 });
 }
+// ---- 8-3's spoils (Glen, 2026-10-23): "a game to collect things", how many can you get? Olives (the purse, as anywhere),
+// bread and figs the Philistines dropped as they ran, and lambs they had stolen (touch one and it runs back to Israel's
+// lines). From column 230 their abandoned camp: raised boards over the way (W8.ROUT_FORKS), spoils up top and others
+// underneath, so you choose. At the end, the tally and the best (davidProgress.rout8Best), and 1 Samuel 17:53.
+Object.assign(W8, {
+  SPOIL_PTS: { olive: 1, bread: 2, figs: 2, lamb: 5 },   // points toward the spoils total
+  SPOIL_SIZE: 0.36,      // bread and figs (food elsewhere is 0.32: a little bigger, they go by fast)
+  LAMB_SIZE: 1.15,      // (a touch bigger than lambs elsewhere, so they read at a run)
+  // the chase, before the camp: [kind, column, row] (row 16 = on the ground, 12-13 = a jump up)
+  ROUT_SPOILS: [["bread", 22, 16], ["figs", 34, 12], ["bread", 52, 16], ["lamb", 64, 16], ["figs", 76, 16], ["bread", 84, 13],
+                ["figs", 100, 16], ["lamb", 108, 16], ["bread", 118, 12], ["figs", 128, 16], ["lamb", 140, 16], ["bread", 147, 16],
+                ["figs", 154, 12], ["lamb", 166, 16], ["bread", 172, 16], ["figs", 182, 13], ["lamb", 200, 16], ["bread", 208, 12],
+                ["figs", 218, 16]],
+  // the camp: [column, what's up on the boards, what's underneath]; the boards run 12 columns at row 13
+  ROUT_FORKS: [[236, "olives", "lamb bread"], [262, "figs bread figs", "lamb lamb"], [288, "olives", "figs lamb figs"],
+               [340, "bread lamb bread", "olives"], [366, "figs figs figs", "lamb bread"], [418, "lamb olives", "bread figs bread"],
+               [444, "olives", "lamb lamb"], [496, "bread figs bread figs", "lamb olives"], [522, "lamb lamb", "olives"]],
+  // piles and loose spoils between the boards: [column, pile height (0 = none), spoils on the ground after it]
+  ROUT_CAMP: [[254, 2, "bread"], [280, 1, "lamb"], [306, 3, ""], [314, 1, "figs"], [322, 2, "lamb"], [332, 1, "bread"],
+              [358, 2, "figs"], [384, 3, ""], [392, 1, "lamb"], [400, 2, "bread"], [410, 1, "figs"], [436, 2, "lamb"],
+              [462, 3, ""], [470, 1, "bread"], [478, 2, "lamb"], [488, 1, "figs"], [514, 2, "bread"], [540, 3, ""],
+              [548, 1, "lamb"], [556, 2, "figs"], [564, 1, "bread"], [572, 2, "lamb"]],
+});
+const spoils8 = [];
+const spoil8 = (kind, c, r) => spoils8.push({ kind, x: c * T + T / 2, y: (r + 1) * T, t: Math.random() * 6, taken: false });
+if (rout8) {
+  for (const [k, c, r] of W8.ROUT_SPOILS) spoil8(k, c, r);
+  const put = (what, c0, r) => what.split(" ").filter(Boolean).forEach((k, i, all) => {
+    const c = c0 + Math.round((i + 1) * 12 / (all.length + 1));
+    if (k === "olives") oliveArc(c0 + 2, r - 1, 8); else spoil8(k, c, r);
+  });
+  for (const [c, up, down] of W8.ROUT_FORKS) {
+    rock(c, GR - 1, 2, 1);                        // a pile to jump from, up onto the boards
+    plat(c + 3, 13, 12);                          // the boards (drop off them, or jump up onto them from underneath)
+    put(up, c + 3, 12); put(down, c + 3, 16);
+  }
+  for (const [c, h, k] of W8.ROUT_CAMP) { if (h) rock(c, GR - h, 2, h); if (k) spoil8(k, c + (h ? 4 : 0), 16); }
+  rout8.got = { olive: 0, bread: 0, figs: 0, lamb: 0 };
+  talk(232, "Tobi", "Their camp! Grab what you can. You can't get it all, so choose: up on the boards, or underneath?");
+}
+const rout8Olives = () => olives.filter(o => o.taken && o.kind !== "golden").length;
+const rout8Total = () => { const g = rout8.got; g.olive = rout8Olives(); return Object.keys(W8.SPOIL_PTS).reduce((n, k) => n + g[k] * W8.SPOIL_PTS[k], 0); };
+function updateSpoils8(dt) {
+  for (const p of spoils8) {
+    p.t += dt;
+    if (p.taken) { if (p.kind === "lamb") { p.x -= 520 * dt; p.gone = (p.gone || 0) + dt; } continue; }   // a saved lamb runs back
+    if (Math.abs(p.x - david.x) < 42 && david.y > p.y - 70 && david.y - david.h < p.y + 10) {
+      p.taken = true; rout8.got[p.kind]++;
+      if (p.kind === "lamb") { baa(p.x, 0.7); toast(`A lamb saved! (${rout8.got.lamb})`); }
+      else sfx("heal", undefined, 0.45);
+      for (let k = 0; k < 8; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.5, color: "#ffe9a0" });
+    }
+  }
+}
+function drawSpoils8(camX) {
+  const now = performance.now() / 1000;
+  for (const p of spoils8) {
+    const x = p.x - camX; if (x < -80 || x > W + 80) continue;
+    if (p.kind === "lamb") {
+      if (p.taken && p.gone > 1.5) continue;
+      const nm = p.taken ? "lamb_run" : "lamb_stand";
+      if (SPR[nm]) drawSprite(nm, p.taken ? frameOf(nm, now * 1.5) : 0, x, p.y, -1, W8.LAMB_SIZE, p.taken ? Math.max(0, 1 - p.gone / 1.5) : 1);
+    } else if (!p.taken) drawItem(p.kind, x, p.y - 4 + Math.sin(p.t * 3) * 3, W8.SPOIL_SIZE);
+  }
+}
+function drawRout8Over() {   // the tally at the top while he runs; the spoils, counted, at the end
+  if (!rout8 || !rout8.got) return;
+  const g = rout8.got, total = rout8Total(), icons = [["olive", "Olives"], ["bread", "Bread"], ["figs", "Figs"], ["lamb", "Lambs"]];
+  const icon = (k, x, y, s) => {
+    if (k === "olive") drawOlive(x, y - 8 * s, "green", 1.3 * s);
+    else if (k === "lamb") { if (SPR.lamb_stand) drawSprite("lamb_stand", 0, x, y + 12 * s, -1, 1.0 * s); }
+    else drawItem(k, x, y + 10 * s, 0.17 * s);
+  };
+  ctx.save(); ctx.textAlign = "left";
+  if (!rout8.panel) {
+    ctx.fillStyle = "rgba(25,14,6,0.6)"; ctx.beginPath(); ctx.roundRect(W / 2 - 250, 40, 500, 50, 12); ctx.fill();
+    icons.forEach(([k], i) => { const x = W / 2 - 215 + i * 100; icon(k, x, 66, 1); ctx.fillStyle = "#fff"; ctx.font = "bold 22px sans-serif"; ctx.fillText(g[k], x + 24, 74); });
+    ctx.textAlign = "right"; ctx.fillStyle = "#ffd166"; ctx.font = "bold 24px sans-serif"; ctx.fillText(total, W / 2 + 236, 78);
+    ctx.font = "12px sans-serif"; ctx.fillText("spoils", W / 2 + 236, 54);
+    ctx.restore(); return;
+  }
+  const f = Math.min(1, rout8.panelT / 0.5);
+  ctx.globalAlpha = f; ctx.fillStyle = "rgba(10,6,2,0.8)"; ctx.beginPath(); ctx.roundRect(W / 2 - 330, 100, 660, 470, 18); ctx.fill();
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 38px Georgia, serif"; ctx.fillText("The Spoils of the Camp", W / 2, 156);
+  ctx.fillStyle = "#e9dcc4"; ctx.font = "italic 18px Georgia, serif";
+  ctx.fillText("The children of Israel returned from chasing after the Philistines,", W / 2, 190);
+  ctx.fillText("and they plundered their camp. (1 Samuel 17:53)", W / 2, 214);
+  icons.forEach(([k, name], i) => {
+    const y = 268 + i * 48; icon(k, W / 2 - 170, y - 8, 1.2);
+    ctx.textAlign = "left"; ctx.fillStyle = "#f3ead8"; ctx.font = "24px sans-serif"; ctx.fillText(name, W / 2 - 130, y);
+    ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`${g[k]}`, W / 2 + 110, y);
+    ctx.fillStyle = "#c9b98f"; ctx.font = "18px sans-serif"; ctx.fillText(`× ${W8.SPOIL_PTS[k]}`, W / 2 + 180, y);
+  });
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffd166"; ctx.font = "bold 30px sans-serif"; ctx.fillText(`Spoils: ${total}`, W / 2, 484);
+  ctx.font = "18px sans-serif"; ctx.fillStyle = rout8.newBest ? "#ffd166" : "#e9dcc4";
+  ctx.fillText(rout8.newBest ? (rout8.prevBest ? `A new best! (was ${rout8.prevBest})` : "Your first run. Can you beat it?") : `Your best: ${rout8.prevBest}`, W / 2, 516);
+  if (rout8.panelT > 1) { ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif"; ctx.fillText(keyText("A: on to the map"), W / 2, 552); }
+  ctx.restore();
+}
 function updateRout8(dt) {
   if (!rout8) return;
-  rout8.t += dt;
+  rout8.t += dt; updateSpoils8(dt);
   const run = TUNE.RUN_SPEED;
   for (const p of rout8.phil) {   // fleeing ahead; once he's passed one by, it comes back in further ahead
     p.x += run * W8.ROUT_PHIL_SPEED * p.s * dt;
@@ -615,14 +714,27 @@ function updateRout8(dt) {
   for (const s of rout8.isr) s.dx += (Math.sin(rout8.t * 0.7 + s.ph) * 30 - (s.dx - (-260 + rout8.isr.indexOf(s) * 90))) * dt * 0.5;   // they keep pace, drifting a little
   if (rout8End && !rout8.done && david.x > rout8End.x) {
     rout8.done = true; david.vx = 0;
-    sayLine("", "The men of Israel chased them as far as Gai and to the gates of Ekron. Then they came back, singing. (1 Samuel 17:52)");
+    sayLine("", "The men of Israel and of Judah arose and shouted, and pursued the Philistines as far as Gai and to the gates of Ekron. (1 Samuel 17:52)");
     sfx("war_horn", undefined, 0.8);
     rout8.endT = 0;
   }
-  if (rout8.done && rout8.endT !== undefined && !dialog.hold) { rout8.endT += dt; if (rout8.endT > 0.6 && !rout8.left) { rout8.left = true; clear8(); setTimeout(() => backToMap(), 700); } }
+  if (rout8.done && rout8.endT !== undefined && !dialog.hold) {
+    rout8.endT += dt;
+    if (rout8.endT > 0.6 && !rout8.panel) {   // the tally, and the best
+      rout8.panel = true; rout8.panelT = 0;
+      const total = rout8Total();
+      try {
+        const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); rout8.prevBest = p.rout8Best || 0; rout8.newBest = total > rout8.prevBest;
+        if (rout8.newBest) { p.rout8Best = total; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); }
+      } catch (e) {}
+      chime(4); setTimeout(() => chime(7), 160);
+    }
+    if (rout8.panel) { rout8.panelT += dt; if (rout8.panelT > 1 && (pressed("a") || pressed("start")) && !rout8.left) { rout8.left = true; clear8(); setTimeout(() => backToMap(), 500); } }
+  }
 }
 function drawRout8Back(camX) {   // behind David: the fleeing Philistines, smaller (further off), and Israel's soldiers with him
   if (!rout8) return;
+  drawSpoils8(camX);
   const now = performance.now() / 1000;
   if (SPR.phil_run) for (const p of rout8.phil) { const x = p.x - camX; if (x > -150 && x < W + 150) drawSprite("phil_run", frameOf("phil_run", now * 1.3 + p.ph), x, GR * T - 26, 1, W8.ROUT_PHIL_SIZE, 0.85, "brightness(0.85)"); }
   if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = david.x + s.dx - camX; if (x > -150 && x < W + 150) drawSprite("soldier_run", frameOf("soldier_run", now * 1.2 + s.ph), x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
