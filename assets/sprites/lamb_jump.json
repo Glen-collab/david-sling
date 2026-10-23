@@ -1,0 +1,11 @@
+{
+  "frames": 12,
+  "frame_w": 292,
+  "frame_h": 243,
+  "ms_per_frame": 76,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 172,
+  "anchor_y": 240,
+  "source": "lamb_stomp with each frame's feet on the anchor line (tools/align_feet.py)"
+}

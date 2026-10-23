@@ -2484,6 +2484,18 @@ window.SPRITE_DATA = {
   "ay": 93,
   "align": "feet"
  },
+ "lamb_jump": {
+  "src": "../assets/sprites/lamb_jump.png",
+  "frames": 12,
+  "w": 292,
+  "h": 243,
+  "ms": 76,
+  "loop": false,
+  "pingpong": false,
+  "ax": 172,
+  "ay": 240,
+  "align": "feet"
+ },
  "lamb_leap": {
   "src": "../assets/sprites/lamb_leap.png",
   "frames": 12,

@@ -2035,7 +2035,8 @@ const LAMB_P2 = {
   W: 40, H: 46,      // her body box
   FAR: 0.55,         // farther than this many screen-widths from David counts as left behind...
   FAR_TIME: 4,       // ...for this many seconds: a heart
-  STOMP_SCALE: 0.5,  // lamb_stomp is cut bigger than lamb_run (170 px standing to about 83)
+  STOMP_SCALE: 0.4,  // lamb_jump (Glen's cleaned stomp, feet aligned) is cut bigger than lamb_run: this matches her running size (lamb_run is drawn at 0.75)
+  LAND_T: 0.14,      // a plain landing: the last frames of the jump, quickly
   STOMP_T: 0.3,      // seconds she stays down on it (the squash frames), before the hop up
 };
 const lambP2 = { on: false, farT: 0, warned: false };
@@ -2492,7 +2493,7 @@ function updateLamb(dt) {
   if (!tgt) { lamb.vx = 0; lamb.onGround = true; return; }
   const y0 = lamb.y, far = Math.hypot(tgt.x - lamb.x, tgt.y - lamb.y);
   moveToward(lamb, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.LAMB_SPEED, far * 5)), dt);
-  lamb.vx = lamb.moved * lamb.facing; lamb.vy = 0;
+  lamb.vx = lamb.moved * lamb.facing; lamb.vy = 0; lamb.airV = dt > 0 ? (lamb.y - y0) / dt : 0;   // (up or down, for the jump frames)
   lamb.onGround = !tgt.hop && Math.abs(lamb.y - y0) < 0.5;
 }
 function updateLambP2(dt) {
@@ -2506,8 +2507,11 @@ function updateLambP2(dt) {
   if (pressed2("a") && lamb.onGround) { lamb.vy = -L.JUMP; lamb.onGround = false; }
   if (!held2("a") && lamb.vy < -L.JUMP * 0.45) lamb.vy = -L.JUMP * 0.45;   // a short tap, a short hop
   lamb.vy = Math.min(TUNE.MAX_FALL, lamb.vy + TUNE.GRAVITY * dt);
-  const falling = lamb.vy > 0;
+  const falling = lamb.vy > 0, wasUp = !lamb.onGround;
   collideBody(lamb, L.W, L.H, dt);
+  lamb.airV = lamb.vy;
+  if (wasUp && lamb.onGround) lamb.landT = L.LAND_T;
+  if (lamb.landT > 0) lamb.landT -= dt;
   lamb.moved = Math.abs(lamb.vx) * dt;
   if (falling) lambStomp();
   // in a pit: a heart, and she's back beside David
@@ -2552,11 +2556,16 @@ function popLamb() {
 function drawLamb(camX) {
   if (lamb.carried || lamb.stolen) return;
   const moving = Math.abs(lamb.vx) > 20 || !lamb.onGround;
-  if (lambP2.on && lamb.stompT > 0 && SPR.lamb_stomp) {   // squashing something (the last frames of Glen's stomp)
-    const n = SPR.lamb_stomp.frames, f = Math.min(n - 1, 8 + Math.floor((1 - lamb.stompT / LAMB_P2.STOMP_T) * (n - 8)));
-    drawSprite("lamb_stomp", f, lamb.x - camX, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
-  } else if (lambP2.on && !lamb.onGround) drawSprite("lamb_run", lamb.vy < 0 ? 6 : 1, lamb.x - camX, lamb.y, lamb.facing);   // up: legs out; down: tucked
-  else drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, lamb.x - camX, lamb.y, lamb.facing);
+  // (Glen, 2026-10-23) her jump is his stomp clip, cleaned (lamb_jump: frames 2-7 in the air, 8-11 coming down on it),
+  // for player 2 and for the hops she makes following David
+  const J = SPR.lamb_jump, x = lamb.x - camX;
+  if (J && lambP2.on && lamb.stompT > 0) {   // squashing something
+    drawSprite("lamb_jump", Math.min(11, 8 + Math.floor((1 - lamb.stompT / LAMB_P2.STOMP_T) * 4)), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+  } else if (J && !lamb.onGround) {   // up (legs out) to the top to coming down, by how fast she's going up or down
+    drawSprite("lamb_jump", Math.max(2, Math.min(7, Math.round(4.5 + (lamb.airV || 0) / 250))), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+  } else if (J && lambP2.on && lamb.landT > 0) {   // touching down
+    drawSprite("lamb_jump", Math.min(11, 9 + Math.floor((1 - lamb.landT / LAMB_P2.LAND_T) * 3)), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+  } else drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, x, lamb.y, lamb.facing);
   if (lambP2.on) {   // player 2's marker: a little arrow over her, or at the edge of the screen when she's off it
     const sx = lamb.x - camX, off = sx < 0 || sx > W, ax = Math.max(18, Math.min(W - 18, sx)), ay = off ? Math.min(H - 30, Math.max(60, lamb.y - 40)) : lamb.y - 70;
     ctx.save(); ctx.fillStyle = lambP2.farT > 0 ? "#ff8a5c" : "#ffe08a"; ctx.strokeStyle = "rgba(40,24,8,0.8)"; ctx.lineWidth = 2; ctx.beginPath();

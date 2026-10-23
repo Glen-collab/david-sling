@@ -507,4 +507,8 @@ the harp phrase at 3-2's campfire.
   it; orange while she's left behind). Each controller can be set up on its own: a new one starts the setup for itself,
   and holding Select+Start on any controller sets up that one ("player 2, the lamb" on the setup screen).
   lamb_stomp: cut from Glen's clip (david-sling-art/lamb), the scorpion in it still to be painted out (he's cleaning
-  lamb_stomp_sheet_TO_CLEAN.png); once clean, its air frames (2-7) could replace lamb_run 6/1 in the air.
+  lamb_stomp_sheet_TO_CLEAN.png); Glen cleaned it (assets/sprites/lamb_stomp.png, 2026-10-23). lamb_jump = the same
+  frames with each one's feet on the anchor line (tools/align_feet.py lamb_stomp lamb_jump: the game lifts her itself):
+  her jump everywhere, player 2 or following David (drawLamb: 2-7 by how fast she goes up or down, 8-11 the squash
+  and a quick landing), at LAMB_P2.STOMP_SCALE 0.4 to match lamb_run (drawn at 0.75). Re-run align_feet after any
+  change to lamb_stomp.
