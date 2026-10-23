@@ -501,7 +501,7 @@ function drawGoliath8Over() {   // the meter (17:48), the five stones, the callo
 
 // ---- hooks (main.js calls these) ----
 function updateWorld8(dt) { if (WORLD !== 8) return; updateWords8(dt); updateGoliath8(dt); updateCrowd8(dt); updateRout8(dt); updateEliab8(dt); if (typeof updateVultures === "function") updateVultures(dt); }
-function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawCrowd8(camX); drawRout8Back(camX); drawWords8(camX); drawGoliath8(camX); drawEliab8(camX); }
+function drawWorld8(camX) { if (WORLD !== 8) return; if (typeof drawVultures === "function") drawVultures(camX); drawRout8Back(camX); drawWords8(camX); drawGoliath8(camX); drawEliab8(camX); }
 function drawWorld8Over() { if (WORLD !== 8) return; drawWords8Over(); drawGoliath8Over(); }
 function stoneHitsWorld8(s) { return WORLD === 8 && stoneHitsGoliath8(s); }
 

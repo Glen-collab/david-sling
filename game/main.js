@@ -4516,6 +4516,7 @@ function frame(now) {
   drawDecor(camX, "back");
   drawCaveDark(camX);
   drawCaveDoors(camX);
+  if (WORLD === 8 && typeof drawCrowd8 === "function") drawCrowd8(camX);   // the crowd stands up the slope, behind the ground and the rocks (world8.js)
   drawTiles(camX);
   drawCaveFeatures(camX);
   drawPlatforms(camX); if (typeof drawWorld3 === "function") drawWorld3(camX);
