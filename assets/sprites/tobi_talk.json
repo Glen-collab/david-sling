@@ -1,11 +1,11 @@
 {
-  "frames": 6,
-  "frame_w": 190,
-  "frame_h": 288,
-  "ms_per_frame": 400,
+  "frames": 36,
+  "frame_w": 183,
+  "frame_h": 290,
+  "ms_per_frame": 168,
   "loop": true,
   "align": "feet",
-  "anchor_x": 86,
-  "anchor_y": 287,
-  "source": "t_talk_m.png"
+  "anchor_x": 114,
+  "anchor_y": 286,
+  "source": "tobi_talk.mp4"
 }

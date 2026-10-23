@@ -4142,14 +4142,14 @@ window.SPRITE_DATA = {
  },
  "tobi_talk": {
   "src": "../assets/sprites/tobi_talk.png",
-  "frames": 6,
-  "w": 190,
-  "h": 288,
-  "ms": 400,
+  "frames": 36,
+  "w": 183,
+  "h": 290,
+  "ms": 168,
   "loop": true,
   "pingpong": false,
-  "ax": 86,
-  "ay": 287,
+  "ax": 114,
+  "ay": 286,
   "align": "feet"
  },
  "tortoise_hide": {

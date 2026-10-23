@@ -473,11 +473,11 @@ function stoneHitsTobi(k, s) { return false; }   // the stone flies on past him
 function drawTobi(k, x) {
   let nm = "tobi_cave", i = 0;
   if (k.state === "hide") i = david.state === "harp" && k.seen ? 2 : k.seen ? 1 : 0;
-  else if (k.state === "talk") { nm = "tobi_talk"; i = dialog.t > 0 && dialog.who === "Tobi" ? [0, 3, 1, 0][Math.floor(performance.now() / 700) % 4] : 0; }
+  else if (k.state === "talk") { nm = "tobi_talk"; i = dialog.t > 0 && dialog.who === "Tobi" ? frameOf(nm, performance.now() / 1000) : 0; }   // (Glen's talking clip, played through)
   else if (k.state === "demo") { nm = "tobi_leap"; i = Math.min(5, Math.floor(k.t / 1.0 * 6)); }
   else if (k.state === "leap") { nm = "tobi_leap"; i = Math.min(4, 1 + Math.floor(k.t / 0.75 * 4)); }
   else if (k.moving) { nm = "tobi_run"; i = frameOf(nm, k.t); }
-  else { nm = dialog.t > 0 && dialog.who === "Tobi" ? "tobi_talk" : "tobi_cave"; i = nm === "tobi_talk" ? [0, 4][Math.floor(performance.now() / 700) % 2] : 5; }
+  else { nm = dialog.t > 0 && dialog.who === "Tobi" ? "tobi_talk" : "tobi_cave"; i = nm === "tobi_talk" ? frameOf(nm, performance.now() / 1000) : 5; }
   drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
 }
 function tobiBlocking() { return tobi && tobiCave && !["follow", "leap", "demo"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
@@ -1210,7 +1210,7 @@ const w5ending = {
       for (let k = 0; k < 4; k++) drawItem("town_grain_baskets", W * 0.62 + k * 70, y + 4, 0.16);
       const walking = B.walk && this.davidX < W * 0.3;
       drawSprite(walking ? "david_walk" : "david_idle", frameOf(walking ? "david_walk" : "david_idle", now), B.walk ? this.davidX : W * 0.3, y, 1);
-      if (SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? [0, 1][Math.floor(now * 1.4) % 2] : 5, W * 0.42, y, 1);
+      if (SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? frameOf("tobi_talk", now) : 5, W * 0.42, y, 1);
       if (B.cmd) drawCommander(W * 0.56, y, B.who === "Tobi's commander", now);
       if (B.prov) { drawItem("grain_sack", W * 0.68, y + 2, 0.3); drawProvision("bread", W * 0.73, y, 1.2); drawProvision("cheese", W * 0.77, y, 1.2); }
       if (SPR.baggage_keeper) {   // Glen's keeper of the baggage: 0 standing, 1 taking a sack, 2 counting, 3 pleased
@@ -1227,7 +1227,7 @@ const w5ending = {
       }
       if (fleeing) drawFleeingArmy(now, ft);
       drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);   // David, still
-      if (B.tobi && SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? [0, 4][Math.floor(now * 1.2) % 2] : 5, W * 0.22, y, 1);
+      if (B.tobi && SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? frameOf("tobi_talk", now) : 5, W * 0.22, y, 1);
     }
     ctx.restore();
     if (B.card) {   // the gift
