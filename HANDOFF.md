@@ -537,4 +537,5 @@ the harp phrase at 3-2's campfire.
   raven_fly_old.png there), cut by tools/green_strip.py: each pose is its own shape (outlines may overlap), keyed,
   lined up on the body (eroded mask's middle) so it holds still while the wings beat, mirrored to face left like the
   old one (the code flips it), pose 9 dropped (the same as 1, for a clean loop). raven_fly2 = his second strip, the
-  same way, waiting for him to clean a doubled wing (raven_fly2_TO_CLEAN.png); not used yet.
+  same way; Glen cleaned the doubled wing (raven_fly2_TO_CLEAN.png, copied in). Both are used: ravenArt() (main.js)
+  gives each bird one of the two in turn (swooping ravens and the 3-x barley crows), so he can compare them in play.

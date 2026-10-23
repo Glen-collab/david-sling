@@ -4227,11 +4227,15 @@ function stoneHitsBugs(s) {
   }
   return false;
 }
+// (Glen, 2026-10-23: "put both of the new ones in so i can see them") the two raven sheets take turns, one per bird
+const RAVEN_ART = ["raven_fly", "raven_fly2"];   // (both drawn facing left)
+let ravenArtN = 0;
+const ravenArt = o => o.ravenArt ??= SPR.raven_fly2 ? RAVEN_ART[ravenArtN++ % 2] : "raven_fly";
 function drawBugs(camX) {
   if (!SPR.bee_fly || !SPR.hornet_fly || !SPR.raven_fly) return;
   for (const b of bees) if (b.alpha > 0) drawSprite("bee_fly", frameOf("bee_fly", b.t * 2), b.x - camX, b.y, b.facing, 1, b.alpha);
   for (const h of hornets) if (h.alpha > 0) {
-    const nm = h.kind === "raven" ? "raven_fly" : "hornet_fly";
+    const nm = h.kind === "raven" ? ravenArt(h) : "hornet_fly";
     drawSprite(nm, frameOf(nm, h.t * (h.state === "dive" ? 3 : 1.5)), h.x - camX, h.y, h.kind === "raven" ? -h.facing : h.facing, 1, h.alpha);   // (raven_fly is drawn facing left, the hornet right)
   }
 }

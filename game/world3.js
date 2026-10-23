@@ -283,7 +283,7 @@ function stoneHitsCrow(k, s) {
 }
 function drawCrow(k, x) {
   const sz = W3.CROW_SIZE;
-  if (k.gone || k.state === "flap") { drawSprite("raven_fly", frameOf("raven_fly", k.t * 1.4), x, k.y, -k.facing, sz, k.alpha); return; }   // (raven_fly is drawn facing left)
+  if (k.gone || k.state === "flap") { drawSprite(ravenArt(k), frameOf(ravenArt(k), k.t * 1.4), x, k.y, -k.facing, sz, k.alpha); return; }   // (raven_fly is drawn facing left)
   drawSprite("raven_peck", frameOf("raven_peck", k.t), x, k.y, k.facing, sz, k.alpha);
 }
 

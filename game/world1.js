@@ -26,7 +26,7 @@ const W1 = {
   CLOUD_EVERY: 16, CLOUD_TIME: 4, CLOUD_DARK: 0.28,   // now and then a cloud covers the moon (never pitch black)
   DIALOG_SECS: 6,
 };
-Object.assign(TUNE.SPRITE_SIZE, { fox_trot: 0.8, fox_sit: 0.8, jackal_run: 0.85, jackal2_sit: 0.85, jackal_carry_lamb: 0.85, raven_fly: 1.5 });
+Object.assign(TUNE.SPRITE_SIZE, { fox_trot: 0.8, fox_sit: 0.8, jackal_run: 0.85, jackal2_sit: 0.85, jackal_carry_lamb: 0.85, raven_fly: 1.5, raven_fly2: 1.5 });
 
 // ---------------------------------------------------------------------------
 // Words from people: campfires (who/say) and talk() spots along the way
