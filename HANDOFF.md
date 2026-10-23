@@ -484,3 +484,6 @@ the harp phrase at 3-2's campfire.
   World 2: "Beyond the Rocks" (MP3s: Glen's WAVs were too big to send): take 1 under the whole opening (music_w2_opening,
   W2_OPEN.FILM_MUSIC), take 2 the stage loop (music_w2_rocks; cut at 178 s, before its ending). Harps' Bounce
   (music_day_w2) is no longer played. Pick a loop's --end where the song is still full, not in its fade.
+  World 3: "Dusty March": take 1 under the opening (music_w3_opening, W3_OPEN.FILM_MUSIC), take 2 the stage loop
+  (music_w3_march, --end 174 --xfade 8: the song builds from quiet to loud, so the longer crossfade eases it back down).
+  3-4 (the storm) keeps the night music.

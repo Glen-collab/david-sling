@@ -1451,7 +1451,8 @@ const W3_OPEN = {   // seconds into the video (make_w3_opening.py prints where e
   BOY: 5.9,              // stops on the boy for his shout
   VERSE: 9.4,            // 16:4 comes up over the elders from here...
   SAMUEL: 14.0,          // ...and it stops on Samuel at the gate for his answer
-  AMBIENCE: 0.35,
+  AMBIENCE: 0.25,
+  FILM_MUSIC: 0.55,      // Glen's "Dusty March" (take 1, music_w3_opening) under the whole opening, out into 3-1
 };
 const w3intro = {
   active: false,
@@ -1465,7 +1466,7 @@ const w3intro = {
   start() {
     Object.assign(this, { active: true, t: 0, step: W3_CLIP.missing ? 5 : 0, stepT: 0, out: 0 });
     hushLoops(); dialog.t = 0;
-    this.amb = loopAudio("ambience_hills");
+    this.amb = loopAudio("ambience_hills"); this.film = loopAudio("music_w3_opening");
     this.playing = !!W3_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
@@ -1475,6 +1476,8 @@ const w3intro = {
       const amb = this.step < 6 ? W3_OPEN.AMBIENCE : 0;
       if (this.amb.paused && amb > 0) this.amb.play().catch(() => {});
       const av = this.amb.volume; this.amb.volume = av + Math.sign(amb - av) * Math.min(Math.abs(amb - av), dt * 0.5);
+      if (this.film.paused && !this.out) this.film.play().catch(() => {});   // in from the start, down with the fade into 3-1
+      this.film.volume = W3_OPEN.FILM_MUSIC * Math.min(1, this.t / 1.5) * (1 - Math.min(1, this.out / 0.8));
     }
     if (this.out > 0) { this.out += dt; if (this.out > 0.8) this.finish(); return; }
     const A = this.stepT > 0.6 && (pressed("a") || pressed("b") || pressed("start"));
@@ -1494,7 +1497,7 @@ const w3intro = {
   },
   next() { this.step++; this.stepT = 0; },
   finish() {
-    this.active = false; W3_CLIP.pause(); this.amb.pause();
+    this.active = false; W3_CLIP.pause(); this.amb.pause(); this.film.pause();
     try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w3intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },
   draw() {

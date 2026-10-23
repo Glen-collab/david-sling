@@ -84,3 +84,5 @@ Silence trimmed off both ends and leveled to -17 LUFS (the harps' loudness). Whi
 | music_w1_opening | "Morning on the Hills" (take 1), as it is | the World 1 opening film | Glen's (Suno) |
 | music_w2_rocks | Glen's Suno song "Beyond the Rocks" (take 2, MP3), david-sling-art/music; gapless loop, cut at 178 s | World 2 stages | Glen's (Suno) |
 | music_w2_opening | "Beyond the Rocks" (take 1), as it is | the World 2 opening | Glen's (Suno) |
+| music_w3_march | Glen's Suno song "Dusty March" (take 2, MP3); gapless loop, cut at 174 s, 8 s crossfade (it builds) | World 3 stages | Glen's (Suno) |
+| music_w3_opening | "Dusty March" (take 1), as it is | the World 3 opening | Glen's (Suno) |
