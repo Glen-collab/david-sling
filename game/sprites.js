@@ -2508,18 +2508,6 @@ window.SPRITE_DATA = {
   "ay": 100,
   "align": "feet"
  },
- "lamb_look": {
-  "src": "../assets/sprites/lamb_look.png",
-  "frames": 8,
-  "w": 197,
-  "h": 178,
-  "ms": 83,
-  "loop": false,
-  "pingpong": false,
-  "ax": 98,
-  "ay": 176,
-  "align": "feet"
- },
  "lamb_run": {
   "src": "../assets/sprites/lamb_run.png",
   "frames": 10,
@@ -2542,6 +2530,18 @@ window.SPRITE_DATA = {
   "pingpong": true,
   "ax": 77,
   "ay": 92,
+  "align": "feet"
+ },
+ "lamb_still": {
+  "src": "../assets/sprites/lamb_still.png",
+  "frames": 8,
+  "w": 197,
+  "h": 178,
+  "ms": 83,
+  "loop": false,
+  "pingpong": false,
+  "ax": 98,
+  "ay": 176,
   "align": "feet"
  },
  "lamb_stomp": {

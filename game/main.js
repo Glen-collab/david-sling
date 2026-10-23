@@ -2037,11 +2037,11 @@ const LAMB_P2 = {
   FAR_TIME: 4,       // ...for this many seconds: a heart
   STOMP_SCALE: 0.4,  // lamb_jump (Glen's cleaned stomp, feet aligned) is cut bigger than lamb_run: this matches her running size (lamb_run is drawn at 0.75)
   LAND_T: 0.14,      // a plain landing: the last frames of the jump, quickly
-  // waiting patiently (Glen, 2026-10-23): standing still a while, she turns her head to look at us and back
-  // (lamb_look, from his clip: 0 facing us .. 7 turned to the side; played back to front, held, then front to back)
+  // standing and waiting patiently (Glen, 2026-10-23): lamb_still frame 0 is her standing pose whenever she isn't
+  // moving; still a while, she turns her head to look at us (1-3), looks (4), and turns back (5-7) to frame 0
   WAIT_LOOK: 2.5,    // seconds still before she first looks
   LOOK_EVERY: 6,     // and then once every this many seconds
-  LOOK_MS: 90,       // each frame of the turn
+  LOOK_MS: 110,      // each frame of the turn
   LOOK_HOLD: 0.9,    // seconds she looks at us
   STOMP_T: 0.3,      // seconds she stays down on it (the squash frames), before the hop up
 };
@@ -2559,14 +2559,14 @@ function popLamb() {
   lamb.x = david.x - david.facing * 55; lamb.y = david.y; lamb.vx = 0; lamb.vy = -300; lamb.lostT = 0;
   for (let k = 0; k < 14; k++) bits.push({ x: lamb.x, y: lamb.y - 20, vx: (Math.random() - 0.5) * 360, vy: -Math.random() * 420, life: 0.6, color: "#fff7c2" });
 }
-function lambLookFrame() {   // waiting patiently: which frame of her head turn, or -1 (her stop pose)
+function lambLookFrame() {   // standing: which frame of lamb_still (0, her standing pose, unless she's looking at us)
   const L = LAMB_P2, still = performance.now() / 1000 - (lamb.stillSince || 0);
-  if (still < L.WAIT_LOOK) return -1;
-  const n = SPR.lamb_look.frames, turn = n * L.LOOK_MS / 1000, p = (still - L.WAIT_LOOK) % L.LOOK_EVERY;
-  if (p < turn) return n - 1 - Math.floor(p / turn * n);                       // turning to look at us
-  if (p < turn + L.LOOK_HOLD) return 0;                                       // looking
-  if (p < 2 * turn + L.LOOK_HOLD) return Math.floor((p - turn - L.LOOK_HOLD) / turn * n);   // and back
-  return -1;
+  if (still < L.WAIT_LOOK) return 0;
+  const f = L.LOOK_MS / 1000, p = (still - L.WAIT_LOOK) % L.LOOK_EVERY;
+  if (p < 3 * f) return 1 + Math.floor(p / f);                               // turning to look at us
+  if (p < 3 * f + L.LOOK_HOLD) return 4;                                     // looking
+  if (p < 6 * f + L.LOOK_HOLD) return 5 + Math.floor((p - 3 * f - L.LOOK_HOLD) / f);   // and back
+  return 0;
 }
 function drawLamb(camX) {
   if (lamb.carried || lamb.stolen) { lamb.stillSince = performance.now() / 1000; return; }
@@ -2581,7 +2581,7 @@ function drawLamb(camX) {
     drawSprite("lamb_jump", Math.max(2, Math.min(7, Math.round(4.5 + (lamb.airV || 0) / 250))), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
   } else if (J && lambP2.on && lamb.landT > 0) {   // touching down
     drawSprite("lamb_jump", Math.min(11, 9 + Math.floor((1 - lamb.landT / LAMB_P2.LAND_T) * 3)), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
-  } else if (!moving && SPR.lamb_look && lambLookFrame() >= 0) drawSprite("lamb_look", lambLookFrame(), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+  } else if (!moving && SPR.lamb_still) drawSprite("lamb_still", lambLookFrame(), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
   else drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, x, lamb.y, lamb.facing);
   if (lambP2.on) {   // player 2's marker: a little arrow over her, or at the edge of the screen when she's off it
     const sx = lamb.x - camX, off = sx < 0 || sx > W, ax = Math.max(18, Math.min(W - 18, sx)), ay = off ? Math.min(H - 30, Math.max(60, lamb.y - 40)) : lamb.y - 70;
