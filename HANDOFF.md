@@ -510,10 +510,12 @@ the harp phrase at 3-2's campfire.
   lamb_stomp_sheet_TO_CLEAN.png); Glen cleaned it (assets/sprites/lamb_stomp.png, 2026-10-23). lamb_jump = the same
   frames with each one's feet on the anchor line (tools/align_feet.py lamb_stomp lamb_jump: the game lifts her itself):
   her jump everywhere, player 2 or following David (drawLamb: 2-7 by how fast she goes up or down, 8-11 the squash
-  and a quick landing), at LAMB_P2.STOMP_SCALE 0.4 to match lamb_run (drawn at 0.75). Re-run align_feet after any
+  and a quick landing), at TUNE.SPRITE_SIZE 0.4 (lamb_jump, lamb_still) to match lamb_run (0.75). Re-run align_feet after any
   change to lamb_stomp.
 - **The lamb standing and waiting patiently (2026-10-23):** lamb_still is Glen's sheet (david-sling-art/lamb/lamb_still.png):
   frame 0 is her standing pose whenever she isn't moving (player 2 or following David); still for WAIT_LOOK s, she
   turns her head to look at us (1-3, a blink), looks (4, LOOK_HOLD s), turns back (5-7, a blink) to frame 0; again
   every LOOK_EVERY s (LAMB_P2 in main.js, lambLookFrame). The head turn came from his clip (tools/keep_largest.py took
   the scorpion out), then he painted it onto his still.
+  Glen's still is her standing pose everywhere David's lamb stands: stages, the world maps (map.js drawLambTok), Jesse's
+  courtyard (home.js), the lamb the lion carries off (drawTakenLamb); on the map and at home she looks at us too.

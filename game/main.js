@@ -126,6 +126,7 @@ const TUNE = {
     bee_fly: 0.6, hornet_fly: 1.0,
     david_play_harp: 0.66,       // the harp clip zoomed in as he sat down
     // lambs are about two-thirds the size of a grown sheep
+    lamb_still: 0.4, lamb_jump: 0.4,   // (Glen's standing lamb and her jump: cut bigger, the same size as these on screen)
     lamb_run: 0.75, lamb_hop: 0.75, lamb_walk: 0.75, lamb_stand: 0.75, lamb_graze: 0.75,
     lamb_bound: 0.75, lamb_bound2: 0.75, lamb_leap: 0.75, lambblack_stand: 0.75, lambblack_walk: 0.75, lambblack_leap: 0.75,
     ram_walk: 1, ram_stand: 1, ram_run: 1, ram_butt: 1, ram_leap: 1,   // Glen's ram clips (one shared sheet size: tools/uniform_sheets.py)
@@ -2035,7 +2036,6 @@ const LAMB_P2 = {
   W: 40, H: 46,      // her body box
   FAR: 0.55,         // farther than this many screen-widths from David counts as left behind...
   FAR_TIME: 4,       // ...for this many seconds: a heart
-  STOMP_SCALE: 0.4,  // lamb_jump (Glen's cleaned stomp, feet aligned) is cut bigger than lamb_run: this matches her running size (lamb_run is drawn at 0.75)
   LAND_T: 0.14,      // a plain landing: the last frames of the jump, quickly
   // standing and waiting patiently (Glen, 2026-10-23): lamb_still frame 0 is her standing pose whenever she isn't
   // moving; still a while, she turns her head to look at us (1-3), looks (4), and turns back (5-7) to frame 0
@@ -2559,8 +2559,8 @@ function popLamb() {
   lamb.x = david.x - david.facing * 55; lamb.y = david.y; lamb.vx = 0; lamb.vy = -300; lamb.lostT = 0;
   for (let k = 0; k < 14; k++) bits.push({ x: lamb.x, y: lamb.y - 20, vx: (Math.random() - 0.5) * 360, vy: -Math.random() * 420, life: 0.6, color: "#fff7c2" });
 }
-function lambLookFrame() {   // standing: which frame of lamb_still (0, her standing pose, unless she's looking at us)
-  const L = LAMB_P2, still = performance.now() / 1000 - (lamb.stillSince || 0);
+function lambLookFrame(since = lamb.stillSince) {   // standing: which frame of lamb_still (0, her standing pose, unless she's looking at us)
+  const L = LAMB_P2, still = performance.now() / 1000 - (since || 0);   // (since: when she stopped, in seconds of performance.now)
   if (still < L.WAIT_LOOK) return 0;
   const f = L.LOOK_MS / 1000, p = (still - L.WAIT_LOOK) % L.LOOK_EVERY;
   if (p < 3 * f) return 1 + Math.floor(p / f);                               // turning to look at us
@@ -2576,12 +2576,12 @@ function drawLamb(camX) {
   // for player 2 and for the hops she makes following David
   const J = SPR.lamb_jump, x = lamb.x - camX;
   if (J && lambP2.on && lamb.stompT > 0) {   // squashing something
-    drawSprite("lamb_jump", Math.min(11, 8 + Math.floor((1 - lamb.stompT / LAMB_P2.STOMP_T) * 4)), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+    drawSprite("lamb_jump", Math.min(11, 8 + Math.floor((1 - lamb.stompT / LAMB_P2.STOMP_T) * 4)), x, lamb.y, lamb.facing);
   } else if (J && !lamb.onGround) {   // up (legs out) to the top to coming down, by how fast she's going up or down
-    drawSprite("lamb_jump", Math.max(2, Math.min(7, Math.round(4.5 + (lamb.airV || 0) / 250))), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+    drawSprite("lamb_jump", Math.max(2, Math.min(7, Math.round(4.5 + (lamb.airV || 0) / 250))), x, lamb.y, lamb.facing);
   } else if (J && lambP2.on && lamb.landT > 0) {   // touching down
-    drawSprite("lamb_jump", Math.min(11, 9 + Math.floor((1 - lamb.landT / LAMB_P2.LAND_T) * 3)), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
-  } else if (!moving && SPR.lamb_still) drawSprite("lamb_still", lambLookFrame(), x, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+    drawSprite("lamb_jump", Math.min(11, 9 + Math.floor((1 - lamb.landT / LAMB_P2.LAND_T) * 3)), x, lamb.y, lamb.facing);
+  } else if (!moving && SPR.lamb_still) drawSprite("lamb_still", lambLookFrame(), x, lamb.y, lamb.facing);
   else drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, x, lamb.y, lamb.facing);
   if (lambP2.on) {   // player 2's marker: a little arrow over her, or at the edge of the screen when she's off it
     const sx = lamb.x - camX, off = sx < 0 || sx > W, ax = Math.max(18, Math.min(W - 18, sx)), ay = off ? Math.min(H - 30, Math.max(60, lamb.y - 40)) : lamb.y - 70;
@@ -3302,7 +3302,8 @@ function updateTakenLamb(dt) {
 function drawTakenLamb(camX) {
   const k = takenLamb; if (!k.active || k.hidden) return;
   const moving = Math.abs(k.vx) > 20;
-  drawSprite("lamb_run", moving ? frameOf("lamb_run", k.t) : 2, k.x - camX, k.y, k.facing);
+  if (!moving && SPR.lamb_still) drawSprite("lamb_still", 0, k.x - camX, k.y, k.facing);   // (Glen's standing lamb)
+  else drawSprite("lamb_run", moving ? frameOf("lamb_run", k.t) : 2, k.x - camX, k.y, k.facing);
 }
 // ---------------------------------------------------------------------------
 // The end of the stage: the sheepfold gate (our flagpole). Touch the post (higher = more olives),
