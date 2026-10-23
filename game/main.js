@@ -4130,9 +4130,11 @@ const rainLoop = loopAudio("rain", false);   // the storm stages (STAGE_INFO.sto
 // one for inside caves. Not one song a stage: day stages keep the hills' birds.
 const nightMusic = loopAudio("music_night"), caveMusic = loopAudio("music_cave");
 const DARK_STAGES = ["2-4", "3-4", "4-4"];   // (3-4: the storm)
-// the day themes: the fun early worlds get Glen's bouncy ones (1: 8-bit Harp Jump, 2: Harps' Bounce), then
-// Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out)
-const dayMusic = loopAudio({ 1: "music_day_w1", 2: "music_day_w2", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
+// the day themes: World 1 has Glen's "Morning on the Hills" (2026-10-23, his cinematic Suno song, take 2, made a gapless
+// loop by tools/make_music_loop.py; take 1 plays under the World 1 opening film), World 2 Harps' Bounce, then
+// Cascading Harp (3, 5, 7) and Harp's Dance (4, 8); World 6, the army camp, has Rhythmic Harp (Glen took the words out).
+// (8-bit Harp Jump, World 1's old tune, still plays in 8-3 and 8-4: STAGE_THEMES.)
+const dayMusic = loopAudio({ 1: "music_w1_hills", 2: "music_day_w2", 6: "music_day_w6" }[WORLD] || (WORLD % 2 ? "music_day_a" : "music_day_b"));
 // (Glen, 2026-10-22) his darker orchestral themes for the dramatic stages, in place of the harp, day or night (caves
 // keep the cave music). Matched by their tempo and feel (tools: librosa): one a stage, World 7 all on Capital.
 const STAGE_THEMES = {

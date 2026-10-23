@@ -80,3 +80,5 @@ Silence trimmed off both ends and leveled to -17 LUFS (the harps' loudness). Whi
 | theme_search | 260-search-evil-theme.mp3 | 6-1 to 6-3 | ? |
 | theme_wishes | 248-wishes-evil-theme.mp3 | 4-4 | ? |
 | theme_sleuth | 250-sleuth-evil-theme.mp3 | 5-3 | ? |
+| music_w1_hills | Glen's Suno song "Morning on the Hills" (take 2), david-sling-art/music; gapless loop by tools/make_music_loop.py | World 1 stages | Glen's (Suno) |
+| music_w1_opening | "Morning on the Hills" (take 1), as it is | the World 1 opening film | Glen's (Suno) |

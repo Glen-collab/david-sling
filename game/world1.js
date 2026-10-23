@@ -633,7 +633,9 @@ const W1_STILL = Object.assign(new Image(), { src: "../assets/video/w1_opening_l
 const W1_OPEN = {
   TOWN: [1.4, 7.4],      // seconds of the video the "Bethlehem" words are up (the flyover; the table comes in at 8.2)
   SONG_VOLUME: 0.7,      // Glen's song on the hillside
-  AMBIENCE: 0.45,        // the hills (birds, wind) under the video and the table
+  AMBIENCE: 0.3,         // the hills (birds, wind) under the video and the table
+  FILM_MUSIC: 0.6,       // Glen's "Morning on the Hills" (take 1, music_w1_opening) under the video and the table; it
+                         // gives way to his song on the hillside
   SIZE: 1.7,             // the people on the hillside (a closer shot than in play)
   SHEEP: 1.35,           // and the flock
 };
@@ -648,7 +650,7 @@ const w1intro = {
   start() {
     Object.assign(this, { active: true, t: 0, step: W1_CLIP.missing ? 1 : 0, stepT: 0, out: 0, sang: false });
     hushLoops(); dialog.t = 0;
-    this.amb = loopAudio("ambience_hills");
+    this.amb = loopAudio("ambience_hills"); this.film = loopAudio("music_w1_opening");
     this.playing = !!W1_CLIP.missing;   // (the video starts on the first frame drawn: the sprites may still be loading)
   },
   update(dt) {
@@ -658,6 +660,10 @@ const w1intro = {
       const amb = this.step < 3 ? W1_OPEN.AMBIENCE : this.step === 3 ? W1_OPEN.AMBIENCE * 0.4 : 0;
       if (this.amb.paused && amb > 0) this.amb.play().catch(() => {});
       const av = this.amb.volume; this.amb.volume = av + Math.sign(amb - av) * Math.min(Math.abs(amb - av), dt * 0.5);
+      const fm = this.step < 3 && !this.out ? W1_OPEN.FILM_MUSIC : 0, fv = this.film.volume;   // in from the start, out as the hillside comes
+      if (this.film.paused && fm > 0) this.film.play().catch(() => {});
+      this.film.volume = Math.max(0, fv + Math.sign(fm - fv) * Math.min(Math.abs(fm - fv), dt * (fm > fv ? 0.6 : 0.35)));
+      if (this.film.volume <= 0 && !this.film.paused) this.film.pause();
       if (this.step >= 3 && typeof journalSong !== "undefined") {
         if (journalSong.paused && this.step === 3 && !this.sang) { this.sang = true; journalSong.currentTime = 0; journalSong.volume = 0; journalSong.play().catch(() => {}); }
         const want = this.step === 3 ? W1_OPEN.SONG_VOLUME : 0;   // in over the hillside, out under the title card
@@ -675,7 +681,7 @@ const w1intro = {
   },
   next() { this.step++; this.stepT = 0; },
   finish() {
-    this.active = false; W1_CLIP.pause(); this.amb.pause();
+    this.active = false; W1_CLIP.pause(); this.amb.pause(); this.film.pause();
     if (typeof journalSong !== "undefined") journalSong.pause();
     try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.w1intro = true; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
   },

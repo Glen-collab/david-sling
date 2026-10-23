@@ -476,3 +476,8 @@ the harp phrase at 3-2's campfire.
   house), Dalet on a roadside rock. Stand-in art: World 2's `w2_2` backgrounds, the thief for raiders, the eagle for
   vultures. The World 5 map is the journey painting until Glen's World 5 map (MAP_WORLDS[5] in map.js).
 - Art prompts for the map and 5-1: ART_PROMPTS.md, "World 5 — The Road to the Valley".
+- **Glen's own music (2026-10-23):** Suno songs, WAV masters in david-sling-art/music (worldN_<name>.wav). World 1:
+  "Morning on the Hills": take 1 under the opening film and table (music_w1_opening, W1_OPEN.FILM_MUSIC, fades out for
+  his song on the hillside), take 2 as the World 1 stage music (music_w1_hills, dayMusic). Suno songs end in a fade-out,
+  so stage loops go through tools/make_music_loop.py (cut on a beat before the ending, the tail crossfaded over the
+  start: no gap). Loudness already matches the harps (about -16 LUFS). 8-3 and 8-4 still play the old 8-bit Harp Jump.
