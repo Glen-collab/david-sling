@@ -2964,7 +2964,7 @@ function drawHelp() {
   const lines = [
     "Arrows: move (hold to run)   Z / Space = A: jump" + (CAN_DOUBLE_JUMP ? ", again in the air = flip" : ""),
     "X = B: sling (hold to charge; Up = aim up, Up+forward = diagonal, Down in the air = aim down)   A + B: Power Sling",
-    "Hold Down + A (or V, SNES X): roll   Down next to the lamb: pick up / put down   Jump into trees: they drop fruit",
+    "Hold Down + A (or V, SNES X): roll   Down next to the lamb: pick up / put down   Up by someone: hear them again   Jump into trees: they drop fruit",
     "Shift = Select (SNES Y): play the harp   R: back to the campfire   M: set up a controller (NES or SNES)   H: hide this",
     "Controller: " + (readPad() ? (padMap ? "set up ✓  (M or hold Select+Start to redo)" : "connected, not set up yet: press M") : "none (press a button on it so the browser sees it)"),
   ];
@@ -3143,8 +3143,8 @@ function updateGourds() {   // walking into a gourd picks it up, like food, and 
     for (let k = 0; k < 10; k++) bits.push({ x: g.x, y: g.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: "#7a2" });
   }
 }
-function drawPickups(camX) {
-  for (const p of pickups) if (!p.taken) drawItem(p.name, p.x - camX, p.y - 4 + Math.sin(p.t * 3) * 3, TUNE.ITEM_SIZE);
+function drawPickups(camX) {   // (Glen, 2026-10-23: the barley looked huge as a game piece: half size)
+  for (const p of pickups) if (!p.taken) drawItem(p.name, p.x - camX, p.y - 4 + Math.sin(p.t * 3) * 3, TUNE.ITEM_SIZE * (p.name === "barley" ? 0.5 : 1));
 }
 
 // the cobra's strike: [frame index, seconds shown]. Frames 5-7 are the strike, 8 settles back.
@@ -4777,6 +4777,7 @@ function frame(now) {
   drawDecor(camX, "back");
   drawCaveDark(camX);
   drawCaveDoors(camX);
+  drawTalkHint(camX);   // (world1.js) "↑" by someone who's spoken: Up hears them again
   if (WORLD === 8 && typeof drawCrowd8 === "function") drawCrowd8(camX);   // the crowd stands up the slope, behind the ground and the rocks (world8.js)
   drawTiles(camX);
   drawCaveFeatures(camX);

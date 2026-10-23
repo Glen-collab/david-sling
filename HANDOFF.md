@@ -529,3 +529,7 @@ the harp phrase at 3-2's campfire.
   caveRoom(w, { back: true }) gives a crack of daylight at the back (room.backX) as a second way out to the same
   mouth; pitFloor(c, w) drops a cave floor. COLS = MAIN_COLS + 200 for the room space. The lamp without oil is
   smaller now (CAVE.LAMP_DIM 105, was 150) and says so once: the long caves are a real tax on the olives.
+- **Hear someone again (2026-10-23):** standing by a person who's spoken (a talk, or a lit campfire's speaker), a "↑"
+  shows over David; Up has them say it again, all of their lines in a row, A for each (world1.js talkAgainNear /
+  updateTalkAgain / drawTalkHint, TALK_AGAIN.NEAR tiles). Not in caves or by a cave mouth. The lamb's barley is
+  drawn at half size (drawPickups).

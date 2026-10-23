@@ -39,7 +39,32 @@ function updateTalks(dt) {
   // (Glen) one person's lines close together (4 tiles, like drawCampfirePeople's one spot) come one after another as
   // A closes each: he keeps talking where he stands, no walking up for the next line
   const chained = (k, i) => { const p = talks[i - 1]; return p && p.done && p.who && p.who === k.who && k.x - p.x <= 4 * T && !dialog.hold; };   // (the moment A lets the last line go: the words just change)
+  updateTalkAgain();
   talks.forEach((k, i) => { if (!k.done && (david.x > k.x || chained(k, i)) && david.x < MAIN_COLS * T && david.deadT <= 0 && !(dialog.t > 0 && dialog.hold)) { k.done = true; sayLine(k.who, k.say); learnSkill(k.teach); } });
+}
+// (Glen, 2026-10-23: he pressed A too soon on the shepherd girl and couldn't get her words back.) Like Castlevania:
+// standing by someone who's already spoken, a "↑" shows, and Up has them say it again (all their lines, A for each).
+const TALK_AGAIN = { NEAR: 3 };   // tiles from where they spoke
+let talkAgain = [];               // lines still to say again
+function talkAgainNear() {   // the lines of the person David's standing by (if they've spoken), or null
+  if (!david.onGround || david.deadT > 0 || david.state === "cave" || (typeof cave !== "undefined" && cave.room)) return null;
+  const near = x => Math.abs(david.x - x) < TALK_AGAIN.NEAR * T;
+  const f = fires.find(f => f.lit && f.who && f.say && near(f.x));
+  if (f) return [[f.who, f.say]];
+  const i = talks.findIndex(k => k.done && k.who && near(k.x + T)); if (i < 0) return null;
+  let a = i, b = i;   // all of that one person's lines in a row (the ones that came one after another)
+  while (a > 0 && talks[a - 1].done && talks[a - 1].who === talks[i].who && talks[a].x - talks[a - 1].x <= 4 * T) a--;
+  while (b < talks.length - 1 && talks[b + 1].done && talks[b + 1].who === talks[i].who && talks[b + 1].x - talks[b].x <= 4 * T) b++;
+  return talks.slice(a, b + 1).map(k => [k.who, k.say]);
+}
+function updateTalkAgain() {
+  if (talkAgain.length && !(dialog.t > 0 && dialog.hold)) { sayLine(...talkAgain.shift()); return; }
+  if (dialog.t > 0 || !pressed("up") || david.charging || doors.some(o => Math.abs(david.x - o.x) < 48)) return;
+  const lines = talkAgainNear(); if (lines) talkAgain = lines.slice();
+}
+function drawTalkHint(camX) {
+  if (dialog.t > 0 || talkAgain.length || !talkAgainNear()) return;
+  upHint(david.x - camX, david.y - 150);
 }
 function drawDialog() {
   if (dialog.t <= 0) return;
