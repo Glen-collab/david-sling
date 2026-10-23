@@ -1977,6 +1977,7 @@ const GRAIN = {   // the lamb's barley (updatePickups)
   PER: 3,          // tufts in each of the POISON.STAGES
   HEAL: 0.5,       // half a heart (they share David's)
   TEXT: "Your lamb found some barley to nibble: +½ heart.",
+  DAVID: "Barley! A handful for you and your lamb: +½ heart.",   // (one player: David picks it up)
   told: false,
 };
 const POISON = {
@@ -3112,7 +3113,8 @@ function fall(o, dt) {   // simple fall-and-land for dropped things
   if (o.y > ROWS * T + 200) o.taken = true;
 }
 // (Glen, 2026-10-23) player 2's lamb picks things up too: olives, food, and poison by accident (it costs David a heart:
-// they share them). The barley (p.lamb) is hers alone: David walks past it, any lamb nibbles it, even one just following.
+// they share them). The barley (p.lamb): any lamb nibbles it, even one just following. With one player David picks it up
+// too (Glen, 2026-10-23); with two it's player 2's alone, something for the lamb to go and get.
 const lambLoose = () => !lamb.carried && !lamb.stolen && david.deadT <= 0;
 const lambTouches = (x, y, rx) => lambLoose() && Math.abs(x - lamb.x) < rx && y > lamb.y - 56 && y < lamb.y + 12;
 function updatePickups(dt) {
@@ -3120,13 +3122,13 @@ function updatePickups(dt) {
     if (p.taken) continue;
     fall(p, dt);
     p.t += dt;
-    const byDavid = !p.lamb && Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10;
+    const byDavid = (!p.lamb || !lambP2.on) && Math.abs(p.x - david.x) < 40 && david.y > p.y - 60 && david.y - david.h < p.y + 10;
     const byLamb = (p.lamb || lambP2.on) && lambTouches(p.x, p.y, 34);
-    if (p.lamb && !byLamb && !GRAIN.told && Math.abs(p.x - david.x) < 40 && Math.abs(p.y - david.y) < 60) { GRAIN.told = true; toast("That barley's for your lamb. Let her walk over it."); }
+    if (p.lamb && lambP2.on && !byLamb && !GRAIN.told && Math.abs(p.x - david.x) < 40 && Math.abs(p.y - david.y) < 60) { GRAIN.told = true; toast("That barley's for your lamb. Let her walk over it."); }
     if (byDavid || byLamb) {
       p.taken = true;
       const v = p.lamb ? GRAIN.HEAL : FOOD[p.name] ?? 1;
-      const said = p.lamb ? GRAIN.TEXT : (byLamb && !byDavid ? (v < 0 ? "Oh no, the lamb ate it! " : "The lamb found it: ") : "") + (FOOD_TEXT[p.name] || p.name);
+      const said = p.lamb ? (byLamb ? GRAIN.TEXT : GRAIN.DAVID) : (byLamb && !byDavid ? (v < 0 ? "Oh no, the lamb ate it! " : "The lamb found it: ") : "") + (FOOD_TEXT[p.name] || p.name);
       toast((v < 0 || p.lamb ? "" : "+ ") + said);
       if (v < 0) hurtDavid(p.x, said, byLamb && !byDavid); else { david.hearts = Math.min(david.maxHearts, david.hearts + v); sfx("heal", undefined, 0.6); }   // (after the message: a poison that costs a life keeps its verse in the new one)
       for (let k = 0; k < 10; k++) bits.push({ x: p.x, y: p.y - 20, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 380, life: 0.6, color: v < 0 ? "#7a2" : "#ffe9a0" });

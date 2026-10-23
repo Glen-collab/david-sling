@@ -522,7 +522,7 @@ the harp phrase at 3-2's campfire.
 - **The lamb gathers; bigger caves (2026-10-23):** player 2's lamb picks up olives, food (heals David: they share
   hearts) and poison by accident (gourds, berries: a heart, no knock-back, "Oh no, the lamb ate it!"); lambTouches()
   in updatePickups / updateGourds / updateOlives. GRAIN (main.js): 3 tufts of barley per POISON.STAGES stage, the
-  lamb's alone (p.lamb: David walks past, any lamb nibbles it, +½ heart). Her stomp: scorpions and rats only; a hen
+  lamb's (p.lamb: any lamb nibbles it, +½ heart; with one player David picks it up too, with two only player 2's lamb). Her stomp: scorpions and rats only; a hen
   gets a fright and runs (a neighbor's: "Leave her be"); no snakes, nothing bigger. The caves: 1-2's 46 -> 82 wide
   (a drop with a crumbling ledge, scorpions, a climb; The One at the back), 1-3's 52 -> 150 (a chasm on three
   crumbling ledges, a low tunnel to roll under, a climb with a wild gourd on top, another drop, a viper, scorpions).
