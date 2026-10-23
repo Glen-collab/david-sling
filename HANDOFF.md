@@ -496,3 +496,15 @@ the harp phrase at 3-2's campfire.
   on black with "Press A to begin" until sound is on; on the Pi (sound allowed) it never shows.
 - **World 1 opening:** Eliab's and Jesse's lines come up by themselves in the video as their lips move
   (W1_OPEN.ELIAB_AT 10.4 s, JESSE_AT 12.7 s), Jesse's stays over the last frame (JESSE_HOLD), then the hillside.
+- **Two players: the lamb (2026-10-23):** the second controller is the lamb (readPads()[1], input2 / held2 / pressed2;
+  the first controller and the keyboard stay David's). Press anything on it in a stage and she's player 2
+  (lambP2.on, until that controller goes away). Only the D-pad and A matter (an NES pad is enough). updateLambP2: her own
+  physics (LAMB_P2 in main.js: speed, jump, a short tap = a short hop); lambStomp: coming down on a scorpion, rat or
+  snake (not the whip snake) squashes it through the stone code (stoneHitsScorpion/Rat), she stays down on it STOMP_T
+  (Glen's lamb_stomp sheet, last frames) then hops up. Two-player only: a pit, or off the screen (FAR) for FAR_TIME s,
+  costs David a heart (hurtDavid(x, why, still): no knock-back) and puts her back beside him. Carried by David she's
+  safe. Not in cut scenes, the stage finish or 8-3 (she follows). A yellow arrow marks her (at the screen edge when off
+  it; orange while she's left behind). Each controller can be set up on its own: a new one starts the setup for itself,
+  and holding Select+Start on any controller sets up that one ("player 2, the lamb" on the setup screen).
+  lamb_stomp: cut from Glen's clip (david-sling-art/lamb), the scorpion in it still to be painted out (he's cleaning
+  lamb_stomp_sheet_TO_CLEAN.png); once clean, its air frames (2-7) could replace lamb_run 6/1 in the air.

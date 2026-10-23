@@ -250,6 +250,8 @@ function readPad() {
   for (const p of pads) if (p && p.connected) return p;
   return null;
 }
+// (Glen, 2026-10-23) two players: the first controller is David (with the keyboard), the second is the lamb
+const readPads = () => [...(navigator.getGamepads ? navigator.getGamepads() : [])].filter(p => p && p.connected);
 function padControl(p, m) {
   if (!m) return false;
   if (m.type === "button") return !!(p.buttons[m.index] && p.buttons[m.index].pressed);
@@ -280,7 +282,12 @@ function defaultPadState(p) {
 }
 
 const input = { now: {}, prev: {} };
+const input2 = { now: {}, prev: {} };   // the second controller: the lamb (only the D-pad and A matter)
+function padState(p) { const m = mapFor(p); return m ? Object.fromEntries(BUTTONS.map(b => [b, padControl(p, m[b])])) : defaultPadState(p); }
 function pollInput() {
+  input2.prev = input2.now;
+  const p2 = readPads()[1];
+  input2.now = p2 && !setup.active ? padState(p2) : {};
   input.prev = input.now;
   const s = {};
   for (const b of BUTTONS) s[b] = KEYMAP[b].some(k => keys[k]);
@@ -295,18 +302,20 @@ function pollInput() {
 const held = b => !!input.now[b] || (b === "right" && typeof autoRun8 === "function" && autoRun8());   // (8-3 runs itself, world8.js)
 const pressed = b => !!input.now[b] && !input.prev[b];
 const released = b => !input.now[b] && !!input.prev[b];
+const held2 = b => !!input2.now[b];
+const pressed2 = b => !!input2.now[b] && !input2.prev[b];
 
 // Controller setup: press each button when asked. Captures buttons, axes or a POV hat.
-const setup = { active: false, step: 0, rest: null, wait: 0, map: {} };
-function startSetup() {
-  const p = readPad();
+const setup = { active: false, step: 0, rest: null, wait: 0, map: {}, index: 0 };
+function startSetup(index) {   // index: which controller (a newly plugged-in one, or the lamb's); none = the first
+  const p = typeof index === "number" ? (navigator.getGamepads ? navigator.getGamepads()[index] : null) : readPad();
   if (!p) { toast("No controller seen yet: press any button on the controller, then press M."); return; }
-  setup.active = true; setup.step = 0; setup.map = {}; setup.wait = 0.4;
+  setup.active = true; setup.step = 0; setup.map = {}; setup.wait = 0.4; setup.index = p.index;
   setup.rest = { axes: [...p.axes], buttons: p.buttons.map(b => b.pressed) };
 }
 function updateSetup(dt) {
-  const p = readPad();
-  if (!p) { setup.active = false; return; }
+  const p = navigator.getGamepads ? navigator.getGamepads()[setup.index] : null;
+  if (!p || !p.connected) { setup.active = false; return; }
   if (setup.wait > 0) {
     setup.wait -= dt;
     setup.rest = { axes: [...p.axes], buttons: p.buttons.map(b => b.pressed) };
@@ -339,17 +348,18 @@ function updateSetup(dt) {
   }
 }
 // Start the setup by itself the first time a controller shows up with no saved buttons.
-addEventListener("gamepadconnected", e => { if (!padMaps[e.gamepad.id] && !setup.active) setTimeout(startSetup, 300); });
+addEventListener("gamepadconnected", e => { if (!padMaps[e.gamepad.id] && !setup.active) setTimeout(() => startSetup(e.gamepad.index), 300); });
 // Holding Select + Start on the controller (default layout) for 2 seconds also starts it.
-let comboT = 0;
+const comboT = {};   // per controller (the lamb's can be set up the same way)
 function checkCombo(dt) {
-  const p = readPad(); if (!p || setup.active) { comboT = 0; return; }
-  padMap = mapFor(p);
-  const pressedCount = p.buttons.filter(b => b.pressed).length;
-  const sel = padMap ? padControl(p, padMap.select) : !!(p.buttons[8] && p.buttons[8].pressed);
-  const st = padMap ? padControl(p, padMap.start) : !!(p.buttons[9] && p.buttons[9].pressed);
-  comboT = (sel && st) ? comboT + dt : 0;
-  if (comboT > 2) { comboT = 0; startSetup(); }
+  if (setup.active) { for (const k in comboT) comboT[k] = 0; return; }
+  for (const p of readPads()) {
+    const m = mapFor(p);
+    const sel = m ? padControl(p, m.select) : !!(p.buttons[8] && p.buttons[8].pressed);
+    const st = m ? padControl(p, m.start) : !!(p.buttons[9] && p.buttons[9].pressed);
+    comboT[p.index] = (sel && st) ? (comboT[p.index] || 0) + dt : 0;
+    if (comboT[p.index] > 2) { comboT[p.index] = 0; startSetup(p.index); return; }
+  }
 }
 
 let toastText = "", toastTime = 0;
@@ -2013,6 +2023,24 @@ const david = {
 };
 const stones = [];
 const lamb = { x: lambSpawn.x, y: lambSpawn.y, vx: 0, vy: 0, facing: 1, onGround: false, t: 0, carried: false };
+// (Glen, 2026-10-23) a second player can be the lamb: press anything on the second controller and she's yours (the
+// D-pad and A, all an NES pad needs). All she can do is jump on scorpions, rats and snakes (not the harmless whip
+// snake: it eats the rats). Nobody playing her: she follows David as always. With a second player, it's harder
+// together: if she falls in a pit, or gets left off the screen too long, David loses a heart. David can still pick
+// her up and carry her (Down, standing beside her), and then she's safe.
+const LAMB_P2 = {
+  SPEED: 330,        // px a second on the ground (David walks 270, runs 450)
+  JUMP: 900,         // jump speed (about 150 px high; David's is 1000)
+  BOUNCE: 620,       // the hop up off a squashed creature
+  W: 40, H: 46,      // her body box
+  FAR: 0.55,         // farther than this many screen-widths from David counts as left behind...
+  FAR_TIME: 4,       // ...for this many seconds: a heart
+  STOMP_SCALE: 0.5,  // lamb_stomp is cut bigger than lamb_run (170 px standing to about 83)
+  STOMP_T: 0.3,      // seconds she stays down on it (the squash frames), before the hop up
+};
+const lambP2 = { on: false, farT: 0, warned: false };
+const lambPlayable = () => lambP2.on && david.deadT <= 0 && !inCutscene() && !(typeof finish !== "undefined" && finish.active)
+  && !(typeof autoRun8 === "function" && autoRun8());   // (8-3 runs by itself: she follows)
 
 // The second jump in the air (the flip) is Tobi's "scout's leap", taught in World 5 (DESIGN §5e, 5-2).
 // Until then David has one jump, and World 1-4 must never need two. "?flip" in the address turns it on for testing.
@@ -2453,14 +2481,69 @@ function updateLamb(dt) {
   if (typeof lambDrop !== "undefined" && lambDrop.on) return;   // tumbling down after an eagle let go (world2.js)
   if (typeof lambDrift === "function" && lambDrift(dt)) return;   // wandering off to the oleander (world2.js)
   lamb.t += dt;
+  if (!lambP2.on && readPads()[1] && ["left", "right", "up", "down", "a", "b"].some(pressed2)) {   // player 2 joins
+    lambP2.on = true; lamb.vy = 0;
+    toast("Player 2 is the lamb! Jump on the scorpions, snakes and rats. Stay together: a fall or getting left behind costs a heart.");
+  }
+  if (lambP2.on && !readPads()[1]) { lambP2.on = false; toast("The lamb's controller went quiet: she'll follow David."); }
+  if (lambPlayable()) { updateLambP2(dt); return; }
   // the lamb walks in David's footsteps, first in the line: it hops where he hopped, so it never falls in a pit.
-  // (When a second player controls the lamb, it'll get its own physics again.)
   const tgt = david.deadT > 0 ? null : trailAt(TUNE.LAMB_GAP);
   if (!tgt) { lamb.vx = 0; lamb.onGround = true; return; }
   const y0 = lamb.y, far = Math.hypot(tgt.x - lamb.x, tgt.y - lamb.y);
   moveToward(lamb, tgt.x, tgt.y, Math.min(900, Math.max(TUNE.LAMB_SPEED, far * 5)), dt);
   lamb.vx = lamb.moved * lamb.facing; lamb.vy = 0;
   lamb.onGround = !tgt.hop && Math.abs(lamb.y - y0) < 0.5;
+}
+function updateLambP2(dt) {
+  const L = LAMB_P2, dir = (held2("right") ? 1 : 0) - (held2("left") ? 1 : 0);
+  if (lamb.stompT > 0) {   // squashing it: she stays down on it a moment (Glen's clip), then hops up
+    lamb.stompT -= dt; lamb.vx = 0; lamb.moved = 0;
+    if (lamb.stompT <= 0) { lamb.vy = -L.BOUNCE; lamb.onGround = false; }
+    return;
+  }
+  lamb.vx = dir * L.SPEED; if (dir) lamb.facing = dir;
+  if (pressed2("a") && lamb.onGround) { lamb.vy = -L.JUMP; lamb.onGround = false; }
+  if (!held2("a") && lamb.vy < -L.JUMP * 0.45) lamb.vy = -L.JUMP * 0.45;   // a short tap, a short hop
+  lamb.vy = Math.min(TUNE.MAX_FALL, lamb.vy + TUNE.GRAVITY * dt);
+  const falling = lamb.vy > 0;
+  collideBody(lamb, L.W, L.H, dt);
+  lamb.moved = Math.abs(lamb.vx) * dt;
+  if (falling) lambStomp();
+  // in a pit: a heart, and she's back beside David
+  if (lamb.y > GR * T + 3 * T) { lambLost("The lamb fell!"); return; }
+  // left behind (or run off ahead), out of sight too long: a heart
+  if (Math.abs(lamb.x - david.x) > W * L.FAR) {
+    lambP2.farT += dt;
+    if (!lambP2.warned) { lambP2.warned = true; toast("Don't leave the lamb behind!"); }
+    if (lambP2.farT > L.FAR_TIME) lambLost("You left the lamb behind!");
+  } else { lambP2.farT = 0; lambP2.warned = false; }
+}
+function lambLost(why) {   // (two players) a heart for David, and the lamb back at his side
+  lamb.x = david.x - david.facing * 50; lamb.y = david.y; lamb.vx = lamb.vy = 0; lambP2.farT = 0; lambP2.warned = false;
+  toast(why + " That costs a heart.");
+  hurtDavid(david.x, why, true);
+}
+function lambStomp() {   // her hooves come down on a scorpion, a rat or a snake: squashed, and she hops up after
+  const feetX = lamb.x, feetY = lamb.y, hw = LAMB_P2.W / 2;
+  const fake = { x: feetX, y: feetY - 10, vx: lamb.facing, vy: 0, life: 1, power: false };   // the stone code does the rest
+  let hit = false;
+  for (const k of critters) {
+    if (k.gone || (k.kind !== "scorpion" && k.kind !== "rat")) continue;
+    const b = critterBox(k);
+    if (feetX + hw < b.x0 || feetX - hw > b.x1 || feetY < b.y0 - 12 || feetY > b.y1 + 6) continue;
+    if (k.kind === "scorpion") stoneHitsScorpion(k, fake); else stoneHitsRat(k, fake);
+    hit = k.y; break;
+  }
+  if (!hit) for (const sn of snakes) {
+    if (sn.gone || sn.kind === "whip") continue;
+    if (Math.abs(feetX - snakeMid(sn)) > 40 + hw || feetY < sn.y - 60 || feetY > sn.y + 6) continue;
+    sn.gone = true; sn.vx = lamb.facing * 220; sn.vy = -480; stoneHit(fake, 0.5); toast("The lamb stomped the snake!");
+    hit = sn.y; break;
+  }
+  if (hit === false) return;
+  lamb.y = hit; lamb.vy = 0; lamb.stompT = LAMB_P2.STOMP_T;   // down on it, where it was (the hop up comes when the squash is done: updateLambP2)
+  for (let k = 0; k < 10; k++) bits.push({ x: feetX, y: feetY - 4, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 260, life: 0.5, color: "#c9a86a" });   // dust
 }
 function popLamb() {
   lamb.x = david.x - david.facing * 55; lamb.y = david.y; lamb.vx = 0; lamb.vy = -300; lamb.lostT = 0;
@@ -2469,7 +2552,18 @@ function popLamb() {
 function drawLamb(camX) {
   if (lamb.carried || lamb.stolen) return;
   const moving = Math.abs(lamb.vx) > 20 || !lamb.onGround;
-  drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, lamb.x - camX, lamb.y, lamb.facing);
+  if (lambP2.on && lamb.stompT > 0 && SPR.lamb_stomp) {   // squashing something (the last frames of Glen's stomp)
+    const n = SPR.lamb_stomp.frames, f = Math.min(n - 1, 8 + Math.floor((1 - lamb.stompT / LAMB_P2.STOMP_T) * (n - 8)));
+    drawSprite("lamb_stomp", f, lamb.x - camX, lamb.y, lamb.facing, LAMB_P2.STOMP_SCALE);
+  } else if (lambP2.on && !lamb.onGround) drawSprite("lamb_run", lamb.vy < 0 ? 6 : 1, lamb.x - camX, lamb.y, lamb.facing);   // up: legs out; down: tucked
+  else drawSprite("lamb_run", moving ? frameOf("lamb_run", lamb.t) : 2, lamb.x - camX, lamb.y, lamb.facing);
+  if (lambP2.on) {   // player 2's marker: a little arrow over her, or at the edge of the screen when she's off it
+    const sx = lamb.x - camX, off = sx < 0 || sx > W, ax = Math.max(18, Math.min(W - 18, sx)), ay = off ? Math.min(H - 30, Math.max(60, lamb.y - 40)) : lamb.y - 70;
+    ctx.save(); ctx.fillStyle = lambP2.farT > 0 ? "#ff8a5c" : "#ffe08a"; ctx.strokeStyle = "rgba(40,24,8,0.8)"; ctx.lineWidth = 2; ctx.beginPath();
+    if (!off) { ctx.moveTo(ax - 8, ay - 10); ctx.lineTo(ax + 8, ay - 10); ctx.lineTo(ax, ay); }
+    else { const s = sx < 0 ? -1 : 1; ctx.moveTo(ax + s * 10, ay); ctx.lineTo(ax - s * 6, ay - 10); ctx.lineTo(ax - s * 6, ay + 10); }
+    ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
 }
 
 // ============================================================================
@@ -2830,7 +2924,8 @@ function drawToastAndSetup() {
   if (setup.active) {
     ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.font = "34px sans-serif";
-    ctx.fillText("Controller setup", W / 2, H / 2 - 60);
+    const lambPad = readPads()[1];
+    ctx.fillText(lambPad && lambPad.index === setup.index ? "Controller setup: player 2, the lamb" : "Controller setup", W / 2, H / 2 - 60);
     ctx.font = "28px sans-serif"; ctx.fillStyle = "#ffe08a";
     const names = { up: "UP", down: "DOWN", left: "LEFT", right: "RIGHT", a: "A", b: "B", select: "SELECT", start: "START", x: "X (roll)", y: "Y (harp)" };
     ctx.fillText("Press " + names[BUTTONS[setup.step]] + " on the controller", W / 2, H / 2);
@@ -2888,14 +2983,16 @@ try {
 } catch (e) {}
 // the game is driving David (walking to the lamb, the hug, the gate): nothing can hurt him, and no hurt-blink
 const inCutscene = () => david.state === "toLamb" || david.state === "rescue" || david.state === "finish" || david.state === "liftSheep" || david.state === "cave";
-function hurtDavid(fromX, why = "") {   // why: what hurt him (the poison's verse), kept in the message if it costs a life
+function hurtDavid(fromX, why = "", still = false) {   // why: what hurt him (the poison's verse), kept in the message if it costs a life; still: no knock-back
   const d = david;
   if (d.inv > 0 || d.deadT > 0 || inCutscene()) return;
   if (ARMORED() && armorHit(fromX)) return;   // the armor's grey hearts go first (world7.js)
   d.hearts -= DIFF.hit; d.inv = TUNE.HURT_INVINCIBLE * DIFF.inv;   // (Hard: a hit costs two hearts)
-  d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
-  d.harp = false; d.charging = false; d.throwT = -1;
-  if (d.state !== "carry") setState("jump");
+  if (!still) {
+    d.vx = Math.sign(d.x - fromX || -d.facing) * 360; d.vy = -560; d.onGround = false;
+    d.harp = false; d.charging = false; d.throwT = -1;
+    if (d.state !== "carry") setState("jump");
+  }
   if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; const tail = d.lives > 0 ? `Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage.";
                        toast(why ? `${why} ${tail}` : d.lives > 0 ? `Ouch! ${tail}` : tail); }
 }
