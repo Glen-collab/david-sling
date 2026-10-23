@@ -57,6 +57,7 @@ const Menu = {
   boot() {
     let seen = false; try { seen = sessionStorage.getItem("davidTitleSeen"); } catch (e) {}
     let back = false; try { back = sessionStorage.getItem("davidScenesBack"); sessionStorage.removeItem("davidScenesBack"); } catch (e) {}
+    if (back && back !== "1") { location.replace(back); return; }   // an opening watched from a stage's pause menu: back into the stage
     if (back) { this.open("title"); this.go("scenes"); return; }   // back from an opening played from Scenes
     let tback = false; try { tback = sessionStorage.getItem("davidTrialBack"); sessionStorage.removeItem("davidTrialBack"); } catch (e) {}
     if (tback) { this.open("title"); this.go("trial"); return; }   // back from a boss in the Shepherd's Trial
@@ -72,6 +73,7 @@ const Menu = {
       this.snap.getContext("2d").drawImage(canvas, 0, 0);
       this.under = WorldMap.active ? "map" : Courtyard.active ? "courtyard" : "stage";
       WorldMap.active = false; Courtyard.active = false;   // paused; they come back on Resume
+      toastTime = 0;   // (a stage's message would sit on top of the menu)
       themeMusic.pause(); mapAmbience.pause();   // paused means quiet: the theme and the hills stop (they fade back in on Resume)
     }
     this.home = screen; this.go(screen);
@@ -120,7 +122,6 @@ const Menu = {
     if (this.screen === "scenes") {
       const p = loadProgress();
       return [...FILM_CLIPS.map(c => !sceneOpen(c, p) ? { label: "Not reached yet", value: c.world, off: true }
-                                 : c.intro && this.fromStage ? { label: c.label, value: "from the title", off: true }   // (it would leave the stage)
                                  : { label: c.label, value: c.world, act: () => this.playScene(c) }),
               { label: "Back", act: () => this.go(this.home) }];   // (to the title, or back to Paused)
     }
@@ -160,7 +161,16 @@ const Menu = {
       + (this.under === "stage" ? " (From the next stage.)" : "");
   },
   playScene(c) {   // full screen, start to finish; A, B or Start stops it
-    if (c.intro) { try { sessionStorage.setItem("davidScenesBack", "1"); } catch (e) {} location.href = `index.html?${c.intro}&scene#${c.stage}`; return; }
+    if (c.intro) {   // an opening is played by the game itself, so it leaves the page; from a stage, it asks first
+      let back = "1";
+      if (this.under === "stage") {
+        if (this.armed !== c || !this.msg) { this.armed = c; this.msg = "This one leaves the stage. You'll come back at your last campfire. Press A again to watch it."; return; }
+        const u = new URLSearchParams(location.search); u.set("at", Math.max(3, Math.floor(checkpoint.x / T)));
+        back = `index.html?${u}${location.hash}`;   // (when it ends: back into the stage, at the campfire)
+      }
+      try { sessionStorage.setItem("davidScenesBack", back); } catch (e) {}
+      location.href = `index.html?${c.intro}&scene#${c.stage}`; return;
+    }
     if (!this.clip) this.clip = Object.assign(document.createElement("video"), { muted: true, playsInline: true, preload: "auto" });
     this.clip.src = c.src + "?v=" + (window.BUILD || 0); this.clip.currentTime = 0; this.clip.play().catch(() => {});
     themeMusic.pause(); this.playing = c; this.playT = 0; this.cue = 0;
@@ -324,7 +334,7 @@ const Menu = {
       ctx.fillText(`Erase ${slotName(this.eraseN)}'s game? Stages, sheep, olives, skills and Trial times will all be gone.`, W / 2, 320);
     }
     // the list
-    const sc = ["scenes", "trial", "files", "erase", "newdiff"].includes(this.screen), it = this.items(), rowH = this.screen === "trial" ? 40 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : ["files", "erase", "newdiff"].includes(this.screen) ? 250 : sc ? 200 : 220;
+    const sc = ["scenes", "trial", "files", "erase", "newdiff"].includes(this.screen), it = this.items(), rowH = this.screen === "trial" ? 40 : this.screen === "scenes" ? 35 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : ["files", "erase", "newdiff"].includes(this.screen) ? 250 : this.screen === "scenes" ? 206 : sc ? 200 : 220;
     const bw = this.screen === "files" || this.screen === "erase" ? 820 : this.screen === "settings" || sc ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {
