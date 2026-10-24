@@ -158,6 +158,8 @@ Object.assign(W8, {
   JAV_R: 40,             // px from where a downward spear lands that it hurts
   SPEAR_SHEET_LEN: 450,  // the thrown spear's length, in goliath_spear sheet pixels (so it matches the one he holds)
   SPEAR_SINK: 22,        // px of the tip buried in the ground once it lands
+  OVER_HAND: [173, 267], // Glen's overhead throw (goliath_overhead, 2026-10-24): his hand in frame 15, the moment it leaves (px in front of / above his feet)
+  OVER_REL: 15,          // its frames: 0-14 the wind-up (spear behind his head, then forward), 15 it's gone, 15-17 the follow-through
   JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the downward spear leaves from there
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
@@ -297,7 +299,8 @@ function g8Throw(kind) {   // the spear leaves his hand: flat from his front, or
   const d = david, k = g8SpearK(), L = W8.SPEAR_SHEET_LEN * k;
   if (g8.jav) g8.past.push(g8.jav);   // (the last one flies on behind him, harmless)
   if (kind === "down") {
-    const hx = g8.x - W8.JAV_HAND[0] * k, hy = GR * T - W8.JAV_HAND[1] * k, a = Math.atan2(GR * T - 6 - hy, Math.min(-1, d.x - hx));
+    const over = !!SPR.goliath_overhead, hk = over ? SCALE * W8.SIZE * W8.CLIP_SIZE * (TUNE.SPRITE_SIZE.goliath_overhead || 1) : k, H8 = over ? W8.OVER_HAND : W8.JAV_HAND;
+    const hx = g8.x - H8[0] * hk, hy = GR * T - H8[1] * hk, a = Math.atan2(GR * T - 6 - hy, Math.min(-1, d.x - hx));
     g8.jav = { kind, x: hx + Math.cos(a) * L * 0.6, y: hy + Math.sin(a) * L * 0.6, a, tx: d.x, t: 0 };   // (x, y: its point)
     g8.jav.y0 = g8.jav.y;
   } else g8.jav = { kind, x: g8Front() - 10, y: GR * T - (kind === "low" ? W8.LOW_Y : W8.HIGH_Y), a: Math.PI, t: 0 };
@@ -472,11 +475,14 @@ function drawGoliath8(camX) {
   const tellP = g8.atk ? Math.min(1, g8.tellT / g8Tell()) : 1, flat = k => k === "low" || k === "high";
   if (g8.atk && flat(g8.atk) && SPR.goliath_thrust)   // the spear lowered, drawn back: it will come flat
     drawSprite("goliath_thrust", Math.min(5, Math.floor(tellP * 6)), x, GR * T, -1, C, 1, fl);
-  else if (g8.atk === "down" && SPR.goliath_spear)   // raised over his head: it will come down (the wind-up ends on 10, spear forward)
-    spear(5 + Math.min(5, Math.floor(tellP * 5.99)));
+  else if (g8.atk === "down" && SPR.goliath_overhead)   // (Glen's overhead throw) the spear back behind his head, then forward: it will come down at you
+    drawSprite("goliath_overhead", Math.min(W8.OVER_REL - 1, Math.floor(tellP * W8.OVER_REL)), x, GR * T, -1, C, 1, fl);
+  else if (g8.atk === "down" && SPR.goliath_spear) spear(5 + Math.min(5, Math.floor(tellP * 5.99)));
   else if (g8.relT < 0.35 && flat(g8.relKind) && SPR.goliath_thrust) {   // the lunge as it leaves his hand
     const n = SPR.goliath_thrust.frames; drawSprite("goliath_thrust", Math.min(n - 1, 6 + Math.floor(g8.relT / 0.35 * (n - 6))), x, GR * T, -1, C, 1, fl);
-  } else if (g8.relT < 1.0 && g8.relKind === "down" && SPR.goliath_spear) spear(11 + Math.min(8, Math.floor(g8.relT * 8)));   // his hand empty, following through
+  } else if (g8.relT < 0.6 && g8.relKind === "down" && SPR.goliath_overhead)   // his hand empty, following through
+    drawSprite("goliath_overhead", Math.min(SPR.goliath_overhead.frames - 1, W8.OVER_REL + Math.floor(g8.relT / 0.15)), x, GR * T, -1, C, 1, fl);
+  else if (g8.relT < 1.0 && g8.relKind === "down" && SPR.goliath_spear) spear(11 + Math.min(8, Math.floor(g8.relT * 8)));
   else if ((g8.state === "roar" || g8.state === "open") && SPR.goliath_roar)   // (Glen) his head thrown back, laughing at the sky: the forehead open
     drawSprite("goliath_roar", g8.state === "roar" && g8.t < 0.6 ? Math.floor(g8.t / 0.2) : 3 + Math.floor(now * 4) % 5, x, GR * T, -1, C, 1, fl);
   else if ((g8.state === "laugh" || g8.state === "taunt" || g8.state === "miss") && SPR.goliath_point)   // he points at David and laughs
@@ -492,6 +498,7 @@ function drawGoliath8(camX) {
   }
   if (typeof drawSbSparks === "function") drawSbSparks(camX);
 }
+TUNE.SPRITE_SIZE.goliath_overhead = 0.64;   // (cut at 375 px tall; his other attack sheets are 240: this matches them)
 Object.assign(W8, { BROW: [-2, 242] });   // px from his feet: his forehead (fit to the art)
 function drawGoliath8Over() {   // how far to him (17:48), the five stones, the callouts, and the throw
   if (!g8 || !g8.on || g8.won) return;
