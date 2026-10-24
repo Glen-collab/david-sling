@@ -3540,6 +3540,18 @@ window.SPRITE_DATA = {
   "ay": 303,
   "align": "feet"
  },
+ "saul_talk": {
+  "src": "../assets/sprites/saul_talk.png",
+  "frames": 48,
+  "w": 158,
+  "h": 318,
+  "ms": 126,
+  "loop": true,
+  "pingpong": false,
+  "ax": 69,
+  "ay": 315,
+  "align": "feet"
+ },
  "saul_torment": {
   "src": "../assets/sprites/saul_torment.png",
   "frames": 6,

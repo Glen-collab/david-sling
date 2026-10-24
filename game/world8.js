@@ -568,7 +568,9 @@ const abnerScene = {
     if (typeof TENT_BG !== "undefined" && TENT_BG.naturalWidth) { const s = Math.max(W / TENT_BG.naturalWidth, H / TENT_BG.naturalHeight); ctx.drawImage(TENT_BG, (W - TENT_BG.naturalWidth * s) / 2, (H - TENT_BG.naturalHeight * s) / 2, TENT_BG.naturalWidth * s, TENT_BG.naturalHeight * s); }
     else { ctx.fillStyle = "#2a1c10"; ctx.fillRect(0, 0, W, H); }
     // Saul, on the left, facing them
-    drawSprite(SPR.saul_armor ? "saul_armor" : "saul", B.saul && SPR.saul_armor ? 5 : 0, W * W8.SAUL_AT, fy, 1, z);
+    // (Glen, 2026-10-24: the old talking pose was jerky) his smooth talking clip, saul_talk, while he speaks; its first frame while he listens
+    if (SPR.saul_talk) drawSprite("saul_talk", B.saul ? frameOf("saul_talk", this.bt) : 0, W * W8.SAUL_AT, fy, 1, z);
+    else drawSprite(SPR.saul_armor ? "saul_armor" : "saul", B.saul && SPR.saul_armor ? 5 : 0, W * W8.SAUL_AT, fy, 1, z);
     // Abner and David: before 17:57 Abner stands before the king; in 17:57 he goes out and brings David in; after, both stand there
     const after = this.i > W8.ABNER_BEATS.findIndex(b => b.fetch), fetching = B.fetch, [gone, back, there] = W8.FETCH;
     if (fetching) {
