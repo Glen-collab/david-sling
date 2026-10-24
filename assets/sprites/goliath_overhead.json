@@ -1,0 +1,31 @@
+{
+  "frames": 18,
+  "frame_w": 691,
+  "frame_h": 469,
+  "ms_per_frame": 120,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 273,
+  "anchor_y": 466,
+  "source": "goliath_overhead.mp4",
+  "video_frames": [
+    46,
+    49,
+    52,
+    55,
+    58,
+    61,
+    64,
+    67,
+    70,
+    73,
+    76,
+    79,
+    82,
+    85,
+    88,
+    91,
+    94,
+    97
+  ]
+}

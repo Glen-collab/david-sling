@@ -1956,6 +1956,18 @@ window.SPRITE_DATA = {
   "ay": 343,
   "align": "feet"
  },
+ "goliath_overhead": {
+  "src": "../assets/sprites/goliath_overhead.png",
+  "frames": 18,
+  "w": 691,
+  "h": 469,
+  "ms": 120,
+  "loop": false,
+  "pingpong": false,
+  "ax": 273,
+  "ay": 466,
+  "align": "feet"
+ },
  "goliath_point": {
   "src": "../assets/sprites/goliath_point.png",
   "frames": 8,
