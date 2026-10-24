@@ -147,7 +147,8 @@ Object.assign(W8, {
   STILL: 0.6,            // seconds standing still before he throws at you at once
   VOLLEY: 4,             // spears in the close-up volley before he laughs at the sky
   SPEED: 2000,           // px/s, every spear (Glen, 2026-10-24: faster; was 1500)
-  // all four of these go with g8Pace(): Settings > Goliath's spears (0-10, 5 = as made, 12% a step), times the difficulty's spear
+  PACE: 1,               // THE KNOB: how quick his spears come, all at once (their speed, the tells, the gaps, his walk). 1.2 = 20% quicker
+                         // (Easy x0.85 and Hard x1.2 on top: main.js DIFFICULTY spear)
   LOW_Y: 24,             // px off the ground of a low flat spear: jump it
   HIGH_Y: 86,            // px off the ground of a high one, at his shoulders: roll under it (David stands 96 px, rolls 64)
   DIAG_RANGE: 22,        // tiles: nearer than this he also throws down at where you stand
@@ -253,7 +254,7 @@ function resetG8() {
 }
 if (g8) resetG8();
 const g8Front = () => g8.x - W8.FRONT;
-const g8Pace = () => g8PaceOf(SETTINGS.spears) * (DIFF.spear || 1);   // read on every throw, so a change in the pause menu takes hold at once
+const g8Pace = () => W8.PACE * (DIFF.spear || 1);
 const g8Tell = () => W8.TELL[g8.state === "volley" ? "volley" : "charge"] * (g8.counsel ? W8.COUNSEL : 1) / g8Pace();
 const g8SpearK = () => SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // goliath_spear sheet px -> world px
 function g8Met(who) {   // the people who call out warnings: only the ones you met (DESIGN 5h)

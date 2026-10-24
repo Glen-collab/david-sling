@@ -170,7 +170,7 @@ const SLOT_KEYS = ["davidProgress", "davidStones", "davidGateTops", "davidTrial"
 function slotNames() { try { return JSON.parse(localStorage.getItem("davidNames")) || {}; } catch (e) { return {}; } }
 function setSlotName(n, name) { const all = slotNames(); if (name) all[n] = name; else delete all[n]; try { localStorage.setItem("davidNames", JSON.stringify(all)); } catch (e) {} }
 // Settings (menu.js): which controller's pictures to show, and the music / sound volumes (0-10).
-const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10, difficulty: "medium", spears: 5 }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
+const SETTINGS = Object.assign({ controller: "keyboard", music: 10, sfx: 10, difficulty: "medium" }, (() => { try { return JSON.parse(localStorage.getItem("davidSettings")) || {}; } catch (e) { return {}; } })());
 {   // the difficulty belongs to the game being played (Game 1 takes the one chosen before there were three)
   let d = null; try { d = localStorage.getItem(slotKey("davidDifficulty")); } catch (e) {}
   SETTINGS.difficulty = d || (SLOT === 1 ? SETTINGS.difficulty : "medium");
@@ -187,7 +187,6 @@ const DIFFICULTY = {
   hard:   { name: "Hard",   hearts: 0, lives: 3, hit: 2, inv: 0.75, tell: 0.75, open: 0.75, hp: 1.35, spear: 1.2 },   // spear: Goliath's spears' pace in 8-2 (world8.js g8Pace)
 };
 const DIFF = DIFFICULTY[SETTINGS.difficulty] || DIFFICULTY.medium;
-const g8PaceOf = v => Math.max(0.3, 1 + ((v ?? 5) - 5) * 0.12);   // Settings > Goliath's spears (0-10) -> their pace in 8-2 (5 = 1; world8.js g8Pace)
 // scale every boss's numbers once, when the game loads (menu.js calls this after every world's table exists); a change of
 // difficulty takes hold at the next stage (every stage is a fresh page)
 function applyDifficulty() {
