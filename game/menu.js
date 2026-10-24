@@ -142,6 +142,7 @@ const Menu = {
         { label: "Show the buttons", act: () => this.go("controls") },
         { label: "Set up a controller", act: () => { if (readPad()) startSetup(); else this.msg = "Press a button on the controller first, so the browser can see it."; } },
         { label: "Difficulty", value: "◀  " + DIFFICULTY[S.difficulty in DIFFICULTY ? S.difficulty : "medium"].name + "  ▶", lr: d => this.setDifficulty(d), act: () => this.setDifficulty(1) },
+        { label: "Goliath's spears", bar: S.spears ?? 5, lr: d => this.setSpears(d) },   // (Glen, 2026-10-24) how fast they come, in 8-2: takes hold at once
         { label: "Music", bar: S.music, lr: d => vol("music", d) },
         { label: "Sounds", bar: S.sfx, lr: d => vol("sfx", d) },
         { label: "Back", act: () => this.go(this.home) },
@@ -159,6 +160,10 @@ const Menu = {
     this.msg = { easy: "Easy: more hearts and lives, and the bosses give you longer to read them.", medium: "Medium: the game as it was made to be played.",
                  hard: "Hard: every hit costs two hearts, fewer lives, and the bosses are quicker and tougher." }[SETTINGS.difficulty]
       + (this.under === "stage" ? " (From the next stage.)" : "");
+  },
+  setSpears(d) {   // Goliath's spears in 8-2 (world8.js g8Pace): 5 is as made, each step 12% slower or faster; read on every throw
+    SETTINGS.spears = Math.max(0, Math.min(10, (SETTINGS.spears ?? 5) + d)); saveSettings();
+    this.msg = `Goliath's spears: ${(g8PaceOf(SETTINGS.spears) * 100).toFixed(0)}% of their speed on Medium${SETTINGS.spears === 5 ? " (as made)" : ""}. Easy and Hard make them slower or quicker still.`;
   },
   playScene(c) {   // full screen, start to finish; A, B or Start stops it
     if (c.intro) {   // an opening is played by the game itself, so it leaves the page; from a stage, it asks first
@@ -334,7 +339,7 @@ const Menu = {
       ctx.fillText(`Erase ${slotName(this.eraseN)}'s game? Stages, sheep, olives, skills and Trial times will all be gone.`, W / 2, 320);
     }
     // the list
-    const sc = ["scenes", "trial", "files", "erase", "newdiff"].includes(this.screen), it = this.items(), rowH = this.screen === "trial" ? 40 : this.screen === "scenes" ? 35 : sc ? 44 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : ["files", "erase", "newdiff"].includes(this.screen) ? 250 : this.screen === "scenes" ? 206 : sc ? 200 : 220;
+    const sc = ["scenes", "trial", "files", "erase", "newdiff"].includes(this.screen), it = this.items(), rowH = this.screen === "trial" ? 40 : this.screen === "scenes" ? 35 : sc ? 44 : this.screen === "settings" ? 47 : 54, top = this.screen === "confirm" ? 380 : title ? 330 : this.screen === "trial" ? 234 : this.screen === "settings" ? 196 : ["files", "erase", "newdiff"].includes(this.screen) ? 250 : this.screen === "scenes" ? 206 : sc ? 200 : 220;
     const bw = this.screen === "files" || this.screen === "erase" ? 820 : this.screen === "settings" || sc ? 620 : 420;
     ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, top - 40, bw, it.length * rowH + 30, 16); ctx.fill();
     it.forEach((m, i) => {

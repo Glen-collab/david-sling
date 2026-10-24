@@ -141,12 +141,13 @@ Object.assign(W8, {
   ARENA: 110,            // columns from the start of the run to the far end
   REACH_AT: 8,           // tiles from his front: David has made it to him (the laugh, the taunt, the volley)
   WALK: 42,              // px/s he comes on between throws (17:48: "the Philistine arose, and walked and came near")
-  TELL: { charge: 0.5, volley: 0.4 },   // seconds he shows each throw: the spear lowered = flat, raised = down at you
+  TELL: { charge: 0.42, volley: 0.34 },   // seconds he shows each throw: the spear lowered = flat, raised = down at you
   COUNSEL: 1.3,          // after a loss (Shammah's counsel): tells this much longer, and the throw's time doubled
-  GAP: 0.35,             // seconds after one spear is gone before he starts the next (only ever one in the air)
+  GAP: 0.22,             // seconds after one spear has passed David before he starts the next (only one coming at a time)
   STILL: 0.6,            // seconds standing still before he throws at you at once
   VOLLEY: 4,             // spears in the close-up volley before he laughs at the sky
-  SPEED: 1500,           // px/s, every spear
+  SPEED: 2000,           // px/s, every spear (Glen, 2026-10-24: faster; was 1500)
+  // all four of these go with g8Pace(): Settings > Goliath's spears (0-10, 5 = as made, 12% a step), times the difficulty's spear
   LOW_Y: 24,             // px off the ground of a low flat spear: jump it
   HIGH_Y: 86,            // px off the ground of a high one, at his shoulders: roll under it (David stands 96 px, rolls 64)
   DIAG_RANGE: 22,        // tiles: nearer than this he also throws down at where you stand
@@ -252,7 +253,8 @@ function resetG8() {
 }
 if (g8) resetG8();
 const g8Front = () => g8.x - W8.FRONT;
-const g8Tell = () => W8.TELL[g8.state === "volley" ? "volley" : "charge"] * (g8.counsel ? W8.COUNSEL : 1);
+const g8Pace = () => g8PaceOf(SETTINGS.spears) * (DIFF.spear || 1);   // read on every throw, so a change in the pause menu takes hold at once
+const g8Tell = () => W8.TELL[g8.state === "volley" ? "volley" : "charge"] * (g8.counsel ? W8.COUNSEL : 1) / g8Pace();
 const g8SpearK = () => SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // goliath_spear sheet px -> world px
 function g8Met(who) {   // the people who call out warnings: only the ones you met (DESIGN 5h)
   const p = loadProgress(), c = id => !!(p[id] && p[id].cleared);
@@ -312,12 +314,13 @@ function g8SpearHits(j) {   // does the spear's shaft (its front half) cross Dav
 function updateSpear8(dt) {   // the one spear in the air, and the ones stuck in the ground
   for (let i = g8.stuck.length - 1; i >= 0; i--) if ((g8.stuck[i].t += dt) > 2.5) g8.stuck.splice(i, 1);
   for (let i = g8.past.length - 1; i >= 0; i--) {
-    const p = g8.past[i]; p.x += Math.cos(p.a) * W8.SPEED * dt; p.y += Math.sin(p.a) * W8.SPEED * dt;
+    const p = g8.past[i]; p.x += Math.cos(p.a) * W8.SPEED * g8Pace() * dt; p.y += Math.sin(p.a) * W8.SPEED * g8Pace() * dt;
     if (p.kind === "down" && p.y >= GR * T - 6) { g8.stuck.push({ x: p.x, a: p.a, t: 0 }); g8.past.splice(i, 1); }
     else if (p.x < camX - 200 || p.x < g8.a0 - 200) g8.past.splice(i, 1);
   }
   const j = g8.jav; if (!j) return;
-  j.t += dt; j.x += Math.cos(j.a) * W8.SPEED * dt; j.y += Math.sin(j.a) * W8.SPEED * dt;
+  const v = W8.SPEED * g8Pace();
+  j.t += dt; j.x += Math.cos(j.a) * v * dt; j.y += Math.sin(j.a) * v * dt;
   if (g8SpearHits(j)) { g8Hurt(); g8.jav = null; return; }
   if (j.kind === "down" && j.y >= GR * T - 6) {   // into the ground where David was standing
     thud(0.5); sfx("arrow_with_stick-to-target", j.x, 0.8, 0.6);
@@ -351,7 +354,7 @@ function updateGoliath8(dt) {
     g8.atk = null; g8Set("laugh"); thud(0.8); shake8(0.8); sfx("taunting_yells", g8.x, 0.8, 0.6);
   }
   if (g8.state === "charge" || g8.state === "volley") {   // his spears, one at a time
-    if (g8.atk) { if ((g8.tellT += dt) >= g8Tell()) { g8Throw(g8.atk); g8.atk = null; g8.nextAt = W8.GAP; } }
+    if (g8.atk) { if ((g8.tellT += dt) >= g8Tell()) { g8Throw(g8.atk); g8.atk = null; g8.nextAt = W8.GAP / g8Pace(); } }
     else if (g8Passed(g8.jav)) {
       if (g8.stillT > W8.STILL && g8.state === "charge") g8.nextAt = Math.min(g8.nextAt, 0);
       if ((g8.nextAt -= dt) <= 0) {
@@ -361,7 +364,7 @@ function updateGoliath8(dt) {
     }
   }
   if (g8.state === "charge") {
-    if (!g8.atk && g8.relT > 0.5 && g8Front() - d.x > (W8.REACH_AT + 3) * T) { g8.x -= W8.WALK * dt; g8.walkT += dt; }   // he comes on, slowly
+    if (!g8.atk && g8.relT > 0.5 && g8Front() - d.x > (W8.REACH_AT + 3) * T) { g8.x -= W8.WALK * g8Pace() * dt; g8.walkT += dt; }   // he comes on, slowly
   } else if (g8.state === "laugh") {
     if (g8.t > 1.5) {   // and taunts (the stage waits on the words)
       g8Set("taunt");
