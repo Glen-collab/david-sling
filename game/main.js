@@ -421,7 +421,7 @@ const STAGE_INFO = {
   "8-1": { cols: 72, bg: "w8_1", ter: "w2s", quiet: true, name: "The Valley" },   // World 8 (world8.js): the open valley floor again, no music: the words before the fight
   "8-3": { cols: 600, bg: "w8_3", ter: "w2s", name: "The Rout" },        // the Philistines run (auto-running: world8.js)
   "8-4": { cols: 214, bg: "w8_4", name: "Home" },                        // the hills of Bethlehem at sunset; the full song
-  "8-2": { cols: 116, bg: "w8_1", ter: "w2s", quiet: true, name: "Goliath" },      // the duel (his own music: Glen's war horns)   // the open valley floor: no music
+  "8-2": { cols: 206, bg: "w8_1", ter: "w2s", quiet: true, name: "Goliath" },      // the duel (his own music: Glen's war horns)   // the open valley floor: no music
   "7-3": { cols: 232, bg: "w7_3", ter: "w2s", name: "Five Smooth Stones" },   // the streambed
   "7-2": { cols: 330, bg: "w7_2", ter: "w2s", name: "Remember the Hills" },   // the memory sections switch to the old worlds' layers (world7.js)   // Glen's late afternoon at the top of the camp   // Glen's World 6 sets (6-1 to 6-4)
   "5-4": { cols: 316, bg: "w5_4", ter: "w2s", name: "Down to Elah" },   // Glen's dawn valley; 5-1's dusty ground
@@ -1517,7 +1517,7 @@ if (LEVEL_NAME === "test") {
   setPiece("words8", 44);
 } else if (LEVEL_NAME === "8-2") {
   // ---- 8-2 Goliath (1 Samuel 17:48-49): the duel. The arena is the whole stage (setPiece "goliath8", world8.js). ----
-  ground(0, 115);
+  ground(0, 205);
   setPiece("goliath8", 2);   // (2026-10-24: a long run at him, W8.ARENA columns)
 } else if (LEVEL_NAME === "8-3") {
   // ---- 8-3 The Rout (1 Samuel 17:51-52): the Philistines run and Israel chases them. It runs itself; jump what they

@@ -156,6 +156,7 @@ const MAP_WORLDS = {
   },
 };
 const BUILT_WORLDS = [1, 2, 3, 4, 5, 6, 7, 8];   // worlds you can go into from the journey map so far
+const NO_FINDS = ["8-2"];   // stages with nothing to find (Glen, 2026-10-24: the map shouldn't list sheep, The One or stones for them)
 const BUILT_STAGES = ["1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "2-3", "2-4", "3-1", "3-2", "3-3", "3-4", "4-1", "4-2", "4-3", "4-4", "5-1", "5-2", "5-3", "5-4", "6-1", "6-2", "6-3", "6-4", "7-1", "7-2", "7-3", "7-4", "8-1", "8-2", "8-3", "8-4"];   // stages that exist so far (the rest say "coming soon")
 
 function loadProgress() { try { return JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) { return {}; } }
@@ -489,7 +490,8 @@ const WorldMap = {
     }
     ctx.fillStyle = "#ffe08a"; ctx.font = "bold 24px sans-serif"; ctx.fillText(`${st.id}  ${st.label}`, W / 2, y + 32);
     ctx.fillStyle = "#e9dcc4"; ctx.font = "16px sans-serif";
-    let line = p.cleared ? `Sheep found ${p.sheep || 0}/${p.total || 5}${p.one ? "  ·  The One ✓" : "  ·  The One: still out there"}  ·  stones ${Math.min(3, p.stones || 0)}/3` : BUILT_STAGES.includes(st.id) ? "A: play" : "Not built yet";
+    const finds = !NO_FINDS.includes(st.id);   // (8-2 is only the giant: no sheep, no One, no stones to show)
+    let line = p.cleared && !finds ? "The giant is down" : p.cleared ? `Sheep found ${p.sheep || 0}/${p.total || 5}${p.one ? "  ·  The One ✓" : "  ·  The One: still out there"}  ·  stones ${Math.min(3, p.stones || 0)}/3` : BUILT_STAGES.includes(st.id) ? "A: play" : "Not built yet";
     if (p.cleared) line += "     A: play again";
     ctx.fillText(line, W / 2, y + 58);
     ctx.textAlign = "right"; ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.8)";

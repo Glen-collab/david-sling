@@ -138,7 +138,8 @@ Object.assign(W8, {
   FRONT: 52,             // 8-2: px from Goliath's feet to his front (he faces left, toward David)
   // (Glen, 2026-10-24) 8-2 is a run at him under his spears: one spear at a time, fast. Stand still and one finds you.
   // Reach him and he laughs, taunts (17:44), throws a quick volley up close, then laughs at the sky: the throw.
-  ARENA: 110,            // columns from the start of the run to the far end
+  ARENA: 200,            // columns from the start of the run to the far end (Glen, 2026-10-24: longer; was 110)
+  WALK_MAX: 12,          // tiles he walks toward David at most (so the crowd knows where to stand: at the end, where David reaches him)
   REACH_AT: 8,           // tiles from his front: David has made it to him (the laugh, the taunt, the volley)
   WALK: 42,              // px/s he comes on between throws (17:48: "the Philistine arose, and walked and came near")
   TELL: { charge: 0.42, volley: 0.34 },   // seconds he shows each throw: the spear lowered = flat, raised = down at you
@@ -146,6 +147,8 @@ Object.assign(W8, {
   GAP: 0.22,             // seconds after one spear has passed David before he starts the next (only one coming at a time)
   STILL: 0.6,            // seconds standing still before he throws at you at once
   VOLLEY: 4,             // spears in the close-up volley before he laughs at the sky
+  ONES: 31,              // The Ones in the game, one a stage but 8-2 (the duel): all of them opens the secret ending
+  VOLLEY_AGAIN: 6,       // after a missed throw: he laughs, and this many before he opens up again
   SPEED: 2000,           // px/s, every spear (Glen, 2026-10-24: faster; was 1500)
   PACE: 1,               // THE KNOB: how quick his spears come, all at once (their speed, the tells, the gaps, his walk). 1.2 = 20% quicker
                          // (Easy x0.85 and Hard x1.2 on top: main.js DIFFICULTY spear)
@@ -158,7 +161,6 @@ Object.assign(W8, {
   JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the downward spear leaves from there
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
-  HEART_STONES: 4,       // +1 heart for every this many stones of remembrance saved
   SIZE: 1.55,            // Goliath (as in 7-4)
   CLIP_SIZE: 1.66,       // Glen's 2026-10-22 attack sheets against goliath_yell (standing 240 px vs 401 in the sheets)
 });
@@ -265,10 +267,9 @@ function g8Call(who, line) { if (g8Met(who)) g8.callout = { who, line, t: 1.2 };
 function stonesSavedAll() { return typeof stonesFound === "function" ? [1, 2, 3, 4, 5, 6, 7].reduce((n, w) => n + stonesFound(w), 0) : 0; }
 function startG8() {
   g8.on = true; g8.t = 0;
-  if (!g8.bonus && !TRIAL) {   // the stones of remembrance you saved (not in the Shepherd's Trial): more hearts, and longer to make the throw (DESIGN 3f)
-    g8.bonus = true; const n = stonesSavedAll(), h = Math.floor(n / W8.HEART_STONES);
-    if (h > 0) { david.maxHearts += h; david.hearts += h; }
-    setTimeout(() => toast(`${n} stone${n === 1 ? "" : "s"} of remembrance${h ? `: +${h} heart${h === 1 ? "" : "s"}` : ""}, and a steadier hand for the throw.`), 5200);
+  if (!g8.bonus && !TRIAL) {   // the stones of remembrance you saved (not in the Shepherd's Trial): longer to make the throw (DESIGN 3f)
+    g8.bonus = true; const n = stonesSavedAll();   // (Glen, 2026-10-24: no extra hearts any more, just the ones you came with)
+    if (n) setTimeout(() => toast(`${n} stone${n === 1 ? "" : "s"} of remembrance: a steadier hand for the throw.`), 5200);
   }
   G8_MUSIC.currentTime = 0; G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 1.1); G8_MUSIC.play().catch(() => {});
   thud(1); shake8(1.2);
@@ -365,7 +366,7 @@ function updateGoliath8(dt) {
     }
   }
   if (g8.state === "charge") {
-    if (!g8.atk && g8.relT > 0.5 && g8Front() - d.x > (W8.REACH_AT + 3) * T) { g8.x -= W8.WALK * g8Pace() * dt; g8.walkT += dt; }   // he comes on, slowly
+    if (!g8.atk && g8.relT > 0.5 && g8Front() - d.x > (W8.REACH_AT + 3) * T) { g8.x = Math.max(g8.a1 - (6 + W8.WALK_MAX) * T, g8.x - W8.WALK * g8Pace() * dt); g8.walkT += dt; }   // he comes on, slowly
   } else if (g8.state === "laugh") {
     if (g8.t > 1.5) {   // and taunts (the stage waits on the words)
       g8Set("taunt");
@@ -399,9 +400,9 @@ function updateGoliath8(dt) {
     if (!g8.missed) {
       g8.missed = true; g8.smooth = Math.max(1, g8.smooth - 1);
       sfx("taunting_yells", undefined, 0.7, 0.6); G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 1.1);
-      toast(`It flies wide. He laughs. (${g8.smooth} smooth stone${g8.smooth === 1 ? "" : "s"} left. Live through his spears and he'll open up again.)`);
+      toast(`It flies wide. He laughs, and the spears come again. (${g8.smooth} smooth stone${g8.smooth === 1 ? "" : "s"} left. Live through them and he'll open up again.)`);
     }
-    if (g8.t > 1.6) { g8.missed = false; g8.code = null; g8Set("volley"); g8.thrown = 0; g8.volleyN = W8.VOLLEY; g8.nextAt = 0.4; }
+    if (g8.t > 1.6) { g8.missed = false; g8.code = null; g8Set("volley"); g8.thrown = 0; g8.volleyN = W8.VOLLEY_AGAIN; g8.nextAt = 0.3; }
   }
 }
 function stoneHitsGoliath8(s) {   // plain stones: clang off his bronze, sparks, nothing more
@@ -841,7 +842,7 @@ const w8ending = {
 // ---------------------------------------------------------------------------
 // The end of the game (Glen, 2026-10-22): after the last Journal page (his whole song playing over it, journal.js
 // journalSong), the credits roll over the hills of Bethlehem while the song plays on, then the final score; and if every
-// one of The One was found (32), the secret ending (DESIGN 5h): a thousand years later, shepherds on the same hills.
+// one of The One was found (W8.ONES, 31), the secret ending (DESIGN 5h): a thousand years later, shepherds on the same hills.
 // W8.CREDITS is the list: [size, text]; "" is a gap. (Glen: fill in or change any line.)
 // To watch it alone: index.html#credits
 // ---------------------------------------------------------------------------
@@ -861,7 +862,7 @@ Object.assign(W8, {
     ["verse", "The battle is the LORD's."], ["small", "1 Samuel 17:47"],
   ],
   CREDITS_SPEED: 42,     // px a second the credits roll (hold A: three times as fast)
-  SECRET: [              // all 32 of The One: Luke 2:8-11 (WEB), on the hills of World 1 at night
+  SECRET: [              // all 31 of The One: Luke 2:8-11 (WEB), on the hills of World 1 at night
     { text: "About a thousand years later." },
     { text: "There were shepherds in the same country staying in the field, and keeping watch by night over their flock. (Luke 2:8)" },
     { text: "Behold, an angel of the Lord stood by them, and the glory of the Lord shone around them, and they were terrified. (Luke 2:9)", glory: true },
@@ -869,7 +870,7 @@ Object.assign(W8, {
     { text: "\"For there is born to you today, in David's city, a Savior, who is Christ the Lord.\" (Luke 2:11)", glory: true, last: true },
   ],
 });
-function endScore() {   // sheep saved, The One found (of 32), stones of remembrance (of 96)
+function endScore() {   // sheep saved, The One found (of W8.ONES: 8-2 has none), stones of remembrance (of 96)
   const p = loadProgress(); let sheep = 0, total = 0, ones = 0;
   for (const k in p) if (/^\d-\d$/.test(k) && p[k] && p[k].cleared) { sheep += p[k].sheep || 0; total += p[k].total || 0; if (p[k].one) ones++; }
   const stones = typeof stonesFound === "function" ? [1, 2, 3, 4, 5, 6, 7, 8].reduce((n, w) => n + stonesFound(w), 0) : 0;
@@ -899,7 +900,7 @@ const credits8 = {
     this.y = Math.max(end, this.y - W8.CREDITS_SPEED * fast * dt);
     if (pressed("start")) this.y = end;
     if (this.y <= end && this.t > 3 && pressed("a")) {
-      if (this.score.ones >= 32) { this.secret = 0; this.st = 0; }
+      if (this.score.ones >= W8.ONES) { this.secret = 0; this.st = 0; }
       else this.out = 0.001;
     }
   },
@@ -939,7 +940,7 @@ const credits8 = {
             const S = this.score; ctx.font = "16px sans-serif"; ctx.fillStyle = "rgba(255,230,190,0.75)"; ctx.fillText("YOUR JOURNEY", W / 2, y);
             ctx.font = "22px Georgia, serif"; ctx.fillStyle = "#fff4dc";
             ctx.fillText(`Sheep brought home: ${S.sheep}${S.total ? ` of ${S.total}` : ""}`, W / 2, y + 34);
-            ctx.fillText(`The One found: ${S.ones} of 32`, W / 2, y + 64);
+            ctx.fillText(`The One found: ${S.ones} of ${W8.ONES}`, W / 2, y + 64);
             ctx.fillText(`Stones of remembrance: ${S.stones} of 96`, W / 2, y + 94);
           }
         }
@@ -993,7 +994,7 @@ function crowd8List() {   // who's on the slope today
 let crowd8 = null;   // made on the first frame (loadProgress is in map.js, which loads after this file)
 function crowd8Spot() {   // the right-hand end of the front row (x, world px): just behind where David stands
   if (words8) return words8.x - 1.6 * T;
-  if (g8) return g8.a0 + (1.2 + Math.max(0, crowd8.front.length - 1) * W8.CROWD_GAP) * T;   // the left end of the arena
+  if (g8) return g8.a1 - (6 + W8.WALK_MAX + W8.REACH_AT + 3) * T - W8.FRONT;   // (Glen, 2026-10-24) at the end of the run, just behind where David reaches him
   return 0;
 }
 function updateCrowd8(dt) {
