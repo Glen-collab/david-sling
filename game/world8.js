@@ -148,10 +148,11 @@ Object.assign(W8, {
   WAVE: 620,             // px/s, the spear slam's shockwave along the ground (be in the air)
   SLAM_SHAKE: 1.7,       // how hard the camera shakes when the spear goes into the ground (the bear's slam is about 1)
   SLAM_POINT: -18,       // px from his feet to where the spear point goes in (the dust)
-  JAV_T: 1.15,           // seconds the javelin is in the air
+  JAV_T: 0.5,            // seconds the javelin is in the air (Glen, 2026-10-24: thrust straight and fast, not a lobbed arc; was 1.15)
   JAV_R: 46,             // px from where it lands that it hurts
   SPEAR_SHEET_LEN: 450,  // the thrown spear's length, in goliath_spear sheet pixels (so it matches the one he holds)
   SPEAR_SINK: 22,        // px of the tip buried in the ground once it lands
+  JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the javelin leaves from there
   RECOVER: 0.9,          // seconds after an attack before he moves again
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
@@ -283,7 +284,7 @@ function g8Attack(atk) {
   g8.atk = atk; g8Set("tell");
   if (atk === "thrust") g8Call("Hanan", "Remember the lion!");
   if (atk === "slam") g8Call("Abinadab", "Get above him!");
-  if (atk === "javelin") g8Call("Tobi", "Watch the sky!");
+  if (atk === "javelin") g8Call("Tobi", "His spear! Get clear!");
   if (atk === "sweep") g8Call("Shammah", "Not so close! Jump!");
   if (atk === "chop") g8Call("Shammah", "Get back from the sword!");
 }
@@ -308,9 +309,9 @@ function g8Code() {   // the throw, as far as you know it (DESIGN 4c), and A (fa
   return code.length ? code : ["a"];
 }
 function g8JavPos(j) {
-  const p = Math.min(1, j.t / W8.JAV_T), x = j.x0 + (j.tx - j.x0) * p, y = j.y0 + (GR * T - 6 - j.y0) * p - Math.sin(p * Math.PI) * 170;
-  const dx = (j.tx - j.x0) / W8.JAV_T, dy = ((GR * T - 6 - j.y0) - Math.cos(p * Math.PI) * Math.PI * 170) / W8.JAV_T;
-  return { x, y, a: Math.atan2(dy, dx) };
+  // where its point is: a straight line from his hand to where David stood when he let go (no arc), point first
+  const p = Math.min(1, j.t / W8.JAV_T), dx = j.tx - j.x0, dy = GR * T - 6 - j.y0;
+  return { x: j.x0 + dx * p, y: j.y0 + dy * p, a: Math.atan2(dy, dx) };
 }
 function updateGoliath8(dt) {
   if (!g8) return;
@@ -352,7 +353,12 @@ function updateGoliath8(dt) {
         const px = g8.x + W8.SLAM_POINT;   // dust and grit thrown up where the point went in
         for (let k = 0; k < 26; k++) bits.push({ x: px + (Math.random() - 0.5) * 40, y: GR * T - 4, vx: (Math.random() - 0.5) * 520, vy: -120 - Math.random() * 520, life: 0.7 + Math.random() * 0.4, color: k % 3 ? "#cdb084" : "#8a6a44" });
       }
-      if (g8.atk === "javelin") { g8.jav = { x0: g8.x - 20, y0: GR * T - 300, tx: d.x, t: 0 }; sfx("arrow_single", g8.x, 0.9, 0.6); g8Call("Gera", "Release, reload! Knock it aside!"); }
+      if (g8.atk === "javelin") {
+        const k = SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1), L = W8.SPEAR_SHEET_LEN * k;
+        const hx = g8.x - W8.JAV_HAND[0] * k, hy = GR * T - W8.JAV_HAND[1] * k, a = Math.atan2(GR * T - hy, Math.min(-1, d.x - hx));
+        g8.jav = { x0: hx + Math.cos(a) * L * 0.6, y0: hy + Math.sin(a) * L * 0.6, tx: d.x, t: 0 };   // its point starts ahead of his hand
+        sfx("arrow_single", g8.x, 0.9, 0.6); g8Call("Gera", "Release, reload! Knock it aside!");
+      }
       if (g8.atk === "thrust" || g8.atk === "sweep" || g8.atk === "chop") sfx("sling_throw_quick", g8.x, 0.8, 0.45);   // the whoosh of it, deep
     }
   } else if (g8.state === "hit") {
@@ -425,7 +431,7 @@ function drawGoliath8(camX) {
     if (img && img.naturalWidth) {   // Glen's spear (assets/items/spear_goliath.png: drawn on a slant, tip at the top right)
       const L = W8.SPEAR_SHEET_LEN * SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // as long as the one in his hand
       const ia = Math.atan2(-img.naturalHeight, img.naturalWidth), k = L / Math.hypot(img.naturalWidth, img.naturalHeight);
-      let a = jp.a, cx = jp.x, cy = jp.y;
+      let a = jp.a, cx = jp.x - Math.cos(a) * L / 2, cy = jp.y - Math.sin(a) * L / 2;   // (jp is the point; the picture is drawn from its middle)
       if (j.down) {   // stuck in the ground where it landed, tip first, at the angle it came down
         a = g8JavPos({ ...j, t: W8.JAV_T }).a;
         cx = j.tx - Math.cos(a) * (L / 2 - W8.SPEAR_SINK); cy = GR * T - Math.sin(a) * (L / 2 - W8.SPEAR_SINK);
@@ -461,7 +467,7 @@ function drawGoliath8(camX) {
     else if (a === "thrust") { if (hit) { ctx.save(); ctx.translate(-36, 0); spear(7); ctx.restore(); } else spear(rec ? 6 : 5 + Math.min(2, Math.floor(tellP * 2.99))); }
     else if (a === "sweep") spear(hit ? 8 : rec ? 7 : 6);
     else if (a === "slam") spear(hit || rec ? 4 : tellP < 0.5 ? 8 : 9);
-    else if (a === "javelin") spear(hit ? 10 : rec ? 11 + Math.min(8, Math.floor(g8.t * 8)) : 5 + Math.min(4, Math.floor(tellP * 4.99)));
+    else if (a === "javelin") spear(hit ? 11 : rec ? 11 + Math.min(8, Math.floor(g8.t * 8)) : 5 + Math.min(5, Math.floor(tellP * 5.99)));   // the wind-up ends on 10 (spear forward), and it's out of his hand (11) the moment it flies
     if (g8.state === "tell" && (a === "thrust" || a === "slam")) {   // the iron head glints: the tell
       const gx = x + W8.GLINT[a][0], gy = GR * T - W8.GLINT[a][1], r = 10 + 8 * Math.sin(now * 18);
       const gl = ctx.createRadialGradient(gx, gy, 0, gx, gy, r * 2); gl.addColorStop(0, "rgba(255,255,230,0.95)"); gl.addColorStop(1, "rgba(255,220,120,0)");
