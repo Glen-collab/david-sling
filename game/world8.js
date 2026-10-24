@@ -120,10 +120,11 @@ if (location.hash === "#giantfall") giantFall.start(() => backToMap());   // (te
 //   setPiece("words8", c)    8-1: past column c, Goliath (standing W8.WORDS_GX tiles on) taunts (17:43-44), and David
 //                            answers line by line, one A press each (17:45-47); the last line earns the throw's last
 //                            piece (A, faith: DESIGN 4c), then it's straight on to 8-2.
-//   setPiece("goliath8", c)  8-2: the arena, 35 columns from c. Plain stones bounce off his bronze. Survive and run
-//                            toward him (17:48): close in W8.CLOSES times a phase; phase 2 is faster, with the people you
-//                            met calling out his attacks; phase 3 he roars at the sky, his forehead is open, and the
-//                            throw (the code, from memory) is the stone. Then giantFall, the slow-motion scene.
+//   setPiece("goliath8", c)  8-2: W8.ARENA columns from c. (Glen, 2026-10-24) A run at him under his spears (17:48):
+//                            one at a time and fast, flat (low: jump, high: roll) or, near him, down at where you
+//                            stand; stand still and one comes at once. Reach him and he laughs, taunts (17:44), throws
+//                            a quick volley up close, then laughs at the sky: his forehead is open and the throw (the
+//                            code, from memory) is the stone. Plain stones bounce off his bronze. Then giantFall.
 // ===========================================================================
 Object.assign(W8, {
   WORDS_GX: 14,          // 8-1: how many tiles past the trigger Goliath stands
@@ -135,25 +136,24 @@ Object.assign(W8, {
     "for the battle is the LORD's. (1 Samuel 17:47)",
   ],
   FRONT: 52,             // 8-2: px from Goliath's feet to his front (he faces left, toward David)
-  CLOSE: 2.6,            // tiles from his front that count as closing in (17:48: David ran to meet him)
-  CLOSES: 3,             // close-ins a phase (phases 1 and 2), then the next phase
-  PUSHBACK: 6,           // tiles he staggers back when David closes in
-  WALK: 42,              // px/s he advances (phase 2: x1.3)
-  TELL: { thrust: 0.85, slam: 1.0, javelin: 1.05, sweep: 0.55, chop: 0.7 },   // seconds of each tell in phase 1
-  TELL2: 0.75,           // phases 2 and 3: tells this much shorter
-  COUNSEL: 1.3,          // after a loss (Shammah's counsel): tells this much longer, and the opening twice as long
-  REACH: { thrust: 6, sweep: 4.2, chop: 3.8 },   // tiles from his front each one reaches (the chop: no jumping over it, get back)
-  THRUST_Y: 70,          // the spear passes this high (px off the ground): jump higher, or roll under it
-  SWEEP_Y: 60,           // the sweep: be higher than this
-  WAVE: 620,             // px/s, the spear slam's shockwave along the ground (be in the air)
-  SLAM_SHAKE: 1.7,       // how hard the camera shakes when the spear goes into the ground (the bear's slam is about 1)
-  SLAM_POINT: -18,       // px from his feet to where the spear point goes in (the dust)
-  JAV_T: 0.5,            // seconds the javelin is in the air (Glen, 2026-10-24: thrust straight and fast, not a lobbed arc; was 1.15)
-  JAV_R: 46,             // px from where it lands that it hurts
+  // (Glen, 2026-10-24) 8-2 is a run at him under his spears: one spear at a time, fast. Stand still and one finds you.
+  // Reach him and he laughs, taunts (17:44), throws a quick volley up close, then laughs at the sky: the throw.
+  ARENA: 110,            // columns from the start of the run to the far end
+  REACH_AT: 8,           // tiles from his front: David has made it to him (the laugh, the taunt, the volley)
+  WALK: 42,              // px/s he comes on between throws (17:48: "the Philistine arose, and walked and came near")
+  TELL: { charge: 0.5, volley: 0.4 },   // seconds he shows each throw: the spear lowered = flat, raised = down at you
+  COUNSEL: 1.3,          // after a loss (Shammah's counsel): tells this much longer, and the throw's time doubled
+  GAP: 0.35,             // seconds after one spear is gone before he starts the next (only ever one in the air)
+  STILL: 0.6,            // seconds standing still before he throws at you at once
+  VOLLEY: 4,             // spears in the close-up volley before he laughs at the sky
+  SPEED: 1500,           // px/s, every spear
+  LOW_Y: 24,             // px off the ground of a low flat spear: jump it
+  HIGH_Y: 86,            // px off the ground of a high one, at his shoulders: roll under it (David stands 96 px, rolls 64)
+  DIAG_RANGE: 22,        // tiles: nearer than this he also throws down at where you stand
+  JAV_R: 40,             // px from where a downward spear lands that it hurts
   SPEAR_SHEET_LEN: 450,  // the thrown spear's length, in goliath_spear sheet pixels (so it matches the one he holds)
   SPEAR_SINK: 22,        // px of the tip buried in the ground once it lands
-  JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the javelin leaves from there
-  RECOVER: 0.9,          // seconds after an attack before he moves again
+  JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the downward spear leaves from there
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
   HEART_STONES: 4,       // +1 heart for every this many stones of remembrance saved
@@ -243,64 +243,87 @@ function drawWords8Over() {   // David's answer, big across the valley, line by 
 
 // ---- 8-2: the duel ----
 const g8Piece = setPieces.find(p => p.kind === "goliath8");
-const g8 = g8Piece ? { a0: g8Piece.c * T, a1: (g8Piece.c + 35) * T, counsel: false, smooth: 5, phase: 1 } : null;
+const g8 = g8Piece ? { a0: g8Piece.c * T, a1: (g8Piece.c + W8.ARENA) * T, counsel: false, smooth: 5, phase: 1 } : null;
 const goliathFight = () => !!(g8 && g8.on && !g8.won);
-function w8Cam() { return g8 && (g8.on || g8.won) ? [g8.a0, g8.a0] : null; }
 const G8_MUSIC = Object.assign(new Audio(`../assets/sounds/music_8_stone.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // Glen's "The One Stone" (2026-10-23; his war horns, goliath_theme, before it: they stay in 7-4)
 function resetG8() {
-  Object.assign(g8, { on: false, won: false, state: "walk", t: 0, x: g8.a1 - 6 * T, closes: 0, atk: null, waves: [], jav: null,
-                      combo: 0, nextAt: 1.4, callout: null, code: null, flash: 0, walkT: 0, needClose: 0, armed: true });
+  Object.assign(g8, { on: false, won: false, state: "charge", t: 0, x: g8.a1 - 6 * T, atk: null, tellT: 0, jav: null, past: [], stuck: [], relT: 9, relKind: null,
+                      thrown: 0, nextAt: 1.4, callout: null, code: null, flash: 0, walkT: 0, stillT: 0, lastAtk: null });
 }
 if (g8) resetG8();
 const g8Front = () => g8.x - W8.FRONT;
-const g8Tell = atk => W8.TELL[atk] * (g8.phase > 1 ? W8.TELL2 : 1) * (g8.counsel ? W8.COUNSEL : 1);
-function g8Met(who) {   // the people who call out warnings in phase 2: only the ones you met (DESIGN 5h)
+const g8Tell = () => W8.TELL[g8.state === "volley" ? "volley" : "charge"] * (g8.counsel ? W8.COUNSEL : 1);
+const g8SpearK = () => SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // goliath_spear sheet px -> world px
+function g8Met(who) {   // the people who call out warnings: only the ones you met (DESIGN 5h)
   const p = loadProgress(), c = id => !!(p[id] && p[id].cleared);
   return { Hanan: c("1-1"), Gera: c("4-2"), Tobi: c("5-1"), Abinadab: c("6-1"), Shammah: c("7-3") }[who];
 }
-function g8Call(who, line) { if (g8.phase >= 2 && g8Met(who)) g8.callout = { who, line, t: 1.6 }; }
+function g8Call(who, line) { if (g8Met(who)) g8.callout = { who, line, t: 1.2 }; }
 function stonesSavedAll() { return typeof stonesFound === "function" ? [1, 2, 3, 4, 5, 6, 7].reduce((n, w) => n + stonesFound(w), 0) : 0; }
 function startG8() {
   g8.on = true; g8.t = 0;
   if (!g8.bonus && !TRIAL) {   // the stones of remembrance you saved (not in the Shepherd's Trial): more hearts, and longer to make the throw (DESIGN 3f)
     g8.bonus = true; const n = stonesSavedAll(), h = Math.floor(n / W8.HEART_STONES);
     if (h > 0) { david.maxHearts += h; david.hearts += h; }
-    setTimeout(() => toast(`${n} stone${n === 1 ? "" : "s"} of remembrance${h ? `: +${h} heart${h === 1 ? "" : "s"}` : ""}, and a steadier hand for the throw.`), 2600);
+    setTimeout(() => toast(`${n} stone${n === 1 ? "" : "s"} of remembrance${h ? `: +${h} heart${h === 1 ? "" : "s"}` : ""}, and a steadier hand for the throw.`), 5200);
   }
   G8_MUSIC.currentTime = 0; G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 1.1); G8_MUSIC.play().catch(() => {});
   thud(1); shake8(1.2);
   sayLine("", "When the Philistine arose, and walked and came near to meet David, David hurried and ran toward the army to meet the Philistine. (1 Samuel 17:48)");
-  setTimeout(() => toast("Plain stones bounce off his bronze. Survive, and run toward him: get in close when you see your chance."), 400);
+  setTimeout(() => toast("Run at him and don't stop. Jump the low spears, roll under the high ones, and never stand still."), 400);
 }
 function g8Hurt() { if (david.inv <= 0 && david.deadT <= 0) hurtDavid(g8.x); }
 function g8Set(s) { g8.state = s; g8.t = 0; }
-function g8Pick() {   // the next attack: the sword up close, otherwise the spear (thrust in reach), the slam or the javelin
-  const dist = g8Front() - david.x;
-  if (dist < W8.REACH.sweep * T) return dist < W8.REACH.chop * T && Math.random() < 0.5 ? "chop" : "sweep";
-  const opts = dist < (W8.REACH.thrust - 0.5) * T ? ["thrust", "thrust", "slam", "javelin"] : ["slam", "javelin", "javelin"];
-  return opts[Math.floor(Math.random() * opts.length)];
+function g8Pick() {   // a flat spear, low (jump it) or high (roll under it); near enough, one thrown down at where you stand
+  const near = g8Front() - david.x < W8.DIAG_RANGE * T;
+  if (near && g8.stillT > W8.STILL) return "down";   // standing still: he throws right at you
+  const opts = near ? ["low", "high", "down"] : ["low", "high"];
+  let a = opts[Math.floor(Math.random() * opts.length)];
+  if (a === g8.lastAtk && Math.random() < 0.5) a = opts[Math.floor(Math.random() * opts.length)];   // not too often the same twice
+  return a;
 }
 function g8Attack(atk) {
-  g8.atk = atk; g8Set("tell");
-  if (atk === "thrust") g8Call("Hanan", "Remember the lion!");
-  if (atk === "slam") g8Call("Abinadab", "Get above him!");
-  if (atk === "javelin") g8Call("Tobi", "His spear! Get clear!");
-  if (atk === "sweep") g8Call("Shammah", "Not so close! Jump!");
-  if (atk === "chop") g8Call("Shammah", "Get back from the sword!");
+  g8.atk = atk; g8.lastAtk = atk; g8.tellT = 0;
+  if (atk === "low") g8Call("Shammah", "Low! Jump!");
+  if (atk === "high") g8Call("Hanan", "High! Roll under it!");
+  if (atk === "down") g8Call("Tobi", "Keep moving!");
 }
-function g8CloseIn() {   // David got in close (17:48): he staggers back, and the meter fills
-  g8.closes++; chime(6 + g8.closes); thud(0.7); shake8(0.6);
-  g8.atk = null; g8.jav = null; g8Set("reset");
-  if (!W8.closeTold) { W8.closeTold = true; toast("Right up to him! He staggers back a step. Do it again."); }
-  if (g8.phase === 3) { if (g8.needClose) { g8.closes = 0; g8.needClose = 0; g8Set("roar"); } return; }
-  if (g8.closes >= W8.CLOSES) {
-    g8.closes = 0; g8.phase++;
-    if (g8.phase === 2) {
-      sayLine("Goliath", "Come to me, and I will give your flesh to the birds of the sky and to the animals of the field. (1 Samuel 17:44)"); goliathChain(["lecha_elai"], 0.8);
-      setTimeout(() => toast("He's angry now: faster, one attack after another. Listen for the people who came with you."), 800);
-    }
-    if (g8.phase === 3) g8Set("roar");
+const g8Passed = j => !j || j.x < david.x - 80;   // the spear in the air is behind David now: the next can come
+function g8Throw(kind) {   // the spear leaves his hand: flat from his front, or down from over his head at where David is
+  const d = david, k = g8SpearK(), L = W8.SPEAR_SHEET_LEN * k;
+  if (g8.jav) g8.past.push(g8.jav);   // (the last one flies on behind him, harmless)
+  if (kind === "down") {
+    const hx = g8.x - W8.JAV_HAND[0] * k, hy = GR * T - W8.JAV_HAND[1] * k, a = Math.atan2(GR * T - 6 - hy, Math.min(-1, d.x - hx));
+    g8.jav = { kind, x: hx + Math.cos(a) * L * 0.6, y: hy + Math.sin(a) * L * 0.6, a, tx: d.x, t: 0 };   // (x, y: its point)
+    g8.jav.y0 = g8.jav.y;
+  } else g8.jav = { kind, x: g8Front() - 10, y: GR * T - (kind === "low" ? W8.LOW_Y : W8.HIGH_Y), a: Math.PI, t: 0 };
+  g8.relT = 0; g8.relKind = kind; g8.thrown++;
+  sfx("arrow_single", g8.x, 0.9, 0.6); sfx("sling_throw_quick", g8.x, 0.7, 0.45);   // the whoosh of it, deep
+}
+function g8SpearHits(j) {   // does the spear's shaft (its front half) cross David?
+  const d = david, L = W8.SPEAR_SHEET_LEN * g8SpearK();
+  const x0 = d.x - BODY_W / 2, x1 = d.x + BODY_W / 2, y0 = d.y - d.h, y1 = d.y;
+  for (let s = 0; s <= L * 0.55; s += 10) {
+    const px = j.x - Math.cos(j.a) * s, py = j.y - Math.sin(j.a) * s;
+    if (px > x0 && px < x1 && py > y0 && py < y1) return true;
   }
+  return false;
+}
+function updateSpear8(dt) {   // the one spear in the air, and the ones stuck in the ground
+  for (let i = g8.stuck.length - 1; i >= 0; i--) if ((g8.stuck[i].t += dt) > 2.5) g8.stuck.splice(i, 1);
+  for (let i = g8.past.length - 1; i >= 0; i--) {
+    const p = g8.past[i]; p.x += Math.cos(p.a) * W8.SPEED * dt; p.y += Math.sin(p.a) * W8.SPEED * dt;
+    if (p.kind === "down" && p.y >= GR * T - 6) { g8.stuck.push({ x: p.x, a: p.a, t: 0 }); g8.past.splice(i, 1); }
+    else if (p.x < camX - 200 || p.x < g8.a0 - 200) g8.past.splice(i, 1);
+  }
+  const j = g8.jav; if (!j) return;
+  j.t += dt; j.x += Math.cos(j.a) * W8.SPEED * dt; j.y += Math.sin(j.a) * W8.SPEED * dt;
+  if (g8SpearHits(j)) { g8Hurt(); g8.jav = null; return; }
+  if (j.kind === "down" && j.y >= GR * T - 6) {   // into the ground where David was standing
+    thud(0.5); sfx("arrow_with_stick-to-target", j.x, 0.8, 0.6);
+    if (Math.abs(david.x - j.x) < W8.JAV_R && david.y > GR * T - 90) g8Hurt();
+    g8.stuck.push({ x: j.x, a: j.a, t: 0 }); g8.jav = null;
+  } else if (j.x < camX - 200 || j.x < g8.a0 - 200) g8.jav = null;   // a flat one, gone past
 }
 function g8Code() {   // the throw, as far as you know it (DESIGN 4c), and A (faith) from 8-1
   const learned = typeof throwLearned === "function" ? throwLearned() : 0, n = THROW_PIECE_LEN.slice(0, Math.min(7, learned)).reduce((a, b) => a + b, 0);
@@ -308,75 +331,46 @@ function g8Code() {   // the throw, as far as you know it (DESIGN 4c), and A (fa
   const code = THROW_CODE.slice(0, n).concat(faith ? ["a"] : []);
   return code.length ? code : ["a"];
 }
-function g8JavPos(j) {
-  // where its point is: a straight line from his hand to where David stood when he let go (no arc), point first
-  const p = Math.min(1, j.t / W8.JAV_T), dx = j.tx - j.x0, dy = GR * T - 6 - j.y0;
-  return { x: j.x0 + dx * p, y: j.y0 + dy * p, a: Math.atan2(dy, dx) };
-}
 function updateGoliath8(dt) {
   if (!g8) return;
   const d = david;
   if (!g8.on && !g8.won && d.x > g8.a0 + 2 * T && d.deadT <= 0) startG8();
   if (!g8.on || g8.won) { if (g8.won && g8.state === "thrown") g8.t += dt; return; }
-  if (d.deadT > 0) {   // David fell: the fight resets (the phase reached stays); Shammah's counsel from the slope
+  if (d.deadT > 0) {   // David fell: the fight starts over; Shammah's counsel from the slope
     resetG8(); G8_MUSIC.pause();
-    if (!g8.counsel && !TRIAL) { g8.counsel = true; setTimeout(() => sayLine("Shammah", "Come here. Tell me what happened. ... Watch him: every blow, he shows you first. You've got longer than you think. And when he roars at the sky, there's your opening."), 1600); }
+    if (!g8.counsel && !TRIAL) { g8.counsel = true; setTimeout(() => sayLine("Shammah", "Come here. Tell me what happened. ... Don't stop running: stand still and he'll find you. He shows you every spear first. Lowered, it comes flat: low, jump it; high, roll under it. Over his head, it comes down at you: keep moving. You've got longer than you think."), 1600); }
     return;
   }
-  g8.t += dt; g8.flash = Math.max(0, g8.flash - dt);
+  g8.t += dt; g8.flash = Math.max(0, g8.flash - dt); g8.relT += dt;
   if (g8.callout && (g8.callout.t -= dt) <= 0) g8.callout = null;
-  if (g8.state !== "reset" && d.x > g8Front() - 14) { d.x = g8Front() - 14; if (d.vx > 0) d.vx = 0; }   // he's a wall of bronze: no walking through him
+  if (d.x > g8Front() - 14) { d.x = g8Front() - 14; if (d.vx > 0) d.vx = 0; }   // he's a wall of bronze: no walking through him
   if (d.x < g8.a0 + 16) d.x = g8.a0 + 16;
-  // the shockwaves and the javelin
-  for (let i = g8.waves.length - 1; i >= 0; i--) {
-    const w = g8.waves[i]; w.x -= W8.WAVE * dt; w.t += dt;
-    if (w.x < g8.a0 - 40) { g8.waves.splice(i, 1); continue; }
-    if ((d.onGround || d.state === "roll") && Math.abs(d.x - w.x) < 28) { g8Hurt(); g8.waves.splice(i, 1); }
+  g8.stillT = d.onGround && Math.abs(d.vx) < 40 ? g8.stillT + dt : 0;
+  updateSpear8(dt);
+  if (g8.state === "charge" && g8Front() - d.x < W8.REACH_AT * T && g8Passed(g8.jav)) {   // David made it to him: he laughs (a throw he was showing, he holds)
+    g8.atk = null; g8Set("laugh"); thud(0.8); shake8(0.8); sfx("taunting_yells", g8.x, 0.8, 0.6);
   }
-  const j = g8.jav;
-  if (j && !j.down) {
-    j.t += dt;
-    if (j.t >= W8.JAV_T) { j.down = true; j.dt = 0; thud(0.5); sfx("arrow_with_stick-to-target", j.tx, 0.8, 0.6); if (Math.abs(d.x - j.tx) < W8.JAV_R && d.y > GR * T - 90) g8Hurt(); }
-  } else if (j && j.down && (j.dt += dt) > 2.5) g8.jav = null;
-  // closing in (17:48): any time but while he's staggering, roaring, or the throw
-  if (g8Front() - d.x > (W8.CLOSE + 1.5) * T) g8.armed = true;   // (after a close-in, step back out before the next one counts: by the arena's end he can't stagger far)
-  if (g8.armed && !["reset", "roar", "open", "thrown", "miss"].includes(g8.state) && g8Front() - d.x < W8.CLOSE * T && d.onGround && d.inv <= 0) { g8.armed = false; g8CloseIn(); return; }
-  if (g8.state === "walk") {
-    if (g8Front() - d.x > 3 * T) { g8.x -= W8.WALK * (g8.phase > 1 ? 1.3 : 1) * dt; g8.walkT += dt; }
-    g8.x = Math.max(g8.a0 + 8 * T, g8.x);
-    if ((g8.nextAt -= dt) <= 0) g8Attack(g8Pick());
-  } else if (g8.state === "tell") {
-    if (g8.t >= g8Tell(g8.atk)) {
-      g8Set("hit");
-      if (g8.atk === "slam") {   // (Glen) the spear driven point-first into the ground: a thunderous boom, the ground shakes
-        thud(1); shake8(W8.SLAM_SHAKE); g8.waves.push({ x: g8Front() - 10, t: 0 }); sfx("stone_hit", g8.x, 1, 0.35); sfx("thunder_3", g8.x, 0.8, 0.7);
-        const px = g8.x + W8.SLAM_POINT;   // dust and grit thrown up where the point went in
-        for (let k = 0; k < 26; k++) bits.push({ x: px + (Math.random() - 0.5) * 40, y: GR * T - 4, vx: (Math.random() - 0.5) * 520, vy: -120 - Math.random() * 520, life: 0.7 + Math.random() * 0.4, color: k % 3 ? "#cdb084" : "#8a6a44" });
+  if (g8.state === "charge" || g8.state === "volley") {   // his spears, one at a time
+    if (g8.atk) { if ((g8.tellT += dt) >= g8Tell()) { g8Throw(g8.atk); g8.atk = null; g8.nextAt = W8.GAP; } }
+    else if (g8Passed(g8.jav)) {
+      if (g8.stillT > W8.STILL && g8.state === "charge") g8.nextAt = Math.min(g8.nextAt, 0);
+      if ((g8.nextAt -= dt) <= 0) {
+        if (g8.state === "volley" && g8.thrown >= g8.volleyN) g8Set("roar");
+        else g8Attack(g8Pick());
       }
-      if (g8.atk === "javelin") {
-        const k = SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1), L = W8.SPEAR_SHEET_LEN * k;
-        const hx = g8.x - W8.JAV_HAND[0] * k, hy = GR * T - W8.JAV_HAND[1] * k, a = Math.atan2(GR * T - hy, Math.min(-1, d.x - hx));
-        g8.jav = { x0: hx + Math.cos(a) * L * 0.6, y0: hy + Math.sin(a) * L * 0.6, tx: d.x, t: 0 };   // its point starts ahead of his hand
-        sfx("arrow_single", g8.x, 0.9, 0.6); g8Call("Gera", "Release, reload! Knock it aside!");
-      }
-      if (g8.atk === "thrust" || g8.atk === "sweep" || g8.atk === "chop") sfx("sling_throw_quick", g8.x, 0.8, 0.45);   // the whoosh of it, deep
     }
-  } else if (g8.state === "hit") {
-    const front = g8Front();
-    if (g8.atk === "thrust" && g8.t < 0.28 && d.x > front - W8.REACH.thrust * T && d.state !== "roll" && d.y > GR * T - W8.THRUST_Y) g8Hurt();
-    if (g8.atk === "sweep" && g8.t < 0.22 && d.x > front - W8.REACH.sweep * T && d.y > GR * T - W8.SWEEP_Y) g8Hurt();
-    if (g8.atk === "chop" && g8.t < 0.25 && d.x > front - W8.REACH.chop * T && d.y > GR * T - 260) g8Hurt();   // overhead and down: only distance saves you
-    if (g8.t > 0.35) g8Set("recover");
-  } else if (g8.state === "recover") {
-    if (g8.t >= W8.RECOVER * (g8.phase > 1 ? 0.75 : 1)) {
-      if (g8.phase > 1 && g8.combo < 1 && Math.random() < 0.7) { g8.combo++; g8Attack(g8Pick()); }
-      else { g8.combo = 0; g8Set("walk"); g8.nextAt = (g8.phase > 1 ? 0.6 : 1.1) + Math.random() * 0.7; if (g8.phase > 1) g8Call("Shammah", "Run toward him, David!"); }
+  }
+  if (g8.state === "charge") {
+    if (!g8.atk && g8.relT > 0.5 && g8Front() - d.x > (W8.REACH_AT + 3) * T) { g8.x -= W8.WALK * dt; g8.walkT += dt; }   // he comes on, slowly
+  } else if (g8.state === "laugh") {
+    if (g8.t > 1.5) {   // and taunts (the stage waits on the words)
+      g8Set("taunt");
+      sayLine("Goliath", "Come to me, and I will give your flesh to the birds of the sky and to the animals of the field. (1 Samuel 17:44)"); goliathChain(["lecha_elai"], 0.8);
     }
-  } else if (g8.state === "reset") {   // he staggers back
-    g8.x = Math.min(g8.a1 - 3 * T, g8.x + W8.PUSHBACK * T * dt);
-    if (g8.t > 1.0) { g8Set("walk"); g8.nextAt = 0.8; }
-  } else if (g8.state === "roar") {   // phase 3: he throws his head back and roars curses at the sky. His forehead is open.
-    if (!g8.roared) { g8.roared = true; goliathChain(["lamah"], 0.9); thud(1); shake8(1.4); G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 0.5); }
+  } else if (g8.state === "taunt") {
+    if (g8.t > 0.4 && !dialog.hold) { g8Set("volley"); g8.thrown = 0; g8.volleyN = W8.VOLLEY; g8.nextAt = 0.3; }
+  } else if (g8.state === "roar") {   // he throws his head back and laughs at the sky. His forehead is open.
+    if (!g8.roared) { g8.roared = true; sfx("taunting_yells", g8.x, 0.9, 0.55); goliathChain(["lamah"], 0.9); thud(1); shake8(1.4); G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 0.5); }
     if (g8.t > 1.3) {
       g8Set("open"); g8.roared = false;
       g8.code = { seq: g8Code(), got: 0, t: (W8.CODE_TIME + stonesSavedAll() * W8.CODE_PER_STONE) * (g8.counsel ? 2 : 1), result: null };
@@ -397,20 +391,23 @@ function updateGoliath8(dt) {
     }
   } else if (g8.state === "thrown") {   // the stone: then the slow-motion scene (giantFall), then the map
     if (g8.t > 0.7 && !TRIAL) { g8.won = true; giantFall.start(() => abnerScene.start(() => { clear8(); backToMap(); })); }   // the fall, then Saul's tent (17:55-58)
-  } else if (g8.state === "miss") {   // the stone flies wide: he laughs, and comes on again; one of the five is gone
+  } else if (g8.state === "miss") {   // the stone flies wide: he laughs, and throws again; one of the five is gone
     if (!g8.missed) {
       g8.missed = true; g8.smooth = Math.max(1, g8.smooth - 1);
       sfx("taunting_yells", undefined, 0.7, 0.6); G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 1.1);
-      toast(`It flies wide. He laughs. (${g8.smooth} smooth stone${g8.smooth === 1 ? "" : "s"} left. Get in close again and he'll open up.)`);
+      toast(`It flies wide. He laughs. (${g8.smooth} smooth stone${g8.smooth === 1 ? "" : "s"} left. Live through his spears and he'll open up again.)`);
     }
-    if (g8.t > 1.6) { g8.missed = false; g8.needClose = 1; g8.closes = 0; g8.code = null; g8Set("walk"); g8.nextAt = 1; }
+    if (g8.t > 1.6) { g8.missed = false; g8.code = null; g8Set("volley"); g8.thrown = 0; g8.volleyN = W8.VOLLEY; g8.nextAt = 0.4; }
   }
 }
 function stoneHitsGoliath8(s) {   // plain stones: clang off his bronze, sparks, nothing more
   if (!g8 || !g8.on || g8.won) return false;
-  if (g8.jav && !g8.jav.down) {   // a stone can knock the javelin aside in the air
-    const jp = g8JavPos(g8.jav);
-    if (Math.hypot(s.x - jp.x, s.y - jp.y) < 34) { if (typeof sbSparks === "function") sbSparks(jp.x, jp.y, 10, true); sfx("stone_hit", jp.x, 0.9, 1.4); g8.jav = null; if (!W8.knockTold) { W8.knockTold = true; toast("Knocked it aside!"); } return true; }
+  if (g8.jav) {   // a stone can knock the spear aside in the air (anywhere along its front half)
+    const j = g8.jav, Ls = W8.SPEAR_SHEET_LEN * g8SpearK();
+    for (let q = 0; q <= Ls * 0.55; q += 14) {
+      const px = j.x - Math.cos(j.a) * q, py = j.y - Math.sin(j.a) * q;
+      if (Math.hypot(s.x - px, s.y - py) < 30) { if (typeof sbSparks === "function") sbSparks(px, py, 10, true); sfx("stone_hit", px, 0.9, 1.4); g8.jav = null; if (!W8.knockTold) { W8.knockTold = true; toast("Knocked it aside!"); } return true; }
+    }
   }
   if (Math.abs(s.x - g8.x) < 60 && s.y > GR * T - 300 && s.y < GR * T) {
     if (typeof sbSparks === "function") sbSparks(s.x, s.y, 6, false);
@@ -420,67 +417,67 @@ function stoneHitsGoliath8(s) {   // plain stones: clang off his bronze, sparks,
   }
   return false;
 }
+function drawSpear8(x, y, a, alpha = 1) {   // Glen's spear, its point at (x, y) on screen, pointing along angle a
+  const img = ITEM.spear_goliath, L = W8.SPEAR_SHEET_LEN * g8SpearK();
+  const cx = x - Math.cos(a) * L / 2, cy = y - Math.sin(a) * L / 2;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(cx, cy);
+  if (img && img.naturalWidth) {   // (assets/items/spear_goliath.png: drawn on a slant, tip at the top right)
+    const ia = Math.atan2(-img.naturalHeight, img.naturalWidth), k = L / Math.hypot(img.naturalWidth, img.naturalHeight);
+    ctx.rotate(a - ia); ctx.drawImage(img, -img.naturalWidth * k / 2, -img.naturalHeight * k / 2, img.naturalWidth * k, img.naturalHeight * k);
+  } else {   // (until the picture loads)
+    ctx.rotate(a); ctx.strokeStyle = "#5a3a1c"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-L / 2, 0); ctx.lineTo(L / 2 - 24, 0); ctx.stroke();
+    ctx.fillStyle = "#9aa3ad"; ctx.beginPath(); ctx.moveTo(L / 2 - 24, -6); ctx.lineTo(L / 2, 0); ctx.lineTo(L / 2 - 24, 6); ctx.fill();
+  }
+  ctx.restore();
+}
 function drawGoliath8(camX) {
   if (!g8) return;
   const x = g8.x - camX, now = performance.now() / 1000, fl = g8.flash > 0 ? "brightness(1.8)" : "";
-  const j = g8.jav;   // the javelin's shadow on the ground, then the javelin
+  for (const s of g8.stuck) drawSpear8(s.x - camX + Math.cos(s.a) * W8.SPEAR_SINK, GR * T + Math.sin(s.a) * W8.SPEAR_SINK - 6, s.a, Math.min(1, (2.5 - s.t) / 0.5));   // stuck in the ground
+  for (const p of g8.past) drawSpear8(p.x - camX, p.y, p.a);
+  const j = g8.jav;
   if (j) {
-    const jp = j.down ? { x: j.tx, y: GR * T - 30 } : g8JavPos(j), p = j.down ? 1 : Math.min(1, j.t / W8.JAV_T);
-    if (!j.down) { ctx.fillStyle = `rgba(0,0,0,${0.15 + 0.35 * p})`; ctx.beginPath(); ctx.ellipse(j.tx - camX, GR * T - 2, 16 + 26 * p, 5 + 3 * p, 0, 0, Math.PI * 2); ctx.fill(); }
-    const img = ITEM.spear_goliath;
-    if (img && img.naturalWidth) {   // Glen's spear (assets/items/spear_goliath.png: drawn on a slant, tip at the top right)
-      const L = W8.SPEAR_SHEET_LEN * SCALE * W8.SIZE * (TUNE.SPRITE_SIZE.goliath_spear || 1);   // as long as the one in his hand
-      const ia = Math.atan2(-img.naturalHeight, img.naturalWidth), k = L / Math.hypot(img.naturalWidth, img.naturalHeight);
-      let a = jp.a, cx = jp.x - Math.cos(a) * L / 2, cy = jp.y - Math.sin(a) * L / 2;   // (jp is the point; the picture is drawn from its middle)
-      if (j.down) {   // stuck in the ground where it landed, tip first, at the angle it came down
-        a = g8JavPos({ ...j, t: W8.JAV_T }).a;
-        cx = j.tx - Math.cos(a) * (L / 2 - W8.SPEAR_SINK); cy = GR * T - Math.sin(a) * (L / 2 - W8.SPEAR_SINK);
-      }
-      ctx.save(); ctx.translate(cx - camX, cy); ctx.rotate(a - ia);
-      ctx.drawImage(img, -img.naturalWidth * k / 2, -img.naturalHeight * k / 2, img.naturalWidth * k, img.naturalHeight * k); ctx.restore();
-    } else {   // (until the picture loads)
-      ctx.save(); ctx.translate(jp.x - camX, jp.y); ctx.rotate(j.down ? -2.0 : jp.a);
-      ctx.strokeStyle = "#5a3a1c"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-60, 0); ctx.lineTo(60, 0); ctx.stroke();
-      ctx.fillStyle = "#9aa3ad"; ctx.beginPath(); ctx.moveTo(60, -6); ctx.lineTo(84, 0); ctx.lineTo(60, 6); ctx.fill(); ctx.restore();
+    if (j.kind === "down") {   // its shadow on the ground where it will land
+      const p = Math.min(1, Math.max(0, (j.y - j.y0) / Math.max(1, GR * T - 6 - j.y0)));
+      ctx.fillStyle = `rgba(0,0,0,${0.15 + 0.35 * p})`; ctx.beginPath(); ctx.ellipse(j.tx - camX, GR * T - 2, 16 + 26 * p, 5 + 3 * p, 0, 0, Math.PI * 2); ctx.fill();
     }
+    const Ls = W8.SPEAR_SHEET_LEN * g8SpearK(), tx = j.x - camX - Math.cos(j.a) * Ls * 0.8, ty = j.y - Math.sin(j.a) * Ls * 0.8;   // a streak behind it, so it can be seen coming
+    const ex = tx - Math.cos(j.a) * 220, ey = ty - Math.sin(j.a) * 220, gr = ctx.createLinearGradient(tx, ty, ex, ey);
+    gr.addColorStop(0, "rgba(255,244,214,0.75)"); gr.addColorStop(1, "rgba(255,244,214,0)");
+    ctx.save(); ctx.strokeStyle = gr; ctx.lineWidth = 7; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(j.x - camX - Math.cos(j.a) * 30, j.y - Math.sin(j.a) * 30); ctx.lineTo(ex, ey); ctx.stroke(); ctx.restore();
+    drawSpear8(j.x - camX, j.y, j.a);
   }
-  for (const w of g8.waves) {   // the slam's shockwave: dust racing along the ground toward David
-    const wx = w.x - camX; ctx.save();
-    for (let k = 0; k < 6; k++) { ctx.fillStyle = `rgba(206,172,122,${0.75 - k * 0.1})`; ctx.beginPath(); ctx.ellipse(wx + k * 12, GR * T - 8 - k * 3, 20 - k * 2, 12 - k, 0, 0, Math.PI * 2); ctx.fill(); }
+  if (g8.atk && (g8.state === "charge" || g8.state === "volley")) {   // the tell, so every spear can be read: how high it will come, or where it will land
+    const p = Math.min(1, g8.tellT / g8Tell()), pulse = 0.55 + 0.45 * Math.sin(now * 22);
+    ctx.save();
+    if (g8.atk === "down") {   // a ring on the ground where David is standing
+      ctx.strokeStyle = `rgba(255,90,60,${0.5 + 0.5 * p * pulse})`; ctx.fillStyle = `rgba(255,80,50,${0.2 + 0.2 * p})`; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.ellipse(david.x - camX, GR * T - 4, 40 - 12 * p, 11 - 3 * p, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    } else {   // a streak at the height it will fly, from his front (or the edge of the screen, if he's off it)
+      const y = GR * T - (g8.atk === "low" ? W8.LOW_Y : W8.HIGH_Y), x1 = Math.min(W - 6, g8Front() - camX), x0 = x1 - 90 - 70 * p;
+      const gr = ctx.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, "rgba(255,120,60,0)"); gr.addColorStop(1, `rgba(255,150,70,${0.5 + 0.45 * pulse})`);
+      ctx.fillStyle = gr; ctx.fillRect(x0, y - 4, x1 - x0, 8);
+      if (g8Front() - camX > W) { ctx.fillStyle = `rgba(255,150,70,${0.6 + 0.4 * pulse})`; ctx.beginPath(); ctx.moveTo(W - 6, y - 14); ctx.lineTo(W - 30, y); ctx.lineTo(W - 6, y + 14); ctx.fill(); }
+    }
     ctx.restore();
   }
   if (!SPR.goliath_yell) return;
   if (!g8.on && !g8.won) { drawSprite("goliath_yell", 0, x, GR * T, -1, W8.SIZE); return; }
-  const spear = f => drawSprite("goliath_spear", f, x, GR * T, -1, W8.SIZE, 1, fl);
-  const tellP = g8.state === "tell" ? Math.min(1, g8.t / g8Tell(g8.atk)) : 1;
-  if (g8.state === "walk" && SPR.goliath_walk && g8Front() - david.x > 3 * T) drawSprite("goliath_walk", frameOf("goliath_walk", g8.walkT), x, GR * T, -1, W8.SIZE, 1, fl);
-  else if ((g8.state === "tell" || g8.state === "hit" || g8.state === "recover") && SPR.goliath_spear && g8.atk) {
-    const a = g8.atk, hit = g8.state === "hit", rec = g8.state === "recover";
-    const SHEET = { thrust: "goliath_thrust", slam: "goliath_slam", sweep: "goliath_sweep", chop: "goliath_chop" }[a];
-    const TELLF = { thrust: 6, slam: 7, sweep: 5, chop: 5 };   // the sheet's frames that are the tell; the rest are the blow
-    if (SHEET && SPR[SHEET]) {
-      const n = SPR[SHEET].frames, tf = TELLF[a];
-      let f = g8.state === "tell" ? Math.min(tf - 1, Math.floor(tellP * tf)) : hit ? Math.min(n - 1, tf + Math.floor(g8.t / 0.35 * (n - tf))) : n - 1;
-      if (a === "slam") f = g8.state === "tell" ? 1 + Math.min(n - 2, Math.floor(tellP * (n - 1))) : 0;   // (Glen) lifted up through the sheet, then slammed down: frame 0, the point in the ground
-      drawSprite(SHEET, f, x, GR * T, -1, W8.SIZE * W8.CLIP_SIZE, 1, fl);
-    }
-    else if (a === "thrust") { if (hit) { ctx.save(); ctx.translate(-36, 0); spear(7); ctx.restore(); } else spear(rec ? 6 : 5 + Math.min(2, Math.floor(tellP * 2.99))); }
-    else if (a === "sweep") spear(hit ? 8 : rec ? 7 : 6);
-    else if (a === "slam") spear(hit || rec ? 4 : tellP < 0.5 ? 8 : 9);
-    else if (a === "javelin") spear(hit ? 11 : rec ? 11 + Math.min(8, Math.floor(g8.t * 8)) : 5 + Math.min(5, Math.floor(tellP * 5.99)));   // the wind-up ends on 10 (spear forward), and it's out of his hand (11) the moment it flies
-    if (g8.state === "tell" && (a === "thrust" || a === "slam")) {   // the iron head glints: the tell
-      const gx = x + W8.GLINT[a][0], gy = GR * T - W8.GLINT[a][1], r = 10 + 8 * Math.sin(now * 18);
-      const gl = ctx.createRadialGradient(gx, gy, 0, gx, gy, r * 2); gl.addColorStop(0, "rgba(255,255,230,0.95)"); gl.addColorStop(1, "rgba(255,220,120,0)");
-      ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = gl; ctx.fillRect(gx - r * 2, gy - r * 2, r * 4, r * 4); ctx.restore();
-    }
-  } else {
-    const yelling = ["reset", "roar", "open", "miss"].includes(g8.state), C = W8.SIZE * W8.CLIP_SIZE;
-    if ((g8.state === "roar" || g8.state === "open") && SPR.goliath_roar)   // (Glen) his head thrown back, roaring at the sky: the forehead open
-      drawSprite("goliath_roar", g8.state === "roar" && g8.t < 0.6 ? Math.floor(g8.t / 0.2) : 3 + Math.floor(now * 4) % 5, x, GR * T, -1, C, 1, fl);
-    else if (g8.state === "miss" && SPR.goliath_point)   // he points at David and laughs
-      drawSprite("goliath_point", g8.t < 1.0 ? Math.min(7, Math.floor(g8.t / 0.12)) : 5 + Math.floor(now * 6) % 3, x, GR * T, -1, C, 1, fl);
-    else drawSprite("goliath_yell", yelling ? frameOf("goliath_yell", now) : 0, x, GR * T, -1, W8.SIZE, 1, fl);
-  }
+  const C = W8.SIZE * W8.CLIP_SIZE, spear = f => drawSprite("goliath_spear", f, x, GR * T, -1, W8.SIZE, 1, fl);
+  const tellP = g8.atk ? Math.min(1, g8.tellT / g8Tell()) : 1, flat = k => k === "low" || k === "high";
+  if (g8.atk && flat(g8.atk) && SPR.goliath_thrust)   // the spear lowered, drawn back: it will come flat
+    drawSprite("goliath_thrust", Math.min(5, Math.floor(tellP * 6)), x, GR * T, -1, C, 1, fl);
+  else if (g8.atk === "down" && SPR.goliath_spear)   // raised over his head: it will come down (the wind-up ends on 10, spear forward)
+    spear(5 + Math.min(5, Math.floor(tellP * 5.99)));
+  else if (g8.relT < 0.35 && flat(g8.relKind) && SPR.goliath_thrust) {   // the lunge as it leaves his hand
+    const n = SPR.goliath_thrust.frames; drawSprite("goliath_thrust", Math.min(n - 1, 6 + Math.floor(g8.relT / 0.35 * (n - 6))), x, GR * T, -1, C, 1, fl);
+  } else if (g8.relT < 1.0 && g8.relKind === "down" && SPR.goliath_spear) spear(11 + Math.min(8, Math.floor(g8.relT * 8)));   // his hand empty, following through
+  else if ((g8.state === "roar" || g8.state === "open") && SPR.goliath_roar)   // (Glen) his head thrown back, laughing at the sky: the forehead open
+    drawSprite("goliath_roar", g8.state === "roar" && g8.t < 0.6 ? Math.floor(g8.t / 0.2) : 3 + Math.floor(now * 4) % 5, x, GR * T, -1, C, 1, fl);
+  else if ((g8.state === "laugh" || g8.state === "taunt" || g8.state === "miss") && SPR.goliath_point)   // he points at David and laughs
+    drawSprite("goliath_point", g8.t < 1.0 && g8.state !== "taunt" ? Math.min(7, Math.floor(g8.t / 0.12)) : 5 + Math.floor(now * 6) % 3, x, GR * T, -1, C, 1, fl);
+  else if (g8.state === "charge" && SPR.goliath_walk && g8.walkT > 0 && g8.relT > 0.5 && g8Front() - david.x > (W8.REACH_AT + 3) * T) drawSprite("goliath_walk", frameOf("goliath_walk", g8.walkT), x, GR * T, -1, W8.SIZE, 1, fl);
+  else drawSprite("goliath_yell", 0, x, GR * T, -1, W8.SIZE, 1, fl);
   if (g8.state === "roar" || g8.state === "open") {   // his forehead, open under the helmet's edge
     const hx = x + W8.BROW[0], hy = GR * T - W8.BROW[1], r = 14 + 6 * Math.sin(now * 6);
     const gl = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 2.4); gl.addColorStop(0, "rgba(255,240,180,0.85)"); gl.addColorStop(1, "rgba(255,200,80,0)");
@@ -490,19 +487,21 @@ function drawGoliath8(camX) {
   }
   if (typeof drawSbSparks === "function") drawSbSparks(camX);
 }
-Object.assign(W8, { GLINT: { thrust: [-150, 150], slam: [42, 119] }, BROW: [-2, 242] });   // px from his feet: the spear-head's glint, his forehead (fit to the art)
-function drawGoliath8Over() {   // the meter (17:48), the five stones, the callouts, and the throw
+Object.assign(W8, { BROW: [-2, 242] });   // px from his feet: his forehead (fit to the art)
+function drawGoliath8Over() {   // how far to him (17:48), the five stones, the callouts, and the throw
   if (!g8 || !g8.on || g8.won) return;
   ctx.save(); ctx.textAlign = "center";
-  // how close you are: a bar that fills as you close in, and a pip for each time you've reached him this phase
-  const dist = Math.max(0, g8Front() - david.x), k = 1 - Math.min(1, Math.max(0, (dist - W8.CLOSE * T) / (18 * T)));
-  const bw = 360, bx = W / 2 - bw / 2, by = 54;
+  const bw = 360, bx = W / 2 - bw / 2, by = 54, run = g8.state === "charge";
+  const full = (W8.ARENA - 8 - W8.REACH_AT) * T, k = run ? 1 - Math.min(1, Math.max(0, (g8Front() - david.x - W8.REACH_AT * T) / full)) : 1;
   ctx.fillStyle = "rgba(20,12,6,0.7)"; ctx.beginPath(); ctx.roundRect(bx - 12, by - 26, bw + 24, 58, 10); ctx.fill();
-  ctx.fillStyle = "#e9dcc4"; ctx.font = "14px sans-serif"; ctx.fillText(g8.phase < 3 ? "Run toward him  (1 Samuel 17:48)" : g8.needClose ? "Get in close again" : "One stone", W / 2, by - 8);
-  ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.fillRect(bx, by, bw, 10);
-  ctx.fillStyle = k > 0.92 ? "#ffd27a" : "#c9a46a"; ctx.fillRect(bx, by, bw * k, 10);
-  const need = g8.phase < 3 ? W8.CLOSES : 1;
-  for (let i = 0; i < need; i++) { ctx.fillStyle = i < g8.closes ? "#ffd27a" : "rgba(255,255,255,0.25)"; ctx.beginPath(); ctx.arc(W / 2 + (i - (need - 1) / 2) * 22, by + 22, 6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = "#e9dcc4"; ctx.font = "14px sans-serif";
+  ctx.fillText(run ? "Run toward him  (1 Samuel 17:48)" : ["roar", "open", "thrown"].includes(g8.state) ? "One stone" : "He laughs at you. Stay on your feet.", W / 2, by - 8);
+  if (g8.state === "volley") {   // the spears still to come, up close
+    for (let i = 0; i < g8.volleyN; i++) { ctx.fillStyle = i < g8.thrown ? "rgba(255,255,255,0.2)" : "#ffd27a"; ctx.beginPath(); ctx.arc(W / 2 + (i - (g8.volleyN - 1) / 2) * 22, by + 8, 6, 0, Math.PI * 2); ctx.fill(); }
+  } else {
+    ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.fillRect(bx, by, bw, 10);
+    ctx.fillStyle = k > 0.92 ? "#ffd27a" : "#c9a46a"; ctx.fillRect(bx, by, bw * k, 10);
+  }
   // the five smooth stones (World 7), bottom left
   for (let i = 0; i < 5; i++) { ctx.globalAlpha = i < g8.smooth ? 1 : 0.25; drawItem("pick_round", 34 + i * 30, H - 34, 26 / 320); }
   ctx.globalAlpha = 1;
