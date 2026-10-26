@@ -714,7 +714,7 @@ if (LEVEL_NAME === "test") {
     hangRock(c + 52, 3, 3, 4); hangRock(c + 63, 3, 2, 3);
     slabRock(c + 58, 14, 3, 3); plat(c + 62, 11, 3); oliveRow(c + 62, 10, 3); bat(c + 60);
     slabRock(c + 66, 13, 3, 4);
-    critter("scorpion", c + 71, GR - 1, 2); bat(c + 70);
+    critter("scorpion", c + 63, GR - 1, 2); bat(c + 70);    // (Glen, 2026-10-26: at c + 71 it began inside the rock and spun in place; the open floor is c + 61..65)
     slabRock(c + 70, 15, 2, 2); slabRock(c + 73, 12, 5, 5);
     lostSheep("lamb", c + 75, 11, "one");                       // The One, at the very back
   }
@@ -816,7 +816,8 @@ if (LEVEL_NAME === "test") {
   oliveArc(82, 16, 6); food("bread", 92, 16);
   crumble(102, 15, 2);
   ground(106, 200);
-  campfire(110, GR - 1, "Hanan", "You hear it? He's been following the flock for three nights.");
+  // (Glen, 2026-10-26: Hanan once, at the first fire, with both his lines; the second fire is just a fire)
+  campfire(110, GR - 1, "Hanan", "You hear it? He's been following the flock for three nights. You're of Judah, and Judah's sign is the lion. Don't run from this one. Watch for the crouch, and the tail.");
   deco("fig_tree", 120, 16, 1.0, "back", "special");
   critter("jackal", 128); snake("viper", 134);
   lostSheep("sheep", 148, 16, "thorns");
@@ -827,10 +828,11 @@ if (LEVEL_NAME === "test") {
   // which Jesse gives you for beating the lion, so you can come straight back for it.
   rock(185, 12, 8, 1); codeWall(185, 13, 1, 4, 1); rock(192, 13, 1, 4);
   lostSheep("lamb", 189, 16, "one");
+  rock(182, 15, 2, 2);   // (Glen, 2026-10-26) a step up onto the shelter's roof: from the floor it was a jump too high, a dead end without the code
   lostSheep("ram", 197, 16);
-  oliveRow(178, 16, 6);
+  oliveRow(178, 16, 4);   // (up to the step at 182)
   ground(204, 300);
-  campfire(215, GR - 1, "Hanan", "You're of Judah, and Judah's sign is the lion. Don't run from this one. Watch for the crouch, and the tail.");
+  campfire(215, GR - 1);
   deco("stone_wall", 220, 16, 1.0, "back");
   deco("cave", 274, 16, 1.7);                                  // the lion's den
   rock(286, 15, 3, 2);                                         // the back of the den: hop over it on the way home

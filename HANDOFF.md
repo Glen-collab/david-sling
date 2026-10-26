@@ -539,3 +539,11 @@ the harp phrase at 3-2's campfire.
   old one (the code flips it), pose 9 dropped (the same as 1, for a clean loop). raven_fly2 = his second strip, the
   same way; Glen cleaned the doubled wing (raven_fly2_TO_CLEAN.png, copied in). Both are used: ravenArt() (main.js)
   gives each bird one of the two in turn (swooping ravens and the 3-x barley crows), so he can compare them in play.
+
+## 2026-10-26: Glen's level-by-level play-through
+- 1-2 cave: the second scorpion began inside a rock (c + 71) and spun in place; now at c + 63 on open floor.
+- The World 3 lane trap (world3.js trapCols: a narrow gap between walls 5+ high counts as a pit) also caught 1-2's and 1-3's
+  crack of daylight at the back of the cave ("Too high to climb out", a death on the way out); it now only scans the stage
+  itself (columns below MAIN_COLS), never the caves. It still finds lanes in 2-3, 3-1, 4-3 and 7-2 (on purpose: no softlock).
+- 1-4: the stone shelter round The One was a dead end without the code (its roof a 5-row jump from the floor); a step
+  rock(182, 15, 2, 2) in front of it. Hanan speaks once, at the first fire, with both lines; the fire at 215 is just a fire.

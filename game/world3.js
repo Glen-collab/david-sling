@@ -30,7 +30,7 @@ for (const t of stairTowers) for (let c = t.c; c < t.c + t.w; c++) specialPlat.a
 const trapCols = new Set();
 {
   const wallH = c => { let r = GR - 1; while (r >= 0 && isSolid(c, r)) r--; return GR - 1 - r; };   // rows of solid above the ground
-  for (let c = 1; c < COLS - 1; c++) {
+  for (let c = 1; c < MAIN_COLS - 1; c++) {   // (not in the caves past MAIN_COLS: 1-2's and 1-3's crack of daylight sits in such a gap, Glen 2026-10-26)
     if (isSolid(c, GR - 1) || !isSolid(c - 1, GR - 1)) continue;   // the left edge of a ground-level gap
     let e = c; while (e < COLS && !isSolid(e, GR - 1)) e++;
     if (e >= COLS || e - c > 4) continue;
