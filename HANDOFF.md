@@ -570,6 +570,7 @@ the harp phrase at 3-2's campfire.
   (updateInscriptions), and row 12 was 4.5 tiles over the floor with nothing to stand on.
 - 4-4 Saul's Torment: walk past the Steward's last line (now col 188) and David sits and plays by himself
   (world4.js W4.SAUL_AUTO tiles past it, once per approach; d.harpAuto keeps a held Right from standing him back up).
-  The song reaches W4.SAUL_REACH (8) tiles from the king, was 6. Faster: HARP_DUEL.saul.rate 1.5 (world2.js) plays the
-  recording 1.5x with its pitch kept, notes and all; the hit window stays the same in real seconds. A clean run is
-  ~41 s (was ~62). The donkey duel is unchanged.
+  The song reaches W4.SAUL_REACH (8) tiles from the king, was 6. Faster presses (Glen: the song stays as it is, the
+  notes were too far apart): re-charted with more of the recording's plucks, 63 notes (was 33), tunes 8,9,10,11,12,13:
+  `python tools/make_harp_chart.py <david-sling-art/audio/Morning_Meditation_1.mp3> saul --start 4.0 --end 70.095
+  --gap 0.5 --phrases 8,9,10,11,12,13`. Notes ~1 s apart (closest 0.5 s), was ~1.9 s. (A 1.5x playback try was undone.)
