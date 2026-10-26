@@ -59,11 +59,12 @@ function talkAgainNear() {   // the lines of the person David's standing by (if 
 }
 function updateTalkAgain() {
   if (talkAgain.length && !(dialog.t > 0 && dialog.hold)) { sayLine(...talkAgain.shift()); return; }
-  if (dialog.t > 0 || !pressed("up") || david.charging || doors.some(o => Math.abs(david.x - o.x) < 48)) return;
+  // (not while he plays the harp: Up is a harp string in the duel, Glen 2026-10-26, by 2-2's donkey it read the boy's words again and stopped the music)
+  if (dialog.t > 0 || !pressed("up") || david.charging || david.harp || doors.some(o => Math.abs(david.x - o.x) < 48)) return;
   const lines = talkAgainNear(); if (lines) talkAgain = lines.slice();
 }
 function drawTalkHint(camX) {
-  if (dialog.t > 0 || talkAgain.length || !talkAgainNear()) return;
+  if (dialog.t > 0 || talkAgain.length || david.harp || !talkAgainNear()) return;
   upHint(david.x - camX, david.y - 150);
 }
 function drawDialog() {

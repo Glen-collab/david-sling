@@ -550,3 +550,5 @@ the harp phrase at 3-2's campfire.
 - Hanan once a stage (Glen): 2-1's boar line joined his charged-sling lesson at the first fire (it came after two boars);
   the fire at 168 is just a fire. His talk() lines (1-2 col 66, 2-4 col 127, 3-4 col 16) only show words (Hanan isn't drawn
   for talks outside World 8), so they stay. 4-4 still has the Steward at two fires (5 and 80, the right-to-left hint).
+- Up (hear them again, world1.js updateTalkAgain) is off while David plays the harp: in the duel Up is a string, and by
+  2-2's donkey it brought back David's line and held the stage, stopping the music.
