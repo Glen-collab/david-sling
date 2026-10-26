@@ -561,8 +561,16 @@ function drawTown(camX) {
 // Glen's sheet, facing left: 0 standing, 1 talking, 2 pointing, 3 hands folded, 4 shaking his head, 5 a small smile.
 TUNE.SPRITE_SIZE.steward = 1.15;
 const STEWARD_POSE = [[1, 4], [2, 1], [1, 3]];   // per line: the two poses he moves between while he says it
+const STEWARD_AT_FIRE = 1.6;   // tiles right of his campfire's middle that he stands
 function drawSteward(camX) {
-  const mine = talks.filter(t => t.who === "The Steward"); if (!mine.length || !SPR.steward) return;
+  if (!SPR.steward) return;
+  for (const f of fires) {   // (Glen, 2026-10-26) at his fire too (4-4's first), standing just past it, facing David
+    if (f.who !== "The Steward") continue;
+    const fx = f.x + STEWARD_AT_FIRE * T, x = fx - camX; if (x < -200 || x > W + 200) continue;
+    const talking = dialog.t > 0 && dialog.who === "The Steward" && Math.abs(david.x - f.x) < 6 * T;
+    drawSprite("steward", talking ? [1, 2][Math.floor(performance.now() / 1000 * 1.1) % 2] : 3, x, f.y, -(Math.sign(david.x - fx) || -1));
+  }
+  const mine = talks.filter(t => t.who === "The Steward"); if (!mine.length) return;
   const talking = dialog.t > 0 && dialog.who === "The Steward", k = mine.findIndex(t => !t.done);
   const cur = k < 0 ? mine.length - 1 : Math.max(0, k - (talking ? 1 : 0));
   const sx = mine[cur].x + 2 * T, x = sx - camX; if (x < -200 || x > W + 200) return;
