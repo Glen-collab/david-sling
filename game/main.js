@@ -1906,14 +1906,14 @@ if (LEVEL_NAME === "test") {
   //      touch stops David in his tracks); light the five hall lamps (the lost things) and the shadows near them melt.
   //      Palace dogs bark. The One wandered in out of the storm, under the great staircase. Then Saul's Torment. ----
   ground(0, 225);
-  campfire(5, GR - 1, "The Steward", "The king is troubled again. Hear the storm? Light the hall lamps as you go: the dark keeps back from the light. Now, David.");
+  campfire(5, GR - 1, "The Steward", "The king is troubled again. Hear the storm? Light the hall lamps as you go: the dark keeps back from the light. And those old marks on the columns? Our fathers wrote from right to left, boy. Most people here have forgotten. Now, David.");   // (Glen, 2026-10-26: the Steward once, at the first fire)
   setPiece("hall_lamp", 14); setPiece("wisp", 20, 13); setPiece("wisp", 27, 12);
   critter("guarddog", 32);
   plat(36, 13, 6); plat(43, 10, 5); special(45, 6); setPiece("wisp", 40, 9);   // up along the balconies
   setPiece("hall_lamp", 52);
   inscription(58, 12, "he");                                     // on a column: the second He
   setPiece("wisp", 62, 13); setPiece("wisp", 68, 11); setPiece("wisp", 74, 13);
-  campfire(80, GR - 1, "The Steward", "Those old marks on the columns? Our fathers wrote from right to left, boy. Most people here have forgotten.");
+  campfire(80, GR - 1);
   // the great staircase: The One is hiding underneath (a low gap: crawl in)
   stair(86, 5); wall(96, 11, 8, 4); lostSheep("lamb", 100, 16, "one");
   setPiece("hall_lamp", 106); setPiece("wisp", 110, 12);
