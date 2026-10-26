@@ -1915,7 +1915,7 @@ if (LEVEL_NAME === "test") {
   critter("guarddog", 32);
   plat(36, 13, 6); plat(43, 10, 5); special(45, 6); setPiece("wisp", 40, 9);   // up along the balconies
   setPiece("hall_lamp", 52);
-  inscription(58, 12, "he");                                     // on a column: the second He
+  inscription(58, 14, "he");                                     // on a column: the second He (row 12 was out of reach, Glen 2026-10-26)
   setPiece("wisp", 62, 13); setPiece("wisp", 68, 11); setPiece("wisp", 74, 13);
   campfire(80, GR - 1);
   // the great staircase: The One is hiding underneath (a low gap: crawl in)

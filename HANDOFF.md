@@ -565,3 +565,6 @@ the harp phrase at 3-2's campfire.
   GATE_HEAR (0.6 s) after A, it says "The sound is still off. Press any key on the keyboard, or click..." with "A: go on
   without sound". It also waits for the browser's answer (audioAsked) instead of a fixed 0.4 s, so a slow-loading .bat
   or Pi doesn't flash the gate. The .bat (and a Pi with --autoplay-policy=no-user-gesture-required) never shows it.
+- 4-4: the Steward is drawn at his campfire (world4.js drawSteward, STEWARD_AT_FIRE); before, only his voice was there.
+- 4-4: the second He (inscription 58) moved from row 12 to 14. Reading needs David standing still within 3 tiles up/down
+  (updateInscriptions), and row 12 was 4.5 tiles over the floor with nothing to stand on.
