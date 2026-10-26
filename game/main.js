@@ -4254,12 +4254,12 @@ harpMusic.loop = true; harpMusic._music = true; harpMusic.volume = 0;
 let harpVol = 0, harpStarting = false, harpHeldT = 0;
 // Browsers only allow sound after the player clicks or presses a key on the page (controller buttons don't count),
 // so the first click or keypress quietly "unlocks" audio.
-let audioUnlocked = false;
+let audioUnlocked = false, audioAsked = false;   // (asked: the browser has answered once, yes or no)
 function unlockAudio() {
   if (audioUnlocked) return;
   try { chimeCtx = chimeCtx || new (window.AudioContext || window.webkitAudioContext)(); chimeCtx.resume(); } catch (e) {}
   harpMusic.muted = true;
-  harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = true; }).catch(() => {});
+  harpMusic.play().then(() => { harpMusic.pause(); harpMusic.muted = false; audioUnlocked = audioAsked = true; }).catch(() => { audioAsked = true; });
 }
 addEventListener("keydown", unlockAudio); addEventListener("pointerdown", unlockAudio);
 unlockAudio();   // when the browser already allows sound (the "Play David" launcher), it's on from the start
@@ -4267,21 +4267,37 @@ unlockAudio();   // when the browser already allows sound (the "Play David" laun
 // key or a tap, so his opening music came in late, on the A at the end of the film. While the sound is still off, an
 // opening (soundGate(this, dt) at the top of its update, drawSoundGate(this) of its draw) holds on black with "Press A
 // to begin": the press turns the sound on, and the film and its music start together. When the browser already
-// allows sound, nothing shows. (A controller's A can't turn sound on, browsers don't count it: it goes on without.)
-const GATE_WAIT = 0.4;   // seconds on black first, for the browser to say if sound is already allowed
+// allows sound, nothing shows.
+// (Glen, 2026-10-26) a controller's A can't turn sound on (browsers don't count it), so his film played silent and his
+// next A skipped it. Now an A that leaves the sound off says so: a key or a click turns it on, A again goes on without.
+const GATE_WAIT = 0.4;   // seconds on black at least, for the browser to say if sound is already allowed (it waits for the answer)
+const GATE_HEAR = 0.6;   // seconds after A for the sound to come on before the screen says it's still off
 function soundGate(o, dt) {
   if (o.gateDone) return false;
+  if (!o.gateT) o.gateA = null;   // (a new opening)
   o.gateT = (o.gateT || 0) + dt;
-  if (audioUnlocked || (o.gateT > GATE_WAIT && (pressed("a") || pressed("b") || pressed("start")))) { o.gateDone = true; return false; }
+  if (audioUnlocked) { o.gateDone = true; return false; }
+  const ready = o.gateT > GATE_WAIT && (audioAsked || o.gateT > 3), A = pressed("a") || pressed("b") || pressed("start");
+  if (o.gateA != null) {
+    o.gateA += dt;
+    if (o.gateA > GATE_HEAR && A) { o.gateDone = true; return false; }   // on without sound
+  } else if (ready && A) o.gateA = 0;
   return true;
 }
 function drawSoundGate(o) {
   if (o.gateDone) return false;
   ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
-  if ((o.gateT || 0) > GATE_WAIT) {
-    const a = Math.min(1, (o.gateT - GATE_WAIT) / 0.5) * (0.75 + 0.25 * Math.sin(performance.now() / 300));
+  const off = o.gateA != null && o.gateA > GATE_HEAR;
+  if (off || (o.gateA == null && (o.gateT || 0) > GATE_WAIT && (audioAsked || o.gateT > 3))) {
+    const a = (off ? Math.min(1, (o.gateA - GATE_HEAR) / 0.4) : Math.min(1, (o.gateT - GATE_WAIT) / 0.5)) * (0.75 + 0.25 * Math.sin(performance.now() / 300));
     ctx.save(); ctx.textAlign = "center"; ctx.globalAlpha = a; ctx.fillStyle = "#fff3d6"; ctx.font = "italic 30px Georgia, serif";
-    ctx.fillText("Press A to begin", W / 2, H / 2); ctx.restore();
+    if (!off) ctx.fillText("Press A to begin", W / 2, H / 2);
+    else {
+      ctx.fillText("The sound is still off.", W / 2, H / 2 - 40);
+      ctx.fillText("Press any key on the keyboard, or click, to turn it on.", W / 2, H / 2 + 4);
+      ctx.font = "italic 22px Georgia, serif"; ctx.globalAlpha *= 0.75; ctx.fillText("A: go on without sound", W / 2, H / 2 + 52);
+    }
+    ctx.restore();
   }
   return true;
 }

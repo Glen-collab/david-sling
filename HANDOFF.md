@@ -560,3 +560,8 @@ the harp phrase at 3-2's campfire.
   before clearing a World 3 stage, it said the Journal was empty.
 - 4-2 Gera: his second line moved from 15 to 12 so the two are one stop (chained, Up hears both); drawGera (world4.js)
   stands at the first line of a group, like world2.js's people. He used to jump 6 tiles between lines.
+- Sound gate (main.js soundGate): in a normal Chrome tab, a controller's A passed "Press A to begin" but can't turn sound
+  on (browsers don't count it), so the film played silent and Glen's next A skipped it. Now if the sound isn't on
+  GATE_HEAR (0.6 s) after A, it says "The sound is still off. Press any key on the keyboard, or click..." with "A: go on
+  without sound". It also waits for the browser's answer (audioAsked) instead of a fixed 0.4 s, so a slow-loading .bat
+  or Pi doesn't flash the gate. The .bat (and a Pi with --autoplay-policy=no-user-gesture-required) never shows it.
