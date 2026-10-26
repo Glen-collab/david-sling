@@ -849,7 +849,7 @@ if (LEVEL_NAME === "test") {
   lostSheep("sheep", 27, 16);                                  // the first one: just walk up to it
   special(36, 12);                                             // over the first gap: grab it mid-jump
   ground(38, 100);
-  campfire(44, GR - 1, "Hanan", "You throw like a boy in a hurry. Let it swing. Longer. Feel it pull. Hold B until the ring turns gold, then let go. Patience puts the power in the stone.", "charge");
+  campfire(44, GR - 1, "Hanan", "You throw like a boy in a hurry. Let it swing. Longer. Feel it pull. Hold B until the ring turns gold, then let go. Patience puts the power in the stone. And a boar won't turn once it starts. Step aside, or stop it. Don't stand and argue with it.", "charge");   // (Glen, 2026-10-26: Hanan once a stage; his boar line came after two boars)
   deadfall(52, 10, 2, 7);                                      // dead branches piled across the trail: too tall to jump, a tap stone bounces off
   oliveRow(57, 16, 4);
   critter("boar", 68, GR - 1, 14);                             // the first boar: it scrapes, then charges
@@ -871,7 +871,7 @@ if (LEVEL_NAME === "test") {
   rock(146, 9, 11, 4); deadfall(146, 13, 1, 4);
   special(151, 16); food("fig_cake", 154, 16); oliveRow(148, 16, 3);
   ground(164, 240);
-  campfire(168, GR - 1, "Hanan", "A boar won't turn once it starts. Step aside, or stop it. Don't stand and argue with it.");
+  campfire(168, GR - 1);
   // The One: up in the treetops, branch by branch
   plat(175, 13, 3); plat(180, 10, 3); plat(185, 7, 3); plat(191, 4, 3);
   lostSheep("lamb", 192, 3, "one");
