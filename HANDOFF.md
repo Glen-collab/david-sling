@@ -558,3 +558,5 @@ the harp phrase at 3-2's campfire.
   charge), roar, lunge, throw, throwBack (world2.js BEAR_GROWLS [volume, rate]); a hit (dazed/defeated) cuts it off.
 - The homestead's Journal shelf (home.js useShelf) now opens the newest world with pages, like the map's Select: back home
   before clearing a World 3 stage, it said the Journal was empty.
+- 4-2 Gera: his second line moved from 15 to 12 so the two are one stop (chained, Up hears both); drawGera (world4.js)
+  stands at the first line of a group, like world2.js's people. He used to jump 6 tiles between lines.

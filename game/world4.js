@@ -446,7 +446,8 @@ TUNE.SPRITE_SIZE.gera = 1.12;   // a grown man, a head taller than David
 function drawGera(camX) {
   const mine = talks.filter(t => t.who === "Gera"); if (!mine.length || !SPR.gera) return;
   const k = mine.findIndex(t => !t.done), cur = k < 0 ? mine.length - 1 : Math.max(0, k - (dialog.t > 0 && dialog.who === "Gera" ? 1 : 0));
-  const gx = mine[cur].x + 2 * T, x = gx - camX; if (x < -200 || x > W + 200) return;
+  let at = cur; while (at > 0 && mine[at].x - mine[at - 1].x <= 4 * T) at--;   // lines a few tiles apart are one stop: he stays put
+  const gx = mine[at].x + 2 * T, x = gx - camX; if (x < -200 || x > W + 200) return;
   const talking = dialog.t > 0 && dialog.who === "Gera", now = performance.now() / 1000;
   let i = 0;
   if (talking) i = cur === 1 ? (Math.floor(now * 2.2) % 2 ? 3 : 2) : cur === mine.length - 1 ? (Math.floor(now * 1.4) % 2 ? 4 : 1) : 1;

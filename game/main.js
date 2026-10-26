@@ -1831,7 +1831,9 @@ if (LEVEL_NAME === "test") {
   ground(0, 231);
   campfire(5);
   talk(9, "Gera", "So you're the shepherd with the sling. Benjamin's slingers are famous, you know. Seven hundred of us, left-handed, and \"every one of them could sling a stone at a hair and not miss\" (Judges 20:16).");
-  talk(15, "Gera", "You throw well. But slow. Watch me: release, reload, release. Tap B twice, quick, and a second stone follows the first.", "quick");
+  talk(12, "Gera", "You throw well. But slow. Watch me: release, reload, release. Tap B twice, quick, and a second stone follows the first.", "quick");
+  // (Glen, 2026-10-26: his second line was at 15 and he jumped there between lines; at 12 the two are one stop, said one
+  // after the other, and Up by him hears both again)
   setPiece("target", 21, 14); setPiece("target", 25, 12); setPiece("target", 29, 15);   // the first targets: try two at once
   special(27, 8);
   critter("goat", 34);                                          // a stray from the king's flock
