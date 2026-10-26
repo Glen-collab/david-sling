@@ -556,3 +556,5 @@ the harp phrase at 3-2's campfire.
   the screen edge; where a wall stops it short, it fades in). The claw rocks that boxed it in moved: 20 -> 5, 137 -> 124.
 - 2-4 bear: Glen's growl (assets/sounds/bear_growl.mp3, was in later/) on every attack: notice, tell (the scrape before a
   charge), roar, lunge, throw, throwBack (world2.js BEAR_GROWLS [volume, rate]); a hit (dazed/defeated) cuts it off.
+- The homestead's Journal shelf (home.js useShelf) now opens the newest world with pages, like the map's Select: back home
+  before clearing a World 3 stage, it said the Journal was empty.

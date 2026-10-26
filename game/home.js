@@ -154,10 +154,15 @@ const Courtyard = {
     if (spot.id === "stall") { this.mode = "market"; this.pick = 0; this.offerAt = this.t; }   // he waves at what he has
   },
   useShelf() {
-    const last = [4, 3, 2, 1].find(k => this.prog[`${this.world}-${k}`] && this.prog[`${this.world}-${k}`].cleared);
-    if (!last) { this.say("", "The Journal is empty for now. Clear 1-1 and David will write in it."); return; }
+    // this world's pages, or (nothing cleared here yet) the newest world before it that has some, like the map's
+    // (Glen, 2026-10-26: back home early in World 3 it said the Journal was empty)
+    const p = this.prog, lastOf = w => [4, 3, 2, 1].find(k => p[`${w}-${k}`] && p[`${w}-${k}`].cleared);
+    let world = null;
+    for (let w = this.world; w >= 1; w--) if (JOURNAL_PAGES[w] && lastOf(w)) { world = w; break; }
+    if (!world) { this.say("", "The Journal is empty for now. Clear 1-1 and David will write in it."); return; }
+    const last = lastOf(world);
     this.active = false;
-    Journal.open({ world: this.world, stage: last, read: true, scene: "note_road", onClose: () => { this.active = true; this.fade = 0; } });
+    Journal.open({ world, stage: last, read: true, scene: "note_road", onClose: () => { this.active = true; this.fade = 0; } });
   },
   useJesse() {
     if (!this.earned) { this.say("Jesse", "The lion's been near the flock, David. When you've faced it, come and find me here at the target. There's something I want to teach you about the throw."); return; }
