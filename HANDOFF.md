@@ -552,3 +552,5 @@ the harp phrase at 3-2's campfire.
   for talks outside World 8), so they stay. 4-4: the Steward once too (Glen): the right-to-left hint joined his first fire (5); the fire at 80 is just a fire.
 - Up (hear them again, world1.js updateTalkAgain) is off while David plays the harp: in the duel Up is a string, and by
   2-2's donkey it brought back David's line and held the stage, stopping the music.
+- 2-4 wolves: the pack's third wolf now comes in from off the left of the screen (world2.js updateWolf looks back past
+  the screen edge; where a wall stops it short, it fades in). The claw rocks that boxed it in moved: 20 -> 5, 137 -> 124.

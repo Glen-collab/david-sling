@@ -799,10 +799,13 @@ function updateWolf(k, dx, sameLevel, dt) {
   if (k.lurk) {
     if (!k.pack.on) { k.alpha = 0; k.x = -9999; return; }   // not yet: nowhere to be seen
     if (k.state === "idle") {
-      // from behind David, on open ground with nothing between them (not past a wall, a log pile or a gap)
+      // from behind David, on open ground with nothing between them (not past a wall, a log pile or a gap): off the left
+      // of the screen if the ground's open that far (Glen, 2026-10-26: it popped in beside the other two); if not, it fades in
       const c = Math.floor(david.x / T), r = Math.floor((david.y - 1) / T); let n = 1;
-      while (n < W2.WOLF_BEHIND && !isSolid(c - n, r) && !isSolid(c - n, r - 1) && (isSolid(c - n, r + 1) || isOneway(c - n, r + 1))) n++;
-      k.alpha = 1; k.x = (c - n + 1.5) * T; k.y = (r + 1) * T; k.vy = 0; k.facing = 1; setCrit(k, "hunt");
+      const far = Math.max(W2.WOLF_BEHIND, Math.ceil((david.x - camX) / T) + 2);
+      while (n < far && !isSolid(c - n, r) && !isSolid(c - n, r - 1) && (isSolid(c - n, r + 1) || isOneway(c - n, r + 1))) n++;
+      k.x = (c - n + 1.5) * T; k.y = (r + 1) * T; k.vy = 0; k.facing = 1; setCrit(k, "hunt");
+      k.alpha = k.x < camX - T ? 1 : 0;
       toast("Wolves hunt in packs. One's coming up behind you!"); sfx("wolf_growl", k.x, 0.8);
     }
   } else if (k.pack && k.state === "idle") {   // sitting, watching: waiting for the one from behind
@@ -822,6 +825,7 @@ function updateWolf(k, dx, sameLevel, dt) {
   }
   if (k.state === "rise") { fall(); if (k.t > 0.8) setCrit(k, "hunt"); return; }
   if (k.state === "hunt") {
+    if (k.lurk && k.alpha < 1) k.alpha = Math.min(1, k.alpha + dt * 2.5);   // (fading in where it had to come in on screen)
     k.facing = Math.sign(dx) || k.facing;
     if (!runCritter(k, W2.WOLF_RUN, dt) && k.t > 0.3) { setCrit(k, "wait"); }
     if (touchesDavid(critterBox(k))) { hurtDavid(k.x); setCrit(k, "pass"); }

@@ -1007,11 +1007,13 @@ if (LEVEL_NAME === "test") {
     critter("wolf", c); Object.assign(critters[critters.length - 1], { pack, lurk: true }); pack.lurker = critters[critters.length - 1];
   };
   ground(0, 40);
-  oliveRow(6, 16, 5);
+  // (Glen, 2026-10-26: the claw rock was at 20, so the first pack's third wolf had no room behind David and popped up
+  // beside the other two; moved back to 5, the ground from 8 to the wolves is open)
+  rock(5, 13, 3, 4); setPiece("claws", 6, 13);                 // claw marks on the rock: something big passed this way
+  oliveRow(9, 16, 5);
   lostSheep("sheep2", 14, 16);
-  rock(20, 13, 3, 4); setPiece("claws", 21, 13);               // claw marks on the rock: something big passed this way
   deco("stump_roots", 10, 16, 0.32); deco("log_broken", 27, 16, 0.4); deco("rubble_sticks", 38, 16, 0.3);   // torn-up logs, overturned rocks
-  special(21, 9);
+  special(6, 9);
   wolfPair(32);
   ground(44, 110);                                             // (a gap at 41-43)
   plat(50, 13, 4); lostSheep("sheepblack", 51, 12, "ledge");  // up on the ledge: climb, or play the harp below
@@ -1030,7 +1032,7 @@ if (LEVEL_NAME === "test") {
   campfire(120, GR - 1, "Hanan", "A lion is quick. A bear is strong, and slow to turn. Never fight it up close. Keep your distance, and keep your stone charged.", "charge");   // (teaches the charge again, in case 2-1's was missed)
   talk(127, "Hanan", "When it rears up on its back legs and roars, that's your moment: a full charged stone. Then it comes down hard and the ground shakes. Be off the ground.");
   lostSheep("sheep", 133, 16, "cast");                         // on its back: roll it over (Down)
-  rock(137, 14, 3, 3); setPiece("claws", 138, 14);
+  rock(124, 14, 3, 3); setPiece("claws", 125, 14);   // (was at 137: the third pack's third wolf had no room behind David, like the first)
   lostSheep("sheep", 144, 16, "thorns");                       // caught in the thorns: sling the bush
   wolfPair(152);
   lostSheep("sheep", 164, 16);
