@@ -43,7 +43,7 @@ Converted to mp3 with the leading silence trimmed. Same licence question as in t
 | later/footsteps_woods, _crunchy | footsteps_woods.wav, footsteps_crunchy.wav (tall grass tried for walking, dropped) | later | ? |
 | later/running_forest_1, _2 | running_forest.wav, running_forest (2).wav | later | ? |
 | later/wolf_growl_1, _2 | wolf_growl.wav, wolf_growl (2).mp3 | jackals / wolves (later) | ? |
-| later/bear_growl | bear_monster_growl.wav | the bear (later) | ? |
+| bear_growl | bear_monster_growl.wav | 2-4's bear: every attack (world2.js BEAR_GROWLS) | ? |
 | lion_hit | lion_hit-with-stone.wav | every stone that hurts the lion | ? |
 | lion_defeated | lion_sound-finishing-stone.wav | the lion's cry at the final stone | ? |
 | thunder, thunder_2, thunder_3 | lightning.mp3, lightning (1).mp3, lightning (2).mp3 (Glen, 2026-10-15) | 3-4's thunder, one at random after each flash | ? |

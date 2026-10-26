@@ -4289,7 +4289,7 @@ function drawSoundGate(o) {
 // ---------------------------------------------------------------------------
 const SFX_FILES = ["ending_jingle_levels", "stage_clear", "sheep_baa_1", "sheep_baa_2", "sheep_baa_3", "sheep_baa_4", "sheep_baa_5", "sheep_baa_6", "sheep_baa_7",
   "flock_baa", "sling_throw", "sling_throw_quick", "sling_charge", "sling_power", "extra_life", "heal", "boss_intro",
-  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated",
+  "jump", "olive_pickup", "fall_pit", "stone_hit", "final_stone", "final_stone_goliath", "lion_roar", "lion_hit", "lion_defeated", "bear_growl",
   "thunder", "thunder_2", "thunder_3",   // 3-4's storm (Glen's lightning sounds)
   "eagle_1", "eagle_2", "crow_1", "crow_2", "jackal", "wolf_growl", "wolf_bark", "wolf_howl", "fox_1", "fox_2", "fox_3", "paper_rip",
   "hyena_1", "hyena_2", "hyena_3",   // Glen's animal sounds (2026-10-15); the hyenas laugh in 5-2

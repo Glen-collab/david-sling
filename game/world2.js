@@ -878,7 +878,16 @@ function resetBear() {
 resetBear();
 const bearFight = () => bear.on && bear.state !== "defeated" && (bear.state !== "pen" || david.x > bearPiece.arena * T - TUNE.BOSS_MUSIC_LEAD * T) && david.deadT <= 0;
 const bearBlocking = () => bear.on && bear.state !== "defeated";
-function setBear(s) { if (bear.state !== s) { bear.state = s; bear.t = 0; } }
+// (Glen, 2026-10-26: "more bear growls when he attacks or throws stuff") his growl (assets/sounds/bear_growl.mp3) on every
+// attack: [volume, rate]; a lower rate is a deeper, longer growl. A new one cuts off the one before.
+const BEAR_GROWLS = { notice: [1, 0.9], tell: [0.9, 1], roar: [1, 0.8], lunge: [0.8, 1.15], throw: [0.85, 1.05], throwBack: [0.85, 1.05] };
+function setBear(s) {
+  if (bear.state === s) return;
+  bear.state = s; bear.t = 0;
+  const g = BEAR_GROWLS[s];
+  if (bear.growl && (g || s === "dazed" || s === "defeated" || s === "pen")) { bear.growl.pause(); bear.growl = null; }   // (hit: the growl breaks off)
+  if (g) bear.growl = sfx("bear_growl", bear.x, g[0], g[1]);
+}
 function bearBox() {
   const tall = bear.state === "roar" ? 185 : bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;   // reared up, it's taller than David
   return { x0: bear.x - 85, x1: bear.x + 85, y0: bear.y - tall, y1: bear.y };
