@@ -212,9 +212,10 @@ function drawDonkey(k, x) {
 // right along six strings; press each one as it reaches the harp. A wrong or late note: the harp stops with a sour twang
 // and that tune starts again. Finish every tune to calm it.
 // ---------------------------------------------------------------------------
+// rate: how fast the recording plays (pitch kept), notes and all (Glen, 2026-10-26: Saul's was too slow for the danger)
 const HARP_DUEL = {
   donkey: { song: "donkey", window: 0.24, speed: 230, title: "Play for the frightened donkey" },   // window: how far off a note can be (s)
-  saul: { song: "saul", window: 0.26, speed: 240, title: "Play for King Saul", lo: "Troubled", hi: "At peace", done: "He sleeps." },   // world4.js: the shadows
+  saul: { song: "saul", window: 0.26, speed: 240, rate: 1.5, title: "Play for King Saul", lo: "Troubled", hi: "At peace", done: "He sleeps." },   // world4.js: the shadows
 };
 const HARP_STRINGS = ["up", "right", "a", "b", "left", "down"];   // top (high notes) to bottom (low)
 const HARP_COLORS = { up: "#f2c84b", right: "#e06a4a", a: "#e48ac0", b: "#8fc8e8", left: "#7cc46a", down: "#5a86d8" };
@@ -236,7 +237,7 @@ function startHarpDuel(kind, target) {
     if (duelAudio) duelAudio.pause();
     duelAudio = new Audio(`../assets/audio/${song.file}?v=${window.BUILD || 0}`); duelAudio._music = true; duelAudio._song = opt.song;
   }
-  duelAudio.volume = TUNE.HARP_VOLUME;
+  duelAudio.volume = TUNE.HARP_VOLUME; duelAudio.defaultPlaybackRate = duelAudio.playbackRate = opt.rate || 1; duelAudio.preservesPitch = true;   // (default too: load() resets the rate to it)
   Object.assign(harpDuel, { active: true, kind, opt, song, target, phrase: 0, next: 0, calm: 0, misses: 0, hits: [], state: "play", t: 0, songT: 0, missNote: null });
   duelPlayFrom(song.phrases[0].start);
 }
@@ -257,7 +258,7 @@ function harpDuelTarget(d) {
 function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = the duel has the controls
   const g = harpDuel;
   if (!g.active) {
-    if (d.harp && d.state === "harp" && d.deadT <= 0) { const k = harpDuelTarget(d); if (k) { startHarpDuel(k.duelKind || "donkey", k.duelKind ? null : k); return true; } }
+    if (d.harp && d.state === "harp" && d.deadT <= 0) { const k = harpDuelTarget(d); if (k) { d.harpAuto = false; startHarpDuel(k.duelKind || "donkey", k.duelKind ? null : k); return true; } }
     return false;
   }
   d.vx = 0;
@@ -275,16 +276,17 @@ function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = 
   // playing: the recording is the clock (it's what you hear)
   if (g.loading) return true;
   if (duelAudio.paused && audioUnlocked) duelAudio.play().catch(() => {});   // back from the pause menu
-  g.songT += dt;
+  const rate = g.opt.rate || 1;
+  g.songT += dt * rate;
   if (!duelAudio.paused && duelAudio.currentTime > 0 && Math.abs(duelAudio.currentTime - g.songT) > 0.08) g.songT = duelAudio.currentTime;
-  const p = g.song.phrases[g.phrase], n = g.song.notes[g.next], w = g.opt.window;
+  const p = g.song.phrases[g.phrase], n = g.song.notes[g.next], w = g.opt.window * rate;   // (the window in real seconds stays the same)
   const miss = why => {
     g.state = "missed"; g.t = 1.3; g.misses++; g.missNote = { b: n.b, why }; duelAudio.pause(); harpTwang();
     if (g.kind === "saul") saulMiss(false);
     if (g.target) g.target.t = 0;
   };
   const btn = ["up", "down", "left", "right", "a", "b"].find(b => pressed(b));
-  if (btn && g.kind === "saul" && g.songT < n.t - w && n.t - g.songT < 0.8) saulMiss(true);   // Saul: rushing makes it worse (no rewind)
+  if (btn && g.kind === "saul" && g.songT < n.t - w && n.t - g.songT < 0.8 * rate) saulMiss(true);   // Saul: rushing makes it worse (no rewind)
   if (btn && Math.abs(g.songT - n.t) <= w) {   // presses well before a note don't count (no penalty for being eager)
     if (btn !== n.b) { miss("wrong"); return true; }
     g.hits.push({ b: n.b, t: 0 }); g.next++;

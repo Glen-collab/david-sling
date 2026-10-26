@@ -589,7 +589,8 @@ function drawSteward(camX) {
 // counsel makes it gentler. The tunes go in three parts: the quiet part, the storm, the new part. Then he sleeps (16:23).
 // ---------------------------------------------------------------------------
 Object.assign(W4, { WISP_DRIFT: 55, WISP_SHIVER: 0.8, LAMP_REACH: 1.4, LAMP_CLEAR: 7,
-  SAUL_SIZE: 1.25, THRONE_SIZE: 0.44, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9 });
+  SAUL_SIZE: 1.25, THRONE_SIZE: 0.44, SAUL_MISS: 0.3, SAUL_RUSH: 0.12, SAUL_TUNE: 0.15, SAUL_ARENA: 9,
+  SAUL_AUTO: 3, SAUL_REACH: 8 });   // AUTO: tiles past the Steward's last line where David sits and plays by himself (Glen); REACH: tiles from the king the song works
 Object.assign(TUNE.SPRITE_SIZE, { saul: W4.SAUL_SIZE, saul_torment: W4.SAUL_SIZE, saul_joy: W4.SAUL_SIZE, saul_sad: W4.SAUL_SIZE });
 // Glen's other Saul sheets: saul_torment (0 lurching, 1 head in hands, 2 fists, 3 shouting, 4 arms flung out, 5 clutching
 // his robe), saul_joy (arms raised, for the End of World 4), saul_sad (head bowed).
@@ -625,14 +626,20 @@ function updateHall(dt) {
 // --- Saul's Torment
 const saulPhase = () => { const g = harpDuel; if (!g.active || g.kind !== "saul") return saul.calm ? 3 : 0; return g.phrase < 2 ? 0 : g.phrase < 4 ? 1 : 2; };
 function saulDuelTarget(d) {   // world2.js harpDuelTarget: sitting by the troubled king
-  if (!throne || saul.calm || Math.abs(d.x - throne.x) > 6 * T) return null;
+  if (!throne || saul.calm || Math.abs(d.x - throne.x) > W4.SAUL_REACH * T) return null;
   return { duelKind: "saul" };
 }
 function inThroneRoom() { return throne && !saul.calm && david.x > throne.x - W4.SAUL_ARENA * T && david.deadT <= 0; }
 function updateSaul(dt) {
   if (!throne) return;
   const d = david, g = harpDuel, duel = g.active && g.kind === "saul";
-  if (inThroneRoom() && !W4.throneTold) { W4.throneTold = true; toast("King Saul, troubled on his throne. Sit beside him and play (Select)."); }
+  // (Glen, 2026-10-26) walk on past the Steward and David sits and plays: no hunting for the spot. Once each time he
+  // comes up to the king (put the harp away and it's Select again, as anywhere)
+  const stew = talks.filter(t => t.who === "The Steward").pop(), autoX = stew ? stew.x + W4.SAUL_AUTO * T : throne.x - 5 * T;
+  if (d.x < autoX - 2 * T) saul.autoDone = false;
+  if (!duel && !saul.calm && !saul.autoDone && !(saul.outT > 0) && d.x >= autoX && d.onGround && !d.harp && !d.carrying && d.deadT <= 0 && dialog.t <= 0 && (!stew || stew.done)) {
+    saul.autoDone = true; d.vx = 0; d.harp = true; d.harpAuto = true; setState("kneel");
+  }
   if (duel) {
     g.dark = g.dark || 0;
     if (dialog.t > 0 && dialog.who !== "King Saul") dialog.t = 0;   // nobody talks over the song

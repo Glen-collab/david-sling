@@ -1927,7 +1927,7 @@ if (LEVEL_NAME === "test") {
   setPiece("wisp", 150, 13); setPiece("wisp", 156, 10); setPiece("wisp", 162, 13);
   campfire(166);                                                // the servants' fire: back here if the king sends you out
   setPiece("hall_lamp", 172); plat(174, 13, 5);
-  talk(182, "The Steward", "There he is. Sit beside him and play. Steady, David. Steady.");
+  talk(188, "The Steward", "There he is. Sit beside him and play. Steady, David. Steady.");   // walk on past him and David sits and plays (world4.js SAUL_AUTO)
   setPiece("throne", 196);                                      // BOSS: Saul's Torment (world4.js)
   sheepfold(208);                                               // the palace door: out into the morning
 } else if (LEVEL_NAME === "3-4") {
@@ -2202,7 +2202,7 @@ function updateDavid(dt) {
     if (d.harp) { d.harp = false; setState("standup"); } else if (!(typeof harpBroken === "function" && harpBroken())) { d.harp = true; setState("kneel"); }   // (4-3: a broken string)
   }
   // Up, any direction, A or B: put the harp away and stand up
-  if (d.harp && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }
+  if (d.harp && !d.harpAuto && (dir !== 0 || pressed("up") || pressed("a") || pressed("b"))) { d.harp = false; setState("standup"); }   // (harpAuto: 4-4 sat him down while he walked)
 
   // --- pick up / put down the lamb (Down, standing still, next to it)
   if (pressed("down") && d.onGround && !busy && !d.harp && d.throwT < 0 && Math.abs(d.vx) < 40 && !(typeof w7Down === "function" && !d.carrying && w7Down())) {   // (7-3: Down beside a stone looks at it)   // (not mid-throw: Down while charging is a crouch)
