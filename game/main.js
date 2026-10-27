@@ -4369,7 +4369,8 @@ const SFX_FILES = ["ending_jingle_levels", "stage_clear", "sheep_baa_1", "sheep_
   "goliath_tenu_li_ish", "goliath_tenu_li_ish_2", "goliath_cheirafti", "goliath_cheirafti_2", "goliath_halo_anochi", "goliath_halo_anochi_2",
   "goliath_lamah", "goliath_avadim", "goliath_bru_lachem", "goliath_im_yuchal", "goliath_maarchot", "goliath_nilachamah", "goliath_hakelev", "goliath_lecha_elai",   // Goliath's Hebrew (Glen, pitched down)   // Glen's voice as the Philistines (tools/crowd.py)
   "arrow_single", "arrow_with_stick-to-target", "arrow_volley_1", "arrow_volley_2", "taunting_yells", "war_horn",   // Glen's World 6 sounds (2026-10-19)
-  "vulture"];   // Glen's World 6 sounds (2026-10-19)
+  "vulture",   // Glen's World 6 sounds (2026-10-19)
+  "spear_woosh_1", "spear_woosh_2"];   // Glen's wooshes for Goliath's spears (2026-10-27): 1 short and sharp, 2 long
 // (plain <audio> elements, not fetch + Web Audio: fetch is blocked when the game is opened straight from a file)
 const SFX = {};
 for (const n of SFX_FILES) { const a = new Audio(`../assets/sounds/${n}.mp3?v=${window.BUILD || 0}`); a.preload = "auto"; a.onerror = () => { a.missing = true; }; SFX[n] = a; }

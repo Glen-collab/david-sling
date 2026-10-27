@@ -311,7 +311,8 @@ function g8Throw(kind) {   // the spear leaves his hand: flat from his front, or
     g8.jav.y0 = g8.jav.y;
   } else g8.jav = { kind, x: g8Front() - 10, y: GR * T - (kind === "low" ? W8.LOW_Y : W8.HIGH_Y), a: Math.PI, t: 0 };
   g8.relT = 0; g8.relKind = kind; g8.thrown++;
-  sfx("arrow_single", g8.x, 0.9, 0.6); sfx("sling_throw_quick", g8.x, 0.7, 0.45);   // the whoosh of it, deep
+  // (Glen's wooshes, 2026-10-27) the quick flat ones a short sharp woosh, the big overhead one down at David the long one
+  if (kind === "down") sfx("spear_woosh_2", g8.x, 1); else sfx("spear_woosh_1", g8.x, 0.75);
 }
 function g8SpearHits(j) {   // does the spear's shaft (its front half) cross David?
   const d = david, L = W8.SPEAR_SHEET_LEN * g8SpearK();
