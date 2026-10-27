@@ -303,6 +303,7 @@ const JOURNAL_PAGES = {
 // ----------------------------------------------------------------------------
 const BOOK = new Image(); BOOK.src = "../assets/items/davids_journal.png?v=" + (window.BUILD || 0);
 const BOOK_RIPPED = new Image(); BOOK_RIPPED.src = "../assets/journal/davids_journal_page_ripped-out.png?v=" + (window.BUILD || 0);   // the stub of a torn-out page
+const RIP_ASK = 2.5;   // seconds after the first A during a tear-out that a second A skips it
 const TEAR = Object.assign(new Image(), { src: "../assets/journal/journal_tear.png?v=" + (window.BUILD || 0) }), TEAR_N = 8, TEAR_MS = 110;
 const TEAR_BOOK = [[16, 31, 251], [11, 27, 249], [11, 28, 249], [4, 27, 252], [13, 43, 250], [0, 45, 254], [6, 44, 258], [0, 43, 254]];   // the book's left half in each tear frame: left x, top, bottom (measured)
 const BURN = Object.assign(new Image(), { src: "../assets/journal/journal_burn.png?v=" + (window.BUILD || 0) }), BURN_N = 7, BURN_MS = 160;
@@ -718,7 +719,9 @@ const Journal = {
   },
   updateRip(dt) {   // write the bitter words, stop, tear the page out, burn it; then the real lesson
     const r = this.rip; r.t += dt;
-    if (pressed("a") || pressed("start")) { r.phase = "done"; this.ripDone(); return; }
+    // (Glen, 2026-10-27) one stray A skipped the whole tear-out: the first A only asks, a second one within RIP_ASK skips
+    if (r.ask > 0) r.ask -= dt;
+    if (pressed("a") || pressed("start")) { if (r.ask > 0) { r.phase = "done"; this.ripDone(); return; } r.ask = RIP_ASK; }
     if (r.phase === "write") {
       while (r.next < r.tl.acts.length && r.tl.acts[r.next].t0 <= r.t) { const a = r.tl.acts[r.next++]; if (a.type === "write") penScratch(a.dur * 0.85); }
       if (r.t >= r.tl.total + 1.3) { r.phase = SPR.david_rip_page ? "fire" : "tear"; r.t = 0; this.viewWant = this.view = 1; }   // he stops...
@@ -806,7 +809,8 @@ const Journal = {
     // what to press
     ctx.font = "15px sans-serif"; ctx.textAlign = "right";
     const keys = [];
-    if ((this.phase === "write" || (this.rip && this.rip.phase !== "done")) && !this.turn) keys.push("A: skip");
+    if (this.rip && this.rip.phase !== "done") keys.push(this.rip.ask > 0 ? "A again: skip" : "A twice: skip");
+    else if (this.phase === "write" && !this.turn) keys.push("A: skip");
     if (this.phase === "done" && !this.turn) keys.push(this.pages.some(p => p.t === 0) ? "A: turn the page" : "A: continue");
     if (this.cur > 0 || this.pages[this.cur + 1]?.t > 0) keys.push("Left / Right: pages");
     keys.push(this.viewWant ? "Down: sit back" : "Up: lean in");

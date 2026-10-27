@@ -578,3 +578,5 @@ the harp phrase at 3-2's campfire.
   note, no rewind; the donkey still rewinds). The shadows (g.dark) only show how it's going; rushing fills them and a
   full meter is a heart. The last heart: "Leave me!", a life, back to the fire, and the Steward's counsel there
   (world4.js saulHurt / saulCounsel; saulSendsOut is gone). The pause menu now stops Saul's dark song (hushLoops).
+- Journal tear-outs (3-2, 6-1): one stray A skipped the whole thing (and it's saved as seen). Now the first A shows
+  "A again: skip" and a second A within RIP_ASK (2.5 s, journal.js) skips; otherwise it plays on.
