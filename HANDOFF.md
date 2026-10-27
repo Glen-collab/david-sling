@@ -608,3 +608,8 @@ the harp phrase at 3-2's campfire.
 - 8-1 ANSWER READABLE (Glen, 2026-10-27: "I can barely read David's name and the press A is unreadable"). world8.js
   drawWords8Over: "David" and the prompt ("Answer him. Press A." / "A: next", was a bare faint "A") sit on dark pills in
   bold 22px; the band behind the words is darker (0.68) and the verse reference brighter (20px, #fff0d4).
+- 8-2 THE WHOLE THROW FROM MEMORY (Glen, 2026-10-27: "I already know it... say it is my third or fourth time
+  playing"). world8.js updateGoliath8 "open": the pieces Jesse has given you + A still work, and so does the whole
+  throw (THROW_CODE, 10) whether he's taught it this time or not: going on past your pieces with the right button
+  grows the boxes to ten and adds W8.CODE_FULL_EXTRA (0.5 s) a button once; a wrong press drops back to your pieces.
+  Tested: 3 pieces (up up down A) works; the whole ten works (5.0 s became 7.8 s); a wrong press then the ten works.

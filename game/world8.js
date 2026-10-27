@@ -163,6 +163,7 @@ Object.assign(W8, {
   JAV_HAND: [172, 293],  // his throwing hand in goliath_spear frame 11 (sheet px in front of / above his feet): the downward spear leaves from there
   CODE_TIME: 5,          // seconds to enter the throw at the opening...
   CODE_PER_STONE: 0.1,   // ...plus this much for every stone of remembrance saved (DESIGN 3f)
+  CODE_FULL_EXTRA: 0.5,  // (Glen, 2026-10-27) going on past the pieces you've learned to the whole throw: this much more time a button
   SIZE: 1.55,            // Goliath (as in 7-4)
   CLIP_SIZE: 1.66,       // Glen's 2026-10-22 attack sheets against goliath_yell (standing 240 px vs 401 in the sheets)
 });
@@ -386,7 +387,7 @@ function updateGoliath8(dt) {
     if (!g8.roared) { g8.roared = true; sfx("taunting_yells", g8.x, 0.9, 0.55); goliathChain(["lamah"], 0.9); thud(1); shake8(1.4); G8_MUSIC.volume = Math.min(1, TUNE.BOSS_MUSIC_VOLUME * 0.5); }
     if (g8.t > 1.3) {
       g8Set("open"); g8.roared = false;
-      g8.code = { seq: g8Code(), got: 0, t: (W8.CODE_TIME + stonesSavedAll() * W8.CODE_PER_STONE) * (g8.counsel ? 2 : 1), result: null };
+      g8.code = { seq: g8Code(), short: null, got: 0, t: (W8.CODE_TIME + stonesSavedAll() * W8.CODE_PER_STONE) * (g8.counsel ? 2 : 1), result: null };
       d.vx = 0; d.facing = 1; setState("idle"); sfx("sling_charge", d.x, 0.8, 0.8);
       if (!W8.codeTold) { W8.codeTold = true; toast("His forehead is open! The throw: enter it from memory."); }
     }
@@ -394,9 +395,18 @@ function updateGoliath8(dt) {
     const c = g8.code; d.vx = 0;
     if (!c.result) {
       c.t -= dt;
+      // (Glen, 2026-10-27: "I already know it", a third or fourth time through) the pieces Jesse has given you, then A;
+      // or, if you know it by heart, the whole throw (the boxes grow to ten), whether he's taught you it this time or not
+      const press = b => {
+        if (b === c.seq[c.got]) { c.got++; chime(c.got); return true; }
+        if (c.seq !== THROW_CODE && b === THROW_CODE[c.got] && c.seq.slice(0, c.got).every((x, i) => x === THROW_CODE[i])) {
+          if (!c.extra) { c.extra = true; c.t += (THROW_CODE.length - c.seq.length) * W8.CODE_FULL_EXTRA; }
+          c.short = c.short || c.seq; c.seq = THROW_CODE; c.got++; chime(c.got); return true;
+        }
+        return false;
+      };
       for (const b of ["up", "down", "left", "right", "a", "b"]) if (pressed(b)) {
-        if (b === c.seq[c.got]) { c.got++; chime(c.got); }
-        else { c.got = b === c.seq[0] ? 1 : 0; sfx("stone_hit", d.x, 0.4, 1.6); }
+        if (!press(b)) { sfx("stone_hit", d.x, 0.4, 1.6); if (c.short) c.seq = c.short; c.got = 0; press(b); }   // wrong: start over (that press may be the first)
         break;
       }
       if (c.got >= c.seq.length) { c.result = "hit"; g8Set("thrown"); sfx("sling_throw", d.x, 1, 0.8); g8.flash = 0.6; G8_MUSIC.pause(); }
