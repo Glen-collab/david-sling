@@ -584,3 +584,10 @@ the harp phrase at 3-2's campfire.
   edge widens toward his sleeve, so every line had drifted in (Glen: "indented").
 - Poison/barley (main.js POISON) now stop POISON.CLEAR tiles before the sheepfold's posts (END), not 12 tiles before
   the stage end: gourds, berries and the lamb's barley had landed inside the fold. All 32 stages scanned: none inside.
+- LIVES CARRY OVER, like Mario (Glen, 2026-10-27: "real risk in the game"). main.js LIVES_CARRY / saveLives /
+  outOfLives / livesCard: lives are saved (progress.lives) whenever they change, and a stage starts with them, not
+  DIFF.lives. Out of lives: a continue (progress.continues, CONTINUES = 3) restarts the stage with DIFF.lives lives.
+  Out of continues: game over, back to the start of that world (its 4 stages un-cleared, p.at = "home"); skills, the
+  Journal, Ones and stones are kept (Glen chose this over restarting the whole game). A world already finished only
+  goes back to the map. Continues go back to 3 when a world's last stage is cleared (map.js stageCleared). Not in the
+  Trial, the range, the test stage or the 3-A story stop. Pits are unchanged (a heart; the last heart costs a life).

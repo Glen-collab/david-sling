@@ -3042,6 +3042,8 @@ const FOOD_TEXT = {
   barley: "Barley: Ruth gleaned it in these very fields of Bethlehem (Ruth 2)",
 };
 
+const CONTINUES = 3;   // (lives carry over: see outOfLives)
+const LIVES_CARRY = !TRIAL && !!STAGE_HASH && !STORY_HASH;
 // hearts
 david.maxHearts = TUNE.HEARTS + DIFF.hearts; david.hearts = david.maxHearts; david.inv = 0; david.deadT = 0; david.specialStones = 0;
 david.lives = DIFF.lives; david.olives = 0; david.lampOil = 0; david.gathered = 0;   // gathered: every olive picked up this stage (for the tithe, home.js)
@@ -3049,6 +3051,7 @@ david.lives = DIFF.lives; david.olives = 0; david.lampOil = 0; david.gathered = 
 try {
   const pr = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}");
   david.olives = pr.olives || 0; david.lampOil = pr.lampOil || 0;
+  if (LIVES_CARRY && pr.lives > 0) david.lives = Math.min(99, pr.lives);   // (Glen, 2026-10-27) lives carry over, like Mario
   if (pr.staff) { david.maxHearts++; david.hearts++; }   // Hanan's staff (End of World 3): one more heart, for good
   if (pr.cloak) { david.maxHearts++; david.hearts++; }   // Tobi's scout cloak (End of World 5)
   if (pr.figCake > 0 && LEVEL_NAME !== "test" && LEVEL_NAME !== "range" && !TRIAL) {   // eaten now: one extra heart for this stage
@@ -3068,7 +3071,7 @@ function hurtDavid(fromX, why = "", still = false) {   // why: what hurt him (th
     d.harp = false; d.charging = false; d.throwT = -1;
     if (d.state !== "carry") setState("jump");
   }
-  if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; const tail = d.lives > 0 ? `Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : "Out of lives. Back to the start of the stage.";
+  if (d.hearts <= 0) { d.deadT = 1.2; d.lives--; const tail = d.lives > 0 ? `Back to the campfire... (${d.lives} ${d.lives === 1 ? "life" : "lives"} left)` : LIVES_CARRY ? "Out of lives..." : "Out of lives. Back to the start of the stage.";
                        toast(why ? `${why} ${tail}` : d.lives > 0 ? `Ouch! ${tail}` : tail); }
 }
 // a pit costs a heart and puts him back on the last solid ground he stood on (it's never back to the start)
@@ -3098,10 +3101,58 @@ function restartStage() {   // out of lives: back to the start of THIS stage; sp
   if (typeof resetWorld2 === "function") resetWorld2(true);
   if (typeof resetOx === "function") resetOx();
 }
+// ---------------------------------------------------------------------------
+// Lives carry over, like Mario (Glen, 2026-10-27: "then there is real risk in the game"). They're kept in the save
+// (progress.lives, written whenever they change), so every stage doesn't start fresh with DIFF.lives. Out of lives:
+// a continue (progress.continues, CONTINUES of them, back to 3 when a world's last stage is cleared: map.js
+// stageCleared) restarts the stage with DIFF.lives. Out of continues: game over, back to the start of that world (its
+// stages to clear again; skills, the Journal, Ones and stones found are kept). A world already finished (a stage
+// played again) only goes back to the map. Not in the Shepherd's Trial, the range or the test stage.
+// ---------------------------------------------------------------------------
+let livesSaved = david.lives;
+function saveLives() {   // every frame in a stage: write lives when they change
+  if (!LIVES_CARRY || david.lives === livesSaved) return;
+  livesSaved = david.lives;
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); p.lives = david.lives; localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
+}
+function outOfLives() {
+  let p = {}; try { p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); } catch (e) {}
+  const w = +LEVEL_NAME[0], cont = p.continues ?? CONTINUES, finished = !!(p[`${w}-4`] && p[`${w}-4`].cleared);
+  david.lives = livesSaved = p.lives = DIFF.lives;
+  if (cont > 0) { p.continues = cont - 1; restartStage(); david.lives = livesSaved = p.lives; livesCard.show("continue", p.continues); }
+  else {
+    p.continues = CONTINUES;
+    if (!finished) { for (let k = 1; k <= 4; k++) if (p[`${w}-${k}`]) p[`${w}-${k}`].cleared = false; p.at = "home"; p.view = w; delete p.justCleared; }
+    livesCard.show(finished ? "map" : "over", 0, w);
+  }
+  try { localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
+}
+const livesCard = {   // the card for a continue or a game over: the stage waits under it until A
+  active: false,
+  show(kind, left, w) { Object.assign(this, { active: true, kind, left, w, t: 0 }); hushLoops(); for (const a of [dayMusic, nightMusic, caveMusic, stageTheme, bossMusic].filter(Boolean)) if (!a.paused) a.pause(); },
+  update(dt) {
+    this.t += dt;
+    if (this.t > 1.2 && (pressed("a") || pressed("start"))) { this.active = false; if (this.kind !== "continue") backToMap(); }
+  },
+  draw() {
+    const a = Math.min(1, this.t / 0.6);
+    ctx.save(); ctx.fillStyle = `rgba(0,0,0,${0.85 * a})`; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = a; ctx.textAlign = "center"; ctx.fillStyle = "#fff3d6";
+    const L = this.kind === "continue"
+      ? ["Out of lives", `A continue: back to the start of this stage with ${DIFF.lives} lives.`, this.left === 0 ? "That was your last continue. Be careful!" : `Continues left: ${this.left}`, "A: try again"]
+      : this.kind === "over"
+      ? ["Game over", `No continues left. Back to the start of World ${this.w}, to clear its stages again.`, "What you've learned, your Journal and the sheep you found are kept.", "A: back to the map"]
+      : ["Game over", "No continues left. Back to the map.", `You start again with ${DIFF.lives} lives and ${CONTINUES} continues.`, "A: back to the map"];
+    ctx.font = "italic 52px Georgia, serif"; ctx.fillText(L[0], W / 2, H / 2 - 70);
+    ctx.font = "italic 26px Georgia, serif"; ctx.fillText(L[1], W / 2, H / 2 - 4); ctx.fillText(L[2], W / 2, H / 2 + 36);
+    if (this.t > 1.2) { ctx.globalAlpha = a * (0.75 + 0.25 * Math.sin(performance.now() / 300)); ctx.font = "italic 22px Georgia, serif"; ctx.fillText(L[3], W / 2, H / 2 + 110); }
+    ctx.restore(); ctx.textAlign = "left";
+  },
+};
 function respawn() {
   const d = david;
   leaveCaveNow();
-  if (d.lives <= 0) restartStage();
+  if (d.lives <= 0) { if (LIVES_CARRY) outOfLives(); else restartStage(); }
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
   if (lamb.stolen) for (const k of critters) if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) Object.assign(k, { x: k.home, state: "idle", t: 0 });
@@ -4544,6 +4595,7 @@ function updateWorld(dt) {
   updateSpecials(dt); updateOlives(dt); updateTrees(dt);
   david.inv = Math.max(0, david.inv - dt);
   if (david.deadT > 0) { david.deadT -= dt; if (david.deadT <= 0) respawn(); }
+  saveLives();
   updatePickups(dt); updateGourds(); updateSnakes(dt); updateFires(dt); updateLion(dt); updateTakenLamb(dt); updateSheep(dt); updateFinish(dt);
   updateCritters(dt); updateCrumbles(dt); updateTalks(dt); updateNight(dt); updateCave(dt);
   if (typeof updateWorld2 === "function") updateWorld2(dt);   // the flood, the boy from Tekoa (world2.js)
@@ -4788,6 +4840,7 @@ function frame(now) {
   if (typeof ending !== "undefined" && ending.active) {   // the end-of-world scene (world2.js) has the screen
     pollInput(); ending.update(real); ending.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return;
   }
+  if (livesCard.active) { pollInput(); livesCard.update(real); livesCard.draw(); drawToastAndSetup(); requestAnimationFrame(frame); return; }   // out of lives: the card has the screen
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
