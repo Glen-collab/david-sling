@@ -594,3 +594,6 @@ the harp phrase at 3-2's campfire.
 - RUNNER ART (Glen, 2026-10-27): Glen redrew the goofy-legged runs: villager_{man,woman,staffman,wrapman,scarfwoman,
   boy,girl,braidgirl}_run (5-1's fleeing families) and soldier_run (the 17:24 crowd at the End of World 5, World 8's
   rout, the HUD soldier icon). Same sheet sizes and frame counts, so no frame data changed. capman and basketgirl kept.
+- END OF WORLD 5 CROWD (Glen, 2026-10-27: "three of the same people in waves of three"): world5.js fleeCrowd /
+  drawFleeingArmy: 11 runners (soldier_run in five tints and sizes, plus villager_capman_run and villager_wrapman_run),
+  shuffled, each with his own speed (380-610 px/s), spacing, depth and stride; a new order on each flee beat.

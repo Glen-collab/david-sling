@@ -1225,7 +1225,7 @@ const w5ending = {
         drawSprite("abinadab_war_idle", frameOf("abinadab_war_idle", now), W * 0.72, y, -1);
         drawSprite("shammah_war_ready", frameOf("shammah_war_ready", now), W * 0.52, y, -1);
       }
-      if (fleeing) drawFleeingArmy(now, ft);
+      if (fleeing) drawFleeingArmy(now, ft, this.i);
       drawSprite("david_idle", frameOf("david_idle", now), W * 0.34, y, 1);   // David, still
       if (B.tobi && SPR.tobi_talk) drawSprite(B.who === "Tobi" ? "tobi_talk" : "tobi_cave", B.who === "Tobi" ? frameOf("tobi_talk", now) : 5, W * 0.22, y, 1);
     }
@@ -1278,12 +1278,35 @@ function drawPhilistineRanks(y, a) {
   for (const [nm, fx, back] of PHIL_RANKS) ctx.filter = "blur(0.6px)", drawItem("phil_sil_" + nm, W * fx, y - back * 6, back ? 0.19 : 0.23, a * (back ? 0.7 : 0.9));
   ctx.filter = "none";
 }
-function drawFleeingArmy(now, t) {   // soldiers running past David on both sides, away from the giant
-  const who = SPR.soldier_run ? ["soldier_run"] : ["villager_man_run", "villager_staffman_run"], f = SPR.soldier_run ? "" : "sepia(0.4) brightness(0.8)";
-  for (let k = 0; k < 9; k++) {
-    const nm = who[k % who.length], x = W + 100 + k * 130 - t * (420 + (k % 3) * 60), y = GR * T + (k % 2 ? 6 : -4);
-    if (x < -150 || x > W + 150) continue;
-    drawSprite(nm, frameOf(nm, now + k * 0.13), x, y, -1, SPR.soldier_run ? 1.05 + (k % 3) * 0.06 : 1.15, 1, SPR.soldier_run ? ["", "brightness(0.85) sepia(0.2)", "brightness(1.08) hue-rotate(-8deg)"][k % 3] : f);   // a little variety in the crowd
+// (Glen, 2026-10-27: it looked like the same three men in waves of three) a mixed crowd: the soldier in different
+// tints and sizes, two of the camp's men among them, each at his own speed and spacing; a new order on each beat.
+const FLEE_TINTS = ["", "brightness(0.85) sepia(0.2)", "brightness(1.08) hue-rotate(-8deg)", "brightness(0.95) saturate(0.8)", "sepia(0.35) brightness(0.92)"];
+function fleeCrowd(seed) {
+  let r = seed * 9301 + 49297; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+  const who = ["soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "villager_capman_run", "villager_wrapman_run", "soldier_run"].filter(n => SPR[n]);
+  for (let i = who.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [who[i], who[j]] = [who[j], who[i]]; }
+  let x = 60; const out = [];
+  for (const nm of who) {
+    const v = nm !== "soldier_run";
+    out.push({ nm, x0: x, sp: 380 + rnd() * 230, ph: rnd() * 2, dy: Math.round(-8 + rnd() * 16),
+      sc: v ? W5.VILLAGER_SIZE[nm.slice(9, -4)] : 1.0 + rnd() * 0.18, f: v ? "sepia(0.15)" : FLEE_TINTS[Math.floor(rnd() * FLEE_TINTS.length)] });
+    x += 50 + rnd() * 210;   // sometimes two together, sometimes a gap
+  }
+  return out.sort((p, q) => p.dy - q.dy);   // the ones further back drawn first
+}
+let fleeCrowdFor = -1, fleeCrowdNow = [];
+function drawFleeingArmy(now, t, beat = 0) {   // soldiers running past David, away from the giant
+  if (!SPR.soldier_run) {
+    for (let k = 0; k < 9; k++) {
+      const nm = ["villager_man_run", "villager_staffman_run"][k % 2], x = W + 100 + k * 130 - t * (420 + (k % 3) * 60);
+      if (x > -150 && x < W + 150) drawSprite(nm, frameOf(nm, now + k * 0.13), x, GR * T + (k % 2 ? 6 : -4), -1, 1.15, 1, "sepia(0.4) brightness(0.8)");
+    }
+    return;
+  }
+  if (fleeCrowdFor !== beat) { fleeCrowdFor = beat; fleeCrowdNow = fleeCrowd(beat + 3); }
+  for (const q of fleeCrowdNow) {
+    const x = W + 100 + q.x0 - t * q.sp; if (x < -150 || x > W + 150) continue;
+    drawSprite(q.nm, frameOf(q.nm, now * (q.sp / 470) + q.ph), x, GR * T + q.dy, -1, q.sc, 1, q.f);
   }
 }
 // "?w5end" plays the End of World 5 straight away (testing); "?w5end=8" starts at that beat
