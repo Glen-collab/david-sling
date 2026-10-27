@@ -582,3 +582,5 @@ the harp phrase at 3-2's campfire.
   "A again: skip" and a second A within RIP_ASK (2.5 s, journal.js) skips; otherwise it plays on.
 - Journal, World 6 scene: the left page's bottom corner out from 680 to 620 (journal.js SCENES[6]); the page's outer
   edge widens toward his sleeve, so every line had drifted in (Glen: "indented").
+- Poison/barley (main.js POISON) now stop POISON.CLEAR tiles before the sheepfold's posts (END), not 12 tiles before
+  the stage end: gourds, berries and the lamb's barley had landed inside the fold. All 32 stages scanned: none inside.

@@ -1999,15 +1999,17 @@ if (POISON.STAGES.includes(LEVEL_NAME)) {
   const busy = new Set(), mark = x => { const c = Math.floor(x / T); for (let k = -POISON.CLEAR; k <= POISON.CLEAR; k++) busy.add(c + k); };
   for (const o of [...fires, ...talks, ...setPieces, ...lost.map(l => ({ x: l.hx })), ...pickups, ...gourds, ...specials]) mark(o.x);
   const top = (c, r) => (solid[r][c] === 1 || solid[r][c] === 2 || solid[r][c] === 3 || oneway[r][c]) && [1, 2, 3].every(k => r - k < 0 || (!solid[r - k][c] && !oneway[r - k][c]));
+  // (Glen, 2026-10-27) none past the sheepfold's posts: the stage is over there (it used to stop 12 tiles before the end)
+  const END = fold ? Math.min(fold.postC - POISON.CLEAR, MAIN_COLS - 12) : MAIN_COLS - 12;
   const ledges = [], floor = [];
-  for (let c = 10; c < MAIN_COLS - 12; c++) {
+  for (let c = 10; c < END; c++) {
     if (busy.has(c)) continue;
     for (let r = 5; r < GR; r++) if (top(c, r) && top(c - 1, r) && top(c + 1, r) && (POISON.WIDE < 4 || top(c + 2, r))) { ledges.push({ c, r }); break; }
     if (top(c, GR) && top(c - 1, GR) && top(c + 1, GR)) floor.push(c);
   }
   const spread = (list, n, put, fallback) => {   // one in each stretch of the stage
     for (let i = 0; i < n; i++) {
-      const lo = 10 + (MAIN_COLS - 22) * i / n, hi = 10 + (MAIN_COLS - 22) * (i + 1) / n;
+      const lo = 10 + (END - 10) * i / n, hi = 10 + (END - 10) * (i + 1) / n;
       const here = list.filter(p => { const c = p.c ?? p; return c >= lo && c < hi && !busy.has(c); });
       if (!here.length) { if (fallback) fallback(lo, hi); continue; }
       const p = here[Math.floor(rnd() * here.length)], c = p.c ?? p; put(p); mark(c * T);
