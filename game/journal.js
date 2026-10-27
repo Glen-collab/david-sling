@@ -520,9 +520,11 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
        thumbs: [[[522, 770], [526, 760], [537, 755], [550, 758], [558, 770], [565, 790], [571, 806], [578, 830], [527, 832]],
                 [[776, 667], [778, 657], [784, 651], [800, 653], [815, 656], [842, 648], [842, 700], [825, 697], [812, 690], [796, 687], [782, 678]]] },
   // Glen's World 6 scene (2026-10-19): the soldiers asleep round the fire, his harp on the rock, Shammah's new bag.
-  // (Re-measured 2026-10-20: the left page's bottom had been pulled far in for his sleeve, which slanted every line)
+  // (Re-measured 2026-10-20: the left page's bottom had been pulled far in for his sleeve, which slanted every line.
+  // 2026-10-27, Glen: still indented: the page's outer edge runs out from 690 at the top to ~615 by his sleeve, so the
+  // bottom corner goes out to 620, just clear of the sleeve)
   6: { src: "../assets/journal/w6_reading.jpg", y: -40, lamp: [1344, 848],
-       left:  { top: [[688, 557], [776, 574], [865, 608]], bot: [[680, 828], [732, 844], [784, 860]] },
+       left:  { top: [[688, 557], [776, 574], [865, 608]], bot: [[620, 836], [702, 850], [784, 860]] },
        right: { top: [[870, 610], [950, 597], [1042, 590]], bot: [[787, 860], [880, 857], [972, 860]] } },
   // Glen's World 7 scene (2026-10-20): on a rock above the valley in the late afternoon, the five stones beside his bag
   // and staff. Out of doors: no lamp. His thumbs on the pages are drawn back over the words (thumbs).
