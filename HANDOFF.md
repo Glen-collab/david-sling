@@ -574,3 +574,7 @@ the harp phrase at 3-2's campfire.
   notes were too far apart): re-charted with more of the recording's plucks, 63 notes (was 33), tunes 8,9,10,11,12,13:
   `python tools/make_harp_chart.py <david-sling-art/audio/Morning_Meditation_1.mp3> saul --start 4.0 --end 70.095
   --gap 0.5 --phrases 8,9,10,11,12,13`. Notes ~1 s apart (closest 0.5 s), was ~1.9 s. (A 1.5x playback try was undone.)
+- 4-4 Saul (2026-10-27): a wrong or late note costs a heart and the song goes on (world2.js miss(): Saul skips the
+  note, no rewind; the donkey still rewinds). The shadows (g.dark) only show how it's going; rushing fills them and a
+  full meter is a heart. The last heart: "Leave me!", a life, back to the fire, and the Steward's counsel there
+  (world4.js saulHurt / saulCounsel; saulSendsOut is gone). The pause menu now stops Saul's dark song (hushLoops).

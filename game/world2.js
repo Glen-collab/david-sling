@@ -237,7 +237,7 @@ function startHarpDuel(kind, target) {
     duelAudio = new Audio(`../assets/audio/${song.file}?v=${window.BUILD || 0}`); duelAudio._music = true; duelAudio._song = opt.song;
   }
   duelAudio.volume = TUNE.HARP_VOLUME;
-  Object.assign(harpDuel, { active: true, kind, opt, song, target, phrase: 0, next: 0, calm: 0, misses: 0, hits: [], state: "play", t: 0, songT: 0, missNote: null });
+  Object.assign(harpDuel, { active: true, kind, opt, song, target, phrase: 0, next: 0, calm: 0, misses: 0, hits: [], state: "play", t: 0, songT: 0, missNote: null, sourT: 0 });
   duelPlayFrom(song.phrases[0].start);
 }
 function duelPlayFrom(t) {
@@ -278,25 +278,29 @@ function updateHarpDuel(d, dt) {   // called from updateDavid (main.js); true = 
   g.songT += dt;
   if (!duelAudio.paused && duelAudio.currentTime > 0 && Math.abs(duelAudio.currentTime - g.songT) > 0.08) g.songT = duelAudio.currentTime;
   const p = g.song.phrases[g.phrase], n = g.song.notes[g.next], w = g.opt.window;
+  if (g.sourT > 0) g.sourT -= dt;
+  const tuneEnd = () => {
+    if (g.next < p.to) return;   // a whole tune
+    g.phrase++; g.calm = g.phrase / g.song.phrases.length; if (g.kind === "saul") saulTune();
+    if (g.phrase >= g.song.phrases.length) {
+      g.state = "done"; g.t = 3.2;
+      if (g.kind === "saul") saulCalmed();
+      else { if (g.target) { g.target.calmed = true; g.target.vx = 0; setCrit(g.target, "calm"); }
+        sfx("heal", undefined, 0.6); toast("The donkey is calm. He lowers his head and lets you by."); }
+    }
+  };
   const miss = why => {
-    g.state = "missed"; g.t = 1.3; g.misses++; g.missNote = { b: n.b, why }; duelAudio.pause(); harpTwang();
-    if (g.kind === "saul") saulMiss(false);
+    g.misses++; g.missNote = { b: n.b, why }; harpTwang();
+    // (Glen, 2026-10-27) Saul: a wrong or late note costs a heart and the song goes on (world4.js saulMiss), no rewind
+    if (g.kind === "saul") { g.sourT = 0.9; g.next++; saulMiss(false); tuneEnd(); return; }
+    g.state = "missed"; g.t = 1.3; duelAudio.pause();
     if (g.target) g.target.t = 0;
   };
   const btn = ["up", "down", "left", "right", "a", "b"].find(b => pressed(b));
   if (btn && g.kind === "saul" && g.songT < n.t - w && n.t - g.songT < 0.8) saulMiss(true);   // Saul: rushing makes it worse (no rewind)
   if (btn && Math.abs(g.songT - n.t) <= w) {   // presses well before a note don't count (no penalty for being eager)
     if (btn !== n.b) { miss("wrong"); return true; }
-    g.hits.push({ b: n.b, t: 0 }); g.next++;
-    if (g.next >= p.to) {   // a whole tune
-      g.phrase++; g.calm = g.phrase / g.song.phrases.length; if (g.kind === "saul") saulTune();
-      if (g.phrase >= g.song.phrases.length) {
-        g.state = "done"; g.t = 3.2;
-        if (g.kind === "saul") saulCalmed();
-        else { if (g.target) { g.target.calmed = true; g.target.vx = 0; setCrit(g.target, "calm"); }
-          sfx("heal", undefined, 0.6); toast("The donkey is calm. He lowers his head and lets you by."); }
-      }
-    }
+    g.hits.push({ b: n.b, t: 0 }); g.next++; tuneEnd();
   } else if (g.songT > n.t + w) miss("late");
   return true;
 }
@@ -321,7 +325,7 @@ function drawHarpDuel() {
     ctx.fillStyle = HARP_COLORS[HARP_STRINGS[s]]; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center";
     ctx.fillText(ARROWS[HARP_STRINGS[s]], hitX - 84, y + 5);
   }
-  ctx.strokeStyle = g.state === "missed" ? "rgba(230,80,60,0.9)" : "rgba(255,216,74,0.9)";
+  ctx.strokeStyle = g.state === "missed" || g.sourT > 0 ? "rgba(230,80,60,0.9)" : "rgba(255,216,74,0.9)";
   ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(hitX, top - 6); ctx.lineTo(hitX, top + lane * 6 + 6); ctx.stroke();
   // the notes still to play, sliding in; a dashed line marks where each tune starts
   const songT = g.songT;
@@ -347,7 +351,8 @@ function drawHarpDuel() {
     ctx.beginPath(); ctx.arc(hitX, y, 14 + h.t * 50, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
   }
   ctx.textAlign = "center"; ctx.font = "15px sans-serif"; ctx.fillStyle = "#e9dcc4";
-  const msg = g.state === "missed" ? (g.missNote.why === "late" ? "Too late! The harp falls silent. Start the tune again." : "Wrong string! Start the tune again.")
+  const msg = g.sourT > 0 ? (g.missNote.why === "late" ? "Too late! It costs you a heart. Keep playing." : "Wrong string! It costs you a heart. Keep playing.")
+            : g.state === "missed" ? (g.missNote.why === "late" ? "Too late! The harp falls silent. Start the tune again." : "Wrong string! Start the tune again.")
             : g.state === "done" ? (g.opt.done || "He's calm.") : g.kind === "saul" ? "Play steady: each note as it reaches the harp, never early" : "Press each note as it reaches the harp  ·  Select: stop";
   ctx.fillText(msg, W / 2, y0 + ph - 16);
   ctx.restore(); ctx.textAlign = "left";

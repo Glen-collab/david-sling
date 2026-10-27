@@ -649,8 +649,8 @@ function updateSaul(dt) {
       if (ph === 2) toast("The new part of the song. The shadows begin to thin.");
       g.lastPh = ph;
     }
-    if (g.dark >= 1) saulSendsOut();
   }
+  saulCounsel();
   saul.flash = Math.max(0, (saul.flash || 0) - dt * 2);
   saul.t = (saul.t || 0) + dt;
   if (saul.outT > 0) saul.outT -= dt;
@@ -661,24 +661,36 @@ function updateSaul(dt) {
   if (saul.darkVol > 0.01 && darkSong.paused && audioUnlocked) darkSong.play().catch(() => {});
   if (saul.darkVol <= 0.01 && !darkSong.paused) darkSong.pause();
 }
+// (Glen, 2026-10-27) a missed note costs a heart and the song goes on; the shadows (g.dark) only show how it's going.
+// Rushing thickens them, and when they fill, that's a heart too. Out of hearts: the king sends David away (a life, back
+// to the servants' fire, where the Steward's counsel makes the next try gentler).
 function saulMiss(rushed) {   // world2.js: a missed or rushed note
-  const g = harpDuel; g.dark = (g.dark || 0) + (rushed ? W4.SAUL_RUSH : W4.SAUL_MISS) * (W4.counsel2 ? 0.6 : 1);
-  if (rushed && !W4.rushTold) { W4.rushTold = true; toast("Too soon! Rushing makes it worse. Play steady: wait for each note to reach the harp."); }
+  const g = harpDuel, k = W4.counsel2 ? 0.6 : 1;
+  if (rushed) {
+    g.dark = (g.dark || 0) + W4.SAUL_RUSH * k;
+    if (!W4.rushTold) { W4.rushTold = true; toast("Too soon! Rushing makes it worse. Play steady: wait for each note to reach the harp."); }
+    if (g.dark >= 1) { g.dark = 0.7; saulHurt(); }
+    return;
+  }
+  g.dark = Math.min(0.95, (g.dark || 0) + W4.SAUL_MISS * k); saulHurt();
+}
+function saulHurt() {
+  const d = david; if (d.inv > 0) return;
+  if (d.hearts <= DIFF.hit) {   // the last one
+    endHarpDuel(); harpDuel.dark = 0; sayLine("King Saul", "Leave me! Get out, all of you!"); saul.outT = 2.5;
+    if (!W4.counsel2 && !TRIAL) W4.counselPending = true;   // (none in the Shepherd's Trial)
+  }
+  hurtDavid(d.x, "The king sends you away.", true);
 }
 function saulTune() { const g = harpDuel; g.dark = Math.max(0, (g.dark || 0) - W4.SAUL_TUNE); }   // a whole tune: the shadows draw back
 function saulCalmed() {
   saul.calm = true; sfx("heal", undefined, 0.7);
   toast("The hall goes quiet. King Saul leans back... and sleeps. \"Saul was refreshed and was well\" (1 Samuel 16:23).");
 }
-function saulSendsOut() {
-  endHarpDuel(); const d = david; d.harp = false; harpDuel.dark = 0;
-  sayLine("King Saul", "Leave me! Get out, all of you!"); saul.outT = 2.5;
-  setTimeout(() => {
-    Object.assign(d, { x: checkpoint.x, y: checkpoint.y, vx: 0, vy: 0 }); setState("idle"); camX = Math.max(0, d.x - W / 2);
-    if (!W4.counsel2 && !TRIAL) { W4.counsel2 = true; HARP_DUEL.saul.window = 0.32 * DIFF.open;   // (none in the Shepherd's Trial)
-      sayLine("The Steward", "Sit down. Tell me what happened. ... It's not your fault, boy. Go back. Slower this time: let each note come to you."); }
-    else toast("Back by the servants' fire. Go back to him when you're ready.");
-  }, 1600);
+function saulCounsel() {   // back by the servants' fire after the king sent him away: the Steward's tier-2 counsel
+  if (!W4.counselPending || david.deadT > 0 || dialog.t > 0) return;
+  W4.counselPending = false; W4.counsel2 = true; HARP_DUEL.saul.window = 0.32 * DIFF.open;
+  sayLine("The Steward", "Sit down. Tell me what happened. ... It's not your fault, boy. Go back. Slower this time: let each note come to you.");
 }
 function drawThrone(x) {   // the empty throne while he's up: Glen's item (assets/items/throne.png), when there is one
   if (ITEM.throne && ITEM.throne.naturalWidth) drawItem("throne", x + 60 * SCALE * W4.SAUL_SIZE, GR * T + 2, W4.THRONE_SIZE);   // where the chair is in his seated frames

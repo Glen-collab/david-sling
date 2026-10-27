@@ -4517,6 +4517,7 @@ function hushLoops(keepRain = false) {
   if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)
   if (!keepRain && !rainLoop.paused) { rainLoop.pause(); rainVol = 0; }
   if (typeof duelAudio !== "undefined" && duelAudio && !duelAudio.paused) duelAudio.pause();   // the harp duel (world2.js)
+  if (typeof darkSong !== "undefined" && !darkSong.paused) darkSong.pause();   // Saul's dark song under it (world4.js: it starts again on its own)
   if (typeof hushFlood === "function") hushFlood();
   if (david.chargeSnd) { david.chargeSnd.pause(); david.chargeSnd = null; }
 }
