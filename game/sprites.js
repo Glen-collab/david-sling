@@ -4394,14 +4394,14 @@ window.SPRITE_DATA = {
  },
  "villager_braidgirl_run": {
   "src": "../assets/sprites/villager_braidgirl_run.png",
-  "frames": 4,
-  "w": 270,
-  "h": 321,
-  "ms": 90,
+  "frames": 12,
+  "w": 251,
+  "h": 328,
+  "ms": 42,
   "loop": true,
   "pingpong": false,
-  "ax": 191,
-  "ay": 319,
+  "ax": 179,
+  "ay": 326,
   "align": "feet"
  },
  "villager_braidgirl_stand": {
@@ -4454,14 +4454,14 @@ window.SPRITE_DATA = {
  },
  "villager_girl_run": {
   "src": "../assets/sprites/villager_girl_run.png",
-  "frames": 4,
-  "w": 254,
-  "h": 321,
-  "ms": 90,
+  "frames": 12,
+  "w": 204,
+  "h": 323,
+  "ms": 62,
   "loop": true,
   "pingpong": false,
-  "ax": 153,
-  "ay": 319,
+  "ax": 133,
+  "ay": 321,
   "align": "feet"
  },
  "villager_girl_stand": {
@@ -4478,14 +4478,14 @@ window.SPRITE_DATA = {
  },
  "villager_man_run": {
   "src": "../assets/sprites/villager_man_run.png",
-  "frames": 4,
-  "w": 275,
-  "h": 321,
-  "ms": 90,
+  "frames": 12,
+  "w": 249,
+  "h": 294,
+  "ms": 62,
   "loop": true,
   "pingpong": false,
-  "ax": 196,
-  "ay": 319,
+  "ax": 169,
+  "ay": 291,
   "align": "feet"
  },
  "villager_man_stand": {
@@ -4538,14 +4538,14 @@ window.SPRITE_DATA = {
  },
  "villager_woman_run": {
   "src": "../assets/sprites/villager_woman_run.png",
-  "frames": 4,
-  "w": 244,
-  "h": 320,
-  "ms": 90,
+  "frames": 12,
+  "w": 219,
+  "h": 326,
+  "ms": 49,
   "loop": true,
   "pingpong": false,
-  "ax": 167,
-  "ay": 318,
+  "ax": 144,
+  "ay": 324,
   "align": "feet"
  },
  "villager_woman_stand": {

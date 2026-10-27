@@ -1,11 +1,25 @@
 {
-  "frames": 4,
-  "frame_w": 275,
-  "frame_h": 321,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 249,
+  "frame_h": 294,
+  "ms_per_frame": 62,
   "loop": true,
   "align": "feet",
-  "anchor_x": 196,
-  "anchor_y": 319,
-  "source": "v_man_run_m.png"
+  "anchor_x": 169,
+  "anchor_y": 291,
+  "source": "v3.mp4",
+  "video_frames": [
+    7,
+    9,
+    10,
+    11,
+    13,
+    15,
+    16,
+    17,
+    19,
+    21,
+    22,
+    23
+  ]
 }

@@ -1,11 +1,25 @@
 {
-  "frames": 4,
-  "frame_w": 254,
-  "frame_h": 321,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 204,
+  "frame_h": 323,
+  "ms_per_frame": 62,
   "loop": true,
   "align": "feet",
-  "anchor_x": 153,
-  "anchor_y": 319,
-  "source": "v_girl_run_m.png"
+  "anchor_x": 133,
+  "anchor_y": 321,
+  "source": "v1.mp4",
+  "video_frames": [
+    31,
+    33,
+    34,
+    35,
+    37,
+    39,
+    40,
+    41,
+    43,
+    45,
+    46,
+    47
+  ]
 }

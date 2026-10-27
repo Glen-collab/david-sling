@@ -1,11 +1,25 @@
 {
-  "frames": 4,
-  "frame_w": 270,
-  "frame_h": 321,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 251,
+  "frame_h": 328,
+  "ms_per_frame": 42,
   "loop": true,
   "align": "feet",
-  "anchor_x": 191,
-  "anchor_y": 319,
-  "source": "v_braidgirl_run_m.png"
+  "anchor_x": 179,
+  "anchor_y": 326,
+  "source": "v4.mp4",
+  "video_frames": [
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76
+  ]
 }

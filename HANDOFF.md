@@ -645,3 +645,7 @@ the harp phrase at 3-2's campfire.
   + The village kids were taller than David (their sheets are ~320 px of body; at 0.8 that's ~120 px on screen vs
   David's 112). W5.VILLAGER_SIZE boy/girl/braidgirl now 0.62 (~92 px running; the boy and braidgirl standing at the
   fold ~100 px). Glen is redoing the other old 4-frame runs from video; cut them at --height 320 so these sizes hold.
+  + Glen's Grok clips for girl, woman, man (the one with the bags) and braidgirl, each 12 frames, --loop --green
+  --height 320. Man: --end 90 so the loop is before he turns to look back and switches the bag hand. Woman and
+  braidgirl: --max-loop 0.8, because the loop search otherwise picks two strides, which would double their legs
+  under VILLAGER_STRIDE (that assumes one stride per sheet). Still on old 4-frame sheets: staffman.

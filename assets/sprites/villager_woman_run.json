@@ -1,11 +1,25 @@
 {
-  "frames": 4,
-  "frame_w": 244,
-  "frame_h": 320,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 219,
+  "frame_h": 326,
+  "ms_per_frame": 49,
   "loop": true,
   "align": "feet",
-  "anchor_x": 167,
-  "anchor_y": 318,
-  "source": "v_woman_run_m.png"
+  "anchor_x": 144,
+  "anchor_y": 324,
+  "source": "v2.mp4",
+  "video_frames": [
+    41,
+    42,
+    43,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    53,
+    54
+  ]
 }
