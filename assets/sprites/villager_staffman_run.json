@@ -1,11 +1,25 @@
 {
-  "frames": 4,
-  "frame_w": 314,
-  "frame_h": 321,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 270,
+  "frame_h": 325,
+  "ms_per_frame": 66,
   "loop": true,
   "align": "feet",
-  "anchor_x": 218,
-  "anchor_y": 319,
-  "source": "v_staffman_run_m.png"
+  "anchor_x": 184,
+  "anchor_y": 323,
+  "source": "v5.mp4",
+  "video_frames": [
+    20,
+    22,
+    23,
+    25,
+    26,
+    28,
+    30,
+    31,
+    33,
+    34,
+    36,
+    37
+  ]
 }

@@ -4514,14 +4514,14 @@ window.SPRITE_DATA = {
  },
  "villager_staffman_run": {
   "src": "../assets/sprites/villager_staffman_run.png",
-  "frames": 4,
-  "w": 314,
-  "h": 321,
-  "ms": 90,
+  "frames": 12,
+  "w": 270,
+  "h": 325,
+  "ms": 66,
   "loop": true,
   "pingpong": false,
-  "ax": 218,
-  "ay": 319,
+  "ax": 184,
+  "ay": 323,
   "align": "feet"
  },
  "villager_staffman_stand": {
