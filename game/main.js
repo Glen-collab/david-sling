@@ -4565,6 +4565,31 @@ function hushGiant() {   // (world7.js) held, not stopped: updateMusic starts th
   if (typeof G8_MUSIC !== "undefined" && !G8_MUSIC.paused) { G8_MUSIC.pause(); G8_MUSIC.held = true; }   // (world8.js, the duel)
   if (typeof giantDrone !== "undefined" && giantDrone.nodes && !giantDrone.held) { giantDrone.held = true; const k = giantDrone.k; giantDrone.to(0.001, 0.15); giantDrone.k = k; }
 }
+// (Glen, 2026-10-27: "paused on world 8 and i can still hear the birds") a pause stops every sound, whatever it is:
+// each <audio> is remembered the first time it plays, the pause stops all the ones still going and keeps a list, and
+// Resume carries those on. Nothing new starts while it's held (the menu's chimes are made on the spot, not <audio>;
+// a scene watched from the pause menu plays its own music).
+const allAudio = new Set(); let audioHeld = null;
+{
+  const play = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function () {
+    if (!(this instanceof HTMLVideoElement)) {
+      allAudio.add(this);
+      if (audioHeld && !(typeof Menu !== "undefined" && Menu.playing)) return Promise.resolve();
+    }
+    return play.apply(this, arguments);
+  };
+}
+function holdAllAudio() {
+  if (audioHeld) return;
+  if (typeof hushGiant === "function") hushGiant();   // (World 7's drone is made on the spot, not <audio>)
+  audioHeld = [];
+  for (const a of allAudio) if (!a.paused && !a.ended) { a.pause(); audioHeld.push(a); }
+}
+function releaseAllAudio(resume = true) {
+  const held = audioHeld; audioHeld = null;
+  if (resume && held) for (const a of held) if (a.paused && !a.ended) a.play().catch(() => {});
+}
 function hushLoops(keepRain = false) {
   for (const a of [stepsRun, ambience, bossMusic, harpMusic]) if (!a.paused) a.pause();   // (the stage music isn't stopped here: updateMusic lowers it)
   if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // World 6's distant sword fight (world6.js)

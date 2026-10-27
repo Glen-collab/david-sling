@@ -66,6 +66,7 @@ const Menu = {
   open(screen, fromStage = false) {
     this.fromStage = fromStage; this.active = true; this.t = 0; this.msg = null;
     if (screen === "title") {
+      releaseAllAudio(false);   // (from the pause menu: the stage's sounds stay stopped)
       if (!this.bg) { this.bg = new Image(); this.bg.src = MENU_TITLE_BG + "?v=" + (window.BUILD || 0); }
       this.snap = null;
     } else {   // keep a picture of what's underneath (the game is paused behind the menu)
@@ -75,6 +76,7 @@ const Menu = {
       WorldMap.active = false; Courtyard.active = false;   // paused; they come back on Resume
       toastTime = 0;   // (a stage's message would sit on top of the menu)
       themeMusic.pause(); mapAmbience.pause();   // paused means quiet: the theme and the hills stop (they fade back in on Resume)
+      holdAllAudio();   // and every other sound still going (main.js)
     }
     this.home = screen; this.go(screen);
   },
@@ -83,7 +85,7 @@ const Menu = {
     const it = this.items(); while (it[this.sel] && it[this.sel].off) this.sel++;
   },
   close() {
-    this.active = false;
+    this.active = false; releaseAllAudio();
     if (this.under === "map") WorldMap.active = true;
     if (this.under === "courtyard") Courtyard.active = true;
     this.under = null;

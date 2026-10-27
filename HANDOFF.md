@@ -597,3 +597,11 @@ the harp phrase at 3-2's campfire.
 - END OF WORLD 5 CROWD (Glen, 2026-10-27: "three of the same people in waves of three"): world5.js fleeCrowd /
   drawFleeingArmy: 11 runners (soldier_run in five tints and sizes, plus villager_capman_run and villager_wrapman_run),
   shuffled, each with his own speed (380-610 px/s), spacing, depth and stride; a new order on each flee beat.
+- PAUSE STOPS EVERY SOUND (Glen, 2026-10-27: "paused on world 8 and i can still hear the birds"). main.js allAudio /
+  holdAllAudio / releaseAllAudio: HTMLMediaElement.prototype.play is wrapped so every <audio> the game ever plays is
+  remembered; Menu.open (any pause: stage, map, courtyard) stops all of them still going and keeps the list, nothing
+  new starts while held (except a scene watched from the pause menu: Menu.playing), Resume (Menu.close) carries the
+  held ones on, and Title screen drops them. So a sound no hush list knows about (a leaked loop) can't play under a
+  pause. Tested headless with real audio (--autoplay-policy): all 32 stages, the map and the courtyard: silent at 2 s
+  and 8 s paused, music and birds back on Resume. (Couldn't reproduce Glen's exact spot: the old code was also silent
+  at each stage's start, so it was a sound started later that no list held.)
