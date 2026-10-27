@@ -769,7 +769,16 @@ function updateRout8(dt) {
     p.x += run * W8.ROUT_PHIL_SPEED * p.s * dt;
     if (p.x < camX - 200) p.x = camX + W + 120 + Math.random() * 400;
   }
-  for (const s of rout8.isr) s.dx += (Math.sin(rout8.t * 0.7 + s.ph) * 30 - (s.dx - (-260 + rout8.isr.indexOf(s) * 90))) * dt * 0.5;   // they keep pace, drifting a little
+  // (Glen, 2026-10-27: "they are just pulsing") each one really runs over the ground at his own pace, held loosely to
+  // his place beside David; his legs go with how far he's gone (W8.ROUT_ISR_STRIDE px a frame), so when David stands
+  // they run on past him, and the ones far ahead come round again from behind
+  rout8.isr.forEach((s, i) => {
+    const home = david.x - 260 + i * 90 + Math.sin(rout8.t * 0.7 + s.ph) * 30;
+    if (s.x === undefined) s.x = david.x + s.dx;
+    const v = Math.max(W8.ROUT_ISR_PACE * 0.6, Math.min(W8.ROUT_ISR_PACE * 2.2, W8.ROUT_ISR_PACE * s.s + (home - s.x) * 1.5));
+    s.x += v * dt; s.step = (s.step || s.ph) + v * dt / (W8.ROUT_ISR_STRIDE * W8.ROUT_ISR_SIZE * s.s);
+    if (s.x - david.x > W * 0.65) s.x = david.x - W * 0.65 - Math.random() * 150;
+  });
   if (rout8End && !rout8.done && david.x > rout8End.x) {
     rout8.done = true; david.vx = 0;
     sayLine("", "The men of Israel and of Judah arose and shouted, and pursued the Philistines as far as Gai and to the gates of Ekron. (1 Samuel 17:52)");
@@ -795,9 +804,11 @@ function drawRout8Back(camX) {   // behind David: the fleeing Philistines, small
   drawSpoils8(camX);
   const now = performance.now() / 1000;
   if (SPR.phil_run) for (const p of rout8.phil) { const x = p.x - camX; if (x > -150 && x < W + 150) drawSprite("phil_run", frameOf("phil_run", now * 1.3 + p.ph), x, GR * T - 26, 1, W8.ROUT_PHIL_SIZE, 0.85, "brightness(0.85)"); }
-  if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = david.x + s.dx - camX; if (x > -150 && x < W + 150) drawSprite("soldier_run", frameOf("soldier_run", now * 1.2 + s.ph), x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
+  if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = (s.x ?? david.x + s.dx) - camX; if (x > -150 && x < W + 150) drawSprite("soldier_run", Math.floor(s.step || 0) % SPR.soldier_run.frames, x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
 }
-Object.assign(W8, { ROUT_PHIL_SIZE: 0.8, ROUT_ISR_SIZE: 1.0 });
+Object.assign(W8, { ROUT_PHIL_SIZE: 0.8, ROUT_ISR_SIZE: 1.0,
+  ROUT_ISR_PACE: 330,    // px/s, Israel's men running when David stands (they keep up with him when he runs)
+  ROUT_ISR_STRIDE: 40 });   // px they cover for each frame of soldier_run (higher = slower legs)
 
 // ---- 8-4: Eliab, a little behind ----
 const eliab8 = LEVEL_STAGE === "8-4" ? { on: false, x: 0, walking: false } : null;

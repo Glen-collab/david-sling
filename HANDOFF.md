@@ -616,3 +616,8 @@ the harp phrase at 3-2's campfire.
 - GOLIATH'S SPEAR WOOSHES (Glen, 2026-10-27): his two wooshes are assets/sounds/spear_woosh_1.mp3 (0.27 s, sharp) and
   spear_woosh_2.mp3 (1.5 s, long and softer), in SFX_FILES. world8.js g8Throw: the flat low/high spears play _1
   (0.75), the overhead one down at David plays _2 (1.0); they replace arrow_single + sling_throw_quick there.
+- 8-3 ISRAEL'S MEN REALLY RUN (Glen, 2026-10-27: "they are just pulsing"; they were glued beside David at 1.2x the
+  run's speed, running in place when he stood). world8.js rout8.isr: each has his own x and runs over the ground
+  (W8.ROUT_ISR_PACE 330 px/s, held loosely to his place by David, never under 0.6 of it); his legs go with the ground
+  covered (W8.ROUT_ISR_STRIDE 40 px a frame: ~8 frames/s at his pace, ~11 keeping up with David's run, was 15). When
+  David stands they run on past, and one far ahead comes round again from behind.
