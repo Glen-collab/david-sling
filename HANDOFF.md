@@ -621,3 +621,10 @@ the harp phrase at 3-2's campfire.
   (W8.ROUT_ISR_PACE 330 px/s, held loosely to his place by David, never under 0.6 of it); his legs go with the ground
   covered (W8.ROUT_ISR_STRIDE 40 px a frame: ~8 frames/s at his pace, ~11 keeping up with David's run, was 15). When
   David stands they run on past, and one far ahead comes round again from behind.
+- FOUR SOLDIER RUNS FROM GLEN'S VIDEOS (2026-10-27): soldier_run (spear and round shield; replaced the boy soldier
+  sheet), soldier_run2 and soldier_run3 (axe, shield on his back; 3 has the quicker legs), soldier_run4 (pitchfork),
+  each 12 frames cut with tools/vid2sprite.py --loop --height 290 (run3/run4 with --min-loop 0.42 --max-loop 0.9/1.1:
+  the new --max-loop keeps it to one stride). End of World 5 crowd (world5.js fleeCrowd): all four mixed with the two
+  camp men. 8-3 rout (world8.js rout8.isr): one look each in turn; ROUT_ISR_STRIDE is now 20 px a frame for a 66 ms
+  sheet, scaled by each sheet's own ms. Everything else that uses soldier_run (World 6 fallbacks, the HUD icon) gets
+  the spear man.

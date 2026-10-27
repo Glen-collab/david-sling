@@ -1,11 +1,25 @@
 {
-  "frames": 6,
-  "frame_w": 264,
-  "frame_h": 305,
-  "ms_per_frame": 80,
+  "frames": 12,
+  "frame_w": 366,
+  "frame_h": 300,
+  "ms_per_frame": 66,
   "loop": true,
   "align": "feet",
-  "anchor_x": 134,
-  "anchor_y": 303,
-  "source": "c_soldier_run_m.png"
+  "anchor_x": 156,
+  "anchor_y": 295,
+  "source": "soldier_run_man.mp4 (Glen, 2026-10-27)",
+  "video_frames": [
+    5,
+    7,
+    8,
+    10,
+    11,
+    13,
+    15,
+    16,
+    18,
+    19,
+    21,
+    22
+  ]
 }

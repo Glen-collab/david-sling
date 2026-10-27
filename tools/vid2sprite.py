@@ -41,6 +41,7 @@ ap.add_argument("--soft", action="store_true"); ap.add_argument("--green", actio
 ap.add_argument("--white", action="store_true", help="the clip is on a white background (not green): key out white and its soft grey shadows")
 ap.add_argument("--ref", default="4:0", help="frames used to measure full standing height, start:end (default 4 to the end)")
 ap.add_argument("--min-loop", type=float, default=0.5, help="shortest loop in seconds (raise it if it finds half a stride)")
+ap.add_argument("--max-loop", type=float, default=2.5, help="longest loop in seconds (lower it if it finds several strides)")
 ap.add_argument("--thin", type=int, default=0); ap.add_argument("--headroom", type=int, default=0)
 ap.add_argument("--pad", type=int, default=0)
 args = ap.parse_args()
@@ -136,7 +137,7 @@ else:
     sils = [sil(k, a) for k, a in zip(keyed, anchors)]
     best = None
     for s0 in range(0, max(1, min(n // 2, n - 15))):
-        for lag in range(max(10, int(fps * args.min_loop)), min(n - s0, int(fps * 2.5))):
+        for lag in range(max(10, int(fps * args.min_loop)), min(n - s0, int(fps * args.max_loop) + 1)):
             d = (sils[s0] ^ sils[s0 + lag]).mean()
             if best is None or d < best[0]:
                 best = (d, s0, lag)

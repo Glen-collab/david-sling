@@ -1283,11 +1283,12 @@ function drawPhilistineRanks(y, a) {
 const FLEE_TINTS = ["", "brightness(0.85) sepia(0.2)", "brightness(1.08) hue-rotate(-8deg)", "brightness(0.95) saturate(0.8)", "sepia(0.35) brightness(0.92)"];
 function fleeCrowd(seed) {
   let r = seed * 9301 + 49297; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
-  const who = ["soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "soldier_run", "villager_capman_run", "villager_wrapman_run", "soldier_run"].filter(n => SPR[n]);
+  // (Glen, 2026-10-27) his four soldiers (spear, two with axes, pitchfork), two or three of each, and the two camp men
+  const who = ["soldier_run", "soldier_run", "soldier_run2", "soldier_run2", "soldier_run3", "soldier_run3", "soldier_run4", "soldier_run4", "soldier_run", "villager_capman_run", "villager_wrapman_run", "soldier_run3"].filter(n => SPR[n]);
   for (let i = who.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [who[i], who[j]] = [who[j], who[i]]; }
   let x = 60; const out = [];
   for (const nm of who) {
-    const v = nm !== "soldier_run";
+    const v = nm.startsWith("villager_");
     out.push({ nm, x0: x, sp: 380 + rnd() * 230, ph: rnd() * 2, dy: Math.round(-8 + rnd() * 16),
       sc: v ? W5.VILLAGER_SIZE[nm.slice(9, -4)] : 1.0 + rnd() * 0.18, f: v ? "sepia(0.15)" : FLEE_TINTS[Math.floor(rnd() * FLEE_TINTS.length)] });
     x += 50 + rnd() * 210;   // sometimes two together, sometimes a gap

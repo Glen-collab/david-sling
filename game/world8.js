@@ -660,7 +660,8 @@ const rout8End = setPieces.find(p => p.kind === "rout8end");
 const rout8 = LEVEL_STAGE === "8-3" ? { done: false, phil: [], isr: [], t: 0 } : null;
 if (rout8) {
   for (let i = 0; i < W8.ROUT_RUNNERS; i++) rout8.phil.push({ x: (14 + i * 6) * T, ph: Math.random() * 3, s: 0.85 + Math.random() * 0.2 });
-  for (let i = 0; i < W8.ROUT_ISRAEL; i++) rout8.isr.push({ dx: -260 + i * 90 + Math.random() * 40, ph: Math.random() * 3, s: 0.8 + Math.random() * 0.15 });
+  for (let i = 0; i < W8.ROUT_ISRAEL; i++) rout8.isr.push({ dx: -260 + i * 90 + Math.random() * 40, ph: Math.random() * 3, s: 0.8 + Math.random() * 0.15,
+                                                    nm: ["soldier_run", "soldier_run2", "soldier_run3", "soldier_run4"][i % 4] });   // (Glen's four soldiers, 2026-10-27)
 }
 // ---- 8-3's spoils (Glen, 2026-10-23): "a game to collect things", how many can you get? Olives (the purse, as anywhere),
 // bread and figs the Philistines dropped as they ran, and lambs they had stolen (touch one and it runs back to Israel's
@@ -776,7 +777,8 @@ function updateRout8(dt) {
     const home = david.x - 260 + i * 90 + Math.sin(rout8.t * 0.7 + s.ph) * 30;
     if (s.x === undefined) s.x = david.x + s.dx;
     const v = Math.max(W8.ROUT_ISR_PACE * 0.6, Math.min(W8.ROUT_ISR_PACE * 2.2, W8.ROUT_ISR_PACE * s.s + (home - s.x) * 1.5));
-    s.x += v * dt; s.step = (s.step || s.ph) + v * dt / (W8.ROUT_ISR_STRIDE * W8.ROUT_ISR_SIZE * s.s);
+    const nm = SPR[s.nm] ? s.nm : "soldier_run", cadence = SPR[nm] ? SPR[nm].ms / 66 : 1;   // each sheet's own leg speed (66 ms a frame = the stride below)
+    s.x += v * dt; s.step = (s.step || s.ph) + v * dt / (W8.ROUT_ISR_STRIDE * cadence * W8.ROUT_ISR_SIZE * s.s);
     if (s.x - david.x > W * 0.65) s.x = david.x - W * 0.65 - Math.random() * 150;
   });
   if (rout8End && !rout8.done && david.x > rout8End.x) {
@@ -804,11 +806,11 @@ function drawRout8Back(camX) {   // behind David: the fleeing Philistines, small
   drawSpoils8(camX);
   const now = performance.now() / 1000;
   if (SPR.phil_run) for (const p of rout8.phil) { const x = p.x - camX; if (x > -150 && x < W + 150) drawSprite("phil_run", frameOf("phil_run", now * 1.3 + p.ph), x, GR * T - 26, 1, W8.ROUT_PHIL_SIZE, 0.85, "brightness(0.85)"); }
-  if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = (s.x ?? david.x + s.dx) - camX; if (x > -150 && x < W + 150) drawSprite("soldier_run", Math.floor(s.step || 0) % SPR.soldier_run.frames, x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
+  if (SPR.soldier_run && !rout8.done) for (const s of rout8.isr) { const x = (s.x ?? david.x + s.dx) - camX; const nm = SPR[s.nm] ? s.nm : "soldier_run"; if (x > -150 && x < W + 150) drawSprite(nm, Math.floor(s.step || 0) % SPR[nm].frames, x, GR * T - 14, 1, W8.ROUT_ISR_SIZE * s.s); }
 }
 Object.assign(W8, { ROUT_PHIL_SIZE: 0.8, ROUT_ISR_SIZE: 1.0,
   ROUT_ISR_PACE: 330,    // px/s, Israel's men running when David stands (they keep up with him when he runs)
-  ROUT_ISR_STRIDE: 40 });   // px they cover for each frame of soldier_run (higher = slower legs)
+  ROUT_ISR_STRIDE: 20 });   // px they cover for each frame of soldier_run (higher = slower legs; 12 frames a stride)
 
 // ---- 8-4: Eliab, a little behind ----
 const eliab8 = LEVEL_STAGE === "8-4" ? { on: false, x: 0, walking: false } : null;
