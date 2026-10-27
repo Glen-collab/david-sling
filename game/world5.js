@@ -28,7 +28,7 @@ const W5 = {
   VULTURE_CRY: [6, 7],   // seconds between their cries while circling: at least this, plus up to this
   VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
   VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
-  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12, farmer: 1.05, farmer2: 1.02 },
+  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.62, girl: 0.62, braidgirl: 0.62, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12, farmer: 1.05, farmer2: 1.02 },
   VILLAGER_STRIDE: { big: 0.46, kid: 0.36 },   // s per full leg cycle in 5-1, whatever the sheet's own timing (Glen: quick legs for how fast they go)
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };

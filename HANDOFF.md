@@ -642,3 +642,6 @@ the harp phrase at 3-2's campfire.
   families move, so drawFleeing no longer uses each sheet's own ms: W5.VILLAGER_STRIDE sets one full leg cycle per
   runner (grown-ups 0.46 s, kids 0.36 s), whatever the sheet. (This replaced VILLAGER_PACE, which had slowed the
   farmers' legs.) The World 5 ending crowd still paces legs by its own speed.
+  + The village kids were taller than David (their sheets are ~320 px of body; at 0.8 that's ~120 px on screen vs
+  David's 112). W5.VILLAGER_SIZE boy/girl/braidgirl now 0.62 (~92 px running; the boy and braidgirl standing at the
+  fold ~100 px). Glen is redoing the other old 4-frame runs from video; cut them at --height 320 so these sizes hold.
