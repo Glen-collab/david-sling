@@ -630,3 +630,8 @@ the harp phrase at 3-2's campfire.
   the spear man.
   + soldier_run5 (the young one with a sword and shield on his back, --height 280), in both crowds too: the 8-3 rout
   cycles spear, axe, sword, axe, pitchfork.
+- **A farmer among the villagers** (Glen, 2026-10-27): Glen painted the axe out of soldier_run2's sheet (his
+  farmer_run.png, renamed villager_farmer_run so it fits the villager_*_run names; the JSON is soldier_run2's, 12 x
+  254x298, 87 ms). He's in VILLAGERS_BIG (5-1 fleeing families, W5.VILLAGER_SIZE.farmer 1.05) and replaces one spear
+  man in the World 5 ending crowd. His legs were drawn for ~470 px/s, so in 5-1 (VILLAGER_RUN 250) W5.VILLAGER_PACE
+  slows his cadence to the ground speed so his feet don't skate.

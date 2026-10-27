@@ -1,0 +1,25 @@
+{
+  "frames": 12,
+  "frame_w": 254,
+  "frame_h": 298,
+  "ms_per_frame": 87,
+  "loop": true,
+  "align": "feet",
+  "anchor_x": 151,
+  "anchor_y": 296,
+  "source": "soldier_run2 sheet with the axe painted out (Glen, 2026-10-27)",
+  "video_frames": [
+    26,
+    28,
+    30,
+    32,
+    34,
+    36,
+    38,
+    41,
+    43,
+    45,
+    47,
+    49
+  ]
+}

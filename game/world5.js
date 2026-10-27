@@ -28,7 +28,8 @@ const W5 = {
   VULTURE_CRY: [6, 7],   // seconds between their cries while circling: at least this, plus up to this
   VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
   VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
-  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12 },
+  VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12, farmer: 1.05 },
+  VILLAGER_PACE: { farmer: 470 },   // px/s his legs were drawn for (the axe soldier's run); slower runners slow his cadence to match
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
 // what David is carrying: full at the start of 5-1, then whatever made it through the stage before
@@ -194,7 +195,7 @@ function drawVultures(camX) {
 // ---------------------------------------------------------------------------
 // (Glen, 2026-10-22: four more villagers so the same faces don't keep coming by) each group is 2-3 people, every face
 // used once before any comes round again; a child always runs with a grown-up.
-const VILLAGERS_BIG = ["man", "woman", "staffman", "capman", "wrapman", "scarfwoman", "basketgirl"], VILLAGERS_KID = ["boy", "girl", "braidgirl"];
+const VILLAGERS_BIG = ["man", "woman", "staffman", "capman", "wrapman", "scarfwoman", "basketgirl", "farmer"], VILLAGERS_KID = ["boy", "girl", "braidgirl"];
 const FAMILIES = (() => {
   const big = VILLAGERS_BIG.filter(w => SPR["villager_" + w + "_run"]), kid = VILLAGERS_KID.filter(w => SPR["villager_" + w + "_run"]);
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -222,7 +223,8 @@ function updateFleeing(dt) {
 function drawFleeing(camX) {
   for (const g of fleeGroups) for (const q of g.people) {
     const nm = "villager_" + q.w + "_run", x = q.x - camX; if (!SPR[nm] || x < -200 || x > W + 200) continue;
-    drawSprite(nm, frameOf(nm, q.t), x, q.y, -1, W5.VILLAGER_SIZE[q.w]);
+    const pace = W5.VILLAGER_PACE[q.w];
+    drawSprite(nm, frameOf(nm, pace ? q.t * q.sp / pace : q.t), x, q.y, -1, W5.VILLAGER_SIZE[q.w]);
   }
 }
 
@@ -1285,7 +1287,7 @@ function fleeCrowd(seed) {
   let r = seed * 9301 + 49297; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
   // (Glen, 2026-10-27) his five soldiers (spear, two with axes, pitchfork, the young one with a sword), two or three of
   // each, and the two camp men
-  const who = ["soldier_run", "soldier_run", "soldier_run2", "soldier_run2", "soldier_run3", "soldier_run3", "soldier_run4", "soldier_run4", "soldier_run5", "soldier_run5", "soldier_run", "villager_capman_run", "villager_wrapman_run"].filter(n => SPR[n]);
+  const who = ["soldier_run", "soldier_run", "soldier_run2", "soldier_run2", "soldier_run3", "soldier_run3", "soldier_run4", "soldier_run4", "soldier_run5", "soldier_run5", "villager_farmer_run", "villager_capman_run", "villager_wrapman_run"].filter(n => SPR[n]);
   for (let i = who.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [who[i], who[j]] = [who[j], who[i]]; }
   let x = 60; const out = [];
   for (const nm of who) {
