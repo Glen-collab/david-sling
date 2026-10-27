@@ -4116,6 +4116,18 @@ window.SPRITE_DATA = {
   "ay": 294,
   "align": "feet"
  },
+ "soldier_run5": {
+  "src": "../assets/sprites/soldier_run5.png",
+  "frames": 12,
+  "w": 248,
+  "h": 287,
+  "ms": 90,
+  "loop": true,
+  "pingpong": false,
+  "ax": 149,
+  "ay": 284,
+  "align": "feet"
+ },
  "soldier_sit": {
   "src": "../assets/sprites/soldier_sit.png",
   "frames": 4,

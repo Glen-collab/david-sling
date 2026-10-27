@@ -628,3 +628,5 @@ the harp phrase at 3-2's campfire.
   camp men. 8-3 rout (world8.js rout8.isr): one look each in turn; ROUT_ISR_STRIDE is now 20 px a frame for a 66 ms
   sheet, scaled by each sheet's own ms. Everything else that uses soldier_run (World 6 fallbacks, the HUD icon) gets
   the spear man.
+  + soldier_run5 (the young one with a sword and shield on his back, --height 280), in both crowds too: the 8-3 rout
+  cycles spear, axe, sword, axe, pitchfork.

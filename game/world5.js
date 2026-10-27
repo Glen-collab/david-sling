@@ -1283,8 +1283,9 @@ function drawPhilistineRanks(y, a) {
 const FLEE_TINTS = ["", "brightness(0.85) sepia(0.2)", "brightness(1.08) hue-rotate(-8deg)", "brightness(0.95) saturate(0.8)", "sepia(0.35) brightness(0.92)"];
 function fleeCrowd(seed) {
   let r = seed * 9301 + 49297; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
-  // (Glen, 2026-10-27) his four soldiers (spear, two with axes, pitchfork), two or three of each, and the two camp men
-  const who = ["soldier_run", "soldier_run", "soldier_run2", "soldier_run2", "soldier_run3", "soldier_run3", "soldier_run4", "soldier_run4", "soldier_run", "villager_capman_run", "villager_wrapman_run", "soldier_run3"].filter(n => SPR[n]);
+  // (Glen, 2026-10-27) his five soldiers (spear, two with axes, pitchfork, the young one with a sword), two or three of
+  // each, and the two camp men
+  const who = ["soldier_run", "soldier_run", "soldier_run2", "soldier_run2", "soldier_run3", "soldier_run3", "soldier_run4", "soldier_run4", "soldier_run5", "soldier_run5", "soldier_run", "villager_capman_run", "villager_wrapman_run"].filter(n => SPR[n]);
   for (let i = who.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [who[i], who[j]] = [who[j], who[i]]; }
   let x = 60; const out = [];
   for (const nm of who) {

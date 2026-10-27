@@ -661,7 +661,7 @@ const rout8 = LEVEL_STAGE === "8-3" ? { done: false, phil: [], isr: [], t: 0 } :
 if (rout8) {
   for (let i = 0; i < W8.ROUT_RUNNERS; i++) rout8.phil.push({ x: (14 + i * 6) * T, ph: Math.random() * 3, s: 0.85 + Math.random() * 0.2 });
   for (let i = 0; i < W8.ROUT_ISRAEL; i++) rout8.isr.push({ dx: -260 + i * 90 + Math.random() * 40, ph: Math.random() * 3, s: 0.8 + Math.random() * 0.15,
-                                                    nm: ["soldier_run", "soldier_run2", "soldier_run3", "soldier_run4"][i % 4] });   // (Glen's four soldiers, 2026-10-27)
+                                                    nm: ["soldier_run", "soldier_run2", "soldier_run5", "soldier_run3", "soldier_run4"][i % 5] });   // (Glen's five soldiers, 2026-10-27)
 }
 // ---- 8-3's spoils (Glen, 2026-10-23): "a game to collect things", how many can you get? Olives (the purse, as anywhere),
 // bread and figs the Philistines dropped as they ran, and lambs they had stolen (touch one and it runs back to Israel's
