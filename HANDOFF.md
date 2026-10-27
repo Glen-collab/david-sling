@@ -635,3 +635,5 @@ the harp phrase at 3-2's campfire.
   254x298, 87 ms). He's in VILLAGERS_BIG (5-1 fleeing families, W5.VILLAGER_SIZE.farmer 1.05) and replaces one spear
   man in the World 5 ending crowd. His legs were drawn for ~470 px/s, so in 5-1 (VILLAGER_RUN 250) W5.VILLAGER_PACE
   slows his cadence to the ground speed so his feet don't skate.
+  + villager_farmer2_run (Glen's farmer_run2: same sheet, beard off too, a younger man; size 1.02, same pace). In
+  VILLAGERS_BIG and in the end crowd in place of one axe soldier.

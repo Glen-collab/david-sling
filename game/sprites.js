@@ -4428,6 +4428,18 @@ window.SPRITE_DATA = {
   "ay": 261,
   "align": "feet"
  },
+ "villager_farmer2_run": {
+  "src": "../assets/sprites/villager_farmer2_run.png",
+  "frames": 12,
+  "w": 254,
+  "h": 298,
+  "ms": 87,
+  "loop": true,
+  "pingpong": false,
+  "ax": 151,
+  "ay": 296,
+  "align": "feet"
+ },
  "villager_farmer_run": {
   "src": "../assets/sprites/villager_farmer_run.png",
   "frames": 12,
