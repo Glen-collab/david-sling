@@ -637,3 +637,8 @@ the harp phrase at 3-2's campfire.
   slows his cadence to the ground speed so his feet don't skate.
   + villager_farmer2_run (Glen's farmer_run2: same sheet, beard off too, a younger man; size 1.02, same pace). In
   VILLAGERS_BIG and in the end crowd in place of one axe soldier.
+- **5-1 boy from video, quicker legs** (Glen, 2026-10-27): villager_boy_run is now 12 frames cut from Glen's Grok clip
+  (vid2sprite --loop --green --height 320 --start 30). Glen: the smooth runs looked too slow-legged for how fast the
+  families move, so drawFleeing no longer uses each sheet's own ms: W5.VILLAGER_STRIDE sets one full leg cycle per
+  runner (grown-ups 0.46 s, kids 0.36 s), whatever the sheet. (This replaced VILLAGER_PACE, which had slowed the
+  farmers' legs.) The World 5 ending crowd still paces legs by its own speed.

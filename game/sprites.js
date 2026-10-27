@@ -4370,14 +4370,14 @@ window.SPRITE_DATA = {
  },
  "villager_boy_run": {
   "src": "../assets/sprites/villager_boy_run.png",
-  "frames": 5,
-  "w": 242,
-  "h": 320,
-  "ms": 90,
+  "frames": 12,
+  "w": 229,
+  "h": 327,
+  "ms": 56,
   "loop": true,
   "pingpong": false,
-  "ax": 154,
-  "ay": 319,
+  "ax": 159,
+  "ay": 324,
   "align": "feet"
  },
  "villager_boy_stand": {

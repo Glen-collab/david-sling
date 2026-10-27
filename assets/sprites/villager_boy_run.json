@@ -1,11 +1,25 @@
 {
-  "frames": 5,
-  "frame_w": 242,
-  "frame_h": 320,
-  "ms_per_frame": 90,
+  "frames": 12,
+  "frame_w": 229,
+  "frame_h": 327,
+  "ms_per_frame": 56,
   "loop": true,
   "align": "feet",
-  "anchor_x": 154,
-  "anchor_y": 319,
-  "source": "v_boy_run_m.png"
+  "anchor_x": 159,
+  "anchor_y": 324,
+  "source": "villager_boy_run.mp4",
+  "video_frames": [
+    31,
+    32,
+    34,
+    35,
+    36,
+    38,
+    39,
+    40,
+    42,
+    43,
+    44,
+    46
+  ]
 }

@@ -29,7 +29,7 @@ const W5 = {
   VULTURE_SPOOK: 5,      // tiles: they flap up when David comes this close
   VILLAGER_RUN: 250,     // px/s, fleeing past David toward Bethlehem
   VILLAGER_SIZE: { man: 1.2, staffman: 1.2, woman: 1.1, boy: 0.8, girl: 0.85, braidgirl: 0.8, capman: 1.2, wrapman: 1.2, scarfwoman: 1.1, basketgirl: 1.12, farmer: 1.05, farmer2: 1.02 },
-  VILLAGER_PACE: { farmer: 470, farmer2: 470 },   // px/s his legs were drawn for (the axe soldier's run); slower runners slow his cadence to match
+  VILLAGER_STRIDE: { big: 0.46, kid: 0.36 },   // s per full leg cycle in 5-1, whatever the sheet's own timing (Glen: quick legs for how fast they go)
 };
 const PROV_NAMES = { bread: "a loaf", cheese: "a cheese" };
 // what David is carrying: full at the start of 5-1, then whatever made it through the stage before
@@ -223,8 +223,8 @@ function updateFleeing(dt) {
 function drawFleeing(camX) {
   for (const g of fleeGroups) for (const q of g.people) {
     const nm = "villager_" + q.w + "_run", x = q.x - camX; if (!SPR[nm] || x < -200 || x > W + 200) continue;
-    const pace = W5.VILLAGER_PACE[q.w];
-    drawSprite(nm, frameOf(nm, pace ? q.t * q.sp / pace : q.t), x, q.y, -1, W5.VILLAGER_SIZE[q.w]);
+    const sp = SPR[nm], cyc = W5.VILLAGER_STRIDE[VILLAGERS_KID.includes(q.w) ? "kid" : "big"];
+    drawSprite(nm, Math.floor(q.t / cyc * sp.frames) % sp.frames, x, q.y, -1, W5.VILLAGER_SIZE[q.w]);
   }
 }
 
