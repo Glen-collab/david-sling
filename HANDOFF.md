@@ -605,3 +605,6 @@ the harp phrase at 3-2's campfire.
   pause. Tested headless with real audio (--autoplay-policy): all 32 stages, the map and the courtyard: silent at 2 s
   and 8 s paused, music and birds back on Resume. (Couldn't reproduce Glen's exact spot: the old code was also silent
   at each stage's start, so it was a sound started later that no list held.)
+- 8-1 ANSWER READABLE (Glen, 2026-10-27: "I can barely read David's name and the press A is unreadable"). world8.js
+  drawWords8Over: "David" and the prompt ("Answer him. Press A." / "A: next", was a bare faint "A") sit on dark pills in
+  bold 22px; the band behind the words is darker (0.68) and the verse reference brighter (20px, #fff0d4).

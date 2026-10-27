@@ -227,7 +227,7 @@ function drawWords8(camX) {
 function drawWords8Over() {   // David's answer, big across the valley, line by line
   const w = words8; if (!w || (w.state !== "answer" && w.state !== "roar")) return;
   ctx.save(); ctx.textAlign = "center";
-  const band = ctx.createLinearGradient(0, 90, 0, 330); band.addColorStop(0, "rgba(10,6,2,0)"); band.addColorStop(0.5, "rgba(10,6,2,0.55)"); band.addColorStop(1, "rgba(10,6,2,0)");
+  const band = ctx.createLinearGradient(0, 90, 0, 330); band.addColorStop(0, "rgba(10,6,2,0)"); band.addColorStop(0.5, "rgba(10,6,2,0.68)"); band.addColorStop(1, "rgba(10,6,2,0)");
   ctx.fillStyle = band; ctx.fillRect(0, 90, W, 240);
   const wrap = (text, font, maxW) => { ctx.font = font; const out = []; let cur = ""; for (const wd of text.split(" ")) { const t2 = cur ? cur + " " + wd : wd; if (ctx.measureText(t2).width > maxW && cur) { out.push(cur); cur = wd; } else cur = t2; } out.push(cur); return out; };
   if (w.line >= 0) {
@@ -236,13 +236,18 @@ function drawWords8Over() {   // David's answer, big across the valley, line by 
     const font = last ? "italic bold 52px Georgia, serif" : "italic 32px Georgia, serif", rows = wrap(text, font, W - 400), lh = last ? 60 : 40, y0 = 205 - (rows.length - 1) * lh / 2 + (1 - f) * 8;
     ctx.globalAlpha = f; ctx.fillStyle = last ? "#ffe3a0" : "#fff4dc"; ctx.shadowColor = last ? "rgba(255,170,40,0.9)" : "rgba(0,0,0,0.8)"; ctx.shadowBlur = last ? 22 : 8;
     rows.forEach((r, i) => ctx.fillText(r, W / 2, y0 + i * lh));
-    if (ref) { ctx.shadowBlur = 4; ctx.font = "italic 18px Georgia, serif"; ctx.fillStyle = "rgba(255,240,215,0.85)"; ctx.fillText(ref, W / 2, y0 + (rows.length - 1) * lh + (last ? 40 : 30)); }
+    if (ref) { ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 6; ctx.font = "italic 20px Georgia, serif"; ctx.fillStyle = "#fff0d4"; ctx.fillText(ref, W / 2, y0 + (rows.length - 1) * lh + (last ? 40 : 30)); }
     ctx.shadowBlur = 0; ctx.globalAlpha = 1;
   }
-  if (w.state === "answer") {
-    ctx.font = "18px sans-serif"; ctx.fillStyle = `rgba(255,240,215,${0.55 + 0.35 * Math.sin(performance.now() / 250)})`;
-    ctx.fillText(keyText(w.line < 0 ? "Answer him. Press A." : "A"), W / 2, 330);
-    ctx.font = "15px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.6)"; ctx.fillText("David", W / 2, 120);
+  if (w.state === "answer") {   // (Glen, 2026-10-27: the name and the A were too faint to read over the bright sky)
+    const pill = (txt, y, font, fg, bg) => {
+      ctx.font = font; const tw = ctx.measureText(txt).width + 36;
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(W / 2 - tw / 2, y - 24, tw, 36, 18); ctx.fill();
+      ctx.fillStyle = fg; ctx.fillText(txt, W / 2, y + 2);
+    };
+    pill("David", 116, "bold 22px Georgia, serif", "#ffd27a", "rgba(20,12,4,0.72)");
+    const pulse = 0.8 + 0.2 * Math.sin(performance.now() / 250);
+    pill(keyText(w.line < 0 ? "Answer him. Press A." : "A: next"), 340, "bold 22px sans-serif", `rgba(255,236,190,${pulse})`, "rgba(20,12,4,0.72)");
   }
   ctx.restore(); ctx.textAlign = "left";
 }
