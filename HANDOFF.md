@@ -669,3 +669,7 @@ the harp phrase at 3-2's campfire.
 - **2-2 mudslide sinks away** (Glen, 2026-10-28: the ending clip squared off and changed color). Once David is out of the
   riverbed the same mud and surge keep playing and just sink off the bottom of the screen (drawMudWall, eased) over
   FLOOD_DRAIN (now 6 s). mud_settle is no longer drawn (the sheet's still in sprites.js).
+- **2-4 wolf packs wake sooner** (Glen, 2026-10-28: he got close and the two just sat). world2.js updateWolf: a pack now
+  howls and sends its third in from behind when David's within WOLF_PACK_SEE (16 tiles, was WOLF_SEE 9), and the two
+  sitters get up after WOLF_SIT (1.4 s, was 2.4) or sooner if the third gets close. (Waking as soon as they're on screen
+  was tried: the first pack is on screen from the start of the level, so it woke at once.)
