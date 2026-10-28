@@ -661,3 +661,11 @@ the harp phrase at 3-2's campfire.
   looked like he was floating. world1.js drawLionRidge: nothing until David reaches column RIDGE_LION_FROM (106, Hanan's
   fire is 110); then he's placed out on the hills right of the fire (sx ~ W*0.72) and fades in over RIDGE_LION_FADE
   (2.5 s). The far roars still sound from the start ("You hear it?").
+- **2-2 tortoise footing only as wide as the shell** (Glen, 2026-10-28: the lamb looked like it was running on air beside
+  the shell). world2.js shellSpan: the one-way tiles are now only those whose middle lies over the shell's back
+  (SHELL_X, 55-245 px of tortoise_walk's frame), not the whole padded body box rounded out. And David's footsteps on
+  the shell ride with it (updateTortoise shifts `trail` points), so the lamb, who walks in them, rides too instead of
+  being left on footsteps hanging over the water. Tested: no frame with the lamb on the ground off the shell.
+- **2-2 mudslide sinks away** (Glen, 2026-10-28: the ending clip squared off and changed color). Once David is out of the
+  riverbed the same mud and surge keep playing and just sink off the bottom of the screen (drawMudWall, eased) over
+  FLOOD_DRAIN (now 6 s). mud_settle is no longer drawn (the sheet's still in sprites.js).

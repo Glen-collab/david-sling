@@ -370,7 +370,7 @@ Object.assign(W2, {
   FLOOD_BEHIND: 13,      // tiles: it never falls further behind David than this (just inside the left of the screen)
   FLOOD_START: 18,       // tiles behind David where it appears
   FLOOD_HEIGHT: 9,       // tiles of water above the riverbed
-  FLOOD_DRAIN: 4,        // seconds for it to spread out and drain once David is out of the riverbed
+  FLOOD_DRAIN: 6,        // seconds for it to sink away once David is out of the riverbed
   FLOOD_SURGE: true,     // the chase front is Glen's HD mudslide clip (mud_surge); false = his still picture (mud_front)
   BOY_GAP: 40,           // how far behind David the boy walks (px along his path; the lamb is at 70)
 });
@@ -430,45 +430,43 @@ function updateFlood(dt) {
     toast("The flood swept you away! Back to the campfire...");
   }
 }
+function drawMudWall(x1, top, sink, flow) {   // Glen's mud (david-sling-art/mud_flow.png, mud_front.png): his "coming in" front, the flowing mud behind it in copies side by side (every other one mirrored so they join), rolling along
+  ctx.save(); ctx.translate(0, sink);
+  const k = (H + 30 - top) / (flow.naturalHeight * 0.8), fw = flow.naturalWidth * k, fh = flow.naturalHeight * k, y = top - fh * 0.2;
+  const front = ITEM.mud_front && ITEM.mud_front.naturalWidth ? ITEM.mud_front : null;
+  const surf = y + fh * 0.236, ffh = fh * 0.93, ffw = front ? front.naturalWidth * ffh / front.naturalHeight : 0;
+  // the surge from Glen's mudslide clip (mud_surge, HD) loops at the front (W2.FLOOD_SURGE)
+  const anim = W2.FLOOD_SURGE ? SPR.mud_surge : null, live = anim && anim.img.naturalWidth;
+  const ah = live ? fh * 1.17 : 0, aw = live ? anim.w * ah / anim.h : 0, ax = x1 - aw * 0.8;   // solid mud at the deadly line
+  const acols = live ? Math.max(1, Math.round(anim.img.naturalWidth / anim.w)) : 1;   // the clip sheets are grids (4 across)
+  const ai = live ? Math.floor(performance.now() / anim.ms) % anim.frames : 0;
+  const xf = live ? ax - ffw * 0.1 : x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
+  ctx.beginPath();
+  if (live) ctx.rect(-10, 0, ax + aw * 0.1 + 10, H);
+  else if (front) ctx.rect(-10, 0, xf + ffw * 0.1 + 10, H);
+  else { ctx.moveTo(-10, H); for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2); ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); }
+  ctx.save(); ctx.clip();
+  const right = live ? ax + aw * 0.1 : front ? xf + ffw * 0.1 : x1, o = (performance.now() / 1000 * 160) % (2 * fw);
+  for (let i = 0, xr = right + 2 * fw - o; xr > -fw; i++, xr -= fw) {
+    if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
+    else ctx.drawImage(flow, xr - fw, y, fw, fh);
+  }
+  ctx.restore();
+  if (live) ctx.drawImage(anim.img, (ai % acols) * anim.w, Math.floor(ai / acols) * anim.h, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah);
+  else if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
+  ctx.restore();
+}
 function drawFlood(camX) {
   if (!flood.on) return;
   const x1 = Math.min(W + 10, flood.x - camX); if (x1 < -10) return;
   ctx.save();
   const top = GR * T - W2.FLOOD_HEIGHT * T * flood.level;
   const flow = ITEM.mud_flow;
-  if (flow && flow.naturalWidth) {   // Glen's mud (david-sling-art/mud_flow.png, mud_front.png): his "coming in" front, the flowing mud behind it in copies side by side (every other one mirrored so they join), rolling along
-    const k = (H + 30 - top) / (flow.naturalHeight * 0.8), fw = flow.naturalWidth * k, fh = flow.naturalHeight * k, y = top - fh * 0.2;
-    const front = ITEM.mud_front && ITEM.mud_front.naturalWidth ? ITEM.mud_front : null;
-    const surf = y + fh * 0.236, ffh = fh * 0.93, ffw = front ? front.naturalWidth * ffh / front.naturalHeight : 0;
-    // Glen's mudslide clip (mud_flow_clip.mp4): once he's out, its ending (mud_settle) fades in and plays as the wall sinks and
-    // fades. While it chases, its surge (mud_surge, HD) loops at the front (W2.FLOOD_SURGE).
-    const lv = flood.level, wallA = flood.done ? Math.max(0, Math.min(1, (lv - 0.55) / 0.4)) : 1;
-    const anim = flood.done ? SPR.mud_settle : W2.FLOOD_SURGE ? SPR.mud_surge : null, live = anim && anim.img.naturalWidth;
-    const ah = live ? fh * 1.17 : 0, aw = live ? anim.w * ah / anim.h : 0, ax = x1 - aw * (flood.done ? 0.9 : 0.8);   // solid mud at the deadly line (draining: it spreads a little past it)
-    const acols = live ? Math.max(1, Math.round(anim.img.naturalWidth / anim.w)) : 1;   // the clip sheets are grids (4 across)
-    const ai = !live ? 0 : flood.done ? Math.min(anim.frames - 1, Math.floor((1 - lv) * 1.15 * anim.frames)) : Math.floor(performance.now() / anim.ms) % anim.frames;
-    const surging = live && !flood.done, xf = surging ? ax - ffw * 0.1 : x1 - ffw * 0.85 + Math.sin(performance.now() / 300) * 6;   // the front's left edge: its solid mud reaches the deadly line, the spray flies past it
-    if (wallA > 0) {
-      ctx.save(); ctx.globalAlpha = wallA; ctx.beginPath();
-      if (surging) ctx.rect(-10, 0, ax + aw * 0.1 + 10, H);
-      else if (front) ctx.rect(-10, 0, xf + ffw * 0.1 + 10, H);
-      else { ctx.moveTo(-10, H); for (let sx = -10; sx <= x1; sx += 8) ctx.lineTo(sx, floodTop(sx + camX) - fh * 0.2); ctx.lineTo(x1 + 18, GR * T + 6 - fh * 0.08); ctx.lineTo(x1 + 18, H); ctx.closePath(); }
-      ctx.save(); ctx.clip();
-      const right = surging ? ax + aw * 0.1 : front ? xf + ffw * 0.1 : x1, o = (performance.now() / 1000 * 160) % (2 * fw);
-      for (let i = 0, xr = right + 2 * fw - o; xr > -fw; i++, xr -= fw) {
-        if (i % 2) { ctx.save(); ctx.translate(xr, 0); ctx.scale(-1, 1); ctx.drawImage(flow, 0, y, fw, fh); ctx.restore(); }
-        else ctx.drawImage(flow, xr - fw, y, fw, fh);
-      }
-      ctx.restore();
-      if (surging) ctx.drawImage(anim.img, (ai % acols) * anim.w, Math.floor(ai / acols) * anim.h, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah);
-      else if (front) ctx.drawImage(front, xf, surf - ffh * 0.22, ffw, ffh);
-      ctx.restore();
-    }
-    if (live && flood.done) {   // the ending: in as the wall goes, out as the last of it soaks away
-      ctx.save(); ctx.globalAlpha = Math.min(1, (1 - lv) * 3, lv * 5);
-      ctx.drawImage(anim.img, (ai % acols) * anim.w, Math.floor(ai / acols) * anim.h, anim.w, anim.h, ax, surf - ah * 0.3, aw, ah); ctx.restore();
-    }
-    ctx.restore(); return;
+  if (flow && flow.naturalWidth) {
+    // out of the riverbed: the same mud and front just sink slowly out of sight (Glen 2026-10-28: the ending clip
+    // squared off and changed color), so it's drawn full height and lowered
+    const sf = flood.done ? 1 - flood.level : 0, sink = sf * sf * (3 - 2 * sf) * (H + 40 - (GR * T - W2.FLOOD_HEIGHT * T));
+    drawMudWall(x1, GR * T - W2.FLOOD_HEIGHT * T, sink, flow); ctx.restore(); return;
   }
   const g = ctx.createLinearGradient(0, top - 20, 0, H);
   g.addColorStop(0, "rgba(150,112,70,0.96)"); g.addColorStop(0.35, "rgba(110,80,48,0.97)"); g.addColorStop(1, "rgba(62,44,26,0.98)");
@@ -1186,9 +1184,12 @@ function drawSmallCritter(k, x, name) {
 Object.assign(W2, { TORTOISE_WALK: 62, TORTOISE_HIDE: 3.2 });
 CRITTER_ART.tortoise = { idle: "tortoise_walk", move: "tortoise_walk", len: 100, h: 70, box: k => spriteBox(k, "tortoise_walk", 70) };
 for (const p of setPieces) if (p.kind === "pool") for (let c = p.c; c < p.c + p.w; c++) specialPlat.add(c + "," + GR);   // the shell's footing is the shell itself: no rock ledge drawn on it
-function shellSpan(k) {   // the columns the shell covers (its back is a stepping stone)
-  const b = critterBox(k), pad = (b.x1 - b.x0) * 0.16;
-  return [Math.floor((b.x0 + pad) / T), Math.floor((b.x1 - pad) / T)];
+const SHELL_X = [55, 245];   // the shell's back in tortoise_walk's frame (sprite px; the head is past 245)
+function shellSpan(k) {   // the columns the shell covers (its back is a stepping stone): only tiles whose middle is over
+  const s = SPR.tortoise_walk;   //   the shell, so the footing never sticks out past it into the air (Glen 2026-10-28: lamb walking on air)
+  if (!s) { const b = critterBox(k), pad = (b.x1 - b.x0) * 0.16; return [Math.floor((b.x0 + pad) / T), Math.floor((b.x1 - pad) / T)]; }
+  const sc = SCALE * (TUNE.SPRITE_SIZE.tortoise_walk || 1), a = k.x + k.facing * (SHELL_X[0] - s.ax) * sc, b = k.x + k.facing * (SHELL_X[1] - s.ax) * sc;
+  return [Math.ceil(Math.min(a, b) / T - 0.5), Math.floor(Math.max(a, b) / T - 0.5)];
 }
 function updateTortoise(k, dx, sameLevel, dt) {
   const x0 = k.x;
@@ -1199,6 +1200,10 @@ function updateTortoise(k, dx, sameLevel, dt) {
   } else { k.vx = 0; collideBody(k, 40, 30, dt); if (k.state === "hide" && k.t > W2.TORTOISE_HIDE) setCrit(k, "peek"); if (k.state === "peek" && k.t > 1.2) setCrit(k, "walk"); }
   // the shell as a stepping stone: one-way tiles at the waterline under it, and David rides along
   const pool = setPieces.find(p => p.kind === "pool" && k.x > p.c * T && k.x < (p.c + p.w) * T);
+  if (k.tiles && k.tiles.length && k.x !== x0) {   // David's footsteps on the shell ride with it, so the lamb (who walks in them) does too
+    const lo = Math.min(...k.tiles) * T - 2, hi = (Math.max(...k.tiles) + 1) * T + 2;
+    for (const q of trail) if (Math.abs(q.y - GR * T) < 3 && q.x >= lo && q.x <= hi) q.x += k.x - x0;
+  }
   for (const c of k.tiles || []) oneway[GR][c] = false;
   k.tiles = [];
   if (pool) { const [c0, c1] = shellSpan(k); for (let c = Math.max(c0, pool.c); c <= Math.min(c1, pool.c + pool.w - 1); c++) { oneway[GR][c] = true; k.tiles.push(c); } }
