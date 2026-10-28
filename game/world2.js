@@ -782,6 +782,7 @@ Object.assign(W2, {
   WOLF_PACK_SEE: 16,     // tiles: a pack wakes (howls, and the third comes in from behind) when David's this close
   BEAR_HP: 8,            // a stagger (full charged stone while it roars) = 2; while dazed: tap 1, charged 2, Power 3
   BEAR_SIZE: 1.7,
+  BEAR_SHEEP_AHEAD: 66,  // px in front of the bear where its clip sets the sheep down (bear_intro_roar's last frame)
   BEAR_WALK: 120, BEAR_CHARGE: 540, BEAR_CHARGE_RUN: 11,   // px/s, and the most tiles one charge runs
   BEAR_TELL: 1.0,        // the scrape before a charge
   BEAR_ROAR: 1.5,        // it rears up on its hind legs and roars (the opening: a full charged stone now staggers it), then slams
@@ -796,6 +797,7 @@ Object.assign(W2, {
 Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
   wolf_grab: W2.WOLF_SIZE, wolf_run_lamb: W2.WOLF_SIZE,
   bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE, bear_throw: W2.BEAR_SIZE, bear_throw_back: W2.BEAR_SIZE,
+  bear_intro_hold: W2.BEAR_SIZE, bear_intro_setdown: W2.BEAR_SIZE, bear_intro_roar: W2.BEAR_SIZE,
   bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
 CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
 const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera)
@@ -911,8 +913,8 @@ const bear = { on: !!bearPiece };
 const fallingRocks = [];
 function resetBear() {
   if (!bear.on) return;
-  Object.assign(bear, { x: bearPiece.x, y: bearPiece.y, vx: 0, vy: 0, onGround: true, facing: 1, state: "pen", t: 0, hp: W2.BEAR_HP,
-                        flash: 0, alpha: 1, atkT: 1.5, told: false, toldPen: false, sheepFreed: false, sheepX: bearPiece.x + 120, sheepT: 0 });
+  Object.assign(bear, { x: bearPiece.x, y: bearPiece.y, vx: 0, vy: 0, onGround: true, facing: -1, state: "pen", t: 0, hp: W2.BEAR_HP,
+                        flash: 0, alpha: 1, atkT: 1.5, told: false, toldPen: false, sheepFreed: false, sheepX: bearPiece.x, sheepT: 0, roared: false });
   fallingRocks.length = 0;
 }
 resetBear();
@@ -920,7 +922,7 @@ const bearFight = () => bear.on && bear.state !== "defeated" && (bear.state !== 
 const bearBlocking = () => bear.on && bear.state !== "defeated";
 // (Glen, 2026-10-26: "more bear growls when he attacks or throws stuff") his growl (assets/sounds/bear_growl.mp3) on every
 // attack: [volume, rate]; a lower rate is a deeper, longer growl. A new one cuts off the one before.
-const BEAR_GROWLS = { notice: [1, 0.9], tell: [0.9, 1], roar: [1, 0.8], lunge: [0.8, 1.15], throw: [0.85, 1.05], throwBack: [0.85, 1.05] };
+const BEAR_GROWLS = { tell: [0.9, 1], roar: [1, 0.8], lunge: [0.8, 1.15], throw: [0.85, 1.05], throwBack: [0.85, 1.05] };
 function setBear(s) {
   if (bear.state === s) return;
   bear.state = s; bear.t = 0;
@@ -928,6 +930,7 @@ function setBear(s) {
   if (bear.growl && (g || s === "dazed" || s === "defeated" || s === "pen")) { bear.growl.pause(); bear.growl = null; }   // (hit: the growl breaks off)
   if (g) bear.growl = sfx("bear_growl", bear.x, g[0], g[1]);
 }
+const bearClip = nm => SPR[nm] ? SPR[nm].frames * SPR[nm].ms / 1000 : 1;
 function bearBox() {
   const tall = bear.state === "roar" ? 185 : bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;   // reared up, it's taller than David
   return { x0: bear.x - 85, x1: bear.x + 85, y0: bear.y - tall, y1: bear.y };
@@ -964,18 +967,22 @@ function updateBear(dt) {
   if (B.state === "defeated") { B.alpha = Math.max(0, B.alpha - dt * 0.4); return; }
   const dx = d.x - B.x, dist = Math.abs(dx), late = B.hp <= W2.BEAR_HP / 2;   // the last half: quicker
   const physics = () => { B.vy = Math.min(TUNE.MAX_FALL, B.vy + TUNE.GRAVITY * dt); collideBody(B, 120, 90, dt); };
-  if (B.state === "pen") {   // clawing at the pen wall, a sheep pinned under its paw. Like the lion with the lamb: it
-    B.vx = 0; physics();         // notices David coming, turns, growls, lets the sheep go, and comes for him
+  // (Glen's clip, 2026-10-28) it stands facing David with a sheep in its mouth, like the lion with the lamb; when he comes
+  // it sets the sheep down (bear_intro_setdown), rears up and roars (bear_intro_roar), and the sheep runs for it
+  const setdownT = bearClip("bear_intro_setdown"), roarT = bearClip("bear_intro_roar");
+  if (B.state === "pen") {
+    B.vx = 0; physics();
     if (d.x > bearPiece.arena * T && d.deadT <= 0 && (dist < 14 * T || (B.penT = (B.penT || 0) + dt) > 1.2)) {
-      B.facing = Math.sign(dx) || -1; setBear("notice"); helpT = 0;
+      B.facing = Math.sign(dx) || -1; setBear("notice"); helpT = 0; B.roared = false;
       toast("The bear! It's seen you.");
     }
     return;
   }
-  if (B.state === "notice") {   // head down, growling at David; then it lets go of the sheep and comes on
+  if (B.state === "notice") {   // it sets the sheep down, rears up and roars; then the sheep runs and it comes on
     B.vx = 0; physics();
-    if (B.t > 1.3) {
-      B.sheepFreed = true; B.atkT = 1.6; setBear("walk");
+    if (!B.roared && B.t > setdownT) { B.roared = true; if (B.growl) B.growl.pause(); B.growl = sfx("bear_growl", B.x, 1, 0.8); }
+    if (B.t > setdownT + roarT) {
+      B.sheepFreed = true; B.sheepX = B.x + B.facing * W2.BEAR_SHEEP_AHEAD; B.sheepDir = B.facing; B.atkT = 1.6; setBear("walk");
       toast("It let the sheep go, and it's coming for you! Keep your distance. When it rears up and roars: a full charged stone.");
     }
     return;
@@ -1052,9 +1059,9 @@ function stoneHitsBear(s) {   // called from updateStones (main.js)
   const B = bear; if (!B.on || B.state === "defeated") return false;
   const b = bearBox(); if (s.x < b.x0 || s.x > b.x1 || s.y < b.y0 || s.y > b.y1) return false;
   if (B.state === "pen") {
-    if (s.charged || s.power) {   // it lets go of the sheep and turns on David
-      stoneHit(s); B.sheepFreed = true; B.facing = -1; setBear("turn"); B.atkT = 2;
-      toast("It let the sheep go! Keep your distance. Hit it with a full charged stone when it rears up to roar.");
+    if (s.charged || s.power) {   // that it feels: it sets the sheep down, rears up and roars, and comes for him
+      stoneHit(s); B.facing = Math.sign(david.x - B.x) || -1; B.roared = false; setBear("notice");
+      toast("The bear! It's seen you.");
     } else { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("The bear doesn't even notice a tap stone. Hold B until the ring turns gold."); } }
     return true;
   }
@@ -1110,15 +1117,18 @@ function drawBoulder(x, y, r, spin, item) {   // what the bear throws (it rolls:
 function drawBear(camX) {
   if (!bear.on || bear.alpha <= 0) return;
   const B = bear, x = B.x - camX; if (x < -400 || x > W + 400) return;
-  if (!B.sheepFreed || B.sheepT < 2.5) {   // the pinned sheep: freed, it bolts for the pen and is gone
-    const sx = B.sheepFreed ? B.sheepX + B.sheepT * 260 : B.sheepX, a = B.sheepFreed ? Math.max(0, 1 - B.sheepT / 2.5) : 1;
-    if (B.sheepFreed) drawSprite("sheep_trot", frameOf("sheep_trot", B.sheepT), sx - camX, B.y, 1, 1, a);
-    else drawSprite("sheep_cast", frameOf("sheep_cast", B.t), sx - camX, B.y, -1);
+  if (B.sheepFreed && B.sheepT < 2.5) {   // the sheep it set down (in its clip until now): it bolts, and is gone
+    drawSprite("sheep_trot", frameOf("sheep_trot", B.sheepT), B.sheepX + B.sheepDir * B.sheepT * 260 - camX, B.y, B.sheepDir, 1, Math.max(0, 1 - B.sheepT / 2.5));
   }
   let name = "bear_walk", i, filter = "";
   switch (B.state) {
-    case "notice": name = "bear_growl"; i = frameOf(name, B.t * 1.6); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;
-    case "pen": { name = "bear_lunge"; const n = SPR[name].frames, k = Math.floor(B.t * 1000 / SPR[name].ms * 0.8) % (2 * n - 2); i = k < n ? k : 2 * n - 2 - k; break; }   // clawing at the wall, over and over
+    case "notice": {   // setting the sheep down, then up on its hind legs, roaring
+      const sd = bearClip("bear_intro_setdown");
+      if (B.t < sd) { name = "bear_intro_setdown"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); }
+      else { name = "bear_intro_roar"; i = Math.min(SPR[name].frames - 1, Math.floor((B.t - sd) * 1000 / SPR[name].ms)); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; }
+      break;
+    }
+    case "pen": { name = "bear_intro_hold"; const k = Math.floor(B.t * 1000 / SPR[name].ms) % 10; i = 2 + (k < 6 ? k : 10 - k); break; }   // the sheep in its mouth, swaying (frames 3-8 back and forth)
     case "walk": i = frameOf(name, B.t); break;
     case "turn": case "rest": i = 0; break;
     case "tell": name = "bear_growl"; i = frameOf(name, B.t * 1.6); filter = "drop-shadow(0 0 10px rgba(255,200,60,0.95))"; break;   // head down, growling

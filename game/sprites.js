@@ -180,6 +180,42 @@ window.SPRITE_DATA = {
   "ay": 158,
   "align": "feet"
  },
+ "bear_intro_hold": {
+  "src": "../assets/sprites/bear_intro_hold.png",
+  "frames": 8,
+  "w": 193,
+  "h": 195,
+  "ms": 160,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 193,
+  "align": "feet"
+ },
+ "bear_intro_roar": {
+  "src": "../assets/sprites/bear_intro_roar.png",
+  "frames": 12,
+  "w": 227,
+  "h": 226,
+  "ms": 140,
+  "loop": false,
+  "pingpong": false,
+  "ax": 105,
+  "ay": 224,
+  "align": "feet"
+ },
+ "bear_intro_setdown": {
+  "src": "../assets/sprites/bear_intro_setdown.png",
+  "frames": 12,
+  "w": 221,
+  "h": 195,
+  "ms": 120,
+  "loop": false,
+  "pingpong": false,
+  "ax": 104,
+  "ay": 193,
+  "align": "feet"
+ },
  "bear_lunge": {
   "src": "../assets/sprites/bear_lunge.png",
   "frames": 8,

@@ -681,3 +681,9 @@ the harp phrase at 3-2's campfire.
   stands; not in its first 0.6 s or while fading in) plays wolf_grab, runs off with her (WOLF_STEAL 250 px/s for
   WOLF_STEAL_RUN 1.8 s), stops and looks back (last grab frame), runs again when David's near. A stone: it plays the
   grab backwards to set her down, then runs off. Carrying her (Down) keeps her safe. Respawn clears a thief.
+- **2-4 bear intro from Glen's clip** (2026-10-28). The bear now waits by the pen wall facing David with the sheep in its
+  mouth (bear_intro_hold, frames 3-8 swaying back and forth), like the lion. When David passes the arena (or lands a
+  charged stone on it) it sets the sheep down (bear_intro_setdown), rears up and roars (bear_intro_roar, growl at the
+  rear-up), then the sheep runs off away from it (sheep_trot, from BEAR_SHEEP_AHEAD in front) and the fight starts as
+  before. Cut from the clip with --mirror --height 220 --ref 200:240 (matches bear_rear_roar's height). The old
+  clawing-at-the-wall pen pose and the sheep_cast under its paw are gone.

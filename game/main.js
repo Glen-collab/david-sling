@@ -1041,7 +1041,7 @@ if (LEVEL_NAME === "test") {
   deco("log_broken", 208, 16, 0.34); deco("rubble_sticks", 221, 16, 0.32);
   // the arena in front of the pen: ledges to get above a charge
   plat(201, 13, 5); plat(213, 13, 5); plat(207, 9, 4);
-  setPiece("bear", 226, GR - 1, { arena: 198 });               // at the pen wall, a sheep pinned under its paw
+  setPiece("bear", 226, GR - 1, { arena: 198 });               // by the pen wall, a sheep in its mouth (world2.js bear_intro_*)
   wallRow(228.5 * T, ["pen_wall_2"], 0.27);                       // the pen's wall, cracked where the bear's been at it
   sheepfold(238);
 } else if (LEVEL_NAME === "3-1") {
