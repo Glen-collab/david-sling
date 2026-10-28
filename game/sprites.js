@@ -159,13 +159,13 @@ window.SPRITE_DATA = {
  "bear_dazed": {
   "src": "../assets/sprites/bear_dazed.png",
   "frames": 7,
-  "w": 235,
-  "h": 224,
-  "ms": 226,
+  "w": 291,
+  "h": 226,
+  "ms": 110,
   "loop": false,
   "pingpong": false,
-  "ax": 156,
-  "ay": 220,
+  "ax": 134,
+  "ay": 191,
   "align": "feet"
  },
  "bear_fall": {

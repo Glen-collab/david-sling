@@ -692,3 +692,9 @@ the harp phrase at 3-2's campfire.
   slow motion stretches it), lies on the ground for 2.5 s after the clip ends, then fades as before. Reared up (the
   roar opening) it plays from the top; sitting dazed (the usual last hit) or on all fours (a Power stone) it starts
   at frame 12, where the clip's bear is crouched, with a 0.35 s blend over from the pose it was in.
+- **2-4 bear dazed: Glen's cut, and a shorter daze** (2026-10-28). Glen replaced bear_dazed.png with bear_fall frames
+  14-20 (the same bear as the new clips; the old sitting one's head was bigger). Its json now matches: 7 frames of
+  291x226, anchor 134,191 (his frames sit 33 px higher than bear_fall's). Dazed it goes down onto the ground, lies a
+  moment and gets back up with the same frames backwards (bearDazedFrame), over BEAR_DAZED, now 1.8 s (was 3.0, room
+  for three charged stones). Its box while down is 110 tall (was 150). A last stone on a dazed bear carries on into
+  bear_fall from the matching frame (BEAR_DAZED_FROM + its frame), no blend needed.

@@ -789,7 +789,7 @@ Object.assign(W2, {
   BEAR_SLAM_DROP: 0.4,   // seconds from the top of the rear to its paws hitting the ground
   BEAR_SLAM_SHAKE: 1.6,  // how hard the screen shakes when it lands
   BEAR_TURN: 0.9,        // slow to turn round
-  BEAR_DAZED: 3.0, BEAR_REST: 1.2,
+  BEAR_DAZED: 1.8, BEAR_REST: 1.2,
   BEAR_SLAM_REACH: 9,    // tiles: the slam shakes the ground this far; be in the air
   BEAR_THROW_SPEED: 0.9, // how fast the throws play (1 = the clip's own speed)
   BOULDER_ROLL: 1.6,     // seconds a thrown boulder rolls along the ground after it lands: jump it or roll under it
@@ -930,9 +930,15 @@ function setBear(s) {
   if (bear.growl && (g || s === "dazed" || s === "defeated" || s === "pen")) { bear.growl.pause(); bear.growl = null; }   // (hit: the growl breaks off)
   if (g) bear.growl = sfx("bear_growl", bear.x, g[0], g[1]);
 }
+const BEAR_DAZED_FROM = 13;   // bear_dazed frame 1 is bear_fall frame 14
+function bearDazedFrame(t) {   // down onto the ground, a moment there, then back up (the same frames backwards) as it ends
+  const s = SPR.bear_dazed; if (!s) return 0;
+  const n = s.frames, f = Math.floor(t * 1000 / s.ms), up = Math.floor((W2.BEAR_DAZED - t) * 1000 / s.ms);
+  return Math.max(0, Math.min(n - 1, f, up));
+}
 const bearClip = nm => SPR[nm] ? SPR[nm].frames * SPR[nm].ms / 1000 : 1;
 function bearBox() {
-  const tall = bear.state === "roar" ? 185 : bear.state === "dazed" || bear.state === "defeated" ? 150 : 100;   // reared up, it's taller than David
+  const tall = bear.state === "roar" ? 185 : bear.state === "dazed" ? 110 : bear.state === "defeated" ? 150 : 100;   // reared up, it's taller than David; dazed, it's down on the ground
   return { x0: bear.x - 85, x1: bear.x + 85, y0: bear.y - tall, y1: bear.y };
 }
 function updateBear(dt) {
@@ -1071,9 +1077,9 @@ function stoneHitsBear(s) {   // called from updateStones (main.js)
   if (B.hp <= 0) {   // the last stone (Glen's clip, bear_fall): reared up, it takes it on the chin and goes down from the top;
     // otherwise (sitting dazed, or a Power stone on all fours) it picks up the clip where it's crouched (frame 12),
     // blending over from the pose it was in
-    const dz = SPR.bear_dazed, reared = B.state === "roar", wasDazed = B.state === "dazed";
-    Object.assign(B, { fallFrom: reared ? 0 : 11, blendName: reared ? null : wasDazed ? "bear_dazed" : "bear_walk",
-                       blendI: wasDazed && dz ? Math.min(dz.frames - 1, Math.floor(B.t * 1000 / dz.ms)) : 0 });
+    // (bear_dazed is Glen's cut of bear_fall frames 14-20, so a dazed bear just carries on down from the frame it's on)
+    const reared = B.state === "roar", wasDazed = B.state === "dazed";
+    Object.assign(B, { fallFrom: reared ? 0 : wasDazed ? BEAR_DAZED_FROM + bearDazedFrame(B.t) : 11, blendName: reared || wasDazed ? null : "bear_walk", blendI: 0 });
   }
   else if (B.state !== "dazed") { setBear("dazed"); toast(B.hp > 0 ? "It's staggered! Hit it again while it's down." : ""); }
   for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
@@ -1151,7 +1157,7 @@ function drawBear(camX) {
       if (B.blendName && B.t < 0.35) drawSprite(B.blendName, B.blendI, x, B.y, B.facing, 1, B.alpha * (1 - B.t / 0.35));
       break;
     }
-    case "dazed": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
+    case "dazed": name = "bear_dazed"; i = bearDazedFrame(B.t); break;
   }
   const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
   if (B.flash > 0) filter = "brightness(1.8)";

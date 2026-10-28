@@ -1,20 +1,11 @@
 {
-  "frames": 7,
-  "frame_w": 235,
-  "frame_h": 224,
-  "ms_per_frame": 226,
-  "loop": false,
-  "align": "feet",
-  "anchor_x": 156,
-  "anchor_y": 220,
-  "source": "z4_2.mp4",
-  "video_frames": [
-    25,
-    31,
-    37,
-    43,
-    50,
-    56,
-    62
-  ]
+ "frames": 7,
+ "frame_w": 291,
+ "frame_h": 226,
+ "ms_per_frame": 110,
+ "loop": false,
+ "align": "feet",
+ "anchor_x": 134,
+ "anchor_y": 191,
+ "source": "Glen's edit of bear_fall frames 14-20 (2026-10-28)"
 }
