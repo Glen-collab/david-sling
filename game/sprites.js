@@ -168,6 +168,18 @@ window.SPRITE_DATA = {
   "ay": 220,
   "align": "feet"
  },
+ "bear_fall": {
+  "src": "../assets/sprites/bear_fall.png",
+  "frames": 24,
+  "w": 291,
+  "h": 226,
+  "ms": 180,
+  "loop": false,
+  "pingpong": false,
+  "ax": 134,
+  "ay": 224,
+  "align": "feet"
+ },
  "bear_growl": {
   "src": "../assets/sprites/bear_growl.png",
   "frames": 10,

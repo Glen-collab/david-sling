@@ -687,3 +687,8 @@ the harp phrase at 3-2's campfire.
   rear-up), then the sheep runs off away from it (sheep_trot, from BEAR_SHEEP_AHEAD in front) and the fight starts as
   before. Cut from the clip with --mirror --height 220 --ref 200:240 (matches bear_rear_roar's height). The old
   clawing-at-the-wall pen pose and the sheep_cast under its paw are gone.
+- **2-4 bear's last stone: Glen's fall clip** (2026-10-28). bear_fall (24 frames, --mirror --height 220 --ref 1:28,
+  starting just after the clip's own stone lands): the defeated bear now takes the hit and goes down (the final-blow
+  slow motion stretches it), lies on the ground for 2.5 s after the clip ends, then fades as before. Reared up (the
+  roar opening) it plays from the top; sitting dazed (the usual last hit) or on all fours (a Power stone) it starts
+  at frame 12, where the clip's bear is crouched, with a 0.35 s blend over from the pose it was in.

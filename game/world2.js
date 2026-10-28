@@ -797,7 +797,7 @@ Object.assign(W2, {
 Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
   wolf_grab: W2.WOLF_SIZE, wolf_run_lamb: W2.WOLF_SIZE,
   bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE, bear_throw: W2.BEAR_SIZE, bear_throw_back: W2.BEAR_SIZE,
-  bear_intro_hold: W2.BEAR_SIZE, bear_intro_setdown: W2.BEAR_SIZE, bear_intro_roar: W2.BEAR_SIZE,
+  bear_fall: W2.BEAR_SIZE, bear_intro_hold: W2.BEAR_SIZE, bear_intro_setdown: W2.BEAR_SIZE, bear_intro_roar: W2.BEAR_SIZE,
   bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
 CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
 const w2Shake = { v: 0 };   // the ground shaking (main.js adds it to the camera)
@@ -964,7 +964,7 @@ function updateBear(dt) {
     if (r.y > GR * T && !r.landed) { r.landed = true; for (let k = 0; k < 6; k++) bits.push({ x: r.x, y: GR * T - 4, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 250, life: 0.5, color: "#8a8378" }); } }
   for (let i = fallingRocks.length - 1; i >= 0; i--) if (fallingRocks[i].landed) fallingRocks.splice(i, 1);
   if (B.sheepFreed) B.sheepT += dt;
-  if (B.state === "defeated") { B.alpha = Math.max(0, B.alpha - dt * 0.4); return; }
+  if (B.state === "defeated") { if (B.t > bearClip("bear_fall") + 2.5) B.alpha = Math.max(0, B.alpha - dt * 0.4); return; }   // falls (in slow motion), lies a while, then fades
   const dx = d.x - B.x, dist = Math.abs(dx), late = B.hp <= W2.BEAR_HP / 2;   // the last half: quicker
   const physics = () => { B.vy = Math.min(TUNE.MAX_FALL, B.vy + TUNE.GRAVITY * dt); collideBody(B, 120, 90, dt); };
   // (Glen's clip, 2026-10-28) it stands facing David with a sheep in its mouth, like the lion with the lamb; when he comes
@@ -1068,7 +1068,14 @@ function stoneHitsBear(s) {   // called from updateStones (main.js)
   const dmg = bearDamage(s);
   if (!dmg) { stoneHit(s, 0.6); if (!B.told) { B.told = true; toast("Stones bounce off its thick coat! Wait until it rears up to roar, then a full charged stone."); } return true; }
   B.hp -= dmg; B.flash = 0.3;
-  if (B.state !== "dazed") { setBear("dazed"); toast(B.hp > 0 ? "It's staggered! Hit it again while it's down." : ""); }
+  if (B.hp <= 0) {   // the last stone (Glen's clip, bear_fall): reared up, it takes it on the chin and goes down from the top;
+    // otherwise (sitting dazed, or a Power stone on all fours) it picks up the clip where it's crouched (frame 12),
+    // blending over from the pose it was in
+    const dz = SPR.bear_dazed, reared = B.state === "roar", wasDazed = B.state === "dazed";
+    Object.assign(B, { fallFrom: reared ? 0 : 11, blendName: reared ? null : wasDazed ? "bear_dazed" : "bear_walk",
+                       blendI: wasDazed && dz ? Math.min(dz.frames - 1, Math.floor(B.t * 1000 / dz.ms)) : 0 });
+  }
+  else if (B.state !== "dazed") { setBear("dazed"); toast(B.hp > 0 ? "It's staggered! Hit it again while it's down." : ""); }
   for (let k = 0; k < 8; k++) bits.push({ x: s.x, y: s.y, vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 300, life: 0.5, color: "#fff2b0" });
   if (B.hp <= 0) {
     setBear("defeated"); bearFinalHit(s);
@@ -1138,7 +1145,13 @@ function drawBear(camX) {
     case "lunge": name = "bear_lunge"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t / 0.12)); break;
     case "throw": case "throwBack": name = B.state === "throw" ? "bear_throw" : "bear_throw_back";
       i = Math.min(SPR[name].frames - 1, Math.floor(B.t * W2.BEAR_THROW_SPEED * 1000 / SPR[name].ms)); break;
-    case "dazed": case "defeated": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
+    case "defeated": {
+      name = "bear_fall"; const n = SPR[name].frames;
+      i = Math.min(n - 1, (B.fallFrom || 0) + Math.floor(B.t * 1000 / SPR[name].ms));
+      if (B.blendName && B.t < 0.35) drawSprite(B.blendName, B.blendI, x, B.y, B.facing, 1, B.alpha * (1 - B.t / 0.35));
+      break;
+    }
+    case "dazed": name = "bear_dazed"; i = Math.min(SPR[name].frames - 1, Math.floor(B.t * 1000 / SPR[name].ms)); break;
   }
   const shake = B.state === "tell" ? Math.sin(B.t * 60) * 3 : 0;
   if (B.flash > 0) filter = "brightness(1.8)";
