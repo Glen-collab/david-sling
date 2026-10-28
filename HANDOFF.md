@@ -657,3 +657,7 @@ the harp phrase at 3-2's campfire.
   clear panel: clearHush() (main.js) is true on the clear phase (not 8-4, and not once the Journal/menu/map/credits are
   up); entering it pauses every audio but finish.jingle, and the play() gate refuses anything else while it holds.
   Tested with real audio: theme, birds and baas playing before; only the jingle 2 s into the clear, baas still being fired.
+- **1-4 ridge lion from Hanan's fire on** (Glen, 2026-10-28): before the fire the far layer has no hill under him and he
+  looked like he was floating. world1.js drawLionRidge: nothing until David reaches column RIDGE_LION_FROM (106, Hanan's
+  fire is 110); then he's placed out on the hills right of the fire (sx ~ W*0.72) and fades in over RIDGE_LION_FADE
+  (2.5 s). The far roars still sound from the start ("You hear it?").

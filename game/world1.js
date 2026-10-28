@@ -559,17 +559,23 @@ const WHIP_FILTER = "hue-rotate(75deg) saturate(1.5) brightness(0.9)";
 // ---------------------------------------------------------------------------
 // 1-4: the night, a cloud over the moon now and then, and the lion on the far ridge, watching
 // ---------------------------------------------------------------------------
-const ridgeLion = { x: 700, t: 0, roarT: 12 };
+// (Glen, 2026-10-28) he only shows from Hanan's fire on: before it the far layer has no hill under him and he floats.
+// He fades in there, out on the hills to the right of the fire, as Hanan says "You hear it?"
+const ridgeLion = { x: 700, t: 0, roarT: 12, a: 0, placed: false };
+const RIDGE_LION_FROM = 106, RIDGE_LION_FADE = 2.5;   // column he appears from; seconds to fade in
 function drawLionRidge(camX) {
   if (!STAGE_INFO.night || !lion || lion.awake || lion.state === "defeated" || david.x > arenaX - 6 * T) return;
   const R = ridgeLion, now = performance.now() / 1000;
+  if (david.x < RIDGE_LION_FROM * T && !R.placed) return;
+  if (!R.placed) { R.placed = true; R.x = camX * 0.25 + W * 0.72; }
+  R.a = Math.min(1, R.a + 1 / 60 / RIDGE_LION_FADE);
   const walking = Math.sin(now * 0.35) > -0.55;   // pads along, stops, watches
   if (walking) R.x += 36 / 60;
   let sx = R.x - camX * 0.25;
   if (sx < -250) { R.x += W + 500; sx = R.x - camX * 0.25; }
   if (sx > W + 250) { R.x -= W + 500; sx = R.x - camX * 0.25; }
   const name = walking ? "lion_prowl" : "lion_sit_roar";
-  drawSprite(name, walking ? frameOf(name, now) : 0, sx, GR * T - 175, 1, 0.32, 0.8, "brightness(0.3) saturate(0.3)");
+  drawSprite(name, walking ? frameOf(name, now) : 0, sx, GR * T - 175, 1, 0.32, 0.8 * R.a, "brightness(0.3) saturate(0.3)");
 }
 function updateNight(dt) {
   if (!STAGE_INFO.night || !lion || lion.awake || lion.state === "defeated") return;
