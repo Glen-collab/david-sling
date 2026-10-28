@@ -673,3 +673,11 @@ the harp phrase at 3-2's campfire.
   howls and sends its third in from behind when David's within WOLF_PACK_SEE (16 tiles, was WOLF_SEE 9), and the two
   sitters get up after WOLF_SIT (1.4 s, was 2.4) or sooner if the third gets close. (Waking as soon as they're on screen
   was tried: the first pack is on screen from the start of the level, so it woke at once.)
+- **Cartoon wolf, and wolves steal the lamb** (Glen, 2026-10-28). His two new clips replace the 2-4 wolves:
+  wolf_sit / wolf_stand_up / wolf_walk / wolf_run from the first, and new wolf_grab (the lamb hops up into its
+  mouth) and wolf_run_lamb from the second (all --height 150, same --ref walking frames so they match). The realistic
+  wolves are saved for David 2 in Desktop\david-sling-2-art\wolves_realistic_from_part_one. world2.js updateWolf: a
+  hunting wolf that comes on the lamb on the ground (WOLF_LAMB_AHEAD 46 px in front of it, where the clip's lamb
+  stands; not in its first 0.6 s or while fading in) plays wolf_grab, runs off with her (WOLF_STEAL 250 px/s for
+  WOLF_STEAL_RUN 1.8 s), stops and looks back (last grab frame), runs again when David's near. A stone: it plays the
+  grab backwards to set her down, then runs off. Carrying her (Down) keeps her safe. Respawn clears a thief.

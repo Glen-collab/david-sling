@@ -1,21 +1,21 @@
 {
   "frames": 8,
-  "frame_w": 246,
-  "frame_h": 150,
-  "ms_per_frame": 120,
+  "frame_w": 220,
+  "frame_h": 153,
+  "ms_per_frame": 130,
   "loop": false,
   "align": "feet",
-  "anchor_x": 170,
-  "anchor_y": 147,
-  "source": "k4.mp4",
+  "anchor_x": 172,
+  "anchor_y": 151,
+  "source": "a.mp4",
   "video_frames": [
-    30,
-    33,
-    36,
-    39,
-    43,
-    46,
-    49,
-    52
+    52,
+    55,
+    59,
+    62,
+    66,
+    69,
+    73,
+    76
   ]
 }

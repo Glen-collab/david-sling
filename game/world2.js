@@ -776,6 +776,9 @@ Object.assign(W2, {
   WOLF_BEHIND: 12,       // tiles behind David where the pack's third wolf comes in
   WOLF_CLOSE: 4,         // when it's this close to David, the two sitting wolves get up
   WOLF_SIT: 1.4,         // seconds the two sit once the pack's awake (or less, if the third gets close)
+  WOLF_STEAL: 250,       // px/s running off with the lamb: a little slower than David (270), so he can catch it
+  WOLF_STEAL_RUN: 1.8,   // seconds it runs before it stops to look back
+  WOLF_LAMB_AHEAD: 46,   // px ahead of the wolf's feet where the lamb stands in Glen's grab clip (wolf_grab frame 1)
   WOLF_PACK_SEE: 16,     // tiles: a pack wakes (howls, and the third comes in from behind) when David's this close
   BEAR_HP: 8,            // a stagger (full charged stone while it roars) = 2; while dazed: tap 1, charged 2, Power 3
   BEAR_SIZE: 1.7,
@@ -791,6 +794,7 @@ Object.assign(W2, {
   BOULDER_ROLL: 1.6,     // seconds a thrown boulder rolls along the ground after it lands: jump it or roll under it
 });
 Object.assign(TUNE.SPRITE_SIZE, { wolf_run: W2.WOLF_SIZE, wolf_walk: W2.WOLF_SIZE, wolf_sit: W2.WOLF_SIZE, wolf_stand_up: W2.WOLF_SIZE,
+  wolf_grab: W2.WOLF_SIZE, wolf_run_lamb: W2.WOLF_SIZE,
   bear_rear_roar: W2.BEAR_SIZE, bear_rear_slam: W2.BEAR_SIZE, bear_growl: W2.BEAR_SIZE, bear_throw: W2.BEAR_SIZE, bear_throw_back: W2.BEAR_SIZE,
   bear_walk: W2.BEAR_SIZE, bear_charge: W2.BEAR_SIZE, bear_lunge: W2.BEAR_SIZE, bear_stand_roar: W2.BEAR_SIZE, bear_dazed: W2.BEAR_SIZE });
 CRITTER_ART.wolf = { idle: "wolf_sit", move: "wolf_run", len: 120, h: 62 };
@@ -830,6 +834,27 @@ function updateWolf(k, dx, sameLevel, dt) {
     return;
   }
   if (k.state === "rise") { fall(); if (k.t > 0.8) setCrit(k, "hunt"); return; }
+  // the lamb (Glen's cartoon wolf, 2026-10-28): a wolf that comes on her on the ground snaps her up (wolf_grab: she hops
+  // into its mouth) and runs off with her, stopping to look back. A stone and it sets her down (the grab backwards), then runs.
+  if (k.state === "grab") { fall(); if (k.t > wolfGrabTime()) { k.facing = -Math.sign(dx) || k.facing; setCrit(k, "steal"); } return; }
+  if (k.state === "steal") { if (!runCritter(k, W2.WOLF_STEAL, dt) || k.t > W2.WOLF_STEAL_RUN) setCrit(k, "hold"); return; }
+  if (k.state === "hold") { fall(); k.facing = Math.sign(dx) || k.facing; if (Math.abs(dx) < 240 && k.t > 0.6) { k.facing = -Math.sign(dx) || k.facing; setCrit(k, "steal"); } return; }
+  if (k.state === "drop") {
+    fall();
+    if (k.t > wolfGrabTime()) {
+      lamb.stolen = false; lamb.x = k.x + k.facing * W2.WOLF_LAMB_AHEAD; lamb.y = k.y; lamb.vx = 0; lamb.vy = 0; trail.length = 0; baa(lamb.x, 1);
+      k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 460; setCrit(k, "hunt");
+    }
+    return;
+  }
+  if (k.state === "hunt" && k.t > 0.6 && (k.alpha === undefined || k.alpha >= 1) && !lamb.carried && !lamb.stolen && david.deadT <= 0 && Math.abs(lamb.y - k.y) < 30) {   // (not the instant it comes in)
+    const ahead = (lamb.x - k.x) * k.facing;
+    if (ahead > W2.WOLF_LAMB_AHEAD - 16 && ahead < W2.WOLF_LAMB_AHEAD + 16) {
+      k.x = lamb.x - k.facing * W2.WOLF_LAMB_AHEAD; k.vx = 0; lamb.stolen = true; baa(lamb.x, 1); setCrit(k, "grab");
+      toast("A wolf has your lamb! Chase it and hit it with a stone, and it'll let her go."); sfx("wolf_growl", k.x, 0.7);
+      return;
+    }
+  }
   if (k.state === "hunt") {
     if (k.lurk && k.alpha < 1) k.alpha = Math.min(1, k.alpha + dt * 2.5);   // (fading in where it had to come in on screen)
     k.facing = Math.sign(dx) || k.facing;
@@ -840,7 +865,10 @@ function updateWolf(k, dx, sameLevel, dt) {
   if (k.state === "pass") { runCritter(k, W2.WOLF_RUN, dt); if (k.t > 0.9) setCrit(k, "hunt"); return; }   // runs on past, then wheels round
   if (k.state === "wait") { fall(); k.facing = Math.sign(dx) || k.facing; if (k.t > 1.0) setCrit(k, "hunt"); }
 }
+const wolfGrabTime = () => SPR.wolf_grab ? SPR.wolf_grab.frames * SPR.wolf_grab.ms / 1000 : 1;
 function stoneHitsWolf(k, s) {
+  if (k.state === "drop") return false;   // already letting her go: the stone flies on
+  if (k.state === "grab" || k.state === "steal" || k.state === "hold") { setCrit(k, "drop"); k.vx = 0; stoneHit(s); toast("The wolf let go of your lamb!"); return !s.power; }
   k.gone = true; k.facing = Math.sign(k.x - david.x) || 1; k.vx = k.facing * 460; stoneHit(s);
   toast("Wolf driven off!"); return !s.power;
 }
@@ -849,6 +877,12 @@ function drawWolf(k, x) {
   if (k.state === "idle") { name = "wolf_sit"; i = frameOf(name, k.t); }
   else if (k.state === "rise") { name = "wolf_stand_up"; i = Math.max(0, Math.min(SPR[name].frames - 1, Math.floor(k.t * 1000 / SPR[name].ms))); }
   else if (k.state === "wait") { name = "wolf_walk"; i = 0; }
+  else if (k.state === "grab" || k.state === "drop") {   // the lamb hopping up into its mouth; backwards, setting her down
+    name = "wolf_grab"; const n = SPR[name].frames, f = Math.min(n - 1, Math.floor(k.t * 1000 / SPR[name].ms));
+    i = k.state === "grab" ? f : n - 1 - f;
+  }
+  else if (k.state === "hold") { name = "wolf_grab"; i = SPR[name].frames - 1; }
+  else if (k.state === "steal") { name = "wolf_run_lamb"; i = frameOf(name, k.t); }
   else i = frameOf(name, k.t);
   drawSprite(name, i, x, k.y, k.facing, 1, k.alpha);
 }

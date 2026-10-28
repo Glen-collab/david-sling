@@ -1,0 +1,25 @@
+{
+ "frames": 12,
+ "frame_w": 291,
+ "frame_h": 152,
+ "ms_per_frame": 100,
+ "loop": false,
+ "align": "feet",
+ "anchor_x": 186,
+ "anchor_y": 151,
+ "source": "b.mp4",
+ "video_frames": [
+  84,
+  89,
+  94,
+  99,
+  104,
+  109,
+  115,
+  120,
+  125,
+  130,
+  135,
+  140
+ ]
+}

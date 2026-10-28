@@ -3156,6 +3156,7 @@ function respawn() {
   d.x = checkpoint.x; d.y = checkpoint.y; d.vx = d.vy = 0; d.hearts = d.maxHearts; d.inv = 1; d.deadT = 0; setState("idle");
   lamb.x = d.x - 50; lamb.y = d.y;
   if (lamb.stolen) for (const k of critters) if (k.kind === "jackal" && (k.state === "flee" || k.state === "wait")) Object.assign(k, { x: k.home, state: "idle", t: 0 });
+  if (lamb.stolen) for (const k of critters) if (k.kind === "wolf" && ["grab", "steal", "hold", "drop"].includes(k.state)) Object.assign(k, { gone: true, alpha: 0, state: "hunt" });   // (world2.js: a wolf ran off with her)
   lamb.stolen = false;
   if (lion && !rescuedLamb) resetLion();
   sheepToCheckpoint();
