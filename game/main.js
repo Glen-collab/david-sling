@@ -3820,7 +3820,7 @@ function updateFinish(dt) {
   const allIn = finish.flock.every(s => s.state === "in");
   if (finish.phase === "land" && d.onGround) { finish.phase = "open"; finish.t = 0; if (finish.flock.length > 1) sfx("flock_baa", undefined, 0.7); }
   if (finish.phase === "open") { finish.gateOpen = Math.min(1, finish.t / 0.7); if (allIn && finish.t > 1) { finish.phase = "close"; finish.t = 0; } }
-  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.phase = "clear"; finish.t = 0; hushLoops(true); finish.jingle = LEVEL_STAGE === "8-4" ? null : sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
+  if (finish.phase === "close") { finish.gateOpen = Math.max(0, 1 - finish.t / 0.7); if (finish.t > 1.2) { finish.t = 0; hushLoops(true); finish.jingle = LEVEL_STAGE === "8-4" ? null : sfx(SFX.ending_jingle_levels && !SFX.ending_jingle_levels.missing ? "ending_jingle_levels" : "stage_clear", undefined, 0.9); finish.phase = "clear"; if (clearHush()) for (const a of allAudio) if (a !== finish.jingle && !a.paused) a.pause(); } }   // the stage-clear jingle (Glen's ending_jingle_levels; the lyre stand-in if it's missing), the harp and hills quiet under it
   if (finish.phase === "clear" && finish.t > 1 && (pressed("a") || pressed("b") || pressed("start"))) {
     // David writes in his Journal, then the stage starts again (until the map exists)
     saveStones(LEVEL_STAGE, specials.filter(o => o.taken).length);
@@ -4576,10 +4576,17 @@ const allAudio = new Set(); let audioHeld = null;
   HTMLMediaElement.prototype.play = function () {
     if (!(this instanceof HTMLVideoElement)) {
       allAudio.add(this);
+      if (typeof clearHush === "function" && clearHush() && this !== finish.jingle) return Promise.resolve();   // the stage-clear screen: only its jingle
       if (audioHeld && !(typeof Menu !== "undefined" && Menu.playing)) return Promise.resolve();
     }
     return play.apply(this, arguments);
   };
+}
+// (Glen, 2026-10-28: "I hear the birds still after the stage clear... all sounds should stop like a pause screen") on the
+// "Stage clear!" panel nothing plays but the jingle: no birds, rain, baas or loops, until the Journal or the map takes over.
+// (Not 8-4: its ending has its own music.)
+function clearHush() {
+  return finish.active && finish.phase === "clear" && LEVEL_STAGE !== "8-4" && !Journal.active && !Menu.active && !WorldMap.active && !Courtyard.active && !(typeof credits8 !== "undefined" && credits8.active);
 }
 function holdAllAudio() {
   if (audioHeld) return;
@@ -4703,7 +4710,7 @@ for (const n of ["heart_full", "heart_half", "heart_empty", "flask_empty", "flas
 function hudIcon(name, x, y, h, alpha = 1) {   // top-left at x,y, scaled to height h; returns its width
   const img = HUD[name]; if (!img || !img.naturalWidth) return h;
   const w = img.naturalWidth * h / img.naturalHeight;
-  ctx.save(); ctx.globalAlpha = alpha; ctx.drawImage(img, x, y, w, h); ctx.restore();
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.drawImage(img, x, y, w, h); ctx.restore();   // (multiplies, so a fading panel fades its icon too)
   return w;
 }
 function hudText(t, x, y, size = 20) {

@@ -651,3 +651,9 @@ the harp phrase at 3-2's campfire.
   under VILLAGER_STRIDE (that assumes one stride per sheet). Still on old 4-frame sheets: staffman.
   + villager_staffman_run from Glen's clip (12 x 270x325, --max-loop 0.8). The staff leaves his hand in some frames;
   Glen cleaned that up in Photoshop on the sheet itself (same 12 x 270 frame grid, 2026-10-28). Every 5-1 villager is now from video.
+- **5-1 end: floating sheep head; stage clear goes quiet** (Glen, 2026-10-28): the father's last line holds the
+  "Stage clear!" panel at alpha 0 until A, and hudIcon set globalAlpha outright, so the panel's sheep icon showed
+  alone in the sky. hudIcon now multiplies the current alpha. And "all sounds should stop like a pause screen" on the
+  clear panel: clearHush() (main.js) is true on the clear phase (not 8-4, and not once the Journal/menu/map/credits are
+  up); entering it pauses every audio but finish.jingle, and the play() gate refuses anything else while it holds.
+  Tested with real audio: theme, birds and baas playing before; only the jingle 2 s into the clear, baas still being fired.
