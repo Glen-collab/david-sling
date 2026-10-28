@@ -650,4 +650,4 @@ the harp phrase at 3-2's campfire.
   braidgirl: --max-loop 0.8, because the loop search otherwise picks two strides, which would double their legs
   under VILLAGER_STRIDE (that assumes one stride per sheet). Still on old 4-frame sheets: staffman.
   + villager_staffman_run from Glen's clip (12 x 270x325, --max-loop 0.8). The staff leaves his hand in some frames;
-  Glen is cleaning that up in Photoshop on the sheet itself (same 12 x 270 frame grid). Every 5-1 villager is now from video.
+  Glen cleaned that up in Photoshop on the sheet itself (same 12 x 270 frame grid, 2026-10-28). Every 5-1 villager is now from video.
