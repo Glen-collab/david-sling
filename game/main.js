@@ -1203,10 +1203,12 @@ if (LEVEL_NAME === "test") {
   // The One, on the highest vineyard terrace; and higher still, a ledge with the cheese (a long jump up)
   rock(136, 15, 3, 2); rock(139, 13, 3, 4); rock(142, 11, 5, 6); lostSheep("lamb", 145, 10, "one"); special(143, 7);
   rock(149, 7, 2, 1); lostGift("cheese", 149, 6);
+  rock(148, 14, 2, 3);                                           // a step back up the terrace from this side (Glen: going back for the donkey without the double jump); too low to reach the cheese from
   oliveRow(152, 16, 4); critter("dove", 156); critter("dove", 158);
   for (const c of [163, 167]) critter("crow", c, GR - 1);
   // gift: the honey, inside an outcrop whose loose stone is at the far (right) end: look back after you climb over
   rock(171, 15, 2, 2); rock(173, 12, 9, 5); fakeRock(180, 13, 2, 4); block(178, 13, 2, 4, 0); lostGift("honey", 178, 16);
+  rock(184, 15, 2, 2);                                           // a step back up it from this side (Glen: going back for a spooked donkey, a plain jump can't clear 5 tiles); 2 tiles out, so the loose stone stays open at the ground
   critter("boar", 188, GR - 1, 10);
   oliveArc(194, 16, 6);
   campfire(200);

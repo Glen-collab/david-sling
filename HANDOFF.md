@@ -698,3 +698,8 @@ the harp phrase at 3-2's campfire.
   moment and gets back up with the same frames backwards (bearDazedFrame), over BEAR_DAZED, now 1.8 s (was 3.0, room
   for three charged stones). Its box while down is 110 tall (was 150). A last stone on a dazed bear carries on into
   bear_fall from the matching frame (BEAR_DAZED_FROM + its frame), no blend needed.
+- **4-1 step stones for going back** (2026-10-29). Glen finished the road, remembered the spooked donkey, went back, and
+  without the double jump couldn't get back up the honey outcrop (5 tiles; a plain jump peaks at about 4.9). Added
+  rock(184, 15, 2, 2) on its right side, 2 tiles out so the loose stone stays open at the ground, and rock(148, 14, 2, 3)
+  on the right of The One's terrace (6 tiles, the same trap). Going forward is unchanged. From the terrace step the
+  cheese ledge is still out of reach (a jump tops out at row 10.7; the ledge's underside is row 8).
