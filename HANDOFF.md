@@ -717,3 +717,5 @@ the harp phrase at 3-2's campfire.
   lookout_point). lookoutPose() picks the sheet and frame. spot = look for SPOT_LOOK of SPOT_T, then point. Walk and run
   frames go by distance (LOOKOUT_STRIDE sheet px per cycle, checked against his planted foot), so the feet don't slide.
   He carries the torch low now, and LOOKOUT_TORCH has the flame per sheet (the light and the torch hit start there).
+- **lookout_dark: Glen's touch-up** (2026-10-30). Glen repainted the skirt and back leg where the flame was taken off.
+  Same 200x345 frame and feet, so the json is unchanged.
