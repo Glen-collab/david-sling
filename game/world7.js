@@ -1206,13 +1206,15 @@ const w7ending = {
   },
   draw() {
     const B = this.beats[this.i], now = performance.now() / 1000;
-    drawBackground(sb ? sb.a0 : 0);
+    // (Glen, 2026-10-30) the stage's own ground under them (it was a flat brown box), and Glen's shield lying in the dust
+    // (it was the placeholder bar, which looked like a health meter on the ground)
+    const cx = sb ? sb.a0 : 0, y = GR * T;
+    drawBackground(cx); drawTiles(cx);
     ctx.fillStyle = "rgba(30,18,10,0.35)"; ctx.fillRect(0, 0, W, H);
-    const y = GR * T;
-    ctx.fillStyle = "rgba(70,52,34,0.9)"; ctx.fillRect(0, y, W, H - y);
     drawSprite("david_idle", frameOf("david_idle", now), W * 0.22, y, 1);
     if (SPR.goliath_yell) drawSprite("goliath_yell", 0, W * 0.8, y, -1, W7.GOLIATH_SIZE);
-    drawFallenShield(W * 0.5, 1);
+    if (ITEM.sb_shield && ITEM.sb_shield.naturalWidth && SPR.sb_drop) drawItem("sb_shield", W * 0.5, y + 4, W7.SB_SHIELD_AT[2] * SCALE * W7.SB_SPR * (TUNE.SPRITE_SIZE.sb_drop || 1));
+    else drawFallenShield(W * 0.5, 1);
     if (B.card) {
       const pw = 900, ph = 470, px = (W - pw) / 2, py = 60;
       ctx.save(); ctx.fillStyle = "rgba(244,230,200,0.96)"; ctx.strokeStyle = "#6b4a24"; ctx.lineWidth = 4;

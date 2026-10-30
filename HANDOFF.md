@@ -733,3 +733,7 @@ the harp phrase at 3-2's campfire.
   Preview: `game previews/6-2_striped_soldier_head_size.jpg`.
 - **7-1: the lamb's helmet** (2026-10-30). Glen: higher and a little bigger. `W7.LAMB_HELM` [1,-43,15] -> [-2,-62,18]:
   the bowl now sits on its head with its nose poking out the front. Preview: `game previews/7-1_lamb_helmet_up_on_its_head.jpg`.
+- **7-4 ending: no ground, and a "health meter"** (2026-10-30). The end-of-World-7 scene (w7ending) painted a flat
+  brown box for the ground and used drawFallenShield's placeholder bar for the shield, which read as a health bar.
+  It now draws the stage's own background and ground (`drawTiles` at the arena) and Glen's `sb_shield` lying flat
+  between David and Goliath, at the size it is in the fight. Preview: `game previews/7-4_ending_ground_and_shield.jpg`.
