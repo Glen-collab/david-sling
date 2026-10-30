@@ -610,7 +610,19 @@ if (LEVEL_STAGE === "5-3") Object.assign(W1, { CLOUD_EVERY: 9, CLOUD_TIME: 3.5, 
 const cloudNow = () => { const k = (performance.now() / 1000) % W1.CLOUD_EVERY; return k < W1.CLOUD_TIME ? Math.sin(Math.PI * k / W1.CLOUD_TIME) : 0; };
 const fireAt = c => setPieces.find(p => p.kind === "signalfire" && p.c === c);
 const lookouts = setPieces.filter(p => p.kind === "lookout").map(p => ({ hx: p.x, x: p.x, y: (p.r + 1) * T, face: p.face || -1, patrol: (p.patrol || 0) * T,
-  fireX: p.fire ? p.fire * T + T / 2 : null, fireLit: false, fireT: 0, state: "watch", t: Math.random() * 3, turnT: 0, torch: true, seenOnce: false }));
+  fireX: p.fire ? p.fire * T + T / 2 : null, fireLit: false, fireT: 0, state: "watch", t: Math.random() * 3, turnT: 0, torch: true, seenOnce: false,
+  deck: (t => t ? { x0: t.c * T, x1: (t.c + 4) * T } : null)(setPieces.find(q => q.kind === "tower" && q.r === p.r + 1 && p.c >= q.c && p.c < q.c + 4)), vy: 0 }));
+// (Glen, 2026-10-30) the tower man ran off his deck and on through the air to his fire. Now he hops down off the end of
+// the deck and drops to the ground, runs and lights it, and keeps watch from the foot of his tower after that.
+function lookoutFall(L, dt) {   // true while he's in the air
+  const onDeck = L.deck && L.x >= L.deck.x0 && L.x < L.deck.x1 && L.y <= L.deckY, floor = onDeck ? L.deckY : GR * T;
+  if (L.y >= floor && !L.vy) return false;
+  if (!L.vy) L.vy = -220;   // off the end of the deck: a little hop out, then down
+  L.vy += 2200 * dt; L.y += L.vy * dt;
+  if (L.y >= floor) { L.y = floor; L.vy = 0; return false; }
+  return true;
+}
+for (const L of lookouts) if (L.deck) L.deckY = L.y;
 let seenOnRidge = false;
 // the torch flame on each sheet, sheet px from his feet when he faces right (he carries it low, at his hip)
 const LOOKOUT_TORCH = { lookout_watch: [34, -100], lookout_walk: [34, -91], lookout_look: [12, -101], lookout_point: [32, -109], lookout_run: [0, -140] };
@@ -621,6 +633,7 @@ function lookoutPose(L) {   // which sheet and frame he's on (the drawing and th
     return k < look ? ["lookout_look", Math.min(7, Math.floor(k / look * 8))] : ["lookout_point", Math.min(7, Math.floor((k - look) / (1 - look) * 8))];
   }
   const step = nm => [nm, SPR[nm] ? Math.floor((L.dist || 0) / (LOOKOUT_STRIDE[nm] * SCALE * W5.LOOKOUT_SIZE / SPR[nm].frames)) % SPR[nm].frames : 0];
+  if (L.vy) return ["lookout_run", 2];   // hopping down off the tower
   if (L.state === "run" || L.state === "back") return step("lookout_run");
   if (L.patrol) return step("lookout_walk");
   return ["lookout_watch", frameOf("lookout_watch", L.t)];
@@ -659,13 +672,15 @@ function updateLookouts(dt) {
         else { if (!L.called) { L.called = true; raidersCome(); } L.state = "watch"; L.t = 0; L.cool = 4; }   // one wave per lookout
       }
     } else if (L.state === "run") {   // to the brushwood pile, and lights it
-      L.face = Math.sign(L.fireX - L.x) || 1; L.x += L.face * 300 * dt; L.dist = (L.dist || 0) + 300 * dt;
+      L.face = Math.sign(L.fireX - L.x) || 1; L.x += L.face * (L.vy ? 150 : 300) * dt;   // (slower through the air: down, not across)
+      if (lookoutFall(L, dt)) continue; L.dist = (L.dist || 0) + 300 * dt;
       if (Math.abs(L.fireX - L.x) < 24) {
         L.fireLit = true; L.fireT = 0; L.called = true; sfx("thunder_3", L.fireX, 0.25, 1.8); raidersCome();
         toast("The signal fire is lit! Raiders are coming. Stand your ground, or keep going.");
         L.state = "back"; L.t = 0;
       }
     } else if (L.state === "back") {
+      if (L.deck && L.y > L.deckY) L.hx = L.deck.x1 + T;   // down off the tower now: he keeps watch from its foot (by the ladder)
       L.face = Math.sign(L.hx - L.x) || 1; L.x += L.face * 160 * dt; L.dist = (L.dist || 0) + 160 * dt;
       if (Math.abs(L.hx - L.x) < 10) { L.x = L.hx; L.state = "watch"; L.t = 0; L.turnT = 0; L.face = -1; L.cool = 4; }
     }
@@ -696,8 +711,11 @@ function drawLookouts(camX) {
   for (const p of setPieces) if (p.kind === "signalfire") {
     const x = p.x - camX; if (x < -200 || x > W + 200) continue;
     const L = lookouts.find(q => q.fireX && Math.abs(q.fireX - p.x) < T);
-    let i = 0; if (L && L.fireLit) i = L.fireT < 0.4 ? 1 : L.fireT < 0.9 ? 2 : 3 + Math.floor(now * 8) % 2;
-    drawSprite("signal_fire", i, x, (p.r + 1) * T + 6, 1, 0.8);
+    // (Glen, 2026-10-30) once it's roaring it holds the tall flame: frames 3 and 4 (a wind-blown one) flipping looked like
+    // skipped frames. The flicker is in its brightness and a slight breathing of its height now.
+    let i = 0; if (L && L.fireLit) i = L.fireT < 0.4 ? 1 : L.fireT < 0.9 ? 2 : 3;
+    const fl = i === 3 ? Math.sin(now * 11) * 0.5 + Math.sin(now * 17.3 + 1) * 0.5 : 0;
+    drawSprite("signal_fire", i, x, (p.r + 1) * T + 6, 1, 0.8 * (1 + fl * 0.025), 1, i === 3 ? `brightness(${(1.04 + fl * 0.08).toFixed(3)})` : "");
   }
   for (const L of lookouts) {
     const x = L.x - camX; if (x < -300 || x > W + 300) continue;

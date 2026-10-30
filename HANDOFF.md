@@ -719,3 +719,10 @@ the harp phrase at 3-2's campfire.
   He carries the torch low now, and LOOKOUT_TORCH has the flame per sheet (the light and the torch hit start there).
 - **lookout_dark: Glen's touch-up** (2026-10-30). Glen repainted the skirt and back leg where the flame was taken off.
   Same 200x345 frame and feet, so the json is unchanged.
+- **5-3: the tower lookout floated to his fire** (2026-10-30). Spotted, he ran straight off his deck at deck height to the
+  signal fire on the ground. Lookouts on a tower deck (`L.deck`, found from the tower setPiece) now hop off the end of
+  the deck by the ladder and drop with gravity (`lookoutFall`, slower across while in the air), run to the fire, and
+  afterwards keep watch from the tower's foot (deck end + 1 tile) instead of floating back up. Preview:
+  `game previews/5-3_tower_lookout_hops_down.jpg`.
+- **Signal fires flickered like skipped frames** (2026-10-30). Once roaring it flipped between frames 3 (tall flame) and
+  4 (a wind-blown one) at 8 fps. It now holds frame 3 and flickers by brightness and a slight breathing of its size.
