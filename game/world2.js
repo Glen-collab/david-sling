@@ -131,6 +131,7 @@ function drawCampfirePeople(camX) {
   }
   // people who speak as David passes (talk() in main.js) and have art: standing there, facing him
   const ART = { Eliab: ["eliab_arms_crossed", "eliab_arms_crossed"], Shammah: ["shammah_idle", "shammah_talk"], Abinadab: ["abinadab_idle", "abinadab_point"], Jesse: ["jesse_idle", "jesse_talk"], ...(WORLD === 7 ? { Tobi: ["tobi_talk", "tobi_talk"] } : {}), ...(WORLD === 8 ? { Tobi: ["tobi_talk", "tobi_talk"], Hanan: ["hanan_idle", "hanan_talk"], Gera: ["gera", "gera"], "The Steward": ["steward", "steward"], "The shepherd girl": ["girl_talk", "girl_talk"], "The boy from Tekoa": ["boy_idle", "boy_talk"], "His father": ["father_idle", "father_talk"], "The old gleaner": ["gleaner_idle", "gleaner_talk"], "The water captain": ["captain_idle", "captain_talk"] } : {}) };   // (World 8: everyone on the path home)   // (World 5 draws Tobi itself)
+  const POSE_SHEETS = { "The Steward": { idle: 3, talk: [1, 5] }, Gera: { idle: 5, talk: [1, 4] } };   // facing left: standing pose, and the two he moves between while talking (world4.js)
   // one of each person: he stands at his next line not yet said (or his last), and once he's said one he walks on
   // ahead to the next spot (2-1: Abinadab warns of the pigs, then goes on up the trail)
   const ppl = talks.ppl || (talks.ppl = {}), dt = Math.min(0.05, now - (talks.pplT ?? now)); talks.pplT = now;
@@ -146,7 +147,11 @@ function drawCampfirePeople(camX) {
     p.t += dt;
     const x = p.x - camX; if (x < -200 || x > W + 200) continue;
     const nm = walking ? walkNm : talking ? ART[who][1] : ART[who][0];
-    drawSprite(nm, frameOf(nm, walking ? p.t : now), x, GR * T, walking ? Math.sign(gap) : Math.sign(david.x - p.x) || -1);
+    // (Glen, 2026-10-30) the Steward's and Gera's sheets face left (the others face right), and they're sheets of poses,
+    // not loops: they had their backs to David as he came up, and flicked through every pose
+    const P = POSE_SHEETS[who], face = (walking ? Math.sign(gap) : Math.sign(david.x - p.x) || -1) * (P ? -1 : 1);
+    const fr = P ? (talking ? P.talk[Math.floor(now * 1.1) % 2] : P.idle) : frameOf(nm, walking ? p.t : now);
+    drawSprite(nm, fr, x, GR * T, face);
   }
 }
 

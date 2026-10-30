@@ -740,3 +740,9 @@ the harp phrase at 3-2's campfire.
 - **8-1: "Answer him" / "A: next" moved to the bottom right** (2026-10-30). In David's answer (drawWords8Over) the A
   prompt was a pill under the words, in the middle of the valley. Glen: keep it bottom right like everywhere else. It is
   now a dark pill in the bottom-right corner; the darkened band behind his words stays (Glen: easier to read).
+- **8-4: the Steward and Gera had their backs to David** (2026-10-30). world2.js draws the path-home people assuming
+  every sheet faces right; the Steward's and Gera's face left, so each stood facing away as David came up and only
+  turned once he'd passed. They were also run through frameOf, flicking through all six poses on their sheets.
+  `POSE_SHEETS` (world2.js) now flips those two and gives them proper poses: Steward hands folded (3), talking/smile
+  (1, 5); Gera arms crossed (5), talking/laughing (1, 4). All other 8-4 sheets checked: they face right.
+  Preview: `game previews/8-4_steward_and_gera_face_david.jpg`.
