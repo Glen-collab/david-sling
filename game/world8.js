@@ -248,7 +248,11 @@ function drawWords8Over() {   // David's answer, big across the valley, line by 
     };
     pill("David", 116, "bold 22px Georgia, serif", "#ffd27a", "rgba(20,12,4,0.72)");
     const pulse = 0.8 + 0.2 * Math.sin(performance.now() / 250);
-    pill(keyText(w.line < 0 ? "Answer him. Press A." : "A: next"), 340, "bold 22px sans-serif", `rgba(255,236,190,${pulse})`, "rgba(20,12,4,0.72)");
+    // (Glen, 2026-10-30) the A goes bottom right, where it is in every other scene, not in the middle of the valley
+    const hint = keyText(w.line < 0 ? "Answer him. Press A." : "A: next");
+    ctx.font = "bold 20px sans-serif"; const hw = ctx.measureText(hint).width + 32;
+    ctx.fillStyle = "rgba(20,12,4,0.72)"; ctx.beginPath(); ctx.roundRect(W - 24 - hw, H - 58, hw, 34, 17); ctx.fill();
+    ctx.fillStyle = `rgba(255,236,190,${pulse})`; ctx.fillText(hint, W - 24 - hw / 2, H - 34);
   }
   ctx.restore(); ctx.textAlign = "left";
 }

@@ -737,3 +737,6 @@ the harp phrase at 3-2's campfire.
   brown box for the ground and used drawFallenShield's placeholder bar for the shield, which read as a health bar.
   It now draws the stage's own background and ground (`drawTiles` at the arena) and Glen's `sb_shield` lying flat
   between David and Goliath, at the size it is in the fight. Preview: `game previews/7-4_ending_ground_and_shield.jpg`.
+- **8-1: "Answer him" / "A: next" moved to the bottom right** (2026-10-30). In David's answer (drawWords8Over) the A
+  prompt was a pill under the words, in the middle of the valley. Glen: keep it bottom right like everywhere else. It is
+  now a dark pill in the bottom-right corner; the darkened band behind his words stays (Glen: easier to read).
