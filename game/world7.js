@@ -22,7 +22,7 @@ const W7 = {
   STUCK_T: 1.4,          // seconds pushing against something before the "take it off" reminder
   SAUL_SIZE: 1.0,
   LAMB_SIZE: 1.5,        // the opening scene (w7intro): the lamb in Saul's spare helmet
-  LAMB_HELM: [1, -43, 15],
+  LAMB_HELM: [-2, -62, 18],   // (Glen, 2026-10-30: up onto its head and a little bigger; it sat low over its chest)
   LAMB_HELM_IMG: [50, 62, 3.2],   // Glen's david_helmet on the lamb: the point of the image (px) that sits on LAMB_HELM, and its width x the helmet radius
   PAIR_SAUL: 40,         // saul_dress / saul_off (Glen's two-person tent clips): Saul's feet, sheet px right of the anchor,
   PAIR_DAVID: 105,       //   and David's, left of it // the helmet on its head: x, y from its feet and radius, in lamb_walk's own px

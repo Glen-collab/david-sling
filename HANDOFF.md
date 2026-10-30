@@ -726,3 +726,10 @@ the harp phrase at 3-2's campfire.
   `game previews/5-3_tower_lookout_hops_down.jpg`.
 - **Signal fires flickered like skipped frames** (2026-10-30). Once roaring it flipped between frames 3 (tall flame) and
   4 (a wind-blown one) at 8 fps. It now holds frame 3 and flickers by brightness and a slight breathing of its size.
+- **6-2: the striped soldier shrank as he stood up** (2026-10-30). Measured soldier5's head (crown to beard tip, and
+  across the headband) on every frame: seated (fear 0-4) it was ~15% bigger than on his walk (soldier5_go), it dipped
+  to walk size or smaller on fear 6-9, and grew again on 10-11. `FEAR_FRAME_SIZE.soldier5_fear` (world6.js) now sizes
+  each frame so his head stays the size it is on his walk. Soldiers 2-4 checked by eye and are consistent.
+  Preview: `game previews/6-2_striped_soldier_head_size.jpg`.
+- **7-1: the lamb's helmet** (2026-10-30). Glen: higher and a little bigger. `W7.LAMB_HELM` [1,-43,15] -> [-2,-62,18]:
+  the bowl now sits on its head with its nose poking out the front. Preview: `game previews/7-1_lamb_helmet_up_on_its_head.jpg`.

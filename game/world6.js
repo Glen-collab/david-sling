@@ -77,6 +77,9 @@ function updateFearful(dt) {
   }
 }
 Object.assign(TUNE.SPRITE_SIZE, { soldier2_fear: 0.8, soldier2_go: 0.88 });   // Glen: the second man (helmet, arms round his knees) sat nearly as tall as David
+// (Glen, 2026-10-30) the striped man's head was bigger sitting than walking, shrank as he stood (frames 6-9), then grew
+// again. Each frame's size here evens his head out to his walk (measured crown to beard tip and across the headband).
+const FEAR_FRAME_SIZE = { soldier5_fear: [0.9, 0.9, 0.9, 0.9, 0.9, 0.92, 0.97, 1.06, 1.03, 1.0, 0.95, 0.95] };
 function drawFearful(camX) {
   const now = performance.now() / 1000;
   for (const s of fearful) {
@@ -87,7 +90,7 @@ function drawFearful(camX) {
     if (SPR[man + "_fear"]) {   // Glen's five men, each his own clip: _fear 0 hiding ... 11 standing; _go walking back to his post
       if (s.state === "go") { drawSprite(man + "_go", frameOf(man + "_go", now), x, s.y, s.dir, 1, s.alpha); continue; }
       const fr = s.state === "rise" ? Math.min(11, 2 + Math.floor(s.t / 2.4 * 10)) : s.song > 0.2 ? 1 : 0;
-      drawSprite(man + "_fear", fr, x + (fr === 0 && Math.abs(david.x - s.x) > 3 * T ? Math.sin(now * 40) * 1.2 : 0), s.y, s.dir, 1, 1); continue;
+      drawSprite(man + "_fear", fr, x + (fr === 0 && Math.abs(david.x - s.x) > 3 * T ? Math.sin(now * 40) * 1.2 : 0), s.y, s.dir, (FEAR_FRAME_SIZE[man + "_fear"] || [])[fr] || 1, 1); continue;
     }
     if (s.state === "go") { drawSprite(SPR.soldier_walk ? "soldier_walk" : "soldier_run", frameOf(SPR.soldier_walk ? "soldier_walk" : "soldier_run", now), x, s.y, s.dir, 1, s.alpha, f); continue; }
     if (SPR.soldier_fear) {   // Glen's frightened soldier: 0 curled up, 1 peeking, 2 listening, 3 standing up, 4 spear up, 5 a nod
