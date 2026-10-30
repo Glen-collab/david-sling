@@ -600,17 +600,32 @@ function drawLeopardEyes(camX) {   // main.js, after the night tint: two eyes sh
 //   critter("gazelle", c)          harmless: grazes, bounds away when David comes close
 //   setPiece("tobistart", c)       Tobi, already with David, following
 // ===========================================================================
-Object.assign(W5, { CONE_LEN: 8, CONE_HALF: 0.42, CONE_CLOUD: 0.3, SPOT_T: 1.3, LOOK_TURN: 5, PATROL_WALK: 70, CAIRN_T: 0.6,
+Object.assign(W5, { CONE_LEN: 8, CONE_HALF: 0.42, CONE_CLOUD: 0.3, SPOT_T: 1.3, SPOT_LOOK: 0.45, LOOK_TURN: 5, PATROL_WALK: 70, CAIRN_T: 0.6,
   LOOKOUT_SIZE: 1.15, GAZELLE_SPOOK: 6 });
-for (const n of ["lookout_watch", "lookout_spot", "lookout_run", "lookout_walk"]) TUNE.SPRITE_SIZE[n] = W5.LOOKOUT_SIZE;
+for (const n of ["lookout_watch", "lookout_look", "lookout_point", "lookout_run", "lookout_walk", "lookout_dark"]) TUNE.SPRITE_SIZE[n] = W5.LOOKOUT_SIZE;
+// (Glen, 2026-10-30) his grass-skirt lookout, all from two clips: one man now (the walk was a different outfit). The walk
+// and the run step with the ground (frames by distance, LOOKOUT_STRIDE px of sheet per full cycle), so the feet don't slide.
+const LOOKOUT_STRIDE = { lookout_walk: 205, lookout_run: 315 };
 if (LEVEL_STAGE === "5-3") Object.assign(W1, { CLOUD_EVERY: 9, CLOUD_TIME: 3.5, CLOUD_DARK: 0.4 });   // clouds pass more often up here
 const cloudNow = () => { const k = (performance.now() / 1000) % W1.CLOUD_EVERY; return k < W1.CLOUD_TIME ? Math.sin(Math.PI * k / W1.CLOUD_TIME) : 0; };
 const fireAt = c => setPieces.find(p => p.kind === "signalfire" && p.c === c);
 const lookouts = setPieces.filter(p => p.kind === "lookout").map(p => ({ hx: p.x, x: p.x, y: (p.r + 1) * T, face: p.face || -1, patrol: (p.patrol || 0) * T,
   fireX: p.fire ? p.fire * T + T / 2 : null, fireLit: false, fireT: 0, state: "watch", t: Math.random() * 3, turnT: 0, torch: true, seenOnce: false }));
 let seenOnRidge = false;
-const LOOKOUT_TORCH = [75, -277];   // the torch flame on lookout_watch, sheet px from his feet when he faces right
-function torchPos(L) { const s = SCALE * W5.LOOKOUT_SIZE; return { x: L.x + L.face * LOOKOUT_TORCH[0] * s, y: L.y + LOOKOUT_TORCH[1] * s }; }
+// the torch flame on each sheet, sheet px from his feet when he faces right (he carries it low, at his hip)
+const LOOKOUT_TORCH = { lookout_watch: [34, -100], lookout_walk: [34, -91], lookout_look: [12, -101], lookout_point: [32, -109], lookout_run: [0, -140] };
+function lookoutPose(L) {   // which sheet and frame he's on (the drawing and the torch light both use it)
+  if (!L.torch) return ["lookout_dark", 0];   // shading his eyes in the dark, the torch gone
+  if (L.state === "spot") {   // shades his eyes, then points and shouts
+    const k = L.t / W5.SPOT_T, look = W5.SPOT_LOOK;
+    return k < look ? ["lookout_look", Math.min(7, Math.floor(k / look * 8))] : ["lookout_point", Math.min(7, Math.floor((k - look) / (1 - look) * 8))];
+  }
+  const step = nm => [nm, SPR[nm] ? Math.floor((L.dist || 0) / (LOOKOUT_STRIDE[nm] * SCALE * W5.LOOKOUT_SIZE / SPR[nm].frames)) % SPR[nm].frames : 0];
+  if (L.state === "run" || L.state === "back") return step("lookout_run");
+  if (L.patrol) return step("lookout_walk");
+  return ["lookout_watch", frameOf("lookout_watch", L.t)];
+}
+function torchPos(L) { const s = SCALE * W5.LOOKOUT_SIZE, o = LOOKOUT_TORCH[lookoutPose(L)[0]] || LOOKOUT_TORCH.lookout_watch; return { x: L.x + L.face * o[0] * s, y: L.y + o[1] * s }; }
 function coneDrop(L, tp) { return Math.max(0, GR * T - 50 - tp.y); }   // how far the beam falls over its length (to David's middle on the ground)
 function coneLen(L) { return W5.CONE_LEN * T * (1 - (1 - W5.CONE_CLOUD) * cloudNow()); }
 function inCone(L) {
@@ -626,7 +641,7 @@ function updateLookouts(dt) {
     if (!L.torch) continue;
     if (L.state === "watch") {
       if (L.patrol) {   // Glen's walking lookout: up and down his stretch
-        L.x += L.face * W5.PATROL_WALK * dt;
+        L.x += L.face * W5.PATROL_WALK * dt; L.dist = (L.dist || 0) + W5.PATROL_WALK * dt;
         if (Math.abs(L.x - L.hx) > L.patrol) { L.x = L.hx + Math.sign(L.x - L.hx) * L.patrol; L.face = -L.face; }
       } else {
         L.turnT += dt;
@@ -644,14 +659,14 @@ function updateLookouts(dt) {
         else { if (!L.called) { L.called = true; raidersCome(); } L.state = "watch"; L.t = 0; L.cool = 4; }   // one wave per lookout
       }
     } else if (L.state === "run") {   // to the brushwood pile, and lights it
-      L.face = Math.sign(L.fireX - L.x) || 1; L.x += L.face * 300 * dt;
+      L.face = Math.sign(L.fireX - L.x) || 1; L.x += L.face * 300 * dt; L.dist = (L.dist || 0) + 300 * dt;
       if (Math.abs(L.fireX - L.x) < 24) {
         L.fireLit = true; L.fireT = 0; L.called = true; sfx("thunder_3", L.fireX, 0.25, 1.8); raidersCome();
         toast("The signal fire is lit! Raiders are coming. Stand your ground, or keep going.");
         L.state = "back"; L.t = 0;
       }
     } else if (L.state === "back") {
-      L.face = Math.sign(L.hx - L.x) || 1; L.x += L.face * 160 * dt;
+      L.face = Math.sign(L.hx - L.x) || 1; L.x += L.face * 160 * dt; L.dist = (L.dist || 0) + 160 * dt;
       if (Math.abs(L.hx - L.x) < 10) { L.x = L.hx; L.state = "watch"; L.t = 0; L.turnT = 0; L.face = -1; L.cool = 4; }
     }
   }
@@ -686,11 +701,7 @@ function drawLookouts(camX) {
   }
   for (const L of lookouts) {
     const x = L.x - camX; if (x < -300 || x > W + 300) continue;
-    let nm = "lookout_watch", i = Math.floor(now * 0.6 + L.hx) % 2;
-    if (!L.torch) { nm = "lookout_spot"; i = 1; }   // shading his eyes in the dark, no torch
-    else if (L.state === "spot") { nm = "lookout_spot"; i = Math.min(3, 1 + Math.floor(L.t / W5.SPOT_T * 3)); }
-    else if (L.state === "run" || L.state === "back") { nm = "lookout_run"; i = frameOf(nm, L.t); }
-    else if (L.patrol) { nm = "lookout_walk"; i = frameOf(nm, L.t); }
+    const [nm, i] = lookoutPose(L);
     drawSprite(nm, i, x, L.y, L.face, 1, 1, L.torch ? "" : "brightness(0.6)");
   }
 }
@@ -1287,12 +1298,12 @@ function drawCommander(x, y, talking, now) {   // Glen's commander when he comes
   drawSprite(talking ? "eliab_war_talk" : "eliab_war_idle", frameOf("eliab_war_idle", now), x, y, -1, 1.05, 1, "saturate(0.5) brightness(0.85)");
 }
 function drawGiant(now, bt, beat) {   // far off on the Philistine hill, a huge dark shape; shown only in silhouette for now
-  const a = Math.min(1, bt * 0.8 + 0.3), x = W * 0.84, y = GR * T - 215, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
+  const a = Math.min(1, bt * 0.8 + 0.3), x = W * 0.84, y = GR * T - 215, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_point";
   drawPhilistineRanks(y, Math.min(1, bt * 0.8 + 0.5));
   ctx.save(); ctx.globalAlpha = a * 0.88;   // across the valley: twice the height of the men around him, even from here
   // Glen's silhouette: 0 standing, 1 shouting with the spear up, 2 pointing across the valley, 3 laughing
   const gp = beat <= 7 ? (bt < 1.2 ? 0 : 1) : beat === 8 ? 2 : 3;
-  drawSprite(nm, nm === "lookout_spot" ? 3 : gp, x, y, -1, nm === "lookout_spot" ? 0.95 : 1.1, 1, "brightness(0) blur(0.8px)");
+  drawSprite(nm, nm === "lookout_point" ? 3 : gp, x, y, -1, nm === "lookout_point" ? 0.95 : 1.1, 1, "brightness(0) blur(0.8px)");
   ctx.restore();
 }
 // the Philistine army in array on its hill (Glen's silhouettes, cut to items, facing Israel): a back rank, a front rank,

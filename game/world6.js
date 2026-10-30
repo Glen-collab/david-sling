@@ -392,7 +392,7 @@ const goliathWatch = {
     const hy = y - 150;
     drawPhilistineRanks(hy, 0.85);
     if (B.giant) {
-      const a = Math.min(1, (this.i === 1 ? this.bt : 2) * 0.8), gx = W * 0.8, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
+      const a = Math.min(1, (this.i === 1 ? this.bt : 2) * 0.8), gx = W * 0.8, nm = SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_point";
       ctx.save(); ctx.globalAlpha = a;
       if (SPR.goliath_full) {
         const f = this.i === 7 ? 2 : B.boom ? 1 : 0;
@@ -400,7 +400,7 @@ const goliathWatch = {
         drawSprite("goliath_full", f, gx, hy + 4, -1, 0.9, 1, "brightness(0) blur(0.4px)");
       } else {
         if (ITEM.phil_sil_shield1) drawItem("phil_sil_shield1", gx - 60, hy + 4, 0.2, a);   // the shield bearer, out in front
-        drawSprite(nm, nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, hy + 4, -1, nm === "lookout_spot" ? 1.3 : 0.62, 1, "brightness(0) blur(0.4px)");
+        drawSprite(nm, nm === "lookout_point" ? 3 : frameOf(nm, now), gx, hy + 4, -1, nm === "lookout_point" ? 1.3 : 0.62, 1, "brightness(0) blur(0.4px)");
       }
       ctx.restore();
     }
@@ -459,8 +459,8 @@ function drawFarGiant(camX) {   // small on the far hill, after David has seen h
   if (!goliathWatch.done || !giantSpot || w6ending.active) return;
   const now = performance.now() / 1000, gx = W * 0.86 - (camX - giantSpot.x + W * 0.3) * 0.06, gy = GR * T - 222;
   if (gx < -100 || gx > W + 100) return;
-  const nm = SPR.goliath_full ? "goliath_full" : SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_spot";
-  ctx.save(); ctx.globalAlpha = 0.55; drawSprite(nm, nm === "goliath_full" ? (W6.shake > 0 ? 1 : 0) : nm === "lookout_spot" ? 3 : frameOf(nm, now), gx, gy, -1, nm === "lookout_spot" ? 0.6 : 0.24, 1, "brightness(0) blur(0.8px)"); ctx.restore();
+  const nm = SPR.goliath_full ? "goliath_full" : SPR.goliath_silhouette ? "goliath_silhouette" : "lookout_point";
+  ctx.save(); ctx.globalAlpha = 0.55; drawSprite(nm, nm === "goliath_full" ? (W6.shake > 0 ? 1 : 0) : nm === "lookout_point" ? 3 : frameOf(nm, now), gx, gy, -1, nm === "lookout_point" ? 0.6 : 0.24, 1, "brightness(0) blur(0.8px)"); ctx.restore();
 }
 const drawBackground6 = drawBackground;
 drawBackground = function (cx) { drawBackground6(cx); if (WORLD === 6) { drawFarGiant(cx); drawFarTower(cx); } };   // the giant, small on the far hill

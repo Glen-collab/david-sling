@@ -1,0 +1,11 @@
+{
+  "frames": 8,
+  "frame_w": 200,
+  "frame_h": 345,
+  "ms_per_frame": 224,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 118,
+  "anchor_y": 343,
+  "source": "lookout_look.png"
+}

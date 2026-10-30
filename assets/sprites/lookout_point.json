@@ -1,0 +1,11 @@
+{
+  "frames": 8,
+  "frame_w": 242,
+  "frame_h": 352,
+  "ms_per_frame": 240,
+  "loop": false,
+  "align": "feet",
+  "anchor_x": 105,
+  "anchor_y": 350,
+  "source": "lookout_point.png"
+}

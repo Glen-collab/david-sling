@@ -708,3 +708,12 @@ the harp phrase at 3-2's campfire.
   runs out to the gap between the overhang and the cliff (TOBI_GAP), crouches, jumps (TOBI_UP), pushes off the air
   (frame 3, Glen's dust puff) and arcs up onto the cliff (TOBI_TOP, the top found from the tiles), lands, and then says
   "See? Now you... Come on up!" He waits up there (state "wait") until David is up beside him, or 14 tiles away.
+- **5-3 lookouts: Glen's new art, one outfit** (2026-10-30). The old walk was a different man (grass skirt) from the
+  watch/spot/run sheets (plaid kilt), and its feet never swapped. From Glen's two clips (kept in
+  david-sling-art/world5 as lookout_walk_look_clip.mp4 and lookout_walk_point_run_clip.mp4), all --soft --height 340
+  and then a de-green pass (the hard key ate the flames): lookout_watch (standing), lookout_walk (a 12-frame full
+  stride), lookout_look (shading his eyes), lookout_point (point and shout), lookout_run, and lookout_dark (the last look
+  frame with the flame taken off: torch knocked away). lookout_spot is gone (the Goliath-silhouette fallbacks use
+  lookout_point). lookoutPose() picks the sheet and frame. spot = look for SPOT_LOOK of SPOT_T, then point. Walk and run
+  frames go by distance (LOOKOUT_STRIDE sheet px per cycle, checked against his planted foot), so the feet don't slide.
+  He carries the torch low now, and LOOKOUT_TORCH has the flame per sheet (the light and the torch hit start there).

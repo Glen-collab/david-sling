@@ -1,11 +1,11 @@
 {
-  "frames": 6,
-  "frame_w": 197,
-  "frame_h": 345,
-  "ms_per_frame": 130,
+  "frames": 12,
+  "frame_w": 188,
+  "frame_h": 339,
+  "ms_per_frame": 128,
   "loop": true,
   "align": "feet",
-  "anchor_x": 121,
-  "anchor_y": 343,
-  "source": "lk_walk_m.png"
+  "anchor_x": 114,
+  "anchor_y": 337,
+  "source": "lookout_walk.png"
 }

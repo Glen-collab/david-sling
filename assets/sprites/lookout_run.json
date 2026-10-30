@@ -1,11 +1,11 @@
 {
-  "frames": 5,
-  "frame_w": 450,
-  "frame_h": 336,
-  "ms_per_frame": 90,
+  "frames": 10,
+  "frame_w": 271,
+  "frame_h": 329,
+  "ms_per_frame": 79,
   "loop": true,
   "align": "feet",
-  "anchor_x": 240,
-  "anchor_y": 334,
-  "source": "lk_run_m.png"
+  "anchor_x": 177,
+  "anchor_y": 327,
+  "source": "lookout_run.png"
 }
