@@ -280,6 +280,8 @@ Object.assign(W5, {
   HYENA_SEE: 9, HYENA_LAUGH: 1.1, HYENA_CROUCH: 0.45, HYENA_LUNGE: 640, HYENA_SIZE: 1.0,
   LEOPARD_SIZE: 1.35, LEOPARD_HP: 3, LEOPARD_SEE: 8, LEOPARD_WATCH: 1.3, LEOPARD_WALK: 150, LEOPARD_GROUND: 4.5,
   TOBI_CALM: 2.0, TOBI_FOLLOW: 3, TOBI_WALK: 200,
+  TOBI_GAP: 10.4, TOBI_TOP: 13.5,          // the leap demo: tiles from the cave piece to the gap he jumps from, and to where he lands up top
+  TOBI_UP: 4.2, TOBI_UP_T: 0.42, TOBI_PUSH_ARC: 2.4, TOBI_PUSH_T: 0.55,   // tiles high / seconds: the first jump, then the push off the air
 });
 Object.assign(TUNE.SPRITE_SIZE, { leopard_walk: W5.LEOPARD_SIZE, leopard_run: W5.LEOPARD_SIZE, leopard_pounce: W5.LEOPARD_SIZE });
 
@@ -439,15 +441,31 @@ function updateTobi(k, dx, sameLevel, dt) {
         tobiSay([["Tobi", "That song... my mother sings that one. ... Thank you. My name is Tobi."],
                  ["Tobi", "You're taking bread to the army? Down there, toward him? ... Then I'm coming with you. I won't run this time."],
                  ["Tobi", "Here, let me show you something. Scouts learn to push off anything: a rock, a branch, even a bit of nothing. Jump, then jump again. Like this."],
-                 () => { setCrit(k, "demo"); k.rescued = true; learnSkill("leap"); },
-                 ["Tobi", "See? Now you. Jump, and press A again in the air. That cliff behind the cave? We'll go up it."]]);
+                 () => { setCrit(k, "demo"); k.ph = "walk"; k.ph0 = 0; k.rescued = true; learnSkill("leap"); }]);   // "Now you" when he lands (a line held now would freeze the stage before he jumps)
       }
     }
     return;
   }
   if (k.state === "talk") { fall(); k.facing = Math.sign(dx) || 1; return; }
-  if (k.state === "demo") {   // the scout's leap, in place
-    fall(); if (k.t > 1.0) setCrit(k, "follow");
+  if (k.state === "demo") {   // (Glen) the scout's leap for real: out of the cave into the gap, jump, push off the air, up onto the cliff
+    const D = tobiDemo(), ph = (n, at) => { k.ph = n; k.ph0 = at; k.lx0 = k.x; k.ly0 = k.y; }, u = k.t - k.ph0;
+    if (k.ph === "walk") {
+      k.facing = Math.sign(D.gx - k.x) || 1; k.moving = true; k.x += k.facing * Math.min(Math.abs(D.gx - k.x), W5.TOBI_WALK * 1.3 * dt);
+      if (Math.abs(D.gx - k.x) < 1) { k.moving = false; k.facing = Math.sign(D.tx - k.x) || 1; ph("crouch", k.t); }
+    } else if (k.ph === "crouch") { if (u > 0.22) { ph("up", k.t); sfx("jump", k.x, 0.5); } }
+    else if (k.ph === "up") {   // the first jump: about as high as David's
+      const f = Math.min(1, u / W5.TOBI_UP_T); k.y = k.ly0 - W5.TOBI_UP * T * Math.sin(f * Math.PI / 2); k.x = k.lx0 + k.facing * 0.3 * T * f;
+      if (f >= 1) { ph("push", k.t); sfx("jump", k.x, 0.5, 1.3); }
+    } else if (k.ph === "push") {   // the second, off nothing at all, and over onto the top
+      const f = Math.min(1, u / W5.TOBI_PUSH_T);
+      k.x = k.lx0 + (D.tx - k.lx0) * f; k.y = k.ly0 + (D.ty - k.ly0) * f - Math.sin(f * Math.PI) * W5.TOBI_PUSH_ARC * T;
+      if (f >= 1) { k.y = D.ty; k.vy = 0; k.onGround = true; ph("land", k.t); }
+    } else if (k.ph === "land") { if (u > 0.4) { setCrit(k, "wait"); sayLine("Tobi", "See? Now you. Jump, and press A again in the air. Come on up!"); } }
+    return;
+  }
+  if (k.state === "wait") {   // up on the cliff till David comes up too (or goes on without him)
+    fall(); k.facing = Math.sign(dx) || 1;
+    if ((david.onGround && Math.abs(david.y - k.y) < 30) || Math.abs(dx) > 14 * T) setCrit(k, "follow");
     return;
   }
   if (k.state === "leap") {
@@ -471,18 +489,30 @@ function updateTobi(k, dx, sameLevel, dt) {
     if (k.stuckT > 1.2 && david.onGround) { k.stuckT = 0; let tx = david.x - (Math.sign(dx) || 1) * 2 * T; if (!standable(tx, david.y)) tx = david.x; goatLeap(k, tx, david.y); }
   } else { k.moving = false; fall(); k.facing = Math.sign(dx) || k.facing; }
 }
+function tobiDemo() {   // where the demo goes: the gap past the overhang's end, and the top of the cliff beyond it
+  const gx = tobiCave.x + W5.TOBI_GAP * T, tx = tobiCave.x + W5.TOBI_TOP * T, c = Math.floor(tx / T);
+  let r = 0; while (r < GR && !isSolid(c, r)) r++;
+  return { gx, tx, ty: r * T };
+}
 function stoneHitsTobi(k, s) { return false; }   // the stone flies on past him
 function drawTobi(k, x) {
   let nm = "tobi_cave", i = 0;
   if (k.state === "hide") i = david.state === "harp" && k.seen ? 2 : k.seen ? 1 : 0;
   else if (k.state === "talk") { nm = "tobi_talk"; i = dialog.t > 0 && dialog.who === "Tobi" ? frameOf(nm, performance.now() / 1000) : 0; }   // (Glen's talking clip, played through)
-  else if (k.state === "demo") { nm = "tobi_leap"; i = Math.min(5, Math.floor(k.t / 1.0 * 6)); }
+  else if (k.state === "demo") {   // Glen's sheet: crouch, up, tuck, the push off the air (his dust puff), up again, land
+    const u = k.t - k.ph0;
+    if (k.ph === "walk") { nm = "tobi_run"; i = frameOf(nm, k.t); }
+    else if (k.ph === "crouch") i = 0;
+    else if (k.ph === "up") i = u < W5.TOBI_UP_T * 0.55 ? 1 : 2;
+    else if (k.ph === "push") i = u < W5.TOBI_PUSH_T * 0.3 ? 3 : 4;
+    else i = 5;
+  }
   else if (k.state === "leap") { nm = "tobi_leap"; i = Math.min(4, 1 + Math.floor(k.t / 0.75 * 4)); }
   else if (k.moving) { nm = "tobi_run"; i = frameOf(nm, k.t); }
   else { nm = dialog.t > 0 && dialog.who === "Tobi" ? "tobi_talk" : "tobi_cave"; i = nm === "tobi_talk" ? frameOf(nm, performance.now() / 1000) : 5; }
   drawSprite(nm, i, x, k.y, k.facing, 1, k.alpha);
 }
-function tobiBlocking() { return tobi && tobiCave && !["follow", "leap", "demo"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
+function tobiBlocking() { return tobi && tobiCave && !["follow", "leap", "demo", "wait"].includes(tobi.state) ? "There's a frightened scout back in the cave. You can't leave him there." : null; }
 function drawTobiCave(camX) {   // the dark under the overhang
   if (!tobiCave) return;
   const x = tobiCave.x - camX; if (x < -400 || x > W + 600) return;

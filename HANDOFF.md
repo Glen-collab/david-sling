@@ -703,3 +703,8 @@ the harp phrase at 3-2's campfire.
   rock(184, 15, 2, 2) on its right side, 2 tiles out so the loose stone stays open at the ground, and rock(148, 14, 2, 3)
   on the right of The One's terrace (6 tiles, the same trap). Going forward is unchanged. From the terrace step the
   cheese ledge is still out of reach (a jump tops out at row 10.7; the ledge's underside is row 8).
+- **5-2 Tobi shows the scout's leap for real** (2026-10-30). The demo used to play in place under the overhang, and only
+  after "See? Now you" was dismissed (a held line freezes the stage), so Glen never saw it. Now, after "Like this.", he
+  runs out to the gap between the overhang and the cliff (TOBI_GAP), crouches, jumps (TOBI_UP), pushes off the air
+  (frame 3, Glen's dust puff) and arcs up onto the cliff (TOBI_TOP, the top found from the tiles), lands, and then says
+  "See? Now you... Come on up!" He waits up there (state "wait") until David is up beside him, or 14 tiles away.
