@@ -755,3 +755,9 @@ the harp phrase at 3-2's campfire.
   and carried an NIV credit: the game uses the World English Bible, public domain, credited now).
 - **Plan (agreed with Glen):** host on Cloudflare Pages (free plan; Glen's $5 Cloudflare Stream plan is a separate
   product), repo to go private; load each world's art when it starts instead of all ~800 sheets at boot.
+- **Live at https://david-sling-8f3.pages.dev/** (Cloudflare Pages, Git-connected to main: every push deploys). The
+  root index.html forwards to game/ (Pages turns game/index.html into game/).
+- **Browser caching on the web.** game/index.html set `BUILD = Date.now()` and every file was loaded with `?v=BUILD`,
+  so each page load (and a cleared stage reloads the page) re-downloaded everything. On the web BUILD is now the fixed
+  string "web": Pages sends `max-age=0, must-revalidate` + ETag, so the browser revalidates and gets 304s (no bytes)
+  while still seeing new art after a push. Localhost / file:// keeps the timestamp.
