@@ -659,7 +659,7 @@ function drawOneMoment() {
 // at Jesse's table and David out the door with a piece of bread. Then two lines over its last frame, the hillside (David
 // playing his harp to the flock, Hanan on his rock, Glen's song, 1 Samuel 16:11), the title card, and 1-1.
 // ---------------------------------------------------------------------------
-const W1_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w1_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+const W1_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w1_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: WORLD === 1 ? "auto" : "none" });
 W1_CLIP.onerror = () => { W1_CLIP.missing = true; };
 const W1_STILL = Object.assign(new Image(), { src: "../assets/video/w1_opening_last.jpg?v=" + (window.BUILD || 0) });
 const W1_OPEN = {

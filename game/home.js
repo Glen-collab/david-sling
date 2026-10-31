@@ -101,7 +101,7 @@ const MARKET = [
 const Courtyard = {
   active: false,
   open(world = 1) {
-    if (!this.img) { this.img = new Image(); this.img.src = `../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`; }
+    if (!this.img) this.img = want(lazyImg(`../assets/backgrounds/courtyard_w1.jpg?v=${window.BUILD || 0}`));
     this.world = world; this.active = true; this.fade = 0; this.leaving = null; this.t = 0; this.cheerAt = null; this.offerAt = null; this.greetAt = null;
     for (const b of BROTHERS) { b.lastT = undefined; b.way = 0; b.stepT = 0; b.px = undefined; }   // back at their chores
     this.x = 0.82; this.facing = -1; this.walkT = 0; this.mode = null; this.msg = null;
@@ -265,7 +265,7 @@ const Courtyard = {
   draw() {
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
-    const img = this.img; if (!img || !img.naturalWidth) { ctx.restore(); return; }
+    const img = want(this.img); if (!img || !img.naturalWidth) { ctx.restore(); return; }
     ctx.globalAlpha = Math.max(0, this.fade);
     const SW = this.sceneW(), px = this.x * SW, cam = Math.max(0, Math.min(SW - W, px - W / 2)), floor = H * HOME.FLOOR;
     ctx.drawImage(img, -cam, 0, SW, H);

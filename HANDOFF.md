@@ -761,3 +761,20 @@ the harp phrase at 3-2's campfire.
   so each page load (and a cleared stage reloads the page) re-downloaded everything. On the web BUILD is now the fixed
   string "web": Pages sends `max-age=0, must-revalidate` + ETag, so the browser revalidates and gets 304s (no bytes)
   while still seeing new art after a push. Localhost / file:// keeps the timestamp.
+- **Per-world loading (web).** Before, every page load fetched all ~800 images and ~15 songs/videos (about 500 MB)
+  before the title. Now (main.js, top: `LOAD`, `want()`, `lazyImg()`, `gateImg()`; bottom: `frame()` wrapper):
+  - Images are made without a src and fetched the first time anything reads them (SPR[n].img is a getter, ITEM is a
+    Proxy, BG/CAVE_BG/Journal scenes are getters). Only the stage's ground, background, HUD and `PLAYER_ART` (David's
+    and the lamb's moves) are waited for up front.
+  - Then the stage draws its opening view behind the loading screen with time stopped; whatever it asks for is
+    fetched, and play starts once it has all arrived (30 s cap). Title screen and map work the same way.
+  - Then `startTrickle()` fetches the rest, 6 at a time: this stage's own (asset_sets.js `stages`, matched from its
+    main.js block, people's names included), David's other poses, the rest of the world, then the shared screens.
+  - `game/asset_sets.js` is made by `python tools/make_asset_sets.py`: **rerun it after adding art** (a new name it
+    doesn't list still loads when first drawn, just not ahead of time).
+  - Opened from the files (file://) or with `?all`: everything is waited for up front, as before (the headless tests
+    rely on it: they jump David around).
+  - Music and sounds: index.html makes `new Audio()` default to preload "none" (the SFX set their own preload);
+    the opening films and World 7/8 clips and music only preload in their own world.
+  - Measured (local server, fresh browser): 22-33 MB before play on 1-1, 6-2, 8-4 (was ~500 MB): David's moves 7, the
+    ground set 6-9, sound effects 5, the background 1-5. The ground tiles are the biggest single part now.

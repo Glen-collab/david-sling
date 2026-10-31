@@ -144,17 +144,36 @@ ctx.imageSmoothingQuality = "high";
 
 const SCALE = TUNE.DAVID_HEIGHT / 240;   // sprites are stored with David 240 px tall
 
-// Load sprite sheets
-const SPR = {};
+// Loading (2026-10-31, for the web). Nothing is fetched up front any more except the stage's ground, its background
+// and the HUD (`loaded` / `total` below). Every other image is made without a src and fetched the first time anything
+// reads it (want()). The stage then draws its opening view, time stopped, behind the loading screen (frame(), at the
+// bottom): whatever that view asks for is fetched, and when it's all in, play starts. After that the rest of this
+// world's art comes in the background (startTrickle, its list from tools/make_asset_sets.py -> asset_sets.js), and
+// anything still missed arrives the moment it's first drawn. Before this, all ~800 images (500 MB) loaded at boot.
 let loaded = 0, total = 0;
-for (const [name, d] of Object.entries(window.SPRITE_DATA)) {
-  total++;
-  const img = new Image();
-  img.onload = () => { loaded++; };
-  img.onerror = () => { loaded++; console.warn("missing sprite", d.src); };
-  img.src = d.src + "?v=" + (window.BUILD || 0);
-  SPR[name] = { ...d, img };
+const LOAD = { warm: true, frames: 0, t0: 0, asked: new Set() };
+function lazyImg(url) { const img = new Image(); img._url = url; return img; }
+function want(img) {   // fetch it now if nobody has yet; while the opening view loads, note that it's waited for
+  if (img && img._url && !img._asked) { img._asked = true; img.src = img._url; }
+  if (img && LOAD.warm && img._asked && !img.complete) LOAD.asked.add(img);
+  return img;
 }
+function gateImg(img) {   // fetched now, and the game waits for it (the boot gate)
+  if (!img || img._asked) return; total++;
+  img.addEventListener("load", () => loaded++, { once: true }); img.addEventListener("error", () => loaded++, { once: true }); want(img);
+}
+function lazyProp(obj, key, url) { const img = lazyImg(url); Object.defineProperty(obj, key, { get: () => want(img), enumerable: true }); return img; }
+// Load sprite sheets (fetched when first drawn)
+const SPR = {};
+for (const [name, d] of Object.entries(window.SPRITE_DATA)) SPR[name] = { ...d, _img: lazyImg(d.src + "?v=" + (window.BUILD || 0)), get img() { return want(this._img); } };
+// what the player can do in the first second (run, jump, roll, sling...): waited for, so David never flickers out
+// the first time he does something (harp, lamp and rescue poses come first in the background fetch)
+const PLAYER_ART = ["david_idle", "david_walk", "david_run", "david_stop", "david_jump_air", "david_jump_land", "david_crouch", "david_crawl",
+  "david_roll", "david_roll_getup", "david_flip", "david_climb", "david_topout", "david_slip", "david_sling_throw", "david_sling_throw_up",
+  "david_run_sling", "david_run_sling_throw", "lamb_walk", "lamb_run", "lamb_jump", "lamb_still"];
+for (const n of PLAYER_ART) if (SPR[n]) gateImg(SPR[n]._img);
+// opened straight from the files (Glen's tests, and the old way), or with ?all: everything up front, as before
+const LOAD_ALL = location.protocol === "file:" || /[?&]all/.test(location.search);
 
 // ============================================================================
 // Input: keyboard + gamepad (with a button-setup screen for NES controllers)
@@ -3020,14 +3039,9 @@ function drawToastAndSetup() {
 // ============================================================================
 // World: items, hearts and damage, food, snakes, campfires, the lion
 // ============================================================================
-const ITEM = {};
-for (const name of window.ITEM_LIST || []) {
-  total++;
-  const img = new Image();
-  img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
-  img.src = `../assets/items/${name}.png?v=${window.BUILD || 0}`;
-  ITEM[name] = img;
-}
+const ITEM_IMG = {};   // (fetched when first drawn: reading ITEM.x fetches it)
+for (const name of window.ITEM_LIST || []) ITEM_IMG[name] = lazyImg(`../assets/items/${name}.png?v=${window.BUILD || 0}`);
+const ITEM = new Proxy(ITEM_IMG, { get: (t, k) => want(t[k]) });
 TER.cave_rock_tile = ITEM.cave_rock_tile; TER.cave_rock_top = ITEM.cave_rock_top;   // Glen's damp cave rock, used inside caves
 function drawItem(name, x, y, size, alpha = 1) {   // (x, y) = bottom-centre
   const img = ITEM[name]; if (!img || !img.naturalWidth) return;
@@ -4655,12 +4669,12 @@ const BG_BORROW = {};   // e.g. { w1_2: { near: "w1" } } while a set is still mi
 for (const w of ["w1", "w2", "w1_2", "w1_3", "w1_4", "w2_1", "w2_2", "w2_3", "w2_4", "w3_1", "w3_2", "w3_3", "w3_4", "w3_end", "w4_1", "w4_2", "w4_3", "w4_4", "w5_1", "w5_2", "w5_3", "w5_4", "w6_1", "w6_2", "w6_3", "w6_4", "w7_1", "w7_2", "w7_3", "w7_4", "w8_1", "w8_3", "w8_4"]) {   // (World 8: 8-1 and 8-2 on w8_1; w8_3 The Rout and w8_4 Home wait for their stages)
   BG[w] = {};
   for (const [layer, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
-    if (BG_BORROW[w] && BG_BORROW[w][layer]) { BG[w][layer] = BG[BG_BORROW[w][layer]][layer]; continue; }
-    total++;
-    const img = new Image(); img.onload = () => { loaded++; }; img.onerror = () => { loaded++; };
-    img.src = `../assets/backgrounds/${w}_${layer}.${ext}?v=${window.BUILD || 0}`; BG[w][layer] = img;
+    if (BG_BORROW[w] && BG_BORROW[w][layer]) { const from = BG_BORROW[w][layer]; Object.defineProperty(BG[w], layer, { get: () => BG[from][layer], enumerable: true }); continue; }
+    lazyProp(BG[w], layer, `../assets/backgrounds/${w}_${layer}.${ext}?v=${window.BUILD || 0}`);   // (fetched when first drawn)
   }
 }
+for (const layer of ["far", "mid", "near"]) if (BG[STAGE_INFO.bg || "w1"]) gateImg(BG[STAGE_INFO.bg || "w1"][layer]);   // this stage's own: waited for
+if (LOAD_ALL) { for (const n in SPR) gateImg(SPR[n]._img); for (const n in ITEM_IMG) gateImg(ITEM_IMG[n]); for (const w in BG) for (const l in BG[w]) gateImg(BG[w][l]); }
 let bgWorld = STAGE_INFO.bg || "w1";   // press 3 to swap between World 1 and World 2 backgrounds (to compare)
 function drawLayerRepeating(img, camX, factor, bottomY, height, mirror = false) {
   if (!img.naturalWidth) return;
@@ -4768,17 +4782,40 @@ function drawChargeRing() {
 // Main loop
 // ============================================================================
 let camX = 0, last = performance.now();
-function frame(now) {
+const booting = () => loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined" || typeof Courtyard === "undefined" || typeof Menu === "undefined";
+function frame(now) {   // the opening view loads behind the loading screen, time stopped (see LOAD at the top)
+  if (!LOAD.warm || booting()) return frameMain(now);
+  if (!LOAD.t0) LOAD.t0 = now;
+  last = now; LOAD.asked.clear(); frameMain(now); LOAD.frames++;
+  const left = [...LOAD.asked].filter(i => !i.complete).length;
+  if ((LOAD.frames > 3 && !left) || now - LOAD.t0 > 30000) { LOAD.warm = false; last = performance.now(); startTrickle(); return; }
+  drawLoading(left);
+}
+function drawLoading(left) {
+  ctx.save(); ctx.fillStyle = "#0b0805"; ctx.fillRect(0, 0, W, H); ctx.textAlign = "center";
+  ctx.fillStyle = "#ffd27a"; ctx.font = "bold 44px Georgia, serif"; ctx.fillText("David", W / 2, H / 2 - 30);
+  ctx.fillStyle = "#f4e6c8"; ctx.font = "italic 24px Georgia, serif"; ctx.fillText("The Shepherd's Sling", W / 2, H / 2 + 6);
+  const dots = ".".repeat(1 + Math.floor(performance.now() / 400) % 3);
+  ctx.fillStyle = "rgba(255,240,215,0.7)"; ctx.font = "18px sans-serif"; ctx.fillText(`Loading${dots}${left ? `  (${left})` : ""}`, W / 2, H / 2 + 60);
+  ctx.restore();
+}
+function startTrickle() {   // the rest of this world's art (and the shared screens'), a few at a time, this stage's own first
+  const S = (window.ASSET_SETS || {})[WORLD]; if (!S) return;
+  const img = k => k[0] === "s" ? SPR[k.slice(2)] && SPR[k.slice(2)]._img : ITEM_IMG[k.slice(2)];
+  const mine = new Set(((window.ASSET_SETS.stages || {})[LEVEL_STAGE]) || []);
+  const player = k => /^s:(david|lamb)_/.test(k);   // David's other poses (harp, lamp, rescue) next to this stage's own
+  const q = [...S.gate.filter(k => mine.has(k)), ...S.gate.filter(k => !mine.has(k) && player(k)), ...S.gate.filter(k => !mine.has(k) && !player(k)), ...S.later].map(img).filter(i => i && !i._asked);
+  let busy = 0;
+  const next = () => { while (busy < 6 && q.length) { const i = q.shift(); if (i._asked) continue; busy++; const done = () => { busy--; next(); }; i.addEventListener("load", done, { once: true }); i.addEventListener("error", done, { once: true }); want(i); } };
+  next();
+}
+function frameMain(now) {
   const real = Math.max(0, Math.min(1 / 30, (now - last) / 1000)); last = Math.max(last, now);   // never let time run backwards
   const dt = real * gameSpeed(real);   // the last stone on a boss slows the world down
   if (toastTime > 0) toastTime -= real;
   if (helpT > 0 && helpT < 9000) helpT -= dt;
   // (also wait for the other scripts: world1.js, the Journal and the map load after this one)
-  if (loaded < total || typeof WorldMap === "undefined" || typeof Journal === "undefined" || typeof updateCritters === "undefined" || typeof camLimits === "undefined" || typeof Courtyard === "undefined" || typeof Menu === "undefined") {
-    ctx.fillStyle = "#111"; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#fff"; ctx.font = "24px sans-serif"; ctx.fillText(`Loading sprites ${loaded} / ${total}`, 40, 60);
-    requestAnimationFrame(frame); return;
-  }
+  if (booting()) { drawLoading(Math.max(0, total - loaded)); requestAnimationFrame(frame); return; }
   if (Menu.active || Journal.active || WorldMap.active || Courtyard.active) {   // the menu, the Journal, a map or the home base covers the screen
     if (setup.active) updateSetup(real); else checkCombo(real);
     if (typeof battleLoop !== "undefined" && !battleLoop.paused) { battleLoop.pause(); W6.battleVol = 0; }   // no sword fight under the Journal's harp (world6.js)

@@ -981,7 +981,7 @@ function updateShieldFall(dt) {
 }
 // (Glen) the bearer gone, Goliath himself walks in: the music turns ("oh crap"), the ground shakes with every step,
 // and he yells as he comes (his lips move in Glen's walk clip). The fight is World 8; this is the cliffhanger.
-const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // (Glen's war horns, 2026-10-22: 3 minutes, looped; the "uh oh")
+const giantMusic = Object.assign(new Audio(`../assets/sounds/goliath_theme.mp3?v=${window.BUILD || 0}`), { loop: true, preload: WORLD === 7 ? "auto" : "none" });   // (Glen's war horns, 2026-10-22: 3 minutes, looped; the "uh oh")
 giantMusic.onended = () => { if (giantMusic.want) giantDrone.start(); };   // (if it ever stops, the drone holds the dread)
 giantMusic.onerror = () => { giantMusic.fallback = true; if (giantMusic.want) giantDrone.start(); };   // no track of Glen's yet: the drone
 // (Glen: the slowed boss music was too uplifting under his words; he wants the gravity of it.) Until Glen's own track:
@@ -1380,7 +1380,7 @@ const w7off = {
 // 7-3, the Stones of the Name: Glen's clip (name_stones.mp4: David walks to a path of carved stones over a chasm and
 // kneels to read them). It plays once, the first time he reaches the first carving (progress.nameVision). After that,
 // Select at either carving shows its last frame as a still: the carving's letters, the clue, and Select for the Journal.
-const NAME_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/name_stones.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+const NAME_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/name_stones.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: WORLD === 7 ? "auto" : "none" });
 NAME_CLIP.onerror = () => { NAME_CLIP.missing = true; };
 const NAME_STILL = Object.assign(new Image(), { src: "../assets/video/name_stones_last.jpg?v=" + (window.BUILD || 0) });
 let nameVisionSeen = false;

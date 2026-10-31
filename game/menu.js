@@ -67,7 +67,7 @@ const Menu = {
     this.fromStage = fromStage; this.active = true; this.t = 0; this.msg = null;
     if (screen === "title") {
       releaseAllAudio(false);   // (from the pause menu: the stage's sounds stay stopped)
-      if (!this.bg) { this.bg = new Image(); this.bg.src = MENU_TITLE_BG + "?v=" + (window.BUILD || 0); }
+      if (!this.bg) this.bg = lazyImg(MENU_TITLE_BG + "?v=" + (window.BUILD || 0));
       this.snap = null;
     } else {   // keep a picture of what's underneath (the game is paused behind the menu)
       this.snap = document.createElement("canvas"); this.snap.width = W; this.snap.height = H;
@@ -306,7 +306,7 @@ const Menu = {
       ctx.restore(); return;
     }
     if (this.snap) { ctx.drawImage(this.snap, 0, 0); ctx.fillStyle = "rgba(10,6,2,0.62)"; ctx.fillRect(0, 0, W, H); }
-    else if (this.bg && this.bg.naturalWidth) {
+    else if (this.bg && want(this.bg).naturalWidth) {
       // a very slow push in, like a film opening
       const img = this.bg, s = Math.max(W / img.naturalWidth, H / img.naturalHeight) * (1.02 + 0.03 * Math.min(1, this.t / 40));
       ctx.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);

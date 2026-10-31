@@ -195,7 +195,8 @@ const WorldMap = {
   active: false,
   open(world = 1) {
     const M = MAP_WORLDS[world]; if (!M) return;
-    if (!M.img) { M.img = new Image(); M.img.src = M.src + "?v=" + (window.BUILD || 0); }
+    if (!M.img) M.img = lazyImg(M.src + "?v=" + (window.BUILD || 0));
+    want(M.img);   // (the loading screen waits for it if the map is what opens)
     this.M = M; this.world = world; this.active = true; this.fade = 0; this.t = 0; this.leaving = null;
     this.prog = loadProgress();
     if (this.prog.view !== world) { this.prog.view = world; saveProgress(this.prog); }   // reopen this map next time
@@ -359,7 +360,7 @@ const WorldMap = {
   },
   // ---- drawing ----
   draw() {
-    const M = this.M, img = M.img; ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const M = this.M, img = want(M.img); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
     if (!img.naturalWidth) { ctx.restore(); return; }
     ctx.globalAlpha = Math.max(0, this.fade);

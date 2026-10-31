@@ -703,7 +703,7 @@ const ANOINT = {
 };
 // Glen's close-up of the oil pouring over David's head (Grok clip). At the pour, the wide shot fades into it, full
 // screen, and fades back out when it ends. Missing file = the wide shot only.
-const ANOINT_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/anointing_closeup.mp4", muted: true, playsInline: true, preload: "auto" });
+const ANOINT_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/anointing_closeup.mp4", muted: true, playsInline: true, preload: WORLD === 3 ? "auto" : "none" });
 ANOINT_CLIP.onerror = () => { ANOINT_CLIP.missing = true; };
 const clipOk = () => !ANOINT_CLIP.missing && ANOINT_CLIP.readyState >= 2;
 const anointing = {
@@ -1443,7 +1443,7 @@ if (LEVEL_STAGE === "3-2" && SPR.dog_run) for (const k of critters) if (k.kind =
 // stops on him at the gate for his answer (16:5, the sacrifice: so 3-1 is the day before it); then Eliab in the
 // courtyard, smoothing his hair. His line, the title card, 3-1.
 // ---------------------------------------------------------------------------
-const W3_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w3_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+const W3_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w3_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: WORLD === 3 ? "auto" : "none" });
 W3_CLIP.onerror = () => { W3_CLIP.missing = true; };
 const W3_STILL = Object.assign(new Image(), { src: "../assets/video/w3_opening_last.jpg?v=" + (window.BUILD || 0) });
 const W3_OPEN = {   // seconds into the video (make_w3_opening.py prints where each clip starts: the boy 0, the elders 6, Eliab 14.8)

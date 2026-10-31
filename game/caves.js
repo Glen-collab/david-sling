@@ -132,8 +132,7 @@ function resetCaves() { for (const b of caveBats) Object.assign(b, { x: b.hx, y:
 // stalactites, and the rubbly floor. The darkness and the lamp go over them (drawCaveDarkness).
 const CAVE_BG = {};
 for (const [n, ext] of [["far", "jpg"], ["mid", "png"], ["near", "png"]]) {
-  total++; const img = new Image(); img.onload = img.onerror = () => { loaded++; };
-  img.src = `../assets/backgrounds/cave_${n}.${ext}?v=${window.BUILD || 0}`; CAVE_BG[n] = img;
+  lazyProp(CAVE_BG, n, `../assets/backgrounds/cave_${n}.${ext}?v=${window.BUILD || 0}`);   // (fetched when a cave is first drawn: main.js want())
 }
 // Glen's cave opening, with its square corners feathered away into the dark (made once)
 let softExitCanvas = null;

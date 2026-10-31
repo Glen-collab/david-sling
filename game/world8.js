@@ -35,11 +35,11 @@ const W8 = {
   ],
 };
 
-const FALL_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/giant_fall.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+const FALL_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/giant_fall.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: WORLD === 8 ? "auto" : "none" });
 FALL_CLIP.onerror = () => { FALL_CLIP.missing = true; };
 const FALL_STILL = Object.assign(new Image(), { src: "../assets/video/giant_fall_last.jpg?v=" + (window.BUILD || 0) });
 
-const FALL_MUSIC = Object.assign(new Audio(`../assets/sounds/giant_fall_music.mp3?v=${window.BUILD || 0}`), { preload: "auto" });
+const FALL_MUSIC = Object.assign(new Audio(`../assets/sounds/giant_fall_music.mp3?v=${window.BUILD || 0}`), { preload: WORLD === 8 ? "auto" : "none" });
 FALL_MUSIC.onerror = () => {   // (until Glen's own track: the boss loop, slowed and deeper)
   if (FALL_MUSIC.fallback) return; FALL_MUSIC.fallback = true;
   FALL_MUSIC.src = `../assets/sounds/boss_loop.mp3?v=${window.BUILD || 0}`; FALL_MUSIC.loop = true;
@@ -261,7 +261,7 @@ function drawWords8Over() {   // David's answer, big across the valley, line by 
 const g8Piece = setPieces.find(p => p.kind === "goliath8");
 const g8 = g8Piece ? { a0: g8Piece.c * T, a1: (g8Piece.c + W8.ARENA) * T, counsel: false, smooth: 5, phase: 1 } : null;
 const goliathFight = () => !!(g8 && g8.on && !g8.won);
-const G8_MUSIC = Object.assign(new Audio(`../assets/sounds/music_8_stone.mp3?v=${window.BUILD || 0}`), { loop: true, preload: "auto" });   // Glen's "The One Stone" (2026-10-23; his war horns, goliath_theme, before it: they stay in 7-4)
+const G8_MUSIC = Object.assign(new Audio(`../assets/sounds/music_8_stone.mp3?v=${window.BUILD || 0}`), { loop: true, preload: WORLD === 8 ? "auto" : "none" });   // Glen's "The One Stone" (2026-10-23; his war horns, goliath_theme, before it: they stay in 7-4)
 function resetG8() {
   Object.assign(g8, { on: false, won: false, state: "charge", t: 0, x: g8.a1 - 6 * T, atk: null, tellT: 0, jav: null, past: [], stuck: [], relT: 9, relKind: null,
                       thrown: 0, nextAt: 1.4, callout: null, code: null, flash: 0, walkT: 0, stillT: 0, lastAtk: null });

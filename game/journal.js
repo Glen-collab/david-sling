@@ -301,12 +301,13 @@ const JOURNAL_PAGES = {
 // ----------------------------------------------------------------------------
 // The book and its pages. Points are on the 1536 x 1024 book image: three along the top edge, three along the bottom.
 // ----------------------------------------------------------------------------
-const BOOK = new Image(); BOOK.src = "../assets/items/davids_journal.png?v=" + (window.BUILD || 0);
-const BOOK_RIPPED = new Image(); BOOK_RIPPED.src = "../assets/journal/davids_journal_page_ripped-out.png?v=" + (window.BUILD || 0);   // the stub of a torn-out page
+const JIMG = {};   // (2026-10-31: the book art, fetched when the Journal first draws it: main.js want())
+lazyProp(JIMG, "book", "../assets/items/davids_journal.png?v=" + (window.BUILD || 0));
+lazyProp(JIMG, "ripped", "../assets/journal/davids_journal_page_ripped-out.png?v=" + (window.BUILD || 0));   // the stub of a torn-out page
 const RIP_ASK = 2.5;   // seconds after the first A during a tear-out that a second A skips it
-const TEAR = Object.assign(new Image(), { src: "../assets/journal/journal_tear.png?v=" + (window.BUILD || 0) }), TEAR_N = 8, TEAR_MS = 110;
+lazyProp(JIMG, "tear", "../assets/journal/journal_tear.png?v=" + (window.BUILD || 0)); const TEAR_N = 8, TEAR_MS = 110;
 const TEAR_BOOK = [[16, 31, 251], [11, 27, 249], [11, 28, 249], [4, 27, 252], [13, 43, 250], [0, 45, 254], [6, 44, 258], [0, 43, 254]];   // the book's left half in each tear frame: left x, top, bottom (measured)
-const BURN = Object.assign(new Image(), { src: "../assets/journal/journal_burn.png?v=" + (window.BUILD || 0) }), BURN_N = 7, BURN_MS = 160;
+lazyProp(JIMG, "burn", "../assets/journal/journal_burn.png?v=" + (window.BUILD || 0)); const BURN_N = 7, BURN_MS = 160;
 const BOOK_BOX = { x: 17, y: 58, w: 1493, h: 900 };   // the visible part of the image
 const SPINE_X = 784;
 const PAGE_EDGES = {
@@ -461,7 +462,7 @@ function tornStub(c) {   // a ragged brown strip along the binding edge of the r
 function renderSpread(target, spread, step, t) {
   const g = target.getContext("2d");
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, target.width, target.height);
-  const book = spread.book && spread.book.naturalWidth ? spread.book : BOOK;
+  const book = spread.book && spread.book.naturalWidth ? spread.book : JIMG.book;
   if (book.naturalWidth) g.drawImage(book, 0, 0);
   for (const side of ["left", "right"]) { drawFlatPage(side, spread[side], step, t); drawBent(g, flatCanvas[side], PAGE_EDGES[side]); }
 }
@@ -547,7 +548,7 @@ const SCENES = {   // per world: the art, how far to shift it up on screen, the 
 SCENES.note_hall = { ...SCENES.note_road, src: "../assets/journal/note_hall.jpg" };   // 4-4, the king's hall at night
 SCENES.note_town = { ...SCENES.note_road, src: "../assets/journal/note_town.jpg" };   // 4-3, Gibeah's paved street
 const noteScene = () => ({ "4-3": SCENES.note_town, "4-4": SCENES.note_hall })[LEVEL_STAGE] || SCENES.note_road;   // the ground at David's feet
-for (const sc of Object.values(SCENES)) { sc.img = new Image(); sc.img.src = sc.src + "?v=" + (window.BUILD || 0); }
+for (const sc of Object.values(SCENES)) lazyProp(sc, "img", sc.src + "?v=" + (window.BUILD || 0));   // (fetched when the Journal first shows it: main.js want())
 const newCanvas = () => Object.assign(document.createElement("canvas"), { width: 1536, height: 1024 });
 const sceneCanvas = newCanvas(), pageCanvas = { left: newCanvas(), right: newCanvas() }, farCanvas = newCanvas();
 // just the paper of one page (no cover), for the page that turns
@@ -643,7 +644,7 @@ const Journal = {
       const S = PP[pg.spread], torn = R && pg.spread === "draft" && pg.step >= R.at;
       const right = torn ? S.right.map(b => ({ ...b, segs: b.segs.filter(sg => !(sg.strike && sg.strike <= R.at)) })) : S.right;
       pg.lay = { left: layoutPage(S.left, "left", pg.step, this.stones), right: layoutPage(right, "right", pg.step, this.stones) };
-      if (torn) pg.lay.book = BOOK_RIPPED;
+      if (torn) pg.lay.book = JIMG.ripped;
       if (torn && pg.ripNow) for (const w of pg.lay.right.words) if (w.at < pg.step) w.at = pg.step;   // the fresh page: he writes it all again
       if (pg.ripNow) {   // first, the page he tears out: what was there before, and the bitter words he starts
         const before = S.right.map(b => ({ ...b, segs: b.segs.filter(sg => sg.at < R.at).map(sg => ({ ...sg, strike: 0 })) }));
@@ -767,9 +768,9 @@ const Journal = {
       const f = (t - 3.0) / 0.5, x0 = dx + h * 0.62, y0 = gy - h * 0.62, x = x0 + (fx - x0) * f, y = y0 + (gy - 40 - y0) * f - Math.sin(f * Math.PI) * 60;
       ctx.save(); ctx.translate(x, y); ctx.rotate(f * 5); ctx.fillStyle = "#e9dcc0"; ctx.beginPath(); ctx.moveTo(-14, -10); ctx.lineTo(12, -14); ctx.lineTo(16, 8); ctx.lineTo(-10, 14); ctx.closePath(); ctx.fill(); ctx.restore();
     }
-    if (t >= 3.5 && BURN.naturalWidth) {   // it burns in the flames (Glen's burn sheet, small)
-      const k = Math.min(BURN_N - 1, Math.floor((t - 3.5) * 1000 / BURN_MS)), fw = BURN.naturalWidth / BURN_N, fh = BURN.naturalHeight, bh = 130, bw = bh * fw / fh;
-      ctx.drawImage(BURN, k * fw, 0, fw, fh, fx - bw / 2, gy - 75 - bh / 2, bw, bh);
+    if (t >= 3.5 && JIMG.burn.naturalWidth) {   // it burns in the flames (Glen's burn sheet, small)
+      const k = Math.min(BURN_N - 1, Math.floor((t - 3.5) * 1000 / BURN_MS)), fw = JIMG.burn.naturalWidth / BURN_N, fh = JIMG.burn.naturalHeight, bh = 130, bw = bh * fw / fh;
+      ctx.drawImage(JIMG.burn, k * fw, 0, fw, fh, fx - bw / 2, gy - 75 - bh / 2, bw, bh);
     }
     const a = Math.min(1, t / 0.5, (6.2 - t) / 0.5); ctx.fillStyle = `rgba(0,0,0,${1 - Math.max(0, a)})`; ctx.fillRect(0, 0, W, H);   // fade in and out
   },
@@ -777,18 +778,18 @@ const Journal = {
     const r = this.rip, dw = 1536 * s, dh = 1024 * s;
     if (r.phase === "fire") { this.drawRipFire(); return; }
     if (r.phase === "write") { renderSpread(spreadCanvas[0], r.lay, r.step, r.t); ctx.drawImage(spreadCanvas[0], bx, by, dw, dh); return; }
-    if (r.phase === "tear" && TEAR.naturalWidth) {   // Glen's tear sheet, scaled over the book
-      const i = Math.min(TEAR_N - 1, Math.floor(r.t * 1000 / TEAR_MS)), fw = TEAR.naturalWidth / TEAR_N, fh = TEAR.naturalHeight;
+    if (r.phase === "tear" && JIMG.tear.naturalWidth) {   // Glen's tear sheet, scaled over the book
+      const i = Math.min(TEAR_N - 1, Math.floor(r.t * 1000 / TEAR_MS)), fw = JIMG.tear.naturalWidth / TEAR_N, fh = JIMG.tear.naturalHeight;
       const [lx, ty, by2] = TEAR_BOOK[i], k = BOOK_BOX.h * s / (by2 - ty);   // each frame's book pinned to the real one (left edge, top, bottom)
-      ctx.drawImage(TEAR, i * fw, 0, fw, fh, bx + BOOK_BOX.x * s - lx * k, by + BOOK_BOX.y * s - ty * k, fw * k, fh * k); return;
+      ctx.drawImage(JIMG.tear, i * fw, 0, fw, fh, bx + BOOK_BOX.x * s - lx * k, by + BOOK_BOX.y * s - ty * k, fw * k, fh * k); return;
     }
     if (r.phase === "burn") {   // the torn book dim behind; the page burning to ash in the firelight
-      if (BOOK_RIPPED.naturalWidth) { ctx.save(); ctx.globalAlpha *= 0.45; ctx.drawImage(BOOK_RIPPED, bx, by, dw, dh); ctx.restore(); }
+      if (JIMG.ripped.naturalWidth) { ctx.save(); ctx.globalAlpha *= 0.45; ctx.drawImage(JIMG.ripped, bx, by, dw, dh); ctx.restore(); }
       const cx = W / 2, cy = H / 2, fl = 0.8 + Math.sin(performance.now() / 60) * 0.1;
       const gl = ctx.createRadialGradient(cx, cy, 20, cx, cy, 380); gl.addColorStop(0, `rgba(255,140,40,${0.45 * fl})`); gl.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
-      if (BURN.naturalWidth) { const i = Math.min(BURN_N - 1, Math.floor(r.t * 1000 / BURN_MS)), fw = BURN.naturalWidth / BURN_N, fh = BURN.naturalHeight, h = H * 0.62, w = h * fw / fh;
-        ctx.drawImage(BURN, i * fw, 0, fw, fh, cx - w / 2, cy - h / 2, w, h); }
+      if (JIMG.burn.naturalWidth) { const i = Math.min(BURN_N - 1, Math.floor(r.t * 1000 / BURN_MS)), fw = JIMG.burn.naturalWidth / BURN_N, fh = JIMG.burn.naturalHeight, h = H * 0.62, w = h * fw / fh;
+        ctx.drawImage(JIMG.burn, i * fw, 0, fw, fh, cx - w / 2, cy - h / 2, w, h); }
     }
   },
   // ---- drawing ----
@@ -834,7 +835,7 @@ const Journal = {
     const words = (pg, alpha) => {
       for (const side of ["left", "right"]) {
         drawFlatPage(side, pg.lay[side], pg.step, pg.t);
-        if (side === "right" && pg.lay.book === BOOK_RIPPED) tornStub(flatCanvas.right);   // the stub of the page he tore out
+        if (side === "right" && pg.lay.book === JIMG.ripped) tornStub(flatCanvas.right);   // the stub of the page he tore out
         drawBent(g, flatCanvas[side], sc[side], alpha);
       }
     };

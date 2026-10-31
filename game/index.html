@@ -17,7 +17,10 @@
   // On the web (2026-10-31): the same addresses every visit, so the browser keeps what it has and only asks Cloudflare
   // "changed?" (a stage cleared reloads the page; a timestamp here re-downloaded all the art every stage).
   window.BUILD = ["localhost", "127.0.0.1", ""].includes(location.hostname) ? Date.now() : "web";
-  document.write('<script src="sprites.js?v=' + BUILD + '"><\/script><script src="main.js?v=' + BUILD + '"><\/script><script src="world1.js?v=' + BUILD + '"><\/script><script src="caves.js?v=' + BUILD + '"><\/script>'
+  // (2026-10-31) music and sounds don't download until they're played (new Audio() would fetch every world's songs at
+  // boot); the short sound effects ask for preload themselves (main.js SFX)
+  { const A = window.Audio; window.Audio = function (src) { const a = new A(); a.preload = "none"; if (src !== undefined) a.src = src; return a; }; window.Audio.prototype = A.prototype; }
+  document.write('<script src="sprites.js?v=' + BUILD + '"><\/script><script src="asset_sets.js?v=' + BUILD + '"><\/script><script src="main.js?v=' + BUILD + '"><\/script><script src="world1.js?v=' + BUILD + '"><\/script><script src="caves.js?v=' + BUILD + '"><\/script>'
     + '<script src="journal_font.js?v=' + BUILD + '"><\/script><script src="journal.js?v=' + BUILD + '"><\/script>'
     + '<script src="map.js?v=' + BUILD + '"><\/script><script src="home.js?v=' + BUILD + '"><\/script><script src="menu.js?v=' + BUILD + '"><\/script><script>if (!location.hash && !JOURNAL_AT) Menu.boot();<\/script>');
 </script>

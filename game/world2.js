@@ -1517,7 +1517,7 @@ if (new URLSearchParams(location.search).has("w2end")) setTimeout(() => {
 // walking east into the wilderness at dawn, the camera rising over it. Summer's words over it, Hanan's line over its
 // last frame, the title card, then 2-1.
 // ---------------------------------------------------------------------------
-const W2_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w2_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: "auto" });
+const W2_CLIP = Object.assign(document.createElement("video"), { src: "../assets/video/w2_opening.mp4?v=" + (window.BUILD || 0), muted: true, playsInline: true, preload: WORLD === 2 ? "auto" : "none" });
 W2_CLIP.onerror = () => { W2_CLIP.missing = true; };
 const W2_STILL = Object.assign(new Image(), { src: "../assets/video/w2_opening_last.jpg?v=" + (window.BUILD || 0) });
 const W2_OPEN = {
