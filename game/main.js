@@ -2933,7 +2933,11 @@ function drawStones(camX) {
 }
 
 let debug = false;
+// (Glen, 2026-10-31) the test keys (1-6, the ` debug view) and their bar only on Glen's own machine (Play David.bat,
+// localhost) or with ?dev in the address; players on the web get just H = controls
+const DEV = ["localhost", "127.0.0.1", ""].includes(location.hostname) || /[?&]dev/.test(location.search);
 addEventListener("keydown", e => {
+  if (!DEV && /^Digit[1-6]$|^Backquote$/.test(e.code)) return;
   if (e.code === "F2" || e.code === "KeyM") { e.preventDefault(); startSetup(); }
   if (e.code === "Backquote") debug = !debug;
   if (e.code === "Escape" && setup.active) { setup.active = false; toast("Controller setup cancelled."); }
@@ -2959,9 +2963,9 @@ function drawHUD() {
     ctx.fillText("Click the game once to turn on sound (the controller can't)", W / 2, H - 20); ctx.textAlign = "left";
   }
   if (helpT <= 0) {
-    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, 600, 26);
+    ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(10, 10, DEV ? 600 : 120, 26);
     ctx.fillStyle = "#fff"; ctx.font = "14px sans-serif";
-    ctx.fillText("H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal   5 = map", 18, 28);
+    ctx.fillText(DEV ? "H = controls   1 = World 1-1   2 = movement test   3 = swap background   4 = Journal   5 = map" : "H = controls", 18, 28);
   } else drawHelp();
   drawDialog();
   drawCodeEntry(); if (typeof drawHarpDuel === "function") drawHarpDuel();

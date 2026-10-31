@@ -367,6 +367,10 @@ const Menu = {
     if (this.msg) { ctx.fillStyle = "#ffd166"; ctx.fillText(this.msg, W / 2, y); }
     if (!audioUnlocked && this.screen === "title") { ctx.fillStyle = "#ffe08a"; ctx.fillText("Click the game once to turn on sound", W / 2, H - 56); }
     this.drawHint();
+    if (this.screen === "title") {   // (Glen, 2026-10-31) the copyright line, in the hint bar's left end
+      ctx.textAlign = "left"; ctx.font = "13px sans-serif"; ctx.fillStyle = "rgba(255,240,215,0.6)";
+      ctx.fillText("© 2026 Glen Rogers · All rights reserved", 18, H - 18);
+    }
     ctx.restore();
   },
   drawHint() {

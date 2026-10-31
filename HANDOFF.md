@@ -746,3 +746,12 @@ the harp phrase at 3-2's campfire.
   `POSE_SHEETS` (world2.js) now flips those two and gives them proper poses: Steward hands folded (3), talking/smile
   (1, 5); Gera arms crossed (5), talking/laughing (1, 4). All other 8-4 sheets checked: they face right.
   Preview: `game previews/8-4_steward_and_gera_face_david.jpg`.
+
+## 2026-10-31: getting it ready for the internet (and a contest)
+- **Test keys hidden from players.** `DEV` (main.js) is true on localhost / 127.0.0.1 / file:// (Glen's Play David.bat)
+  or with `?dev` in the address. Otherwise the 1-6 and ` keys do nothing and the top bar just says "H = controls".
+- **Copyright.** "© 2026 Glen Rogers · All rights reserved" in the left end of the title screen's hint bar (menu.js);
+  a LICENSE file (all rights reserved, no license granted); README rewritten for players (it still said "design phase",
+  and carried an NIV credit: the game uses the World English Bible, public domain, credited now).
+- **Plan (agreed with Glen):** host on Cloudflare Pages (free plan; Glen's $5 Cloudflare Stream plan is a separate
+  product), repo to go private; load each world's art when it starts instead of all ~800 sheets at boot.
