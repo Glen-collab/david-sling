@@ -1,6 +1,6 @@
 # Where we left off
 
-If a chat session closes, start here. Last updated 2026-10-11 (end of a long session).
+If a chat session closes, read START_HERE.md first (the short, current summary), then this file for detail. This top part dates from 2026-10-11; the newest entries are at the bottom.
 
 ## How to play and test
 
