@@ -1,0 +1,3 @@
+window.addEventListener("error", e => (window.__errs = window.__errs || []).push(e.message));
+(() => { const p = {}; for (let w = 1; w <= 8; w++) for (let s = 1; s <= 4; s++) p[w + "-" + s] = { cleared: true, sheep: 3, total: 3 }; p.ripped = { 3: true, 6: true }; p.goliathCard = true; p.throwGiven = 8; p.tithes = {1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1}; localStorage.setItem("davidProgress", JSON.stringify(p)); })();
+(() => { const p = JSON.parse(localStorage.getItem("davidProgress")); for (let w = 1; w <= 8; w++) p["w" + w + "intro"] = true; localStorage.setItem("davidProgress", JSON.stringify(p)); })();

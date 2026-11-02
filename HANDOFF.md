@@ -778,3 +778,6 @@ the harp phrase at 3-2's campfire.
     the opening films and World 7/8 clips and music only preload in their own world.
   - Measured (local server, fresh browser): 22-33 MB before play on 1-1, 6-2, 8-4 (was ~500 MB): David's moves 7, the
     ground set 6-9, sound effects 5, the background 1-5. The ground tiles are the biggest single part now.
+
+## 2026-11-02: test tools saved in the repo
+The headless test harness that checked every fix (screenshot one moment with cap.sh, time the live site with livetest.mjs) now lives in tools/testing/ with a README, instead of only in a temp folder. Part Two can copy it.
