@@ -315,7 +315,7 @@ const Menu = {
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     }
     ctx.textAlign = "center";
-    if (this.screen === "controls") { this.drawControls(); ctx.restore(); return; }
+    if (this.screen === "controls") { keyWordsOff = true; try { this.drawControls(); } finally { keyWordsOff = false; } ctx.restore(); return; }   // (written for each controller already)
     if (this.screen === "name") { this.drawName(); this.drawHint(); ctx.restore(); return; }
     const title = this.screen === "title" || (this.screen === "confirm");
     if (title) {
@@ -376,7 +376,7 @@ const Menu = {
   drawHint() {
     ctx.textAlign = "center"; ctx.fillStyle = "rgba(10,6,2,0.9)"; ctx.fillRect(0, H - 46, W, 46);
     ctx.fillStyle = "rgba(255,240,215,0.8)"; ctx.font = "15px sans-serif";
-    ctx.fillText(this.hint(), W / 2, H - 18);
+    keyWordsOff = true; ctx.fillText(this.hint(), W / 2, H - 18); keyWordsOff = false;   // (the hint has its own keyboard words)
   },
   hint() {
     const k = SETTINGS.controller === "keyboard";
