@@ -3627,7 +3627,7 @@ function updateSheep(dt) {
       }
       if (sh.how === "flies" && typeof fliesSheep === "function") fliesSheep(sh, dx, dy);   // world3.js: oil its head
       if (sh.how === "thorns" && Math.abs(dx) < 140 && Math.abs(dy) < 80 && !sh.hinted) {
-        sh.hinted = true; toast("Its wool is caught in the thorns. Sling the bush to cut it free!");
+        sh.hinted = true; if (!showTip("thorns")) toast("Its wool is caught in the thorns. Sling the bush to cut it free!");
       }
       if (sh.how === "thorns" && Math.abs(dx) < 38 && Math.abs(dy) < 50) hurtDavid(sh.x);   // thorns hurt
       continue;
@@ -4620,7 +4620,7 @@ function updateSound(dt) {
   rainVol = fadeLoop(rainLoop, rainVol, STAGE_INFO.storm && !cave.room ? TUNE.RAIN_VOLUME : 0, dt, 0.4);
   const d = david;
   // footsteps: a running patter while he's running on the ground (walking is quiet)
-  const scene = (typeof passScene !== "undefined" && passScene.active) || oneMoment.active || finish.active;   // a scene over the stage: no footsteps
+  const scene = (typeof passScene !== "undefined" && passScene.active) || oneMoment.active || tipBox.active || finish.active;   // a scene over the stage: no footsteps
   const spd = d.onGround && d.deadT <= 0 && !d.harp && !scene ? Math.abs(d.vx) : 0;
   const running = spd > (TUNE.WALK_SPEED + TUNE.RUN_SPEED) / 2;
   runVol = fadeLoop(stepsRun, runVol, running ? TUNE.STEPS_VOLUME : 0, dt, 6);
@@ -4972,8 +4972,9 @@ function frameMain(now) {
   if (setup.active) updateSetup(dt); else checkCombo(dt);
   pollInput();
   // Start in a stage: pause (resume, settings, back to the map)
-  if (pressed("start") && !setup.active && !oneMoment.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, stageTheme, bossMusic].filter(Boolean)) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
+  if (pressed("start") && !setup.active && !oneMoment.active && !tipBox.active && !(typeof passScene !== "undefined" && passScene.active) && !finish.active && !codeEntry.active && david.deadT <= 0) { hushLoops(); for (const a of [...sfxAll, dayMusic, nightMusic, caveMusic, stageTheme, bossMusic].filter(Boolean)) if (!a.paused) a.pause(); Menu.open("pause", true); requestAnimationFrame(frame); return; }   // paused: everything stops at once (one-shot sounds too)
   if (oneMoment.active) { hushLoops(); updateOneMoment(real); }
+  else if (tipBox.active) { hushLoops(true); updateTipBox(real); }   // (Glen 11-11) a message box: the stage waits till A
   else if (typeof passScene !== "undefined" && passScene.active) { if (!stepsRun.paused) { stepsRun.pause(); runVol = 0; } updatePassScene(real); }   // world3.js: back in town, before Samuel (no footsteps under it)
   else if (typeof w7Hold === "function" && w7Hold(real)) { hushLoops(true); }   // 7-3: looking at a stone (world7.js)
   else if (dialogHeld()) { hushLoops(true); if (pressed("a") || pressed("b")) { dialog.hold = false; dialog.t = Math.min(dialog.t, 0.25); } }   // someone's talking: the stage waits until A (or B), so every line can be read
@@ -5036,7 +5037,7 @@ function frameMain(now) {
   }
   drawHUD();
   drawFinishBanner();
-  drawOneMoment(); if (typeof drawPassScene === "function") drawPassScene();
+  drawOneMoment(); drawTipBox(); if (typeof drawPassScene === "function") drawPassScene();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

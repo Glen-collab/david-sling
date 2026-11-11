@@ -40,7 +40,7 @@ function updateTalks(dt) {
   // A closes each: he keeps talking where he stands, no walking up for the next line
   const chained = (k, i) => { const p = talks[i - 1]; return p && p.done && p.who && p.who === k.who && k.x - p.x <= 4 * T && !dialog.hold; };   // (the moment A lets the last line go: the words just change)
   updateTalkAgain();
-  talks.forEach((k, i) => { if (!k.done && (david.x > k.x || chained(k, i)) && david.x < MAIN_COLS * T && david.deadT <= 0 && !(dialog.t > 0 && dialog.hold)) { k.done = true; sayLine(k.who, k.say); learnSkill(k.teach); } });
+  talks.forEach((k, i) => { if (!k.done && (david.x > k.x || chained(k, i)) && david.x < MAIN_COLS * T && david.deadT <= 0 && !(dialog.t > 0 && dialog.hold)) { k.done = true; if (k.who === "Eliab") showTip("eliab"); sayLine(k.who, k.say); learnSkill(k.teach); } });
 }
 // (Glen, 2026-10-23: he pressed A too soon on the shepherd girl and couldn't get her words back.) Like Castlevania:
 // standing by someone who's already spoken, a "↑" shows, and Up has them say it again (all their lines, A for each).
@@ -632,6 +632,41 @@ function updateOneMoment(real) {
   oneMoment.t += real;
   if (oneMoment.t > 1.2 && (pressed("a") || pressed("b") || pressed("start"))) oneMoment.active = false;
 }
+// (Glen 11-11, like Super Mario World's message blocks) the first time something new comes up, a box stops the game
+//  and says what's going on; A goes on. Each one once per saved game (davidProgress.tips).
+const TIPS = {
+  eliab: ["Eliab", "Eliab is David's oldest brother. He's tall and strong, and he thinks a shepherd boy is good for nothing. But the LORD doesn't look at how tall someone is. He looks at the heart. (1 Samuel 16:7)"],
+  thorns: ["Caught in the thorns", "This sheep's wool is caught in a thorn bush. Don't walk into it: the thorns hurt! Stand back and throw a stone at the bush (press B). The thorns are cut away. Then go and get the sheep."],
+};
+const tipBox = { active: false, t: 0, id: null };
+function tipSeen(id) { try { return (JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}").tips || []).includes(id); } catch (e) { return false; } }
+function showTip(id) {   // true: the box is up (false: seen before, or another box is)
+  if (!TIPS[id] || tipBox.active || tipSeen(id)) return false;
+  try { const p = JSON.parse(localStorage.getItem(slotKey("davidProgress")) || "{}"); (p.tips = p.tips || []).push(id); localStorage.setItem(slotKey("davidProgress"), JSON.stringify(p)); } catch (e) {}
+  Object.assign(tipBox, { active: true, t: 0, id }); chime(5); return true;
+}
+function updateTipBox(real) {
+  tipBox.t += real;
+  if (tipBox.t > 0.8 && (pressed("a") || pressed("b") || pressed("start"))) tipBox.active = false;
+}
+function drawTipBox() {
+  if (!tipBox.active) return;
+  const [title, text] = TIPS[tipBox.id], a = Math.min(1, tipBox.t * 3);
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = "rgba(10,6,2,0.45)"; ctx.fillRect(0, 0, W, H);
+  ctx.font = "21px sans-serif";
+  const w = 700, words = text.split(" "), lines = []; let cur = "";
+  for (const wd of words) { const t = cur ? cur + " " + wd : wd; if (ctx.measureText(t).width > w - 80) { lines.push(cur); cur = wd; } else cur = t; }
+  lines.push(cur);
+  const h = 120 + lines.length * 30, x = W / 2 - w / 2, y = H / 2 - h / 2 - 30;
+  const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, "rgba(58,36,14,0.97)"); g.addColorStop(1, "rgba(30,18,7,0.97)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, w, h, 18); ctx.fill();
+  ctx.strokeStyle = "rgba(255,214,120,0.7)"; ctx.lineWidth = 3; ctx.stroke();
+  ctx.textAlign = "center"; ctx.fillStyle = "#ffd98a"; ctx.font = "bold 28px Georgia, serif"; ctx.fillText(title, W / 2, y + 46);
+  ctx.fillStyle = "#fff6e2"; ctx.font = "21px sans-serif"; lines.forEach((l, i) => ctx.fillText(l, W / 2, y + 86 + i * 30));
+  if (tipBox.t > 0.8) { ctx.fillStyle = "rgba(255,240,215,0.8)"; ctx.font = "16px sans-serif"; ctx.fillText("A: continue", W / 2, y + h - 18); }
+  ctx.restore();
+}
 function drawOneMoment() {
   if (!oneMoment.active) return;
   const a = Math.min(1, oneMoment.t * 2);
@@ -676,6 +711,44 @@ const W1_OPEN = {
   JESSE_AT: 12.7,
   JESSE_HOLD: 3.2,       // seconds Jesse's line is up before the hillside comes (A goes on sooner)
 };
+// (Glen 11-11, "like a Star Wars crawl") after the title card: who's who and what you're doing, rising up the screen
+//  and away. A skips it.
+const W1_CRAWL = {
+  SPEED: 46, SPACE: 44, TAIL: 4,   // px a second; px between lines; seconds after the last line starts up
+  LINES: [
+    "Long ago, Israel had a king named Saul.",
+    "But Saul had stopped listening to the LORD.",
+    "",
+    "In the little town of Bethlehem lived Jesse,",
+    "and Jesse had eight sons.",
+    "The oldest, Eliab, was tall and proud.",
+    "Abinadab, the next, was kinder.",
+    "The youngest was David.",
+    "",
+    "David kept his father's sheep in the hills.",
+    "Out there he learned to sling a stone,",
+    "to play the harp,",
+    "and to trust the LORD who watched over him.",
+    "",
+    "Now the flock is scattered across the hills.",
+    "Find every lost sheep,",
+    "and bring them home.",
+  ],
+};
+function drawW1Crawl(t) {
+  ctx.fillStyle = `rgba(8,5,2,${Math.min(0.9, 0.75 + t * 0.2)})`; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.textAlign = "center";
+  const top = H * 0.12;
+  W1_CRAWL.LINES.forEach((l, i) => {
+    const y = H + 30 + i * W1_CRAWL.SPACE - t * W1_CRAWL.SPEED; if (!l || y > H + 40 || y < top - 20) return;
+    const k = Math.max(0.45, Math.min(1, (y - top) / (H - top) * 0.7 + 0.45));   // smaller as it goes up and away
+    ctx.globalAlpha = Math.min(1, (y - top) / 120, (H + 40 - y) / 60);
+    ctx.fillStyle = "#ffe08a"; ctx.font = `${Math.round(34 * k)}px Georgia, serif`;
+    ctx.save(); ctx.translate(W / 2, y); ctx.scale(1, 0.92); ctx.fillText(l, 0, 0); ctx.restore();
+  });
+  ctx.restore();
+  if (t > 1.5) caption("A: skip", 0.6, true);
+}
 const w1intro = {
   active: false,
   // steps: 0 the video (Eliab's and Jesse's lines come up in it, W1_OPEN.ELIAB_AT...), 2 Jesse's line over its last
@@ -717,7 +790,8 @@ const w1intro = {
       return;
     }
     if (this.step === 2) { if (this.t - this.jesseT > W1_OPEN.JESSE_HOLD || A) this.next(); return; }   // Jesse's line, then on by itself
-    if (this.step === 4) { if (this.stepT > 3.6 || A) this.out = 0.001; return; }
+    if (this.step === 4) { if (this.stepT > 3.6 || A) this.next(); return; }
+    if (this.step === 5) { if (this.stepT > W1_CRAWL.LINES.length * W1_CRAWL.SPACE / W1_CRAWL.SPEED + W1_CRAWL.TAIL || (A && this.stepT > 1.5)) this.out = 0.001; return; }   // the crawl: A skips
     if (A) this.next();
   },
   next() { this.step++; this.stepT = 0; },
@@ -755,6 +829,7 @@ const w1intro = {
     }
     const L = this.lines[this.step];
     if (L && this.step > 0) { ctx.textAlign = "center"; drawStoryBox(L[0], L[1], this.step === 2 ? "" : "A: next", this.step === 3); ctx.textAlign = "left"; }
+    if (this.step === 5) drawW1Crawl(this.stepT);
     if (this.step === 4) {   // the title card, over the hillside
       const f = Math.min(1, this.stepT / 0.8); ctx.fillStyle = `rgba(10,6,2,${0.75 * f})`; ctx.fillRect(0, 0, W, H);
       ctx.save(); ctx.globalAlpha = f; ctx.textAlign = "center"; ctx.fillStyle = "#ffe08a"; ctx.font = "bold 54px Georgia, serif"; ctx.fillText("WORLD 1", W / 2, H / 2 - 20);
