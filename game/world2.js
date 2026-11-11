@@ -328,7 +328,7 @@ function drawHarpDuel() {
     const y = top + s * lane + lane / 2;
     ctx.strokeStyle = "rgba(233,220,196,0.28)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(hitX - 70, y); ctx.lineTo(right, y); ctx.stroke();
     ctx.fillStyle = HARP_COLORS[HARP_STRINGS[s]]; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(ARROWS[HARP_STRINGS[s]], hitX - 84, y + 5);
+    ctx.fillText(btnLetter(ARROWS, HARP_STRINGS[s]), hitX - 84, y + 5);
   }
   ctx.strokeStyle = g.state === "missed" || g.sourT > 0 ? "rgba(230,80,60,0.9)" : "rgba(255,216,74,0.9)";
   ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(hitX, top - 6); ctx.lineTo(hitX, top + lane * 6 + 6); ctx.stroke();
@@ -347,7 +347,7 @@ function drawHarpDuel() {
     const y = top + HARP_STRINGS.indexOf(n.b) * lane + lane / 2, missed = g.state === "missed" && i === g.next;
     ctx.fillStyle = missed ? "#c0392b" : HARP_COLORS[n.b]; ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = "rgba(40,24,10,0.8)"; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = "#2a1808"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.fillText(ARROWS[n.b], x, y + 6);
+    ctx.fillStyle = "#2a1808"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.fillText(btnLetter(ARROWS, n.b), x, y + 6);
   }
   ctx.restore();
   for (const h of g.hits) {   // a played note: a gold ring spreading from the harp

@@ -49,7 +49,16 @@ function slotSummary(n) {   // for the Choose a game list: where they are, how f
   return `${(p["8-2"] || {}).cleared ? "The giant is down" : "World " + w}  ·  ${done.length}/32 stages  ·  ${sheep} sheep  ·  ${diff}`;
 }
 const NAME_MAX = 10;
-const NAME_GRID = [[..."ABCDEFGHI"], [..."JKLMNOPQR"], [..."STUVWXYZ", " "], ["back", "done"]];   // the letters on the name screen
+// the letters on the name screen, laid out like a keyboard (Glen 11-11: QWERTY). On a keyboard you can just type.
+const NAME_GRID = [[..."QWERTYUIOP"], [..."ASDFGHJKL"], [..."ZXCVBNM", " "], ["back", "done"]];
+const nameTyped = [];   // keys typed on the name screen since the last frame: a letter, " ", "back" or "done"
+addEventListener("keydown", e => {
+  if (!Menu.active || Menu.screen !== "name" || e.repeat) return;
+  if (/^[a-zA-Z]$/.test(e.key)) nameTyped.push(e.key.toUpperCase());
+  else if (e.key === " ") { nameTyped.push(" "); e.preventDefault(); }
+  else if (e.key === "Backspace") { nameTyped.push("back"); e.preventDefault(); }
+  else if (e.key === "Enter") nameTyped.push("done");
+});
 
 const Menu = {
   active: false,
@@ -231,16 +240,24 @@ const Menu = {
     if (pressed("up")) ud(-1);
     if (pressed("down")) ud(1);
     const back = () => { if (this.name) { this.name = this.name.slice(0, -1); chime(2); } else this.go("files"); };
+    const add = c => {   // one letter (or the grid's back / done)
+      this.msg = null;
+      if (c === "back") { back(); return true; }
+      if (c === "done") { chime(4); this.nameDone(); return true; }
+      if (this.name.length >= NAME_MAX) { this.msg = `${NAME_MAX} letters at most.`; return false; }
+      if (c === " " && (!this.name || this.name.endsWith(" "))) return false;   // (no space first, or two together)
+      this.name += !this.name || this.name.endsWith(" ") ? c : c.toLowerCase(); chime(4);   // Glen, not GLEN
+      return false;
+    };
+    // typed on the keyboard: the keys are the letters (so Z types a Z here, not "add"; Enter is done, Backspace takes one back)
+    if (nameTyped.length) {
+      const typed = nameTyped.splice(0);
+      for (const c of typed) { const g = NAME_GRID.findIndex(r => r.includes(c)); if (g >= 0) { this.gy = g; this.gx = NAME_GRID[g].indexOf(c); } if (add(c)) return; }
+      return;
+    }
     if (pressed("start")) { chime(4); this.nameDone(); return; }
     if (pressed("b")) { back(); return; }
-    if (pressed("a")) {
-      const c = row()[this.gx]; this.msg = null;
-      if (c === "back") { back(); return; }
-      if (c === "done") { chime(4); this.nameDone(); return; }
-      if (this.name.length >= NAME_MAX) { this.msg = `${NAME_MAX} letters at most.`; return; }
-      if (c === " " && (!this.name || this.name.endsWith(" "))) return;   // (no space first, or two together)
-      this.name += !this.name || this.name.endsWith(" ") ? c : c.toLowerCase(); chime(4);   // Glen, not GLEN
-    }
+    if (pressed("a")) add(row()[this.gx]);
   },
   drawName() {
     ctx.textAlign = "center";
@@ -250,15 +267,17 @@ const Menu = {
     ctx.fillStyle = "#fff6e2"; ctx.font = "bold 48px Georgia, serif";
     const nw = ctx.measureText(this.name).width; ctx.fillText(this.name, W / 2, 244);
     if (this.name.length < NAME_MAX && Math.floor(this.t * 2) % 2 === 0) { ctx.fillStyle = "#ffd166"; ctx.fillRect(W / 2 + nw / 2 + 4, 250, 28, 4); }
-    const cell = 72, gx0 = W / 2 - 4 * cell, gy0 = 340;
-    ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 360, gy0 - 56, 720, 4 * cell + 34, 16); ctx.fill();
+    const cell = 72, gy0 = 340;
+    ctx.fillStyle = "rgba(25,14,6,0.72)"; ctx.beginPath(); ctx.roundRect(W / 2 - 400, gy0 - 56, 800, 4 * cell + 34, 16); ctx.fill();
+    keyWordsOff = true;   // (these are letters to pick, not buttons: main.js keyWords must leave "A" an A)
     NAME_GRID.forEach((r, y) => r.forEach((c, x) => {
       const on = y === this.gy && x === this.gx, wide = r.length === 2;
-      const cx = wide ? W / 2 + (x ? 140 : -140) : gx0 + x * cell, cy = gy0 + y * cell, bw = wide ? 240 : 60;
+      const cx = wide ? W / 2 + (x ? 140 : -140) : W / 2 + (x - (r.length - 1) / 2) * cell + (y === 1 ? -cell / 4 : y === 2 ? cell / 4 : 0), cy = gy0 + y * cell, bw = wide ? 240 : 60;
       if (on) { ctx.fillStyle = "rgba(255,210,110,0.25)"; ctx.beginPath(); ctx.roundRect(cx - bw / 2, cy - 40, bw, 54, 10); ctx.fill(); }
       ctx.fillStyle = on ? "#ffe08a" : "#f3ead8"; ctx.font = `${on ? "bold " : ""}${wide || c === " " ? 23 : 32}px sans-serif`;
       ctx.fillText(c === "back" ? "◀ Take one back" : c === "done" ? "Done ✓" : c === " " ? "space" : c, cx, cy);
     }));
+    keyWordsOff = false;
     if (this.msg) { ctx.fillStyle = "#ffd166"; ctx.font = "17px sans-serif"; ctx.fillText(this.msg, W / 2, gy0 + 4 * cell + 8); }
   },
   update(dt) {
@@ -380,7 +399,7 @@ const Menu = {
   },
   hint() {
     const k = SETTINGS.controller === "keyboard";
-    if (this.screen === "name") return k ? "Arrows: choose a letter    Z: add it    X: take one back    Enter: done" : "D-pad: choose a letter    A: add it    B: take one back    Start: done";
+    if (this.screen === "name") return k ? "Type your name    Backspace: take one back    Enter: done" : "D-pad: choose a letter    A: add it    B: take one back    Start: done";
     return k ? "Arrows: choose    Left / Right: change    Z or Enter: OK    X: back" : "D-pad: choose    Left / Right: change    A: OK    B: back";
   },
   // a picture of the chosen controller and what each button does

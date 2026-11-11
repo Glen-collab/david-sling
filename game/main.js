@@ -424,9 +424,11 @@ function onKeyboard() {   // (asked many times a frame: the controller is looked
   if (now - kbCache.t > 250) { let kb = true; try { kb = controllerKind() === "keyboard"; } catch (e) {} kbCache = { t: now, kb }; }
   return kbCache.kb;
 }
+// a button's letter for the throw code's boxes, Jesse's lesson and the harp's notes: on the keyboard, its key (B -> X, A -> Z).
+// (Only there: a lone "A" elsewhere, like on the name screen, is just a letter.)
+function btnLetter(table, k) { const v = table[k]; return onKeyboard() && /^(A|B|X|Y)$/.test(v) ? KEY_WORDS[v] : v; }
 function keyWords(s) {
   if (keyWordsOff || typeof s !== "string" || !/\b(A|B|X|Y|Select|Start)\b|D-pad/.test(s) || !onKeyboard()) return s;
-  if (/^(A|B|X|Y)$/.test(s)) return KEY_WORDS[s];   // a letter on its own is a button: the throw code's boxes, the harp's notes
   return s.replace(/D-pad/g, "Arrows").replace(/\b(A|B|X|Y|Select|Start)\b/g, (b, _, i, str) => {
     const before = str.slice(0, i), after = str.slice(i + b.length);
     const isButton = /\b(press|hold|tap|mash|let go of)\s$/i.test(before)          // "press A", "Hold B"

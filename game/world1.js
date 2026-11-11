@@ -268,7 +268,7 @@ function drawCodeEntry() {
     const bx = W / 2 - tw / 2 + i * (box + gap), done = i < codeEntry.got;
     ctx.fillStyle = done ? "#e8b84a" : "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(bx, y, box, box, 10); ctx.fill();
     ctx.fillStyle = done ? "#3a2410" : "rgba(255,255,255,0.35)"; ctx.font = "bold 28px sans-serif";
-    ctx.fillText(done ? ARROWS[codeEntry.code[i]] : "?", bx + box / 2, y + 37);
+    ctx.fillText(done ? btnLetter(ARROWS, codeEntry.code[i]) : "?", bx + box / 2, y + 37);
   }
   ctx.font = "16px sans-serif"; ctx.fillStyle = "#e9dcc4";
   const r = codeEntry.result;

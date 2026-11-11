@@ -242,7 +242,7 @@ const Courtyard = {
     const given = this.prog.throwGiven || 0;
     if (this.earned > given) {   // a new piece
       const k = given; this.prog.throwGiven = k + 1; this.save();
-      this.say("Jesse", `${THROW_WORDS[k]}  (The throw: ${THROW_PIECES[k].map(b => ARROW[b]).join(" ")})`, 9);
+      this.say("Jesse", `${THROW_WORDS[k]}  (The throw: ${THROW_PIECES[k].map(b => btnLetter(ARROW, b)).join(" ")})`, 9);
       if (typeof chime === "function") chime(7);
     }
   },
@@ -439,7 +439,7 @@ const Courtyard = {
       const bx = x0 + i * (box + gap), done = i < this.got;
       ctx.fillStyle = done ? "#e8b84a" : "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(bx, y, box, box, 10); ctx.fill();
       ctx.fillStyle = done ? "#3a2410" : "rgba(255,255,255,0.35)"; ctx.font = "bold 30px sans-serif";
-      ctx.fillText(done ? ARROW[this.code[i]] : "?", bx + box / 2, y + 40);   // from memory: the pieces only show once you've entered them
+      ctx.fillText(done ? btnLetter(ARROW, this.code[i]) : "?", bx + box / 2, y + 40);   // from memory: the pieces only show once you've entered them
     }
     ctx.font = "17px sans-serif"; ctx.fillStyle = "#e9dcc4";
     const msg = this.result ? (this.result.ok ? "Thwack! Right in the middle of the target." : (this.wrong ? "Wrong move, and it went wide. Try again." : "Too slow, and it went wide. Try again.")) : this.sling ? "" : `Enter the throw from memory  ·  ${Math.max(0, this.pt).toFixed(1)} s`;

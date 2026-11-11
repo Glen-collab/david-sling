@@ -552,7 +552,7 @@ function drawGoliath8Over() {   // how far to him (17:48), the five stones, the 
     for (let i = 0; i < n; i++) {
       const bx2 = W / 2 - tw / 2 + i * (box + gap), done = i < c.got;
       ctx.fillStyle = done ? "#e8b84a" : "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(bx2, y, box, box, 10); ctx.fill();
-      ctx.fillStyle = done ? "#3a2410" : "rgba(255,255,255,0.35)"; ctx.font = "bold 28px sans-serif"; ctx.fillText(done ? ARROWS[c.seq[i]] : "?", bx2 + box / 2, y + 36);
+      ctx.fillStyle = done ? "#3a2410" : "rgba(255,255,255,0.35)"; ctx.font = "bold 28px sans-serif"; ctx.fillText(done ? btnLetter(ARROWS, c.seq[i]) : "?", bx2 + box / 2, y + 36);
     }
     ctx.font = "16px sans-serif"; ctx.fillStyle = "#e9dcc4"; ctx.fillText(`Enter the throw from memory  ·  ${Math.max(0, c.t).toFixed(1)} s`, W / 2, y + box + 34);
   }
