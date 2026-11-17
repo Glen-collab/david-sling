@@ -1,0 +1,25 @@
+{
+ "frame_w": 443,
+ "frame_h": 300,
+ "anchor_x": 166,
+ "anchor_y": 298,
+ "align": "feet",
+ "frames": 12,
+ "ms_per_frame": 70,
+ "loop": false,
+ "video_frames": [
+  69,
+  79,
+  91,
+  95,
+  99,
+  103,
+  107,
+  111,
+  115,
+  119,
+  123,
+  127
+ ],
+ "source": "david1_crouch_sling.mp4: crouched, the sling: 0-1 the arm up, 2-7 the whirl (loop while charging), 8-11 the throw (the stone leaves about 10)"
+}

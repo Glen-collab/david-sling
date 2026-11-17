@@ -1,0 +1,20 @@
+{
+ "frame_w": 443,
+ "frame_h": 300,
+ "anchor_x": 166,
+ "anchor_y": 298,
+ "align": "feet",
+ "frames": 6,
+ "ms_per_frame": 120,
+ "loop": true,
+ "video_frames": [
+  45,
+  49,
+  53,
+  57,
+  61,
+  65
+ ],
+ "source": "david1_crouch_sling.mp4: crouched low, the sling in his hands (played there and back)",
+ "pingpong": true
+}

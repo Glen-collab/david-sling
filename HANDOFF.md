@@ -781,3 +781,17 @@ the harp phrase at 3-2's campfire.
 
 ## 2026-11-02: test tools saved in the repo
 The headless test harness that checked every fix (screenshot one moment with cap.sh, time the live site with livetest.mjs) now lives in tools/testing/ with a README, instead of only in a temp folder. Part Two can copy it.
+
+## 2026-11-17: crouch and the crouched sling (Glen)
+Glen couldn't hit low things (snakes, rats, scorpions) with a standing throw: it leaves at chest height and sails over them.
+- New sheets `david_crouch_low` and `david_crouch_sling` (cut from his young-David clip `david1_crouch_sling.mp4`; the
+  originals and padded Photoshop copies are in `Desktop\for David 1 - crouch and low sling`).
+- Holding Down (standing still): the first two frames of `david_crouch_low`, then he holds frame 1. Under a roof lower than
+  `CROUCH_ART_H` (92 px) he uses the old `david_crouch` so his head doesn't go through the rock. Moving low is still the crawl.
+- Down + B: `david_crouch_sling`: 0-1 arm up, 2-7 whirl (loops while charging), 8-11 the throw; a charged throw goes
+  straight to 8. The stone leaves at frame 10, `TUNE.CROUCH_THROW_Y` (48) off the ground at `TUNE.CROUCH_THROW_ANGLE`
+  (-0.05): flat, ~8 tiles on a tap. He stays put and stays down until the throw is done (`david.lowThrow`, decided
+  up to the release; `crouchThrowNow()`). Power Sling works crouched too. Up + B is still the upward standing throw.
+- Tested headless in 1-1: crouched taps hit a cobra and viper at 5 tiles, rats at 3/5/8, scorpions at 5/8, and charged
+  ones too. Standing throws at a rat or scorpion 5 tiles off still miss, which is the reason for the crouched throw.
+  Preview: `Desktop\game previews\david1_crouch_and_low_sling.png`.

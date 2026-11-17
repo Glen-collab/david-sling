@@ -40,6 +40,8 @@ const TUNE = {
   THROW_TIME: 0.45,       // seconds for the whole throw animation
   RUN_THROW_TIME: 0.6,    // the throw while running (legs keep running)
   RUN_THROW_SPEED: 120,   // moving faster than this when the throw starts = running throw
+  CROUCH_THROW_Y: 48,     // (Glen 11-17) a crouched throw leaves this high off the ground and flies flat: snakes, rats, scorpions
+  CROUCH_THROW_ANGLE: -0.05,   // a hair upward (a standing throw is -0.12): low enough to hit a rat, still carries ~8 tiles
   LAMB_SPEED: 380,
   TER_FILL_SCALE: 0.3,    // terrain art sizes (pixels on screen)
   TER_TOPSOIL_H: 46, TER_GRASS_RISE: 16,
@@ -168,7 +170,7 @@ const SPR = {};
 for (const [name, d] of Object.entries(window.SPRITE_DATA)) SPR[name] = { ...d, _img: lazyImg(d.src + "?v=" + (window.BUILD || 0)), get img() { return want(this._img); } };
 // what the player can do in the first second (run, jump, roll, sling...): waited for, so David never flickers out
 // the first time he does something (harp, lamp and rescue poses come first in the background fetch)
-const PLAYER_ART = ["david_idle", "david_walk", "david_run", "david_stop", "david_jump_air", "david_jump_land", "david_crouch", "david_crawl",
+const PLAYER_ART = ["david_idle", "david_walk", "david_run", "david_stop", "david_jump_air", "david_jump_land", "david_crouch", "david_crouch_low", "david_crouch_sling", "david_crawl",
   "david_roll", "david_roll_getup", "david_flip", "david_climb", "david_topout", "david_slip", "david_sling_throw", "david_sling_throw_up",
   "david_run_sling", "david_run_sling_throw", "lamb_walk", "lamb_run", "lamb_jump", "lamb_still"];
 for (const n of PLAYER_ART) if (SPR[n]) gateImg(SPR[n]._img);
@@ -2208,6 +2210,13 @@ function collideBody(b, w, h, dt) {
     else { b.fell = true; b.vx = b.vy = 0; b.y = ROWS * T + 400; }
   }
 }
+// (Glen 11-17) Down + B: the crouched sling (david_crouch_sling), low and flat along the ground. Not with Up held
+// (that's the upward throw) or with the lamb in his arms.
+function crouchThrowNow(d) {
+  return d.onGround && !d.carrying && !(aimHeld("up") && hasSkill("aimUp")) && (held("down") || !headroom(d, STAND_H)) && !!SPR.david_crouch_sling;
+}
+const CROUCH_ART_H = 92;   // how tall david_crouch_low / _sling stand on screen; under a lower roof he uses the old crawl-crouch
+
 function headroom(b, h) { // can he stand up here?
   const c0 = Math.floor((b.x - BODY_W / 2 + 2) / T), c1 = Math.floor((b.x + BODY_W / 2 - 2) / T);
   for (let c = c0; c <= c1; c++) for (let r = Math.floor((b.y - h) / T); r <= Math.floor((b.y - 1) / T); r++) if (isSolid(c, r)) return false;
@@ -2310,42 +2319,48 @@ function updateDavid(dt) {
   if (!d.carrying && !d.harp && !busy && !ARMORED() && d.specialStones > 0 && justStarted &&
       ((pressed("b") && held("a")) || (pressed("a") && held("b")))) {
     d.specialStones--;
-    d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
-    d.throwT = d.runThrow ? TUNE.RUN_THROW_TIME * 9 / 12 : TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
+    d.lowThrow = crouchThrowNow(d);
+    d.runThrow = !d.lowThrow && d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
+    d.throwT = d.runThrow ? TUNE.RUN_THROW_TIME * 9 / 12 : d.lowThrow ? TUNE.THROW_TIME * 8 / 12 : TUNE.THROW_TIME * 6 / 12; d.thrown = true; d.charging = false;   // jump straight to the release frames
     const aimUp = held("up") && hasSkill("aimUp"), aimDown = held("down") && !d.onGround;   // Down only aims while in the air (on the ground it's crouch)
     const ang = aimUp ? (held("left") || held("right") ? -Math.PI / 4 : -Math.PI / 2 + 0.04) : aimDown ? Math.PI / 4 : 0;
-    stones.push({ x: d.x + d.facing * 30, y: d.y - (d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
+    stones.push({ x: d.x + d.facing * 30, y: d.y - (d.lowThrow && !aimUp ? TUNE.CROUCH_THROW_Y : d.onGround ? 70 : 50), vx: Math.cos(ang) * TUNE.POWER_SPEED * d.facing, vy: Math.sin(ang) * TUNE.POWER_SPEED,
                   charged: true, power: true, life: 1.6, trail: [] });
     sfx("sling_power");
     toast(`Power Sling! (${d.specialStones} stone${d.specialStones === 1 ? "" : "s"} of remembrance left)`);
   }
   if (!d.carrying && !d.harp && !busy && !ARMORED()) {
     if (pressed("b") && d.throwT < 0) { d.charging = true; d.charge = 0; d.throwT = 0; d.thrown = false; d.quickUsed = false; d.quickQueued = false; }
-    if (d.throwT >= 0 && !d.thrown) d.aimingUp = aimHeld("up") && hasSkill("aimUp");   // aim decided up to the moment the stone leaves
-    if (d.charging) { d.charge += dt; if (released("b") || !held("b")) { d.charging = false; d.runThrow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED; } }
+    if (d.throwT >= 0 && !d.thrown) { d.aimingUp = aimHeld("up") && hasSkill("aimUp"); d.lowThrow = crouchThrowNow(d); }   // aim (and crouched or not) decided up to the moment the stone leaves
+    if (d.charging) { d.charge += dt; if (released("b") || !held("b")) {
+      d.charging = false; d.runThrow = !d.lowThrow && d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
+      if (d.lowThrow && d.charge > 0.14) d.throwT = TUNE.THROW_TIME * 8 / 12;   // crouched, after whirling: straight into the throw frames (8-11), no second wind-up
+    } }
   }
   // a throw that hasn't left his hand is dropped if he picks up the lamb or the harp (or it would hang there, whirling, forever)
-  if ((d.carrying || d.harp) && d.throwT >= 0 && !d.thrown) { d.charging = false; d.throwT = -1; d.runThrow = false; }
+  if ((d.carrying || d.harp) && d.throwT >= 0 && !d.thrown) { d.charging = false; d.throwT = -1; d.runThrow = false; d.lowThrow = false; }
+  if (d.throwT < 0 || !d.onGround) d.lowThrow = false;
   if (d.throwT >= 0) {
     if (!d.charging) d.throwT += dt;
     const dur = d.runThrow ? TUNE.RUN_THROW_TIME : TUNE.THROW_TIME;
-    const relAt = d.runThrow ? dur * 9.5 / 12 : d.aimingUp ? dur * 9.5 / 12 : dur * 7 / 12;   // running and upward throws: the stone leaves at frame 10
+    const relAt = d.runThrow || d.aimingUp || d.lowThrow ? dur * 9.5 / 12 : dur * 7 / 12;   // running, upward and crouched throws: the stone leaves at frame 10
     if (!d.thrown && d.throwT >= relAt) {
       d.thrown = true;
       const full = hasSkill("charge") ? Math.min(1, d.charge / TUNE.CHARGE_TIME) : 0;   // full power is taught in World 2
       const sp = full >= 1 ? TUNE.STONE_SPEED_CHARGED : TUNE.STONE_SPEED;
       const aimUp = aimHeld("up") && hasSkill("aimUp"), straightUp = aimUp && !(aimHeld("left") || aimHeld("right"));
       const aimDown = held("down") && !d.onGround;   // Down + B in the air: throw diagonally down
-      let ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : -0.12;
-      if (!aimUp && !aimDown && typeof towerAim === "function") { const a = towerAim(d.x + d.facing * 30, d.y - (d.h === LOW_H ? 40 : 78), sp, full >= 1, d.facing); if (a !== null) ang = a; }   // world6.js: a flat throw at an open tower window arcs up into it
-      stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : d.h === LOW_H ? 40 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
+      const low = d.lowThrow && !aimUp;   // crouched: low and flat along the ground, for snakes, rats and scorpions
+      let ang = aimUp ? (straightUp ? -Math.PI / 2 + 0.04 : -Math.PI / 4) : aimDown ? Math.PI / 4 : low ? TUNE.CROUCH_THROW_ANGLE : -0.12;
+      if (!aimUp && !aimDown && !low && typeof towerAim === "function") { const a = towerAim(d.x + d.facing * 30, d.y - (d.h === LOW_H ? 40 : 78), sp, full >= 1, d.facing); if (a !== null) ang = a; }   // world6.js: a flat throw at an open tower window arcs up into it
+      stones.push({ x: d.x + d.facing * (straightUp ? 6 : 30), y: d.y - (straightUp ? 100 : low ? TUNE.CROUCH_THROW_Y : d.h === LOW_H ? 40 : 78), vx: Math.cos(ang) * sp * d.facing + d.vx * (straightUp ? 0 : 0.3),
                     vy: Math.sin(ang) * sp, charged: full >= 1, life: 2.5 });
       sfx("sling_throw", undefined, full >= 1 ? 0.95 : 0.8, 0.95 + Math.random() * 0.1);   // always the whip of the throw
     }
     if (hasSkill("quick") && !d.charging && pressed("b") && !d.carrying && !d.harp && d.throwT > 0.04) d.quickQueued = true;   // tapped again during the throw
     if (d.thrown && d.quickQueued && !d.quickUsed && d.throwT >= relAt + 0.07) {   // quick release (Gera, 4-2): the second stone, right behind the first
       d.quickUsed = true; const st = stones[stones.length - 1];
-      if (st) { stones.push({ ...st, x: d.x + d.facing * 30, y: st.charged ? st.y : d.y - (d.h === LOW_H ? 40 : 78), vx: st.vx, vy: st.vy, charged: false, power: false, life: 2.5, trail: undefined, quick: true });
+      if (st) { stones.push({ ...st, x: d.x + d.facing * 30, y: st.charged ? st.y : d.y - (d.lowThrow ? TUNE.CROUCH_THROW_Y : d.h === LOW_H ? 40 : 78), vx: st.vx, vy: st.vy, charged: false, power: false, life: 2.5, trail: undefined, quick: true });
         sfx("sling_throw_quick", undefined, 0.9, 1.05); }
     }
     if (d.throwT >= dur) { d.throwT = -1; d.runThrow = false; d.quickUsed = false; d.quickQueued = false; }
@@ -2413,7 +2428,7 @@ function updateDavid(dt) {
   } else if (d.harp) {
     d.vx = 0;
   } else {
-    const crouching = d.onGround && held("down") && !d.carrying;
+    const crouching = d.onGround && (held("down") || d.lowThrow) && !d.carrying;   // (a crouched throw keeps him down till it's done)
     const stuckLow = d.onGround && !headroom(d, STAND_H);
     lowPose = crouching || stuckLow;
     // inside rock (no room even crouched: a respawn or a shove put him in it): after a moment, up onto the top of it
@@ -2421,7 +2436,7 @@ function updateDavid(dt) {
     if (d.inRockT > 0.5) { for (let k = 0; k < 8 && !headroom(d, STAND_H); k++) d.y = (Math.floor((d.y - 1) / T)) * T; d.vy = 0; d.inRockT = 0; }
     if (dir !== 0) { d.facing = dir; d.holdDirT += dt; } else d.holdDirT = 0;
     let target = dir * (d.holdDirT > TUNE.RUN_DELAY ? TUNE.RUN_SPEED : TUNE.WALK_SPEED);
-    if (lowPose) target = dir * TUNE.CRAWL_SPEED;
+    if (lowPose) target = d.lowThrow ? 0 : dir * TUNE.CRAWL_SPEED;   // crouched with the sling: he stays put (Left/Right still turn him)
     if (d.carrying) target *= 0.8;
     if (ARMORED()) target = dir * TUNE.WALK_SPEED * armorSpeed();   // clank, clank: no running in a coat of armor
     const mud = d.onGround && typeof onMud === "function" && onMud(d.x, d.y) ? TUNE.MUD_GRIP : 1;   // 3-4's mud slicks (world3.js)
@@ -2493,7 +2508,13 @@ function drawDavid(camX) {
   if (d.throwT >= 0 && d.state !== "roll" && d.state !== "flip") {
     let i, gx, gy;
     const runningNow = d.onGround && Math.abs(d.vx) > TUNE.RUN_THROW_SPEED;
-    if (d.charging && runningNow && SPR.david_run_sling) {
+    if (d.lowThrow && SPR.david_crouch_sling) {
+      // crouched: 0-1 the arm up, 2-7 the whirl (loops while charging), 8-11 the throw (the stone leaves at 10)
+      if (d.charging) i = d.charge < 0.14 ? Math.floor(d.charge / 0.07) : 2 + Math.floor((d.charge - 0.14) / 0.07) % 6;
+      else i = Math.min(11, Math.floor(d.throwT / TUNE.THROW_TIME * 12));
+      drawSprite("david_crouch_sling", i, x, y, d.facing);
+      gx = x - d.facing * 8; gy = y - 205 * SCALE;   // the glow: the pouch whirls just over his head
+    } else if (d.charging && runningNow && SPR.david_run_sling) {
       // charging on the run: legs keep running, sling whirling overhead
       i = frameOf("david_run_sling", d.t * Math.max(0.7, Math.abs(d.vx) / TUNE.RUN_SPEED));
       drawSprite("david_run_sling", i, x, y, d.facing);
@@ -2568,7 +2589,10 @@ function drawDavid(camX) {
     case "climb": drawSprite("david_climb", Math.floor((d.climbDist || 0) / TUNE.CLIMB_STRIDE) % SPR.david_climb.frames, x, y, 1); break;   // his back to us
     case "roll": drawSprite("david_roll", Math.min(11, Math.floor(d.rollT / TUNE.ROLL_TIME * 12)), x, y, d.facing); break;
     case "getup": drawSprite("david_roll_getup", Math.min(6, 3 + Math.floor(d.t / 0.07)), x, y, d.facing); break;
-    case "crouch": drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing); break;
+    case "crouch":   // (Glen 11-17) the first two frames of david_crouch_low, then he holds the second; under a low roof, the old crouch
+      if (SPR.david_crouch_low && headroom(d, CROUCH_ART_H)) drawSprite("david_crouch_low", t < 0.08 ? 0 : 1, x, y, d.facing);
+      else drawSprite("david_crouch", frameOf("david_crouch", t, 40), x, y, d.facing);
+      break;
     case "crawl": drawSprite("david_crawl", frameOf("david_crawl", t), x, y, d.facing); break;
     case "kneel": { const i = frameOf("david_sit_harp", t, 95); drawSprite("david_sit_harp", i, x, y, d.facing, sitHarpScale(i)); break; }
     case "harp": {

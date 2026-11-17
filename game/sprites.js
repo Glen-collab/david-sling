@@ -912,6 +912,30 @@ window.SPRITE_DATA = {
   "ay": 235,
   "align": "feet"
  },
+ "david_crouch_low": {
+  "src": "../assets/sprites/david_crouch_low.png",
+  "frames": 6,
+  "w": 443,
+  "h": 300,
+  "ms": 120,
+  "loop": true,
+  "pingpong": true,
+  "ax": 166,
+  "ay": 298,
+  "align": "feet"
+ },
+ "david_crouch_sling": {
+  "src": "../assets/sprites/david_crouch_sling.png",
+  "frames": 12,
+  "w": 443,
+  "h": 300,
+  "ms": 70,
+  "loop": false,
+  "pingpong": false,
+  "ax": 166,
+  "ay": 298,
+  "align": "feet"
+ },
  "david_flip": {
   "src": "../assets/sprites/david_flip.png",
   "frames": 10,
